@@ -9,6 +9,7 @@ const levelLabel = {
   advanced: "Nâng cao",
 };
 
+
 export default function AcademyPage() {
   return (
     <div className="space-y-8">
