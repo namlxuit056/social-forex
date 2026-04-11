@@ -2,16 +2,27 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 
-type Props = { params: Promise<{ slug: string }> };
+type Props = {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ q?: string }>;
+};
 
 export const dynamic = "force-dynamic";
 
-export default async function ForumCategoryPage({ params }: Props) {
+export default async function ForumCategoryPage({ params, searchParams }: Props) {
   const { slug } = await params;
+  const { q } = await searchParams;
+  const query = q?.trim();
+
   const category = await prisma.forumCategory.findUnique({
     where: { slug },
     include: {
       threads: {
+        where: query
+          ? {
+              title: { contains: query, mode: "insensitive" as const },
+            }
+          : undefined,
         orderBy: { updatedAt: "desc" },
         take: 50,
         include: {
@@ -41,6 +52,21 @@ export default async function ForumCategoryPage({ params }: Props) {
           Tạo chủ đề mới
         </Link>
       </div>
+
+      <form method="get" className="flex max-w-xl flex-wrap gap-2">
+        <input
+          name="q"
+          defaultValue={query ?? ""}
+          placeholder="Lọc theo tiêu đề trong mục này…"
+          className="min-w-[200px] flex-1 rounded border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm"
+        />
+        <button
+          type="submit"
+          className="rounded border border-zinc-600 px-3 py-2 text-sm text-zinc-300 hover:bg-zinc-800"
+        >
+          Lọc
+        </button>
+      </form>
 
       <ul className="divide-y divide-zinc-800 rounded-xl border border-zinc-800">
         {category.threads.length === 0 && (

@@ -25,7 +25,7 @@ export default async function ForumThreadPage({ params }: Props) {
       posts: {
         orderBy: { createdAt: "asc" },
         include: {
-          author: { select: { name: true, email: true } },
+          author: { select: { id: true, name: true, email: true } },
         },
       },
     },
@@ -42,8 +42,17 @@ export default async function ForumThreadPage({ params }: Props) {
       <header>
         <h1 className="text-2xl font-semibold text-white">{thread.title}</h1>
         <p className="mt-2 text-sm text-zinc-500">
-          {thread.author?.name ?? thread.author?.email} ·{" "}
-          {new Date(thread.createdAt).toLocaleString("vi-VN")}
+          {thread.author?.id ? (
+            <Link
+              href={`/u/${thread.author.id}`}
+              className="text-emerald-500 hover:underline"
+            >
+              {thread.author?.name ?? thread.author?.email}
+            </Link>
+          ) : (
+            (thread.author?.name ?? thread.author?.email)
+          )}{" "}
+          · {new Date(thread.createdAt).toLocaleString("vi-VN")}
         </p>
       </header>
 
@@ -54,8 +63,17 @@ export default async function ForumThreadPage({ params }: Props) {
             className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5"
           >
             <div className="mb-2 text-xs text-zinc-500">
-              {p.author?.name ?? p.author?.email} ·{" "}
-              {new Date(p.createdAt).toLocaleString("vi-VN")}
+              {p.author?.id ? (
+                <Link
+                  href={`/u/${p.author.id}`}
+                  className="text-emerald-500 hover:underline"
+                >
+                  {p.author?.name ?? p.author?.email}
+                </Link>
+              ) : (
+                (p.author?.name ?? p.author?.email)
+              )}{" "}
+              · {new Date(p.createdAt).toLocaleString("vi-VN")}
             </div>
             <div className="whitespace-pre-wrap text-zinc-300">{p.body}</div>
           </article>

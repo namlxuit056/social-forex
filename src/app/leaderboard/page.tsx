@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 
 export const metadata = { title: "Bảng xếp hạng" };
@@ -88,7 +89,14 @@ export default async function LeaderboardPage() {
             {rows.map((r, i) => (
               <tr key={r.userId} className="hover:bg-zinc-900/40">
                 <td className="px-4 py-3 font-mono text-zinc-500">{i + 1}</td>
-                <td className="px-4 py-3 text-zinc-200">{r.name}</td>
+                <td className="px-4 py-3 text-zinc-200">
+                  <Link
+                    href={`/u/${r.userId}`}
+                    className="text-emerald-400 hover:underline"
+                  >
+                    {r.name}
+                  </Link>
+                </td>
                 <td className="px-4 py-3 text-emerald-400">{r.wins}</td>
                 <td className="px-4 py-3 text-rose-400">{r.losses}</td>
                 <td className="px-4 py-3 font-mono">

@@ -8,12 +8,18 @@ const nav = [
   { href: "/tools", label: "Công cụ" },
   { href: "/chart", label: "Biểu đồ" },
   { href: "/forum", label: "Diễn đàn" },
+  { href: "/forum/search", label: "Tìm" },
   { href: "/signals", label: "Tín hiệu" },
   { href: "/leaderboard", label: "BXH" },
+  { href: "/messages", label: "Tin nhắn" },
   { href: "/sentiment", label: "Sentiment" },
   { href: "/heatmap", label: "Heatmap" },
   { href: "/backtest", label: "Backtest" },
   { href: "/academy", label: "Academy" },
+  { href: "/webinar", label: "Webinar" },
+  { href: "/resources", label: "Tài liệu" },
+  { href: "/brokers", label: "Sàn" },
+  { href: "/partners", label: "Đối tác" },
 ];
 
 export async function SiteHeader() {

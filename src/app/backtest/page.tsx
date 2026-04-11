@@ -1,19 +1,18 @@
+import { DemoBacktest } from "@/components/backtest/demo-backtest";
+
 export const metadata = { title: "Backtest" };
 
 export default function BacktestPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-white">Backtest (kế hoạch)</h1>
+        <h1 className="text-2xl font-semibold text-white">Backtest (mô phỏng)</h1>
         <p className="mt-2 max-w-2xl text-zinc-400">
-          Module nặng: cần kho lịch sử OHLC chất lượng, engine tính lệnh, và giới
-          hạn tài nguyên CPU. Giai đoạn sau: đồ thị equity, thống kê drawdown,
-          export CSV.
+          Demo Monte Carlo đơn giản — không dùng OHLC thật. Backtest chuyên nghiệm cần
+          dữ liệu lịch sử + engine riêng.
         </p>
       </div>
-      <div className="rounded-xl border border-dashed border-zinc-700 p-10 text-center text-zinc-500">
-        Chưa triển khai — placeholder kiến trúc.
-      </div>
+      <DemoBacktest />
     </div>
   );
 }

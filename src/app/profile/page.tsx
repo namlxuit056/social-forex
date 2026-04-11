@@ -45,8 +45,23 @@ export default async function ProfilePage() {
             <dd>{session.user.email ?? "—"}</dd>
           </div>
           <div className="flex gap-4">
-            <dt className="text-zinc-500">ID</dt>
-            <dd className="font-mono text-xs text-zinc-400">{session.user.id}</dd>
+            <dt className="text-zinc-500">Hồ sơ công khai</dt>
+            <dd>
+              <Link
+                href={`/u/${session.user.id}`}
+                className="text-emerald-500 hover:underline"
+              >
+                Xem trang /u/…
+              </Link>
+            </dd>
+          </div>
+          <div className="flex gap-4">
+            <dt className="text-zinc-500">Tin nhắn</dt>
+            <dd>
+              <Link href="/messages" className="text-emerald-500 hover:underline">
+                Hộp thư
+              </Link>
+            </dd>
           </div>
           <div className="flex gap-4">
             <dt className="text-zinc-500">VIP</dt>
@@ -58,8 +73,8 @@ export default async function ProfilePage() {
           </div>
         </dl>
         <p className="mt-6 text-sm text-zinc-500">
-          Follow và tin nhắn — sẽ bổ sung. Thanh toán VIP (Stripe) gắn vào{" "}
-          <code className="font-mono">vipUntil</code>.
+          Kích hoạt VIP quản trị: POST <code className="font-mono">/api/admin/vip</code> với{" "}
+          <code className="font-mono">ADMIN_SECRET</code>. Thanh toán tự động (Stripe) có thể gắn sau.
         </p>
       </div>
     </div>
