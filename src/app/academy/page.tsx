@@ -10,6 +10,7 @@ const levelLabel = {
 };
 
 
+
 export default function AcademyPage() {
   return (
     <div className="space-y-8">
