@@ -1,0 +1,10 @@
+---
+description: Một lệnh một vai trò — không gom PRD + UI + code + Issue trong cùng một prompt
+alwaysApply: true
+---
+
+# Luồng vai trò
+
+- **Không** yêu cầu AI làm đồng thời: phân tích nghiệp vụ, thiết kế UI, kiến trúc, implementation, test, và tạo GitHub Issue trong **một** câu lệnh đơn.
+- Chia thành các bước hoặc phiên riêng; bật rule đúng vai trò (`.cursor/rules/pm-ba.mdc`, `ux-ui.mdc`, `senior-dev.mdc`) khi bắt đầu từng phần.
+- Kết quả bước trước (PRD, wireframe, API contract) là đầu vào rõ ràng cho bước sau.

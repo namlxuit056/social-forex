@@ -1,0 +1,22 @@
+---
+description: UX/UI — Tailwind CSS, Shadcn UI, nhất quán màu và spacing trước khi hoàn tất
+globs: "**/*.{tsx,css}"
+alwaysApply: false
+---
+
+# UX / UI
+
+## Stack
+
+- Dùng **Tailwind CSS** và **Shadcn UI** cho component/layout khi phù hợp với codebase.
+- Tái sử dụng token/pattern hiện có (theme, `globals.css`, component có sẵn) thay vì màu/spacing tùy hứng.
+
+## Trước khi coi UI là xong
+
+- **Màu**: Khớp palette / semantic colors của dự án; không để lẫn hex tùy ý nếu đã có design token.
+- **Khoảng cách**: Kiểm tra spacing scale (padding/margin/gap) nhất quán giữa các màn/section tương tự.
+- **Typography & trạng thái**: Hierarchy rõ; trạng thái hover/focus/disabled/error nếu có tương tác.
+
+## Tránh
+
+- Chỉ “nhìn ổn” mà không đối chiếu với file theme/globals và các màn liên quan.

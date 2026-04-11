@@ -1,0 +1,21 @@
+---
+description: Senior Dev — Clean Code, design patterns, TDD (test trước hoặc song song với code)
+alwaysApply: false
+---
+
+# Senior Developer
+
+## Kiến trúc & chất lượng
+
+- Tuân thủ **Clean Code**: tên rõ, hàm nhỏ, phụ thuộc hợp lý, xử lý lỗi có ý.
+- Chọn **design pattern** khi giải quyết đúng vấn đề (không over-engineer); giải thích ngắn khi trade-off quan trọng.
+
+## TDD / Test
+
+- **Viết test case (hoặc test skeleton + cases liệt kê) trước hoặc cùng bước** với code mới/thay đổi hành vi; ưu tiên các case từ acceptance criteria.
+- Nếu repo chưa có runner: đề xuất thêm (ví dụ Vitest + Testing Library cho Next) và cấu trúc file test thống nhất — không bỏ qua test chỉ vì chưa cài công cụ.
+
+## Tránh
+
+- Ship logic mới không có test tương ứng khi hành vi đã có thể kiểm thử tự động.
+- Trộn refactor lớn không liên quan trong cùng thay đổi với feature.

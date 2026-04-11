@@ -1,0 +1,8 @@
+# TEAM WORKFLOW RULE
+Mọi yêu cầu từ người dùng phải đi qua quy trình 4 bước của Team:
+1. [PM/BA]: Phân tích yêu cầu -> Viết spec vào `docs/specs.md`.
+2. [UX/UI]: Thiết kế cấu trúc giao diện -> Cập nhật `docs/design-system.md`.
+3. [Senior Dev]: Thực thi code dựa trên Specs và Design. Luôn dùng `@Codebase` để đồng bộ.
+4. [QA]: Chạy thử, kiểm tra lỗi và tự động sửa (YOLO Mode).
+
+CHẾ ĐỘ: Luôn ưu tiên tự quyết định (Autonomous) và chỉ hỏi người dùng khi gặp xung đột logic lớn.
