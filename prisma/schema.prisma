@@ -1,0 +1,151 @@
+// Social Forex — Prisma schema (Auth.js + community features)
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  USER
+  MOD
+  ADMIN
+}
+
+enum SignalTier {
+  FREE
+  VIP
+}
+
+enum SignalStatus {
+  ACTIVE
+  CLOSED_WIN
+  CLOSED_LOSS
+  CANCELLED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?
+  bio           String?
+  role          UserRole  @default(USER)
+  vipUntil      DateTime?
+
+  accounts Account[]
+  sessions Session[]
+
+  followingFollows UserFollow[] @relation("UserFollowing")
+  followerFollows  UserFollow[] @relation("UserFollowers")
+
+  threads ForumThread[]
+  posts   ForumPost[]
+  signals Signal[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model UserFollow {
+  id          String @id @default(cuid())
+  followerId  String
+  followingId String
+  follower    User   @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User   @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+}
+
+model ForumCategory {
+  id          String        @id @default(cuid())
+  slug        String        @unique
+  name        String
+  description String?
+  threads     ForumThread[]
+}
+
+model ForumThread {
+  id         String        @id @default(cuid())
+  categoryId String
+  authorId   String
+  title      String
+  slug       String
+  category   ForumCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  author     User          @relation(fields: [authorId], references: [id])
+  posts      ForumPost[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([categoryId, slug])
+}
+
+model ForumPost {
+  id       String      @id @default(cuid())
+  threadId String
+  authorId String
+  body     String
+  thread   ForumThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  author   User        @relation(fields: [authorId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Signal {
+  id         String       @id @default(cuid())
+  authorId   String
+  symbol     String
+  direction  String
+  entry      Float
+  stopLoss   Float?
+  takeProfit Float?
+  tier       SignalTier   @default(FREE)
+  status     SignalStatus @default(ACTIVE)
+  notes      String?
+  author     User         @relation(fields: [authorId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
