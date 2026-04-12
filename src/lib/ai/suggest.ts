@@ -60,7 +60,7 @@ export async function getAiSuggestion(
   const resolved = resolveProvider();
   if (!resolved) {
     throw new AiUnavailableError(
-      "Chưa cấu hình AI key. Thêm GROQ_API_KEY (free) hoặc OPENAI_API_KEY trong .env.",
+      "No AI API key configured. Add GROQ_API_KEY (free) or OPENAI_API_KEY to .env.",
     );
   }
 
@@ -83,20 +83,20 @@ export async function getAiSuggestion(
 
   const raw = response.choices[0]?.message?.content;
   if (!raw) {
-    throw new Error("AI trả về response rỗng");
+    throw new Error("AI returned an empty response");
   }
 
   let parsed: unknown;
   try {
     parsed = JSON.parse(raw);
   } catch {
-    throw new Error("AI response không phải JSON hợp lệ");
+    throw new Error("AI response is not valid JSON");
   }
 
   const result = aiSuggestionSchema.safeParse(parsed);
   if (!result.success) {
     throw new Error(
-      `AI response format không hợp lệ: ${result.error.issues.map((i) => i.message).join(", ")}`,
+      `Invalid AI response format: ${result.error.issues.map((i) => i.message).join(", ")}`,
     );
   }
 

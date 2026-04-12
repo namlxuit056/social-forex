@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
@@ -21,14 +22,16 @@ export async function addSignalComment(
   const session = await auth();
   if (!session?.user?.id) redirect("/auth/signin");
 
+  const t = await getTranslations("errors");
+
   const parsed = commentSchema.safeParse({
     signalId: formData.get("signalId"),
     body: formData.get("body"),
   });
-  if (!parsed.success) return { error: "Nội dung không hợp lệ." };
+  if (!parsed.success) return { error: t("invalidData") };
 
   const { ok } = rateLimit(`sig-comment:${session.user.id}`, 10, 60_000);
-  if (!ok) return { error: "Bạn bình luận quá nhanh." };
+  if (!ok) return { error: t("rateLimitComment") };
 
   await prisma.signalComment.create({
     data: {

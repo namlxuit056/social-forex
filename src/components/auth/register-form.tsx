@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export function RegisterForm() {
+  const t = useTranslations("auth");
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -35,9 +37,9 @@ export function RegisterForm() {
     const data = (await res.json()) as { error?: string };
     if (!res.ok) {
       setLoading(false);
-      const msg = data.error ?? "Không thể đăng ký.";
+      const msg = data.error ?? t("registerFailed");
       setError(msg);
-      toast.error("Đăng ký không thành công", { description: msg });
+      toast.error(t("registerFailTitle"), { description: msg });
       return;
     }
     const sign = await signIn("credentials", {
@@ -47,13 +49,12 @@ export function RegisterForm() {
     });
     setLoading(false);
     if (sign?.error) {
-      const msg =
-        "Đã tạo tài khoản nhưng đăng nhập thất bại — hãy thử đăng nhập.";
+      const msg = t("createdSignInFailed");
       setError(msg);
-      toast.warning("Cần đăng nhập thủ công", { description: msg });
+      toast.warning(t("manualSignInTitle"), { description: msg });
       return;
     }
-    toast.success("Chào mừng đến Social Forex");
+    toast.success(t("welcomeToast"));
     router.push("/dashboard");
     router.refresh();
   }
@@ -62,29 +63,26 @@ export function RegisterForm() {
     <Card className="border-border/80 bg-card/80 shadow-lg ring-1 ring-primary/10 backdrop-blur-sm">
       <CardHeader className="space-y-1">
         <CardTitle className="font-heading text-xl tracking-tight">
-          Tạo tài khoản mới
+          {t("registerTitle")}
         </CardTitle>
-        <CardDescription>
-          Mật khẩu tối thiểu 8 ký tự. Bằng việc đăng ký, bạn đồng ý với điều
-          khoản sử dụng và công bố rủi ro giao dịch.
-        </CardDescription>
+        <CardDescription>{t("registerPolicy")}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="register-name">Tên hiển thị</Label>
+            <Label htmlFor="register-name">{t("name")}</Label>
             <Input
               id="register-name"
               required
               minLength={2}
               autoComplete="name"
-              placeholder="Tên của bạn"
+              placeholder={t("namePlaceholder")}
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="register-email">Email</Label>
+            <Label htmlFor="register-email">{t("email")}</Label>
             <Input
               id="register-email"
               type="email"
@@ -96,14 +94,14 @@ export function RegisterForm() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="register-password">Mật khẩu</Label>
+            <Label htmlFor="register-password">{t("password")}</Label>
             <Input
               id="register-password"
               type="password"
               required
               minLength={8}
               autoComplete="new-password"
-              placeholder="Tối thiểu 8 ký tự"
+              placeholder={t("passwordPlaceholder")}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               aria-invalid={error ? true : undefined}
@@ -120,7 +118,7 @@ export function RegisterForm() {
             className="w-full"
             size="lg"
           >
-            {loading ? "Đang tạo tài khoản…" : "Đăng ký"}
+            {loading ? t("creatingAccount") : t("submitRegister")}
           </Button>
         </form>
       </CardContent>

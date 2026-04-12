@@ -6,7 +6,7 @@ import { EmptyState } from "@/components/layout/empty-state";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { pageCtas } from "@/lib/page-cta-presets";
+import { pageCtaItems } from "@/lib/page-cta-i18n";
 
 export async function generateMetadata({
   params,
@@ -29,6 +29,8 @@ export default async function MessagesIndexPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("messages");
+  const tCommon = await getTranslations("common");
+  const ctaRow = await pageCtaItems("community", "explore");
 
   const session = await auth();
   if (!session?.user?.id) {
@@ -80,7 +82,7 @@ export default async function MessagesIndexPage({
             description={t("emptyHint")}
             primary={{ href: "/leaderboard", label: "Leaderboard" }}
           />
-          <PageCtaRow heading="→" items={[...pageCtas.community, ...pageCtas.explore]} />
+          <PageCtaRow heading={tCommon("next")} items={ctaRow} />
         </div>
       ) : (
         <>
@@ -100,7 +102,9 @@ export default async function MessagesIndexPage({
                     </p>
                   </div>
                   <div className="text-right text-xs text-muted-foreground">
-                    {new Date(c.last.createdAt).toLocaleString(locale)}
+                    {new Date(c.last.createdAt).toLocaleString(
+                      locale === "vi" ? "vi-VN" : "en-US",
+                    )}
                     {c.unread > 0 && (
                       <span className="ml-2 rounded-full bg-primary px-2 py-0.5 text-primary-foreground">
                         {c.unread}
@@ -111,7 +115,7 @@ export default async function MessagesIndexPage({
               </li>
             ))}
           </ul>
-          <PageCtaRow heading="→" items={[...pageCtas.community, ...pageCtas.explore]} />
+          <PageCtaRow heading={tCommon("next")} items={ctaRow} />
         </>
       )}
     </div>

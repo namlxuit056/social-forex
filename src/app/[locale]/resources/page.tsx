@@ -3,7 +3,7 @@ import { PageCtaRow } from "@/components/layout/page-cta-row";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ebookResources } from "@/lib/content/resources";
-import { pageCtas } from "@/lib/page-cta-presets";
+import { pageCtaItems } from "@/lib/page-cta-i18n";
 
 export async function generateMetadata({
   params,
@@ -24,6 +24,8 @@ export default async function ResourcesPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("resources");
+  const tCommon = await getTranslations("common");
+  const ctaRow = await pageCtaItems("learn", "community");
 
   return (
     <div className="space-y-8">
@@ -54,7 +56,7 @@ export default async function ResourcesPage({
           </li>
         ))}
       </ul>
-      <PageCtaRow heading="→" items={[...pageCtas.learn, ...pageCtas.community]} />
+      <PageCtaRow heading={tCommon("next")} items={ctaRow} />
     </div>
   );
 }

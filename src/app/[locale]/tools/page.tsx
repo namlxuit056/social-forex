@@ -1,7 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { TradingCalculators } from "@/components/tools/trading-calculators";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
-import { pageCtas } from "@/lib/page-cta-presets";
+import { pageCtaItems } from "@/lib/page-cta-i18n";
 
 export async function generateMetadata({
   params,
@@ -22,6 +22,8 @@ export default async function ToolsPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("tools");
+  const tCommon = await getTranslations("common");
+  const ctaRow = await pageCtaItems("explore", "trading");
 
   return (
     <div className="space-y-8">
@@ -32,7 +34,7 @@ export default async function ToolsPage({
         <p className="mt-2 text-muted-foreground">{t("description")}</p>
       </div>
       <TradingCalculators />
-      <PageCtaRow heading="→" items={[...pageCtas.explore, ...pageCtas.trading]} />
+      <PageCtaRow heading={tCommon("next")} items={ctaRow} />
     </div>
   );
 }

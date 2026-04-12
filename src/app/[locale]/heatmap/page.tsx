@@ -1,6 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
-import { pageCtas } from "@/lib/page-cta-presets";
+import { pageCtaItems } from "@/lib/page-cta-i18n";
 import { resolveQuotes } from "@/lib/quotes/resolve-quotes";
 
 export async function generateMetadata({
@@ -86,6 +86,8 @@ export default async function HeatmapPage({
         : source === "mock" || source === "mock_fallback"
           ? t("source_mock")
           : source;
+  const tCommon = await getTranslations("common");
+  const ctaRow = await pageCtaItems("trading", "explore");
 
   return (
     <div className="space-y-8">
@@ -125,7 +127,7 @@ export default async function HeatmapPage({
         </table>
       </div>
       <p className="text-xs text-muted-foreground">{sourceLabel}</p>
-      <PageCtaRow heading="→" items={[...pageCtas.trading, ...pageCtas.explore]} />
+      <PageCtaRow heading={tCommon("next")} items={ctaRow} />
     </div>
   );
 }

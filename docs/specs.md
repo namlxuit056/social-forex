@@ -262,3 +262,59 @@ Là **trader đăng signal**, tôi muốn **đính kèm một hoặc vài ảnh*
 - **UX/UI:** wireframe sort + pagination (mobile-first); màn hình thanh toán VIP.  
 - **Senior Dev:** spike payment provider; estimate F1.1 query + cursor pagination.  
 - **PM:** tạo issue GitHub theo bảng F1–F4; gắn nhãn `priority` / `phase-F`.
+
+---
+
+# Spec — i18n: locale `en` phải toàn bộ tiếng Anh (user-facing)
+
+## Vấn đề
+
+Khi user chọn **English**, một phần UI / thông báo / metadata vẫn hiển thị **tiếng Việt** vì copy không đi qua `next-intl` (hoặc không theo `locale`), mà bị **hardcode** trong component, Server Action, API route, `layout` gốc, hoặc module nội dung.
+
+## Mục tiêu
+
+- Với **`locale === en`**, mọi chuỗi **user-facing** (UI, toast, `confirm()`, lỗi trả về form/API mà client hiển thị, `metadata` theo locale, cảnh báo trên trang) là **tiếng Anh**.
+- Với **`locale === vi`**, cùng các vị trí đó là **tiếng Việt** (hoặc song ngữ có chủ đích — ghi rõ nếu ngoại lệ).
+- **Ngoài phạm vi giai đoạn 1:** comment code nội bộ, log server thuần devops (có thể giữ một ngôn ngữ).
+
+## Phân loại nợ kỹ thuật (inventory — rà soát codebase)
+
+| Nhóm | Ví dụ khu vực | Ghi chú |
+|------|----------------|---------|
+| **A. Server Actions** | `signals.ts`, `forum.ts`, `journal.ts`, `messages.ts`, `signal-social.ts`, `moderation.ts`, `admin-vip.ts`, `admin-signals.ts` | `return { error: "..." }` đang cố định tiếng Việt → cần key i18n hoặc map theo locale (truyền locale từ client / cookie / `headers`). |
+| **B. API / Route Handlers** | `api/ai/suggest/route.ts`, `api/signal-images/upload/route.ts`, `api/auth/register/route.ts` | JSON `message`/`error` tiếng Việt → chọn locale từ `Accept-Language`, cookie `NEXT_LOCALE`, hoặc query; thống nhất một cách. |
+| **C. Components (client) không dịch** | `dm-compose.tsx`, `reply-form.tsx`, `new-thread-form.tsx`, `report-button.tsx`, `vip-grant-form.tsx`, `register-form.tsx`, `mod-actions.tsx`, `economic-calendar.tsx`, `live-quotes-table.tsx`, `page-cta-row.tsx` (default heading) | Thay bằng `useTranslations` / nhận `label` từ server đã dịch. |
+| **D. Pages (server) hardcode** | `forum/search/page.tsx` (metadata + toàn trang), `forum/[slug]/page.tsx`, `forum/.../thread/...`, `messages/[userId]`, `u/[userId]`, `forum/.../new`, `admin/vip` (cột “Tên”), `upgrade-vip` | Dùng `getTranslations` + `generateMetadata` theo locale. |
+| **E. Root `layout.tsx`** | `metadata`, `openGraph`, keywords | Đang tiếng Việt cố định → chuyển sang `[locale]/layout` hoặc `generateMetadata` theo segment locale. |
+| **F. Lib / warnings hiển thị UI** | `resolve-calendar.ts`, `resolve-quotes.ts`, `signal-images.ts`, `calendar-sample.ts`, `quotes/definitions.ts` (tên cặp), `page-cta-presets.ts` | Chuỗi đưa ra component → i18n; dữ liệu mẫu song ngữ hoặc key + dịch tại tầng UI. |
+| **G. Nội dung dài (Academy / resources)** | `lib/content/academy.ts`, `resources.ts` | Quyết định PM: (1) bản EN + VI tách file theo locale, hoặc (2) chỉ EN trên `en`, VI trên `vi` — không dùng một file VI cho cả hai locale. |
+
+## Chiến lược kỹ thuật (đề xuất Senior Dev)
+
+1. **Chuẩn hóa một nguồn truth cho copy UI:** `messages/en.json` + `messages/vi.json`; hạn chế string literal trong TSX cho nhãn người dùng.
+2. **Server Actions:**  
+   - Cách A: truyền `locale` từ form (hidden field) và chọn message từ object `en`/`vi` trong action;  
+   - Cách B: trả về **mã lỗi** (`errorCode: "RATE_LIMIT"`) và client dịch bằng `t()`.  
+   Ưu tiên B nếu muốn tránh lệch tin cậy (user sửa hidden locale).
+3. **`confirm()` / `alert()`:** dùng `useTranslations` trên client hoặc thay bằng dialog có i18n.
+4. **Kiểm tra hồi quy:** grep `[àáảãạăâèéêìíòóôơùúưỳýđĐ]` trong `src/**/*.tsx` (trừ comment có chủ đích) + review `return { error:` trong `src/actions`.
+
+## Tiêu chí chấp nhận (QA)
+
+- [ ] Với `en`, không còn đoạn tiếng Việt **có dấu** trên các flow: đăng ký/đăng nhập, forum (tạo thread/reply/report/search), tin nhắn, signals (tạo/đóng/comment), journal, calendar, quotes, AI panel, admin (kể cả lỗi action), upgrade VIP.
+- [ ] `metadata` (title/description) trang chủ và các trang chính khớp locale.
+- [ ] Toast / validation / rate limit hiển thị đúng ngôn ngữ.
+- [ ] Academy/resources: theo quyết định mục **G** (đồng nhất với locale).
+
+## Thứ tự triển khai đề xuất (PM)
+
+1. **Sprint i18n-1:** A + B (actions + API lỗi user-visible) + register/sign-in.  
+2. **Sprint i18n-2:** C + D (components + pages forum/messages/profile).  
+3. **Sprint i18n-3:** E + F (layout metadata, calendar/quotes warnings, presets).  
+4. **Sprint i18n-4:** G (nội dung academy/resources theo locale).
+
+## Handoff
+
+- **UX/UI:** rà soát không dùng chuỗi dài trong `confirm`; ưu tiên dialog có `t()`.  
+- **Senior Dev:** spike chọn pattern error code vs locale trong Server Actions; cập nhật `AGENTS.md` hoặc rule nội bộ “no user-facing string without i18n”.  
+- **QA:** checklist trên staging với account EN end-to-end.

@@ -30,6 +30,7 @@ export default async function AdminVipPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("admin");
+  const tc = await getTranslations("common");
 
   const session = await auth();
   if (!session?.user?.id) redirect("/auth/signin");
@@ -78,7 +79,7 @@ export default async function AdminVipPage({
 
   return (
     <div className="space-y-8">
-      <BackLink href="/dashboard">Dashboard</BackLink>
+      <BackLink href="/dashboard">{tc("dashboard")}</BackLink>
 
       <div>
         <h1 className="font-heading text-2xl font-semibold text-foreground">
@@ -110,7 +111,7 @@ export default async function AdminVipPage({
                 <thead>
                   <tr className="border-b border-border text-left text-xs text-muted-foreground">
                     <th className="pb-2 pr-4">{t("userEmail")}</th>
-                    <th className="pb-2 pr-4">Tên</th>
+                    <th className="pb-2 pr-4">{t("colName")}</th>
                     <th className="pb-2 pr-4">{t("vipUntil")}</th>
                     <th className="pb-2 pr-4" />
                     <th className="pb-2" />

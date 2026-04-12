@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { replyForumThread } from "@/actions/forum";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -16,6 +17,8 @@ export function ReplyForm({
   threadId: string;
   categorySlug: string;
 }) {
+  const t = useTranslations("forum");
+  const tc = useTranslations("common");
   const [state, formAction] = useActionState(replyForumThread, initial);
   const ref = useRef<HTMLFormElement>(null);
 
@@ -30,7 +33,7 @@ export function ReplyForm({
       <input type="hidden" name="threadId" value={threadId} />
       <input type="hidden" name="categorySlug" value={categorySlug} />
       <div>
-        <Label htmlFor="reply-body">Trả lời</Label>
+        <Label htmlFor="reply-body">{t("replyLabel")}</Label>
         <Textarea
           id="reply-body"
           name="body"
@@ -43,7 +46,7 @@ export function ReplyForm({
         <p className="text-sm text-destructive">{state.error}</p>
       )}
       <Button type="submit" variant="outline" size="sm">
-        Gửi
+        {tc("send")}
       </Button>
     </form>
   );

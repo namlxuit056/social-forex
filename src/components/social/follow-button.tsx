@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { toggleFollowUser } from "@/actions/social";
 import { Button } from "@/components/ui/button";
 
@@ -10,6 +11,8 @@ export function FollowButton({
   userId: string;
   isFollowing: boolean;
 }) {
+  const t = useTranslations("profile");
+
   return (
     <form action={toggleFollowUser}>
       <input type="hidden" name="targetUserId" value={userId} />
@@ -18,7 +21,7 @@ export function FollowButton({
         size="sm"
         variant={isFollowing ? "outline" : "default"}
       >
-        {isFollowing ? "Đang follow" : "Follow"}
+        {isFollowing ? t("following") : t("follow")}
       </Button>
     </form>
   );

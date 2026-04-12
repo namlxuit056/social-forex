@@ -1,8 +1,8 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { LiveQuotesTable } from "@/components/quotes/live-quotes-table";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
+import { pageCtaItems } from "@/lib/page-cta-i18n";
 import { resolveQuotes } from "@/lib/quotes/resolve-quotes";
-import { pageCtas } from "@/lib/page-cta-presets";
 
 export async function generateMetadata({
   params,
@@ -23,7 +23,17 @@ export default async function QuotesPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("quotes");
+  const tCommon = await getTranslations("common");
   const initial = await resolveQuotes();
+
+  const initialWarning =
+    initial.warningKey === "mockData"
+      ? t("warningMock")
+      : initial.warningKey === "providerFallback" && initial.warningParams
+        ? t("warningFallback", initial.warningParams)
+        : undefined;
+
+  const ctaRow = await pageCtaItems("trading", "explore");
 
   return (
     <div className="space-y-8">
@@ -38,10 +48,10 @@ export default async function QuotesPage({
       <LiveQuotesTable
         initial={initial.quotes}
         initialSource={initial.source}
-        initialWarning={initial.warning}
+        initialWarning={initialWarning}
         initialUpdatedAt={initial.updatedAt}
       />
-      <PageCtaRow heading="→" items={[...pageCtas.trading, ...pageCtas.explore]} />
+      <PageCtaRow heading={tCommon("next")} items={ctaRow} />
     </div>
   );
 }

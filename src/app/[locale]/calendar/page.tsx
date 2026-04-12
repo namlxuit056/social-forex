@@ -2,7 +2,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { EconomicCalendar } from "@/components/calendar/economic-calendar";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
 import { resolveCalendarEvents } from "@/lib/calendar/resolve-calendar";
-import { pageCtas } from "@/lib/page-cta-presets";
+import { pageCtaItems } from "@/lib/page-cta-i18n";
 
 export async function generateMetadata({
   params,
@@ -25,7 +25,16 @@ export default async function CalendarPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("calendar");
+  const tCommon = await getTranslations("common");
   const cal = await resolveCalendarEvents();
+
+  const warningText =
+    cal.warning &&
+    (cal.warning.detail
+      ? t(`warnings.${cal.warning.key}`, { message: cal.warning.detail })
+      : t(`warnings.${cal.warning.key}`));
+
+  const ctaRow = await pageCtaItems("trading", "explore");
 
   return (
     <div className="space-y-8">
@@ -38,10 +47,10 @@ export default async function CalendarPage({
       <EconomicCalendar
         events={cal.events}
         source={cal.source}
-        warning={cal.warning}
+        warning={warningText ?? undefined}
         syncedAt={cal.syncedAt}
       />
-      <PageCtaRow heading="→" items={[...pageCtas.trading, ...pageCtas.explore]} />
+      <PageCtaRow heading={tCommon("next")} items={ctaRow} />
     </div>
   );
 }

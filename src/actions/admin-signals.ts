@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
@@ -23,15 +24,17 @@ export async function adminDeleteSignal(
   const session = await auth();
   if (!session?.user?.id) redirect("/auth/signin");
 
+  const t = await getTranslations("errors");
+
   if (!(await requireStaff(session.user.id))) {
-    return { error: "Không có quyền." };
+    return { error: t("forbidden") };
   }
 
   const parsed = deleteSchema.safeParse({
     signalId: formData.get("signalId"),
   });
   if (!parsed.success) {
-    return { error: "Dữ liệu không hợp lệ." };
+    return { error: t("invalidData") };
   }
 
   const { signalId } = parsed.data;
@@ -39,7 +42,7 @@ export async function adminDeleteSignal(
   try {
     await prisma.signal.delete({ where: { id: signalId } });
   } catch {
-    return { error: "Không xóa được (tín hiệu không tồn tại?)." };
+    return { error: t("deleteSignalFailed") };
   }
 
   revalidatePath("/signals");

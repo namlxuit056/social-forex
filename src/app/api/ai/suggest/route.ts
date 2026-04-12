@@ -7,22 +7,29 @@ import { resolveQuotes } from "@/lib/quotes/resolve-quotes";
 import { QUOTE_BY_SYMBOL } from "@/lib/quotes/definitions";
 import { getAiSuggestion, AiUnavailableError } from "@/lib/ai/suggest";
 import type { AiSuggestResponse, AiSuggestError } from "@/lib/ai/types";
+import { localeFromRequest } from "@/lib/api-locale";
+import { pickAi } from "@/lib/messages-pick";
 
 const FREE_SYMBOL = "EURUSD";
-const DISCLAIMER =
-  "Đề xuất AI chỉ mang tính tham khảo và giáo dục, không phải tư vấn đầu tư. Bạn tự chịu trách nhiệm về mọi quyết định giao dịch.";
 
-function errorJson(error: string, status: number, retryAfterMs?: number) {
+function errorJson(
+  error: string,
+  status: number,
+  retryAfterMs?: number,
+) {
   const body: AiSuggestError = { error, retryAfterMs };
   return NextResponse.json(body, { status });
 }
 
 export async function POST(req: NextRequest) {
+  const loc = localeFromRequest(req);
+  const ai = pickAi(loc);
+
   const hasAiKey =
     !!process.env.GROQ_API_KEY?.trim() ||
     !!process.env.OPENAI_API_KEY?.trim();
   if (!hasAiKey) {
-    return errorJson("AI chưa được kích hoạt trên hệ thống.", 503);
+    return errorJson(ai.apiNotConfigured, 503);
   }
 
   const session = await auth();
@@ -32,7 +39,7 @@ export async function POST(req: NextRequest) {
   const symbol = (body.symbol ?? FREE_SYMBOL).toUpperCase();
 
   if (!QUOTE_BY_SYMBOL[symbol]) {
-    return errorJson("Symbol không được hỗ trợ.", 400);
+    return errorJson(ai.apiSymbolUnsupported, 400);
   }
 
   let isVip = false;
@@ -46,12 +53,16 @@ export async function POST(req: NextRequest) {
 
   if (symbol !== FREE_SYMBOL && !isVip) {
     return errorJson(
-      `Nâng cấp VIP để phân tích AI cho ${symbol}. Bản Free chỉ hỗ trợ ${FREE_SYMBOL}.`,
+      ai.apiVipOnlySymbol
+        .replace("{symbol}", symbol)
+        .replace("{freeSymbol}", FREE_SYMBOL),
       403,
     );
   }
 
-  const rateLimitKey = userId ? `ai:${userId}` : `ai:anon:${req.headers.get("x-forwarded-for") ?? "unknown"}`;
+  const rateLimitKey = userId
+    ? `ai:${userId}`
+    : `ai:anon:${req.headers.get("x-forwarded-for") ?? "unknown"}`;
   const maxReq = isVip ? 3 : 1;
   const windowMs = isVip ? 60_000 : 300_000;
   const { ok, remaining } = rateLimit(rateLimitKey, maxReq, windowMs);
@@ -59,9 +70,7 @@ export async function POST(req: NextRequest) {
   if (!ok) {
     const retryAfterMs = remaining === 0 ? windowMs : undefined;
     return errorJson(
-      isVip
-        ? "Giới hạn 3 lần/phút. Vui lòng chờ."
-        : "Giới hạn 1 lần/5 phút. Nâng VIP để phân tích nhiều hơn.",
+      isVip ? ai.apiRateLimitVip : ai.apiRateLimitFree,
       429,
       retryAfterMs,
     );
@@ -70,7 +79,7 @@ export async function POST(req: NextRequest) {
   const { quotes } = await resolveQuotes();
   const quote = quotes.find((q) => q.symbol === symbol);
   if (!quote) {
-    return errorJson("Không có dữ liệu giá cho symbol này.", 404);
+    return errorJson(ai.apiNoQuote, 404);
   }
 
   try {
@@ -80,7 +89,7 @@ export async function POST(req: NextRequest) {
       symbol,
       suggestion,
       generatedAt: new Date().toISOString(),
-      disclaimer: DISCLAIMER,
+      disclaimer: ai.apiDisclaimer,
     };
 
     return NextResponse.json(response);
@@ -88,7 +97,7 @@ export async function POST(req: NextRequest) {
     if (e instanceof AiUnavailableError) {
       return errorJson(e.message, 503);
     }
-    const msg = e instanceof Error ? e.message : "Lỗi AI không xác định";
-    return errorJson(`Không thể phân tích lúc này: ${msg}`, 500);
+    const msg = e instanceof Error ? e.message : ai.apiUnknownError;
+    return errorJson(ai.apiAnalyzeFailed.replace("{message}", msg), 500);
   }
 }

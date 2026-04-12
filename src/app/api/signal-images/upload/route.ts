@@ -1,6 +1,8 @@
 import { put } from "@vercel/blob";
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionUserIdForApi } from "@/lib/auth-api";
+import { localeFromRequest } from "@/lib/api-locale";
+import { pickErrors } from "@/lib/messages-pick";
 import { assertImageFile, effectiveImageMime } from "@/lib/signal-images";
 import { rateLimit } from "@/lib/rate-limit";
 
@@ -22,10 +24,13 @@ function blobUploadPrefix(): string {
 }
 
 export async function POST(req: NextRequest) {
+  const loc = localeFromRequest(req);
+  const err = pickErrors(loc);
+
   const token = blobToken();
   if (!token) {
     return NextResponse.json(
-      { error: "not_configured", message: "BLOB_READ_WRITE_TOKEN chưa cấu hình hoặc đang rỗng." },
+      { error: "not_configured", message: err.blobNotConfigured },
       { status: 503 },
     );
   }
@@ -61,7 +66,13 @@ export async function POST(req: NextRequest) {
 
   const check = assertImageFile(file);
   if (!check.ok) {
-    return NextResponse.json({ error: "validation", message: check.error }, { status: 400 });
+    const msg =
+      check.errorKey === "signalImageUrlInvalid"
+        ? err.signalImageUrlInvalid
+        : check.errorKey === "signalImageTypeInvalid"
+          ? err.signalImageTypeInvalid
+          : err.signalImageTooLarge;
+    return NextResponse.json({ error: "validation", message: msg }, { status: 400 });
   }
 
   const mime = effectiveImageMime(file) ?? "image/jpeg";
@@ -82,7 +93,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ url: blob.url });
   } catch (e) {
     const message =
-      e instanceof Error ? e.message : "Không thể ghi lên Vercel Blob.";
+      e instanceof Error ? e.message : err.blobUploadFailed;
     return NextResponse.json(
       { error: "blob_upload_failed", message },
       { status: 502 },

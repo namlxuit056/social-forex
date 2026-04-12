@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { BackLink } from "@/components/layout/back-link";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
@@ -9,17 +10,23 @@ import { HidePostButton, DeleteThreadButton } from "@/components/forum/mod-actio
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
-import { pageCtas } from "@/lib/page-cta-presets";
+import { pageCtaItems } from "@/lib/page-cta-i18n";
 import { cn } from "@/lib/utils";
 
 type Props = {
-  params: Promise<{ slug: string; threadSlug: string }>;
+  params: Promise<{ locale: string; slug: string; threadSlug: string }>;
 };
 
 export const dynamic = "force-dynamic";
 
 export default async function ForumThreadPage({ params }: Props) {
-  const { slug, threadSlug } = await params;
+  const { locale, slug, threadSlug } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("forum");
+  const tCommon = await getTranslations("common");
+  const ctaRow = await pageCtaItems("community", "trading");
+  const dateLocale = locale === "vi" ? "vi-VN" : "en-US";
+
   const session = await auth();
 
   const dbUser = session?.user?.id
@@ -78,7 +85,7 @@ export default async function ForumThreadPage({ params }: Props) {
           ) : (
             (thread.author?.name ?? thread.author?.email)
           )}{" "}
-          · {new Date(thread.createdAt).toLocaleString("vi-VN")}
+          · {new Date(thread.createdAt).toLocaleString(dateLocale)}
         </p>
       </header>
 
@@ -103,11 +110,11 @@ export default async function ForumThreadPage({ params }: Props) {
                 ) : (
                   (p.author?.name ?? p.author?.email)
                 )}{" "}
-                · {new Date(p.createdAt).toLocaleString("vi-VN")}
+                · {new Date(p.createdAt).toLocaleString(dateLocale)}
               </span>
               {p.hidden && (
                 <Badge variant="outline" className="text-[10px]">
-                  Đã ẩn
+                  {t("hidden")}
                 </Badge>
               )}
             </div>
@@ -130,13 +137,13 @@ export default async function ForumThreadPage({ params }: Props) {
             href="/auth/signin"
             className={cn(buttonVariants({ variant: "link", size: "sm" }), "h-auto px-0")}
           >
-            Đăng nhập
-          </Link>{" "}
-          để trả lời.
+            {t("threadLoginWord")}
+          </Link>
+          {t("threadLoginSuffix")}
         </p>
       )}
 
-      <PageCtaRow heading="Tiếp theo" items={[...pageCtas.community, ...pageCtas.trading]} />
+      <PageCtaRow heading={tCommon("next")} items={ctaRow} />
     </div>
   );
 }

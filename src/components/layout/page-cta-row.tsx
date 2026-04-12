@@ -9,7 +9,7 @@ export type PageCtaItem = {
 };
 
 export function PageCtaRow({
-  heading = "Tiếp theo",
+  heading = "Next",
   items,
   className,
 }: {

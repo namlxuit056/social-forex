@@ -1,7 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Disclaimer } from "@/components/layout/disclaimer";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
-import { pageCtas } from "@/lib/page-cta-presets";
+import { pageCtaItems } from "@/lib/page-cta-i18n";
 
 const brokers = [
   { name: "IC Markets", spread: "0.0–0.6", regulation: "ASIC, CySEC, SCB", minDeposit: "$200", note: "Raw spread, scalping/EA." },
@@ -30,6 +30,8 @@ export default async function BrokersPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("brokers");
+  const tCommon = await getTranslations("common");
+  const ctaRow = await pageCtaItems("risk", "explore");
 
   return (
     <div className="space-y-8">
@@ -64,7 +66,7 @@ export default async function BrokersPage({
         </table>
       </div>
       <Disclaimer variant="compact" />
-      <PageCtaRow heading="→" items={[...pageCtas.risk, ...pageCtas.explore]} />
+      <PageCtaRow heading={tCommon("next")} items={ctaRow} />
     </div>
   );
 }

@@ -2,7 +2,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { pageCtas } from "@/lib/page-cta-presets";
+import { pageCtaItems } from "@/lib/page-cta-i18n";
 
 export async function generateMetadata({
   params,
@@ -24,6 +24,8 @@ export default async function PartnersPage({
   setRequestLocale(locale);
   const t = await getTranslations("partners");
   const tn = await getTranslations("nav");
+  const tCommon = await getTranslations("common");
+  const ctaRow = await pageCtaItems("risk", "learn");
 
   return (
     <div className="max-w-2xl space-y-8">
@@ -54,7 +56,7 @@ export default async function PartnersPage({
           </p>
         </CardContent>
       </Card>
-      <PageCtaRow heading="→" items={[...pageCtas.risk, ...pageCtas.learn]} />
+      <PageCtaRow heading={tCommon("next")} items={ctaRow} />
     </div>
   );
 }

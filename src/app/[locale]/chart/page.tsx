@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ChartContainer } from "@/components/charts/chart-container";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
-import { pageCtas } from "@/lib/page-cta-presets";
+import { pageCtaItems } from "@/lib/page-cta-i18n";
 
 export async function generateMetadata({
   params,
@@ -23,6 +23,8 @@ export default async function ChartPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("chart");
+  const tCommon = await getTranslations("common");
+  const ctaRow = await pageCtaItems("trading", "explore");
 
   return (
     <div className="space-y-6">
@@ -37,10 +39,7 @@ export default async function ChartPage({
       <Suspense>
         <ChartContainer locale={locale} />
       </Suspense>
-      <PageCtaRow
-        heading="→"
-        items={[...pageCtas.trading, ...pageCtas.explore]}
-      />
+      <PageCtaRow heading={tCommon("next")} items={ctaRow} />
     </div>
   );
 }

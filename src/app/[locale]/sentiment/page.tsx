@@ -2,7 +2,7 @@ import { BarChart3 } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
 import { EmptyState } from "@/components/layout/empty-state";
-import { pageCtas } from "@/lib/page-cta-presets";
+import { pageCtaItems } from "@/lib/page-cta-i18n";
 import { prisma } from "@/lib/prisma";
 
 export async function generateMetadata({
@@ -62,6 +62,8 @@ export default async function SentimentPage({
       };
     })
     .sort((a, b) => b.total - a.total);
+  const tCommon = await getTranslations("common");
+  const ctaRow = await pageCtaItems("trading", "community");
 
   return (
     <div className="space-y-8">
@@ -109,7 +111,7 @@ export default async function SentimentPage({
         </div>
       )}
 
-      <PageCtaRow heading="→" items={[...pageCtas.trading, ...pageCtas.community]} />
+      <PageCtaRow heading={tCommon("next")} items={ctaRow} />
     </div>
   );
 }

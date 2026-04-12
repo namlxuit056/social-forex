@@ -8,7 +8,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { prisma } from "@/lib/prisma";
 import { isVipActive } from "@/lib/vip";
-import { pageCtas } from "@/lib/page-cta-presets";
+import { pageCtaItems } from "@/lib/page-cta-i18n";
 
 export async function generateMetadata({
   params,
@@ -32,6 +32,7 @@ export default async function ProfilePage({
   setRequestLocale(locale);
   const t = await getTranslations("profile");
   const tc = await getTranslations("common");
+  const ctaRow = await pageCtaItems("explore", "community");
 
   const session = await auth();
 
@@ -45,7 +46,7 @@ export default async function ProfilePage({
           primary={{ href: "/auth/signin?callbackUrl=/profile", label: tc("signIn") }}
           secondary={[{ href: "/auth/register", label: tc("signUp") }]}
         />
-        <PageCtaRow heading="→" items={[...pageCtas.explore, ...pageCtas.community]} />
+        <PageCtaRow heading={tc("next")} items={ctaRow} />
       </div>
     );
   }
@@ -115,7 +116,7 @@ export default async function ProfilePage({
           </div>
         )}
       </div>
-      <PageCtaRow heading="→" items={[...pageCtas.explore, ...pageCtas.community]} />
+      <PageCtaRow heading={tc("next")} items={ctaRow} />
     </div>
   );
 }

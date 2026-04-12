@@ -6,7 +6,7 @@ import { Disclaimer } from "@/components/layout/disclaimer";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
 import { Badge } from "@/components/ui/badge";
 import { academyLessons } from "@/lib/content/academy";
-import { pageCtas } from "@/lib/page-cta-presets";
+import { pageCtaItems } from "@/lib/page-cta-i18n";
 
 type Props = { params: Promise<{ slug: string; locale: string }> };
 
@@ -14,6 +14,8 @@ export default async function AcademyLessonPage({ params }: Props) {
   const { slug, locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("academy");
+  const tCommon = await getTranslations("common");
+  const ctaRow = await pageCtaItems("learn", "trading");
 
   const lesson = academyLessons.find((l) => l.slug === slug);
   if (!lesson) notFound();
@@ -100,7 +102,7 @@ export default async function AcademyLessonPage({ params }: Props) {
           </Link>
         </p>
       </article>
-      <PageCtaRow heading="Tiếp theo" items={[...pageCtas.learn, ...pageCtas.trading]} />
+      <PageCtaRow heading={tCommon("next")} items={ctaRow} />
     </div>
   );
 }

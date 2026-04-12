@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
@@ -25,20 +26,21 @@ export async function grantVip(
 ) {
   const session = await auth();
   if (!session?.user?.id) redirect("/auth/signin");
+  const t = await getTranslations("errors");
   if (!(await requireAdmin(session.user.id))) {
-    return { error: "Bạn không có quyền ADMIN." };
+    return { error: t("adminOnly") };
   }
 
   const parsed = grantSchema.safeParse({
     email: formData.get("email"),
     days: formData.get("days"),
   });
-  if (!parsed.success) return { error: "Dữ liệu không hợp lệ." };
+  if (!parsed.success) return { error: t("invalidData") };
 
   const { email, days } = parsed.data;
 
   const target = await prisma.user.findUnique({ where: { email } });
-  if (!target) return { error: `Không tìm thấy user: ${email}` };
+  if (!target) return { error: t("userNotFound", { email }) };
 
   const vipUntil = new Date();
   vipUntil.setDate(vipUntil.getDate() + days);

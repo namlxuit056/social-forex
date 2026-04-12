@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { sendDirectMessage } from "@/actions/messages";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,6 +10,8 @@ import { Textarea } from "@/components/ui/textarea";
 const initial: { error?: string; ok?: boolean } | null = null;
 
 export function DmCompose({ recipientId }: { recipientId: string }) {
+  const t = useTranslations("messages");
+  const tc = useTranslations("common");
   const [state, formAction] = useActionState(sendDirectMessage, initial);
   const ref = useRef<HTMLFormElement>(null);
 
@@ -25,13 +28,13 @@ export function DmCompose({ recipientId }: { recipientId: string }) {
         name="body"
         required
         rows={3}
-        placeholder="Nhập tin nhắn…"
+        placeholder={t("compose")}
       />
       {state?.error && (
         <p className="text-sm text-destructive">{state.error}</p>
       )}
       <Button type="submit" size="sm">
-        Gửi
+        {tc("send")}
       </Button>
     </form>
   );

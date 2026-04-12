@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { BackLink } from "@/components/layout/back-link";
 import { EmptyState } from "@/components/layout/empty-state";
@@ -9,14 +10,18 @@ import { cn } from "@/lib/utils";
 import { MessageSquarePlus } from "lucide-react";
 
 type Props = {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ locale: string; slug: string }>;
   searchParams: Promise<{ q?: string }>;
 };
 
 export const dynamic = "force-dynamic";
 
 export default async function ForumCategoryPage({ params, searchParams }: Props) {
-  const { slug } = await params;
+  const { locale, slug } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("forum");
+  const dateLocale = locale === "vi" ? "vi-VN" : "en-US";
+
   const { q } = await searchParams;
   const query = q?.trim();
 
@@ -41,7 +46,7 @@ export default async function ForumCategoryPage({ params, searchParams }: Props)
 
   return (
     <div className="space-y-6">
-      <BackLink href="/forum">Diễn đàn</BackLink>
+      <BackLink href="/forum">{t("backToForum")}</BackLink>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="font-heading text-2xl font-semibold text-foreground">
@@ -55,7 +60,7 @@ export default async function ForumCategoryPage({ params, searchParams }: Props)
           href={`/forum/${slug}/new`}
           className={cn(buttonVariants({ size: "sm" }))}
         >
-          Tạo chủ đề mới
+          {t("createNewThread")}
         </Link>
       </div>
 
@@ -63,38 +68,41 @@ export default async function ForumCategoryPage({ params, searchParams }: Props)
         <Input
           name="q"
           defaultValue={query ?? ""}
-          placeholder="Lọc theo tiêu đề trong mục này…"
+          placeholder={t("categoryFilterPlaceholder")}
           className="min-w-[200px] flex-1"
         />
         <Button type="submit" variant="outline" size="sm">
-          Lọc
+          {t("categoryFilter")}
         </Button>
       </form>
 
       {category.threads.length === 0 ? (
         <EmptyState
           icon={MessageSquarePlus}
-          title="Chưa có bài viết trong mục này"
+          title={t("categoryEmptyTitle")}
           description={
-            query
-              ? "Thử bỏ bộ lọc hoặc từ khóa khác."
-              : "Tạo chủ đề đầu tiên để mở cuộc thảo luận."
+            query ? t("categoryEmptyFiltered") : t("categoryEmptyDefault")
           }
-          primary={{ href: `/forum/${slug}/new`, label: "Tạo chủ đề mới" }}
-          secondary={[{ href: "/forum/search", label: "Tìm toàn diễn đàn" }]}
+          primary={{
+            href: `/forum/${slug}/new`,
+            label: t("createNewThread"),
+          }}
+          secondary={[{ href: "/forum/search", label: t("searchWholeForum") }]}
         />
       ) : (
         <ul className="divide-y divide-border rounded-xl border border-border">
-          {category.threads.map((t) => (
-            <li key={t.id}>
+          {category.threads.map((row) => (
+            <li key={row.id}>
               <Link
-                href={`/forum/${slug}/thread/${t.slug}`}
+                href={`/forum/${slug}/thread/${row.slug}`}
                 className="block p-4 transition hover:bg-muted/40"
               >
-                <span className="font-medium text-foreground">{t.title}</span>
+                <span className="font-medium text-foreground">{row.title}</span>
                 <div className="mt-1 flex flex-wrap gap-3 text-xs text-muted-foreground">
-                  <span>{t.author?.name ?? t.author?.email ?? "Ẩn danh"}</span>
-                  <span>{new Date(t.updatedAt).toLocaleString("vi-VN")}</span>
+                  <span>
+                    {row.author?.name ?? row.author?.email ?? t("anonymousAuthor")}
+                  </span>
+                  <span>{new Date(row.updatedAt).toLocaleString(dateLocale)}</span>
                 </div>
               </Link>
             </li>

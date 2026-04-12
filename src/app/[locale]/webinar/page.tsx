@@ -2,7 +2,7 @@ import { Video } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { EmptyState } from "@/components/layout/empty-state";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
-import { pageCtas } from "@/lib/page-cta-presets";
+import { pageCtaItems } from "@/lib/page-cta-i18n";
 
 export async function generateMetadata({
   params,
@@ -23,6 +23,7 @@ export default async function WebinarPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("webinar");
+  const ctaRow = await pageCtaItems("learn", "community");
 
   return (
     <div className="space-y-8">
@@ -38,7 +39,7 @@ export default async function WebinarPage({
         description={t("emptyHint")}
         primary={{ href: "/academy", label: "Academy" }}
       />
-      <PageCtaRow heading={t("inMeantime")} items={[...pageCtas.learn, ...pageCtas.community]} />
+      <PageCtaRow heading={t("inMeantime")} items={ctaRow} />
     </div>
   );
 }

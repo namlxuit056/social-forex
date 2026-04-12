@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
@@ -24,8 +25,10 @@ export async function createForumThread(
   }
   const userId = session.user.id;
 
+  const t = await getTranslations("errors");
+
   const { ok } = rateLimit(`thread:${userId}`, 5, 60_000);
-  if (!ok) return { error: "Bạn đang tạo quá nhanh. Vui lòng chờ 1 phút." };
+  if (!ok) return { error: t("threadCreateRateLimit") };
 
   const parsed = createThreadSchema.safeParse({
     title: formData.get("title"),
@@ -33,7 +36,7 @@ export async function createForumThread(
     categorySlug: formData.get("categorySlug"),
   });
   if (!parsed.success) {
-    return { error: "Nội dung không hợp lệ." };
+    return { error: t("invalidThreadContent") };
   }
 
   const { title, body, categorySlug } = parsed.data;
@@ -41,7 +44,7 @@ export async function createForumThread(
     where: { slug: categorySlug },
   });
   if (!category) {
-    return { error: "Chủ đề không tồn tại." };
+    return { error: t("forumCategoryNotFound") };
   }
 
   const base = slugify(title);
@@ -87,24 +90,26 @@ export async function replyForumThread(
   }
   const userId = session.user.id;
 
+  const t = await getTranslations("errors");
+
   const parsed = replySchema.safeParse({
     body: formData.get("body"),
     threadId: formData.get("threadId"),
     categorySlug: formData.get("categorySlug"),
   });
   if (!parsed.success) {
-    return { error: "Bình luận không hợp lệ." };
+    return { error: t("replyInvalid") };
   }
 
   const { ok } = rateLimit(`reply:${userId}`, 10, 60_000);
-  if (!ok) return { error: "Bạn đang gửi quá nhanh. Vui lòng chờ 1 phút." };
+  if (!ok) return { error: t("replyRateLimit") };
 
   const { body, threadId, categorySlug } = parsed.data;
   const thread = await prisma.forumThread.findFirst({
     where: { id: threadId, category: { slug: categorySlug } },
   });
   if (!thread) {
-    return { error: "Chủ đề không tồn tại." };
+    return { error: t("threadNotFound") };
   }
 
   await prisma.forumPost.create({

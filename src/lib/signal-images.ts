@@ -36,28 +36,37 @@ export function isAllowedSignalImageUrl(url: string): boolean {
   }
 }
 
+export type SignalImageErrorKey =
+  | "signalImageUrlInvalid"
+  | "signalImageTypeInvalid"
+  | "signalImageTooLarge";
+
 export function parseAndValidateImageUrls(
   values: unknown[],
-): { ok: true; urls: string[] } | { ok: false; error: string } {
+):
+  | { ok: true; urls: string[] }
+  | { ok: false; errorKey: SignalImageErrorKey } {
   const urls = values
     .filter((v): v is string => typeof v === "string" && v.length > 0)
     .slice(0, MAX_IMAGES);
 
   for (const url of urls) {
     if (!isAllowedSignalImageUrl(url)) {
-      return { ok: false, error: "URL ảnh không hợp lệ." };
+      return { ok: false, errorKey: "signalImageUrlInvalid" };
     }
   }
   return { ok: true, urls };
 }
 
-export function assertImageFile(file: File): { ok: true } | { ok: false; error: string } {
+export function assertImageFile(
+  file: File,
+): { ok: true } | { ok: false; errorKey: SignalImageErrorKey } {
   const mime = effectiveImageMime(file);
   if (!mime) {
-    return { ok: false, error: "Chỉ chấp nhận JPEG, PNG hoặc WebP." };
+    return { ok: false, errorKey: "signalImageTypeInvalid" };
   }
   if (file.size > MAX_BYTES) {
-    return { ok: false, error: "Ảnh tối đa 2 MB." };
+    return { ok: false, errorKey: "signalImageTooLarge" };
   }
   return { ok: true };
 }

@@ -121,15 +121,14 @@ async function resolveViaInvesting(): Promise<ResolveCalendarResult> {
         return {
           events: dbEvents.map(dbToEvent),
           source: "stale_db",
-          warning: "API không trả sự kiện mới — hiển thị cache DB.",
+          warning: { key: "investingApiStaleDb" },
           syncedAt: meta?.lastSyncAt.toISOString(),
         };
       }
       return {
         events: sampleCalendar,
         source: "sample",
-        warning:
-          "Không có sự kiện lịch kinh tế tuần này — hiển thị dữ liệu mẫu.",
+        warning: { key: "investingNoEventsSample" },
       };
     }
 
@@ -147,7 +146,7 @@ async function resolveViaInvesting(): Promise<ResolveCalendarResult> {
       return {
         events: dbEvents.map(dbToEvent),
         source: "stale_db",
-        warning: `Không đồng bộ được (${message}). Hiển thị cache DB.`,
+        warning: { key: "investingSyncFailedDb", detail: message },
         syncedAt: meta?.lastSyncAt.toISOString(),
       };
     }
@@ -155,7 +154,7 @@ async function resolveViaInvesting(): Promise<ResolveCalendarResult> {
     return {
       events: sampleCalendar,
       source: "sample",
-      warning: `Không lấy được lịch kinh tế (${message}). Đang hiển thị dữ liệu mẫu.`,
+      warning: { key: "investingFetchFailedSample", detail: message },
     };
   }
 }
@@ -167,8 +166,7 @@ async function resolveViaFmp(): Promise<ResolveCalendarResult> {
     return {
       events: sampleCalendar,
       source: "sample",
-      warning:
-        "Chưa cấu hình FMP_API_KEY — hiển thị dữ liệu mẫu. Thêm key tại Financial Modeling Prep.",
+      warning: { key: "fmpNoApiKey" },
     };
   }
 
@@ -233,8 +231,7 @@ async function resolveViaFmp(): Promise<ResolveCalendarResult> {
       return {
         events: sampleCalendar,
         source: "sample",
-        warning:
-          "FMP không trả sự kiện trong khoảng ngày hiện tại — hiển thị mẫu.",
+        warning: { key: "fmpNoRowsSample" },
         syncedAt: new Date().toISOString(),
       };
     }
@@ -252,8 +249,7 @@ async function resolveViaFmp(): Promise<ResolveCalendarResult> {
       return {
         events: sampleCalendar,
         source: "sample",
-        warning:
-          "FMP cần gói trả phí (HTTP 402). Đang hiển thị mẫu. Đổi CALENDAR_PROVIDER=investing (mặc định) để dùng nguồn free.",
+        warning: { key: "fmp402Sample" },
       };
     }
 
@@ -268,8 +264,8 @@ async function resolveViaFmp(): Promise<ResolveCalendarResult> {
         events: dbEvents.map(dbToEvent),
         source: "stale_db",
         warning: looksLikePaywall
-          ? "FMP từ chối endpoint lịch (gói hiện tại). Hiển thị cache DB đã lưu."
-          : `Không đồng bộ FMP (${message}). Hiển thị cache DB.`,
+          ? { key: "fmpPaywallStaleDb" }
+          : { key: "fmpSyncFailedDb", detail: message },
         syncedAt: meta?.lastSyncAt.toISOString(),
       };
     }
@@ -277,8 +273,8 @@ async function resolveViaFmp(): Promise<ResolveCalendarResult> {
       events: sampleCalendar,
       source: "sample",
       warning: looksLikePaywall
-        ? "FMP cần gói trả phí. Đang hiển thị dữ liệu mẫu."
-        : `Không đồng bộ FMP (${message}). Hiển thị mẫu.`,
+        ? { key: "fmpPaywallSample" }
+        : { key: "fmpSyncFailedSample", detail: message },
     };
   }
 }

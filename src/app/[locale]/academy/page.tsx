@@ -5,7 +5,7 @@ import { PageCtaRow } from "@/components/layout/page-cta-row";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { academyLessons } from "@/lib/content/academy";
-import { pageCtas } from "@/lib/page-cta-presets";
+import { pageCtaItems } from "@/lib/page-cta-i18n";
 
 export async function generateMetadata({
   params,
@@ -26,6 +26,8 @@ export default async function AcademyPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("academy");
+  const tCommon = await getTranslations("common");
+  const ctaRow = await pageCtaItems("learn", "explore");
 
   const levelLabel: Record<string, string> = {
     beginner: t("beginner"),
@@ -67,7 +69,7 @@ export default async function AcademyPage({
         ))}
       </ul>
       <Disclaimer variant="compact" />
-      <PageCtaRow heading="→" items={[...pageCtas.learn, ...pageCtas.explore]} />
+      <PageCtaRow heading={tCommon("next")} items={ctaRow} />
     </div>
   );
 }

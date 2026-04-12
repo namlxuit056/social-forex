@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
@@ -18,22 +19,24 @@ export async function changeUserRole(
   const session = await auth();
   if (!session?.user?.id) redirect("/auth/signin");
 
+  const t = await getTranslations("errors");
+
   const admin = await prisma.user.findUnique({
     where: { id: session.user.id },
     select: { role: true },
   });
   if (admin?.role !== "ADMIN") {
-    return { error: "Only ADMIN can change roles." };
+    return { error: t("onlyAdminRole") };
   }
 
   const parsed = changeRoleSchema.safeParse({
     userId: formData.get("userId"),
     role: formData.get("role"),
   });
-  if (!parsed.success) return { error: "Invalid input." };
+  if (!parsed.success) return { error: t("invalidAdminInput") };
 
   if (parsed.data.userId === session.user.id) {
-    return { error: "Cannot change your own role." };
+    return { error: t("cannotChangeOwnRole") };
   }
 
   await prisma.user.update({

@@ -217,7 +217,7 @@ export default async function UpgradeVipPage({
 
         {dbUser?.email && (
           <div className="rounded-lg border border-border bg-muted/30 px-4 py-2.5 text-xs text-muted-foreground">
-            Email tài khoản của bạn:{" "}
+            {t("accountEmailLabel")}{" "}
             <strong className="text-foreground">{dbUser.email}</strong>
           </div>
         )}

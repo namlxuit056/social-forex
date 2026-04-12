@@ -14,36 +14,12 @@ const geistMono = Geist_Mono({
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://socialforex.vn";
 
+/** Fallback when outside `[locale]`; per-locale SEO is set in `[locale]/layout.tsx`. */
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Social Forex — Cộng đồng & công cụ giao dịch",
+    default: "Social Forex",
     template: "%s · Social Forex",
-  },
-  description:
-    "Tỷ giá, lịch kinh tế, công cụ tính toán, biểu đồ TradingView, diễn đàn và tín hiệu giao dịch forex.",
-  keywords: [
-    "forex",
-    "tỷ giá",
-    "lịch kinh tế",
-    "tín hiệu giao dịch",
-    "trading signals",
-    "diễn đàn forex",
-    "công cụ forex",
-  ],
-  openGraph: {
-    type: "website",
-    locale: "vi_VN",
-    url: siteUrl,
-    siteName: "Social Forex",
-    title: "Social Forex — Cộng đồng & công cụ giao dịch",
-    description:
-      "Tỷ giá live, lịch kinh tế, TradingView, diễn đàn, tín hiệu và academy cho trader.",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Social Forex",
-    description: "Nền tảng cộng đồng & công cụ giao dịch forex.",
   },
   robots: {
     index: true,

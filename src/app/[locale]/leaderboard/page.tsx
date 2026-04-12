@@ -4,7 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { EmptyState } from "@/components/layout/empty-state";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
 import { prisma } from "@/lib/prisma";
-import { pageCtas } from "@/lib/page-cta-presets";
+import { pageCtaItems } from "@/lib/page-cta-i18n";
 
 export async function generateMetadata({
   params,
@@ -36,6 +36,9 @@ export default async function LeaderboardPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("leaderboard");
+  const tCommon = await getTranslations("common");
+  const ctaEmpty = await pageCtaItems("community", "explore");
+  const ctaTable = await pageCtaItems("community", "trading");
 
   const closed = await prisma.signal.findMany({
     where: { status: { in: ["CLOSED_WIN", "CLOSED_LOSS"] } },
@@ -81,7 +84,7 @@ export default async function LeaderboardPage({
             description={t("emptyHint")}
             primary={{ href: "/signals", label: t("goToSignals") }}
           />
-          <PageCtaRow heading="→" items={[...pageCtas.community, ...pageCtas.explore]} />
+          <PageCtaRow heading={tCommon("next")} items={ctaEmpty} />
         </div>
       ) : (
         <>
@@ -113,7 +116,7 @@ export default async function LeaderboardPage({
               </tbody>
             </table>
           </div>
-          <PageCtaRow heading="→" items={[...pageCtas.community, ...pageCtas.trading]} />
+          <PageCtaRow heading={tCommon("next")} items={ctaTable} />
         </>
       )}
     </div>

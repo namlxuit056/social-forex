@@ -11,10 +11,13 @@ export type QuoteRow = {
 
 export type QuotesSource = "yahoo" | "massive" | "mock" | "mock_fallback";
 
+export type QuotesWarningKey = "mockData" | "providerFallback";
+
 export type QuotesApiResponse = {
   updatedAt: string;
   quotes: QuoteRow[];
   source: QuotesSource;
-  /** Thông báo khi dùng fallback hoặc dữ liệu trễ */
-  warning?: string;
+  /** Client translates via next-intl using `quotes.warning*` keys */
+  warningKey?: QuotesWarningKey;
+  warningParams?: { source: string; message: string };
 };

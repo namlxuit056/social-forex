@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useTransition } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { formatInTimeZone } from "date-fns-tz";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -30,52 +31,8 @@ function computeStatus(timeUtc: string, nowMs: number): CalendarEventStatus {
   return "finished";
 }
 
-function statusLabel(s: CalendarEventStatus) {
-  if (s === "upcoming") return "Sắp diễn ra";
-  if (s === "live") return "Đang công bố";
-  return "Đã xong";
-}
-
-function badge(impact: Impact) {
-  const map = {
-    low: "bg-muted text-muted-foreground",
-    medium: "bg-amber-500/15 text-amber-200/95",
-    high: "bg-destructive/20 text-destructive",
-  };
-  const label = { low: "Thấp", medium: "Trung bình", high: "Cao" };
-  return (
-    <span className={`rounded px-2 py-0.5 text-xs font-medium ${map[impact]}`}>
-      {label[impact]}
-    </span>
-  );
-}
-
-function statusBadge(s: CalendarEventStatus) {
-  const map = {
-    upcoming: "bg-muted text-muted-foreground",
-    live: "bg-primary/25 text-primary ring-1 ring-primary/30",
-    finished: "bg-muted text-muted-foreground",
-  };
-  return (
-    <span
-      className={cn(
-        "rounded px-2 py-0.5 text-xs font-medium tabular-nums",
-        map[s],
-      )}
-    >
-      {statusLabel(s)}
-    </span>
-  );
-}
-
 type Zone = "utc" | "vn";
 type DateRange = "today" | "week";
-
-const IMPACT_OPTIONS: { value: Impact; label: string; color: string }[] = [
-  { value: "high", label: "Cao", color: "bg-destructive/20 text-destructive border-destructive/30" },
-  { value: "medium", label: "TB", color: "bg-amber-500/15 text-amber-200/95 border-amber-500/30" },
-  { value: "low", label: "Thấp", color: "bg-muted text-muted-foreground border-border" },
-];
 
 type Props = {
   events: CalendarEvent[];
@@ -90,6 +47,9 @@ export function EconomicCalendar({
   warning,
   syncedAt,
 }: Props) {
+  const t = useTranslations("calendar");
+  const intlLocale = useLocale();
+
   const [zone, setZone] = useState<Zone>("vn");
   const [dateRange, setDateRange] = useState<DateRange>("today");
   const [selectedCurrencies, setSelectedCurrencies] = useState<Set<string>>(
@@ -100,6 +60,72 @@ export function EconomicCalendar({
   );
   const [isPending, startTransition] = useTransition();
   const now = useNow();
+
+  const statusText = (s: CalendarEventStatus) =>
+    s === "upcoming"
+      ? t("statusUpcoming")
+      : s === "live"
+        ? t("statusLive")
+        : t("statusDone");
+
+  const impactBadge = (impact: Impact) => {
+    const map = {
+      low: "bg-muted text-muted-foreground",
+      medium: "bg-amber-500/15 text-amber-200/95",
+      high: "bg-destructive/20 text-destructive",
+    };
+    const label =
+      impact === "low"
+        ? t("impactLow")
+        : impact === "medium"
+          ? t("impactMedShort")
+          : t("impactHigh");
+    return (
+      <span className={`rounded px-2 py-0.5 text-xs font-medium ${map[impact]}`}>
+        {label}
+      </span>
+    );
+  };
+
+  const statusBadgeRow = (s: CalendarEventStatus) => {
+    const map = {
+      upcoming: "bg-muted text-muted-foreground",
+      live: "bg-primary/25 text-primary ring-1 ring-primary/30",
+      finished: "bg-muted text-muted-foreground",
+    };
+    return (
+      <span
+        className={cn(
+          "rounded px-2 py-0.5 text-xs font-medium tabular-nums",
+          map[s],
+        )}
+      >
+        {statusText(s)}
+      </span>
+    );
+  };
+
+  const impactOptions = useMemo(
+    () =>
+      [
+        {
+          value: "high" as const,
+          label: t("impactHigh"),
+          color: "bg-destructive/20 text-destructive border-destructive/30",
+        },
+        {
+          value: "medium" as const,
+          label: t("impactMedShort"),
+          color: "bg-amber-500/15 text-amber-200/95 border-amber-500/30",
+        },
+        {
+          value: "low" as const,
+          label: t("impactLow"),
+          color: "bg-muted text-muted-foreground border-border",
+        },
+      ] as const,
+    [t],
+  );
 
   const sorted = useMemo(
     () =>
@@ -147,16 +173,16 @@ export function EconomicCalendar({
   );
 
   const tz = zone === "utc" ? "UTC" : "Asia/Ho_Chi_Minh";
-  const zoneLabel = zone === "utc" ? "UTC" : "Việt Nam (UTC+7)";
+  const zoneLabel = zone === "utc" ? t("zoneUtc") : t("zoneVn");
 
   const sourceLabel =
     source === "investing"
-      ? "Forex Factory (live)"
+      ? t("sourceInvesting")
       : source === "fmp"
-        ? "FMP (cache DB)"
+        ? t("sourceFmp")
         : source === "stale_db"
-          ? "Cache DB (API lỗi)"
-          : "Mẫu";
+          ? t("sourceStaleDb")
+          : t("sourceSample");
 
   function toggleCurrency(c: string) {
     setSelectedCurrencies((prev) => {
@@ -187,14 +213,17 @@ export function EconomicCalendar({
       {/* Source + Sync info */}
       <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
         <span className="rounded-md bg-muted/80 px-2 py-0.5 font-mono text-[10px] text-foreground/80">
-          Nguồn: {sourceLabel}
+          {t("labelSource")} {sourceLabel}
         </span>
         {syncedAt && (
           <span>
-            Đồng bộ:{" "}
-            {new Date(syncedAt).toLocaleString("vi-VN", {
-              timeZone: "Asia/Ho_Chi_Minh",
-            })}
+            {t("labelSynced")}{" "}
+            {new Date(syncedAt).toLocaleString(
+              intlLocale === "vi" ? "vi-VN" : "en-US",
+              {
+                timeZone: "Asia/Ho_Chi_Minh",
+              },
+            )}
           </span>
         )}
       </div>
@@ -212,7 +241,9 @@ export function EconomicCalendar({
       <div className="flex flex-col gap-3 rounded-xl border border-border/60 bg-muted/20 p-3 sm:flex-row sm:flex-wrap sm:items-center">
         {/* Date range */}
         <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-muted-foreground">Ngày:</span>
+          <span className="text-xs font-medium text-muted-foreground">
+            {t("labelDate")}
+          </span>
           <div className="inline-flex rounded-lg border border-border p-0.5">
             <Button
               type="button"
@@ -221,7 +252,7 @@ export function EconomicCalendar({
               className="h-7 rounded-md px-3 text-xs"
               onClick={() => setDateRange("today")}
             >
-              Hôm nay
+              {t("filterToday")}
             </Button>
             <Button
               type="button"
@@ -230,7 +261,7 @@ export function EconomicCalendar({
               className="h-7 rounded-md px-3 text-xs"
               onClick={() => setDateRange("week")}
             >
-              Cả tuần
+              {t("filterWeek")}
             </Button>
           </div>
         </div>
@@ -240,9 +271,11 @@ export function EconomicCalendar({
 
         {/* Impact filter */}
         <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-muted-foreground">Tác động:</span>
+          <span className="text-xs font-medium text-muted-foreground">
+            {t("labelImpact")}
+          </span>
           <div className="flex gap-1">
-            {IMPACT_OPTIONS.map((opt) => (
+            {impactOptions.map((opt) => (
               <button
                 key={opt.value}
                 type="button"
@@ -265,7 +298,9 @@ export function EconomicCalendar({
 
         {/* Currency filter */}
         <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-muted-foreground">Tiền tệ:</span>
+          <span className="text-xs font-medium text-muted-foreground">
+            {t("labelCurrency")}
+          </span>
           <div className="flex flex-wrap gap-1">
             {currencies.map((c) => (
               <button
@@ -288,7 +323,7 @@ export function EconomicCalendar({
                 onClick={() => setSelectedCurrencies(new Set())}
                 className="rounded-md px-2 py-0.5 text-xs text-muted-foreground/60 underline-offset-2 hover:text-foreground hover:underline"
               >
-                Tất cả
+                {t("allCurrencies")}
               </button>
             )}
           </div>
@@ -299,7 +334,9 @@ export function EconomicCalendar({
 
         {/* Timezone */}
         <div className="flex items-center gap-2">
-          <span className="text-xs font-medium text-muted-foreground">Giờ:</span>
+          <span className="text-xs font-medium text-muted-foreground">
+            {t("labelTime")}
+          </span>
           <div
             className={cn(
               "inline-flex rounded-lg border border-border p-0.5 transition-opacity",
@@ -331,8 +368,10 @@ export function EconomicCalendar({
 
       {/* Results count */}
       <p className="text-xs text-muted-foreground">
-        {rows.length} sự kiện
-        {dateRange === "today" ? " hôm nay" : " trong tuần"}
+        {t("eventsCount", {
+          count: rows.length,
+          range: dateRange === "today" ? t("rangeToday") : t("rangeWeek"),
+        })}
         {selectedCurrencies.size > 0 &&
           ` · ${Array.from(selectedCurrencies).join(", ")}`}
       </p>
@@ -342,12 +381,12 @@ export function EconomicCalendar({
         <table className="w-full min-w-[800px] text-left text-sm">
           <thead className="bg-muted/50 text-muted-foreground">
             <tr>
-              <th className="px-4 py-3">Thời gian</th>
-              <th className="px-4 py-3">Trạng thái</th>
-              <th className="px-4 py-3">Tiền tệ</th>
-              <th className="px-4 py-3">Sự kiện</th>
-              <th className="px-4 py-3">Tác động</th>
-              <th className="px-4 py-3">Dự báo / Trước / Thực tế</th>
+              <th className="px-4 py-3">{t("tableTime")}</th>
+              <th className="px-4 py-3">{t("tableStatus")}</th>
+              <th className="px-4 py-3">{t("tableCurrency")}</th>
+              <th className="px-4 py-3">{t("tableEvent")}</th>
+              <th className="px-4 py-3">{t("tableImpact")}</th>
+              <th className="px-4 py-3">{t("tableValues")}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -357,7 +396,7 @@ export function EconomicCalendar({
                   colSpan={6}
                   className="px-4 py-8 text-center text-muted-foreground"
                 >
-                  Không có sự kiện phù hợp bộ lọc.
+                  {t("emptyFilter")}
                 </td>
               </tr>
             ) : (
@@ -376,10 +415,10 @@ export function EconomicCalendar({
                       "yyyy-MM-dd HH:mm",
                     )}
                   </td>
-                  <td className="px-4 py-3">{statusBadge(status)}</td>
+                  <td className="px-4 py-3">{statusBadgeRow(status)}</td>
                   <td className="px-4 py-3 font-medium">{ev.currency}</td>
                   <td className="px-4 py-3">{ev.title}</td>
-                  <td className="px-4 py-3">{badge(ev.impact)}</td>
+                  <td className="px-4 py-3">{impactBadge(ev.impact)}</td>
                   <td className="px-4 py-3 text-muted-foreground">
                     {[ev.forecast, ev.previous, ev.actual]
                       .filter(Boolean)

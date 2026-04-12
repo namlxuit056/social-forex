@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useActionState } from "react";
+import { useTranslations } from "next-intl";
 import { Flag } from "lucide-react";
 import { reportPost } from "@/actions/moderation";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,8 @@ import { Label } from "@/components/ui/label";
 const initial: { error?: string; ok?: boolean } | null = null;
 
 export function ReportButton({ postId }: { postId: string }) {
+  const t = useTranslations("forum");
+  const tc = useTranslations("common");
   const [open, setOpen] = useState(false);
   const [state, formAction] = useActionState(reportPost, initial);
   const [pending, startTransition] = useTransition();
@@ -18,7 +21,7 @@ export function ReportButton({ postId }: { postId: string }) {
   if (state?.ok) {
     return (
       <span className="text-xs text-muted-foreground">
-        Đã gửi báo cáo
+        {t("reported")}
       </span>
     );
   }
@@ -31,7 +34,7 @@ export function ReportButton({ postId }: { postId: string }) {
         className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive"
       >
         <Flag className="size-3" />
-        Báo cáo
+        {tc("report")}
       </button>
     );
   }
@@ -43,19 +46,21 @@ export function ReportButton({ postId }: { postId: string }) {
     >
       <input type="hidden" name="postId" value={postId} />
       <div className="flex-1">
-        <Label htmlFor={`reason-${postId}`} className="text-xs">Lý do</Label>
+        <Label htmlFor={`reason-${postId}`} className="text-xs">
+          {t("reportReason")}
+        </Label>
         <Input
           id={`reason-${postId}`}
           name="reason"
           required
           minLength={3}
           maxLength={500}
-          placeholder="Spam, vi phạm quy tắc…"
+          placeholder={t("reportPlaceholder")}
           className="h-8 text-xs"
         />
       </div>
       <Button type="submit" size="sm" variant="destructive" disabled={pending}>
-        Gửi
+        {t("reportSubmit")}
       </Button>
       <Button
         type="button"
@@ -63,7 +68,7 @@ export function ReportButton({ postId }: { postId: string }) {
         variant="ghost"
         onClick={() => setOpen(false)}
       >
-        Hủy
+        {tc("cancel")}
       </Button>
       {state?.error && (
         <p className="w-full text-xs text-destructive">{state.error}</p>

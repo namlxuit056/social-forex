@@ -31,7 +31,7 @@ export async function resolveQuotes(): Promise<QuotesApiResponse> {
       updatedAt,
       quotes: buildQuotes(tickFromTime()),
       source: "mock",
-      warning: "QUOTES_PROVIDER=mock — dữ liệu giả lập.",
+      warningKey: "mockData",
     };
     cache = { at: now, payload };
     return payload;
@@ -52,7 +52,8 @@ export async function resolveQuotes(): Promise<QuotesApiResponse> {
       updatedAt,
       quotes: buildQuotes(tickFromTime()),
       source: "mock_fallback",
-      warning: `${source} error (${message}). Showing simulated data.`,
+      warningKey: "providerFallback",
+      warningParams: { source, message },
     };
     cache = { at: now, payload };
     return payload;

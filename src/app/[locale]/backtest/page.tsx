@@ -2,7 +2,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { DemoBacktest } from "@/components/backtest/demo-backtest";
 import { Disclaimer } from "@/components/layout/disclaimer";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
-import { pageCtas } from "@/lib/page-cta-presets";
+import { pageCtaItems } from "@/lib/page-cta-i18n";
 
 export async function generateMetadata({
   params,
@@ -23,6 +23,8 @@ export default async function BacktestPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("backtest");
+  const tCommon = await getTranslations("common");
+  const ctaRow = await pageCtaItems("trading", "explore");
 
   return (
     <div className="space-y-8">
@@ -36,7 +38,7 @@ export default async function BacktestPage({
       </div>
       <DemoBacktest />
       <Disclaimer variant="compact" />
-      <PageCtaRow heading="→" items={[...pageCtas.trading, ...pageCtas.explore]} />
+      <PageCtaRow heading={tCommon("next")} items={ctaRow} />
     </div>
   );
 }

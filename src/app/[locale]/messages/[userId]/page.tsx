@@ -1,19 +1,26 @@
 import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { redirect } from "next/navigation";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { BackLink } from "@/components/layout/back-link";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
 import { auth } from "@/auth";
 import { DmCompose } from "@/components/messages/dm-compose";
 import { prisma } from "@/lib/prisma";
-import { pageCtas } from "@/lib/page-cta-presets";
+import { pageCtaItems } from "@/lib/page-cta-i18n";
 
-type Props = { params: Promise<{ userId: string }> };
+type Props = { params: Promise<{ locale: string; userId: string }> };
 
 export const dynamic = "force-dynamic";
 
 export default async function MessageThreadPage({ params }: Props) {
-  const { userId: otherId } = await params;
+  const { locale, userId: otherId } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("messages");
+  const tCommon = await getTranslations("common");
+  const ctaRow = await pageCtaItems("community", "explore");
+  const dateLocale = locale === "vi" ? "vi-VN" : "en-US";
+
   const session = await auth();
   if (!session?.user?.id) {
     redirect(`/auth/signin?callbackUrl=/messages/${otherId}`);
@@ -55,7 +62,7 @@ export default async function MessageThreadPage({ params }: Props) {
   return (
     <div className="space-y-8">
       <div className="flex flex-wrap items-center gap-4">
-        <BackLink href="/messages">Hội thoại</BackLink>
+        <BackLink href="/messages">{t("conversation")}</BackLink>
         <Link
           href={`/u/${otherId}`}
           className="text-lg font-medium text-foreground hover:text-primary"
@@ -67,7 +74,7 @@ export default async function MessageThreadPage({ params }: Props) {
       <div className="space-y-3 rounded-xl border border-border bg-card/50 p-4">
         {thread.length === 0 && (
           <p className="py-2 text-center text-sm text-muted-foreground">
-            Chưa có tin nhắn — gửi lời chào bên dưới để bắt đầu.
+            {t("threadEmpty")}
           </p>
         )}
         {thread.map((m) => {
@@ -83,7 +90,7 @@ export default async function MessageThreadPage({ params }: Props) {
             >
               <p className="whitespace-pre-wrap">{m.body}</p>
               <p className="mt-1 text-[10px] text-muted-foreground">
-                {new Date(m.createdAt).toLocaleString("vi-VN")}
+                {new Date(m.createdAt).toLocaleString(dateLocale)}
               </p>
             </div>
           );
@@ -91,7 +98,7 @@ export default async function MessageThreadPage({ params }: Props) {
       </div>
 
       <DmCompose recipientId={otherId} />
-      <PageCtaRow heading="Tiếp theo" items={[...pageCtas.community, ...pageCtas.explore]} />
+      <PageCtaRow heading={tCommon("next")} items={ctaRow} />
     </div>
   );
 }

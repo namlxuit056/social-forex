@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
@@ -21,25 +22,27 @@ export async function sendDirectMessage(
     redirect("/auth/signin");
   }
 
+  const t = await getTranslations("errors");
+
   const parsed = sendSchema.safeParse({
     recipientId: formData.get("recipientId"),
     body: formData.get("body"),
   });
   if (!parsed.success) {
-    return { error: "Nội dung không hợp lệ." };
+    return { error: t("messageBodyInvalid") };
   }
 
   const { ok } = rateLimit(`dm:${session.user.id}`, 15, 60_000);
-  if (!ok) return { error: "Bạn đang gửi quá nhanh. Vui lòng chờ 1 phút." };
+  if (!ok) return { error: t("messageRateLimit") };
 
   const { recipientId, body } = parsed.data;
   if (recipientId === session.user.id) {
-    return { error: "Không thể nhắn cho chính mình." };
+    return { error: t("messageSelf") };
   }
 
   const target = await prisma.user.findUnique({ where: { id: recipientId } });
   if (!target) {
-    return { error: "Người nhận không tồn tại." };
+    return { error: t("recipientNotFound") };
   }
 
   await prisma.directMessage.create({

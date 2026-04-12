@@ -18,9 +18,28 @@ export type CalendarEvent = {
 /** investing = Investing.com (free); fmp = cache DB từ FMP; sample = dữ liệu mẫu; stale_db = cache DB khi API lỗi */
 export type CalendarSource = "investing" | "fmp" | "sample" | "stale_db";
 
+export type CalendarWarningKey =
+  | "investingApiStaleDb"
+  | "investingNoEventsSample"
+  | "investingSyncFailedDb"
+  | "investingFetchFailedSample"
+  | "fmpNoApiKey"
+  | "fmpNoRowsSample"
+  | "fmp402Sample"
+  | "fmpPaywallStaleDb"
+  | "fmpSyncFailedDb"
+  | "fmpPaywallSample"
+  | "fmpSyncFailedSample";
+
+export type CalendarWarning = {
+  key: CalendarWarningKey;
+  /** Interpolation `{message}` in translation */
+  detail?: string;
+};
+
 export type ResolveCalendarResult = {
   events: CalendarEvent[];
   source: CalendarSource;
-  warning?: string;
+  warning?: CalendarWarning;
   syncedAt?: string;
 };

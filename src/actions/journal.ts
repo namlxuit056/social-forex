@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
@@ -50,7 +51,9 @@ export async function createTrade(
     closedAt: formData.get("closedAt") || null,
   });
 
-  if (!parsed.success) return { error: "Dữ liệu không hợp lệ." };
+  const te = await getTranslations("errors");
+
+  if (!parsed.success) return { error: te("journalInvalidData") };
 
   const d = parsed.data;
   await prisma.tradeJournal.create({
@@ -82,14 +85,16 @@ export async function updateTrade(
   const session = await auth();
   if (!session?.user?.id) redirect("/auth/signin");
 
+  const te = await getTranslations("errors");
+
   const tradeId = formData.get("tradeId") as string;
-  if (!tradeId) return { error: "Missing trade ID." };
+  if (!tradeId) return { error: te("missingTradeId") };
 
   const trade = await prisma.tradeJournal.findUnique({
     where: { id: tradeId },
   });
   if (!trade || trade.userId !== session.user.id) {
-    return { error: "Không có quyền." };
+    return { error: te("journalForbidden") };
   }
 
   const parsed = tradeSchema.safeParse({
@@ -107,7 +112,7 @@ export async function updateTrade(
     closedAt: formData.get("closedAt") || null,
   });
 
-  if (!parsed.success) return { error: "Dữ liệu không hợp lệ." };
+  if (!parsed.success) return { error: te("journalInvalidData") };
 
   const d = parsed.data;
   await prisma.tradeJournal.update({

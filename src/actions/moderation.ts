@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
@@ -19,15 +20,17 @@ export async function reportPost(
   const session = await auth();
   if (!session?.user?.id) redirect("/auth/signin");
 
+  const t = await getTranslations("errors");
+
   const parsed = reportSchema.safeParse({
     postId: formData.get("postId") || undefined,
     threadId: formData.get("threadId") || undefined,
     reason: formData.get("reason"),
   });
-  if (!parsed.success) return { error: "Lý do không hợp lệ." };
+  if (!parsed.success) return { error: t("reportReasonInvalid") };
 
   const { postId, threadId, reason } = parsed.data;
-  if (!postId && !threadId) return { error: "Thiếu đối tượng báo cáo." };
+  if (!postId && !threadId) return { error: t("reportMissingTarget") };
 
   await prisma.forumReport.create({
     data: {

@@ -1,16 +1,18 @@
 "use client";
 
 import { useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { revokeVip } from "@/actions/admin-vip";
 import { Button } from "@/components/ui/button";
 
 export function RevokeVipButton({ userId }: { userId: string }) {
+  const t = useTranslations("admin");
   const [pending, startTransition] = useTransition();
 
   return (
     <form
       action={(fd) => {
-        if (!confirm("Thu hồi VIP của người dùng này?")) return;
+        if (!confirm(t("revokeConfirm"))) return;
         startTransition(() => revokeVip(fd));
       }}
     >
@@ -22,7 +24,7 @@ export function RevokeVipButton({ userId }: { userId: string }) {
         disabled={pending}
         className="h-7 text-xs text-destructive hover:text-red-400"
       >
-        Thu hồi
+        {t("revoke")}
       </Button>
     </form>
   );

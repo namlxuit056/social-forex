@@ -10,7 +10,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { prisma } from "@/lib/prisma";
 import { isVipActive } from "@/lib/vip";
-import { pageCtas } from "@/lib/page-cta-presets";
+import { pageCtaItems } from "@/lib/page-cta-i18n";
 
 export async function generateMetadata({
   params,
@@ -86,6 +86,8 @@ export default async function SignalsPage({
       createdAt: s.createdAt.toISOString(),
     };
   });
+  const tCommon = await getTranslations("common");
+  const ctaRow = await pageCtaItems("trading", "community");
 
   return (
     <div className="space-y-8">
@@ -142,7 +144,7 @@ export default async function SignalsPage({
 
       <SignalRoom signals={signals} showCreate={!!session?.user} />
       <Disclaimer />
-      <PageCtaRow heading="→" items={[...pageCtas.trading, ...pageCtas.community]} />
+      <PageCtaRow heading={tCommon("next")} items={ctaRow} />
     </div>
   );
 }

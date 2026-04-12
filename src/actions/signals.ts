@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
@@ -45,12 +46,14 @@ export async function createSignal(
     tier: formData.get("tier"),
     notes: (formData.get("notes") as string) || undefined,
   });
+  const t = await getTranslations("errors");
+
   if (!parsed.success) {
-    return { error: "Dữ liệu không hợp lệ." };
+    return { error: t("invalidData") };
   }
 
   const { ok } = rateLimit(`signal:${userId}`, 5, 60_000);
-  if (!ok) return { error: "Bạn đang đăng quá nhanh. Vui lòng chờ 1 phút." };
+  if (!ok) return { error: t("rateLimitSignal") };
 
   const data = parsed.data;
   const dbUser = await prisma.user.findUnique({
@@ -58,16 +61,13 @@ export async function createSignal(
     select: { vipUntil: true },
   });
   if (data.tier === "VIP" && !isVipActive(dbUser?.vipUntil)) {
-    return {
-      error:
-        "Chỉ tài khoản VIP (vipUntil) mới đăng được tín hiệu VIP. Liên hệ admin để kích hoạt demo.",
-    };
+    return { error: t("vipSignalOnly") };
   }
 
   const imageUrlFields = formData.getAll("imageUrls");
   const imagesParsed = parseAndValidateImageUrls(imageUrlFields);
   if (!imagesParsed.ok) {
-    return { error: imagesParsed.error };
+    return { error: t(imagesParsed.errorKey) };
   }
 
   const signal = await prisma.signal.create({
@@ -113,12 +113,14 @@ export async function closeSignal(
   }
   const userId = session.user.id;
 
+  const t = await getTranslations("errors");
+
   const parsed = closeSignalSchema.safeParse({
     signalId: formData.get("signalId"),
     status: formData.get("status"),
   });
   if (!parsed.success) {
-    return { error: "Không hợp lệ." };
+    return { error: t("signalCloseInvalid") };
   }
 
   const { signalId, status } = parsed.data;
@@ -126,10 +128,10 @@ export async function closeSignal(
     where: { id: signalId },
   });
   if (!signal || signal.authorId !== userId) {
-    return { error: "Không có quyền." };
+    return { error: t("forbidden") };
   }
   if (signal.status !== "ACTIVE") {
-    return { error: "Tín hiệu đã đóng." };
+    return { error: t("signalAlreadyClosed") };
   }
 
   await prisma.signal.update({

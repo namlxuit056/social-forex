@@ -1,5 +1,7 @@
 "use client";
 
+import en from "../../messages/en.json";
+
 export default function GlobalError({
   error,
   reset,
@@ -7,8 +9,12 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const title = en.error.criticalTitle;
+  const description = en.error.criticalDescription;
+  const retry = en.common.retry;
+
   return (
-    <html lang="vi">
+    <html lang="en">
       <body
         style={{
           margin: 0,
@@ -24,10 +30,10 @@ export default function GlobalError({
       >
         <div>
           <h1 style={{ fontSize: "1.5rem", marginBottom: "0.5rem" }}>
-            Lỗi nghiêm trọng
+            {title}
           </h1>
           <p style={{ color: "#a1a1aa", maxWidth: "24rem", margin: "0 auto" }}>
-            Ứng dụng không thể tải. Vui lòng thử lại.
+            {description}
           </p>
           {error.digest && (
             <p
@@ -42,6 +48,7 @@ export default function GlobalError({
             </p>
           )}
           <button
+            type="button"
             onClick={reset}
             style={{
               marginTop: "1.5rem",
@@ -54,7 +61,7 @@ export default function GlobalError({
               fontSize: "0.875rem",
             }}
           >
-            Thử lại
+            {retry}
           </button>
         </div>
       </body>

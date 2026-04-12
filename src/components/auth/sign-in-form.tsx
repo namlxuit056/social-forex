@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { safeCallbackPath } from "@/lib/safe-redirect";
 
 export function SignInForm() {
+  const t = useTranslations("auth");
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = safeCallbackPath(searchParams.get("callbackUrl"));
@@ -37,10 +39,10 @@ export function SignInForm() {
     });
     setLoading(false);
     if (res?.error) {
-      setError("Email hoặc mật khẩu không đúng.");
+      setError(t("invalidCredentials"));
       return;
     }
-    toast.success("Đăng nhập thành công");
+    toast.success(t("signInSuccessToast"));
     router.push(callbackUrl);
     router.refresh();
   }
@@ -59,7 +61,7 @@ export function SignInForm() {
       <CardContent>
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="signin-email">Email</Label>
+            <Label htmlFor="signin-email">{t("email")}</Label>
             <Input
               id="signin-email"
               type="email"
@@ -95,7 +97,7 @@ export function SignInForm() {
             className="w-full"
             size="lg"
           >
-            {loading ? "Đang xử lý…" : "Đăng nhập"}
+            {loading ? t("signingIn") : t("submitSignIn")}
           </Button>
         </form>
       </CardContent>

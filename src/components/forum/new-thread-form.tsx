@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { useTranslations } from "next-intl";
 import { createForumThread } from "@/actions/forum";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,13 +11,14 @@ import { Textarea } from "@/components/ui/textarea";
 const initial: { error?: string } | null = null;
 
 export function NewThreadForm({ categorySlug }: { categorySlug: string }) {
+  const t = useTranslations("forum");
   const [state, formAction] = useActionState(createForumThread, initial);
 
   return (
     <form action={formAction} className="space-y-4">
       <input type="hidden" name="categorySlug" value={categorySlug} />
       <div>
-        <Label htmlFor="thread-title">Tiêu đề</Label>
+        <Label htmlFor="thread-title">{t("threadTitle")}</Label>
         <Input
           id="thread-title"
           name="title"
@@ -27,7 +29,7 @@ export function NewThreadForm({ categorySlug }: { categorySlug: string }) {
         />
       </div>
       <div>
-        <Label htmlFor="thread-body">Nội dung mở đầu</Label>
+        <Label htmlFor="thread-body">{t("threadBody")}</Label>
         <Textarea
           id="thread-body"
           name="body"
@@ -39,9 +41,7 @@ export function NewThreadForm({ categorySlug }: { categorySlug: string }) {
       {state?.error && (
         <p className="text-sm text-destructive">{state.error}</p>
       )}
-      <Button type="submit">
-        Đăng chủ đề
-      </Button>
+      <Button type="submit">{t("createThreadSubmit")}</Button>
     </form>
   );
 }
