@@ -154,6 +154,7 @@
     "imageUploadFailed": "Could not upload image. Try again.",
     "imageInvalidType": "Only JPEG, PNG or WebP is allowed.",
     "imageTooLarge": "Each image must be at most 2 MB.",
+    "imageUploadRateLimited": "Too many uploads. Wait about a minute and try again.",
     "imageUploadNeedLogin": "Session expired — refresh the page and sign in again to upload images.",
     "removeImage": "Remove image"
   },

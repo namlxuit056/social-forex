@@ -1,5 +1,6 @@
 import { put } from "@vercel/blob";
 import { getToken } from "next-auth/jwt";
+import type { Session } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { assertImageFile, effectiveImageMime } from "@/lib/signal-images";
@@ -7,22 +8,45 @@ import { rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
+function blobToken(): string | undefined {
+  const raw = process.env.BLOB_READ_WRITE_TOKEN;
+  if (typeof raw !== "string") return undefined;
+  const t = raw.trim();
+  return t.length > 0 ? t : undefined;
+}
+
+/** Prefix object trong store (vd: signal → signal/{userId}/file.jpg). Mặc định khớp thư mục signal/ trên Blob. */
+function blobUploadPrefix(): string {
+  let p = (process.env.BLOB_UPLOAD_PREFIX ?? "signal").trim();
+  p = p.replace(/^\/+|\/+$/g, "");
+  if (!p || p.includes("..")) return "signal";
+  return p;
+}
+
+function authSecret(): string | undefined {
+  return process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
+}
+
 export async function POST(req: NextRequest) {
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+  const token = blobToken();
+  if (!token) {
     return NextResponse.json(
-      { error: "not_configured", message: "BLOB_READ_WRITE_TOKEN chưa cấu hình." },
+      { error: "not_configured", message: "BLOB_READ_WRITE_TOKEN chưa cấu hình hoặc đang rỗng." },
       { status: 503 },
     );
   }
 
-  const session = await auth();
+  // Truyền NextRequest vào auth để cookie/session khớp request (App Router).
+  // Typings NextAuth v5 chưa khai báo overload NextRequest; runtime hỗ trợ (lib/index.js).
+  const session = await (auth as (r: NextRequest) => Promise<Session | null>)(req);
   let userId = session?.user?.id;
   if (!userId) {
-    const token = await getToken({
+    const secret = authSecret();
+    const jwt = await getToken({
       req,
-      secret: process.env.AUTH_SECRET,
+      secret,
     });
-    userId = token?.sub ?? undefined;
+    userId = jwt?.sub ?? undefined;
   }
   if (!userId) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
@@ -61,13 +85,24 @@ export async function POST(req: NextRequest) {
   const ext =
     mime === "image/png" ? "png" : mime === "image/webp" ? "webp" : "jpg";
 
-  const path = `signals/${userId}/${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${ext}`;
+  const prefix = blobUploadPrefix();
+  const path = `${prefix}/${userId}/${Date.now()}-${crypto.randomUUID().slice(0, 8)}.${ext}`;
 
-  const blob = await put(path, file, {
-    access: "public",
-    token: process.env.BLOB_READ_WRITE_TOKEN,
-    addRandomSuffix: false,
-  });
+  try {
+    const blob = await put(path, file, {
+      access: "public",
+      token,
+      addRandomSuffix: false,
+      contentType: mime,
+    });
 
-  return NextResponse.json({ url: blob.url });
+    return NextResponse.json({ url: blob.url });
+  } catch (e) {
+    const message =
+      e instanceof Error ? e.message : "Không thể ghi lên Vercel Blob.";
+    return NextResponse.json(
+      { error: "blob_upload_failed", message },
+      { status: 502 },
+    );
+  }
 }

@@ -9,6 +9,7 @@ import { effectiveImageMime, SIGNAL_IMAGE_LIMITS } from "@/lib/signal-images";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Card,
@@ -49,16 +50,18 @@ export function SignalCreateForm() {
 
   const onPickFiles = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const files = e.target.files;
+      // Phải copy FileList trước khi reset input: `value = ""` làm FileList cùng tham chiếu bị rỗng.
+      const picked = e.target.files;
+      const snapshot = picked?.length ? Array.from(picked) : [];
       e.target.value = "";
-      if (!files?.length) return;
+      if (snapshot.length === 0) return;
 
       setUploadError(null);
       const remaining =
         SIGNAL_IMAGE_LIMITS.MAX_IMAGES - uploadedUrls.length - pendingSlots.length;
       if (remaining <= 0) return;
 
-      const rawList = Array.from(files).slice(0, remaining);
+      const rawList = snapshot.slice(0, remaining);
       const valid: File[] = [];
       for (const file of rawList) {
         if (!effectiveImageMime(file)) {
@@ -87,7 +90,11 @@ export function SignalCreateForm() {
 
           const fd = new FormData();
           fd.append("file", file);
-          const res = await fetch("/api/signal-images/upload", {
+          const uploadUrl = new URL(
+            "/api/signal-images/upload",
+            window.location.origin,
+          ).toString();
+          const res = await fetch(uploadUrl, {
             method: "POST",
             body: fd,
             credentials: "include",
@@ -113,9 +120,14 @@ export function SignalCreateForm() {
           }
 
           if (!res.ok) {
-            setUploadError(
-              data.message ?? data.error ?? t("imageUploadFailed"),
-            );
+            const hint =
+              data.message ??
+              (data.error === "rate_limited"
+                ? t("imageUploadRateLimited")
+                : null) ??
+              data.error ??
+              t("imageUploadFailed");
+            setUploadError(hint);
             revokeBatchFromIndex(batch, i);
             break;
           }
@@ -155,88 +167,100 @@ export function SignalCreateForm() {
   const selectClass =
     "mt-1.5 flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
+  const fileInputClass = cn(
+    "h-8 max-w-xs min-w-0 cursor-pointer rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm transition-colors outline-none file:mr-2 file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm dark:bg-input/30",
+    uploading ||
+      uploadedUrls.length + pendingSlots.length >= SIGNAL_IMAGE_LIMITS.MAX_IMAGES
+      ? "pointer-events-none opacity-50"
+      : null,
+  );
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>{t("postSignal")}</CardTitle>
         <CardDescription>{t("vipNote")}</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-6">
+        {/*
+          File input ngoài <form action={createAction}> để tránh xung đột Server Action
+          và đảm bảo onChange/fetch chạy đúng (không bọc Base UI Field.Control).
+        */}
+        <div>
+          <Label htmlFor="signal-images">{t("images")}</Label>
+          <p className="mt-1 text-xs text-muted-foreground">{t("imagesHint")}</p>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <input
+              id="signal-images"
+              type="file"
+              accept="image/jpeg,image/jpg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+              multiple
+              disabled={
+                uploading ||
+                uploadedUrls.length + pendingSlots.length >=
+                  SIGNAL_IMAGE_LIMITS.MAX_IMAGES
+              }
+              onChange={onPickFiles}
+              className={fileInputClass}
+            />
+          </div>
+          {uploadError && (
+            <p className="mt-2 text-sm text-destructive">{uploadError}</p>
+          )}
+          {(uploadedUrls.length > 0 || pendingSlots.length > 0) && (
+            <ul className="mt-3 flex flex-wrap gap-2">
+              {uploadedUrls.map((url) => (
+                <li
+                  key={url}
+                  className="relative inline-block rounded-md border border-border/60"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={url}
+                    alt=""
+                    className="h-16 max-w-[120px] rounded-md object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeUrl(url)}
+                    className="absolute -right-1.5 -top-1.5 flex size-6 items-center justify-center rounded-full border border-border bg-background text-muted-foreground shadow hover:bg-destructive hover:text-destructive-foreground"
+                    aria-label={t("removeImage")}
+                  >
+                    <X className="size-3.5" />
+                  </button>
+                </li>
+              ))}
+              {pendingSlots.map((slot) => (
+                <li
+                  key={slot.id}
+                  className="relative inline-block overflow-hidden rounded-md border border-primary/30 ring-2 ring-primary/20"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={slot.previewUrl}
+                    alt=""
+                    className="h-16 max-w-[120px] rounded-md object-cover opacity-90"
+                  />
+                  <div
+                    className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-background/55 backdrop-blur-[2px]"
+                    aria-live="polite"
+                    aria-busy="true"
+                  >
+                    <Loader2 className="size-5 animate-spin text-primary" />
+                    <span className="max-w-[100px] truncate px-1 text-center text-[10px] font-medium text-foreground">
+                      {t("imagesUploading")}
+                    </span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
         <form action={createAction} className="grid gap-4 sm:grid-cols-2">
           {uploadedUrls.map((url) => (
             <input key={url} type="hidden" name="imageUrls" value={url} />
           ))}
-
-          <div className="sm:col-span-2">
-            <Label htmlFor="signal-images">{t("images")}</Label>
-            <p className="mt-1 text-xs text-muted-foreground">{t("imagesHint")}</p>
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              <Input
-                id="signal-images"
-                type="file"
-                accept="image/jpeg,image/jpg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
-                multiple
-                disabled={
-                  uploading ||
-                  uploadedUrls.length + pendingSlots.length >=
-                    SIGNAL_IMAGE_LIMITS.MAX_IMAGES
-                }
-                onChange={onPickFiles}
-                className="max-w-xs cursor-pointer text-sm file:mr-2"
-              />
-            </div>
-            {uploadError && (
-              <p className="mt-2 text-sm text-destructive">{uploadError}</p>
-            )}
-            {(uploadedUrls.length > 0 || pendingSlots.length > 0) && (
-              <ul className="mt-3 flex flex-wrap gap-2">
-                {uploadedUrls.map((url) => (
-                  <li
-                    key={url}
-                    className="relative inline-block rounded-md border border-border/60"
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={url}
-                      alt=""
-                      className="h-16 max-w-[120px] rounded-md object-cover"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeUrl(url)}
-                      className="absolute -right-1.5 -top-1.5 flex size-6 items-center justify-center rounded-full border border-border bg-background text-muted-foreground shadow hover:bg-destructive hover:text-destructive-foreground"
-                      aria-label={t("removeImage")}
-                    >
-                      <X className="size-3.5" />
-                    </button>
-                  </li>
-                ))}
-                {pendingSlots.map((slot) => (
-                  <li
-                    key={slot.id}
-                    className="relative inline-block overflow-hidden rounded-md border border-primary/30 ring-2 ring-primary/20"
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={slot.previewUrl}
-                      alt=""
-                      className="h-16 max-w-[120px] rounded-md object-cover opacity-90"
-                    />
-                    <div
-                      className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-background/55 backdrop-blur-[2px]"
-                      aria-live="polite"
-                      aria-busy="true"
-                    >
-                      <Loader2 className="size-5 animate-spin text-primary" />
-                      <span className="max-w-[100px] truncate px-1 text-center text-[10px] font-medium text-foreground">
-                        {t("imagesUploading")}
-                      </span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
 
           <div className="sm:col-span-2">
             <Label htmlFor="signal-symbol">{t("symbol")}</Label>

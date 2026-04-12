@@ -154,6 +154,7 @@
     "imageUploadFailed": "Không tải được ảnh. Thử lại.",
     "imageInvalidType": "Chỉ chấp nhận JPEG, PNG hoặc WebP.",
     "imageTooLarge": "Mỗi ảnh tối đa 2 MB.",
+    "imageUploadRateLimited": "Đang upload quá nhanh. Chờ khoảng 1 phút rồi thử lại.",
     "imageUploadNeedLogin": "Phiên đăng nhập hết hạn — tải lại trang và đăng nhập lại để upload ảnh.",
     "removeImage": "Gỡ ảnh"
   },

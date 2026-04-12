@@ -1,4 +1,11 @@
-const BLOB_HOST_SUFFIX = ".public.blob.vercel-storage.com";
+/** Public URL từ Vercel Blob (có thể là *.public.blob… hoặc biến thể *.blob.vercel-storage.com) */
+function isVercelBlobHost(hostname: string): boolean {
+  const h = hostname.toLowerCase();
+  return (
+    h.endsWith(".public.blob.vercel-storage.com") ||
+    h.endsWith(".blob.vercel-storage.com")
+  );
+}
 
 const MAX_IMAGES = 3;
 const MAX_BYTES = 2 * 1024 * 1024; // 2 MB
@@ -23,8 +30,7 @@ export function isAllowedSignalImageUrl(url: string): boolean {
   try {
     const u = new URL(url);
     if (u.protocol !== "https:") return false;
-    if (!u.hostname.endsWith(BLOB_HOST_SUFFIX)) return false;
-    return true;
+    return isVercelBlobHost(u.hostname);
   } catch {
     return false;
   }
