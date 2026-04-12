@@ -89,3 +89,68 @@ Là **trader đăng signal**, tôi muốn **đính kèm một hoặc vài ảnh*
 
 - **Chi phí** storage/băng thông nếu traffic lớn — cần giới hạn số file & dung lượng.
 - **Nội dung vi phạm** trên ảnh — giữ báo cáo signal (mở rộng sau) hoặc dựa vào moderation hiện có.
+
+---
+
+# Spec — Signal Room (`/[locale]/signals`) — UX / UI (kế hoạch PM)
+
+**Tham chiếu live:** [Signal Room (EN)](https://social-forex.vercel.app/en/signals)
+
+## Bối cảnh & vấn đề hiện tại
+
+- Trang là **hub tín hiệu**: mô tả ngắn, CTA đăng nhập / VIP, form đăng (khi đã login), danh sách dạng **card xếp chồng dài**, disclaimer, hàng CTA footer.
+- **Độ dài danh sách** (tới 100 item): khó quét nhanh symbol / trạng thái / thời gian; mỗi card có nhiều khối text (Entry / SL / TP dạng `dl`) + social counts + link chi tiết — **thứ bậc thị giác** chưa tách rõ “quan trọng nhất” vs “phụ”.
+- **Người chưa đăng nhập:** thấy list FREE đầy đủ nhưng **VIP masked** — cần nhất quán thông điệp (đã có banner VIP + card masked) và tránh trùng lặp CTA.
+- **Mobile:** card hiện flex-wrap + nhiều dòng; cần xác nhận tap target (badge, link “View detail”, nút đóng lệnh cho author).
+
+## Mục tiêu sản phẩm
+
+1. **Quét nhanh (scan):** user nhìn 2–3 giây biết symbol, LONG/SHORT, FREE/VIP, ACTIVE/đóng, và (nếu không masked) mức giá chính.
+2. **Giảm tải nhận thức:** gom thông tin phụ (tác giả, giờ, reaction) thành một hàng meta rõ ràng; số Entry/SL/TP là **khối số** dễ đọc (tabular / mono).
+3. **Luồng rõ:** đăng signal → xem list → vào detail / tương tác; VIP upgrade không che luồng chính nhưng **visible** khi có tín hiệu VIP trong list.
+4. **Tin cậy & tuân thủ:** disclaimer và rủi ro vẫn **cuối trang**, không ẩn sau vô hạn scroll mà không có anchor.
+
+## Thông tin kiến trúc trang (IA)
+
+| Vùng | Nội dung | Ghi chú |
+|------|----------|---------|
+| **Hero** | H1 + mô tả 1 dòng | Giữ ngắn; có thể thêm 1 dòng “last updated” / số signal hôm nay (P2, cần API). |
+| **Alert stack** | (1) Chưa login → đăng nhập để post (2) Có VIP trong list + user chưa VIP → upgrade | Thứ tự: login trước; gộp visual thành “banner strip” nếu cả hai hiện (P2). |
+| **Primary** | Form tạo signal (chỉ khi logged in) | Có thể **collapse** “Đăng tín hiệu” mặc định thu gọn để list lên cao hơn (P1 đề xuất). |
+| **Secondary** | Danh sách tín hiệu | Card hoặc **bảng responsive** / compact row + expand (P2). |
+| **Legal** | Disclaimer signal | Giữ; có thể sticky mini-link “Disclaimer” (P2). |
+| **Discovery** | `PageCtaRow` | Giữ; cân nhắc đổi heading “→” thành copy có nghĩa (i18n). |
+
+## User stories (ưu tiên)
+
+### P1 — MVP UX
+
+- Là **viewer**, tôi muốn **lọc / gom** theo symbol hoặc tier (FREE chỉ / tất cả) để list ngắn lại trên mobile.
+- Là **viewer**, tôi muốn **sticky subnav** hoặc anchor “Jump to list” khi form đăng mở cao.
+- Là **author đã login**, tôi muốn **thu gọn form** đăng signal mặc định, chỉ mở khi bấm “Post signal”.
+- Là **viewer**, tôi muốn **trạng thái signal** (ACTIVE / CLOSED_*) có màu / icon nhất quán, không chỉ text trong Badge outline.
+
+### P2 — Nâng cao
+
+- Sort: mới nhất / theo symbol / theo tier.
+- Skeleton / pagination hoặc “Load more” thay vì 100 card một lần.
+- Card **compact** trên mobile: một hàng symbol + direction + tier; tap expand chi tiết.
+- Empty state phân biệt “chưa có signal nào” vs “lọc không có kết quả”.
+
+## Tiêu chí chấp nhận (P1)
+
+- [ ] Trên viewport mobile (≤390px), **không** cần scroll quá 2 viewport mới thấy **ít nhất một** dòng list (khi form thu gọn).
+- [ ] Entry / SL / TP (khi không masked) dùng **cùng alignment** (cột hoặc grid), font mono, đọc được với số dài.
+- [ ] Link “View detail” có **aria-label** / copy rõ (đã có i18n) và vùng bấm ≥ 44×44px tương đương.
+- [ ] Banner VIP + masked card không mâu thuẫn copy (đã kiểm tra EN/VI).
+
+## Rủi ro & phụ thuộc
+
+- **Performance:** 100 card + ảnh lazy — giữ `loading="lazy"`; P2 pagination giảm DOM.
+- **i18n:** mọi nhãn mới (filter, collapse) phải có `en` + `vi`.
+- **Triển khai:** sau khi spec/design được chốt, nhánh **Senior Dev** chỉnh `signals/page.tsx`, `signal-room.tsx`, có thể tách `SignalListToolbar` (client).
+
+## Handoff
+
+- **UX/UI:** cập nhật khung layout & component trong `docs/design-system.md` (mục Signal Room).
+- **Dev:** implement P1 theo thứ tự: collapse form → list visual hierarchy → filter tối thiểu (tier hoặc symbol).

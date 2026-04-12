@@ -3,7 +3,7 @@
 import { useCallback, useState } from "react";
 import { useActionState } from "react";
 import { useTranslations } from "next-intl";
-import { Loader2, X } from "lucide-react";
+import { ChevronDown, ChevronUp, Loader2, X } from "lucide-react";
 import { Link, usePathname } from "@/i18n/navigation";
 import { createSignal } from "@/actions/signals";
 import { effectiveImageMime, SIGNAL_IMAGE_LIMITS } from "@/lib/signal-images";
@@ -24,9 +24,16 @@ const createInitial: { error?: string } | null = null;
 
 type PendingSlot = { id: string; previewUrl: string };
 
-export function SignalCreateForm() {
+export function SignalCreateForm({
+  collapsible = false,
+  defaultCollapsed = true,
+}: {
+  collapsible?: boolean;
+  defaultCollapsed?: boolean;
+} = {}) {
   const t = useTranslations("signals");
   const pathname = usePathname();
+  const [expanded, setExpanded] = useState(() => !collapsible || !defaultCollapsed);
   const [createState, createAction] = useActionState(createSignal, createInitial);
   const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
   const [pendingSlots, setPendingSlots] = useState<PendingSlot[]>([]);
@@ -191,10 +198,47 @@ export function SignalCreateForm() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>{t("postSignal")}</CardTitle>
-        <CardDescription>{t("vipNote")}</CardDescription>
+      <CardHeader className={cn(collapsible && "space-y-3")}>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0 space-y-1">
+            <CardTitle>{t("postSignal")}</CardTitle>
+            <CardDescription>{t("vipNote")}</CardDescription>
+          </div>
+          {collapsible ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="shrink-0 gap-1.5"
+              aria-expanded={expanded}
+              onClick={() => setExpanded((v) => !v)}
+            >
+              {expanded ? (
+                <>
+                  {t("collapseForm")}
+                  <ChevronUp className="size-4" aria-hidden />
+                </>
+              ) : (
+                <>
+                  {t("expandForm")}
+                  <ChevronDown className="size-4" aria-hidden />
+                </>
+              )}
+            </Button>
+          ) : null}
+        </div>
+        {collapsible && expanded ? (
+          <p>
+            <a
+              href="#signal-list"
+              className="text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
+            >
+              {t("skipToList")}
+            </a>
+          </p>
+        ) : null}
       </CardHeader>
+      {(!collapsible || expanded) && (
       <CardContent className="space-y-6">
         {/*
           File input ngoài <form action={createAction}> để tránh xung đột Server Action
@@ -367,6 +411,7 @@ export function SignalCreateForm() {
           </Button>
         </form>
       </CardContent>
+      )}
     </Card>
   );
 }
