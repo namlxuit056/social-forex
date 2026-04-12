@@ -9,7 +9,7 @@
 - [x] Quotes: Yahoo + fallback mock, API, cache, UI.
 - [x] TradingView embed Dashboard.
 - [x] Lịch kinh tế: FMP + cache DB + fallback mẫu + toggle VN/UTC + trạng thái live.
-- [x] CI: GitHub Actions (lint + build + Postgres service).
+- [x] CI: GitHub Actions (lint + test + build + Postgres service).
 
 ## Giai đoạn C — Cộng đồng & kiếm tiền
 
@@ -19,40 +19,64 @@
 
 ## Giai đoạn D — Vận hành & mở rộng
 
-### SEO & Open Graph
+- [x] SEO: sitemap.ts, robots.ts, metadata + Open Graph cho mọi trang.
+- [x] Error handling: not-found.tsx, error.tsx, global-error.tsx.
+- [x] Disclaimer tài chính (footer, signals, academy).
+- [x] Security headers (HSTS, X-Frame, CSP, Referrer-Policy).
+- [x] Vitest + 17 unit tests (rate-limit, vip, slug).
 
-- [x] `sitemap.ts` — routes tĩnh + academy slugs.
-- [x] `robots.ts` — allow/disallow chuẩn.
-- [x] Metadata mỗi trang content chính (quotes, calendar, tools, forum, academy, resources, signals) có `description`.
-- [x] Open Graph defaults: `metadataBase`, `openGraph`, `twitter` trong root layout.
+## Giai đoạn E — Xóa dữ liệu ảo, hoàn thiện nội dung
 
-### Error Handling & Resilience
+### Dashboard
 
-- [x] `src/app/not-found.tsx` — trang 404 custom với CTA hữu ích.
-- [x] `src/app/error.tsx` — trang lỗi runtime, reset + quay về trang chủ.
-- [x] `src/app/global-error.tsx` — boundary cho lỗi root layout.
+- [x] Stat cards thật: tín hiệu đang mở, lệnh đã đóng, tỷ lệ thắng, tin nhắn chưa đọc (từ DB).
+- [x] Xóa "Watchlist (demo)", "P/L tuần (demo)", hardcoded values.
+- [x] Xóa copy technical (env vars, fallback mock).
 
-### Pháp lý & Disclaimer
+### Sentiment
 
-- [x] Disclaimer tài chính trong footer (rõ ràng, có `<strong>`).
-- [x] Disclaimer trên trang signals và academy (component `Disclaimer`).
+- [x] Tính Long/Short % từ tín hiệu đang mở trong DB (không còn hardcoded array).
+- [x] Empty state khi chưa có tín hiệu.
 
-### Security
+### Heatmap
 
-- [x] Security headers (HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy) trong `next.config.ts`.
+- [x] Ma trận sức mạnh tính từ tỷ giá live (Yahoo Finance `changePct`).
+- [x] Xóa `demoStrength()` cố định.
 
-### Testing
+### Academy
 
-- [x] Vitest setup + runner (`npm test`).
-- [x] Unit tests: `rate-limit.ts` (4 tests), `vip.ts` (5 tests), `slug.ts` (8 tests) — 17/17 pass.
-- [x] Test step thêm vào CI pipeline.
+- [x] 5 bài học có nội dung đầy đủ (body text thật, không còn "placeholder").
+- [x] Lesson detail render inline markdown (bold, headers, lists).
+
+### Resources
+
+- [x] 6 liên kết thật (BabyPips, Investopedia, TradingView, ForexFactory, MyFxBook).
+- [x] Xóa `href: "#"` và "(placeholder)".
+
+### Brokers
+
+- [x] 5 sàn thật (IC Markets, Exness, XM, Pepperstone, FXTM) với spread, quy định, nạp tối thiểu.
+- [x] Xóa "Broker A (mẫu)".
+
+### Webinar
+
+- [x] Xóa rickroll iframe; thay bằng EmptyState "chưa có webinar nào được lên lịch".
+
+### Trang chủ
+
+- [x] Copy marketing thật, xóa "demo + pipeline WebSocket", "giai đoạn tiếp theo".
+- [x] Thêm icon cho mỗi block.
+
+### Profile
+
+- [x] Xóa copy technical (ADMIN_SECRET, API endpoint).
 
 ### Chất lượng
 
 - [x] `npm run lint` sạch.
 - [x] `npm run build` pass (36 routes, 0 errors).
-- [x] `npm test` — 17 tests, 3 files, tất cả pass.
+- [x] `npm test` — 17 tests pass.
 
 ---
 
-*Tất cả 4 giai đoạn A → D hoàn thành.*
+*Tất cả 5 giai đoạn A → E hoàn thành. Không còn dữ liệu ảo trên sản phẩm.*

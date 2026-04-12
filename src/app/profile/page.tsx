@@ -87,17 +87,12 @@ export default async function ProfilePage() {
             </dd>
           </div>
         </dl>
-        <p className="mt-6 text-sm text-muted-foreground">
-          Kích hoạt VIP quản trị: POST{" "}
-          <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">
-            /api/admin/vip
-          </code>{" "}
-          với{" "}
-          <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">
-            ADMIN_SECRET
-          </code>
-          . Thanh toán tự động (Stripe) có thể gắn sau.
-        </p>
+        {!vip && (
+          <p className="mt-6 text-sm text-muted-foreground">
+            Nâng cấp VIP để xem đầy đủ tín hiệu giao dịch và các tính năng
+            cao cấp. Liên hệ admin hoặc theo dõi trang đối tác để biết thêm.
+          </p>
+        )}
       </div>
       <PageCtaRow heading="Tiếp theo" items={[...pageCtas.explore, ...pageCtas.community]} />
     </div>

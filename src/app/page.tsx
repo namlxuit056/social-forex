@@ -1,22 +1,26 @@
 import Link from "next/link";
+import { BarChart3, MessageSquare, Shield } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const blocks = [
   {
-    title: "Utility",
-    desc: "Position size, pivot, margin; máy tính gắn với thực hành.",
+    title: "Công cụ & Dữ liệu",
+    desc: "Position size, pivot, margin — kèm tỷ giá live và lịch kinh tế cập nhật liên tục.",
     href: "/tools",
+    icon: BarChart3,
   },
   {
-    title: "Real-time",
-    desc: "Bảng giá demo + pipeline WebSocket/API broker khi bạn tích hợp.",
+    title: "Tỷ giá & Phân tích",
+    desc: "Bảng giá forex, vàng, chỉ số từ Yahoo Finance. Biểu đồ TradingView nhúng trực tiếp.",
     href: "/quotes",
+    icon: Shield,
   },
   {
-    title: "Social",
-    desc: "Diễn đàn, tín hiệu (free/VIP), BXH và hồ sơ trader.",
+    title: "Cộng đồng",
+    desc: "Diễn đàn, tín hiệu giao dịch (free/VIP), bảng xếp hạng trader và tin nhắn riêng.",
     href: "/forum",
+    icon: MessageSquare,
   },
 ];
 
@@ -34,9 +38,8 @@ export default function HomePage() {
           <span className="text-chart-4">người cùng chiến tuyến</span>.
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-          Next.js, Prisma, Auth.js và route cho quotes, calendar, tools, chart,
-          forum, signals, analytics, academy. Đăng nhập để vào Dashboard; giai
-          đoạn tiếp theo: giá thật, thanh toán VIP và moderation.
+          Tỷ giá live, lịch kinh tế, biểu đồ TradingView, diễn đàn, phòng tín
+          hiệu và academy — tất cả trong một nền tảng dành cho trader Việt Nam.
         </p>
         <div className="mt-10 flex flex-wrap justify-center gap-4">
           <Link href="/quotes" className={cn(buttonVariants({ size: "lg" }))}>
@@ -69,6 +72,9 @@ export default function HomePage() {
             href={b.href}
             className="group rounded-2xl border border-border bg-card/50 p-6 ring-1 ring-foreground/5 transition hover:border-primary/30 hover:bg-card"
           >
+            <div className="mb-3 flex size-10 items-center justify-center rounded-lg bg-muted ring-1 ring-border">
+              <b.icon className="size-5 text-primary" />
+            </div>
             <h2 className="font-heading text-lg font-medium text-foreground group-hover:text-primary">
               {b.title}
             </h2>

@@ -1,38 +1,37 @@
+import { Video } from "lucide-react";
+import { EmptyState } from "@/components/layout/empty-state";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
 import { pageCtas } from "@/lib/page-cta-presets";
 
-export const metadata = { title: "Webinar / Live" };
+export const metadata = {
+  title: "Webinar & Livestream",
+  description: "Webinar giao dịch forex trực tiếp — lịch phát sóng và replay.",
+};
 
 export default function WebinarPage() {
   return (
     <div className="space-y-8">
       <div>
         <h1 className="font-heading text-2xl font-semibold text-foreground">
-          Webinar & livestream
+          Webinar & Livestream
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Nhúng YouTube Live hoặc Zoom Webinar — thay{" "}
-          <code className="rounded bg-muted px-1 py-0.5 font-mono text-sm">
-            VIDEO_ID
-          </code>{" "}
-          bên dưới.
+          Phiên giao dịch trực tiếp, phân tích kỹ thuật và Q&A cộng đồng.
         </p>
       </div>
-      <div className="aspect-video max-w-3xl overflow-hidden rounded-xl border border-border bg-black ring-1 ring-foreground/10">
-        <iframe
-          className="h-full w-full"
-          src="https://www.youtube.com/embed/dQw4w9WgXcQ"
-          title="Webinar placeholder"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-        />
-      </div>
-      <p className="text-sm text-muted-foreground">
-        Lịch phát sóng có thể lưu trong CMS hoặc bảng{" "}
-        <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">Event</code>{" "}
-        sau.
-      </p>
-      <PageCtaRow heading="Tiếp theo" items={[...pageCtas.learn, ...pageCtas.community]} />
+
+      <EmptyState
+        icon={Video}
+        title="Chưa có webinar nào được lên lịch"
+        description="Chúng tôi đang chuẩn bị nội dung webinar đầu tiên. Theo dõi trang này để cập nhật lịch phát sóng."
+        primary={{ href: "/academy", label: "Xem Academy" }}
+        secondary={[
+          { href: "/signals", label: "Phòng tín hiệu" },
+          { href: "/calendar", label: "Lịch kinh tế" },
+        ]}
+      />
+
+      <PageCtaRow heading="Trong lúc chờ đợi" items={[...pageCtas.learn, ...pageCtas.community]} />
     </div>
   );
 }

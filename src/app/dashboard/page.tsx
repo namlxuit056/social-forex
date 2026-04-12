@@ -22,47 +22,21 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { DashboardTradingViewWidget } from "@/components/dashboard/tradingview-widget";
+import { Disclaimer } from "@/components/layout/disclaimer";
 import { prisma } from "@/lib/prisma";
 
-export const metadata = { title: "Dashboard" };
+export const metadata = {
+  title: "Dashboard",
+  description: "Bảng điều khiển cá nhân — tổng quan tín hiệu, leaderboard và công cụ.",
+};
 
 const quickLinks = [
-  {
-    href: "/quotes",
-    title: "Tỷ giá live",
-    desc: "Yahoo Finance + fallback mock.",
-    icon: BarChart3,
-  },
-  {
-    href: "/signals",
-    title: "Phòng tín hiệu",
-    desc: "Tín hiệu free & VIP theo tier.",
-    icon: Radio,
-  },
-  {
-    href: "/forum",
-    title: "Diễn đàn",
-    desc: "Thảo luận chiến lược & tin tức.",
-    icon: MessageSquare,
-  },
-  {
-    href: "/leaderboard",
-    title: "Bảng xếp hạng",
-    desc: "So sánh hiệu suất cộng đồng.",
-    icon: Trophy,
-  },
-  {
-    href: "/academy",
-    title: "Academy",
-    desc: "Bài học và tài liệu nền tảng.",
-    icon: BookOpen,
-  },
-  {
-    href: "/tools",
-    title: "Công cụ",
-    desc: "Position size, margin, pivot…",
-    icon: Wrench,
-  },
+  { href: "/quotes", title: "Tỷ giá live", desc: "Forex, vàng, chỉ số cập nhật liên tục.", icon: BarChart3 },
+  { href: "/signals", title: "Phòng tín hiệu", desc: "Tín hiệu free & VIP từ cộng đồng.", icon: Radio },
+  { href: "/forum", title: "Diễn đàn", desc: "Thảo luận chiến lược & tin tức.", icon: MessageSquare },
+  { href: "/leaderboard", title: "Bảng xếp hạng", desc: "So sánh hiệu suất cộng đồng.", icon: Trophy },
+  { href: "/academy", title: "Academy", desc: "Bài học và tài liệu giao dịch.", icon: BookOpen },
+  { href: "/tools", title: "Công cụ", desc: "Position size, margin, pivot…", icon: Wrench },
 ];
 
 export default async function DashboardPage() {
@@ -71,14 +45,33 @@ export default async function DashboardPage() {
     redirect("/auth/signin?callbackUrl=/dashboard");
   }
 
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { name: true, email: true, vipUntil: true },
-  });
+  const userId = session.user.id;
+
+  const [user, activeSignals, closedSignals, unreadDm] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: userId },
+      select: { name: true, email: true, vipUntil: true },
+    }),
+    prisma.signal.count({
+      where: { authorId: userId, status: "ACTIVE" },
+    }),
+    prisma.signal.findMany({
+      where: { authorId: userId, status: { in: ["CLOSED_WIN", "CLOSED_LOSS"] } },
+      select: { status: true },
+    }),
+    prisma.directMessage.count({
+      where: { recipientId: userId, readAt: null },
+    }),
+  ]);
 
   const displayName = user?.name ?? user?.email ?? "Trader";
   const now = new Date();
   const vipActive = user?.vipUntil != null && user.vipUntil > now;
+
+  const wins = closedSignals.filter((s) => s.status === "CLOSED_WIN").length;
+  const losses = closedSignals.filter((s) => s.status === "CLOSED_LOSS").length;
+  const totalClosed = wins + losses;
+  const winRate = totalClosed > 0 ? Math.round((wins / totalClosed) * 1000) / 10 : null;
 
   return (
     <div className="space-y-10">
@@ -91,8 +84,7 @@ export default async function DashboardPage() {
             Xin chào, {displayName}
           </h1>
           <p className="mt-2 max-w-xl text-muted-foreground">
-            Tổng quan nhanh: biểu đồ TradingView embed, thẻ thống kê minh họa và
-            lối tắt tới công cụ. Tỷ giá live: Yahoo Finance (xem trang Tỷ giá).
+            Tổng quan cá nhân: tín hiệu đang mở, tỷ lệ thắng, biểu đồ và lối tắt nhanh.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -117,59 +109,58 @@ export default async function DashboardPage() {
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Watchlist (demo)</CardDescription>
-            <CardTitle className="font-mono text-2xl tabular-nums text-chart-1">
-              12 cặp
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-xs text-muted-foreground">
-            EUR/USD, GBP/USD, XAU/USD…
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
             <CardDescription>Tín hiệu đang mở</CardDescription>
-            <CardTitle className="font-mono text-2xl tabular-nums text-foreground">
-              —
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-xs text-muted-foreground">
-            Xem phòng tín hiệu để cập nhật.
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>P/L tuần (demo)</CardDescription>
             <CardTitle className="font-mono text-2xl tabular-nums text-chart-1">
-              +0.0%
+              {activeSignals}
             </CardTitle>
           </CardHeader>
           <CardContent className="text-xs text-muted-foreground">
-            Không phải tư vấn đầu tư.
+            <Link href="/signals" className="text-primary hover:underline">
+              Xem phòng tín hiệu
+            </Link>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Cảnh báo rủi ro</CardDescription>
-            <CardTitle className="text-base text-chart-2">Cao</CardTitle>
+            <CardDescription>Lệnh đã đóng</CardDescription>
+            <CardTitle className="font-mono text-2xl tabular-nums text-foreground">
+              {totalClosed}
+            </CardTitle>
           </CardHeader>
           <CardContent className="text-xs text-muted-foreground">
-            Giao dịch margin có thể mất vốn.
+            {wins} thắng · {losses} thua
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardDescription>Tỷ lệ thắng</CardDescription>
+            <CardTitle className="font-mono text-2xl tabular-nums text-chart-1">
+              {winRate !== null ? `${winRate}%` : "—"}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-xs text-muted-foreground">
+            Dựa trên tín hiệu đã đóng.
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardDescription>Tin nhắn chưa đọc</CardDescription>
+            <CardTitle className="font-mono text-2xl tabular-nums text-foreground">
+              {unreadDm}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-xs text-muted-foreground">
+            <Link href="/messages" className="text-primary hover:underline">
+              Mở hộp thư
+            </Link>
           </CardContent>
         </Card>
       </section>
 
       <section className="space-y-3">
         <h2 className="font-heading text-lg font-medium text-foreground">
-          Biểu đồ nhanh (TradingView)
+          Biểu đồ (TradingView)
         </h2>
-        <p className="text-sm text-muted-foreground">
-          Widget nhúng — đổi mã qua biến môi trường{" "}
-          <code className="rounded bg-muted px-1 font-mono text-xs">
-            NEXT_PUBLIC_TRADINGVIEW_SYMBOL
-          </code>
-          .
-        </p>
         <DashboardTradingViewWidget />
       </section>
 
@@ -189,10 +180,7 @@ export default async function DashboardPage() {
                     <CardTitle className="text-base">{item.title}</CardTitle>
                     <CardDescription className="mt-1">{item.desc}</CardDescription>
                   </div>
-                  <ArrowRight
-                    className="size-4 shrink-0 text-muted-foreground"
-                    aria-hidden
-                  />
+                  <ArrowRight className="size-4 shrink-0 text-muted-foreground" aria-hidden />
                 </CardHeader>
               </Card>
             </Link>
@@ -201,12 +189,7 @@ export default async function DashboardPage() {
       </section>
 
       <Separator />
-
-      <p className="text-center text-xs leading-relaxed text-muted-foreground">
-        Social Forex cung cấp công cụ và nội dung mang tính giáo dục. Không phải
-        dịch vụ tư vấn đầu tư hay lời khuyên tài chính cá nhân. Bạn chịu trách
-        nhiệm với mọi quyết định giao dịch.
-      </p>
+      <Disclaimer variant="compact" />
     </div>
   );
 }

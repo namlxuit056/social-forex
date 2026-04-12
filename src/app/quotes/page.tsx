@@ -19,12 +19,8 @@ export default async function QuotesPage() {
           Bảng tỷ giá
         </h1>
         <p className="mt-2 max-w-2xl text-muted-foreground">
-          Nguồn mặc định: Yahoo Finance qua{" "}
-          <code className="rounded bg-muted px-1 font-mono text-sm">yahoo-finance2</code>
-          . Có thể đặt{" "}
-          <code className="rounded bg-muted px-1 font-mono text-sm">QUOTES_PROVIDER=mock</code>{" "}
-          để chỉ dùng dữ liệu mô phỏng. Khi API lỗi hoặc rate limit, hệ thống tự
-          fallback sang mock và hiển thị cảnh báo.
+          Tỷ giá forex, vàng, chỉ số và crypto cập nhật liên tục.
+          Dữ liệu được tự động làm mới mỗi 15 giây.
         </p>
       </div>
       <LiveQuotesTable

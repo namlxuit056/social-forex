@@ -2,7 +2,10 @@ import { TradingViewEmbed } from "@/components/charts/tradingview-embed";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
 import { pageCtas } from "@/lib/page-cta-presets";
 
-export const metadata = { title: "Biểu đồ" };
+export const metadata = {
+  title: "Biểu đồ",
+  description: "Biểu đồ TradingView trực tiếp — phân tích kỹ thuật forex, vàng, chỉ số.",
+};
 
 export default function ChartPage() {
   return (
@@ -12,8 +15,7 @@ export default function ChartPage() {
           Biểu đồ TradingView
         </h1>
         <p className="mt-2 text-muted-foreground">
-          Widget nhúng — đổi symbol qua UI TradingView. Có thể chuyển sang
-          Charting Library khi có license.
+          Phân tích kỹ thuật trực tiếp — chọn symbol, khung thời gian và indicator qua giao diện TradingView.
         </p>
       </div>
       <TradingViewEmbed />
