@@ -1,0 +1,261 @@
+{
+  "common": {
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "signOut": "Sign out",
+    "home": "Go home",
+    "next": "Next",
+    "send": "Send",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "save": "Save",
+    "search": "Search",
+    "loading": "Loading...",
+    "retry": "Retry",
+    "report": "Report",
+    "profile": "Profile",
+    "dashboard": "Dashboard",
+    "copyright": "© {year} Social Forex. All rights reserved."
+  },
+  "nav": {
+    "quotes": "Live Quotes",
+    "calendar": "Calendar",
+    "tools": "Tools",
+    "chart": "Chart",
+    "forum": "Forum",
+    "searchTopics": "Search",
+    "signals": "Signals",
+    "leaderboard": "Ranks",
+    "messages": "Messages",
+    "sentiment": "Sentiment",
+    "heatmap": "Heatmap",
+    "backtest": "Backtest",
+    "academy": "Academy",
+    "webinar": "Webinar",
+    "resources": "Resources",
+    "brokers": "Brokers",
+    "partners": "Partners"
+  },
+  "footer": {
+    "tagline": "Community platform and forex trading tools.",
+    "disclaimerTitle": "Disclaimer",
+    "disclaimerBody": "All content on Social Forex (including signals, posts, technical analysis and academy materials) is for informational and educational purposes only, <b>not investment advice</b>. Forex trading and derivative products carry a high level of risk — you may lose all your capital. Consider carefully before trading and consult a licensed financial advisor when needed."
+  },
+  "disclaimer": {
+    "compact": "Content is for reference only, not investment advice. Forex trading carries high risk.",
+    "title": "Disclaimer",
+    "body": "Signals, analysis and content on this page are for informational and educational purposes only, <b>not investment advice</b>. You are solely responsible for your trading decisions."
+  },
+  "notFound": {
+    "title": "404 — Not found",
+    "description": "The page you're looking for doesn't exist or has been moved. Check the URL or go back to the homepage."
+  },
+  "error": {
+    "title": "Something went wrong",
+    "description": "The application encountered an error processing your request. You can try again or go back home.",
+    "errorCode": "Error code: {code}",
+    "criticalTitle": "Critical error",
+    "criticalDescription": "The application failed to load. Please try again."
+  },
+  "home": {
+    "badge": "Forex · Community · Data",
+    "headline": "One platform for traders who need <tools>tools</tools>, <data>data</data> and <people>like-minded people</people>.",
+    "subtitle": "Live quotes, economic calendar, TradingView charts, forum, signal room and academy — all in one platform for Vietnamese traders.",
+    "cta_quotes": "View quotes",
+    "block_tools_title": "Tools & Data",
+    "block_tools_desc": "Position size, pivot, margin — with live quotes and continuously updating economic calendar.",
+    "block_quotes_title": "Quotes & Analysis",
+    "block_quotes_desc": "Forex, gold, index prices from Yahoo Finance. TradingView charts embedded directly.",
+    "block_social_title": "Community",
+    "block_social_desc": "Forum, trading signals (free/VIP), trader leaderboard and private messaging."
+  },
+  "quotes": {
+    "title": "Live Quotes",
+    "description": "Forex, gold, index and crypto prices updated continuously. Data auto-refreshes every 15 seconds."
+  },
+  "calendar": {
+    "title": "Economic Calendar",
+    "description": "Key economic events — supports VN/UTC timezone toggle."
+  },
+  "tools": {
+    "title": "Trading Calculators",
+    "description": "Position size, margin, pivot point and pip value calculators for forex traders."
+  },
+  "chart": {
+    "title": "TradingView Chart",
+    "description": "Live technical analysis — choose symbol, timeframe and indicators via the TradingView interface."
+  },
+  "forum": {
+    "title": "Forum",
+    "description": "Browse categories to view threads, create new topics and reply.",
+    "empty": "No forum categories yet",
+    "emptyHint": "Run seed to create sample categories and threads, or add data via Prisma Studio.",
+    "reply": "Reply",
+    "newThread": "New thread",
+    "threadTitle": "Title",
+    "threadBody": "Opening content",
+    "loginToReply": "to reply.",
+    "hidden": "Hidden",
+    "deleteThread": "Delete thread",
+    "deleteConfirm": "Delete this thread? This cannot be undone.",
+    "hidePost": "Hide post",
+    "unhidePost": "Show post",
+    "reportReason": "Reason",
+    "reportPlaceholder": "Spam, rule violation…",
+    "reported": "Report submitted"
+  },
+  "signals": {
+    "title": "Signal Room",
+    "description": "Post signals, close orders to update leaderboard. VIP signals only show full details with an active VIP subscription.",
+    "loginToPost": "Sign in to post signals",
+    "loginHint": "You can still view free signals; an account is needed to create and manage orders.",
+    "vipLocked": "VIP signals locked",
+    "vipLockedHint": "There are {count} VIP signals on this page. Upgrade your account to see full entry, SL and TP.",
+    "upgradeVip": "View profile & upgrade VIP",
+    "postSignal": "Post signal",
+    "vipNote": "VIP: only accounts with active vipUntil.",
+    "maskedMessage": "VIP signal — upgrade your account to view entry / SL / TP.",
+    "status": "Status",
+    "list": "List",
+    "empty": "No signals yet",
+    "emptyCreate": "Use the form above to post the first signal, or wait for other members.",
+    "emptyLogin": "Sign in to post signals and get full access based on VIP status."
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "greeting": "Hello, {name}",
+    "subtitle": "Personal overview: open signals, win rate, chart and quick links.",
+    "vipActive": "VIP active",
+    "freeAccount": "Free account",
+    "activeSignals": "Open signals",
+    "closedOrders": "Closed orders",
+    "winRate": "Win rate",
+    "unreadMessages": "Unread messages",
+    "basedOnClosed": "Based on closed signals.",
+    "winsLosses": "{wins} wins · {losses} losses",
+    "viewSignals": "Go to signal room",
+    "openInbox": "Open inbox",
+    "chartTitle": "Chart (TradingView)",
+    "shortcuts": "Quick links"
+  },
+  "leaderboard": {
+    "title": "Leaderboard",
+    "description": "Calculated from closed signals (wins/losses). Only showing traders with at least one closed order.",
+    "empty": "No ranking data yet",
+    "emptyHint": "Close a few signals (win or lose) in the signal room to appear on the board.",
+    "goToSignals": "Go to signal room",
+    "rank": "#",
+    "trader": "Trader",
+    "wins": "Wins",
+    "losses": "Losses",
+    "winRate": "Win rate"
+  },
+  "sentiment": {
+    "title": "Market Sentiment",
+    "description": "Long / Short ratio calculated from the community's active signals. The more signals, the more accurate the data.",
+    "empty": "No sentiment data yet",
+    "emptyHint": "The community needs at least one active signal to display market sentiment.",
+    "signals": "{count} signals"
+  },
+  "heatmap": {
+    "title": "Heatmap — Currency Strength",
+    "description": "Relative strength among 8 major currencies, calculated from {source} data. Values near 1 = strong base, near 0 = weak base.",
+    "source_yahoo": "Yahoo Finance (live)",
+    "source_mock": "Simulated data"
+  },
+  "academy": {
+    "title": "Academy / Wiki",
+    "description": "Learn forex trading from beginner to advanced.",
+    "beginner": "Beginner",
+    "intermediate": "Intermediate",
+    "advanced": "Advanced",
+    "detail": "Details →",
+    "backToList": "← Lesson list"
+  },
+  "resources": {
+    "title": "Resource Library",
+    "description": "Useful links and materials for forex traders.",
+    "open": "Open",
+    "download": "Download / view"
+  },
+  "brokers": {
+    "title": "Forex Broker Comparison",
+    "description": "Reference information based on publicly available data from broker websites. Spread values are averages and may vary by market conditions and account type.",
+    "name": "Broker",
+    "spread": "Spread (pips)",
+    "regulation": "Regulation",
+    "minDeposit": "Min. deposit",
+    "note": "Notes"
+  },
+  "webinar": {
+    "title": "Webinar & Livestream",
+    "description": "Live trading sessions, technical analysis and community Q&A.",
+    "empty": "No webinars scheduled",
+    "emptyHint": "We're preparing our first webinar. Follow this page for broadcast schedule updates.",
+    "inMeantime": "In the meantime"
+  },
+  "backtest": {
+    "title": "Backtest — equity simulation",
+    "description": "Monte Carlo simulation helps you understand the impact of win rate and risk/reward on the equity curve. Enter parameters and observe results across multiple scenarios."
+  },
+  "partners": {
+    "title": "Partners & Revenue",
+    "description": "Projected revenue model and legal notices."
+  },
+  "profile": {
+    "title": "Profile",
+    "account": "Account",
+    "name": "Name",
+    "email": "Email",
+    "publicProfile": "Public profile",
+    "viewProfile": "View /u/… page",
+    "inbox": "Inbox",
+    "vip": "VIP",
+    "vipActive": "Active until {date}",
+    "vipInactive": "Not activated",
+    "upgradeHint": "Upgrade to VIP for full access to trading signals and premium features. Contact admin or visit the partners page for more.",
+    "loginTitle": "Sign in to view profile",
+    "loginHint": "Manage display name, VIP and public profile link."
+  },
+  "auth": {
+    "signInTitle": "Sign in",
+    "registerTitle": "Create account",
+    "email": "Email",
+    "password": "Password",
+    "name": "Display name",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "No account?",
+    "hasAccount": "Already have an account?"
+  },
+  "messages": {
+    "title": "Messages",
+    "compose": "Type a message…",
+    "empty": "No messages",
+    "emptyHint": "Visit a user's profile to send your first message."
+  },
+  "admin": {
+    "vipManagement": "VIP Management",
+    "vipDescription": "Grant, revoke VIP and view operation history.",
+    "grantVip": "Grant VIP to user",
+    "grantHint": "Enter email and number of days. VIP starts from now.",
+    "userEmail": "User email",
+    "days": "Days",
+    "grant": "Grant VIP",
+    "granted": "VIP granted successfully.",
+    "vipUsers": "Users with VIP",
+    "vipUntil": "VIP until",
+    "active": "Active",
+    "expired": "Expired",
+    "revoke": "Revoke",
+    "revokeConfirm": "Revoke VIP for this user?",
+    "auditLog": "Operation history (Audit log)",
+    "time": "Time",
+    "action": "Action",
+    "noAccess": "Access denied",
+    "noAccessHint": "This page requires ADMIN permission."
+  },
+  "language": {
+    "vi": "Tiếng Việt",
+    "en": "English"
+  }
+}

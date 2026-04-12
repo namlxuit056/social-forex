@@ -1,34 +1,38 @@
-import Link from "next/link";
 import { auth } from "@/auth";
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { SignOutButton } from "@/components/auth/sign-out-button";
+import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const nav = [
-  { href: "/quotes", label: "Tỷ giá live" },
-  { href: "/calendar", label: "Lịch kinh tế" },
-  { href: "/tools", label: "Công cụ" },
-  { href: "/chart", label: "Biểu đồ" },
-  { href: "/forum", label: "Diễn đàn" },
-  { href: "/forum/search", label: "Tìm" },
-  { href: "/signals", label: "Tín hiệu" },
-  { href: "/leaderboard", label: "BXH" },
-  { href: "/messages", label: "Tin nhắn" },
-  { href: "/sentiment", label: "Sentiment" },
-  { href: "/heatmap", label: "Heatmap" },
-  { href: "/backtest", label: "Backtest" },
-  { href: "/academy", label: "Academy" },
-  { href: "/webinar", label: "Webinar" },
-  { href: "/resources", label: "Tài liệu" },
-  { href: "/brokers", label: "Sàn" },
-  { href: "/partners", label: "Đối tác" },
-];
+const navKeys = [
+  { href: "/quotes", key: "quotes" },
+  { href: "/calendar", key: "calendar" },
+  { href: "/tools", key: "tools" },
+  { href: "/chart", key: "chart" },
+  { href: "/forum", key: "forum" },
+  { href: "/forum/search", key: "searchTopics" },
+  { href: "/signals", key: "signals" },
+  { href: "/leaderboard", key: "leaderboard" },
+  { href: "/messages", key: "messages" },
+  { href: "/sentiment", key: "sentiment" },
+  { href: "/heatmap", key: "heatmap" },
+  { href: "/backtest", key: "backtest" },
+  { href: "/academy", key: "academy" },
+  { href: "/webinar", key: "webinar" },
+  { href: "/resources", key: "resources" },
+  { href: "/brokers", key: "brokers" },
+  { href: "/partners", key: "partners" },
+] as const;
 
 const navLinkClass =
   "rounded-md px-2 py-1 text-muted-foreground transition hover:bg-muted hover:text-foreground";
 
 export async function SiteHeader() {
   const session = await auth();
+  const t = await getTranslations("nav");
+  const tc = await getTranslations("common");
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur-md">
@@ -41,14 +45,15 @@ export async function SiteHeader() {
             Social Forex
           </Link>
           <nav className="hidden items-center gap-1 text-sm lg:flex">
-            {nav.map((item) => (
+            {navKeys.map((item) => (
               <Link key={item.href} href={item.href} className={navLinkClass}>
-                {item.label}
+                {t(item.key)}
               </Link>
             ))}
           </nav>
         </div>
         <div className="flex flex-wrap items-center gap-2 text-sm">
+          <LanguageSwitcher />
           {session?.user ? (
             <>
               <Link
@@ -58,7 +63,7 @@ export async function SiteHeader() {
                   "hidden sm:inline-flex",
                 )}
               >
-                Dashboard
+                {tc("dashboard")}
               </Link>
               <Link
                 href="/profile"
@@ -74,13 +79,13 @@ export async function SiteHeader() {
                 href="/auth/signin"
                 className="text-muted-foreground hover:text-foreground"
               >
-                Đăng nhập
+                {tc("signIn")}
               </Link>
               <Link
                 href="/auth/register"
                 className={cn(buttonVariants({ size: "sm" }))}
               >
-                Đăng ký
+                {tc("signUp")}
               </Link>
             </>
           )}
@@ -88,13 +93,13 @@ export async function SiteHeader() {
       </div>
       <div className="border-t border-border/60 px-4 py-2 lg:hidden">
         <nav className="flex max-w-7xl flex-wrap gap-1 text-xs">
-          {nav.map((item) => (
+          {navKeys.map((item) => (
             <Link
               key={item.href}
               href={item.href}
               className="rounded px-2 py-1 text-muted-foreground hover:bg-muted"
             >
-              {item.label}
+              {t(item.key)}
             </Link>
           ))}
           {session?.user ? (
@@ -102,7 +107,7 @@ export async function SiteHeader() {
               href="/dashboard"
               className="rounded px-2 py-1 font-medium text-primary hover:bg-muted"
             >
-              Dashboard
+              {tc("dashboard")}
             </Link>
           ) : null}
         </nav>

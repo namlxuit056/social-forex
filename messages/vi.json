@@ -1,0 +1,261 @@
+{
+  "common": {
+    "signIn": "Đăng nhập",
+    "signUp": "Đăng ký",
+    "signOut": "Đăng xuất",
+    "home": "Về trang chủ",
+    "next": "Tiếp theo",
+    "send": "Gửi",
+    "cancel": "Hủy",
+    "delete": "Xóa",
+    "save": "Lưu",
+    "search": "Tìm",
+    "loading": "Đang tải...",
+    "retry": "Thử lại",
+    "report": "Báo cáo",
+    "profile": "Hồ sơ",
+    "dashboard": "Dashboard",
+    "copyright": "© {year} Social Forex. Mọi quyền được bảo lưu."
+  },
+  "nav": {
+    "quotes": "Tỷ giá live",
+    "calendar": "Lịch kinh tế",
+    "tools": "Công cụ",
+    "chart": "Biểu đồ",
+    "forum": "Diễn đàn",
+    "searchTopics": "Tìm",
+    "signals": "Tín hiệu",
+    "leaderboard": "BXH",
+    "messages": "Tin nhắn",
+    "sentiment": "Sentiment",
+    "heatmap": "Heatmap",
+    "backtest": "Backtest",
+    "academy": "Academy",
+    "webinar": "Webinar",
+    "resources": "Tài liệu",
+    "brokers": "Sàn",
+    "partners": "Đối tác"
+  },
+  "footer": {
+    "tagline": "Nền tảng cộng đồng và công cụ giao dịch forex.",
+    "disclaimerTitle": "Tuyên bố miễn trừ trách nhiệm",
+    "disclaimerBody": "Tất cả nội dung trên Social Forex (bao gồm tín hiệu, bài viết, phân tích kỹ thuật và tài liệu academy) chỉ mang tính chất tham khảo và giáo dục, <b>không phải tư vấn đầu tư</b>. Giao dịch forex và các sản phẩm tài chính phái sinh có rủi ro cao, bạn có thể mất toàn bộ vốn. Hãy cân nhắc kỹ trước khi giao dịch và tham khảo ý kiến chuyên gia tài chính có giấy phép khi cần."
+  },
+  "disclaimer": {
+    "compact": "Nội dung chỉ mang tính tham khảo, không phải tư vấn đầu tư. Giao dịch forex có rủi ro cao.",
+    "title": "Tuyên bố miễn trừ trách nhiệm",
+    "body": "Tín hiệu, phân tích và nội dung trên trang này chỉ mang tính chất tham khảo và giáo dục, <b>không phải tư vấn đầu tư</b>. Bạn tự chịu trách nhiệm về mọi quyết định giao dịch."
+  },
+  "notFound": {
+    "title": "404 — Không tìm thấy",
+    "description": "Trang bạn tìm không tồn tại hoặc đã bị di chuyển. Kiểm tra URL hoặc quay về trang chính."
+  },
+  "error": {
+    "title": "Đã xảy ra lỗi",
+    "description": "Ứng dụng gặp sự cố khi xử lý yêu cầu. Bạn có thể thử lại hoặc quay về trang chủ.",
+    "errorCode": "Mã lỗi: {code}",
+    "criticalTitle": "Lỗi nghiêm trọng",
+    "criticalDescription": "Ứng dụng không thể tải. Vui lòng thử lại."
+  },
+  "home": {
+    "badge": "Forex · Cộng đồng · Dữ liệu",
+    "headline": "Một nền tảng cho trader cần <tools>công cụ</tools>, <data>số liệu</data> và <people>người cùng chiến tuyến</people>.",
+    "subtitle": "Tỷ giá live, lịch kinh tế, biểu đồ TradingView, diễn đàn, phòng tín hiệu và academy — tất cả trong một nền tảng dành cho trader Việt Nam.",
+    "cta_quotes": "Xem tỷ giá",
+    "block_tools_title": "Công cụ & Dữ liệu",
+    "block_tools_desc": "Position size, pivot, margin — kèm tỷ giá live và lịch kinh tế cập nhật liên tục.",
+    "block_quotes_title": "Tỷ giá & Phân tích",
+    "block_quotes_desc": "Bảng giá forex, vàng, chỉ số từ Yahoo Finance. Biểu đồ TradingView nhúng trực tiếp.",
+    "block_social_title": "Cộng đồng",
+    "block_social_desc": "Diễn đàn, tín hiệu giao dịch (free/VIP), bảng xếp hạng trader và tin nhắn riêng."
+  },
+  "quotes": {
+    "title": "Bảng tỷ giá",
+    "description": "Tỷ giá forex, vàng, chỉ số và crypto cập nhật liên tục. Dữ liệu được tự động làm mới mỗi 15 giây."
+  },
+  "calendar": {
+    "title": "Lịch kinh tế",
+    "description": "Sự kiện kinh tế quan trọng — hỗ trợ toggle múi giờ VN/UTC."
+  },
+  "tools": {
+    "title": "Công cụ tính toán",
+    "description": "Máy tính position size, margin, pivot point và pip value cho trader forex."
+  },
+  "chart": {
+    "title": "Biểu đồ TradingView",
+    "description": "Phân tích kỹ thuật trực tiếp — chọn symbol, khung thời gian và indicator qua giao diện TradingView."
+  },
+  "forum": {
+    "title": "Diễn đàn",
+    "description": "Vào từng chủ đề để xem thread, tạo bài mới và trả lời.",
+    "empty": "Chưa có danh mục diễn đàn",
+    "emptyHint": "Chạy seed để tạo category và thread mẫu, hoặc thêm dữ liệu qua Prisma Studio.",
+    "reply": "Trả lời",
+    "newThread": "Đăng chủ đề",
+    "threadTitle": "Tiêu đề",
+    "threadBody": "Nội dung mở đầu",
+    "loginToReply": "để trả lời.",
+    "hidden": "Đã ẩn",
+    "deleteThread": "Xóa thread",
+    "deleteConfirm": "Xóa thread này? Thao tác không thể hoàn tác.",
+    "hidePost": "Ẩn bài",
+    "unhidePost": "Hiện lại",
+    "reportReason": "Lý do",
+    "reportPlaceholder": "Spam, vi phạm quy tắc…",
+    "reported": "Đã gửi báo cáo"
+  },
+  "signals": {
+    "title": "Signal room",
+    "description": "Đăng tín hiệu, đóng lệnh để cập nhật leaderboard. Tín hiệu VIP chỉ hiện đầy đủ khi tài khoản có VIP còn hạn.",
+    "loginToPost": "Đăng nhập để đăng tín hiệu",
+    "loginHint": "Bạn vẫn xem được tín hiệu free; cần tài khoản để tạo và quản lý lệnh.",
+    "vipLocked": "Tín hiệu VIP bị khóa",
+    "vipLockedHint": "Có {count} tín hiệu VIP trên trang này. Nâng cấp tài khoản để xem đầy đủ entry, SL và TP.",
+    "upgradeVip": "Xem hồ sơ & nâng cấp VIP",
+    "postSignal": "Đăng tín hiệu",
+    "vipNote": "VIP: chỉ tài khoản có vipUntil còn hạn.",
+    "maskedMessage": "Tín hiệu VIP — nâng cấp tài khoản để xem entry / SL / TP.",
+    "status": "Trạng thái",
+    "list": "Danh sách",
+    "empty": "Chưa có tín hiệu nào",
+    "emptyCreate": "Dùng form phía trên để đăng tín hiệu đầu tiên, hoặc chờ thành viên khác.",
+    "emptyLogin": "Đăng nhập để đăng tín hiệu và xem đầy đủ theo quyền VIP."
+  },
+  "dashboard": {
+    "title": "Bảng điều khiển",
+    "greeting": "Xin chào, {name}",
+    "subtitle": "Tổng quan cá nhân: tín hiệu đang mở, tỷ lệ thắng, biểu đồ và lối tắt nhanh.",
+    "vipActive": "VIP đang hoạt động",
+    "freeAccount": "Tài khoản Free",
+    "activeSignals": "Tín hiệu đang mở",
+    "closedOrders": "Lệnh đã đóng",
+    "winRate": "Tỷ lệ thắng",
+    "unreadMessages": "Tin nhắn chưa đọc",
+    "basedOnClosed": "Dựa trên tín hiệu đã đóng.",
+    "winsLosses": "{wins} thắng · {losses} thua",
+    "viewSignals": "Xem phòng tín hiệu",
+    "openInbox": "Mở hộp thư",
+    "chartTitle": "Biểu đồ (TradingView)",
+    "shortcuts": "Lối tắt"
+  },
+  "leaderboard": {
+    "title": "Leaderboard",
+    "description": "Tính từ tín hiệu đã đóng (thắng/thua). Chỉ hiển thị trader có ít nhất một lệnh đóng.",
+    "empty": "Chưa có dữ liệu xếp hạng",
+    "emptyHint": "Đóng vài tín hiệu (thắng hoặc thua) trong phòng tín hiệu để xuất hiện trên bảng.",
+    "goToSignals": "Đến phòng tín hiệu",
+    "rank": "#",
+    "trader": "Trader",
+    "wins": "Thắng",
+    "losses": "Thua",
+    "winRate": "Tỷ lệ thắng"
+  },
+  "sentiment": {
+    "title": "Tâm lý thị trường",
+    "description": "Tỷ lệ Long / Short được tính từ tín hiệu đang mở của cộng đồng. Càng nhiều tín hiệu, dữ liệu càng chính xác.",
+    "empty": "Chưa có dữ liệu sentiment",
+    "emptyHint": "Cộng đồng cần đăng ít nhất một tín hiệu đang mở để hiển thị tâm lý thị trường.",
+    "signals": "{count} tín hiệu"
+  },
+  "heatmap": {
+    "title": "Heatmap — sức mạnh tiền tệ",
+    "description": "Sức mạnh tương đối giữa 8 đồng tiền chính, tính từ dữ liệu tỷ giá {source}. Giá trị gần 1 = base mạnh, gần 0 = base yếu.",
+    "source_yahoo": "Yahoo Finance (live)",
+    "source_mock": "Dữ liệu mô phỏng"
+  },
+  "academy": {
+    "title": "Academy / Wiki",
+    "description": "Học giao dịch forex từ cơ bản đến nâng cao.",
+    "beginner": "Cơ bản",
+    "intermediate": "Trung cấp",
+    "advanced": "Nâng cao",
+    "detail": "Chi tiết →",
+    "backToList": "← Danh sách bài học"
+  },
+  "resources": {
+    "title": "Kho tài liệu",
+    "description": "Liên kết và tài liệu hữu ích cho trader forex.",
+    "open": "Mở",
+    "download": "Tải / xem"
+  },
+  "brokers": {
+    "title": "So sánh sàn Forex",
+    "description": "Thông tin tham khảo dựa trên dữ liệu công khai từ website các sàn. Spread là giá trị trung bình, có thể thay đổi theo thị trường và loại tài khoản.",
+    "name": "Sàn",
+    "spread": "Spread (pip)",
+    "regulation": "Quy định",
+    "minDeposit": "Nạp tối thiểu",
+    "note": "Ghi chú"
+  },
+  "webinar": {
+    "title": "Webinar & Livestream",
+    "description": "Phiên giao dịch trực tiếp, phân tích kỹ thuật và Q&A cộng đồng.",
+    "empty": "Chưa có webinar nào được lên lịch",
+    "emptyHint": "Chúng tôi đang chuẩn bị nội dung webinar đầu tiên. Theo dõi trang này để cập nhật lịch phát sóng.",
+    "inMeantime": "Trong lúc chờ đợi"
+  },
+  "backtest": {
+    "title": "Backtest — mô phỏng equity",
+    "description": "Mô phỏng Monte Carlo giúp bạn hiểu tác động của win rate và risk/reward lên đường equity. Nhập thông số và quan sát kết quả qua nhiều kịch bản."
+  },
+  "partners": {
+    "title": "Đối tác & thu nhập",
+    "description": "Mô hình doanh thu dự kiến và lưu ý pháp lý."
+  },
+  "profile": {
+    "title": "Hồ sơ",
+    "account": "Tài khoản",
+    "name": "Tên",
+    "email": "Email",
+    "publicProfile": "Hồ sơ công khai",
+    "viewProfile": "Xem trang /u/…",
+    "inbox": "Hộp thư",
+    "vip": "VIP",
+    "vipActive": "Đang hoạt động đến {date}",
+    "vipInactive": "Chưa kích hoạt",
+    "upgradeHint": "Nâng cấp VIP để xem đầy đủ tín hiệu giao dịch và các tính năng cao cấp. Liên hệ admin hoặc theo dõi trang đối tác để biết thêm.",
+    "loginTitle": "Đăng nhập để xem hồ sơ",
+    "loginHint": "Quản lý tên hiển thị, VIP và liên kết hồ sơ công khai."
+  },
+  "auth": {
+    "signInTitle": "Đăng nhập",
+    "registerTitle": "Đăng ký tài khoản",
+    "email": "Email",
+    "password": "Mật khẩu",
+    "name": "Tên hiển thị",
+    "forgotPassword": "Quên mật khẩu?",
+    "noAccount": "Chưa có tài khoản?",
+    "hasAccount": "Đã có tài khoản?"
+  },
+  "messages": {
+    "title": "Tin nhắn",
+    "compose": "Nhập tin nhắn…",
+    "empty": "Chưa có tin nhắn",
+    "emptyHint": "Ghé hồ sơ người dùng để gửi tin nhắn đầu tiên."
+  },
+  "admin": {
+    "vipManagement": "Quản lý VIP",
+    "vipDescription": "Cấp, thu hồi VIP và xem lịch sử thao tác.",
+    "grantVip": "Cấp VIP cho người dùng",
+    "grantHint": "Nhập email và số ngày. VIP sẽ được tính từ thời điểm hiện tại.",
+    "userEmail": "Email người dùng",
+    "days": "Số ngày",
+    "grant": "Cấp VIP",
+    "granted": "Đã cấp VIP thành công.",
+    "vipUsers": "Người dùng có VIP",
+    "vipUntil": "VIP đến",
+    "active": "Còn hạn",
+    "expired": "Hết hạn",
+    "revoke": "Thu hồi",
+    "revokeConfirm": "Thu hồi VIP của người dùng này?",
+    "auditLog": "Lịch sử thao tác (Audit log)",
+    "time": "Thời gian",
+    "action": "Hành động",
+    "noAccess": "Không có quyền truy cập",
+    "noAccessHint": "Trang này yêu cầu quyền ADMIN."
+  },
+  "language": {
+    "vi": "Tiếng Việt",
+    "en": "English"
+  }
+}

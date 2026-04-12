@@ -1,8 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { SiteFooter } from "@/components/layout/site-footer";
-import { SiteHeader } from "@/components/layout/site-header";
-import { AppProviders } from "@/components/providers/app-providers";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -46,8 +43,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Social Forex",
-    description:
-      "Nền tảng cộng đồng & công cụ giao dịch forex.",
+    description: "Nền tảng cộng đồng & công cụ giao dịch forex.",
   },
   robots: {
     index: true,
@@ -62,18 +58,10 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="vi"
       className={`${geistSans.variable} ${geistMono.variable} dark h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full font-sans antialiased">
-        <AppProviders>
-          <SiteHeader />
-          <main className="mx-auto min-h-[60vh] max-w-7xl px-4 py-10">
-            {children}
-          </main>
-          <SiteFooter />
-        </AppProviders>
-      </body>
+      <body className="min-h-full font-sans antialiased">{children}</body>
     </html>
   );
 }
