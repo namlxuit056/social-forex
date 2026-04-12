@@ -1,12 +1,14 @@
 import { auth } from "@/auth";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import { Shield } from "lucide-react";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { SiteLogo } from "@/components/layout/site-logo";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { prisma } from "@/lib/prisma";
 
 const primaryNavKeys = [
   { href: "/quotes", key: "quotes" },
@@ -35,6 +37,16 @@ export async function SiteHeader() {
   const session = await auth();
   const t = await getTranslations("nav");
   const tc = await getTranslations("common");
+  const ta = await getTranslations("admin");
+
+  let isStaff = false;
+  if (session?.user?.id) {
+    const u = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { role: true },
+    });
+    isStaff = u?.role === "ADMIN" || u?.role === "MOD";
+  }
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-xl">
@@ -88,6 +100,15 @@ export async function SiteHeader() {
               >
                 {tc("dashboard")}
               </Link>
+              {isStaff && (
+                <Link
+                  href="/admin"
+                  className="hidden items-center gap-1 rounded-md px-2 py-1 text-xs text-yellow-600 transition hover:bg-yellow-500/10 dark:text-yellow-500 sm:inline-flex"
+                >
+                  <Shield className="size-3" />
+                  {ta("dashboard")}
+                </Link>
+              )}
               <SignOutButton />
             </>
           ) : (
