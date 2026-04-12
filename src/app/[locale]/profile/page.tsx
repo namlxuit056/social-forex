@@ -104,7 +104,15 @@ export default async function ProfilePage({
           </div>
         </dl>
         {!vip && (
-          <p className="mt-6 text-sm text-muted-foreground">{t("upgradeHint")}</p>
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <p className="flex-1 text-sm text-muted-foreground">{t("upgradeHint")}</p>
+            <Link
+              href="/upgrade-vip"
+              className={cn(buttonVariants({ size: "sm" }), "shrink-0 gap-1.5")}
+            >
+              {t("upgradeVip")}
+            </Link>
+          </div>
         )}
       </div>
       <PageCtaRow heading="→" items={[...pageCtas.explore, ...pageCtas.community]} />

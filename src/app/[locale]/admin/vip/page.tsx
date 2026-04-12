@@ -57,10 +57,24 @@ export default async function AdminVipPage({
     take: 50,
   });
 
-  const auditLogs = await prisma.vipAuditLog.findMany({
+  const rawLogs = await prisma.vipAuditLog.findMany({
     orderBy: { createdAt: "desc" },
     take: 50,
   });
+
+  const logUserIds = [
+    ...new Set(rawLogs.flatMap((l) => [l.adminId, l.userId])),
+  ];
+  const logUsers = await prisma.user.findMany({
+    where: { id: { in: logUserIds } },
+    select: { id: true, email: true, name: true },
+  });
+  const userMap = new Map(logUsers.map((u) => [u.id, u]));
+  const auditLogs = rawLogs.map((l) => ({
+    ...l,
+    adminLabel: userMap.get(l.adminId)?.email ?? l.adminId.slice(0, 8) + "…",
+    userLabel: userMap.get(l.userId)?.email ?? l.userId.slice(0, 8) + "…",
+  }));
 
   return (
     <div className="space-y-8">
@@ -96,6 +110,7 @@ export default async function AdminVipPage({
                 <thead>
                   <tr className="border-b border-border text-left text-xs text-muted-foreground">
                     <th className="pb-2 pr-4">{t("userEmail")}</th>
+                    <th className="pb-2 pr-4">Tên</th>
                     <th className="pb-2 pr-4">{t("vipUntil")}</th>
                     <th className="pb-2 pr-4" />
                     <th className="pb-2" />
@@ -107,6 +122,7 @@ export default async function AdminVipPage({
                     return (
                       <tr key={u.id} className="border-b border-border/50">
                         <td className="py-2 pr-4 font-mono text-xs">{u.email}</td>
+                        <td className="py-2 pr-4 text-xs">{u.name ?? "—"}</td>
                         <td className="py-2 pr-4 text-xs">
                           {u.vipUntil ? new Date(u.vipUntil).toLocaleDateString(locale) : "—"}
                         </td>
@@ -154,8 +170,8 @@ export default async function AdminVipPage({
                       <td className="py-2 pr-4 text-xs">
                         {new Date(log.createdAt).toLocaleString(locale)}
                       </td>
-                      <td className="py-2 pr-4 font-mono text-xs">{log.adminId.slice(0, 8)}…</td>
-                      <td className="py-2 pr-4 font-mono text-xs">{log.userId.slice(0, 8)}…</td>
+                      <td className="py-2 pr-4 font-mono text-xs">{log.adminLabel}</td>
+                      <td className="py-2 pr-4 font-mono text-xs">{log.userLabel}</td>
                       <td className="py-2 pr-4">
                         <Badge
                           variant={log.action === "grant" ? "default" : "destructive"}
