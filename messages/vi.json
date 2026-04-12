@@ -7,6 +7,7 @@
     "next": "Tiếp theo",
     "send": "Gửi",
     "cancel": "Hủy",
+    "close": "Đóng",
     "delete": "Xóa",
     "save": "Lưu",
     "search": "Tìm",
@@ -157,6 +158,7 @@
     "imageUploadRateLimited": "Đang upload quá nhanh. Chờ khoảng 1 phút rồi thử lại.",
     "imageUploadNeedLogin": "Bạn cần đăng nhập để tải ảnh lên.",
     "imageUploadSignInLink": "Đăng nhập",
+    "imageViewerDialog": "Ảnh chart",
     "removeImage": "Gỡ ảnh"
   },
   "dashboard": {

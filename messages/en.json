@@ -7,6 +7,7 @@
     "next": "Next",
     "send": "Send",
     "cancel": "Cancel",
+    "close": "Close",
     "delete": "Delete",
     "save": "Save",
     "search": "Search",
@@ -157,6 +158,7 @@
     "imageUploadRateLimited": "Too many uploads. Wait about a minute and try again.",
     "imageUploadNeedLogin": "You need to be signed in to upload images.",
     "imageUploadSignInLink": "Sign in",
+    "imageViewerDialog": "Chart image",
     "removeImage": "Remove image"
   },
   "dashboard": {
