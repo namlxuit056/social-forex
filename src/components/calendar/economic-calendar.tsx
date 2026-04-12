@@ -69,6 +69,13 @@ function statusBadge(s: CalendarEventStatus) {
 }
 
 type Zone = "utc" | "vn";
+type DateRange = "today" | "week";
+
+const IMPACT_OPTIONS: { value: Impact; label: string; color: string }[] = [
+  { value: "high", label: "Cao", color: "bg-destructive/20 text-destructive border-destructive/30" },
+  { value: "medium", label: "TB", color: "bg-amber-500/15 text-amber-200/95 border-amber-500/30" },
+  { value: "low", label: "Thấp", color: "bg-muted text-muted-foreground border-border" },
+];
 
 type Props = {
   events: CalendarEvent[];
@@ -84,6 +91,13 @@ export function EconomicCalendar({
   syncedAt,
 }: Props) {
   const [zone, setZone] = useState<Zone>("vn");
+  const [dateRange, setDateRange] = useState<DateRange>("today");
+  const [selectedCurrencies, setSelectedCurrencies] = useState<Set<string>>(
+    new Set(),
+  );
+  const [selectedImpacts, setSelectedImpacts] = useState<Set<Impact>>(
+    new Set(["high", "medium", "low"]),
+  );
   const [isPending, startTransition] = useTransition();
   const now = useNow();
 
@@ -96,27 +110,81 @@ export function EconomicCalendar({
     [events],
   );
 
+  const currencies = useMemo(() => {
+    const set = new Set(sorted.map((ev) => ev.currency));
+    return Array.from(set).sort();
+  }, [sorted]);
+
+  const todayStr = useMemo(() => {
+    const tz = zone === "utc" ? "UTC" : "Asia/Ho_Chi_Minh";
+    return formatInTimeZone(new Date(), tz, "yyyy-MM-dd");
+  }, [zone]);
+
+  const filtered = useMemo(() => {
+    const tz = zone === "utc" ? "UTC" : "Asia/Ho_Chi_Minh";
+    return sorted.filter((ev) => {
+      if (!selectedImpacts.has(ev.impact)) return false;
+
+      if (selectedCurrencies.size > 0 && !selectedCurrencies.has(ev.currency))
+        return false;
+
+      if (dateRange === "today") {
+        const evDay = formatInTimeZone(new Date(ev.timeUtc), tz, "yyyy-MM-dd");
+        if (evDay !== todayStr) return false;
+      }
+
+      return true;
+    });
+  }, [sorted, selectedImpacts, selectedCurrencies, dateRange, todayStr, zone]);
+
   const rows = useMemo(
     () =>
-      sorted.map((ev) => ({
+      filtered.map((ev) => ({
         ev,
         status: computeStatus(ev.timeUtc, now),
       })),
-    [sorted, now],
+    [filtered, now],
   );
 
   const tz = zone === "utc" ? "UTC" : "Asia/Ho_Chi_Minh";
   const zoneLabel = zone === "utc" ? "UTC" : "Việt Nam (UTC+7)";
 
   const sourceLabel =
-    source === "fmp"
-      ? "FMP (cache DB)"
-      : source === "stale_db"
-        ? "Cache DB (API lỗi)"
-        : "Mẫu";
+    source === "investing"
+      ? "Forex Factory (live)"
+      : source === "fmp"
+        ? "FMP (cache DB)"
+        : source === "stale_db"
+          ? "Cache DB (API lỗi)"
+          : "Mẫu";
+
+  function toggleCurrency(c: string) {
+    setSelectedCurrencies((prev) => {
+      const next = new Set(prev);
+      if (next.has(c)) {
+        next.delete(c);
+      } else {
+        next.add(c);
+      }
+      return next;
+    });
+  }
+
+  function toggleImpact(impact: Impact) {
+    setSelectedImpacts((prev) => {
+      const next = new Set(prev);
+      if (next.has(impact)) {
+        if (next.size > 1) next.delete(impact);
+      } else {
+        next.add(impact);
+      }
+      return next;
+    });
+  }
 
   return (
     <div className="space-y-4">
+      {/* Source + Sync info */}
       <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
         <span className="rounded-md bg-muted/80 px-2 py-0.5 font-mono text-[10px] text-foreground/80">
           Nguồn: {sourceLabel}
@@ -140,36 +208,136 @@ export function EconomicCalendar({
         </p>
       ) : null}
 
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-sm text-muted-foreground">Múi giờ hiển thị:</span>
-        <div
-          className={cn(
-            "inline-flex rounded-lg border border-border p-0.5 transition-opacity",
-            isPending && "opacity-70",
-          )}
-        >
-          <Button
-            type="button"
-            variant={zone === "vn" ? "default" : "ghost"}
-            size="sm"
-            className="rounded-md"
-            onClick={() => startTransition(() => setZone("vn"))}
-          >
-            VN
-          </Button>
-          <Button
-            type="button"
-            variant={zone === "utc" ? "default" : "ghost"}
-            size="sm"
-            className="rounded-md"
-            onClick={() => startTransition(() => setZone("utc"))}
-          >
-            UTC
-          </Button>
+      {/* Filters bar */}
+      <div className="flex flex-col gap-3 rounded-xl border border-border/60 bg-muted/20 p-3 sm:flex-row sm:flex-wrap sm:items-center">
+        {/* Date range */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-medium text-muted-foreground">Ngày:</span>
+          <div className="inline-flex rounded-lg border border-border p-0.5">
+            <Button
+              type="button"
+              variant={dateRange === "today" ? "default" : "ghost"}
+              size="sm"
+              className="h-7 rounded-md px-3 text-xs"
+              onClick={() => setDateRange("today")}
+            >
+              Hôm nay
+            </Button>
+            <Button
+              type="button"
+              variant={dateRange === "week" ? "default" : "ghost"}
+              size="sm"
+              className="h-7 rounded-md px-3 text-xs"
+              onClick={() => setDateRange("week")}
+            >
+              Cả tuần
+            </Button>
+          </div>
         </div>
-        <span className="text-xs text-muted-foreground">{zoneLabel}</span>
+
+        {/* Divider */}
+        <div className="hidden h-6 w-px bg-border sm:block" />
+
+        {/* Impact filter */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-medium text-muted-foreground">Tác động:</span>
+          <div className="flex gap-1">
+            {IMPACT_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => toggleImpact(opt.value)}
+                className={cn(
+                  "rounded-md border px-2.5 py-1 text-xs font-medium transition-all",
+                  selectedImpacts.has(opt.value)
+                    ? opt.color
+                    : "border-transparent bg-muted/40 text-muted-foreground/50",
+                )}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div className="hidden h-6 w-px bg-border sm:block" />
+
+        {/* Currency filter */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-medium text-muted-foreground">Tiền tệ:</span>
+          <div className="flex flex-wrap gap-1">
+            {currencies.map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => toggleCurrency(c)}
+                className={cn(
+                  "rounded-md border px-2 py-0.5 text-xs font-medium transition-all",
+                  selectedCurrencies.size === 0 || selectedCurrencies.has(c)
+                    ? "border-primary/30 bg-primary/10 text-primary"
+                    : "border-transparent bg-muted/40 text-muted-foreground/50",
+                )}
+              >
+                {c}
+              </button>
+            ))}
+            {selectedCurrencies.size > 0 && (
+              <button
+                type="button"
+                onClick={() => setSelectedCurrencies(new Set())}
+                className="rounded-md px-2 py-0.5 text-xs text-muted-foreground/60 underline-offset-2 hover:text-foreground hover:underline"
+              >
+                Tất cả
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div className="hidden h-6 w-px bg-border sm:block" />
+
+        {/* Timezone */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-medium text-muted-foreground">Giờ:</span>
+          <div
+            className={cn(
+              "inline-flex rounded-lg border border-border p-0.5 transition-opacity",
+              isPending && "opacity-70",
+            )}
+          >
+            <Button
+              type="button"
+              variant={zone === "vn" ? "default" : "ghost"}
+              size="sm"
+              className="h-7 rounded-md px-2.5 text-xs"
+              onClick={() => startTransition(() => setZone("vn"))}
+            >
+              VN
+            </Button>
+            <Button
+              type="button"
+              variant={zone === "utc" ? "default" : "ghost"}
+              size="sm"
+              className="h-7 rounded-md px-2.5 text-xs"
+              onClick={() => startTransition(() => setZone("utc"))}
+            >
+              UTC
+            </Button>
+          </div>
+          <span className="text-[10px] text-muted-foreground/60">{zoneLabel}</span>
+        </div>
       </div>
 
+      {/* Results count */}
+      <p className="text-xs text-muted-foreground">
+        {rows.length} sự kiện
+        {dateRange === "today" ? " hôm nay" : " trong tuần"}
+        {selectedCurrencies.size > 0 &&
+          ` · ${Array.from(selectedCurrencies).join(", ")}`}
+      </p>
+
+      {/* Table */}
       <div className="overflow-x-auto rounded-xl border border-border">
         <table className="w-full min-w-[800px] text-left text-sm">
           <thead className="bg-muted/50 text-muted-foreground">
@@ -183,32 +351,43 @@ export function EconomicCalendar({
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {rows.map(({ ev, status }) => (
-              <tr
-                key={ev.id}
-                className={cn(
-                  "hover:bg-muted/30",
-                  status === "live" && "bg-primary/[0.06]",
-                )}
-              >
-                <td className="px-4 py-3 font-mono text-foreground/90">
-                  {formatInTimeZone(
-                    new Date(ev.timeUtc),
-                    tz,
-                    "yyyy-MM-dd HH:mm",
-                  )}
-                </td>
-                <td className="px-4 py-3">{statusBadge(status)}</td>
-                <td className="px-4 py-3 font-medium">{ev.currency}</td>
-                <td className="px-4 py-3">{ev.title}</td>
-                <td className="px-4 py-3">{badge(ev.impact)}</td>
-                <td className="px-4 py-3 text-muted-foreground">
-                  {[ev.forecast, ev.previous, ev.actual]
-                    .filter(Boolean)
-                    .join(" · ") || "—"}
+            {rows.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={6}
+                  className="px-4 py-8 text-center text-muted-foreground"
+                >
+                  Không có sự kiện phù hợp bộ lọc.
                 </td>
               </tr>
-            ))}
+            ) : (
+              rows.map(({ ev, status }) => (
+                <tr
+                  key={ev.id}
+                  className={cn(
+                    "hover:bg-muted/30",
+                    status === "live" && "bg-primary/6",
+                  )}
+                >
+                  <td className="px-4 py-3 font-mono text-foreground/90">
+                    {formatInTimeZone(
+                      new Date(ev.timeUtc),
+                      tz,
+                      "yyyy-MM-dd HH:mm",
+                    )}
+                  </td>
+                  <td className="px-4 py-3">{statusBadge(status)}</td>
+                  <td className="px-4 py-3 font-medium">{ev.currency}</td>
+                  <td className="px-4 py-3">{ev.title}</td>
+                  <td className="px-4 py-3">{badge(ev.impact)}</td>
+                  <td className="px-4 py-3 text-muted-foreground">
+                    {[ev.forecast, ev.previous, ev.actual]
+                      .filter(Boolean)
+                      .join(" · ") || "—"}
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

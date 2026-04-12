@@ -2,6 +2,7 @@ import {
   FmpSubscriptionRequiredError,
   fetchFmpEconomicCalendar,
 } from "@/lib/calendar/fmp";
+import { fetchInvestingCalendar } from "@/lib/calendar/investing";
 import type {
   CalendarEvent,
   Impact,
@@ -39,7 +40,127 @@ function dbToEvent(row: {
   };
 }
 
-export async function resolveCalendarEvents(): Promise<ResolveCalendarResult> {
+function chosenProvider(): "investing" | "fmp" | "sample" {
+  const p = process.env.CALENDAR_PROVIDER?.toLowerCase();
+  if (p === "fmp") return "fmp";
+  if (p === "sample") return "sample";
+  return "investing";
+}
+
+const INVESTING_SYNC_ID = "investing";
+
+async function persistToDb(events: CalendarEvent[]) {
+  const seen = new Set<string>();
+  const unique = events.filter((ev) => {
+    if (seen.has(ev.id)) return false;
+    seen.add(ev.id);
+    return true;
+  });
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      await tx.economicCalendarEvent.deleteMany({});
+      if (unique.length > 0) {
+        await tx.economicCalendarEvent.createMany({
+          data: unique.map((ev) => ({
+            externalId: ev.id,
+            timeUtc: new Date(ev.timeUtc),
+            currency: ev.currency,
+            title: ev.title,
+            impact: ev.impact,
+            forecast: ev.forecast ?? null,
+            previous: ev.previous ?? null,
+            actual: ev.actual ?? null,
+          })),
+        });
+      }
+      await tx.calendarSyncMeta.upsert({
+        where: { id: INVESTING_SYNC_ID },
+        create: {
+          id: INVESTING_SYNC_ID,
+          lastSyncAt: new Date(),
+          source: "investing",
+        },
+        update: {
+          lastSyncAt: new Date(),
+          source: "investing",
+        },
+      });
+    });
+  } catch {
+    // DB persist failed silently — in-memory cache still works
+  }
+}
+
+async function resolveViaInvesting(): Promise<ResolveCalendarResult> {
+  const meta = await prisma.calendarSyncMeta.findUnique({
+    where: { id: INVESTING_SYNC_ID },
+  });
+  const dbEvents = await prisma.economicCalendarEvent.findMany({
+    orderBy: { timeUtc: "asc" },
+  });
+
+  const stale =
+    !meta ||
+    Date.now() - meta.lastSyncAt.getTime() >= ttlMs() ||
+    dbEvents.length === 0;
+
+  if (!stale && dbEvents.length > 0) {
+    return {
+      events: dbEvents.map(dbToEvent),
+      source: "investing",
+      syncedAt: meta!.lastSyncAt.toISOString(),
+    };
+  }
+
+  try {
+    const events = await fetchInvestingCalendar();
+
+    if (events.length === 0) {
+      if (dbEvents.length > 0) {
+        return {
+          events: dbEvents.map(dbToEvent),
+          source: "stale_db",
+          warning: "API không trả sự kiện mới — hiển thị cache DB.",
+          syncedAt: meta?.lastSyncAt.toISOString(),
+        };
+      }
+      return {
+        events: sampleCalendar,
+        source: "sample",
+        warning:
+          "Không có sự kiện lịch kinh tế tuần này — hiển thị dữ liệu mẫu.",
+      };
+    }
+
+    await persistToDb(events);
+
+    return {
+      events,
+      source: "investing",
+      syncedAt: new Date().toISOString(),
+    };
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "Unknown error";
+
+    if (dbEvents.length > 0) {
+      return {
+        events: dbEvents.map(dbToEvent),
+        source: "stale_db",
+        warning: `Không đồng bộ được (${message}). Hiển thị cache DB.`,
+        syncedAt: meta?.lastSyncAt.toISOString(),
+      };
+    }
+
+    return {
+      events: sampleCalendar,
+      source: "sample",
+      warning: `Không lấy được lịch kinh tế (${message}). Đang hiển thị dữ liệu mẫu.`,
+    };
+  }
+}
+
+async function resolveViaFmp(): Promise<ResolveCalendarResult> {
   const key = process.env.FMP_API_KEY?.trim();
 
   if (!key) {
@@ -132,7 +253,7 @@ export async function resolveCalendarEvents(): Promise<ResolveCalendarResult> {
         events: sampleCalendar,
         source: "sample",
         warning:
-          "Economic Calendar trên FMP cần gói trả phí (HTTP 402 — endpoint bị giới hạn). Đang hiển thị dữ liệu mẫu. Bạn có thể nâng cấp tại financialmodelingprep.com hoặc xóa FMP_API_KEY để ẩn cảnh báo này và chỉ dùng mẫu.",
+          "FMP cần gói trả phí (HTTP 402). Đang hiển thị mẫu. Đổi CALENDAR_PROVIDER=investing (mặc định) để dùng nguồn free.",
       };
     }
 
@@ -156,8 +277,22 @@ export async function resolveCalendarEvents(): Promise<ResolveCalendarResult> {
       events: sampleCalendar,
       source: "sample",
       warning: looksLikePaywall
-        ? "Economic Calendar trên FMP cần gói trả phí. Đang hiển thị dữ liệu mẫu."
+        ? "FMP cần gói trả phí. Đang hiển thị dữ liệu mẫu."
         : `Không đồng bộ FMP (${message}). Hiển thị mẫu.`,
     };
   }
+}
+
+export async function resolveCalendarEvents(): Promise<ResolveCalendarResult> {
+  const provider = chosenProvider();
+
+  if (provider === "sample") {
+    return { events: sampleCalendar, source: "sample" };
+  }
+
+  if (provider === "fmp") {
+    return resolveViaFmp();
+  }
+
+  return resolveViaInvesting();
 }

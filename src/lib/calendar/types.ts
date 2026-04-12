@@ -15,8 +15,8 @@ export type CalendarEvent = {
   actual?: string;
 };
 
-/** fmp = cache DB từ FMP; sample = dữ liệu mẫu; stale_db = cache DB khi API lỗi */
-export type CalendarSource = "fmp" | "sample" | "stale_db";
+/** investing = Investing.com (free); fmp = cache DB từ FMP; sample = dữ liệu mẫu; stale_db = cache DB khi API lỗi */
+export type CalendarSource = "investing" | "fmp" | "sample" | "stale_db";
 
 export type ResolveCalendarResult = {
   events: CalendarEvent[];
