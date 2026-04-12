@@ -1,5 +1,6 @@
 import { buildQuotes } from "@/lib/quotes/providers/mock";
 import { fetchYahooQuotes } from "@/lib/quotes/providers/yahoo";
+import { fetchMassiveQuotes } from "@/lib/quotes/providers/massive";
 import type { QuotesApiResponse } from "@/lib/quotes/types";
 
 const TTL_MS = 20_000;
@@ -9,15 +10,13 @@ function tickFromTime() {
   return Math.floor(Date.now() / 3000);
 }
 
-function envProvider(): "yahoo" | "mock" {
+function envProvider(): "massive" | "yahoo" | "mock" {
   const p = process.env.QUOTES_PROVIDER?.toLowerCase();
   if (p === "mock") return "mock";
+  if (p === "massive") return "massive";
   return "yahoo";
 }
 
-/**
- * Nguồn tỷ giá: Yahoo (mặc định) hoặc mock; khi Yahoo lỗi → mock_fallback + warning.
- */
 export async function resolveQuotes(): Promise<QuotesApiResponse> {
   const now = Date.now();
   if (cache && now - cache.at < TTL_MS) {
@@ -38,13 +37,13 @@ export async function resolveQuotes(): Promise<QuotesApiResponse> {
     return payload;
   }
 
+  const fetcher =
+    provider === "massive" ? fetchMassiveQuotes : fetchYahooQuotes;
+  const source = provider === "massive" ? ("massive" as const) : ("yahoo" as const);
+
   try {
-    const quotes = await fetchYahooQuotes();
-    const payload: QuotesApiResponse = {
-      updatedAt,
-      quotes,
-      source: "yahoo",
-    };
+    const quotes = await fetcher();
+    const payload: QuotesApiResponse = { updatedAt, quotes, source };
     cache = { at: now, payload };
     return payload;
   } catch (e) {
@@ -53,7 +52,7 @@ export async function resolveQuotes(): Promise<QuotesApiResponse> {
       updatedAt,
       quotes: buildQuotes(tickFromTime()),
       source: "mock_fallback",
-      warning: `Không lấy được Yahoo Finance (${message}). Đang hiển thị dữ liệu mô phỏng.`,
+      warning: `${source} error (${message}). Showing simulated data.`,
     };
     cache = { at: now, payload };
     return payload;

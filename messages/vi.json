@@ -161,6 +161,7 @@
     "title": "Heatmap — sức mạnh tiền tệ",
     "description": "Sức mạnh tương đối giữa 8 đồng tiền chính, tính từ dữ liệu tỷ giá {source}. Giá trị gần 1 = base mạnh, gần 0 = base yếu.",
     "source_yahoo": "Yahoo Finance (live)",
+    "source_massive": "Massive API (live)",
     "source_mock": "Dữ liệu mô phỏng"
   },
   "academy": {

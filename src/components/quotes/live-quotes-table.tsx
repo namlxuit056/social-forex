@@ -81,13 +81,15 @@ export function LiveQuotesTable({
   };
 
   const sourceLabel =
-    source === "yahoo"
-      ? "Yahoo Finance"
-      : source === "mock"
-        ? "Mô phỏng (mock)"
-        : source === "mock_fallback"
-          ? "Mô phỏng (fallback)"
-          : "—";
+    source === "massive"
+      ? "Massive API"
+      : source === "yahoo"
+        ? "Yahoo Finance"
+        : source === "mock"
+          ? "Mock"
+          : source === "mock_fallback"
+            ? "Mock (fallback)"
+            : "—";
 
   return (
     <div className="space-y-4">

@@ -161,6 +161,7 @@
     "title": "Heatmap — Currency Strength",
     "description": "Relative strength among 8 major currencies, calculated from {source} data. Values near 1 = strong base, near 0 = weak base.",
     "source_yahoo": "Yahoo Finance (live)",
+    "source_massive": "Massive API (live)",
     "source_mock": "Simulated data"
   },
   "academy": {

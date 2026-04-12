@@ -79,7 +79,13 @@ export default async function HeatmapPage({
   const grid = buildStrengthMatrix(allQuotes);
 
   const sourceLabel =
-    source === "yahoo" ? t("source_yahoo") : source === "mock" ? t("source_mock") : source;
+    source === "massive"
+      ? t("source_massive")
+      : source === "yahoo"
+        ? t("source_yahoo")
+        : source === "mock" || source === "mock_fallback"
+          ? t("source_mock")
+          : source;
 
   return (
     <div className="space-y-8">

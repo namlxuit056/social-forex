@@ -1,6 +1,8 @@
 import { QUOTE_DEFINITIONS } from "@/lib/quotes/definitions";
 import type { QuoteRow } from "@/lib/quotes/types";
-import yahooFinance from "yahoo-finance2";
+import YahooFinance from "yahoo-finance2";
+
+const yahooFinance = new YahooFinance();
 
 function decimalsFor(def: (typeof QUOTE_DEFINITIONS)[0], mid: number) {
   if (def.group === "crypto") return 2;
@@ -26,13 +28,11 @@ type YahooQuote = {
   regularMarketChangePercent?: number;
 };
 
-/**
- * Lấy giá từ Yahoo Finance (yahoo-finance2). Có thể throw nếu mạng/Yahoo lỗi.
- */
 export async function fetchYahooQuotes(): Promise<QuoteRow[]> {
   const ids = QUOTE_DEFINITIONS.map((d) => d.yahoo);
   const raw = await yahooFinance.quote(ids);
-  const list: YahooQuote[] = Array.isArray(raw) ? raw : [raw as YahooQuote];
+  const arr = Array.isArray(raw) ? raw : [raw];
+  const list = arr as unknown as YahooQuote[];
 
   const byYahoo = new Map<string, YahooQuote>();
   for (const q of list) {

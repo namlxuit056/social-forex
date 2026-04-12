@@ -9,7 +9,7 @@ export type QuoteRow = {
   changePct: number;
 };
 
-export type QuotesSource = "yahoo" | "mock" | "mock_fallback";
+export type QuotesSource = "yahoo" | "massive" | "mock" | "mock_fallback";
 
 export type QuotesApiResponse = {
   updatedAt: string;

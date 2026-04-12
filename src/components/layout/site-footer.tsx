@@ -42,7 +42,7 @@ export async function SiteFooter() {
           </p>
           <p
             className="mt-1"
-            dangerouslySetInnerHTML={{ __html: tf("disclaimerBody") }}
+            dangerouslySetInnerHTML={{ __html: tf.raw("disclaimerBody") }}
           />
         </div>
 
