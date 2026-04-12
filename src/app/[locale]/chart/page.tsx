@@ -1,5 +1,6 @@
+import { Suspense } from "react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { TradingViewEmbed } from "@/components/charts/tradingview-embed";
+import { ChartContainer } from "@/components/charts/chart-container";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
 import { pageCtas } from "@/lib/page-cta-presets";
 
@@ -24,15 +25,22 @@ export default async function ChartPage({
   const t = await getTranslations("chart");
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div>
         <h1 className="font-heading text-2xl font-semibold text-foreground">
           {t("title")}
         </h1>
-        <p className="mt-2 text-muted-foreground">{t("description")}</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {t("description")}
+        </p>
       </div>
-      <TradingViewEmbed />
-      <PageCtaRow heading="→" items={[...pageCtas.trading, ...pageCtas.explore]} />
+      <Suspense>
+        <ChartContainer locale={locale} />
+      </Suspense>
+      <PageCtaRow
+        heading="→"
+        items={[...pageCtas.trading, ...pageCtas.explore]}
+      />
     </div>
   );
 }

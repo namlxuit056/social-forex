@@ -83,7 +83,20 @@
   },
   "chart": {
     "title": "Biểu đồ TradingView",
-    "description": "Phân tích kỹ thuật trực tiếp — chọn symbol, khung thời gian và indicator qua giao diện TradingView."
+    "description": "Phân tích kỹ thuật trực tiếp — chọn symbol, khung thời gian và indicator qua giao diện TradingView.",
+    "favorites": "Yêu thích",
+    "allPairs": "Tất cả",
+    "addFavorite": "Thêm vào yêu thích",
+    "removeFavorite": "Bỏ yêu thích",
+    "loginToSave": "Đăng nhập để lưu yêu thích",
+    "noFavorites": "Chưa có cặp yêu thích — nhấn ★ để thêm",
+    "maxFavorites": "Tối đa {max} cặp yêu thích",
+    "major": "Chính",
+    "minor": "Phụ",
+    "metal": "Kim loại",
+    "energy": "Năng lượng",
+    "crypto": "Crypto",
+    "selectPair": "Chọn cặp giao dịch"
   },
   "forum": {
     "title": "Diễn đàn",

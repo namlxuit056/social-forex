@@ -51,6 +51,7 @@ model User {
   sentMessages     DirectMessage[] @relation("SentMessages")
   receivedMessages DirectMessage[] @relation("ReceivedMessages")
   forumReports     ForumReport[]   @relation("ForumReporter")
+  favoriteSymbols  UserFavoriteSymbol[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -210,6 +211,19 @@ model VipAuditLog {
   createdAt DateTime @default(now())
 
   @@index([userId, createdAt])
+}
+
+model UserFavoriteSymbol {
+  id        String   @id @default(cuid())
+  userId    String
+  symbol    String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, symbol])
+  @@index([userId, sortOrder])
 }
 
 /// Bản ghi singleton — lần đồng bộ lịch kinh tế (FMP) gần nhất.

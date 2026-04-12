@@ -83,7 +83,20 @@
   },
   "chart": {
     "title": "TradingView Chart",
-    "description": "Live technical analysis — choose symbol, timeframe and indicators via the TradingView interface."
+    "description": "Live technical analysis — choose symbol, timeframe and indicators via the TradingView interface.",
+    "favorites": "Favorites",
+    "allPairs": "All pairs",
+    "addFavorite": "Add to favorites",
+    "removeFavorite": "Remove from favorites",
+    "loginToSave": "Sign in to save favorites",
+    "noFavorites": "No favorites yet — tap ★ to add",
+    "maxFavorites": "Maximum {max} favorites",
+    "major": "Major",
+    "minor": "Minor",
+    "metal": "Metal",
+    "energy": "Energy",
+    "crypto": "Crypto",
+    "selectPair": "Select trading pair"
   },
   "forum": {
     "title": "Forum",
