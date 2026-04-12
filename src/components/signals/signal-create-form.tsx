@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import { useActionState } from "react";
 import { useTranslations } from "next-intl";
 import { Loader2, X } from "lucide-react";
+import { Link, usePathname } from "@/i18n/navigation";
 import { createSignal } from "@/actions/signals";
 import { effectiveImageMime, SIGNAL_IMAGE_LIMITS } from "@/lib/signal-images";
 import { Button } from "@/components/ui/button";
@@ -25,11 +26,17 @@ type PendingSlot = { id: string; previewUrl: string };
 
 export function SignalCreateForm() {
   const t = useTranslations("signals");
+  const pathname = usePathname();
   const [createState, createAction] = useActionState(createSignal, createInitial);
   const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
   const [pendingSlots, setPendingSlots] = useState<PendingSlot[]>([]);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadNeedsSignIn, setUploadNeedsSignIn] = useState(false);
+
+  const signInForUploadHref = `/auth/signin?callbackUrl=${encodeURIComponent(
+    pathname?.startsWith("/") ? pathname : "/signals",
+  )}`;
 
   const removeUrl = useCallback((url: string) => {
     setUploadedUrls((prev) => prev.filter((u) => u !== url));
@@ -57,6 +64,7 @@ export function SignalCreateForm() {
       if (snapshot.length === 0) return;
 
       setUploadError(null);
+      setUploadNeedsSignIn(false);
       const remaining =
         SIGNAL_IMAGE_LIMITS.MAX_IMAGES - uploadedUrls.length - pendingSlots.length;
       if (remaining <= 0) return;
@@ -65,10 +73,12 @@ export function SignalCreateForm() {
       const valid: File[] = [];
       for (const file of rawList) {
         if (!effectiveImageMime(file)) {
+          setUploadNeedsSignIn(false);
           setUploadError(t("imageInvalidType"));
           return;
         }
         if (file.size > SIGNAL_IMAGE_LIMITS.MAX_BYTES) {
+          setUploadNeedsSignIn(false);
           setUploadError(t("imageTooLarge"));
           return;
         }
@@ -108,18 +118,21 @@ export function SignalCreateForm() {
           }
 
           if (res.status === 401) {
+            setUploadNeedsSignIn(true);
             setUploadError(t("imageUploadNeedLogin"));
             revokeBatchFromIndex(batch, i);
             break;
           }
 
           if (res.status === 503 && data.error === "not_configured") {
+            setUploadNeedsSignIn(false);
             setUploadError(t("imagesNotConfigured"));
             revokeBatchFromIndex(batch, i);
             break;
           }
 
           if (!res.ok) {
+            setUploadNeedsSignIn(false);
             const hint =
               data.message ??
               (data.error === "rate_limited"
@@ -140,6 +153,7 @@ export function SignalCreateForm() {
           revokeAndRemoveSlot(slot);
         }
       } catch {
+        setUploadNeedsSignIn(false);
         setUploadError(t("imageUploadFailed"));
         setPendingSlots((prev) => {
           const batchIds = new Set(batch.map((b) => b.id));
@@ -205,7 +219,20 @@ export function SignalCreateForm() {
             />
           </div>
           {uploadError && (
-            <p className="mt-2 text-sm text-destructive">{uploadError}</p>
+            <p className="mt-2 text-sm text-destructive">
+              {uploadError}
+              {uploadNeedsSignIn ? (
+                <>
+                  {" "}
+                  <Link
+                    href={signInForUploadHref}
+                    className="font-medium underline underline-offset-2 hover:text-destructive/90"
+                  >
+                    {t("imageUploadSignInLink")}
+                  </Link>
+                </>
+              ) : null}
+            </p>
           )}
           {(uploadedUrls.length > 0 || pendingSlots.length > 0) && (
             <ul className="mt-3 flex flex-wrap gap-2">
