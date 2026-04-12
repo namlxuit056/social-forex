@@ -25,7 +25,7 @@ export function AiAnalysisPanel({ symbol }: Props) {
   const [data, setData] = useState<AiSuggestResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [cooldown, setCooldown] = useState(0);
-  const timerRef = useRef<ReturnType<typeof setInterval>>();
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     setData(null);
@@ -44,7 +44,7 @@ export function AiAnalysisPanel({ symbol }: Props) {
     timerRef.current = setInterval(() => {
       setCooldown((prev) => {
         if (prev <= 1) {
-          clearInterval(timerRef.current);
+          if (timerRef.current) clearInterval(timerRef.current);
           return 0;
         }
         return prev - 1;
