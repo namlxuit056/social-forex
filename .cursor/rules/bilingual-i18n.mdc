@@ -1,0 +1,30 @@
+---
+description: Bắt buộc song ngữ (en + vi) cho mọi copy UI và lỗi user-facing — next-intl + messages
+alwaysApply: true
+---
+
+# Song ngữ (bắt buộc)
+
+Dự án dùng **`next-intl`** với locale **`en`** và **`vi`**. Mỗi lần implement hoặc sửa copy hiển thị cho người dùng, **luôn làm đủ hai ngôn ngữ trong cùng một thay đổi** — không ship chỉ một file messages.
+
+## Quy tắc
+
+1. **Không** hardcode chuỗi UI (tiêu đề, nút, placeholder, empty state, toast, `confirm`, metadata `title`/`description`, v.v.) trực tiếp trong component/page nếu chuỗi đó là nội dung sản phẩm. Dùng `useTranslations` / `getTranslations` và key trong JSON.
+2. **Luôn** cập nhật **cả hai** file:
+   - `messages/en.json`
+   - `messages/vi.json`  
+   Cùng namespace + cùng key; bản dịch tiếng Anh trong `en`, tiếng Việt trong `vi`.
+3. **API / Server Actions / Route Handlers** trả lỗi cho client: dùng **error key** (vd. `errors.*`) + `pickErrors` / `getTranslations("errors")` theo locale request — không trả chuỗi tiếng Việt cố định cho user `en`.
+4. **Metadata SEO**: `generateMetadata` phải lấy text từ translations theo `locale`, không để một ngôn ngữ cố định cho mọi locale.
+5. **Đặt key**: theo cấu trúc namespace hiện có (`common`, `forum`, `auth`, `admin`, …); tên key mô tả ngắn (`searchNoResultsTitle`), tránh trùng ý nghĩa khác nhau cùng key.
+
+## Ngoại lệ (hiếm)
+
+- Comment trong code, tên biến nội bộ, log kỹ thuật (không hiển thị user).
+- `global-error` hoặc boundary không có `IntlProvider`: giữ một bản fallback đã thống nhất trong repo (vd. copy từ `messages/en.json`).
+
+## Checklist trước khi coi xong task
+
+- [ ] Mọi chuỗi mới/đổi có trong **`en.json` và `vi.json`**.
+- [ ] Đã chạy **`npx tsc --noEmit`** (và test/lint nếu task yêu cầu).
+- [ ] Không còn literal tiếng Việt trong nhánh `/en` hoặc literal tiếng Anh độc quyền trong nhánh `/vi` cho cùng một màn hình (trừ nội dung cố ý giữ nguyên như brand/symbol).
