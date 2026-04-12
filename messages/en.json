@@ -155,7 +155,8 @@
     "imageInvalidType": "Only JPEG, PNG or WebP is allowed.",
     "imageTooLarge": "Each image must be at most 2 MB.",
     "imageUploadRateLimited": "Too many uploads. Wait about a minute and try again.",
-    "imageUploadNeedLogin": "Session expired — refresh the page and sign in again to upload images.",
+    "imageUploadNeedLogin": "You need to be signed in to upload images.",
+    "imageUploadSignInLink": "Sign in",
     "removeImage": "Remove image"
   },
   "dashboard": {
