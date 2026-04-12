@@ -80,3 +80,33 @@
 ---
 
 *Tất cả 5 giai đoạn A → E hoàn thành. Không còn dữ liệu ảo trên sản phẩm.*
+
+## Giai đoạn F — Tăng trưởng & bền vững (backlog)
+
+*Kế hoạch chi tiết & sprint: `docs/specs.md` → **Roadmap — Bước tiếp theo**.*
+
+### F1 — Signal & social
+
+- [ ] Signal list: sort (mới nhất / symbol / tier) + pagination hoặc “Load more” + skeleton.
+- [ ] Trang chi tiết signal: rà soát comment/reaction/report, metadata SEO.
+- [ ] Ảnh signal P2: xóa Blob khi xóa signal; (optional) báo cáo ảnh.
+
+### F2 — Monetization & tin cậy
+
+- [ ] Thanh toán VIP (sandbox → production) + webhook `vipUntil`.
+- [ ] Email xác nhận / nhắc VIP (optional).
+
+### F3 — Vận hành
+
+- [ ] Error tracking (vd. Sentry) + alert deploy/build.
+- [ ] Staging + checklist smoke.
+- [ ] PageCtaRow: heading có nghĩa (i18n), bỏ “→” vô nghĩa.
+
+### F4 — Nội dung
+
+- [ ] Webinar: một buổi thật hoặc embed + lịch.
+- [ ] Academy: internal link từ signals/forum; bài mới theo chủ đề.
+
+### Đã ship gần đây (ngoài TODO cũ)
+
+- [x] Signal Room P1: form thu gọn, filter tier/symbol, card hierarchy, status màu, `AUTH_URL`/cookie production (upload).

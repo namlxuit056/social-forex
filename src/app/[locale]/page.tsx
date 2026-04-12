@@ -1,7 +1,8 @@
-import { BarChart3, MessageSquare, Shield } from "lucide-react";
+import { BarChart3, ExternalLink, MessageSquare, Shield } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { buttonVariants } from "@/components/ui/button";
+import { getExnessAffiliateUrl } from "@/lib/exness-affiliate";
 import { cn } from "@/lib/utils";
 
 const blocks = [
@@ -36,6 +37,7 @@ export default async function HomePage({
   const tHome = await getTranslations("home");
   const tNav = await getTranslations("nav");
   const tCommon = await getTranslations("common");
+  const exnessAffiliateUrl = getExnessAffiliateUrl();
 
   return (
     <div className="space-y-16">
@@ -78,6 +80,20 @@ export default async function HomePage({
           >
             {tCommon("dashboard")}
           </Link>
+        </div>
+        <div className="mt-10 flex justify-center px-4">
+          <a
+            href={exnessAffiliateUrl}
+            target="_blank"
+            rel="noopener noreferrer sponsored nofollow"
+            className={cn(
+              buttonVariants({ variant: "default", size: "lg" }),
+              "inline-flex items-center gap-2 shadow-md shadow-primary/25 ring-2 ring-primary/35 transition-[box-shadow,transform] hover:shadow-lg hover:shadow-primary/30 hover:ring-primary/50",
+            )}
+          >
+            <ExternalLink className="size-4 shrink-0" aria-hidden />
+            {tHome("exness_cta")}
+          </a>
         </div>
       </section>
 

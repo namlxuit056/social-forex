@@ -1,6 +1,6 @@
 # Kế hoạch hoàn thiện Social Forex (PM / BA)
 
-**Phiên bản:** 1.0 · **Cập nhật:** 2026-04-11
+**Phiên bản:** 1.1 · **Cập nhật:** 2026-04-12
 
 ## 1. Mục tiêu sản phẩm
 
@@ -49,6 +49,17 @@
 
 - Observability (logging, error tracking), backup DB, CI (lint + build), staging environment.
 - SEO cho academy/resources; Open Graph cho chia sẻ link.
+
+### Giai đoạn E — “Nội dung thật” (đã hoàn thành — xem `TODO.md`)
+
+- Dashboard, sentiment, heatmap, academy, resources, brokers, webinar placeholder, homepage, profile — xóa dữ liệu ảo; build/lint/test xanh.
+
+### Giai đoạn F — “Tăng trưởng & bền vững” (bước tiếp theo — chi tiết `docs/specs.md` mục *Roadmap — Bước tiếp theo*)
+
+- **F1 Signal/social:** list P2 (sort, pagination/load more), polish trang chi tiết signal, lifecycle ảnh Blob (P2).
+- **F2 Monetization:** thanh toán VIP + webhook; email thông báo (optional).
+- **F3 Ops:** Sentry, staging smoke, copy PageCtaRow có nghĩa.
+- **F4 Nội dung:** webinar thật, internal link academy/SEO.
 
 ## 5. Phân vai trò (UI / Dev / PM)
 

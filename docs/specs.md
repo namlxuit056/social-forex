@@ -1,3 +1,45 @@
+# Spec — Trang chủ: liên kết affiliate Exness
+
+## Mục tiêu
+
+Là **visitor** vào trang chủ, tôi muốn **một lối rõ ràng** để mở tài khoản / đăng ký qua **Exness** (affiliate), để **chuyển đổi** từ nội dung cộng đồng sang broker phù hợp mà không làm lệch **CTA chính** (quotes, academy, dashboard).
+
+## Liên kết affiliate (mặc định)
+
+- **URL:** `https://one.exnessonelink.com/a/nmm9gkpy67`
+- **Cấu hình (khuyến nghị):** biến môi trường `NEXT_PUBLIC_EXNESS_AFFILIATE_URL` trỏ tới URL trên; fallback trong code cùng giá trị để preview/local vẫn hoạt động nếu chưa set env.
+
+## Phạm vi MVP (vị trí — quyết định PM)
+
+1. **Chỉ trang chủ** `src/app/[locale]/page.tsx` — không thay thế trang `/brokers` (so sánh đa sàn vẫn độc lập).
+2. **Sau khối CTA hero** (ba nút nội bộ: quotes, academy, dashboard): thêm **một** hành động phụ dạng **text link** hoặc **nút outline** (ví dụ “Mở tài khoản Exness” / “Trade with Exness”) mở **tab mới**.
+3. **Thuộc tính link:** `target="_blank"`, `rel="noopener noreferrer sponsored"` (và `nofollow` nếu team SEO chọn — ghi chú trong implementation).
+
+## Minh bạch & rủi ro
+
+- **Disclosure ngắn** (EN + VI) ngay gần CTA: nội dung kiểu *liên kết affiliate, chúng tôi có thể nhận hoa hồng khi bạn đăng ký* — copy cụ thể do UX/i18n chốt, tránh giả dạng trang chính thức của Exness.
+- **Không** auto-redirect; user chủ động click.
+
+## Ngoài phạm vi (P2)
+
+- Đồng bộ dòng Exness trong `/brokers` với cùng affiliate URL + badge “Partner”.
+- Tracking UTM bổ sung (nếu Exness cho phép) — chỉ khi có quy ước analytics.
+
+## Tiêu chí chấp nhận
+
+- [ ] Locale `en` và `vi` đều hiển thị CTA + disclosure; không chuỗi cứng tiếng Anh chỉ một phía.
+- [ ] Click đi đúng URL affiliate (ưu tiên từ env nếu đã cấu hình).
+- [ ] Mở tab mới; `rel` phù hợp affiliate / bảo mật tab.
+- [ ] Trợ năng: nhãn link có nghĩa cho screen reader (aria-label hoặc text đủ rõ).
+- [ ] CTA **không** trộn visual với ba nút primary — thứ bậc: nội dung sản phẩm trước, broker sau.
+
+## Handoff
+
+- **UX/UI:** Cập nhật `docs/design-system.md` nếu cần pattern “external affiliate CTA” (kích thước, màu outline, khoảng cách dưới hero).
+- **Senior Dev:** Implement theo spec + `.env.example` (dòng `NEXT_PUBLIC_EXNESS_AFFILIATE_URL`).
+
+---
+
 # Spec — Lịch kinh tế API (Giai đoạn B)
 
 ## User story
@@ -137,12 +179,12 @@ Là **trader đăng signal**, tôi muốn **đính kèm một hoặc vài ảnh*
 - Card **compact** trên mobile: một hàng symbol + direction + tier; tap expand chi tiết.
 - Empty state phân biệt “chưa có signal nào” vs “lọc không có kết quả”.
 
-## Tiêu chí chấp nhận (P1)
+## Tiêu chí chấp nhận (P1) — đã triển khai
 
-- [ ] Trên viewport mobile (≤390px), **không** cần scroll quá 2 viewport mới thấy **ít nhất một** dòng list (khi form thu gọn).
-- [ ] Entry / SL / TP (khi không masked) dùng **cùng alignment** (cột hoặc grid), font mono, đọc được với số dài.
-- [ ] Link “View detail” có **aria-label** / copy rõ (đã có i18n) và vùng bấm ≥ 44×44px tương đương.
-- [ ] Banner VIP + masked card không mâu thuẫn copy (đã kiểm tra EN/VI).
+- [x] Trên viewport mobile (≤390px), **không** cần scroll quá 2 viewport mới thấy **ít nhất một** dòng list (khi form thu gọn).
+- [x] Entry / SL / TP (khi không masked) dùng **cùng alignment** (cột hoặc grid), font mono, đọc được với số dài.
+- [x] Link “View detail” có **aria-label** / copy rõ (đã có i18n) và vùng bấm ≥ 44×44px tương đương.
+- [x] Banner VIP + masked card không mâu thuẫn copy (đã kiểm tra EN/VI).
 
 ## Rủi ro & phụ thuộc
 
@@ -154,3 +196,69 @@ Là **trader đăng signal**, tôi muốn **đính kèm một hoặc vài ảnh*
 
 - **UX/UI:** cập nhật khung layout & component trong `docs/design-system.md` (mục Signal Room).
 - **Dev:** implement P1 theo thứ tự: collapse form → list visual hierarchy → filter tối thiểu (tier hoặc symbol).
+
+---
+
+# Roadmap — Bước tiếp theo (PM / BA)
+
+**Bối cảnh:** Giai đoạn A→E (TODO.md) đã đóng; Signal Room **P1** (collapse form, filter, card hierarchy, status màu) đã code. Tài liệu này ưu tiên **3–6 sprint** tới.
+
+## 1. Mục tiêu đo lường (gợi ý)
+
+| Chỉ số | Vì sao |
+|--------|--------|
+| Tỷ lệ hoàn thành đăng signal (đã login) | Form thu gọn có thể làm bước “mở form” tăng — cần baseline. |
+| Thời gian đến “xem chi tiết” từ list | Đo gián tiếp qua click link / depth. |
+| Lỗi upload ảnh (401/503) trên production | Đã có `AUTH_URL` / secure cookie — theo dõi sau deploy. |
+
+*Cần công cụ: analytics sự kiện (hoặc log tổng hợp) — hạng mục Giai đoạn F.*
+
+## 2. Giai đoạn F — “Tăng trưởng & bền vững” (ưu tiên đề xuất)
+
+### F1 — Signal & social (2–3 sprint)
+
+| # | Hạng mục | Mô tả ngắn | Phụ thuộc |
+|---|----------|------------|------------|
+| F1.1 | **Signal list P2** | Sort (mới nhất / symbol / tier), pagination hoặc “Load more”, skeleton loading. | Spec P2 đã có trong mục Signal Room. |
+| F1.2 | **Trang chi tiết signal** | Rà soát luồng comment / reaction / báo cáo: empty state, rate limit message, SEO `metadata`. | DB + actions hiện có. |
+| F1.3 | **Ảnh signal (P2)** | Lifecycle: xóa object Blob khi xóa signal; (tuỳ chọn) report ảnh. | Vercel Blob API, moderation policy. |
+
+### F2 — Monetization & tin cậy (song song, 2–4 tuần)
+
+| # | Hạng mục | Mô tả ngắn | Phụ thuộc |
+|---|----------|------------|------------|
+| F2.1 | **Thanh toán VIP** | Stripe/PayPal (hoặc cổng VN) + webhook cập nhật `vipUntil`; trang “thank you / lỗi”. | Pháp lý, chính sách hoàn tiền. |
+| F2.2 | **Email / thông báo** | Xác nhận đăng ký, VIP sắp hết hạn (optional). | SMTP hoặc Resend/SendGrid. |
+
+### F3 — Vận hành & chất lượng (1–2 sprint)
+
+| # | Hạng mục | Mô tả ngắn | Phụ thuộc |
+|---|----------|------------|------------|
+| F3.1 | **Observability** | Sentry (hoặc tương đương) cho server + client; alert lỗi build/deploy. | Tài khoản vendor. |
+| F3.2 | **Staging** | Nhánh preview + DB Neon branch; checklist smoke trước production. | Vercel + env. |
+| F3.3 | **PageCtaRow / copy** | Thay heading “→” bằng copy có nghĩa (i18n) trên các trang dùng preset. | UX copy. |
+
+### F4 — Nội dung & giữ chân
+
+| # | Hạng mục | Mô tả ngắn |
+|---|----------|------------|
+| F4.1 | **Webinar** | Một slot thật (YouTube/Vimeo embed + lịch) hoặc đăng ký chờ. |
+| F4.2 | **Academy / SEO** | Internal link từ signals/forum về bài học liên quan; bài mới theo chủ đề. |
+
+## 3. Thứ tự đề xuất (sprint)
+
+1. **Sprint 1:** F1.1 (pagination/sort) + F3.3 (copy nhỏ, nhanh).  
+2. **Sprint 2:** F1.2 (detail polish) + F3.1 (Sentry cơ bản).  
+3. **Sprint 3:** F2.1 (bắt đầu thanh toán — spike + sandbox) **hoặc** F1.3 (Blob lifecycle) tùy ưu tiên doanh thu vs kỹ thuật.  
+4. **Sprint 4+:** F2.2, F3.2, F4.x theo nguồn lực.
+
+## 4. Rủi ro cần quyết định PM
+
+- **Thu phí VIP tại VN:** cần xác nhận pháp lý trước khi commit F2.1.  
+- **Chi phí Blob + bandwidth** khi traffic tăng: F1.1 giảm số card một lần; F1.3 tránh orphan files.
+
+## 5. Handoff
+
+- **UX/UI:** wireframe sort + pagination (mobile-first); màn hình thanh toán VIP.  
+- **Senior Dev:** spike payment provider; estimate F1.1 query + cursor pagination.  
+- **PM:** tạo issue GitHub theo bảng F1–F4; gắn nhãn `priority` / `phase-F`.
