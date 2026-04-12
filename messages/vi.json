@@ -268,6 +268,31 @@
     "noAccess": "Không có quyền truy cập",
     "noAccessHint": "Trang này yêu cầu quyền ADMIN."
   },
+  "ai": {
+    "analyzeButton": "Phân tích AI",
+    "analyzing": "Đang phân tích...",
+    "title": "Đề xuất AI",
+    "direction": "Hướng",
+    "long": "LONG (Mua)",
+    "short": "SHORT (Bán)",
+    "entry": "Giá vào",
+    "stopLoss": "Cắt lỗ (SL)",
+    "takeProfit": "Chốt lời (TP)",
+    "confidence": "Độ tin cậy",
+    "reasoning": "Phân tích",
+    "support": "Hỗ trợ",
+    "resistance": "Kháng cự",
+    "keyLevels": "Mức giá quan trọng",
+    "postSignal": "Đăng tín hiệu từ AI",
+    "disclaimer": "Đề xuất AI chỉ mang tính tham khảo, không phải tư vấn đầu tư.",
+    "unavailable": "AI chưa được kích hoạt",
+    "unavailableHint": "Tính năng phân tích AI cần cấu hình OPENAI_API_KEY.",
+    "vipOnly": "VIP để phân tích tất cả cặp",
+    "freeHint": "Bản Free chỉ hỗ trợ phân tích EURUSD. Nâng VIP để mở khóa tất cả cặp tiền.",
+    "rateLimited": "Đã đạt giới hạn",
+    "retryIn": "Thử lại sau {seconds}s",
+    "error": "Không thể phân tích lúc này"
+  },
   "language": {
     "vi": "Tiếng Việt",
     "en": "English"

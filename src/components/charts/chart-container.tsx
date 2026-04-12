@@ -6,6 +6,7 @@ import { SessionProvider } from "next-auth/react";
 import { QUOTE_BY_SYMBOL } from "@/lib/quotes/definitions";
 import { TradingViewEmbed } from "@/components/charts/tradingview-embed";
 import { ChartWatchlist } from "@/components/charts/chart-watchlist";
+import { AiAnalysisPanel } from "@/components/ai/ai-analysis-panel";
 
 const DEFAULT_SYMBOL = "EURUSD";
 
@@ -32,11 +33,14 @@ function ChartContainerInner({ locale }: Props) {
   );
 
   return (
-    <div className="flex flex-col gap-3 lg:flex-row lg:gap-4">
-      <ChartWatchlist activeSymbol={symbol} onSelect={handleSelect} />
-      <div className="flex-1">
-        <TradingViewEmbed symbol={symbol} locale={tvLocale} />
+    <div className="space-y-4">
+      <div className="flex flex-col gap-3 lg:flex-row lg:gap-4">
+        <ChartWatchlist activeSymbol={symbol} onSelect={handleSelect} />
+        <div className="flex-1">
+          <TradingViewEmbed symbol={symbol} locale={tvLocale} />
+        </div>
       </div>
+      <AiAnalysisPanel symbol={symbol} />
     </div>
   );
 }

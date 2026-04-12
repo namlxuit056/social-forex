@@ -268,6 +268,31 @@
     "noAccess": "Access denied",
     "noAccessHint": "This page requires ADMIN permission."
   },
+  "ai": {
+    "analyzeButton": "AI Analysis",
+    "analyzing": "Analyzing...",
+    "title": "AI Suggestion",
+    "direction": "Direction",
+    "long": "LONG (Buy)",
+    "short": "SHORT (Sell)",
+    "entry": "Entry price",
+    "stopLoss": "Stop Loss (SL)",
+    "takeProfit": "Take Profit (TP)",
+    "confidence": "Confidence",
+    "reasoning": "Analysis",
+    "support": "Support",
+    "resistance": "Resistance",
+    "keyLevels": "Key levels",
+    "postSignal": "Post signal from AI",
+    "disclaimer": "AI suggestions are for reference only, not investment advice.",
+    "unavailable": "AI not available",
+    "unavailableHint": "AI analysis requires OPENAI_API_KEY configuration.",
+    "vipOnly": "VIP for all pairs",
+    "freeHint": "Free plan only supports EURUSD analysis. Upgrade to VIP to unlock all pairs.",
+    "rateLimited": "Rate limited",
+    "retryIn": "Retry in {seconds}s",
+    "error": "Unable to analyze right now"
+  },
   "language": {
     "vi": "Tiếng Việt",
     "en": "English"
