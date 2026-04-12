@@ -3,31 +3,33 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
+import { MobileNav } from "@/components/layout/mobile-nav";
+import { SiteLogo } from "@/components/layout/site-logo";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const navKeys = [
+const primaryNavKeys = [
   { href: "/quotes", key: "quotes" },
   { href: "/calendar", key: "calendar" },
-  { href: "/tools", key: "tools" },
   { href: "/chart", key: "chart" },
-  { href: "/forum", key: "forum" },
-  { href: "/forum/search", key: "searchTopics" },
+  { href: "/tools", key: "tools" },
   { href: "/signals", key: "signals" },
-  { href: "/leaderboard", key: "leaderboard" },
-  { href: "/messages", key: "messages" },
-  { href: "/sentiment", key: "sentiment" },
+  { href: "/forum", key: "forum" },
+] as const;
+
+const secondaryNavKeys = [
   { href: "/heatmap", key: "heatmap" },
+  { href: "/sentiment", key: "sentiment" },
+  { href: "/leaderboard", key: "leaderboard" },
   { href: "/backtest", key: "backtest" },
   { href: "/academy", key: "academy" },
   { href: "/webinar", key: "webinar" },
   { href: "/resources", key: "resources" },
   { href: "/brokers", key: "brokers" },
+  { href: "/messages", key: "messages" },
   { href: "/partners", key: "partners" },
+  { href: "/forum/search", key: "searchTopics" },
 ] as const;
-
-const navLinkClass =
-  "rounded-md px-2 py-1 text-muted-foreground transition hover:bg-muted hover:text-foreground";
 
 export async function SiteHeader() {
   const session = await auth();
@@ -35,41 +37,56 @@ export async function SiteHeader() {
   const tc = await getTranslations("common");
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur-md">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3">
-        <div className="flex items-center gap-8">
-          <Link
-            href="/"
-            className="font-semibold tracking-tight text-primary transition hover:text-primary/90"
-          >
-            Social Forex
-          </Link>
-          <nav className="hidden items-center gap-1 text-sm lg:flex">
-            {navKeys.map((item) => (
-              <Link key={item.href} href={item.href} className={navLinkClass}>
-                {t(item.key)}
-              </Link>
-            ))}
-          </nav>
-        </div>
-        <div className="flex flex-wrap items-center gap-2 text-sm">
+    <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur-xl">
+      {/* Main bar */}
+      <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-2.5">
+        {/* Logo + Brand */}
+        <Link
+          href="/"
+          className="flex shrink-0 items-center gap-2.5 transition-opacity hover:opacity-80"
+        >
+          <SiteLogo />
+          <span className="text-base font-bold tracking-tight text-foreground">
+            Social<span className="text-primary">Forex</span>
+          </span>
+        </Link>
+
+        {/* Desktop primary nav */}
+        <nav className="ml-2 hidden items-center gap-0.5 lg:flex">
+          {primaryNavKeys.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="rounded-md px-2.5 py-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            >
+              {t(item.key)}
+            </Link>
+          ))}
+        </nav>
+
+        {/* Spacer */}
+        <div className="flex-1" />
+
+        {/* Right actions */}
+        <div className="flex items-center gap-1.5">
           <LanguageSwitcher />
+
           {session?.user ? (
             <>
               <Link
+                href="/profile"
+                className="hidden rounded-md px-2 py-1 text-sm text-foreground/80 transition hover:bg-muted hover:text-foreground sm:inline-flex"
+              >
+                {session.user.name ?? session.user.email}
+              </Link>
+              <Link
                 href="/dashboard"
                 className={cn(
-                  buttonVariants({ variant: "default", size: "sm" }),
-                  "hidden sm:inline-flex",
+                  buttonVariants({ size: "sm" }),
+                  "h-8 text-xs",
                 )}
               >
                 {tc("dashboard")}
-              </Link>
-              <Link
-                href="/profile"
-                className="text-foreground/90 hover:text-foreground"
-              >
-                {session.user.name ?? session.user.email}
               </Link>
               <SignOutButton />
             </>
@@ -77,40 +94,39 @@ export async function SiteHeader() {
             <>
               <Link
                 href="/auth/signin"
-                className="text-muted-foreground hover:text-foreground"
+                className="hidden rounded-md px-2.5 py-1.5 text-sm text-muted-foreground transition hover:bg-muted hover:text-foreground sm:inline-flex"
               >
                 {tc("signIn")}
               </Link>
               <Link
                 href="/auth/register"
-                className={cn(buttonVariants({ size: "sm" }))}
+                className={cn(
+                  buttonVariants({ size: "sm" }),
+                  "h-8 text-xs",
+                )}
               >
                 {tc("signUp")}
               </Link>
             </>
           )}
+
+          <MobileNav />
         </div>
       </div>
-      <div className="border-t border-border/60 px-4 py-2 lg:hidden">
-        <nav className="flex max-w-7xl flex-wrap gap-1 text-xs">
-          {navKeys.map((item) => (
+
+      {/* Desktop secondary nav */}
+      <div className="hidden border-t border-border/40 bg-muted/30 lg:block">
+        <div className="mx-auto flex max-w-7xl items-center gap-0.5 px-4 py-1">
+          {secondaryNavKeys.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="rounded px-2 py-1 text-muted-foreground hover:bg-muted"
+              className="rounded px-2 py-0.5 text-xs text-muted-foreground/80 transition-colors hover:bg-muted hover:text-foreground"
             >
               {t(item.key)}
             </Link>
           ))}
-          {session?.user ? (
-            <Link
-              href="/dashboard"
-              className="rounded px-2 py-1 font-medium text-primary hover:bg-muted"
-            >
-              {tc("dashboard")}
-            </Link>
-          ) : null}
-        </nav>
+        </div>
       </div>
     </header>
   );
