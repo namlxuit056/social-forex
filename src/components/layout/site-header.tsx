@@ -23,6 +23,7 @@ const secondaryNavKeys = [
   { href: "/heatmap", key: "heatmap" },
   { href: "/sentiment", key: "sentiment" },
   { href: "/leaderboard", key: "leaderboard" },
+  { href: "/journal", key: "journal" },
   { href: "/backtest", key: "backtest" },
   { href: "/academy", key: "academy" },
   { href: "/webinar", key: "webinar" },

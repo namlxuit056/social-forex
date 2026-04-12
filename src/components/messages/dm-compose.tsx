@@ -1,6 +1,6 @@
 "use client";
 
-import { useFormState } from "react-dom";
+import { useActionState } from "react";
 import { useEffect, useRef } from "react";
 import { sendDirectMessage } from "@/actions/messages";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 const initial: { error?: string; ok?: boolean } | null = null;
 
 export function DmCompose({ recipientId }: { recipientId: string }) {
-  const [state, formAction] = useFormState(sendDirectMessage, initial);
+  const [state, formAction] = useActionState(sendDirectMessage, initial);
   const ref = useRef<HTMLFormElement>(null);
 
   useEffect(() => {

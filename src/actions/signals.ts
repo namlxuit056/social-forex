@@ -7,6 +7,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { isVipActive } from "@/lib/vip";
 import { rateLimit } from "@/lib/rate-limit";
+import { parseAndValidateImageUrls } from "@/lib/signal-images";
 
 function optNum(fd: FormData, key: string): number | undefined {
   const raw = fd.get(key);
@@ -63,7 +64,13 @@ export async function createSignal(
     };
   }
 
-  await prisma.signal.create({
+  const imageUrlFields = formData.getAll("imageUrls");
+  const imagesParsed = parseAndValidateImageUrls(imageUrlFields);
+  if (!imagesParsed.ok) {
+    return { error: imagesParsed.error };
+  }
+
+  const signal = await prisma.signal.create({
     data: {
       authorId: userId,
       symbol: data.symbol.toUpperCase(),
@@ -73,10 +80,20 @@ export async function createSignal(
       takeProfit: data.takeProfit,
       tier: data.tier,
       notes: data.notes,
+      images:
+        imagesParsed.urls.length > 0
+          ? {
+              create: imagesParsed.urls.map((url, sortOrder) => ({
+                url,
+                sortOrder,
+              })),
+            }
+          : undefined,
     },
   });
 
   revalidatePath("/signals");
+  revalidatePath(`/signals/${signal.id}`);
   revalidatePath("/leaderboard");
   redirect("/signals");
 }
@@ -121,6 +138,7 @@ export async function closeSignal(
   });
 
   revalidatePath("/signals");
+  revalidatePath(`/signals/${signalId}`);
   revalidatePath("/leaderboard");
   return { ok: true };
 }

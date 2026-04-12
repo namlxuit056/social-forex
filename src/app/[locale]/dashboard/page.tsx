@@ -2,6 +2,7 @@ import {
   ArrowRight,
   BarChart3,
   BookOpen,
+  ClipboardList,
   MessageSquare,
   Radio,
   Trophy,
@@ -85,6 +86,7 @@ export default async function DashboardPage({
     { href: "/signals" as const, titleKey: "nav.signals", desc: "—", icon: Radio },
     { href: "/forum" as const, titleKey: "nav.forum", desc: "—", icon: MessageSquare },
     { href: "/leaderboard" as const, titleKey: "nav.leaderboard", desc: "—", icon: Trophy },
+    { href: "/journal" as const, titleKey: "nav.journal", desc: "—", icon: ClipboardList },
     { href: "/academy" as const, titleKey: "nav.academy", desc: "—", icon: BookOpen },
     { href: "/tools" as const, titleKey: "nav.tools", desc: "—", icon: Wrench },
   ];
@@ -196,7 +198,7 @@ export default async function DashboardPage({
                   </div>
                   <div className="min-w-0 flex-1">
                     <CardTitle className="text-base">
-                      {tn(item.titleKey.split(".")[1] as "quotes" | "signals" | "forum" | "leaderboard" | "academy" | "tools")}
+                      {tn(item.titleKey.split(".")[1] as "quotes" | "signals" | "forum" | "leaderboard" | "journal" | "academy" | "tools")}
                     </CardTitle>
                   </div>
                   <ArrowRight className="size-4 shrink-0 text-muted-foreground" aria-hidden />

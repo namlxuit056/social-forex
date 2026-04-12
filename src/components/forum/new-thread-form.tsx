@@ -1,6 +1,6 @@
 "use client";
 
-import { useFormState } from "react-dom";
+import { useActionState } from "react";
 import { createForumThread } from "@/actions/forum";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 const initial: { error?: string } | null = null;
 
 export function NewThreadForm({ categorySlug }: { categorySlug: string }) {
-  const [state, formAction] = useFormState(createForumThread, initial);
+  const [state, formAction] = useActionState(createForumThread, initial);
 
   return (
     <form action={formAction} className="space-y-4">

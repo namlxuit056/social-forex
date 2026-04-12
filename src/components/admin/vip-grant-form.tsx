@@ -1,6 +1,6 @@
 "use client";
 
-import { useFormState } from "react-dom";
+import { useActionState } from "react";
 import { grantVip } from "@/actions/admin-vip";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 const initial: { error?: string; ok?: boolean } | null = null;
 
 export function VipGrantForm() {
-  const [state, formAction] = useFormState(grantVip, initial);
+  const [state, formAction] = useActionState(grantVip, initial);
 
   return (
     <form action={formAction} className="grid gap-4 sm:grid-cols-[1fr_auto_auto]">

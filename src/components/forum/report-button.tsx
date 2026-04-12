@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useFormState } from "react-dom";
+import { useActionState } from "react";
 import { Flag } from "lucide-react";
 import { reportPost } from "@/actions/moderation";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ const initial: { error?: string; ok?: boolean } | null = null;
 
 export function ReportButton({ postId }: { postId: string }) {
   const [open, setOpen] = useState(false);
-  const [state, formAction] = useFormState(reportPost, initial);
+  const [state, formAction] = useActionState(reportPost, initial);
   const [pending, startTransition] = useTransition();
 
   if (state?.ok) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useFormState } from "react-dom";
+import { useActionState } from "react";
 import { useEffect, useRef } from "react";
 import { replyForumThread } from "@/actions/forum";
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,7 @@ export function ReplyForm({
   threadId: string;
   categorySlug: string;
 }) {
-  const [state, formAction] = useFormState(replyForumThread, initial);
+  const [state, formAction] = useActionState(replyForumThread, initial);
   const ref = useRef<HTMLFormElement>(null);
 
   useEffect(() => {

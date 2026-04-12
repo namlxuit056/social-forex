@@ -23,10 +23,11 @@ export async function Disclaimer({
         <TriangleAlert className="size-3.5" />
         {t("title")}
       </div>
-      <p
-        className="mt-1"
-        dangerouslySetInnerHTML={{ __html: t("body") }}
-      />
+      <p className="mt-1">
+        {t.rich("body", {
+          b: (chunks) => <strong className="text-foreground/90">{chunks}</strong>,
+        })}
+      </p>
     </div>
   );
 }

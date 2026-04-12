@@ -39,3 +39,53 @@ Là **trader**, tôi muốn xem **lịch sự kiện kinh tế** với giờ rõ
 
 - **CI:** GitHub Actions chạy `npm ci` → `npm run lint` → `prisma migrate deploy` → `next build` với PostgreSQL service.
 - **Staging:** Dùng `DATABASE_URL` riêng (Neon branch / Postgres), copy `.env.example` → `.env.staging`, set `FMP_API_KEY` và secrets Auth; deploy preview (Vercel/GitHub) trỏ DB staging.
+
+---
+
+# Spec — Signal: upload ảnh (chart / setup)
+
+## Mục tiêu
+
+Là **trader đăng signal**, tôi muốn **đính kèm một hoặc vài ảnh** (screenshot chart, setup) cùng tín hiệu để người xem hiểu ngữ cảnh nhanh hơn chỉ bằng số entry/SL/TP.
+
+## Phạm vi (MVP đề xuất)
+
+- **Có:** Upload khi **tạo signal** (form `/signals`); hiển thị thumbnail + lightbox/xem lớn trên **danh sách** và **trang chi tiết** `/signals/[id]`.
+- **Số lượng:** Tối đa **3 ảnh** / signal (tránh abuse & chi phí lưu trữ).
+- **Định dạng:** `image/jpeg`, `image/png`, `image/webp` (từ chối SVG upload trực tiếp — rủi ro XSS nếu serve sai).
+- **Kích thước:** Tối đa **~2 MB** / file (có thể resize phía client trước khi gửi).
+- **Quyền xem:** Giữ **cùng quy tắc VIP** như signal: nếu signal VIP và user không VIP → **không hiển thị ảnh** (hoặc placeholder “VIP”), tránh lộ setup qua ảnh.
+
+## Ngoài phạm vi (có thể P2)
+
+- Sửa/xóa ảnh sau khi đăng (chỉ author hoặc MOD).
+- OCR / auto-detect giá từ ảnh.
+- Video / GIF động.
+
+## Dữ liệu
+
+- **Ưu tiên:** Bảng con `SignalImage` — `id`, `signalId`, `url` (public URL object storage), `sortOrder`, `createdAt`. Không lưu binary trong Postgres.
+- **Lưu trữ:** Object storage có CDN (Vercel Blob, S3 + CloudFront, Cloudinary, Uploadthing). Biến môi trường: token/key bucket; URL public chỉ đọc.
+
+## Luồng kỹ thuật (gợi ý)
+
+1. Client chọn file → validate type/size → (optional) resize Web API.
+2. **Presigned URL** hoặc API route nhận `multipart` → upload lên storage → trả `url`.
+3. `createSignal` nhận thêm danh sách `imageUrls[]` (hoặc `imageIds[]`) đã upload; transaction tạo `Signal` + `SignalImage`.
+
+## Bảo mật & kiểm duyệt
+
+- Chỉ user đã đăng nhập; rate limit theo user (đã có pattern trên signal).
+- MOD/ADMIN: có thể ẩn signal (đã có) — ảnh đi theo; cân nhắc xóa object khi signal bị xóa (lifecycle hook hoặc cron).
+
+## Tiêu chí chấp nhận
+
+- [ ] Đăng signal kèm 0–3 ảnh thành công; ảnh hiện đúng trên list + detail.
+- [ ] Signal VIP + viewer không VIP: không thấy nội dung ảnh thật (placeholder).
+- [ ] Từ chối file quá lớn / sai MIME; thông báo rõ ràng (i18n).
+- [ ] Build & typecheck pass; không lộ secret storage ra client.
+
+## Rủi ro
+
+- **Chi phí** storage/băng thông nếu traffic lớn — cần giới hạn số file & dung lượng.
+- **Nội dung vi phạm** trên ảnh — giữ báo cáo signal (mở rộng sau) hoặc dựa vào moderation hiện có.

@@ -52,6 +52,9 @@ export default async function SignalsPage({
     take: 100,
     include: {
       author: { select: { name: true, email: true } },
+      reactions: { select: { type: true } },
+      _count: { select: { comments: true } },
+      images: { orderBy: { sortOrder: "asc" }, select: { url: true } },
     },
   });
 
@@ -60,6 +63,7 @@ export default async function SignalsPage({
 
   const signals = rows.map((s) => {
     const masked = s.tier === "VIP" && !canViewVip;
+    const imageUrls = masked ? [] : s.images.map((i) => i.url);
     return {
       id: s.id,
       symbol: s.symbol,
@@ -72,7 +76,13 @@ export default async function SignalsPage({
       notes: masked ? null : s.notes,
       masked,
       authorLabel: s.author?.name ?? s.author?.email ?? "—",
+      authorId: s.authorId,
       isAuthor: userId === s.authorId,
+      likes: s.reactions.filter((r) => r.type === "LIKE").length,
+      dislikes: s.reactions.filter((r) => r.type === "DISLIKE").length,
+      commentCount: s._count.comments,
+      imageUrls,
+      imageCount: s.images.length,
       createdAt: s.createdAt.toISOString(),
     };
   });
