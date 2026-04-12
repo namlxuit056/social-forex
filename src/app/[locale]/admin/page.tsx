@@ -104,6 +104,7 @@ export default async function AdminDashboardPage({
     { href: "/admin/vip", label: t("manageVip"), icon: Crown },
     { href: "/admin/users", label: t("manageUsers"), icon: Users },
     { href: "/admin/reports", label: t("manageReports"), icon: Flag },
+    { href: "/admin/signals", label: t("manageSignals"), icon: TrendingUp },
   ];
 
   return (
@@ -146,7 +147,7 @@ export default async function AdminDashboardPage({
         <CardHeader>
           <CardTitle>{t("quickLinks")}</CardTitle>
         </CardHeader>
-        <CardContent className="grid gap-2 sm:grid-cols-3">
+        <CardContent className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
           {links.map((l) => (
             <Link
               key={l.href}
