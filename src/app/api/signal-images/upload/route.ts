@@ -1,8 +1,6 @@
 import { put } from "@vercel/blob";
-import { getToken } from "next-auth/jwt";
-import type { Session } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { getSessionUserIdForApi } from "@/lib/auth-api";
 import { assertImageFile, effectiveImageMime } from "@/lib/signal-images";
 import { rateLimit } from "@/lib/rate-limit";
 
@@ -23,10 +21,6 @@ function blobUploadPrefix(): string {
   return p;
 }
 
-function authSecret(): string | undefined {
-  return process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
-}
-
 export async function POST(req: NextRequest) {
   const token = blobToken();
   if (!token) {
@@ -36,18 +30,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Truyền NextRequest vào auth để cookie/session khớp request (App Router).
-  // Typings NextAuth v5 chưa khai báo overload NextRequest; runtime hỗ trợ (lib/index.js).
-  const session = await (auth as (r: NextRequest) => Promise<Session | null>)(req);
-  let userId = session?.user?.id;
-  if (!userId) {
-    const secret = authSecret();
-    const jwt = await getToken({
-      req,
-      secret,
-    });
-    userId = jwt?.sub ?? undefined;
-  }
+  const userId = await getSessionUserIdForApi(req);
   if (!userId) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
