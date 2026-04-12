@@ -271,7 +271,13 @@
     "imageUploadNeedLogin": "Bạn cần đăng nhập để tải ảnh lên.",
     "imageUploadSignInLink": "Đăng nhập",
     "imageViewerDialog": "Ảnh chart",
-    "removeImage": "Gỡ ảnh"
+    "removeImage": "Gỡ ảnh",
+    "newsContext": {
+      "title": "Sự kiện kinh tế impact cao ({hours}h tới)",
+      "disclaimer": "Dữ liệu lịch chỉ mang tính tham khảo — không phải khuyến nghị vào hay thoát lệnh.",
+      "empty": "Không có sự kiện impact cao trong khung thời gian này cho các tiền tệ liên quan tới cặp.",
+      "viewFullCalendar": "Mở lịch kinh tế đầy đủ"
+    }
   },
   "dashboard": {
     "title": "Bảng điều khiển",

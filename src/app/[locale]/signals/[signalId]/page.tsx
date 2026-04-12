@@ -7,6 +7,13 @@ import { isVipActive } from "@/lib/vip";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { SignalImageGallery } from "@/components/signals/signal-image-gallery";
+import { SignalNewsContext } from "@/components/signals/signal-news-context";
+import {
+  getNewsContextHours,
+  getNewsContextWindow,
+  getUpcomingHighImpactEvents,
+} from "@/lib/calendar/news-context-db";
+import { symbolToCurrencies } from "@/lib/signals/symbol-currencies";
 import { SignalReactions } from "./signal-reactions";
 import { SignalComments } from "./signal-comments";
 
@@ -79,6 +86,18 @@ export default async function SignalDetailPage({
     authorId: c.author.id,
     createdAt: c.createdAt.toISOString(),
   }));
+
+  const newsCurrencies = symbolToCurrencies(signal.symbol);
+  const windowHours = getNewsContextHours();
+  const { from: newsFrom, to: newsTo } = getNewsContextWindow();
+  const newsEvents =
+    newsCurrencies.length > 0
+      ? await getUpcomingHighImpactEvents({
+          currencies: newsCurrencies,
+          from: newsFrom,
+          to: newsTo,
+        })
+      : [];
 
   return (
     <div className="space-y-6">
@@ -156,6 +175,14 @@ export default async function SignalDetailPage({
           />
         </CardContent>
       </Card>
+
+      {newsCurrencies.length > 0 ? (
+        <SignalNewsContext
+          events={newsEvents}
+          locale={locale}
+          windowHours={windowHours}
+        />
+      ) : null}
 
       <SignalComments
         signalId={signalId}

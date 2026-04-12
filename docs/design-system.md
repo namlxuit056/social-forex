@@ -71,4 +71,53 @@ Bổ sung cho `DESIGN-TOKENS.md` (màu, type). Tài liệu này mô tả **bố 
 
 ---
 
+## Signal detail — bối cảnh tin (*News context strip*)
+
+**Tham chiếu spec:** `docs/specs.md` — *Bối cảnh tin tức: lịch kinh tế gắn với cặp & tín hiệu*.  
+**Vị trí:** `/[locale]/signals/[id]` — dưới khối giá/notes (trong cùng flow với nội dung signal), **trước** reactions/comments nếu muốn nhấn “bối cảnh trước khi tương tác”; hoặc ngay dưới card chính, tách `Card` riêng để không lẫn tier thị giác của signal.
+
+### Wireframe (desktop)
+
+```
+┌── Card: News context ────────────────────────────────┐
+│ H3 + optional icon (Calendar)                         │
+│ Disclaimer: 1 dòng, text-xs text-muted-foreground   │
+├─────────────────────────────────────────────────────┤
+│ List (max ~8–12 dòng, scroll nội bộ nếu dài)        │
+│  • time (tabular) · CUR · title truncated…  [impact]  │
+│  • …                                                │
+├─────────────────────────────────────────────────────┤
+│ [outline Button / Link] → Economic calendar         │
+└──────────────────────────────────────────────────────┘
+```
+
+### Trạng thái
+
+| Trạng thái | UI |
+|------------|-----|
+| Có sự kiện | Danh sách theo thời gian tăng dần; mỗi dòng: **thời gian** (theo zone VN hoặc UTC — đồng bộ quy ước với trang calendar), **currency** (`font-mono` text-xs), **title** (`text-sm`, line-clamp-2 nếu cần). |
+| Empty (0 row) | Một dòng empty state muted, không icon cảnh báo đỏ; không coi là lỗi. |
+| Symbol không map được tiền tệ | **Ẩn cả khối** (không chiếm chỗ); không hiện “lỗi”. |
+
+### Badge impact — **đồng bộ với Economic Calendar**
+
+Dùng **cùng class tailwind** như `economic-calendar.tsx` (`impactBadge`):
+
+- **low:** `bg-muted text-muted-foreground`
+- **medium:** `bg-amber-500/15 text-amber-200/95`
+- **high:** `bg-destructive/20 text-destructive`
+
+Nhãn chữ lấy từ `calendar.impactLow` / `impactMedShort` / `impactHigh` (i18n), không hardcode.
+
+### Mobile
+
+- Card full width; list không cần cột bảng — stack **time + currency** trên một hàng, **title** hàng dưới, badge impact canh phải hoặc dưới title.
+- Nút “Mở lịch” full width `sm` nếu cần touch target.
+
+### Component
+
+- `SignalNewsContext` (RSC): nhận dữ liệu đã query; không fetch trong client.
+
+---
+
 *Cập nhật khi ship từng phase trong `docs/specs.md` (Signal Room UX/UI).*

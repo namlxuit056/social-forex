@@ -318,3 +318,81 @@ Khi user chọn **English**, một phần UI / thông báo / metadata vẫn hi�
 - **UX/UI:** rà soát không dùng chuỗi dài trong `confirm`; ưu tiên dialog có `t()`.  
 - **Senior Dev:** spike chọn pattern error code vs locale trong Server Actions; cập nhật `AGENTS.md` hoặc rule nội bộ “no user-facing string without i18n”.  
 - **QA:** checklist trên staging với account EN end-to-end.
+
+---
+
+# Spec — Bối cảnh tin tức: lịch kinh tế gắn với cặp & tín hiệu
+
+## Quyết định PM (hướng đã chọn)
+
+Trong các đề xuất “tính năng đặc biệt”, **ưu tiên triển khai trước:** hiển thị **sự kiện kinh tế sắp tới (ưu tiên impact cao)** **liên quan đến cặp** mà user đang xem — trên **phòng tín hiệu** và/hoặc **trang chi tiết signal** — tận dụng nguồn lịch và DB hiện có (`EconomicCalendarEvent`), không yêu cầu user rời trang để mở `/calendar`.
+
+**Tên làm việc:** *News context strip* / *Pair-linked economic events*.
+
+## Mục tiêu kinh doanh
+
+- Tăng **giá trị nhận thức** của signal room: không chỉ “entry/SL/TP” mà có **bối cảnh thời điểm** (tin có thể làm spike spread/slippage).
+- Tăng **tần suất dùng calendar** gián tiếp (teaser + link sâu).
+- Khác biệt sản phẩm: **forum + bảng giá** ít khi gắn tin theo **đúng cặp** user đang trade.
+
+## User stories
+
+1. Là **trader đang xem danh sách hoặc chi tiết signal**, tôi muốn **thấy ngay** các **sự kiện kinh tế impact cao** (trong cửa sổ thời gian đã chốt) **liên quan tới tiền tệ của cặp đó**, để **cân nhắc rủi ro** trước khi vào lệnh hoặc giữ lệnh.
+
+2. Là **trader đang xem signal có cặp X**, tôi muốn **một lối rõ ràng** sang **trang lịch đầy đủ** đã **lọc sẵn** (cùng ngày / cùng currency nếu kỹ thuật cho phép), để **đào sâu** khi cần.
+
+3. Là **visitor chưa đăng nhập**, tôi vẫn có thể **thấy teaser** (số lượng sự kiện hoặc dòng cảnh báo ngắn) **hoặc** thấy empty state rõ ràng — **không** lỗi trắng; quyền xem chi tiết titlename giữ **đồng nhất** với policy hiện tại của trang calendar (cache công khai).
+
+4. Là **PM/Compliance**, tôi muốn mọi copy hiển thị kèm **disclaimer ngắn**: *đây là thông tin lịch, không phải khuyến nghị vào/thoát lệnh* — song ngữ **en** + **vi** (theo locale).
+
+## Phạm vi MVP (P0)
+
+- **Vị trí UI (chọn tối thiểu một, có thể cả hai nếu effort thấp):**
+  - **A.** Trang **`/signals/[id]`** (chi tiết signal): khối “**Tin liên quan (24h tới)**” dưới hoặc cạnh khối giá/summary.
+  - **B.** **Signal room** (list): với mỗi card (hoặc chỉ card đang expand/hover — do UX chọn), dòng phụ **1 sự kiện tiếp theo** hoặc badge “**N sự kiện USD/EUR…**” trong 24h — **ưu tiên đơn giản:** chỉ trên **detail** trước nếu list quá tải.
+
+- **Cửa sổ thời gian:** `nowUtc` → `nowUtc + 24h` (có thể config hằng số server, ví dụ `NEWS_CONTEXT_HOURS=24`).
+
+- **Lọc impact:** chỉ **`impact` thuộc tập “cao”** theo dữ liệu đang sync (chuẩn hóa case-insensitive: ví dụ `high`, `HIGH`, `High` — Senior Dev map về enum nội bộ).
+
+- **Ánh xạ cặp → tiền tệ:** bảng/map trong code (MVP): ví dụ `EURUSD` → `[EUR, USD]`, `XAUUSD` → `[USD]` (hoặc thêm `XAU` nếu data có — fallback an toàn). Cặp không map được → **không hiển thị khối tin** + optional tooltip “Chưa hỗ trợ map cặp” (i18n) **hoặc** chỉ hiện link tới calendar (UX chốt).
+
+- **Nguồn dữ liệu:** đọc **`EconomicCalendarEvent`** qua Prisma (cùng pattern cache/TTL hiện có của calendar — không bắt buộc gọi FMP trực tiếp từ request signal).
+
+## Ngoài phạm vi MVP (P1 / P2)
+
+- Push notification / email digest.
+- Tự động cảnh báo khi user **tạo signal** trong vòng 30 phút trước tin NFP/CPI (wizard validation).
+- Map cặp phức tạp (indices, crypto) đầy đủ; multi-day range; user tùy chỉnh khung giờ.
+
+## Quy tắc ánh xạ & rủi ro dữ liệu
+
+- **Đồng bộ timezone hiển thị:** dùng **cùng quy ước** với trang calendar (VN / UTC) — component tái sử dụng formatter hoặc prop `timeZone` từ user/locale.
+- **DB trống / nguồn mẫu:** hiển thị empty state thân thiện (“Không có sự kiện impact cao trong 24h tới cho các tiền tệ này”) — **không** báo lỗi kỹ thuật.
+- **Hiệu năng:** một query (hoặc ít query) có `where timeUtc in range` + `currency in (...)` + impact filter; index `@@index([timeUtc])` đã có — cân nhắc index gộp `(timeUtc, currency)` nếu explain chậm (P1).
+
+## i18n (bắt buộc)
+
+- Mọi nhãn, empty state, disclaimer, nút “Xem lịch đầy đủ” nằm trong **`messages/en.json`** và **`messages/vi.json`** (namespace gợi ý: `signals.newsContext` hoặc `calendar.pairContext` — thống nhất một namespace).
+
+## Tiêu chí chấp nhận (QA)
+
+- [ ] Với signal có `symbol` đã nmap (vd. `EURUSD`), trong 24h tới có bản ghi `EconomicCalendarEvent` đúng `currency` + impact cao → UI **liệt kê** ít nhất thời gian (theo zone đang chọn), currency, title (truncate nếu dài), và mức impact (badge/icon nhất quán design system).
+- [ ] Không có sự kiện thỏa điều kiện → **empty state** đúng locale, không throw.
+- [ ] `symbol` chưa có trong map → hành vi đã chốt ở MVP (ẩn khối **hoặc** chỉ CTA calendar) — **document trong PR** và nhất quán en/vi.
+- [ ] Link “Xem lịch” dẫn tới `/calendar` (hoặc URL có query lọc nếu đã implement) và mở đúng locale (`/en/...`, `/vi/...`).
+- [ ] Trang vẫn đạt **Lighthouse / không CLS** tệ do block mới (loading skeleton hoặc SSR đồng bộ — UX chốt).
+- [ ] Disclaimer ngắn hiển thị gần khối tin; không thay thế disclaimer chung của trang signal nếu đã có.
+
+## Phụ thuộc & thứ tự làm
+
+1. **Spike kỹ thuật (0.5–1 ngày):** sample 20 dòng `EconomicCalendarEvent` — giá trị `impact` thực tế từ FMP/sample để chốt filter.
+2. **Implement UI + query** theo MVP.
+3. **QA:** so sánh với `/calendar` cùng ngày cho cùng currency (manual).
+
+## Handoff
+
+- **UX/UI:** wireframe khối trên desktop/mobile; thứ tự ưu tiên A (detail) trước B (list); trạng thái loading/empty; badge impact đồng bộ với calendar.
+- **Senior Dev:** module `symbolToCurrencies(symbol: string): string[]`; hàm `getUpcomingHighImpactEvents({ currencies, from, to })`; tích hợp RSC hoặc server component tại `signals/[id]`; không hardcode copy.
+- **PM:** tạo GitHub Issue một track; gắn nhãn `feature`, `signals`, `calendar`, `i18n`.
+- **QA:** checklist trên staging với DB có/không có sự kiện; regression trang calendar.

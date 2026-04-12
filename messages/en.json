@@ -271,7 +271,13 @@
     "imageUploadNeedLogin": "You need to be signed in to upload images.",
     "imageUploadSignInLink": "Sign in",
     "imageViewerDialog": "Chart image",
-    "removeImage": "Remove image"
+    "removeImage": "Remove image",
+    "newsContext": {
+      "title": "High-impact economic events (next {hours}h)",
+      "disclaimer": "Calendar data is for information only — not a recommendation to enter or exit trades.",
+      "empty": "No high-impact events in this window for the currencies linked to this pair.",
+      "viewFullCalendar": "Open economic calendar"
+    }
   },
   "dashboard": {
     "title": "Dashboard",
