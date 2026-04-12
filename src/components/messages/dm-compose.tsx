@@ -3,6 +3,8 @@
 import { useFormState } from "react-dom";
 import { useEffect, useRef } from "react";
 import { sendDirectMessage } from "@/actions/messages";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 
 const initial: { error?: string; ok?: boolean } | null = null;
 
@@ -19,22 +21,18 @@ export function DmCompose({ recipientId }: { recipientId: string }) {
   return (
     <form ref={ref} action={formAction} className="space-y-2">
       <input type="hidden" name="recipientId" value={recipientId} />
-      <textarea
+      <Textarea
         name="body"
         required
         rows={3}
         placeholder="Nhập tin nhắn…"
-        className="w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm"
       />
       {state?.error && (
-        <p className="text-sm text-rose-400">{state.error}</p>
+        <p className="text-sm text-destructive">{state.error}</p>
       )}
-      <button
-        type="submit"
-        className="rounded bg-emerald-600 px-4 py-2 text-sm text-white hover:bg-emerald-500"
-      >
+      <Button type="submit" size="sm">
         Gửi
-      </button>
+      </Button>
     </form>
   );
 }

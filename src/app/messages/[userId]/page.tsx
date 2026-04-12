@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { BackLink } from "@/components/layout/back-link";
+import { PageCtaRow } from "@/components/layout/page-cta-row";
 import { auth } from "@/auth";
 import { DmCompose } from "@/components/messages/dm-compose";
 import { prisma } from "@/lib/prisma";
+import { pageCtas } from "@/lib/page-cta-presets";
 
 type Props = { params: Promise<{ userId: string }> };
 
@@ -49,22 +52,22 @@ export default async function MessageThreadPage({ params }: Props) {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex flex-wrap items-center gap-4">
-        <Link href="/messages" className="text-sm text-emerald-500 hover:underline">
-          ← Hội thoại
-        </Link>
+        <BackLink href="/messages">Hội thoại</BackLink>
         <Link
           href={`/u/${otherId}`}
-          className="text-lg font-medium text-white hover:text-emerald-400"
+          className="text-lg font-medium text-foreground hover:text-primary"
         >
           {other.name ?? other.email ?? "Trader"}
         </Link>
       </div>
 
-      <div className="space-y-3 rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
+      <div className="space-y-3 rounded-xl border border-border bg-card/50 p-4">
         {thread.length === 0 && (
-          <p className="text-sm text-zinc-500">Chưa có tin nhắn — gửi lời chào bên dưới.</p>
+          <p className="py-2 text-center text-sm text-muted-foreground">
+            Chưa có tin nhắn — gửi lời chào bên dưới để bắt đầu.
+          </p>
         )}
         {thread.map((m) => {
           const mine = m.senderId === me;
@@ -73,12 +76,12 @@ export default async function MessageThreadPage({ params }: Props) {
               key={m.id}
               className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${
                 mine
-                  ? "ml-auto bg-emerald-900/40 text-emerald-100"
-                  : "bg-zinc-800 text-zinc-200"
+                  ? "ml-auto bg-primary/20 text-foreground"
+                  : "bg-muted text-foreground/90"
               }`}
             >
               <p className="whitespace-pre-wrap">{m.body}</p>
-              <p className="mt-1 text-[10px] text-zinc-500">
+              <p className="mt-1 text-[10px] text-muted-foreground">
                 {new Date(m.createdAt).toLocaleString("vi-VN")}
               </p>
             </div>
@@ -87,6 +90,7 @@ export default async function MessageThreadPage({ params }: Props) {
       </div>
 
       <DmCompose recipientId={otherId} />
+      <PageCtaRow heading="Tiếp theo" items={[...pageCtas.community, ...pageCtas.explore]} />
     </div>
   );
 }

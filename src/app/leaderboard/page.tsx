@@ -1,5 +1,9 @@
 import Link from "next/link";
+import { EmptyState } from "@/components/layout/empty-state";
+import { PageCtaRow } from "@/components/layout/page-cta-row";
 import { prisma } from "@/lib/prisma";
+import { pageCtas } from "@/lib/page-cta-presets";
+import { Trophy } from "lucide-react";
 
 export const metadata = { title: "Bảng xếp hạng" };
 
@@ -59,54 +63,71 @@ export default async function LeaderboardPage() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold text-white">Leaderboard</h1>
-        <p className="mt-2 text-zinc-400">
+        <h1 className="font-heading text-2xl font-semibold text-foreground">
+          Leaderboard
+        </h1>
+        <p className="mt-2 text-muted-foreground">
           Tính từ tín hiệu đã đóng (thắng/thua). Chỉ hiển thị trader có ít nhất một
           lệnh đóng.
         </p>
       </div>
-      <div className="overflow-x-auto rounded-xl border border-zinc-800">
-        <table className="w-full min-w-[520px] text-left text-sm">
-          <thead className="bg-zinc-900/80 text-zinc-500">
-            <tr>
-              <th className="px-4 py-3">#</th>
-              <th className="px-4 py-3">Trader</th>
-              <th className="px-4 py-3">Thắng</th>
-              <th className="px-4 py-3">Thua</th>
-              <th className="px-4 py-3">Tỷ lệ thắng</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-zinc-800">
-            {rows.length === 0 && (
-              <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-zinc-500">
-                  Chưa có dữ liệu — hãy đóng vài tín hiệu ở Signal room.
-                </td>
-              </tr>
-            )}
-            {rows.map((r, i) => (
-              <tr key={r.userId} className="hover:bg-zinc-900/40">
-                <td className="px-4 py-3 font-mono text-zinc-500">{i + 1}</td>
-                <td className="px-4 py-3 text-zinc-200">
-                  <Link
-                    href={`/u/${r.userId}`}
-                    className="text-emerald-400 hover:underline"
-                  >
-                    {r.name}
-                  </Link>
-                </td>
-                <td className="px-4 py-3 text-emerald-400">{r.wins}</td>
-                <td className="px-4 py-3 text-rose-400">{r.losses}</td>
-                <td className="px-4 py-3 font-mono">
-                  {r.winRate !== null ? `${r.winRate}%` : "—"}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+
+      {rows.length === 0 ? (
+        <div className="space-y-6">
+          <EmptyState
+            icon={Trophy}
+            title="Chưa có dữ liệu xếp hạng"
+            description="Đóng vài tín hiệu (thắng hoặc thua) trong phòng tín hiệu để xuất hiện trên bảng."
+            primary={{ href: "/signals", label: "Đến phòng tín hiệu" }}
+            secondary={[
+              { href: "/quotes", label: "Tỷ giá" },
+              { href: "/academy", label: "Academy" },
+            ]}
+          />
+          <PageCtaRow heading="Khám phá" items={[...pageCtas.community, ...pageCtas.explore]} />
+        </div>
+      ) : (
+        <>
+          <div className="overflow-x-auto rounded-xl border border-border">
+            <table className="w-full min-w-[520px] text-left text-sm">
+              <thead className="bg-muted/50 text-muted-foreground">
+                <tr>
+                  <th className="px-4 py-3">#</th>
+                  <th className="px-4 py-3">Trader</th>
+                  <th className="px-4 py-3">Thắng</th>
+                  <th className="px-4 py-3">Thua</th>
+                  <th className="px-4 py-3">Tỷ lệ thắng</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {rows.map((r, i) => (
+                  <tr key={r.userId} className="hover:bg-muted/30">
+                    <td className="px-4 py-3 font-mono text-muted-foreground">
+                      {i + 1}
+                    </td>
+                    <td className="px-4 py-3 text-foreground">
+                      <Link
+                        href={`/u/${r.userId}`}
+                        className="font-medium text-primary hover:underline"
+                      >
+                        {r.name}
+                      </Link>
+                    </td>
+                    <td className="px-4 py-3 text-primary">{r.wins}</td>
+                    <td className="px-4 py-3 text-destructive">{r.losses}</td>
+                    <td className="px-4 py-3 font-mono">
+                      {r.winRate !== null ? `${r.winRate}%` : "—"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <PageCtaRow heading="Tiếp theo" items={[...pageCtas.community, ...pageCtas.trading]} />
+        </>
+      )}
     </div>
   );
 }

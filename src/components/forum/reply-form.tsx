@@ -3,6 +3,9 @@
 import { useFormState } from "react-dom";
 import { useEffect, useRef } from "react";
 import { replyForumThread } from "@/actions/forum";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 const initial: { error?: string; ok?: boolean } | null = null;
 
@@ -26,24 +29,22 @@ export function ReplyForm({
     <form ref={ref} action={formAction} className="space-y-3">
       <input type="hidden" name="threadId" value={threadId} />
       <input type="hidden" name="categorySlug" value={categorySlug} />
-      <label className="block text-sm">
-        <span className="text-zinc-400">Trả lời</span>
-        <textarea
+      <div>
+        <Label htmlFor="reply-body">Trả lời</Label>
+        <Textarea
+          id="reply-body"
           name="body"
           required
           rows={4}
-          className="mt-1 w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-2"
+          className="mt-1.5"
         />
-      </label>
+      </div>
       {state?.error && (
-        <p className="text-sm text-rose-400">{state.error}</p>
+        <p className="text-sm text-destructive">{state.error}</p>
       )}
-      <button
-        type="submit"
-        className="rounded-lg border border-zinc-600 px-4 py-2 text-sm text-zinc-200 hover:bg-zinc-800"
-      >
+      <Button type="submit" variant="outline" size="sm">
         Gửi
-      </button>
+      </Button>
     </form>
   );
 }

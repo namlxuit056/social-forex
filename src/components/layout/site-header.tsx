@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { auth } from "@/auth";
 import { SignOutButton } from "@/components/auth/sign-out-button";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const nav = [
   { href: "/quotes", label: "Tỷ giá live" },
@@ -22,37 +24,45 @@ const nav = [
   { href: "/partners", label: "Đối tác" },
 ];
 
+const navLinkClass =
+  "rounded-md px-2 py-1 text-muted-foreground transition hover:bg-muted hover:text-foreground";
+
 export async function SiteHeader() {
   const session = await auth();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-zinc-800/80 bg-zinc-950/90 backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3">
         <div className="flex items-center gap-8">
           <Link
             href="/"
-            className="font-semibold tracking-tight text-emerald-400 transition hover:text-emerald-300"
+            className="font-semibold tracking-tight text-primary transition hover:text-primary/90"
           >
             Social Forex
           </Link>
-          <nav className="hidden items-center gap-1 text-sm text-zinc-400 lg:flex">
+          <nav className="hidden items-center gap-1 text-sm lg:flex">
             {nav.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="rounded-md px-2 py-1 transition hover:bg-zinc-800 hover:text-zinc-100"
-              >
+              <Link key={item.href} href={item.href} className={navLinkClass}>
                 {item.label}
               </Link>
             ))}
           </nav>
         </div>
-        <div className="flex items-center gap-3 text-sm">
+        <div className="flex flex-wrap items-center gap-2 text-sm">
           {session?.user ? (
             <>
               <Link
+                href="/dashboard"
+                className={cn(
+                  buttonVariants({ variant: "default", size: "sm" }),
+                  "hidden sm:inline-flex",
+                )}
+              >
+                Dashboard
+              </Link>
+              <Link
                 href="/profile"
-                className="text-zinc-300 hover:text-white"
+                className="text-foreground/90 hover:text-foreground"
               >
                 {session.user.name ?? session.user.email}
               </Link>
@@ -62,13 +72,13 @@ export async function SiteHeader() {
             <>
               <Link
                 href="/auth/signin"
-                className="text-zinc-300 hover:text-white"
+                className="text-muted-foreground hover:text-foreground"
               >
                 Đăng nhập
               </Link>
               <Link
                 href="/auth/register"
-                className="rounded-md bg-emerald-600 px-3 py-1.5 font-medium text-white hover:bg-emerald-500"
+                className={cn(buttonVariants({ size: "sm" }))}
               >
                 Đăng ký
               </Link>
@@ -76,17 +86,25 @@ export async function SiteHeader() {
           )}
         </div>
       </div>
-      <div className="border-t border-zinc-800/60 px-4 py-2 lg:hidden">
-        <nav className="flex max-w-7xl flex-wrap gap-1 text-xs text-zinc-400">
+      <div className="border-t border-border/60 px-4 py-2 lg:hidden">
+        <nav className="flex max-w-7xl flex-wrap gap-1 text-xs">
           {nav.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="rounded px-2 py-1 hover:bg-zinc-800"
+              className="rounded px-2 py-1 text-muted-foreground hover:bg-muted"
             >
               {item.label}
             </Link>
           ))}
+          {session?.user ? (
+            <Link
+              href="/dashboard"
+              className="rounded px-2 py-1 font-medium text-primary hover:bg-muted"
+            >
+              Dashboard
+            </Link>
+          ) : null}
         </nav>
       </div>
     </header>

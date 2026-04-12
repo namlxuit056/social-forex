@@ -1,6 +1,7 @@
 "use client";
 
 import { toggleFollowUser } from "@/actions/social";
+import { Button } from "@/components/ui/button";
 
 export function FollowButton({
   userId,
@@ -12,16 +13,13 @@ export function FollowButton({
   return (
     <form action={toggleFollowUser}>
       <input type="hidden" name="targetUserId" value={userId} />
-      <button
+      <Button
         type="submit"
-        className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
-          isFollowing
-            ? "border border-zinc-600 text-zinc-300 hover:bg-zinc-800"
-            : "bg-emerald-600 text-white hover:bg-emerald-500"
-        }`}
+        size="sm"
+        variant={isFollowing ? "outline" : "default"}
       >
         {isFollowing ? "Đang follow" : "Follow"}
-      </button>
+      </Button>
     </form>
   );
 }

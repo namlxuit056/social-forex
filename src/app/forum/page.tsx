@@ -1,7 +1,15 @@
 import Link from "next/link";
+import { EmptyState } from "@/components/layout/empty-state";
 import { prisma } from "@/lib/prisma";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { Inbox } from "lucide-react";
 
-export const metadata = { title: "Diễn đàn" };
+export const metadata = {
+  title: "Diễn đàn",
+  description:
+    "Diễn đàn forex tiếng Việt — thảo luận chiến lược, chia sẻ kinh nghiệm, hỏi đáp cộng đồng.",
+};
 
 export const dynamic = "force-dynamic";
 
@@ -14,44 +22,50 @@ export default async function ForumPage() {
     <div className="space-y-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold text-white">Diễn đàn</h1>
-          <p className="mt-2 text-zinc-400">
+          <h1 className="font-heading text-2xl font-semibold text-foreground">
+            Diễn đàn
+          </h1>
+          <p className="mt-2 text-muted-foreground">
             Vào từng chủ đề để xem thread, tạo bài mới và trả lời.
           </p>
         </div>
         <Link
           href="/forum/search"
-          className="rounded-lg border border-zinc-600 px-4 py-2 text-sm text-zinc-200 hover:bg-zinc-800"
+          className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
         >
           Tìm chủ đề
         </Link>
       </div>
-      <ul className="grid gap-4 md:grid-cols-2">
-        {categories.map((c) => (
-          <li
-            key={c.id}
-            className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5"
-          >
-            <Link
-              href={`/forum/${c.slug}`}
-              className="text-lg font-medium text-emerald-400 hover:text-emerald-300"
+      {categories.length === 0 ? (
+        <EmptyState
+          icon={Inbox}
+          title="Chưa có danh mục diễn đàn"
+          description="Chạy seed để tạo category và thread mẫu, hoặc thêm dữ liệu qua Prisma Studio."
+          primary={{ href: "/", label: "Về trang chủ" }}
+          secondary={[
+            { href: "/signals", label: "Phòng tín hiệu" },
+            { href: "/academy", label: "Academy" },
+          ]}
+        />
+      ) : (
+        <ul className="grid gap-4 md:grid-cols-2">
+          {categories.map((c) => (
+            <li
+              key={c.id}
+              className="rounded-xl border border-border bg-card/50 p-5 ring-1 ring-foreground/5"
             >
-              {c.name}
-            </Link>
-            {c.description && (
-              <p className="mt-2 text-sm text-zinc-500">{c.description}</p>
-            )}
-          </li>
-        ))}
-      </ul>
-      {categories.length === 0 && (
-        <p className="text-zinc-500">
-          Chưa có danh mục — chạy{" "}
-          <code className="rounded bg-zinc-800 px-1 py-0.5 font-mono text-sm">
-            npm run db:seed
-          </code>
-          .
-        </p>
+              <Link
+                href={`/forum/${c.slug}`}
+                className="font-heading text-lg font-medium text-primary hover:underline"
+              >
+                {c.name}
+              </Link>
+              {c.description && (
+                <p className="mt-2 text-sm text-muted-foreground">{c.description}</p>
+              )}
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );

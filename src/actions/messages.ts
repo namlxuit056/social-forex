@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { rateLimit } from "@/lib/rate-limit";
 
 const sendSchema = z.object({
   recipientId: z.string().min(1),
@@ -27,6 +28,9 @@ export async function sendDirectMessage(
   if (!parsed.success) {
     return { error: "Nội dung không hợp lệ." };
   }
+
+  const { ok } = rateLimit(`dm:${session.user.id}`, 15, 60_000);
+  if (!ok) return { error: "Bạn đang gửi quá nhanh. Vui lòng chờ 1 phút." };
 
   const { recipientId, body } = parsed.data;
   if (recipientId === session.user.id) {

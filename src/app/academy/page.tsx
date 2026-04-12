@@ -1,7 +1,16 @@
 import Link from "next/link";
+import { Disclaimer } from "@/components/layout/disclaimer";
+import { PageCtaRow } from "@/components/layout/page-cta-row";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { academyLessons } from "@/lib/content/academy";
+import { pageCtas } from "@/lib/page-cta-presets";
 
-export const metadata = { title: "Academy" };
+export const metadata = {
+  title: "Academy",
+  description:
+    "Học giao dịch forex từ cơ bản đến nâng cao: quản lý rủi ro, price action, tin tức và SMC.",
+};
 
 const levelLabel = {
   beginner: "Cơ bản",
@@ -9,14 +18,14 @@ const levelLabel = {
   advanced: "Nâng cao",
 };
 
-
-
 export default function AcademyPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold text-white">Academy / Wiki</h1>
-        <p className="mt-2 text-zinc-400">
+        <h1 className="font-heading text-2xl font-semibold text-foreground">
+          Academy / Wiki
+        </h1>
+        <p className="mt-2 text-muted-foreground">
           Nội dung tĩnh trong code — chuyển sang CMS hoặc MDX khi có nhiều bài.
         </p>
       </div>
@@ -24,22 +33,29 @@ export default function AcademyPage() {
         {academyLessons.map((lesson) => (
           <li
             key={lesson.slug}
-            className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5"
+            className="rounded-xl border border-border bg-card/50 p-5 ring-1 ring-foreground/5"
           >
-            <span className="text-xs font-medium uppercase tracking-wide text-emerald-500/90">
+            <span className="text-xs font-medium uppercase tracking-wide text-primary">
               {levelLabel[lesson.level]}
             </span>
-            <h2 className="mt-2 text-lg font-medium text-white">{lesson.title}</h2>
-            <p className="mt-2 text-sm text-zinc-500">{lesson.summary}</p>
+            <h2 className="mt-2 font-heading text-lg font-medium text-foreground">
+              {lesson.title}
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">{lesson.summary}</p>
             <Link
               href={`/academy/${lesson.slug}`}
-              className="mt-4 inline-block text-sm text-emerald-500 hover:underline"
+              className={cn(
+                buttonVariants({ variant: "link", size: "sm" }),
+                "mt-4 h-auto px-0",
+              )}
             >
-              Chi tiết (skeleton)
+              Chi tiết →
             </Link>
           </li>
         ))}
       </ul>
+      <Disclaimer variant="compact" />
+      <PageCtaRow heading="Tiếp theo" items={[...pageCtas.learn, ...pageCtas.explore]} />
     </div>
   );
 }

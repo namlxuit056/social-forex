@@ -1,5 +1,10 @@
 import Link from "next/link";
+import { BackLink } from "@/components/layout/back-link";
+import { EmptyState } from "@/components/layout/empty-state";
 import { prisma } from "@/lib/prisma";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
 
 export const metadata = { title: "Tìm trong diễn đàn" };
 
@@ -28,42 +33,46 @@ export default async function ForumSearchPage({ searchParams }: Props) {
 
   return (
     <div className="space-y-6">
-      <Link href="/forum" className="text-sm text-emerald-500 hover:underline">
-        ← Diễn đàn
-      </Link>
-      <h1 className="text-2xl font-semibold text-white">Tìm chủ đề</h1>
+      <BackLink href="/forum">Diễn đàn</BackLink>
+      <h1 className="font-heading text-2xl font-semibold text-foreground">
+        Tìm chủ đề
+      </h1>
       <form method="get" className="flex flex-wrap gap-2">
-        <input
+        <Input
           name="q"
           defaultValue={query}
           placeholder="Từ khóa (tối thiểu 2 ký tự)"
-          className="min-w-[240px] flex-1 rounded border border-zinc-700 bg-zinc-950 px-3 py-2"
+          className="min-w-[240px] flex-1"
         />
-        <button
-          type="submit"
-          className="rounded-lg bg-emerald-600 px-4 py-2 text-sm text-white hover:bg-emerald-500"
-        >
+        <Button type="submit" size="sm">
           Tìm
-        </button>
+        </Button>
       </form>
 
       {query.length > 0 && query.length < 2 && (
         <p className="text-sm text-amber-200/90">Nhập ít nhất 2 ký tự.</p>
       )}
 
-      {query.length >= 2 && (
-        <ul className="divide-y divide-zinc-800 rounded-xl border border-zinc-800">
-          {results.length === 0 && (
-            <li className="p-6 text-zinc-500">Không có kết quả.</li>
-          )}
+      {query.length >= 2 && results.length === 0 && (
+        <EmptyState
+          icon={Search}
+          title="Không có kết quả"
+          description="Thử từ khóa khác hoặc tìm trong từng danh mục."
+          primary={{ href: "/forum", label: "Về diễn đàn" }}
+          secondary={[{ href: "/signals", label: "Tín hiệu" }]}
+        />
+      )}
+
+      {query.length >= 2 && results.length > 0 && (
+        <ul className="divide-y divide-border rounded-xl border border-border">
           {results.map((t) => (
             <li key={t.id}>
               <Link
                 href={`/forum/${t.category.slug}/thread/${t.slug}`}
-                className="block p-4 hover:bg-zinc-900/50"
+                className="block p-4 hover:bg-muted/40"
               >
-                <span className="font-medium text-zinc-100">{t.title}</span>
-                <div className="mt-1 text-xs text-zinc-500">
+                <span className="font-medium text-foreground">{t.title}</span>
+                <div className="mt-1 text-xs text-muted-foreground">
                   {t.category.name} · {t.author?.name ?? t.author?.email}
                 </div>
               </Link>

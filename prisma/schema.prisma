@@ -50,6 +50,7 @@ model User {
 
   sentMessages     DirectMessage[] @relation("SentMessages")
   receivedMessages DirectMessage[] @relation("ReceivedMessages")
+  forumReports     ForumReport[]   @relation("ForumReporter")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -114,9 +115,11 @@ model ForumThread {
   authorId   String
   title      String
   slug       String
+  hidden     Boolean       @default(false)
   category   ForumCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   author     User          @relation(fields: [authorId], references: [id])
   posts      ForumPost[]
+  reports    ForumReport[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -129,8 +132,10 @@ model ForumPost {
   threadId String
   authorId String
   body     String
+  hidden   Boolean     @default(false)
   thread   ForumThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
   author   User        @relation(fields: [authorId], references: [id])
+  reports  ForumReport[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -166,4 +171,65 @@ model DirectMessage {
 
   @@index([recipientId, createdAt])
   @@index([senderId, createdAt])
+}
+
+enum ReportStatus {
+  OPEN
+  REVIEWED
+  DISMISSED
+}
+
+model ForumReport {
+  id         String       @id @default(cuid())
+  reporterId String
+  postId     String?
+  threadId   String?
+  reason     String
+  status     ReportStatus @default(OPEN)
+  reviewedBy String?
+  reviewNote String?
+
+  reporter User        @relation("ForumReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  post     ForumPost?  @relation(fields: [postId], references: [id], onDelete: SetNull)
+  thread   ForumThread? @relation(fields: [threadId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, createdAt])
+}
+
+model VipAuditLog {
+  id        String   @id @default(cuid())
+  adminId   String
+  userId    String
+  action    String
+  days      Int
+  vipUntil  DateTime
+  note      String?
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+/// Bản ghi singleton — lần đồng bộ lịch kinh tế (FMP) gần nhất.
+model CalendarSyncMeta {
+  id         String   @id
+  lastSyncAt DateTime
+  source     String
+}
+
+/// Cache sự kiện lịch kinh tế (đồng bộ từ FMP hoặc ghi đè khi fallback).
+model EconomicCalendarEvent {
+  id         String   @id @default(cuid())
+  externalId String   @unique
+  timeUtc    DateTime
+  currency   String
+  title      String
+  impact     String
+  forecast   String?
+  previous   String?
+  actual     String?
+
+  @@index([timeUtc])
 }

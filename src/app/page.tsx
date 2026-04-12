@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const blocks = [
   {
@@ -22,31 +24,40 @@ export default function HomePage() {
   return (
     <div className="space-y-16">
       <section className="text-center">
-        <p className="text-sm font-medium uppercase tracking-widest text-emerald-500/90">
+        <p className="text-sm font-medium uppercase tracking-widest text-primary">
           Forex · Cộng đồng · Dữ liệu
         </p>
-        <h1 className="mt-4 text-4xl font-semibold tracking-tight text-white md:text-5xl">
+        <h1 className="mt-4 font-heading text-4xl font-semibold tracking-tight text-foreground md:text-5xl">
           Một nền tảng cho trader cần{" "}
-          <span className="text-emerald-400">công cụ</span>,{" "}
-          <span className="text-sky-400">số liệu</span> và{" "}
-          <span className="text-amber-400/90">người cùng chiến tuyến</span>.
+          <span className="text-primary">công cụ</span>,{" "}
+          <span className="text-chart-3">số liệu</span> và{" "}
+          <span className="text-chart-4">người cùng chiến tuyến</span>.
         </h1>
-        <p className="mx-auto mt-6 max-w-2xl text-lg text-zinc-400">
-          Đã scaffold Next.js, Prisma, Auth.js, route cho quotes/calendar/tools/chart/forum/signals/analytics/academy.
-          Bước tiếp: nối nhà cung cấp giá thật, thanh toán VIP và moderation.
+        <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
+          Next.js, Prisma, Auth.js và route cho quotes, calendar, tools, chart,
+          forum, signals, analytics, academy. Đăng nhập để vào Dashboard; giai
+          đoạn tiếp theo: giá thật, thanh toán VIP và moderation.
         </p>
         <div className="mt-10 flex flex-wrap justify-center gap-4">
-          <Link
-            href="/quotes"
-            className="rounded-lg bg-emerald-600 px-6 py-3 font-medium text-white hover:bg-emerald-500"
-          >
+          <Link href="/quotes" className={cn(buttonVariants({ size: "lg" }))}>
             Xem tỷ giá
           </Link>
           <Link
             href="/academy"
-            className="rounded-lg border border-zinc-700 px-6 py-3 font-medium text-zinc-200 hover:bg-zinc-900"
+            className={cn(
+              buttonVariants({ variant: "outline", size: "lg" }),
+              "border-border",
+            )}
           >
             Academy
+          </Link>
+          <Link
+            href="/dashboard"
+            className={cn(
+              buttonVariants({ variant: "secondary", size: "lg" }),
+            )}
+          >
+            Dashboard
           </Link>
         </div>
       </section>
@@ -56,12 +67,12 @@ export default function HomePage() {
           <Link
             key={b.href}
             href={b.href}
-            className="group rounded-2xl border border-zinc-800 bg-zinc-900/40 p-6 transition hover:border-emerald-900/60 hover:bg-zinc-900/70"
+            className="group rounded-2xl border border-border bg-card/50 p-6 ring-1 ring-foreground/5 transition hover:border-primary/30 hover:bg-card"
           >
-            <h2 className="text-lg font-medium text-white group-hover:text-emerald-400">
+            <h2 className="font-heading text-lg font-medium text-foreground group-hover:text-primary">
               {b.title}
             </h2>
-            <p className="mt-2 text-sm leading-relaxed text-zinc-500">
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
               {b.desc}
             </p>
           </Link>

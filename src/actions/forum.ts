@@ -6,6 +6,7 @@ import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { randomSuffix, slugify } from "@/lib/slug";
+import { rateLimit } from "@/lib/rate-limit";
 
 const createThreadSchema = z.object({
   title: z.string().min(2).max(200),
@@ -22,6 +23,9 @@ export async function createForumThread(
     redirect("/auth/signin");
   }
   const userId = session.user.id;
+
+  const { ok } = rateLimit(`thread:${userId}`, 5, 60_000);
+  if (!ok) return { error: "Bạn đang tạo quá nhanh. Vui lòng chờ 1 phút." };
 
   const parsed = createThreadSchema.safeParse({
     title: formData.get("title"),
@@ -91,6 +95,9 @@ export async function replyForumThread(
   if (!parsed.success) {
     return { error: "Bình luận không hợp lệ." };
   }
+
+  const { ok } = rateLimit(`reply:${userId}`, 10, 60_000);
+  if (!ok) return { error: "Bạn đang gửi quá nhanh. Vui lòng chờ 1 phút." };
 
   const { body, threadId, categorySlug } = parsed.data;
   const thread = await prisma.forumThread.findFirst({

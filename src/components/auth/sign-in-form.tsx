@@ -2,10 +2,25 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { safeCallbackPath } from "@/lib/safe-redirect";
 
 export function SignInForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = safeCallbackPath(searchParams.get("callbackUrl"));
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -25,45 +40,65 @@ export function SignInForm() {
       setError("Email hoặc mật khẩu không đúng.");
       return;
     }
-    router.push("/profile");
+    toast.success("Đăng nhập thành công");
+    router.push(callbackUrl);
     router.refresh();
   }
 
   return (
-    <form
-      onSubmit={onSubmit}
-      className="space-y-4 rounded-xl border border-zinc-800 bg-zinc-900/40 p-6"
-    >
-      <label className="block text-sm">
-        <span className="text-zinc-400">Email</span>
-        <input
-          type="email"
-          required
-          autoComplete="email"
-          className="mt-1 w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-2"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-      </label>
-      <label className="block text-sm">
-        <span className="text-zinc-400">Mật khẩu</span>
-        <input
-          type="password"
-          required
-          autoComplete="current-password"
-          className="mt-1 w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-2"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-      </label>
-      {error && <p className="text-sm text-rose-400">{error}</p>}
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full rounded-lg bg-emerald-600 py-2 font-medium text-white hover:bg-emerald-500 disabled:opacity-50"
-      >
-        {loading ? "…" : "Đăng nhập"}
-      </button>
-    </form>
+    <Card className="border-border/80 bg-card/80 shadow-lg ring-1 ring-primary/10 backdrop-blur-sm">
+      <CardHeader className="space-y-1">
+        <CardTitle className="font-heading text-xl tracking-tight">
+          Truy cập tài khoản
+        </CardTitle>
+        <CardDescription>
+          Dữ liệu được mã hóa khi chuyển tải. Không chia sẻ mật khẩu với bên thứ
+          ba.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={onSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="signin-email">Email</Label>
+            <Input
+              id="signin-email"
+              type="email"
+              required
+              autoComplete="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              aria-invalid={error ? true : undefined}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="signin-password">Mật khẩu</Label>
+            <Input
+              id="signin-password"
+              type="password"
+              required
+              autoComplete="current-password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              aria-invalid={error ? true : undefined}
+            />
+          </div>
+          {error ? (
+            <p className="text-sm text-destructive" role="alert">
+              {error}
+            </p>
+          ) : null}
+          <Button
+            type="submit"
+            disabled={loading}
+            className="w-full"
+            size="lg"
+          >
+            {loading ? "Đang xử lý…" : "Đăng nhập"}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

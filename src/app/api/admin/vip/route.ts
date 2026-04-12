@@ -8,10 +8,6 @@ const bodySchema = z.object({
   days: z.coerce.number().int().min(1).max(3650).optional().default(30),
 });
 
-/**
- * Kích hoạt VIP theo email (bảo vệ bằng ADMIN_SECRET).
- * POST /api/admin/vip  { "secret": "...", "email": "...", "days": 30 }
- */
 export async function POST(request: Request) {
   const adminSecret = process.env.ADMIN_SECRET;
   if (!adminSecret) {
@@ -54,6 +50,16 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json({ error: "user not found" }, { status: 404 });
   }
+
+  await prisma.vipAuditLog.create({
+    data: {
+      adminId: "api",
+      userId: user.id,
+      action: "grant",
+      days,
+      vipUntil,
+    },
+  });
 
   return NextResponse.json({ ok: true, user });
 }

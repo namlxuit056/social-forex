@@ -6,6 +6,7 @@ import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { isVipActive } from "@/lib/vip";
+import { rateLimit } from "@/lib/rate-limit";
 
 function optNum(fd: FormData, key: string): number | undefined {
   const raw = fd.get(key);
@@ -46,6 +47,9 @@ export async function createSignal(
   if (!parsed.success) {
     return { error: "Dữ liệu không hợp lệ." };
   }
+
+  const { ok } = rateLimit(`signal:${userId}`, 5, 60_000);
+  if (!ok) return { error: "Bạn đang đăng quá nhanh. Vui lòng chờ 1 phút." };
 
   const data = parsed.data;
   const dbUser = await prisma.user.findUnique({

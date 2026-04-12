@@ -1,8 +1,17 @@
 import { NextResponse } from "next/server";
-import { buildQuotes } from "@/lib/quotes/mock";
+import { resolveQuotes } from "@/lib/quotes/resolve-quotes";
+
+export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const tick = Math.floor(Date.now() / 3000);
-  const quotes = buildQuotes(tick);
-  return NextResponse.json({ updatedAt: new Date().toISOString(), quotes });
+  try {
+    const data = await resolveQuotes();
+    return NextResponse.json(data);
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "Server error";
+    return NextResponse.json(
+      { error: message, updatedAt: new Date().toISOString(), quotes: [] },
+      { status: 500 },
+    );
+  }
 }

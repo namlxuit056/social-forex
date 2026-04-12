@@ -1,3 +1,6 @@
+import { PageCtaRow } from "@/components/layout/page-cta-row";
+import { pageCtas } from "@/lib/page-cta-presets";
+
 const currencies = ["USD", "EUR", "JPY", "GBP", "AUD", "CAD", "CHF", "NZD"];
 
 /** Giá trị cố định (demo) — không dùng Math.random để tránh lệch SSR. */
@@ -16,28 +19,30 @@ export default function HeatmapPage() {
   }));
 
   function cellColor(v: number | null) {
-    if (v === null) return "bg-zinc-800";
-    if (v > 0.55) return "bg-emerald-900/70";
-    if (v < 0.45) return "bg-rose-900/60";
-    return "bg-zinc-800/80";
+    if (v === null) return "bg-muted";
+    if (v > 0.55) return "bg-primary/35";
+    if (v < 0.45) return "bg-destructive/35";
+    return "bg-muted/80";
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold text-white">Heatmap (demo)</h1>
-        <p className="mt-2 text-zinc-400">
-          Ma trận ngẫu nhiên để demo UI. Thực tế: tính % thay đổi theo phiên từ
+        <h1 className="font-heading text-2xl font-semibold text-foreground">
+          Heatmap (demo)
+        </h1>
+        <p className="mt-2 text-muted-foreground">
+          Ma trận cố định để demo UI. Thực tế: tính % thay đổi theo phiên từ
           dữ liệu giá.
         </p>
       </div>
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto rounded-xl border border-border p-4">
         <table className="border-collapse text-xs">
           <thead>
             <tr>
               <th className="p-1" />
               {currencies.map((c) => (
-                <th key={c} className="p-1 font-mono text-zinc-500">
+                <th key={c} className="p-1 font-mono text-muted-foreground">
                   {c}
                 </th>
               ))}
@@ -46,11 +51,11 @@ export default function HeatmapPage() {
           <tbody>
             {grid.map((row) => (
               <tr key={row.base}>
-                <td className="p-1 font-mono text-zinc-500">{row.base}</td>
+                <td className="p-1 font-mono text-muted-foreground">{row.base}</td>
                 {row.values.map((v, i) => (
                   <td
                     key={currencies[i]}
-                    className={`h-10 w-10 border border-zinc-900 p-0 text-center font-mono ${cellColor(v)}`}
+                    className={`h-10 w-10 border border-border p-0 text-center font-mono ${cellColor(v)}`}
                   >
                     {v === null ? null : v.toFixed(2)}
                   </td>
@@ -60,6 +65,7 @@ export default function HeatmapPage() {
           </tbody>
         </table>
       </div>
+      <PageCtaRow heading="Tiếp theo" items={[...pageCtas.trading, ...pageCtas.explore]} />
     </div>
   );
 }
