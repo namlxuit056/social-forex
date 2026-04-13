@@ -1,13 +1,26 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { Link } from "@/i18n/navigation";
+import {
+  AlertCircle,
+  Calendar,
+  LineChart,
+  Loader2,
+  Radio,
+  Star,
+} from "lucide-react";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { useFavorites } from "@/hooks/use-favorites";
 import type {
   QuoteRow,
   QuotesSource,
   QuotesWarningKey,
 } from "@/lib/quotes/types";
+import { sortQuoteRowsByFavorites } from "@/lib/quotes/sort-by-favorites";
+import { symbolToCurrencies } from "@/lib/signals/symbol-currencies";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -39,6 +52,12 @@ function formatWarning(
   return undefined;
 }
 
+function calendarHrefForSymbol(symbol: string): string {
+  const cur = symbolToCurrencies(symbol);
+  if (cur.length === 0) return "/calendar";
+  return `/calendar?currencies=${cur.map(encodeURIComponent).join(",")}`;
+}
+
 export function LiveQuotesTable({
   initial,
   initialSource,
@@ -46,7 +65,11 @@ export function LiveQuotesTable({
   initialUpdatedAt,
 }: Props) {
   const t = useTranslations("quotes");
+  const tChart = useTranslations("chart");
   const intlLocale = useLocale();
+  const { data: session } = useSession();
+  const { favorites, isFavorite, toggle, loaded: favoritesLoaded } =
+    useFavorites();
 
   const [rows, setRows] = useState(initial);
   const [updatedAt, setUpdatedAt] = useState<string | null>(
@@ -113,6 +136,17 @@ export function LiveQuotesTable({
 
   const dateLocale = intlLocale === "vi" ? "vi-VN" : "en-US";
 
+  const handlePin = useCallback(
+    (symbol: string) => {
+      if (!session?.user) {
+        window.alert(tChart("loginToSave"));
+        return;
+      }
+      toggle(symbol);
+    },
+    [session?.user, tChart, toggle],
+  );
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
@@ -151,9 +185,18 @@ export function LiveQuotesTable({
         </div>
       )}
 
+      {favoritesLoaded && favorites.length > 0 ? (
+        <p className="text-xs text-muted-foreground">
+          {t("watchlistPinnedHint")}
+        </p>
+      ) : null}
+
       <div className="space-y-6">
         {groups.map((g) => {
-          const subset = rows.filter((r) => r.group === g);
+          const subset = sortQuoteRowsByFavorites(
+            rows.filter((r) => r.group === g),
+            favorites,
+          );
           if (!subset.length) return null;
           const label =
             g === "major"
@@ -169,18 +212,27 @@ export function LiveQuotesTable({
             <section key={g}>
               <h3 className="mb-2 text-sm font-medium text-primary">{label}</h3>
               <div className="overflow-x-auto rounded-lg border border-border">
-                <table className="w-full min-w-[640px] text-left text-sm">
+                <table className="w-full min-w-[720px] text-left text-sm">
                   <thead className="bg-muted/50 text-muted-foreground">
                     <tr>
                       <th className="px-3 py-2 font-medium">{t("colPair")}</th>
                       <th className="px-3 py-2 font-medium">{t("colBid")}</th>
                       <th className="px-3 py-2 font-medium">{t("colAsk")}</th>
                       <th className="px-3 py-2 font-medium">{t("colChange")}</th>
+                      <th className="w-px whitespace-nowrap px-2 py-2 text-end font-medium">
+                        {t("colActions")}
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
                     {subset.map((r) => (
-                      <tr key={r.symbol} className="hover:bg-muted/40">
+                      <tr
+                        key={r.symbol}
+                        className={cn(
+                          "hover:bg-muted/40",
+                          isFavorite(r.symbol) && "bg-primary/5",
+                        )}
+                      >
                         <td className="px-3 py-2">
                           <span className="font-mono font-medium text-foreground">
                             {r.symbol}
@@ -203,6 +255,78 @@ export function LiveQuotesTable({
                         >
                           {r.changePct >= 0 ? "+" : ""}
                           {r.changePct}%
+                        </td>
+                        <td className="px-2 py-1.5">
+                          <div className="flex items-center justify-end gap-0.5">
+                            <Link
+                              href={`/chart?symbol=${encodeURIComponent(r.symbol)}`}
+                              aria-label={t("rowOpenChart", { symbol: r.symbol })}
+                              className={cn(
+                                buttonVariants({
+                                  variant: "ghost",
+                                  size: "icon",
+                                }),
+                                "size-8 shrink-0",
+                              )}
+                            >
+                              <LineChart className="size-4" />
+                            </Link>
+                            <Link
+                              href={calendarHrefForSymbol(r.symbol)}
+                              aria-label={t("rowOpenCalendar", {
+                                symbol: r.symbol,
+                              })}
+                              className={cn(
+                                buttonVariants({
+                                  variant: "ghost",
+                                  size: "icon",
+                                }),
+                                "size-8 shrink-0",
+                              )}
+                            >
+                              <Calendar className="size-4" />
+                            </Link>
+                            <Link
+                              href={`/signals?symbol=${encodeURIComponent(r.symbol)}`}
+                              aria-label={t("rowOpenSignals", {
+                                symbol: r.symbol,
+                              })}
+                              className={cn(
+                                buttonVariants({
+                                  variant: "ghost",
+                                  size: "icon",
+                                }),
+                                "size-8 shrink-0",
+                              )}
+                            >
+                              <Radio className="size-4" />
+                            </Link>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className={cn(
+                                "size-8 shrink-0",
+                                isFavorite(r.symbol) && "text-amber-400",
+                              )}
+                              aria-label={
+                                isFavorite(r.symbol)
+                                  ? t("rowUnpinWatchlist", { symbol: r.symbol })
+                                  : t("rowPinWatchlist", { symbol: r.symbol })
+                              }
+                              aria-pressed={isFavorite(r.symbol)}
+                              onClick={() => handlePin(r.symbol)}
+                            >
+                              <Star
+                                className="size-4"
+                                fill={
+                                  isFavorite(r.symbol)
+                                    ? "currentColor"
+                                    : "none"
+                                }
+                              />
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     ))}

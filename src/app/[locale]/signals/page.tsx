@@ -27,10 +27,14 @@ export const dynamic = "force-dynamic";
 
 export default async function SignalsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ symbol?: string }>;
 }) {
   const { locale } = await params;
+  const sp = await searchParams;
+  const symbolFromUrl = typeof sp.symbol === "string" ? sp.symbol : "";
   setRequestLocale(locale);
   const t = await getTranslations("signals");
   const tc = await getTranslations("common");
@@ -142,7 +146,11 @@ export default async function SignalsPage({
         </Card>
       )}
 
-      <SignalRoom signals={signals} showCreate={!!session?.user} />
+      <SignalRoom
+        signals={signals}
+        showCreate={!!session?.user}
+        initialSymbolFilter={symbolFromUrl}
+      />
       <Disclaimer />
       <PageCtaRow heading={tCommon("next")} items={ctaRow} />
     </div>

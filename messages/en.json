@@ -94,7 +94,14 @@
     "colChange": "Δ%",
     "warningMock": "QUOTES_PROVIDER=mock — simulated data.",
     "warningFallback": "{source} error ({message}). Showing simulated data.",
-    "networkError": "Network error"
+    "networkError": "Network error",
+    "colActions": "Links",
+    "watchlistPinnedHint": "★ Watchlist pairs are pinned to the top of each group (sign in to save).",
+    "rowOpenChart": "Open chart for {symbol}",
+    "rowOpenCalendar": "Open calendar filtered for {symbol}",
+    "rowOpenSignals": "Open signals filtered for {symbol}",
+    "rowPinWatchlist": "Add {symbol} to watchlist",
+    "rowUnpinWatchlist": "Remove {symbol} from watchlist"
   },
   "calendar": {
     "title": "Economic Calendar",
@@ -382,7 +389,16 @@
     "following": "Following",
     "publicJoined": "Member since {date}",
     "followers": "Followers",
-    "threads": "Threads"
+    "threads": "Threads",
+    "traderStats": {
+      "title": "Signal performance (closed)",
+      "disclaimer": "Based on signals closed on Social Forex. Past results do not predict future returns. Not investment advice.",
+      "empty": "No closed signals yet — stats appear after trades are closed on the platform.",
+      "insufficient": "{count} closed signal(s) on record. Win rate is shown after at least {min} closed signals.",
+      "winRateLabel": "Win rate",
+      "winsLosses": "{wins} wins · {losses} losses · {total} closed",
+      "viewSignals": "Open signal room"
+    }
   },
   "auth": {
     "signInTitle": "Sign in",

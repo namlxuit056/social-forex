@@ -132,4 +132,32 @@ body {
   html {
     @apply font-sans;
   }
+
+  /* Mọi vùng có thể bấm: con trỏ bàn tay */
+  a[href] {
+    @apply cursor-pointer;
+  }
+  button:not(:disabled) {
+    @apply cursor-pointer;
+  }
+  button:disabled {
+    @apply cursor-not-allowed;
+  }
+  [role="button"]:not([aria-disabled="true"]) {
+    @apply cursor-pointer;
+  }
+  [role="button"][aria-disabled="true"] {
+    @apply cursor-not-allowed;
+  }
+  summary {
+    @apply cursor-pointer;
+  }
+  select:not(:disabled) {
+    @apply cursor-pointer;
+  }
+  input[type="checkbox"],
+  input[type="radio"],
+  input[type="file"]:not(:disabled) {
+    @apply cursor-pointer;
+  }
 }

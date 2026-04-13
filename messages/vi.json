@@ -94,7 +94,14 @@
     "colChange": "Δ%",
     "warningMock": "QUOTES_PROVIDER=mock — dữ liệu giả lập.",
     "warningFallback": "Lỗi {source} ({message}). Đang hiển thị dữ liệu giả lập.",
-    "networkError": "Lỗi mạng"
+    "networkError": "Lỗi mạng",
+    "colActions": "Lối tắt",
+    "watchlistPinnedHint": "★ Cặp trong watchlist được ghim lên đầu mỗi nhóm (đăng nhập để lưu).",
+    "rowOpenChart": "Mở biểu đồ {symbol}",
+    "rowOpenCalendar": "Mở lịch đã lọc theo {symbol}",
+    "rowOpenSignals": "Mở tín hiệu lọc theo {symbol}",
+    "rowPinWatchlist": "Thêm {symbol} vào watchlist",
+    "rowUnpinWatchlist": "Gỡ {symbol} khỏi watchlist"
   },
   "calendar": {
     "title": "Lịch kinh tế",
@@ -382,7 +389,16 @@
     "following": "Đang follow",
     "publicJoined": "Tham gia {date}",
     "followers": "Follower",
-    "threads": "Thread"
+    "threads": "Thread",
+    "traderStats": {
+      "title": "Thống kê signal (đã đóng)",
+      "disclaimer": "Dựa trên signal đã đóng trên Social Forex. Kết quả quá khứ không báo hiệu tương lai. Không phải tư vấn đầu tư.",
+      "empty": "Chưa có signal đã đóng — thống kê sẽ hiện sau khi có lệnh đóng trên nền tảng.",
+      "insufficient": "Đang có {count} signal đã đóng. Win rate hiển thị khi có ít nhất {min} signal đã đóng.",
+      "winRateLabel": "Tỷ lệ thắng",
+      "winsLosses": "{wins} thắng · {losses} thua · {total} đã đóng",
+      "viewSignals": "Mở phòng tín hiệu"
+    }
   },
   "auth": {
     "signInTitle": "Đăng nhập",

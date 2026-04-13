@@ -39,6 +39,8 @@ type Props = {
   source: CalendarSource;
   warning?: string;
   syncedAt?: string;
+  /** Từ URL — set ban đầu; parent nên đổi `key` khi query đổi để reset filter. */
+  initialSelectedCurrencies?: string[];
 };
 
 export function EconomicCalendar({
@@ -46,6 +48,7 @@ export function EconomicCalendar({
   source,
   warning,
   syncedAt,
+  initialSelectedCurrencies = [],
 }: Props) {
   const t = useTranslations("calendar");
   const intlLocale = useLocale();
@@ -53,7 +56,7 @@ export function EconomicCalendar({
   const [zone, setZone] = useState<Zone>("vn");
   const [dateRange, setDateRange] = useState<DateRange>("today");
   const [selectedCurrencies, setSelectedCurrencies] = useState<Set<string>>(
-    new Set(),
+    () => new Set(initialSelectedCurrencies),
   );
   const [selectedImpacts, setSelectedImpacts] = useState<Set<Impact>>(
     new Set(["high", "medium", "low"]),

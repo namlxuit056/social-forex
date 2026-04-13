@@ -120,4 +120,36 @@ Nhãn chữ lấy từ `calendar.impactLow` / `impactMedShort` / `impactHigh` (i
 
 ---
 
+## Public profile — thẻ uy tín trader (*performance card*)
+
+**Tham chiếu spec:** `docs/specs.md` — *Thẻ uy tín trader (public performance) trên `/u/[userId]`*.  
+**Vị trí:** `/[locale]/u/[userId]` — ưu tiên dưới bio, trên (hoặc xen kẽ hợp lý với) grid follower/following/thread.
+
+### Wireframe
+
+```
+┌── Card (border-muted, bg-card/50) ──────────────────┐
+│ Title: “Signal performance” (i18n)                  │
+│ Disclaimer: text-xs text-muted-foreground, 1–2 dòng │
+├────────────────────────────────────────────────────┤
+│ [ Đủ mẫu ]   Win rate lớn (tabular-nums) + %        │
+│              Sub: X wins · Y losses · Z total       │
+│ [ Ít mẫu ]   Copy “chưa đủ lệnh đóng để hiển thị %” │
+│ [ Zero ]     Empty state ngắn                        │
+├────────────────────────────────────────────────────┤
+│ [outline] → Signal room (P1: filter theo tác giả)   │
+└────────────────────────────────────────────────────┘
+```
+
+### Màu & thứ bậc
+
+- **Không** dùng xanh lá “đảm bảo lợi nhuận”; win rate dùng `text-foreground` hoặc accent nhẹ (`primary` tinh chỉnh opacity).  
+- Số win/loss: `text-muted-foreground`; có thể badge outline `secondary` cho “W / L” count.
+
+### Component
+
+- RSC nhận aggregate từ server; không tính trên client.
+
+---
+
 *Cập nhật khi ship từng phase trong `docs/specs.md` (Signal Room UX/UI).*

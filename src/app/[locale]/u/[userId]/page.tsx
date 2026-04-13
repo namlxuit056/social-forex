@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
 import { auth } from "@/auth";
+import { TraderPerformanceCard } from "@/components/profile/trader-performance-card";
 import { FollowButton } from "@/components/social/follow-button";
 import { buttonVariants } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
@@ -90,6 +91,8 @@ export default async function PublicProfilePage({ params }: Props) {
           )}
         </div>
       </div>
+
+      <TraderPerformanceCard userId={userId} />
 
       <dl className="grid grid-cols-3 gap-4 rounded-xl border border-border bg-card/50 p-4 text-center text-sm ring-1 ring-foreground/5">
         <div>

@@ -1,6 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { EconomicCalendar } from "@/components/calendar/economic-calendar";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
+import { parseCalendarCurrencySearchParams } from "@/lib/calendar/parse-currency-search-params";
 import { resolveCalendarEvents } from "@/lib/calendar/resolve-calendar";
 import { pageCtaItems } from "@/lib/page-cta-i18n";
 
@@ -19,14 +20,23 @@ export const dynamic = "force-dynamic";
 
 export default async function CalendarPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ currencies?: string; currency?: string }>;
 }) {
   const { locale } = await params;
+  const sp = await searchParams;
   setRequestLocale(locale);
   const t = await getTranslations("calendar");
   const tCommon = await getTranslations("common");
   const cal = await resolveCalendarEvents();
+
+  const initialCurrencies = parseCalendarCurrencySearchParams(sp);
+  const calendarFilterKey =
+    initialCurrencies.length > 0
+      ? [...initialCurrencies].sort().join(",")
+      : "all";
 
   const warningText =
     cal.warning &&
@@ -45,10 +55,12 @@ export default async function CalendarPage({
         <p className="mt-2 text-muted-foreground">{t("description")}</p>
       </div>
       <EconomicCalendar
+        key={calendarFilterKey}
         events={cal.events}
         source={cal.source}
         warning={warningText ?? undefined}
         syncedAt={cal.syncedAt}
+        initialSelectedCurrencies={initialCurrencies}
       />
       <PageCtaRow heading={tCommon("next")} items={ctaRow} />
     </div>

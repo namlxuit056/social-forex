@@ -1,7 +1,9 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "@/i18n/navigation";
 import { ThumbsDown, MessageCircle, ThumbsUp } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { closeSignal } from "@/actions/signals";
@@ -78,16 +80,24 @@ const toolbarSelectClass =
 export function SignalRoom({
   signals,
   showCreate,
+  initialSymbolFilter = "",
 }: {
   signals: SignalRow[];
   showCreate: boolean;
+  /** Từ `?symbol=` trên URL (server truyền xuống). */
+  initialSymbolFilter?: string;
 }) {
   const t = useTranslations("signals");
   const tn = useTranslations("nav");
   const tc = useTranslations("common");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const [tierFilter, setTierFilter] = useState<"all" | "FREE" | "VIP">("all");
-  const [symbolQuery, setSymbolQuery] = useState("");
+  const [symbolQuery, setSymbolQuery] = useState(() =>
+    initialSymbolFilter.trim(),
+  );
 
   const filtered = useMemo(() => {
     const q = symbolQuery.trim().toUpperCase();
@@ -99,6 +109,22 @@ export function SignalRoom({
   }, [signals, tierFilter, symbolQuery]);
 
   const filtersActive = tierFilter !== "all" || symbolQuery.trim() !== "";
+
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      const q = symbolQuery.trim().toUpperCase();
+      const params = new URLSearchParams(searchParams.toString());
+      if (q) params.set("symbol", q);
+      else params.delete("symbol");
+      const next = params.toString();
+      const prev = searchParams.toString();
+      if (next === prev) return;
+      router.replace(next ? `${pathname}?${next}` : pathname, {
+        scroll: false,
+      });
+    }, 400);
+    return () => window.clearTimeout(id);
+  }, [symbolQuery, pathname, router, searchParams]);
 
   return (
     <div className="space-y-10">
@@ -157,6 +183,7 @@ export function SignalRoom({
                   onClick={() => {
                     setTierFilter("all");
                     setSymbolQuery("");
+                    router.replace(pathname, { scroll: false });
                   }}
                 >
                   {t("filterReset")}

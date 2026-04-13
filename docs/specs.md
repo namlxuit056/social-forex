@@ -396,3 +396,84 @@ Trong các đề xuất “tính năng đặc biệt”, **ưu tiên triển kha
 - **Senior Dev:** module `symbolToCurrencies(symbol: string): string[]`; hàm `getUpcomingHighImpactEvents({ currencies, from, to })`; tích hợp RSC hoặc server component tại `signals/[id]`; không hardcode copy.
 - **PM:** tạo GitHub Issue một track; gắn nhãn `feature`, `signals`, `calendar`, `i18n`.
 - **QA:** checklist trên staging với DB có/không có sự kiện; regression trang calendar.
+
+---
+
+# Spec — Thẻ uy tín trader (public performance) trên `/u/[userId]`
+
+## Quyết định PM (chốt epic)
+
+Trong hai hướng “đặc biệt” đã đề xuất:
+
+| Epic | Góc | Ghi chú |
+|------|-----|--------|
+| **Signal → Journal một chạm** | Kỷ luật / workflow | Nối signal với nhật ký cá nhân. |
+| **Thẻ uy tín trader (epic này)** | **Viral / share / social proof** | Số liệu công khai trên hồ sơ, dễ chụp màn hình và khoe link `/u/...`. |
+
+**Chốt cho sprint epic tiếp theo (hướng hình ảnh):** triển khai **thẻ uy tín trader** trên trang hồ sơ công khai. Epic **Signal → Journal** giữ trong backlog (sprint sau hoặc song song nếu đủ nguồn lực).
+
+## Mục tiêu
+
+- Là **visitor**, tôi muốn **nhìn nhanh** mức độ “có số liệu” của người đăng signal trên nền tảng — **win rate** và **quy mô mẫu** — để quyết định có follow / xem thêm signal hay không.
+- Là **trader có hồ sơ**, tôi muốn **uy tín được tính tự động** từ lịch sử **đóng lệnh công khai** (signal), không phải tự khai báo.
+
+## Phạm vi nguồn dữ liệu (P0 — bắt buộc minh bạch)
+
+- **Chỉ** bản ghi `Signal` thỏa:
+  - `authorId` = user của trang `/u/[userId]`
+  - `status` ∈ `{ CLOSED_WIN, CLOSED_LOSS }`
+- **Loại trừ:** `ACTIVE`, `CANCELLED`.
+- **VIP / FREE:** cùng một quy tắc đếm — trạng thái đóng là một phần hồ sơ công khai trên nền tảng; không tách dòng VIP trong MVP (P2 có thể tách báo cáo nếu compliance yêu cầu).
+
+**Không** dùng `TradeJournal` làm nguồn P0 (dữ liệu nhật ký mang tính **cá nhân**, không đồng nhất “công khai trên nền tảng” như signal room).
+
+## Định nghĩa chỉ số
+
+| Chỉ số | Công thức / quy tắc |
+|--------|---------------------|
+| **Số lệnh đã đóng (mẫu)** | `n = count(CLOSED_WIN) + count(CLOSED_LOSS)` |
+| **Win rate** | `count(CLOSED_WIN) / n × 100`, làm tròn **một** chữ số thập phân (hoặc số nguyên % — UX chốt). |
+| **Điều kiện hiển thị %** | Chỉ hiển thị win rate khi `n >= N_min`. **N_min đề xuất:** `5` (tránh ảnh 100% với 1 lệnh). Nếu `n < N_min` và `n > 0`: có thể hiện “**X lệnh đã đóng — cần thêm dữ liệu để hiển thị tỷ lệ**” (copy i18n). Nếu `n = 0`: empty state ngắn. |
+
+## Trung bình R (avg R)
+
+- **Ngoài phạm vi MVP (P1):** hiện tại `Signal` đóng không lưu **exit price** / bội số R; không suy ra “avg R” đúng nghĩa mà không thêm field hoặc không liên kết journal.  
+- **P1 (spike):** quy ước giản lược (vd. coi mỗi lệnh 1R risk) **chỉ** khi có đủ SL/TP và được legal/UX chấp nhận disclaimer — ghi spec riêng khi chốt.
+
+## User stories
+
+1. Là **visitor**, tôi xem `/u/[userId]` và thấy một **card** (hoặc strip) “**Thống kê signal (đã đóng)**” với win rate (khi đủ mẫu), số win / loss, và **disclaimer** một dòng.  
+2. Là **visitor**, khi user **chưa có** lệnh đóng nào, tôi thấy **empty state** thân thiện, không ô trống lỗi.  
+3. Là **PM/Compliance**, tôi yêu cầu disclaimer: *số liệu từ hoạt động đăng signal trên site, quá khứ không báo hiệu tương lai, không phải tư vấn đầu tư* — **en + vi**.  
+4. Là **user**, tôi có thể **đi tới danh sách signal** (P0: link tới `/signals`; P1: lọc theo tác giả nếu có query/UI).
+
+## UX/UI (đồng bộ design system)
+
+- Vị trí đề xuất: **dưới** block follow/message và **trên** hoặc **dưới** grid follower/following/thread — ưu tiên **dưới tiêu đề + bio**, **trên** stats social (followers…) để “uy tín trading” nổi trước mạng xã hội.  
+- Trực quan: **win rate** typography lớn (heading nhỏ), win/loss phụ (`text-muted`), có thể thanh progress hoặc donut **tuỳ UX** (`docs/design-system.md` bổ sung pattern “performance card”).  
+- Màu: tránh “xanh lá = chắc chắn kiếm tiền”; ưu tiên **neutral + accent nhẹ**; không trùng màu `CLOSED_WIN`/`CLOSED_LOSS` của signal room nếu gây hiểu nhầm — UX quyết.
+
+## i18n
+
+- Namespace gợi ý: `profile.traderStats` (hoặc `publicProfile.performance`) — mọi chuỗi trong **`messages/en.json`** và **`messages/vi.json`**.
+
+## Hiệu năng & chỉ mục
+
+- Một query aggregate (`groupBy` status hoặc hai `count`) theo `authorId` + `status` — có thể chấp nhận ở MVP.  
+- Nếu chậm: thêm `@@index([authorId, status])` trên `Signal` (migration) — Senior Dev đo trước khi thêm.
+
+## Tiêu chí chấp nhận (QA)
+
+- [ ] User có ≥ 5 lệnh đóng win/loss → hiển thị **win rate** đúng công thức (so với tay / SQL).  
+- [ ] User có 1–4 lệnh đóng → **không** hiển thị % gây hiểu nhầm; đúng copy đã chốt.  
+- [ ] User không có CLOSED_WIN/LOSS → empty state.  
+- [ ] `CANCELLED` / `ACTIVE` **không** vào mẫu.  
+- [ ] Disclaimer hiển thị trên card; locale `en`/`vi` đúng.  
+- [ ] Không lộ email; không truy vấn journal của user khác.
+
+## Handoff
+
+- **UX/UI:** wireframe card + trạng thái ít mẫu / đủ mẫu / zero; cập nhật `docs/design-system.md` (pattern performance card).  
+- **Senior Dev:** hàm aggregate hoặc query tối ưu; component RSC trên `u/[userId]/page.tsx`; i18n.  
+- **PM:** GitHub Issue epic; nhãn `feature`, `profile`, `signals`, `i18n`.  
+- **QA:** seed hoặc staging với user 0 / 3 / 10 lệnh đóng.
