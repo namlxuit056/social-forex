@@ -4,7 +4,7 @@ const GROUPS = {
   explore: ["/quotes", "/tools", "/dashboard"],
   trading: ["/chart", "/calendar", "/signals"],
   community: ["/forum", "/leaderboard", "/messages"],
-  learn: ["/academy", "/resources", "/webinar"],
+  learn: ["/start", "/academy", "/resources", "/webinar"],
   risk: ["/brokers", "/partners", "/profile"],
 } as const;
 
@@ -18,6 +18,7 @@ const LABEL_KEY: Record<string, string> = {
   "/forum": "labelForum",
   "/leaderboard": "labelLeaderboard",
   "/messages": "labelMessages",
+  "/start": "labelStartHere",
   "/academy": "labelAcademy",
   "/resources": "labelResources",
   "/webinar": "labelWebinar",

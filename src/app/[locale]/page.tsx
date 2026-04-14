@@ -1,11 +1,18 @@
-import { BarChart3, ExternalLink, MessageSquare, Shield } from "lucide-react";
+import { BarChart3, BookOpen, ExternalLink, Shield } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import { FaqJsonLd } from "@/components/seo/faq-json-ld";
 import { buttonVariants } from "@/components/ui/button";
 import { getExnessAffiliateUrl } from "@/lib/exness-affiliate";
 import { cn } from "@/lib/utils";
 
 const blocks = [
+  {
+    titleKey: "block_beginner_title" as const,
+    descKey: "block_beginner_desc" as const,
+    href: "/start" as const,
+    icon: BookOpen,
+  },
   {
     titleKey: "block_tools_title" as const,
     descKey: "block_tools_desc" as const,
@@ -18,12 +25,6 @@ const blocks = [
     href: "/quotes" as const,
     icon: Shield,
   },
-  {
-    titleKey: "block_social_title" as const,
-    descKey: "block_social_desc" as const,
-    href: "/forum" as const,
-    icon: MessageSquare,
-  },
 ] as const;
 
 export default async function HomePage({
@@ -35,12 +36,20 @@ export default async function HomePage({
   setRequestLocale(locale);
 
   const tHome = await getTranslations("home");
-  const tNav = await getTranslations("nav");
-  const tCommon = await getTranslations("common");
+  const tf = await getTranslations("schemaFaqHome");
   const exnessAffiliateUrl = getExnessAffiliateUrl();
+
+  const faqItems = [
+    { question: tf("q1"), answer: tf("a1") },
+    { question: tf("q2"), answer: tf("a2") },
+    { question: tf("q3"), answer: tf("a3") },
+    { question: tf("q4"), answer: tf("a4") },
+    { question: tf("q5"), answer: tf("a5") },
+  ];
 
   return (
     <div className="space-y-16">
+      <FaqJsonLd items={faqItems} />
       <section className="text-center">
         <p className="text-sm font-medium uppercase tracking-widest text-primary">
           {tHome("badge")}
@@ -61,9 +70,9 @@ export default async function HomePage({
         <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
           {tHome("subtitle")}
         </p>
-        <div className="mt-10 flex flex-wrap justify-center gap-4">
-          <Link href="/quotes" className={cn(buttonVariants({ size: "lg" }))}>
-            {tHome("cta_quotes")}
+        <div className="mt-10 flex flex-wrap justify-center gap-3">
+          <Link href="/start" className={cn(buttonVariants({ size: "lg" }))}>
+            {tHome("cta_start")}
           </Link>
           <Link
             href="/academy"
@@ -72,13 +81,25 @@ export default async function HomePage({
               "border-border",
             )}
           >
-            {tNav("academy")}
+            {tHome("cta_academy")}
           </Link>
           <Link
-            href="/dashboard"
-            className={cn(buttonVariants({ variant: "secondary", size: "lg" }))}
+            href="/calendar"
+            className={cn(
+              buttonVariants({ variant: "outline", size: "lg" }),
+              "border-border",
+            )}
           >
-            {tCommon("dashboard")}
+            {tHome("cta_calendar")}
+          </Link>
+          <Link
+            href="/quotes"
+            className={cn(
+              buttonVariants({ variant: "outline", size: "lg" }),
+              "border-border",
+            )}
+          >
+            {tHome("cta_quotes")}
           </Link>
         </div>
         <div className="mt-10 flex justify-center px-4">

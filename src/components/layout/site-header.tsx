@@ -20,6 +20,7 @@ const primaryNavKeys = [
 ] as const;
 
 const secondaryNavKeys = [
+  { href: "/start", key: "startHere" },
   { href: "/heatmap", key: "heatmap" },
   { href: "/sentiment", key: "sentiment" },
   { href: "/leaderboard", key: "leaderboard" },

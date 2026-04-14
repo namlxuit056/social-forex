@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 
 const footerNavKeys = [
+  { href: "/start", key: "startHere" },
   { href: "/quotes", key: "quotes" },
   { href: "/calendar", key: "calendar" },
   { href: "/forum", key: "forum" },
@@ -23,7 +24,7 @@ export async function SiteFooter() {
             <p className="font-medium text-foreground/90">Social Forex</p>
             <p className="mt-2 max-w-md leading-relaxed">{tf("tagline")}</p>
           </div>
-          <nav className="flex flex-wrap gap-x-4 gap-y-1 text-xs">
+          <nav className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
             {footerNavKeys.map((l) => (
               <Link
                 key={l.href}
@@ -33,6 +34,12 @@ export async function SiteFooter() {
                 {tn(l.key)}
               </Link>
             ))}
+            <a
+              href="/llms.txt"
+              className="text-muted-foreground transition hover:text-foreground"
+            >
+              {tf("llmsLink")}
+            </a>
           </nav>
         </div>
 

@@ -1,11 +1,13 @@
 import type { MetadataRoute } from "next";
 import { academyLessons } from "@/lib/content/academy";
 import { routing } from "@/i18n/routing";
+import { getSiteUrl } from "@/lib/site-url";
 
-const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://socialforex.vn";
+const BASE = getSiteUrl();
 
 const staticPaths = [
   { path: "", changeFrequency: "daily" as const, priority: 1.0 },
+  { path: "/start", changeFrequency: "weekly" as const, priority: 0.95 },
   { path: "/quotes", changeFrequency: "hourly" as const, priority: 0.9 },
   { path: "/calendar", changeFrequency: "hourly" as const, priority: 0.9 },
   { path: "/chart", changeFrequency: "daily" as const, priority: 0.7 },
@@ -24,7 +26,14 @@ const staticPaths = [
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
-  const entries: MetadataRoute.Sitemap = [];
+  const entries: MetadataRoute.Sitemap = [
+    {
+      url: `${BASE}/llms.txt`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.65,
+    },
+  ];
 
   for (const locale of routing.locales) {
     const prefix = locale === routing.defaultLocale ? "" : `/${locale}`;

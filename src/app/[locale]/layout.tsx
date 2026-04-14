@@ -6,12 +6,11 @@ import { routing } from "@/i18n/routing";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { AppProviders } from "@/components/providers/app-providers";
+import { getSiteUrl } from "@/lib/site-url";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
-
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://socialforex.vn";
 
 export async function generateMetadata({
   params,
@@ -36,7 +35,7 @@ export async function generateMetadata({
     openGraph: {
       type: "website",
       locale: ogLocale,
-      url: siteUrl,
+      url: getSiteUrl(),
       siteName: "Social Forex",
       title: t("ogTitle"),
       description: t("ogDescription"),
