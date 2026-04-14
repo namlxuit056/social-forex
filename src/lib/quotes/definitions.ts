@@ -5,7 +5,10 @@ export type QuoteDefinition = {
   symbol: string;
   name: string;
   group: QuoteGroup;
-  /** Yahoo Finance symbol */
+  /**
+   * Yahoo Finance symbol. Gold/silver spot tickers `XAUUSD=X` / `XAGUSD=X`
+   * often return no data; we use liquid COMEX futures as price proxy.
+   */
   yahoo: string;
   mockMid: number;
 };
@@ -21,8 +24,8 @@ export const QUOTE_DEFINITIONS: QuoteDefinition[] = [
   { symbol: "EURGBP", name: "Euro / Bảng", group: "minor", yahoo: "EURGBP=X", mockMid: 0.858 },
   { symbol: "EURJPY", name: "Euro / Yên", group: "minor", yahoo: "EURJPY=X", mockMid: 161.9 },
   { symbol: "GBPJPY", name: "Bảng / Yên", group: "minor", yahoo: "GBPJPY=X", mockMid: 188.7 },
-  { symbol: "XAUUSD", name: "Vàng spot", group: "metal", yahoo: "XAUUSD=X", mockMid: 2650 },
-  { symbol: "XAGUSD", name: "Bạc spot", group: "metal", yahoo: "XAGUSD=X", mockMid: 31.2 },
+  { symbol: "XAUUSD", name: "Vàng spot", group: "metal", yahoo: "GC=F", mockMid: 2650 },
+  { symbol: "XAGUSD", name: "Bạc spot", group: "metal", yahoo: "SI=F", mockMid: 31.2 },
   { symbol: "USOIL", name: "Dầu WTI (tham chiếu)", group: "energy", yahoo: "CL=F", mockMid: 78.4 },
   { symbol: "BTCUSD", name: "Bitcoin", group: "crypto", yahoo: "BTC-USD", mockMid: 98500 },
   { symbol: "ETHUSD", name: "Ethereum", group: "crypto", yahoo: "ETH-USD", mockMid: 3450 },

@@ -2,7 +2,7 @@ import { QUOTE_DEFINITIONS } from "@/lib/quotes/definitions";
 import type { QuoteRow } from "@/lib/quotes/types";
 import YahooFinance from "yahoo-finance2";
 
-const yahooFinance = new YahooFinance();
+const yahooFinance = new YahooFinance({ suppressNotices: ["yahooSurvey"] });
 
 function decimalsFor(def: (typeof QUOTE_DEFINITIONS)[0], mid: number) {
   if (def.group === "crypto") return 2;
