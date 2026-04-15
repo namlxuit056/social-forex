@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { Shield } from "lucide-react";
+import { Bell, Shield } from "lucide-react";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { MobileNav } from "@/components/layout/mobile-nav";
@@ -42,12 +42,16 @@ export async function SiteHeader() {
   const ta = await getTranslations("admin");
 
   let isStaff = false;
+  let unreadNotifications = 0;
   if (session?.user?.id) {
     const u = await prisma.user.findUnique({
       where: { id: session.user.id },
       select: { role: true },
     });
     isStaff = u?.role === "ADMIN" || u?.role === "MOD";
+    unreadNotifications = await prisma.notification.count({
+      where: { userId: session.user.id, readAt: null },
+    });
   }
 
   return (
@@ -87,6 +91,18 @@ export async function SiteHeader() {
 
           {session?.user ? (
             <>
+              <Link
+                href="/notifications"
+                className="relative inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                aria-label={tc("notificationsBellAria")}
+              >
+                <Bell className="size-[1.125rem]" aria-hidden />
+                {unreadNotifications > 0 ? (
+                  <span className="absolute -right-0.5 -top-0.5 flex min-w-[1rem] items-center justify-center rounded-full bg-primary px-1 text-[0.6rem] font-semibold leading-none text-primary-foreground">
+                    {unreadNotifications > 99 ? "99+" : unreadNotifications}
+                  </span>
+                ) : null}
+              </Link>
               <Link
                 href="/profile"
                 className="hidden rounded-md px-2 py-1 text-sm text-foreground/80 transition hover:bg-muted hover:text-foreground sm:inline-flex"

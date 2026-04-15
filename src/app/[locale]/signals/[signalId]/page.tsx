@@ -17,8 +17,29 @@ import { symbolToCurrencies } from "@/lib/signals/symbol-currencies";
 import { absoluteUrl } from "@/lib/site-url";
 import { signalLevelDetail } from "@/components/signals/signal-level-classes";
 import { SignalShareCopy } from "@/components/signals/signal-share-copy";
+import { SignalCloseForm } from "@/components/signals/signal-close-form";
+import { SignalEditForm } from "@/components/signals/signal-edit-form";
 import { SignalReactions } from "./signal-reactions";
 import { SignalComments } from "./signal-comments";
+
+const SIGNAL_EDIT_WINDOW_MS = 48 * 60 * 60 * 1000;
+
+function auditFieldLabel(field: string, t: (key: string) => string) {
+  switch (field) {
+    case "stopLoss":
+      return t("slField");
+    case "takeProfit":
+      return t("tp1Field");
+    case "takeProfit2":
+      return t("tp2Field");
+    case "takeProfit3":
+      return t("tp3Field");
+    case "notes":
+      return t("notes");
+    default:
+      return field;
+  }
+}
 
 export async function generateMetadata({
   params,
@@ -27,12 +48,18 @@ export async function generateMetadata({
 }) {
   const { locale, signalId } = await params;
   setRequestLocale(locale);
+  const t = await getTranslations("signals");
   const signal = await prisma.signal.findUnique({
     where: { id: signalId },
     select: { symbol: true, direction: true },
   });
-  if (!signal) return { title: "Signal" };
-  return { title: `${signal.symbol} ${signal.direction}` };
+  if (!signal) return { title: t("title") };
+  return {
+    title: t("detailMetaTitle", {
+      symbol: signal.symbol,
+      direction: signal.direction,
+    }),
+  };
 }
 
 export const dynamic = "force-dynamic";
@@ -56,6 +83,10 @@ export default async function SignalDetailPage({
         include: { author: { select: { id: true, name: true, email: true } } },
       },
       images: { orderBy: { sortOrder: "asc" }, select: { url: true } },
+      editLogs: {
+        orderBy: { createdAt: "desc" },
+        take: 40,
+      },
     },
   });
 
@@ -77,6 +108,12 @@ export default async function SignalDetailPage({
   const shareUrl = absoluteUrl(`/signals/${signalId}`, locale);
   const imageCount = signal.images.length;
   const imageUrls = masked ? [] : signal.images.map((i) => i.url);
+  const isAuthor = userId === signal.authorId;
+  const editDeadline = new Date(
+    signal.createdAt.getTime() + SIGNAL_EDIT_WINDOW_MS,
+  );
+  const editLogs =
+    isAuthor && signal.editLogs.length > 0 ? signal.editLogs : [];
 
   const likes = signal.reactions.filter((r) => r.type === "LIKE").length;
   const dislikes = signal.reactions.filter((r) => r.type === "DISLIKE").length;
@@ -136,6 +173,12 @@ export default async function SignalDetailPage({
             {signal.author.name ?? signal.author.email} ·{" "}
             {new Date(signal.createdAt).toLocaleString(locale)}
           </p>
+          {signal.status !== "ACTIVE" && signal.closedAt ? (
+            <p className="text-sm text-muted-foreground">
+              {t("closedAtLabel")}{" "}
+              {new Date(signal.closedAt).toLocaleString(locale)}
+            </p>
+          ) : null}
 
           <SignalImageGallery
             imageUrls={imageUrls}
@@ -187,22 +230,62 @@ export default async function SignalDetailPage({
             </>
           )}
 
-          {userId === signal.authorId ? (
-            <div className="flex flex-wrap gap-2 pt-1">
-              <SignalShareCopy
-                show
-                symbol={signal.symbol}
-                direction={signal.direction}
-                tier={signal.tier}
-                status={signal.status}
-                entry={signal.entry}
+          {isAuthor && !masked && signal.status === "ACTIVE" ? (
+            <div className="space-y-2 pt-2">
+              <h3 className="text-sm font-medium text-foreground">
+                {t("editSectionTitle")}
+              </h3>
+              <SignalEditForm
+                signalId={signalId}
                 stopLoss={signal.stopLoss}
                 takeProfit={signal.takeProfit}
                 takeProfit2={signal.takeProfit2}
                 takeProfit3={signal.takeProfit3}
                 notes={signal.notes}
-                signalUrl={shareUrl}
+                editDeadlineIso={editDeadline.toISOString()}
+                locale={locale}
               />
+            </div>
+          ) : null}
+
+          {editLogs.length > 0 ? (
+            <div className="space-y-2 border-t border-border/40 pt-4">
+              <h3 className="text-sm font-medium text-foreground">
+                {t("editAuditTitle")}
+              </h3>
+              <ul className="space-y-1.5 font-mono text-xs text-muted-foreground">
+                {editLogs.map((log) => (
+                  <li key={log.id}>
+                    {new Date(log.createdAt).toLocaleString(locale)} ·{" "}
+                    {auditFieldLabel(log.field, t)}:{" "}
+                    {log.oldValue ?? "—"} → {log.newValue ?? "—"}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
+          {isAuthor ? (
+            <div className="flex flex-col gap-3 pt-2">
+              {signal.status === "ACTIVE" ? (
+                <SignalCloseForm signalId={signalId} />
+              ) : null}
+              <div className="flex flex-wrap gap-2">
+                <SignalShareCopy
+                  show
+                  symbol={signal.symbol}
+                  direction={signal.direction}
+                  tier={signal.tier}
+                  status={signal.status}
+                  entry={signal.entry}
+                  stopLoss={signal.stopLoss}
+                  takeProfit={signal.takeProfit}
+                  takeProfit2={signal.takeProfit2}
+                  takeProfit3={signal.takeProfit3}
+                  notes={signal.notes}
+                  signalUrl={shareUrl}
+                />
+              </div>
             </div>
           ) : null}
 

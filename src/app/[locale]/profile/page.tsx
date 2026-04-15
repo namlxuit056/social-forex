@@ -9,6 +9,9 @@ import { cn } from "@/lib/utils";
 import { prisma } from "@/lib/prisma";
 import { isVipActive } from "@/lib/vip";
 import { pageCtaItems } from "@/lib/page-cta-i18n";
+import { updateNotificationSettings } from "@/actions/notifications";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 
 export async function generateMetadata({
   params,
@@ -53,7 +56,12 @@ export default async function ProfilePage({
 
   const dbUser = await prisma.user.findUnique({
     where: { id: session.user.id },
-    select: { vipUntil: true },
+    select: {
+      vipUntil: true,
+      notifySignalFollow: true,
+      notifySignalFavoriteSym: true,
+      notifySignalVipBroadcast: true,
+    },
   });
   const vip = isVipActive(dbUser?.vipUntil);
 
@@ -116,6 +124,70 @@ export default async function ProfilePage({
           </div>
         )}
       </div>
+
+      <div className="rounded-xl border border-border bg-card/50 p-6 ring-1 ring-foreground/5">
+        <h2 className="font-medium text-foreground">{t("notificationPrefsTitle")}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{t("notificationPrefsHint")}</p>
+        <form action={updateNotificationSettings} className="mt-4 space-y-4">
+          <div className="flex items-start gap-3">
+            <input
+              id="notify-follow"
+              type="checkbox"
+              name="notifySignalFollow"
+              value="on"
+              defaultChecked={dbUser?.notifySignalFollow ?? true}
+              className="mt-1 size-4 rounded border-border"
+            />
+            <div>
+              <Label htmlFor="notify-follow" className="text-sm font-medium">
+                {t("notifySignalFollow")}
+              </Label>
+              <p className="text-xs text-muted-foreground">{t("notifySignalFollowHint")}</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <input
+              id="notify-fav"
+              type="checkbox"
+              name="notifySignalFavoriteSym"
+              value="on"
+              defaultChecked={dbUser?.notifySignalFavoriteSym ?? true}
+              className="mt-1 size-4 rounded border-border"
+            />
+            <div>
+              <Label htmlFor="notify-fav" className="text-sm font-medium">
+                {t("notifySignalFavoriteSym")}
+              </Label>
+              <p className="text-xs text-muted-foreground">{t("notifySignalFavoriteSymHint")}</p>
+            </div>
+          </div>
+          <div className="flex items-start gap-3">
+            <input
+              id="notify-vip-broadcast"
+              type="checkbox"
+              name="notifySignalVipBroadcast"
+              value="on"
+              defaultChecked={dbUser?.notifySignalVipBroadcast ?? false}
+              disabled={!vip}
+              className="mt-1 size-4 rounded border-border disabled:opacity-50"
+            />
+            <div>
+              <Label htmlFor="notify-vip-broadcast" className="text-sm font-medium">
+                {t("notifySignalVipBroadcast")}
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                {vip
+                  ? t("notifySignalVipBroadcastHint")
+                  : t("notifySignalVipBroadcastVipOnly")}
+              </p>
+            </div>
+          </div>
+          <Button type="submit" size="sm">
+            {t("notificationPrefsSave")}
+          </Button>
+        </form>
+      </div>
+
       <PageCtaRow heading={tc("ctaDiscovery")} items={ctaRow} />
     </div>
   );

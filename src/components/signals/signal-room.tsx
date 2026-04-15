@@ -1,11 +1,11 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { ChevronRight, MessageCircle, ThumbsDown, ThumbsUp } from "lucide-react";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
-import { closeSignal } from "@/actions/signals";
+import { SignalCloseForm } from "@/components/signals/signal-close-form";
 import { SignalCardNews } from "@/components/signals/signal-card-news";
 import { SignalShareCopy } from "@/components/signals/signal-share-copy";
 import { SignalCreateForm } from "@/components/signals/signal-create-form";
@@ -25,6 +25,7 @@ import {
 } from "@/lib/signals/signal-list-query";
 import type { SignalCardNewsEvent } from "@/lib/signals/signal-list-news";
 import { signalLevel } from "@/components/signals/signal-level-classes";
+import { FollowButton } from "@/components/social/follow-button";
 import { cn } from "@/lib/utils";
 
 type SignalRow = {
@@ -45,6 +46,8 @@ type SignalRow = {
   authorImage: string | null;
   authorId: string;
   isAuthor: boolean;
+  /** Viewer đã follow tác giả (chỉ khi đăng nhập và không phải tác giả). */
+  viewerFollowsAuthor: boolean;
   shareUrl: string;
   likes: number;
   dislikes: number;
@@ -53,8 +56,6 @@ type SignalRow = {
   imageCount: number;
   createdAt: string;
 };
-
-const closeInitial: { error?: string; ok?: boolean } | null = null;
 
 function statusLabel(
   status: SignalRow["status"],
@@ -121,9 +122,13 @@ export function SignalRoom({
   hasMore,
   newsBySignalId = {},
   newsContextHours = 24,
+  favoriteSymbols = [],
+  currentUserId = null,
 }: {
   signals: SignalRow[];
   showCreate: boolean;
+  currentUserId?: string | null;
+  favoriteSymbols?: string[];
   initialSymbolFilter?: string;
   initialAuthorFilter?: string;
   initialStatusFilter?: SignalStatusFilter;
@@ -297,6 +302,43 @@ export function SignalRoom({
             </p>
           ) : null}
         </div>
+
+        {favoriteSymbols.length > 0 ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-medium text-muted-foreground">
+              {t("watchlistQuickLabel")}
+            </span>
+            {favoriteSymbols.map((sym) => {
+              const active =
+                initialSymbolFilter.trim().toUpperCase() === sym.toUpperCase();
+              return (
+                <Link
+                  key={sym}
+                  href={buildSignalsListHref({
+                    pathname,
+                    symbol: sym,
+                    author: initialAuthorFilter,
+                    tier: tierFilter,
+                    status: statusFilter,
+                    period: periodFilter,
+                    tz: tzFilter,
+                    sort,
+                    page: 1,
+                  })}
+                  scroll={false}
+                  className={cn(
+                    "rounded-full border px-2.5 py-1 font-mono text-xs font-medium transition-colors",
+                    active
+                      ? "border-primary bg-primary/15 text-primary"
+                      : "border-border/70 bg-muted/40 text-muted-foreground hover:border-primary/50 hover:text-foreground",
+                  )}
+                >
+                  {sym}
+                </Link>
+              );
+            })}
+          </div>
+        ) : null}
 
         {totalUnfiltered > 0 ? (
           <Card className="border-border/60 bg-muted/10">
@@ -643,6 +685,12 @@ export function SignalRoom({
                                 {s.authorLabel}
                               </span>
                             </Link>
+                            {currentUserId && !s.isAuthor ? (
+                              <FollowButton
+                                userId={s.authorId}
+                                isFollowing={s.viewerFollowsAuthor}
+                              />
+                            ) : null}
                             <span className="text-border" aria-hidden>
                               ·
                             </span>
@@ -734,7 +782,7 @@ export function SignalRoom({
                             {statusLabel(s.status, t)}
                           </Badge>
                           {s.isAuthor && s.status === "ACTIVE" ? (
-                            <CloseSignalForm signalId={s.id} />
+                            <SignalCloseForm signalId={s.id} />
                           ) : null}
                         </div>
                       </div>
@@ -834,48 +882,5 @@ export function SignalRoom({
         ) : null}
       </section>
     </div>
-  );
-}
-
-function CloseSignalForm({ signalId }: { signalId: string }) {
-  const t = useTranslations("signals");
-  const [state, formAction] = useActionState(closeSignal, closeInitial);
-  return (
-    <form action={formAction} className="inline-flex flex-wrap gap-1.5">
-      <input type="hidden" name="signalId" value={signalId} />
-      {state?.error ? (
-        <span className="w-full text-destructive">{state.error}</span>
-      ) : null}
-      <Button
-        type="submit"
-        name="status"
-        value="CLOSED_WIN"
-        size="sm"
-        variant="outline"
-        className="h-8 gap-1 px-2 text-xs text-emerald-400 hover:text-emerald-300"
-      >
-        {t("closeTpHit")}
-      </Button>
-      <Button
-        type="submit"
-        name="status"
-        value="CLOSED_LOSS"
-        size="sm"
-        variant="outline"
-        className="h-8 gap-1 px-2 text-xs text-destructive hover:text-red-400"
-      >
-        {t("closeSlHit")}
-      </Button>
-      <Button
-        type="submit"
-        name="status"
-        value="CANCELLED"
-        size="sm"
-        variant="ghost"
-        className="h-8 gap-1 px-2 text-xs"
-      >
-        {t("closeCancelSignal")}
-      </Button>
-    </form>
   );
 }

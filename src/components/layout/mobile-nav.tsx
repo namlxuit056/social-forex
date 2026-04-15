@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Menu, Shield, X } from "lucide-react";
+import { Bell, Menu, Shield, X } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 
@@ -15,6 +15,7 @@ export function MobileNav({ isStaff }: { isStaff: boolean }) {
   const [open, setOpen] = useState(false);
   const tc = useTranslations("common");
   const ta = useTranslations("admin");
+  const tn = useTranslations("nav");
 
   return (
     <div className="lg:hidden">
@@ -31,6 +32,14 @@ export function MobileNav({ isStaff }: { isStaff: boolean }) {
       {open && (
         <div className="absolute inset-x-0 top-full z-50 border-b border-border bg-background/95 backdrop-blur-lg">
           <div className="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-3">
+            <Link
+              href="/notifications"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2 rounded-md px-2 py-2 text-sm font-medium text-foreground transition hover:bg-muted"
+            >
+              <Bell className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+              {tn("notifications")}
+            </Link>
             <Link
               href="/profile"
               onClick={() => setOpen(false)}

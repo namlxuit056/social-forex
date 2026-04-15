@@ -36,7 +36,7 @@ export default async function PublicProfilePage({ params }: Props) {
   });
   if (!user) notFound();
 
-  const [followerCount, followingCount, threadCount, isFollowing] =
+  const [followerCount, followingCount, threadCount, isFollowing, followerRows] =
     await Promise.all([
       prisma.userFollow.count({ where: { followingId: userId } }),
       prisma.userFollow.count({ where: { followerId: userId } }),
@@ -51,6 +51,17 @@ export default async function PublicProfilePage({ params }: Props) {
             },
           })
         : null,
+      prisma.userFollow.findMany({
+        where: { followingId: userId },
+        select: {
+          id: true,
+          follower: {
+            select: { id: true, name: true, email: true, image: true },
+          },
+        },
+        orderBy: { id: "desc" },
+        take: 48,
+      }),
     ]);
 
   const isSelf = session?.user?.id === userId;
@@ -108,6 +119,65 @@ export default async function PublicProfilePage({ params }: Props) {
           <dd className="text-lg font-medium text-foreground">{threadCount}</dd>
         </div>
       </dl>
+
+      {followerCount > 0 ? (
+        <div className="space-y-3">
+          <h2 className="font-heading text-lg font-semibold text-foreground">
+            {t("followersListTitle")}
+          </h2>
+          {followerCount > followerRows.length ? (
+            <p className="text-xs text-muted-foreground">
+              {t("followersListTruncated", {
+                shown: followerRows.length,
+                total: followerCount,
+              })}
+            </p>
+          ) : null}
+          <ul className="grid gap-2 sm:grid-cols-2">
+            {followerRows.map((row) => {
+              const label =
+                row.follower.name ?? row.follower.email ?? "—";
+              const initials = (() => {
+                const raw = label.trim();
+                if (!raw || raw === "—") return "?";
+                const parts = raw.split(/\s+/).filter(Boolean);
+                if (parts.length >= 2) {
+                  return `${parts[0]?.[0] ?? ""}${parts[1]?.[0] ?? ""}`.toUpperCase().slice(0, 2);
+                }
+                return raw.slice(0, 2).toUpperCase();
+              })();
+              return (
+                <li key={row.id}>
+                  <Link
+                    href={`/u/${row.follower.id}`}
+                    className="flex items-center gap-3 rounded-lg border border-border/60 bg-muted/15 px-3 py-2 transition-colors hover:bg-muted/40"
+                  >
+                    <span className="inline-flex size-9 shrink-0 overflow-hidden rounded-full bg-muted ring-1 ring-border">
+                      {row.follower.image ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={row.follower.image}
+                          alt=""
+                          className="size-full object-cover"
+                          loading="lazy"
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        <span className="flex size-full items-center justify-center text-[0.65rem] font-semibold uppercase text-muted-foreground">
+                          {initials}
+                        </span>
+                      )}
+                    </span>
+                    <span className="min-w-0 truncate font-medium text-primary">
+                      {label}
+                    </span>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ) : null}
 
       <PageCtaRow heading={tCommon("ctaDiscovery")} items={ctaRow} />
     </div>

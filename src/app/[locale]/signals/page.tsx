@@ -68,12 +68,21 @@ export default async function SignalsPage({
   const session = await auth();
   const userId = session?.user?.id;
 
-  const dbUser = userId
-    ? await prisma.user.findUnique({
-        where: { id: userId },
-        select: { vipUntil: true },
-      })
-    : null;
+  const [dbUser, favoriteRows] = userId
+    ? await Promise.all([
+        prisma.user.findUnique({
+          where: { id: userId },
+          select: { vipUntil: true },
+        }),
+        prisma.userFavoriteSymbol.findMany({
+          where: { userId },
+          orderBy: { sortOrder: "asc" },
+          select: { symbol: true },
+        }),
+      ])
+    : [null, []];
+
+  const favoriteSymbols = favoriteRows.map((r) => r.symbol);
 
   const canViewVip = isVipActive(dbUser?.vipUntil);
 
@@ -120,6 +129,19 @@ export default async function SignalsPage({
 
   const hasVipSignals = vipCount > 0;
 
+  const authorIds = [...new Set(rows.map((r) => r.authorId))];
+  let followingIdSet = new Set<string>();
+  if (userId && authorIds.length > 0) {
+    const follows = await prisma.userFollow.findMany({
+      where: {
+        followerId: userId,
+        followingId: { in: authorIds },
+      },
+      select: { followingId: true },
+    });
+    followingIdSet = new Set(follows.map((f) => f.followingId));
+  }
+
   const signals = rows.map((s) => {
     const isAuthor = userId === s.authorId;
     const masked = s.tier === "VIP" && !canViewVip && !isAuthor;
@@ -141,6 +163,7 @@ export default async function SignalsPage({
       authorImage: s.author?.image ?? null,
       authorId: s.authorId,
       isAuthor,
+      viewerFollowsAuthor: userId ? followingIdSet.has(s.authorId) : false,
       shareUrl: absoluteUrl(`/signals/${s.id}`, locale),
       likes: s.reactions.filter((r) => r.type === "LIKE").length,
       dislikes: s.reactions.filter((r) => r.type === "DISLIKE").length,
@@ -231,6 +254,8 @@ export default async function SignalsPage({
       <SignalRoom
         signals={signals}
         showCreate={!!session?.user}
+        currentUserId={userId ?? null}
+        favoriteSymbols={favoriteSymbols}
         initialSymbolFilter={symbol}
         initialAuthorFilter={author}
         initialStatusFilter={status}

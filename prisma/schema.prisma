@@ -55,6 +55,16 @@ model User {
   signalComments   SignalComment[]
   signalReactions  SignalReaction[]
   tradeJournals    TradeJournal[]
+  notifications       Notification[] @relation("NotificationRecipient")
+  notificationsAsActor Notification[] @relation("NotificationActor")
+  signalEditLogs   SignalEditLog[]
+
+  /// Thông báo in-app: tín hiệu từ trader đang follow
+  notifySignalFollow Boolean @default(true)
+  /// Thông báo khi có tín hiệu trùng symbol trong watchlist (favorites)
+  notifySignalFavoriteSym Boolean @default(true)
+  /// (VIP) Thông báo khi có tín hiệu VIP mới trên nền tảng
+  notifySignalVipBroadcast Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -158,13 +168,58 @@ model Signal {
   tier       SignalTier   @default(FREE)
   status     SignalStatus @default(ACTIVE)
   notes      String?
+  /// Thời điểm đóng lệnh (khi chuyển khỏi ACTIVE)
+  closedAt   DateTime?
   author     User         @relation(fields: [authorId], references: [id])
   comments   SignalComment[]
   reactions  SignalReaction[]
   images     SignalImage[]
+  editLogs   SignalEditLog[]
+  notifications Notification[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model SignalEditLog {
+  id       String   @id @default(cuid())
+  signalId String
+  userId   String
+  field    String
+  oldValue String?
+  newValue String?
+  createdAt DateTime @default(now())
+
+  signal Signal @relation(fields: [signalId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([signalId, createdAt])
+}
+
+enum NotificationKind {
+  SIGNAL_NEW
+  USER_FOLLOWED
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  kind      NotificationKind @default(SIGNAL_NEW)
+  /// SIGNAL_NEW: trùng signalId; USER_FOLLOWED: "f:{followerId}"
+  dedupeKey String
+  signalId  String?
+  /// Người follow (chỉ dùng khi kind = USER_FOLLOWED)
+  actorUserId String?
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user   User    @relation("NotificationRecipient", fields: [userId], references: [id], onDelete: Cascade)
+  signal Signal? @relation(fields: [signalId], references: [id], onDelete: Cascade)
+  actor  User?   @relation("NotificationActor", fields: [actorUserId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, dedupeKey])
+  @@index([userId, readAt])
+  @@index([userId, createdAt])
 }
 
 model SignalImage {
