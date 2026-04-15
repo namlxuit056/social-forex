@@ -7,6 +7,7 @@ import { ChevronRight, MessageCircle, ThumbsDown, ThumbsUp } from "lucide-react"
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { closeSignal } from "@/actions/signals";
 import { SignalCardNews } from "@/components/signals/signal-card-news";
+import { SignalShareCopy } from "@/components/signals/signal-share-copy";
 import { SignalCreateForm } from "@/components/signals/signal-create-form";
 import { SignalImageGallery } from "@/components/signals/signal-image-gallery";
 import { EmptyState } from "@/components/layout/empty-state";
@@ -43,6 +44,7 @@ type SignalRow = {
   authorImage: string | null;
   authorId: string;
   isAuthor: boolean;
+  shareUrl: string;
   likes: number;
   dislikes: number;
   commentCount: number;
@@ -743,32 +745,53 @@ export function SignalRoom({
                       />
                     </div>
 
-                    <div className="flex flex-col gap-3 border-t border-border/40 bg-muted/5 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-                      <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-                        <span className="inline-flex items-center gap-1">
-                          <ThumbsUp className="size-3.5 shrink-0" aria-hidden />
-                          {s.likes}
-                        </span>
-                        <span className="inline-flex items-center gap-1">
-                          <ThumbsDown className="size-3.5 shrink-0" aria-hidden />
-                          {s.dislikes}
-                        </span>
-                        <span className="inline-flex items-center gap-1">
-                          <MessageCircle
-                            className="size-3.5 shrink-0"
-                            aria-hidden
-                          />
-                          {s.commentCount}
-                        </span>
+                    <div className="flex flex-col gap-3 border-t border-border/40 bg-muted/5 px-4 py-3 sm:px-5">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+                          <span className="inline-flex items-center gap-1">
+                            <ThumbsUp className="size-3.5 shrink-0" aria-hidden />
+                            {s.likes}
+                          </span>
+                          <span className="inline-flex items-center gap-1">
+                            <ThumbsDown className="size-3.5 shrink-0" aria-hidden />
+                            {s.dislikes}
+                          </span>
+                          <span className="inline-flex items-center gap-1">
+                            <MessageCircle
+                              className="size-3.5 shrink-0"
+                              aria-hidden
+                            />
+                            {s.commentCount}
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+                          {s.isAuthor ? (
+                            <SignalShareCopy
+                              show
+                              symbol={s.symbol}
+                              direction={s.direction}
+                              tier={s.tier}
+                              status={s.status}
+                              entry={s.entry}
+                              stopLoss={s.stopLoss}
+                              takeProfit={s.takeProfit}
+                              takeProfit2={s.takeProfit2}
+                              takeProfit3={s.takeProfit3}
+                              notes={s.notes}
+                              signalUrl={s.shareUrl}
+                              className="h-9"
+                            />
+                          ) : null}
+                          <Link
+                            href={`/signals/${s.id}`}
+                            className="inline-flex min-h-11 items-center gap-1 text-sm font-medium text-primary underline-offset-4 hover:underline"
+                            aria-label={t("viewDetailAria", { symbol: s.symbol })}
+                          >
+                            {t("viewDetail")}
+                            <ChevronRight className="size-4 shrink-0" aria-hidden />
+                          </Link>
+                        </div>
                       </div>
-                      <Link
-                        href={`/signals/${s.id}`}
-                        className="inline-flex min-h-11 items-center gap-1 text-sm font-medium text-primary underline-offset-4 hover:underline"
-                        aria-label={t("viewDetailAria", { symbol: s.symbol })}
-                      >
-                        {t("viewDetail")}
-                        <ChevronRight className="size-4 shrink-0" aria-hidden />
-                      </Link>
                     </div>
                   </CardContent>
                 </Card>

@@ -14,6 +14,8 @@ import {
   getUpcomingHighImpactEvents,
 } from "@/lib/calendar/news-context-db";
 import { symbolToCurrencies } from "@/lib/signals/symbol-currencies";
+import { absoluteUrl } from "@/lib/site-url";
+import { SignalShareCopy } from "@/components/signals/signal-share-copy";
 import { SignalReactions } from "./signal-reactions";
 import { SignalComments } from "./signal-comments";
 
@@ -69,7 +71,9 @@ export default async function SignalDetailPage({
     : null;
 
   const canViewVip = isVipActive(dbUser?.vipUntil);
-  const masked = signal.tier === "VIP" && !canViewVip;
+  const masked =
+    signal.tier === "VIP" && !canViewVip && userId !== signal.authorId;
+  const shareUrl = absoluteUrl(`/signals/${signalId}`, locale);
   const imageCount = signal.images.length;
   const imageUrls = masked ? [] : signal.images.map((i) => i.url);
 
@@ -179,6 +183,25 @@ export default async function SignalDetailPage({
               )}
             </>
           )}
+
+          {userId === signal.authorId ? (
+            <div className="flex flex-wrap gap-2 pt-1">
+              <SignalShareCopy
+                show
+                symbol={signal.symbol}
+                direction={signal.direction}
+                tier={signal.tier}
+                status={signal.status}
+                entry={signal.entry}
+                stopLoss={signal.stopLoss}
+                takeProfit={signal.takeProfit}
+                takeProfit2={signal.takeProfit2}
+                takeProfit3={signal.takeProfit3}
+                notes={signal.notes}
+                signalUrl={shareUrl}
+              />
+            </div>
+          ) : null}
 
           <SignalReactions
             signalId={signalId}

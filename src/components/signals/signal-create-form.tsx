@@ -34,7 +34,10 @@ export function SignalCreateForm({
   const t = useTranslations("signals");
   const pathname = usePathname();
   const [expanded, setExpanded] = useState(() => !collapsible || !defaultCollapsed);
-  const [createState, createAction] = useActionState(createSignal, createInitial);
+  const [createState, createAction, isPending] = useActionState(
+    createSignal,
+    createInitial,
+  );
   const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
   const [pendingSlots, setPendingSlots] = useState<PendingSlot[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -328,7 +331,15 @@ export function SignalCreateForm({
           )}
         </div>
 
-        <form action={createAction} className="grid gap-4 sm:grid-cols-2">
+        <form
+          action={createAction}
+          className="grid gap-4 sm:grid-cols-2"
+          aria-busy={isPending}
+        >
+          <fieldset
+            disabled={isPending}
+            className="contents min-w-0 border-0 p-0"
+          >
           {uploadedUrls.map((url) => (
             <input key={url} type="hidden" name="imageUrls" value={url} />
           ))}
@@ -428,9 +439,21 @@ export function SignalCreateForm({
               {createState.error}
             </p>
           )}
-          <Button type="submit" className="sm:col-span-2" disabled={uploading}>
-            {t("postSignal")}
+          <Button
+            type="submit"
+            className="sm:col-span-2 gap-2"
+            disabled={uploading || isPending}
+          >
+            {isPending ? (
+              <>
+                <Loader2 className="size-4 shrink-0 animate-spin" aria-hidden />
+                {t("postingSignal")}
+              </>
+            ) : (
+              t("postSignal")
+            )}
           </Button>
+          </fieldset>
         </form>
       </CardContent>
       )}

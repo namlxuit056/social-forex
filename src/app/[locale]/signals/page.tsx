@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { prisma } from "@/lib/prisma";
 import { isVipActive } from "@/lib/vip";
 import { pageCtaItems } from "@/lib/page-cta-i18n";
+import { absoluteUrl } from "@/lib/site-url";
 import {
   getNewsContextHours,
   getNewsContextWindow,
@@ -120,7 +121,8 @@ export default async function SignalsPage({
   const hasVipSignals = vipCount > 0;
 
   const signals = rows.map((s) => {
-    const masked = s.tier === "VIP" && !canViewVip;
+    const isAuthor = userId === s.authorId;
+    const masked = s.tier === "VIP" && !canViewVip && !isAuthor;
     const imageUrls = masked ? [] : s.images.map((i) => i.url);
     return {
       id: s.id,
@@ -138,7 +140,8 @@ export default async function SignalsPage({
       authorLabel: s.author?.name ?? s.author?.email ?? "—",
       authorImage: s.author?.image ?? null,
       authorId: s.authorId,
-      isAuthor: userId === s.authorId,
+      isAuthor,
+      shareUrl: absoluteUrl(`/signals/${s.id}`, locale),
       likes: s.reactions.filter((r) => r.type === "LIKE").length,
       dislikes: s.reactions.filter((r) => r.type === "DISLIKE").length,
       commentCount: s._count.comments,
