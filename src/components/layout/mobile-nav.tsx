@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Menu, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const primaryNavKeys = [
   { href: "/quotes", key: "quotes" },
@@ -31,9 +32,14 @@ const secondaryNavKeys = [
   { href: "/forum/search", key: "searchTopics" },
 ] as const;
 
-export function MobileNav() {
+export function MobileNav({
+  isAuthenticated = false,
+}: {
+  isAuthenticated?: boolean;
+}) {
   const [open, setOpen] = useState(false);
   const t = useTranslations("nav");
+  const tc = useTranslations("common");
 
   return (
     <div className="lg:hidden">
@@ -76,6 +82,31 @@ export function MobileNav() {
                 ))}
               </div>
             </div>
+
+            {!isAuthenticated ? (
+              <div className="flex flex-wrap items-center gap-2 border-t border-border/50 pt-3">
+                <Link
+                  href="/auth/signin"
+                  onClick={() => setOpen(false)}
+                  className={cn(
+                    buttonVariants({ variant: "outline", size: "sm" }),
+                    "flex-1 min-w-[7rem] justify-center text-xs",
+                  )}
+                >
+                  {tc("signIn")}
+                </Link>
+                <Link
+                  href="/auth/register"
+                  onClick={() => setOpen(false)}
+                  className={cn(
+                    buttonVariants({ size: "sm" }),
+                    "flex-1 min-w-[7rem] justify-center text-xs",
+                  )}
+                >
+                  {tc("signUp")}
+                </Link>
+              </div>
+            ) : null}
           </div>
         </div>
       )}

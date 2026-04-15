@@ -117,7 +117,7 @@ export async function SiteHeader() {
             <>
               <Link
                 href="/auth/signin"
-                className="hidden rounded-md px-2.5 py-1.5 text-sm text-muted-foreground transition hover:bg-muted hover:text-foreground sm:inline-flex"
+                className="inline-flex shrink-0 whitespace-nowrap rounded-md px-2 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground sm:px-2.5 sm:text-sm"
               >
                 {tc("signIn")}
               </Link>
@@ -125,7 +125,7 @@ export async function SiteHeader() {
                 href="/auth/register"
                 className={cn(
                   buttonVariants({ size: "sm" }),
-                  "h-8 text-xs",
+                  "h-8 shrink-0 text-xs",
                 )}
               >
                 {tc("signUp")}
@@ -133,7 +133,7 @@ export async function SiteHeader() {
             </>
           )}
 
-          <MobileNav />
+          <MobileNav isAuthenticated={!!session?.user} />
         </div>
       </div>
 
