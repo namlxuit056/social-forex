@@ -15,6 +15,7 @@ import {
 } from "@/lib/calendar/news-context-db";
 import { symbolToCurrencies } from "@/lib/signals/symbol-currencies";
 import { absoluteUrl } from "@/lib/site-url";
+import { signalLevelDetail } from "@/components/signals/signal-level-classes";
 import { SignalShareCopy } from "@/components/signals/signal-share-copy";
 import { SignalReactions } from "./signal-reactions";
 import { SignalComments } from "./signal-comments";
@@ -147,33 +148,35 @@ export default async function SignalDetailPage({
           ) : (
             <>
               <dl className="grid gap-3 font-mono text-sm sm:grid-cols-2">
-                <div>
-                  <dt className="text-muted-foreground">{t("entryField")}</dt>
-                  <dd className="text-lg font-semibold">{signal.entry}</dd>
+                <div className={signalLevelDetail.entry.box}>
+                  <dt className={signalLevelDetail.entry.label}>
+                    {t("entryField")}
+                  </dt>
+                  <dd className={signalLevelDetail.entry.value}>{signal.entry}</dd>
                 </div>
-                <div>
-                  <dt className="text-muted-foreground">{t("slField")}</dt>
-                  <dd className="text-lg font-semibold">
+                <div className={signalLevelDetail.sl.box}>
+                  <dt className={signalLevelDetail.sl.label}>{t("slField")}</dt>
+                  <dd className={signalLevelDetail.sl.value}>
                     {signal.stopLoss ?? "—"}
                   </dd>
                 </div>
               </dl>
-              <dl className="mt-2 grid gap-3 font-mono text-sm sm:grid-cols-3">
-                <div>
-                  <dt className="text-muted-foreground">{t("tp1Field")}</dt>
-                  <dd className="text-lg font-semibold">
+              <dl className="mt-3 grid gap-3 font-mono text-sm sm:grid-cols-3">
+                <div className={signalLevelDetail.tp1.box}>
+                  <dt className={signalLevelDetail.tp1.label}>{t("tp1Field")}</dt>
+                  <dd className={signalLevelDetail.tp1.value}>
                     {signal.takeProfit ?? "—"}
                   </dd>
                 </div>
-                <div>
-                  <dt className="text-muted-foreground">{t("tp2Field")}</dt>
-                  <dd className="text-lg font-semibold">
+                <div className={signalLevelDetail.tp2.box}>
+                  <dt className={signalLevelDetail.tp2.label}>{t("tp2Field")}</dt>
+                  <dd className={signalLevelDetail.tp2.value}>
                     {signal.takeProfit2 ?? "—"}
                   </dd>
                 </div>
-                <div>
-                  <dt className="text-muted-foreground">{t("tp3Field")}</dt>
-                  <dd className="text-lg font-semibold">
+                <div className={signalLevelDetail.tp3.box}>
+                  <dt className={signalLevelDetail.tp3.label}>{t("tp3Field")}</dt>
+                  <dd className={signalLevelDetail.tp3.value}>
                     {signal.takeProfit3 ?? "—"}
                   </dd>
                 </div>

@@ -24,6 +24,7 @@ import {
   type SignalListTz,
 } from "@/lib/signals/signal-list-query";
 import type { SignalCardNewsEvent } from "@/lib/signals/signal-list-news";
+import { signalLevel } from "@/components/signals/signal-level-classes";
 import { cn } from "@/lib/utils";
 
 type SignalRow = {
@@ -667,47 +668,47 @@ export function SignalRoom({
                             {t("maskedMessage")}
                           </p>
                         ) : (
-                          <div className="space-y-2 rounded-lg border border-border/60 bg-muted/25 p-3">
+                          <div className="space-y-2 rounded-lg border border-border/60 bg-muted/20 p-3">
                             <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                              <div className="min-w-0">
-                                <div className="text-[0.65rem] font-medium uppercase tracking-wide text-muted-foreground">
+                              <div className={cn("min-w-0", signalLevel.entry.box)}>
+                                <div className={signalLevel.entry.label}>
                                   {t("entryField")}
                                 </div>
-                                <div className="truncate font-mono text-sm tabular-nums text-foreground">
+                                <div className={signalLevel.entry.value}>
                                   {s.entry}
                                 </div>
                               </div>
-                              <div className="min-w-0">
-                                <div className="text-[0.65rem] font-medium uppercase tracking-wide text-muted-foreground">
+                              <div className={cn("min-w-0", signalLevel.sl.box)}>
+                                <div className={signalLevel.sl.label}>
                                   {t("slField")}
                                 </div>
-                                <div className="truncate font-mono text-sm tabular-nums text-foreground">
+                                <div className={signalLevel.sl.value}>
                                   {s.stopLoss ?? "—"}
                                 </div>
                               </div>
                             </div>
                             <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                              <div className="min-w-0">
-                                <div className="text-[0.65rem] font-medium uppercase tracking-wide text-muted-foreground">
+                              <div className={cn("min-w-0", signalLevel.tp1.box)}>
+                                <div className={signalLevel.tp1.label}>
                                   {t("tp1Field")}
                                 </div>
-                                <div className="truncate font-mono text-sm tabular-nums text-foreground">
+                                <div className={signalLevel.tp1.value}>
                                   {s.takeProfit ?? "—"}
                                 </div>
                               </div>
-                              <div className="min-w-0">
-                                <div className="text-[0.65rem] font-medium uppercase tracking-wide text-muted-foreground">
+                              <div className={cn("min-w-0", signalLevel.tp2.box)}>
+                                <div className={signalLevel.tp2.label}>
                                   {t("tp2Field")}
                                 </div>
-                                <div className="truncate font-mono text-sm tabular-nums text-foreground">
+                                <div className={signalLevel.tp2.value}>
                                   {s.takeProfit2 ?? "—"}
                                 </div>
                               </div>
-                              <div className="min-w-0">
-                                <div className="text-[0.65rem] font-medium uppercase tracking-wide text-muted-foreground">
+                              <div className={cn("min-w-0", signalLevel.tp3.box)}>
+                                <div className={signalLevel.tp3.label}>
                                   {t("tp3Field")}
                                 </div>
-                                <div className="truncate font-mono text-sm tabular-nums text-foreground">
+                                <div className={signalLevel.tp3.value}>
                                   {s.takeProfit3 ?? "—"}
                                 </div>
                               </div>
