@@ -111,7 +111,9 @@ export async function SiteHeader() {
                   {ta("dashboard")}
                 </Link>
               )}
-              <SignOutButton />
+              <span className="hidden lg:inline-flex">
+                <SignOutButton />
+              </span>
             </>
           ) : (
             <>
@@ -133,8 +135,40 @@ export async function SiteHeader() {
             </>
           )}
 
-          <MobileNav isAuthenticated={!!session?.user} />
+          {session?.user ? <MobileNav isStaff={isStaff} /> : null}
         </div>
+      </div>
+
+      {/* Mobile & tablet: menu luôn thấy (cuộn ngang) */}
+      <div className="border-t border-border/40 bg-muted/25 lg:hidden">
+        <nav
+          aria-label={t("scrollPrimaryAria")}
+          className="scrollbar-none -mx-4 flex gap-1.5 overflow-x-auto px-4 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          {primaryNavKeys.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="shrink-0 rounded-full bg-muted/90 px-3 py-1.5 text-xs font-medium text-foreground shadow-sm ring-1 ring-border/50 transition hover:bg-primary/15 hover:text-primary"
+            >
+              {t(item.key)}
+            </Link>
+          ))}
+        </nav>
+        <nav
+          aria-label={t("scrollSecondaryAria")}
+          className="scrollbar-none -mx-4 flex gap-1 overflow-x-auto border-t border-border/30 px-4 py-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          {secondaryNavKeys.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="shrink-0 rounded-md px-2.5 py-1 text-[11px] font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground"
+            >
+              {t(item.key)}
+            </Link>
+          ))}
+        </nav>
       </div>
 
       {/* Desktop secondary nav */}

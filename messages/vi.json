@@ -3,6 +3,7 @@
     "signIn": "Đăng nhập",
     "signUp": "Đăng ký",
     "signOut": "Đăng xuất",
+    "accountMenuAria": "Menu tài khoản",
     "home": "Về trang chủ",
     "next": "Tiếp theo",
     "ctaDiscovery": "Khám phá thêm",
@@ -38,7 +39,9 @@
     "brokers": "Sàn",
     "partners": "Đối tác",
     "journal": "Nhật ký",
-    "startHere": "Bắt đầu tại đây"
+    "startHere": "Bắt đầu tại đây",
+    "scrollPrimaryAria": "Mục chính",
+    "scrollSecondaryAria": "Liên kết và công cụ thêm"
   },
   "footer": {
     "tagline": "Công cụ, lịch kinh tế và bài học cho người mới — kèm cộng đồng khi bạn sẵn sàng.",

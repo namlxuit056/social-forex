@@ -3,6 +3,7 @@
     "signIn": "Sign in",
     "signUp": "Sign up",
     "signOut": "Sign out",
+    "accountMenuAria": "Account menu",
     "home": "Go home",
     "next": "Next",
     "ctaDiscovery": "Explore more",
@@ -38,7 +39,9 @@
     "brokers": "Brokers",
     "partners": "Partners",
     "journal": "Journal",
-    "startHere": "Start here"
+    "startHere": "Start here",
+    "scrollPrimaryAria": "Primary sections",
+    "scrollSecondaryAria": "More links and tools"
   },
   "footer": {
     "tagline": "Forex tools, calendar, and lessons for new traders — plus community when you are ready.",

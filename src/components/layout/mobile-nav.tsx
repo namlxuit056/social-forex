@@ -3,43 +3,18 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Menu, X } from "lucide-react";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { Menu, Shield, X } from "lucide-react";
+import { signOut } from "next-auth/react";
+import { Button } from "@/components/ui/button";
 
-const primaryNavKeys = [
-  { href: "/quotes", key: "quotes" },
-  { href: "/calendar", key: "calendar" },
-  { href: "/chart", key: "chart" },
-  { href: "/tools", key: "tools" },
-  { href: "/signals", key: "signals" },
-  { href: "/forum", key: "forum" },
-] as const;
-
-const secondaryNavKeys = [
-  { href: "/start", key: "startHere" },
-  { href: "/heatmap", key: "heatmap" },
-  { href: "/sentiment", key: "sentiment" },
-  { href: "/leaderboard", key: "leaderboard" },
-  { href: "/journal", key: "journal" },
-  { href: "/backtest", key: "backtest" },
-  { href: "/academy", key: "academy" },
-  { href: "/webinar", key: "webinar" },
-  { href: "/resources", key: "resources" },
-  { href: "/brokers", key: "brokers" },
-  { href: "/messages", key: "messages" },
-  { href: "/partners", key: "partners" },
-  { href: "/forum/search", key: "searchTopics" },
-] as const;
-
-export function MobileNav({
-  isAuthenticated = false,
-}: {
-  isAuthenticated?: boolean;
-}) {
+/**
+ * Chỉ hiện từ `lg` trở xuống. Danh sách trang chính nằm dưới header (cuộn ngang).
+ * Menu này chỉ còn lối tắt tài khoản (Profile, Dashboard, Admin, đăng xuất).
+ */
+export function MobileNav({ isStaff }: { isStaff: boolean }) {
   const [open, setOpen] = useState(false);
-  const t = useTranslations("nav");
   const tc = useTranslations("common");
+  const ta = useTranslations("admin");
 
   return (
     <div className="lg:hidden">
@@ -48,65 +23,50 @@ export function MobileNav({
         size="icon"
         className="size-8"
         onClick={() => setOpen((v) => !v)}
-        aria-label="Menu"
+        aria-label={tc("accountMenuAria")}
       >
         {open ? <X className="size-4" /> : <Menu className="size-4" />}
       </Button>
 
       {open && (
         <div className="absolute inset-x-0 top-full z-50 border-b border-border bg-background/95 backdrop-blur-lg">
-          <div className="mx-auto max-w-7xl space-y-3 px-4 py-4">
-            <div className="flex flex-wrap gap-1.5">
-              {primaryNavKeys.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setOpen(false)}
-                  className="rounded-md bg-muted/60 px-3 py-1.5 text-xs font-medium text-foreground transition hover:bg-primary/10 hover:text-primary"
-                >
-                  {t(item.key)}
-                </Link>
-              ))}
-            </div>
-            <div className="border-t border-border/50 pt-2">
-              <div className="flex flex-wrap gap-1.5">
-                {secondaryNavKeys.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setOpen(false)}
-                    className="rounded-md px-2.5 py-1 text-xs text-muted-foreground transition hover:bg-muted hover:text-foreground"
-                  >
-                    {t(item.key)}
-                  </Link>
-                ))}
-              </div>
-            </div>
-
-            {!isAuthenticated ? (
-              <div className="flex flex-wrap items-center gap-2 border-t border-border/50 pt-3">
-                <Link
-                  href="/auth/signin"
-                  onClick={() => setOpen(false)}
-                  className={cn(
-                    buttonVariants({ variant: "outline", size: "sm" }),
-                    "flex-1 min-w-[7rem] justify-center text-xs",
-                  )}
-                >
-                  {tc("signIn")}
-                </Link>
-                <Link
-                  href="/auth/register"
-                  onClick={() => setOpen(false)}
-                  className={cn(
-                    buttonVariants({ size: "sm" }),
-                    "flex-1 min-w-[7rem] justify-center text-xs",
-                  )}
-                >
-                  {tc("signUp")}
-                </Link>
-              </div>
+          <div className="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-3">
+            <Link
+              href="/profile"
+              onClick={() => setOpen(false)}
+              className="rounded-md px-2 py-2 text-sm font-medium text-foreground transition hover:bg-muted"
+            >
+              {tc("profile")}
+            </Link>
+            <Link
+              href="/dashboard"
+              onClick={() => setOpen(false)}
+              className="rounded-md px-2 py-2 text-sm font-medium text-foreground transition hover:bg-muted"
+            >
+              {tc("dashboard")}
+            </Link>
+            {isStaff ? (
+              <Link
+                href="/admin"
+                onClick={() => setOpen(false)}
+                className="flex items-center gap-2 rounded-md px-2 py-2 text-sm font-medium text-yellow-600 transition hover:bg-yellow-500/10 dark:text-yellow-500"
+              >
+                <Shield className="size-4 shrink-0" aria-hidden />
+                {ta("dashboard")}
+              </Link>
             ) : null}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="mt-1 w-full justify-center"
+              onClick={() => {
+                setOpen(false);
+                void signOut({ callbackUrl: "/" });
+              }}
+            >
+              {tc("signOut")}
+            </Button>
           </div>
         </div>
       )}
