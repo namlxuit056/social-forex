@@ -66,7 +66,7 @@ export default async function BrokersPage({
         </table>
       </div>
       <Disclaimer variant="compact" />
-      <PageCtaRow heading={tCommon("next")} items={ctaRow} />
+      <PageCtaRow heading={tCommon("ctaDiscovery")} items={ctaRow} />
     </div>
   );
 }

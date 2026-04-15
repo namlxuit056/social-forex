@@ -56,7 +56,7 @@ export default async function PartnersPage({
           </p>
         </CardContent>
       </Card>
-      <PageCtaRow heading={tCommon("next")} items={ctaRow} />
+      <PageCtaRow heading={tCommon("ctaDiscovery")} items={ctaRow} />
     </div>
   );
 }

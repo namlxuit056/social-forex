@@ -51,7 +51,7 @@ export default async function QuotesPage({
         initialWarning={initialWarning}
         initialUpdatedAt={initial.updatedAt}
       />
-      <PageCtaRow heading={tCommon("next")} items={ctaRow} />
+      <PageCtaRow heading={tCommon("ctaDiscovery")} items={ctaRow} />
     </div>
   );
 }

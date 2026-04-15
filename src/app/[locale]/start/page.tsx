@@ -174,7 +174,7 @@ export default async function StartPage({
       </div>
 
       <Disclaimer variant="compact" />
-      <PageCtaRow heading={tCommon("next")} items={ctaRow} />
+      <PageCtaRow heading={tCommon("ctaDiscovery")} items={ctaRow} />
     </div>
   );
 }

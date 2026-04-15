@@ -98,7 +98,7 @@ export default async function MessageThreadPage({ params }: Props) {
       </div>
 
       <DmCompose recipientId={otherId} />
-      <PageCtaRow heading={tCommon("next")} items={ctaRow} />
+      <PageCtaRow heading={tCommon("ctaDiscovery")} items={ctaRow} />
     </div>
   );
 }

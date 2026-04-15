@@ -147,12 +147,14 @@ model ForumPost {
 
 model Signal {
   id         String       @id @default(cuid())
-  authorId   String
-  symbol     String
-  direction  String
-  entry      Float
-  stopLoss   Float?
-  takeProfit Float?
+  authorId    String
+  symbol      String
+  direction   String
+  entry       Float
+  stopLoss    Float?
+  takeProfit  Float?
+  takeProfit2 Float?
+  takeProfit3 Float?
   tier       SignalTier   @default(FREE)
   status     SignalStatus @default(ACTIVE)
   notes      String?

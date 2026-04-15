@@ -48,6 +48,42 @@ export async function getUpcomingHighImpactEvents(params: {
   return rows;
 }
 
+/**
+ * High + medium impact events for signal list cards (one batched query, then split per pair).
+ */
+export async function getUpcomingHighAndMediumImpactEvents(params: {
+  currencies: string[];
+  from: Date;
+  to: Date;
+  limit?: number;
+}): Promise<NewsContextEventRow[]> {
+  const { currencies, from, to } = params;
+  const take = params.limit ?? 120;
+  if (currencies.length === 0) return [];
+
+  const rows = await prisma.economicCalendarEvent.findMany({
+    where: {
+      timeUtc: { gte: from, lte: to },
+      currency: { in: currencies },
+      OR: [
+        { impact: { equals: "high", mode: "insensitive" } },
+        { impact: { equals: "medium", mode: "insensitive" } },
+      ],
+    },
+    orderBy: { timeUtc: "asc" },
+    take,
+    select: {
+      id: true,
+      timeUtc: true,
+      currency: true,
+      title: true,
+      impact: true,
+    },
+  });
+
+  return rows;
+}
+
 export function getNewsContextWindow(from: Date = new Date()): { from: Date; to: Date } {
   const hours = getNewsContextHours();
   const to = new Date(from.getTime() + hours * 60 * 60 * 1000);

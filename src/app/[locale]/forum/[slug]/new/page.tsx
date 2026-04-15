@@ -39,7 +39,7 @@ export default async function NewThreadPage({ params }: Props) {
         <p className="mt-2 text-muted-foreground">{t("newThreadSubtitle")}</p>
       </div>
       <NewThreadForm categorySlug={slug} />
-      <PageCtaRow heading={tCommon("next")} items={ctaRow} />
+      <PageCtaRow heading={tCommon("ctaDiscovery")} items={ctaRow} />
     </div>
   );
 }

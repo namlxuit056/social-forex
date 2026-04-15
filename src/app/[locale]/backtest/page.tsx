@@ -38,7 +38,7 @@ export default async function BacktestPage({
       </div>
       <DemoBacktest />
       <Disclaimer variant="compact" />
-      <PageCtaRow heading={tCommon("next")} items={ctaRow} />
+      <PageCtaRow heading={tCommon("ctaDiscovery")} items={ctaRow} />
     </div>
   );
 }

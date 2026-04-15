@@ -102,7 +102,7 @@ export default async function AcademyLessonPage({ params }: Props) {
           </Link>
         </p>
       </article>
-      <PageCtaRow heading={tCommon("next")} items={ctaRow} />
+      <PageCtaRow heading={tCommon("ctaDiscovery")} items={ctaRow} />
     </div>
   );
 }

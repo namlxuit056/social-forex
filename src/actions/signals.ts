@@ -23,6 +23,8 @@ const createSignalSchema = z.object({
   entry: z.coerce.number().positive(),
   stopLoss: z.number().optional(),
   takeProfit: z.number().optional(),
+  takeProfit2: z.number().optional(),
+  takeProfit3: z.number().optional(),
   tier: z.enum(["FREE", "VIP"]),
   notes: z.string().max(2000).optional(),
 });
@@ -43,6 +45,8 @@ export async function createSignal(
     entry: formData.get("entry"),
     stopLoss: optNum(formData, "stopLoss"),
     takeProfit: optNum(formData, "takeProfit"),
+    takeProfit2: optNum(formData, "takeProfit2"),
+    takeProfit3: optNum(formData, "takeProfit3"),
     tier: formData.get("tier"),
     notes: (formData.get("notes") as string) || undefined,
   });
@@ -78,6 +82,8 @@ export async function createSignal(
       entry: data.entry,
       stopLoss: data.stopLoss,
       takeProfit: data.takeProfit,
+      takeProfit2: data.takeProfit2,
+      takeProfit3: data.takeProfit3,
       tier: data.tier,
       notes: data.notes,
       images:

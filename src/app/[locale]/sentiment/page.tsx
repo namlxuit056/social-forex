@@ -111,7 +111,7 @@ export default async function SentimentPage({
         </div>
       )}
 
-      <PageCtaRow heading={tCommon("next")} items={ctaRow} />
+      <PageCtaRow heading={tCommon("ctaDiscovery")} items={ctaRow} />
     </div>
   );
 }

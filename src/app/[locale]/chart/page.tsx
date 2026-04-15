@@ -39,7 +39,7 @@ export default async function ChartPage({
       <Suspense>
         <ChartContainer locale={locale} />
       </Suspense>
-      <PageCtaRow heading={tCommon("next")} items={ctaRow} />
+      <PageCtaRow heading={tCommon("ctaDiscovery")} items={ctaRow} />
     </div>
   );
 }

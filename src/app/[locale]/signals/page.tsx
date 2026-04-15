@@ -1,6 +1,7 @@
 import { Lock } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { SignalRoom } from "@/components/signals/signal-room";
 import { Disclaimer } from "@/components/layout/disclaimer";
@@ -11,6 +12,20 @@ import { cn } from "@/lib/utils";
 import { prisma } from "@/lib/prisma";
 import { isVipActive } from "@/lib/vip";
 import { pageCtaItems } from "@/lib/page-cta-i18n";
+import {
+  getNewsContextHours,
+  getNewsContextWindow,
+  getUpcomingHighAndMediumImpactEvents,
+} from "@/lib/calendar/news-context-db";
+import {
+  buildSignalOrderBy,
+  buildSignalWhere,
+  buildSignalsListHref,
+  parseSignalListSearchParams,
+  SIGNAL_LIST_PAGE_SIZE,
+} from "@/lib/signals/signal-list-query";
+import { mapCalendarEventsToSignals } from "@/lib/signals/signal-list-news";
+import { symbolToCurrencies } from "@/lib/signals/symbol-currencies";
 
 export async function generateMetadata({
   params,
@@ -30,11 +45,21 @@ export default async function SignalsPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ symbol?: string }>;
+  searchParams: Promise<{
+    symbol?: string;
+    author?: string;
+    tier?: string;
+    status?: string;
+    period?: string;
+    tz?: string;
+    sort?: string;
+    page?: string;
+  }>;
 }) {
   const { locale } = await params;
-  const sp = await searchParams;
-  const symbolFromUrl = typeof sp.symbol === "string" ? sp.symbol : "";
+  const rawSp = await searchParams;
+  const { symbol, author, tier, status, period, tz, sort, page } =
+    parseSignalListSearchParams(rawSp);
   setRequestLocale(locale);
   const t = await getTranslations("signals");
   const tc = await getTranslations("common");
@@ -51,18 +76,47 @@ export default async function SignalsPage({
 
   const canViewVip = isVipActive(dbUser?.vipUntil);
 
-  const rows = await prisma.signal.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 100,
-    include: {
-      author: { select: { name: true, email: true } },
-      reactions: { select: { type: true } },
-      _count: { select: { comments: true } },
-      images: { orderBy: { sortOrder: "asc" }, select: { url: true } },
-    },
-  });
+  const where = buildSignalWhere(symbol, tier, author, status, period, tz);
+  const orderBy = buildSignalOrderBy(sort);
 
-  const vipCount = rows.filter((s) => s.tier === "VIP").length;
+  const [totalUnfiltered, totalMatching, vipCount, rawRows] = await Promise.all([
+    prisma.signal.count(),
+    prisma.signal.count({ where }),
+    prisma.signal.count({ where: { tier: "VIP" } }),
+    prisma.signal.findMany({
+      where,
+      orderBy,
+      skip: (page - 1) * SIGNAL_LIST_PAGE_SIZE,
+      take: SIGNAL_LIST_PAGE_SIZE + 1,
+      include: {
+        author: { select: { name: true, email: true, image: true } },
+        reactions: { select: { type: true } },
+        _count: { select: { comments: true } },
+        images: { orderBy: { sortOrder: "asc" }, select: { url: true } },
+      },
+    }),
+  ]);
+
+  const hasMore = rawRows.length > SIGNAL_LIST_PAGE_SIZE;
+  const rows = rawRows.slice(0, SIGNAL_LIST_PAGE_SIZE);
+
+  const totalPages = Math.max(1, Math.ceil(totalMatching / SIGNAL_LIST_PAGE_SIZE));
+  if (page > totalPages && totalMatching > 0) {
+    redirect(
+      buildSignalsListHref({
+        pathname: "/signals",
+        symbol,
+        author,
+        tier,
+        status,
+        period,
+        tz,
+        sort,
+        page: totalPages,
+      }),
+    );
+  }
+
   const hasVipSignals = vipCount > 0;
 
   const signals = rows.map((s) => {
@@ -75,11 +129,14 @@ export default async function SignalsPage({
       entry: masked ? null : s.entry,
       stopLoss: masked ? null : s.stopLoss,
       takeProfit: masked ? null : s.takeProfit,
+      takeProfit2: masked ? null : s.takeProfit2,
+      takeProfit3: masked ? null : s.takeProfit3,
       tier: s.tier,
       status: s.status,
       notes: masked ? null : s.notes,
       masked,
       authorLabel: s.author?.name ?? s.author?.email ?? "—",
+      authorImage: s.author?.image ?? null,
       authorId: s.authorId,
       isAuthor: userId === s.authorId,
       likes: s.reactions.filter((r) => r.type === "LIKE").length,
@@ -90,6 +147,28 @@ export default async function SignalsPage({
       createdAt: s.createdAt.toISOString(),
     };
   });
+
+  const newsContextHours = getNewsContextHours();
+  const { from: newsFrom, to: newsTo } = getNewsContextWindow();
+  const calendarCurrencies = new Set<string>();
+  for (const s of rows) {
+    for (const c of symbolToCurrencies(s.symbol)) calendarCurrencies.add(c);
+  }
+  const calendarCurrencyList = [...calendarCurrencies];
+  const calendarEvents =
+    calendarCurrencyList.length > 0
+      ? await getUpcomingHighAndMediumImpactEvents({
+          currencies: calendarCurrencyList,
+          from: newsFrom,
+          to: newsTo,
+          limit: Math.min(240, Math.max(48, rows.length * 12)),
+        })
+      : [];
+  const newsBySignalId = mapCalendarEventsToSignals(
+    rows.map((s) => ({ id: s.id, symbol: s.symbol })),
+    calendarEvents,
+  );
+
   const tCommon = await getTranslations("common");
   const ctaRow = await pageCtaItems("trading", "community");
 
@@ -149,10 +228,23 @@ export default async function SignalsPage({
       <SignalRoom
         signals={signals}
         showCreate={!!session?.user}
-        initialSymbolFilter={symbolFromUrl}
+        initialSymbolFilter={symbol}
+        initialAuthorFilter={author}
+        initialStatusFilter={status}
+        initialPeriodFilter={period}
+        initialTzFilter={tz}
+        initialTierFilter={tier}
+        sort={sort}
+        page={page}
+        pageSize={SIGNAL_LIST_PAGE_SIZE}
+        totalMatching={totalMatching}
+        totalUnfiltered={totalUnfiltered}
+        hasMore={hasMore}
+        newsBySignalId={newsBySignalId}
+        newsContextHours={newsContextHours}
       />
       <Disclaimer />
-      <PageCtaRow heading={tCommon("next")} items={ctaRow} />
+      <PageCtaRow heading={tCommon("ctaDiscovery")} items={ctaRow} />
     </div>
   );
 }

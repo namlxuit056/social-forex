@@ -46,7 +46,7 @@ export default async function ProfilePage({
           primary={{ href: "/auth/signin?callbackUrl=/profile", label: tc("signIn") }}
           secondary={[{ href: "/auth/register", label: tc("signUp") }]}
         />
-        <PageCtaRow heading={tc("next")} items={ctaRow} />
+        <PageCtaRow heading={tc("ctaDiscovery")} items={ctaRow} />
       </div>
     );
   }
@@ -116,7 +116,7 @@ export default async function ProfilePage({
           </div>
         )}
       </div>
-      <PageCtaRow heading={tc("next")} items={ctaRow} />
+      <PageCtaRow heading={tc("ctaDiscovery")} items={ctaRow} />
     </div>
   );
 }

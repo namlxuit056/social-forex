@@ -62,7 +62,7 @@ export default async function CalendarPage({
         syncedAt={cal.syncedAt}
         initialSelectedCurrencies={initialCurrencies}
       />
-      <PageCtaRow heading={tCommon("next")} items={ctaRow} />
+      <PageCtaRow heading={tCommon("ctaDiscovery")} items={ctaRow} />
     </div>
   );
 }

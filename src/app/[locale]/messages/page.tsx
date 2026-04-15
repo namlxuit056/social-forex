@@ -82,7 +82,7 @@ export default async function MessagesIndexPage({
             description={t("emptyHint")}
             primary={{ href: "/leaderboard", label: "Leaderboard" }}
           />
-          <PageCtaRow heading={tCommon("next")} items={ctaRow} />
+          <PageCtaRow heading={tCommon("ctaDiscovery")} items={ctaRow} />
         </div>
       ) : (
         <>
@@ -115,7 +115,7 @@ export default async function MessagesIndexPage({
               </li>
             ))}
           </ul>
-          <PageCtaRow heading={tCommon("next")} items={ctaRow} />
+          <PageCtaRow heading={tCommon("ctaDiscovery")} items={ctaRow} />
         </>
       )}
     </div>

@@ -142,21 +142,35 @@ export default async function SignalDetailPage({
             <p className="text-sm text-amber-400/90">{t("maskedMessage")}</p>
           ) : (
             <>
-              <dl className="grid gap-2 font-mono text-sm sm:grid-cols-3">
+              <dl className="grid gap-3 font-mono text-sm sm:grid-cols-2">
                 <div>
-                  <dt className="text-muted-foreground">Entry</dt>
+                  <dt className="text-muted-foreground">{t("entryField")}</dt>
                   <dd className="text-lg font-semibold">{signal.entry}</dd>
                 </div>
                 <div>
-                  <dt className="text-muted-foreground">SL</dt>
+                  <dt className="text-muted-foreground">{t("slField")}</dt>
                   <dd className="text-lg font-semibold">
                     {signal.stopLoss ?? "—"}
                   </dd>
                 </div>
+              </dl>
+              <dl className="mt-2 grid gap-3 font-mono text-sm sm:grid-cols-3">
                 <div>
-                  <dt className="text-muted-foreground">TP</dt>
+                  <dt className="text-muted-foreground">{t("tp1Field")}</dt>
                   <dd className="text-lg font-semibold">
                     {signal.takeProfit ?? "—"}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-muted-foreground">{t("tp2Field")}</dt>
+                  <dd className="text-lg font-semibold">
+                    {signal.takeProfit2 ?? "—"}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-muted-foreground">{t("tp3Field")}</dt>
+                  <dd className="text-lg font-semibold">
+                    {signal.takeProfit3 ?? "—"}
                   </dd>
                 </div>
               </dl>

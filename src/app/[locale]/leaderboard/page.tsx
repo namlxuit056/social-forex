@@ -84,7 +84,7 @@ export default async function LeaderboardPage({
             description={t("emptyHint")}
             primary={{ href: "/signals", label: t("goToSignals") }}
           />
-          <PageCtaRow heading={tCommon("next")} items={ctaEmpty} />
+          <PageCtaRow heading={tCommon("ctaDiscovery")} items={ctaEmpty} />
         </div>
       ) : (
         <>
@@ -116,7 +116,7 @@ export default async function LeaderboardPage({
               </tbody>
             </table>
           </div>
-          <PageCtaRow heading={tCommon("next")} items={ctaTable} />
+          <PageCtaRow heading={tCommon("ctaDiscovery")} items={ctaTable} />
         </>
       )}
     </div>

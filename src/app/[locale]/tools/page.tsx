@@ -34,7 +34,7 @@ export default async function ToolsPage({
         <p className="mt-2 text-muted-foreground">{t("description")}</p>
       </div>
       <TradingCalculators />
-      <PageCtaRow heading={tCommon("next")} items={ctaRow} />
+      <PageCtaRow heading={tCommon("ctaDiscovery")} items={ctaRow} />
     </div>
   );
 }

@@ -1,20 +1,28 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
-import { usePathname, useRouter } from "@/i18n/navigation";
-import { ThumbsDown, MessageCircle, ThumbsUp } from "lucide-react";
-import { Link } from "@/i18n/navigation";
+import { ChevronRight, MessageCircle, ThumbsDown, ThumbsUp } from "lucide-react";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { closeSignal } from "@/actions/signals";
+import { SignalCardNews } from "@/components/signals/signal-card-news";
 import { SignalCreateForm } from "@/components/signals/signal-create-form";
 import { SignalImageGallery } from "@/components/signals/signal-image-gallery";
 import { EmptyState } from "@/components/layout/empty-state";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  buildSignalsListHref,
+  type SignalDatePeriod,
+  type SignalListSort,
+  type SignalStatusFilter,
+  type SignalListTz,
+} from "@/lib/signals/signal-list-query";
+import type { SignalCardNewsEvent } from "@/lib/signals/signal-list-news";
 import { cn } from "@/lib/utils";
 
 type SignalRow = {
@@ -24,11 +32,15 @@ type SignalRow = {
   entry: number | null;
   stopLoss: number | null;
   takeProfit: number | null;
+  takeProfit2: number | null;
+  takeProfit3: number | null;
   tier: "FREE" | "VIP";
   status: "ACTIVE" | "CLOSED_WIN" | "CLOSED_LOSS" | "CANCELLED";
   notes: string | null;
   masked: boolean;
   authorLabel: string;
+  /** `User.image` (OAuth / profile); null → initials fallback */
+  authorImage: string | null;
   authorId: string;
   isAuthor: boolean;
   likes: number;
@@ -74,6 +86,18 @@ function statusBadgeClass(status: SignalRow["status"]): string {
   }
 }
 
+function authorInitials(label: string): string {
+  const raw = label.trim();
+  if (!raw || raw === "—") return "?";
+  const parts = raw.split(/\s+/).filter(Boolean);
+  if (parts.length >= 2) {
+    const a = parts[0]?.[0] ?? "";
+    const b = parts[1]?.[0] ?? "";
+    return (a + b).toUpperCase().slice(0, 2);
+  }
+  return raw.slice(0, 2).toUpperCase();
+}
+
 const toolbarSelectClass =
   "mt-1 h-9 w-full min-w-[10rem] rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:w-auto";
 
@@ -81,11 +105,36 @@ export function SignalRoom({
   signals,
   showCreate,
   initialSymbolFilter = "",
+  initialAuthorFilter = "",
+  initialStatusFilter = "all",
+  initialPeriodFilter = "today",
+  initialTzFilter = "vn",
+  initialTierFilter = "all",
+  sort,
+  page,
+  pageSize,
+  totalMatching,
+  totalUnfiltered,
+  hasMore,
+  newsBySignalId = {},
+  newsContextHours = 24,
 }: {
   signals: SignalRow[];
   showCreate: boolean;
-  /** Từ `?symbol=` trên URL (server truyền xuống). */
   initialSymbolFilter?: string;
+  initialAuthorFilter?: string;
+  initialStatusFilter?: SignalStatusFilter;
+  initialPeriodFilter?: SignalDatePeriod;
+  initialTzFilter?: SignalListTz;
+  initialTierFilter?: "all" | "FREE" | "VIP";
+  sort: SignalListSort;
+  page: number;
+  pageSize: number;
+  totalMatching: number;
+  totalUnfiltered: number;
+  hasMore: boolean;
+  newsBySignalId?: Record<string, SignalCardNewsEvent[]>;
+  newsContextHours?: number;
 }) {
   const t = useTranslations("signals");
   const tn = useTranslations("nav");
@@ -94,65 +143,215 @@ export function SignalRoom({
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const [tierFilter, setTierFilter] = useState<"all" | "FREE" | "VIP">("all");
+  const tierFilter = initialTierFilter;
+  const statusFilter = initialStatusFilter;
+  const periodFilter = initialPeriodFilter;
+  const tzFilter = initialTzFilter;
+
   const [symbolQuery, setSymbolQuery] = useState(() =>
     initialSymbolFilter.trim(),
   );
+  const [authorQuery, setAuthorQuery] = useState(() =>
+    initialAuthorFilter.trim(),
+  );
 
-  const filtered = useMemo(() => {
-    const q = symbolQuery.trim().toUpperCase();
-    return signals.filter((s) => {
-      if (tierFilter !== "all" && s.tier !== tierFilter) return false;
-      if (q && !s.symbol.toUpperCase().includes(q)) return false;
-      return true;
-    });
-  }, [signals, tierFilter, symbolQuery]);
+  useEffect(() => {
+    setSymbolQuery(initialSymbolFilter.trim());
+  }, [initialSymbolFilter]);
 
-  const filtersActive = tierFilter !== "all" || symbolQuery.trim() !== "";
+  useEffect(() => {
+    setAuthorQuery(initialAuthorFilter.trim());
+  }, [initialAuthorFilter]);
+
+  const filtersActive =
+    tierFilter !== "all" ||
+    symbolQuery.trim() !== "" ||
+    authorQuery.trim() !== "" ||
+    statusFilter !== "all" ||
+    periodFilter !== "today" ||
+    tzFilter !== "vn";
 
   useEffect(() => {
     const id = window.setTimeout(() => {
-      const q = symbolQuery.trim().toUpperCase();
-      const params = new URLSearchParams(searchParams.toString());
-      if (q) params.set("symbol", q);
-      else params.delete("symbol");
-      const next = params.toString();
-      const prev = searchParams.toString();
-      if (next === prev) return;
-      router.replace(next ? `${pathname}?${next}` : pathname, {
-        scroll: false,
+      const q = symbolQuery.trim();
+      if (q === initialSymbolFilter.trim()) return;
+
+      const nextHref = buildSignalsListHref({
+        pathname,
+        symbol: symbolQuery,
+        author: authorQuery,
+        tier: tierFilter,
+        status: statusFilter,
+        period: periodFilter,
+        tz: tzFilter,
+        sort,
+        page: 1,
       });
+      const cur = searchParams.toString();
+      const nextQ = nextHref.includes("?")
+        ? nextHref.slice(nextHref.indexOf("?") + 1)
+        : "";
+      if (nextQ === cur) return;
+      router.replace(nextHref, { scroll: false });
     }, 400);
     return () => window.clearTimeout(id);
-  }, [symbolQuery, pathname, router, searchParams]);
+  }, [
+    symbolQuery,
+    initialSymbolFilter,
+    authorQuery,
+    pathname,
+    router,
+    searchParams,
+    tierFilter,
+    statusFilter,
+    periodFilter,
+    tzFilter,
+    sort,
+  ]);
+
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      const a = authorQuery.trim();
+      if (a === initialAuthorFilter.trim()) return;
+
+      const nextHref = buildSignalsListHref({
+        pathname,
+        symbol: symbolQuery,
+        author: authorQuery,
+        tier: tierFilter,
+        status: statusFilter,
+        period: periodFilter,
+        tz: tzFilter,
+        sort,
+        page: 1,
+      });
+      const cur = searchParams.toString();
+      const nextQ = nextHref.includes("?")
+        ? nextHref.slice(nextHref.indexOf("?") + 1)
+        : "";
+      if (nextQ === cur) return;
+      router.replace(nextHref, { scroll: false });
+    }, 400);
+    return () => window.clearTimeout(id);
+  }, [
+    authorQuery,
+    initialAuthorFilter,
+    symbolQuery,
+    pathname,
+    router,
+    searchParams,
+    tierFilter,
+    statusFilter,
+    periodFilter,
+    tzFilter,
+    sort,
+  ]);
+
+  const rangeFrom =
+    signals.length > 0 ? (page - 1) * pageSize + 1 : 0;
+  const rangeTo = (page - 1) * pageSize + signals.length;
+
+  const prevHref = buildSignalsListHref({
+    pathname,
+    symbol: initialSymbolFilter,
+    author: initialAuthorFilter,
+    tier: tierFilter,
+    status: statusFilter,
+    period: periodFilter,
+    tz: tzFilter,
+    sort,
+    page: page - 1,
+  });
+  const nextHref = buildSignalsListHref({
+    pathname,
+    symbol: initialSymbolFilter,
+    author: initialAuthorFilter,
+    tier: tierFilter,
+    status: statusFilter,
+    period: periodFilter,
+    tz: tzFilter,
+    sort,
+    page: page + 1,
+  });
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-8">
       {showCreate ? (
         <SignalCreateForm collapsible defaultCollapsed />
       ) : null}
 
-      <section id="signal-list" aria-labelledby="signal-list-heading">
-        <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">
+      <section id="signal-list" aria-labelledby="signal-list-heading" className="space-y-4">
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
           <h2
             id="signal-list-heading"
-            className="text-lg font-medium text-foreground"
+            className="text-lg font-semibold tracking-tight text-foreground"
           >
             {t("list")}
           </h2>
-          {signals.length > 0 ? (
-            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-end sm:gap-3">
-              <div className="grid flex-1 gap-3 sm:flex sm:max-w-md sm:flex-initial sm:items-end">
-                <div className="min-w-0 flex-1">
+          {totalUnfiltered > 0 ? (
+            <p className="text-xs text-muted-foreground">
+              {t("listToolbarHint")}
+            </p>
+          ) : null}
+        </div>
+
+        {totalUnfiltered > 0 ? (
+          <Card className="border-border/60 bg-muted/10">
+            <CardContent className="space-y-4 p-4 sm:p-5">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-12 lg:items-end lg:gap-4">
+                <div className="sm:col-span-1 lg:col-span-2">
+                  <Label htmlFor="signal-sort" className="text-xs">
+                    {t("sortLabel")}
+                  </Label>
+                  <select
+                    id="signal-sort"
+                    value={sort}
+                    onChange={(e) => {
+                      router.replace(
+                        buildSignalsListHref({
+                          pathname,
+                          symbol: symbolQuery,
+                          author: authorQuery,
+                          tier: tierFilter,
+                          status: statusFilter,
+                          period: periodFilter,
+                          tz: tzFilter,
+                          sort: e.target.value as SignalListSort,
+                          page: 1,
+                        }),
+                        { scroll: false },
+                      );
+                    }}
+                    className={toolbarSelectClass}
+                  >
+                    <option value="newest">{t("sortNewest")}</option>
+                    <option value="symbol">{t("sortSymbol")}</option>
+                    <option value="tier">{t("sortTier")}</option>
+                  </select>
+                </div>
+                <div className="sm:col-span-1 lg:col-span-2">
                   <Label htmlFor="signal-filter-tier" className="text-xs">
                     {t("filterTier")}
                   </Label>
                   <select
                     id="signal-filter-tier"
                     value={tierFilter}
-                    onChange={(e) =>
-                      setTierFilter(e.target.value as "all" | "FREE" | "VIP")
-                    }
+                    onChange={(e) => {
+                      router.replace(
+                        buildSignalsListHref({
+                          pathname,
+                          symbol: symbolQuery,
+                          author: authorQuery,
+                          tier: e.target.value as "all" | "FREE" | "VIP",
+                          status: statusFilter,
+                          period: periodFilter,
+                          tz: tzFilter,
+                          sort,
+                          page: 1,
+                        }),
+                        { scroll: false },
+                      );
+                    }}
                     className={toolbarSelectClass}
                   >
                     <option value="all">{t("filterTierAll")}</option>
@@ -160,7 +359,7 @@ export function SignalRoom({
                     <option value="VIP">{t("filterTierVip")}</option>
                   </select>
                 </div>
-                <div className="min-w-0 flex-1">
+                <div className="sm:col-span-2 lg:col-span-4">
                   <Label htmlFor="signal-filter-symbol" className="text-xs">
                     {t("filterSymbol")}
                   </Label>
@@ -173,27 +372,185 @@ export function SignalRoom({
                     autoComplete="off"
                   />
                 </div>
+                <div className="sm:col-span-2 lg:col-span-4">
+                  <Label htmlFor="signal-filter-author" className="text-xs">
+                    {t("filterAuthor")}
+                  </Label>
+                  <Input
+                    id="signal-filter-author"
+                    value={authorQuery}
+                    onChange={(e) => setAuthorQuery(e.target.value)}
+                    placeholder={t("filterAuthorPlaceholder")}
+                    className="mt-1"
+                    autoComplete="off"
+                    spellCheck={false}
+                  />
+                </div>
+                <div className="flex items-end sm:col-span-2 lg:col-span-12 lg:justify-end">
+                  {filtersActive ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="h-9 w-full sm:w-auto"
+                      onClick={() => {
+                        setSymbolQuery("");
+                        setAuthorQuery("");
+                        router.replace(pathname, { scroll: false });
+                      }}
+                    >
+                      {t("filterReset")}
+                    </Button>
+                  ) : null}
+                </div>
               </div>
-              {filtersActive ? (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="h-9 shrink-0 self-start sm:self-auto"
-                  onClick={() => {
-                    setTierFilter("all");
-                    setSymbolQuery("");
-                    router.replace(pathname, { scroll: false });
-                  }}
-                >
-                  {t("filterReset")}
-                </Button>
-              ) : null}
-            </div>
-          ) : null}
-        </div>
 
-        {signals.length === 0 && (
+              <div className="grid gap-3 border-t border-border/40 pt-4 sm:grid-cols-2 lg:grid-cols-12 lg:items-end lg:gap-4">
+                <div className="lg:col-span-3">
+                  <Label htmlFor="signal-filter-period" className="text-xs">
+                    {t("filterPeriod")}
+                  </Label>
+                  <select
+                    id="signal-filter-period"
+                    value={periodFilter}
+                    onChange={(e) => {
+                      router.replace(
+                        buildSignalsListHref({
+                          pathname,
+                          symbol: symbolQuery,
+                          author: authorQuery,
+                          tier: tierFilter,
+                          status: statusFilter,
+                          period: e.target.value as SignalDatePeriod,
+                          tz: tzFilter,
+                          sort,
+                          page: 1,
+                        }),
+                        { scroll: false },
+                      );
+                    }}
+                    className={toolbarSelectClass}
+                  >
+                    <option value="today">{t("filterPeriodToday")}</option>
+                    <option value="week">{t("filterPeriodWeek")}</option>
+                    <option value="all">{t("filterPeriodAll")}</option>
+                  </select>
+                </div>
+                <div className="lg:col-span-3">
+                  <Label htmlFor="signal-filter-status" className="text-xs">
+                    {t("filterStatus")}
+                  </Label>
+                  <select
+                    id="signal-filter-status"
+                    value={statusFilter}
+                    onChange={(e) => {
+                      router.replace(
+                        buildSignalsListHref({
+                          pathname,
+                          symbol: symbolQuery,
+                          author: authorQuery,
+                          tier: tierFilter,
+                          status: e.target.value as SignalStatusFilter,
+                          period: periodFilter,
+                          tz: tzFilter,
+                          sort,
+                          page: 1,
+                        }),
+                        { scroll: false },
+                      );
+                    }}
+                    className={toolbarSelectClass}
+                  >
+                    <option value="all">{t("filterStatusAll")}</option>
+                    <option value="ACTIVE">{t("filterStatusActive")}</option>
+                    <option value="CLOSED_WIN">{t("filterStatusClosedWin")}</option>
+                    <option value="CLOSED_LOSS">
+                      {t("filterStatusClosedLoss")}
+                    </option>
+                    <option value="CANCELLED">{t("filterStatusCancelled")}</option>
+                  </select>
+                </div>
+                <div className="flex flex-col gap-2 lg:col-span-6">
+                  <span className="text-xs font-medium text-muted-foreground">
+                    {t("filterTimezone")}
+                  </span>
+                  <div
+                    className="inline-flex w-fit rounded-lg border border-border bg-muted/30 p-0.5"
+                    role="group"
+                    aria-label={t("filterTimezone")}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (tzFilter === "vn") return;
+                        router.replace(
+                          buildSignalsListHref({
+                            pathname,
+                            symbol: symbolQuery,
+                            author: authorQuery,
+                            tier: tierFilter,
+                            status: statusFilter,
+                            period: periodFilter,
+                            tz: "vn",
+                            sort,
+                            page: 1,
+                          }),
+                          { scroll: false },
+                        );
+                      }}
+                      className={cn(
+                        "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
+                        tzFilter === "vn"
+                          ? "bg-background text-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground",
+                      )}
+                    >
+                      {t("filterTzVn")}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (tzFilter === "utc") return;
+                        router.replace(
+                          buildSignalsListHref({
+                            pathname,
+                            symbol: symbolQuery,
+                            author: authorQuery,
+                            tier: tierFilter,
+                            status: statusFilter,
+                            period: periodFilter,
+                            tz: "utc",
+                            sort,
+                            page: 1,
+                          }),
+                          { scroll: false },
+                        );
+                      }}
+                      className={cn(
+                        "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
+                        tzFilter === "utc"
+                          ? "bg-background text-foreground shadow-sm"
+                          : "text-muted-foreground hover:text-foreground",
+                      )}
+                    >
+                      {t("filterTzUtc")}
+                    </button>
+                  </div>
+                  <p className="text-[0.65rem] leading-snug text-muted-foreground">
+                    {t("filterPeriodHint", {
+                      zone:
+                        tzFilter === "utc"
+                          ? t("filterTzUtcLong")
+                          : t("filterTzVnLong"),
+                    })}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ) : null}
+
+        {totalUnfiltered === 0 && (
           <div className="mt-4">
             <EmptyState
               title={t("empty")}
@@ -217,142 +574,240 @@ export function SignalRoom({
           </div>
         )}
 
-        {signals.length > 0 && filtered.length === 0 && (
+        {totalUnfiltered > 0 && totalMatching === 0 && (
           <p className="mt-6 rounded-lg border border-border/60 bg-muted/20 px-4 py-6 text-center text-sm text-muted-foreground">
             {t("listFilteredEmpty")}
           </p>
         )}
 
-        <ul className="mt-4 space-y-4">
-          {filtered.map((s) => (
-            <li key={s.id}>
-              <Card>
-                <CardContent className="space-y-3 pt-4 pb-4">
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-mono text-lg font-semibold tracking-tight text-foreground">
-                        {s.symbol}
-                      </span>
-                      <Badge
-                        variant={
-                          s.direction === "LONG" ? "default" : "destructive"
-                        }
-                        className="text-xs"
-                      >
-                        {s.direction}
-                      </Badge>
-                      <Badge
-                        variant={s.tier === "VIP" ? "secondary" : "outline"}
-                        className="text-xs"
-                      >
-                        {s.tier}
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground sm:text-right">
-                      <span>{s.authorLabel}</span>
-                      <span className="mx-1.5 text-border" aria-hidden>
-                        ·
-                      </span>
-                      <time dateTime={s.createdAt}>
-                        {new Date(s.createdAt).toLocaleString()}
-                      </time>
-                    </p>
-                  </div>
+        {totalMatching > 0 && (
+          <ul className="mt-4 space-y-4">
+            {signals.map((s) => (
+              <li key={s.id}>
+                <Card className="overflow-hidden border-border/60">
+                  <CardContent className="p-0">
+                    <div className="flex flex-col lg:flex-row lg:items-stretch">
+                      <div className="min-w-0 flex-1 space-y-3 p-4 sm:p-5">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="font-mono text-lg font-semibold tracking-tight text-foreground">
+                              {s.symbol}
+                            </span>
+                            <Badge
+                              variant={
+                                s.direction === "LONG" ? "default" : "destructive"
+                              }
+                              className="text-xs"
+                            >
+                              {s.direction}
+                            </Badge>
+                            <Badge
+                              variant={s.tier === "VIP" ? "secondary" : "outline"}
+                              className="text-xs"
+                            >
+                              {s.tier}
+                            </Badge>
+                          </div>
+                          <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:max-w-[min(100%,22rem)] sm:justify-end sm:text-right">
+                            <Link
+                              href={`/u/${s.authorId}`}
+                              aria-label={t("authorProfileAria", {
+                                name: s.authorLabel,
+                              })}
+                              className="inline-flex min-w-0 max-w-full items-center gap-2 rounded-md text-muted-foreground transition-colors hover:text-foreground"
+                            >
+                              <span className="inline-flex size-8 shrink-0 overflow-hidden rounded-full bg-muted ring-1 ring-border">
+                                {s.authorImage ? (
+                                  // OAuth URLs vary; avoid next/image remotePatterns churn
+                                  // eslint-disable-next-line @next/next/no-img-element
+                                  <img
+                                    src={s.authorImage}
+                                    alt=""
+                                    className="size-full object-cover"
+                                    loading="lazy"
+                                    referrerPolicy="no-referrer"
+                                  />
+                                ) : (
+                                  <span
+                                    className="flex size-full items-center justify-center text-[0.65rem] font-semibold uppercase text-muted-foreground"
+                                    aria-hidden
+                                  >
+                                    {authorInitials(s.authorLabel)}
+                                  </span>
+                                )}
+                              </span>
+                              <span className="min-w-0 truncate font-medium text-primary underline-offset-4 hover:underline">
+                                {s.authorLabel}
+                              </span>
+                            </Link>
+                            <span className="text-border" aria-hidden>
+                              ·
+                            </span>
+                            <time
+                              dateTime={s.createdAt}
+                              className="shrink-0 text-muted-foreground"
+                            >
+                              {new Date(s.createdAt).toLocaleString()}
+                            </time>
+                          </div>
+                        </div>
 
-                  <SignalImageGallery
-                    className="mt-1"
-                    size="sm"
-                    imageUrls={s.imageUrls}
-                    imageCount={s.imageCount}
-                    masked={s.masked}
-                  />
-
-                  {s.masked ? (
-                    <p className="text-sm text-amber-400/90">
-                      {t("maskedMessage")}
-                    </p>
-                  ) : (
-                    <div className="grid grid-cols-3 gap-2 rounded-lg border border-border/60 bg-muted/25 p-3 sm:gap-3">
-                      <div className="min-w-0">
-                        <div className="text-[0.65rem] font-medium uppercase tracking-wide text-muted-foreground">
-                          {t("entryField")}
-                        </div>
-                        <div className="truncate font-mono text-sm tabular-nums text-foreground">
-                          {s.entry}
-                        </div>
-                      </div>
-                      <div className="min-w-0">
-                        <div className="text-[0.65rem] font-medium uppercase tracking-wide text-muted-foreground">
-                          {t("slField")}
-                        </div>
-                        <div className="truncate font-mono text-sm tabular-nums text-foreground">
-                          {s.stopLoss ?? "—"}
-                        </div>
-                      </div>
-                      <div className="min-w-0">
-                        <div className="text-[0.65rem] font-medium uppercase tracking-wide text-muted-foreground">
-                          {t("tpField")}
-                        </div>
-                        <div className="truncate font-mono text-sm tabular-nums text-foreground">
-                          {s.takeProfit ?? "—"}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {s.notes && !s.masked ? (
-                    <p className="text-sm text-muted-foreground">{s.notes}</p>
-                  ) : null}
-
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs text-muted-foreground">
-                      {t("status")}
-                    </span>
-                    <Badge
-                      variant="outline"
-                      className={cn(
-                        "text-xs font-medium",
-                        statusBadgeClass(s.status),
-                      )}
-                    >
-                      {statusLabel(s.status, t)}
-                    </Badge>
-                    {s.isAuthor && s.status === "ACTIVE" ? (
-                      <CloseSignalForm signalId={s.id} />
-                    ) : null}
-                  </div>
-
-                  <div className="flex flex-col gap-3 border-t border-border/40 pt-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-                      <span className="inline-flex items-center gap-1">
-                        <ThumbsUp className="size-3.5 shrink-0" aria-hidden />
-                        {s.likes}
-                      </span>
-                      <span className="inline-flex items-center gap-1">
-                        <ThumbsDown className="size-3.5 shrink-0" aria-hidden />
-                        {s.dislikes}
-                      </span>
-                      <span className="inline-flex items-center gap-1">
-                        <MessageCircle
-                          className="size-3.5 shrink-0"
-                          aria-hidden
+                        <SignalImageGallery
+                          className="mt-1"
+                          size="sm"
+                          imageUrls={s.imageUrls}
+                          imageCount={s.imageCount}
+                          masked={s.masked}
                         />
-                        {s.commentCount}
-                      </span>
+
+                        {s.masked ? (
+                          <p className="text-sm text-amber-400/90">
+                            {t("maskedMessage")}
+                          </p>
+                        ) : (
+                          <div className="space-y-2 rounded-lg border border-border/60 bg-muted/25 p-3">
+                            <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                              <div className="min-w-0">
+                                <div className="text-[0.65rem] font-medium uppercase tracking-wide text-muted-foreground">
+                                  {t("entryField")}
+                                </div>
+                                <div className="truncate font-mono text-sm tabular-nums text-foreground">
+                                  {s.entry}
+                                </div>
+                              </div>
+                              <div className="min-w-0">
+                                <div className="text-[0.65rem] font-medium uppercase tracking-wide text-muted-foreground">
+                                  {t("slField")}
+                                </div>
+                                <div className="truncate font-mono text-sm tabular-nums text-foreground">
+                                  {s.stopLoss ?? "—"}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                              <div className="min-w-0">
+                                <div className="text-[0.65rem] font-medium uppercase tracking-wide text-muted-foreground">
+                                  {t("tp1Field")}
+                                </div>
+                                <div className="truncate font-mono text-sm tabular-nums text-foreground">
+                                  {s.takeProfit ?? "—"}
+                                </div>
+                              </div>
+                              <div className="min-w-0">
+                                <div className="text-[0.65rem] font-medium uppercase tracking-wide text-muted-foreground">
+                                  {t("tp2Field")}
+                                </div>
+                                <div className="truncate font-mono text-sm tabular-nums text-foreground">
+                                  {s.takeProfit2 ?? "—"}
+                                </div>
+                              </div>
+                              <div className="min-w-0">
+                                <div className="text-[0.65rem] font-medium uppercase tracking-wide text-muted-foreground">
+                                  {t("tp3Field")}
+                                </div>
+                                <div className="truncate font-mono text-sm tabular-nums text-foreground">
+                                  {s.takeProfit3 ?? "—"}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {s.notes && !s.masked ? (
+                          <p className="text-sm text-muted-foreground">{s.notes}</p>
+                        ) : null}
+
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-xs text-muted-foreground">
+                            {t("status")}
+                          </span>
+                          <Badge
+                            variant="outline"
+                            className={cn(
+                              "text-xs font-medium",
+                              statusBadgeClass(s.status),
+                            )}
+                          >
+                            {statusLabel(s.status, t)}
+                          </Badge>
+                          {s.isAuthor && s.status === "ACTIVE" ? (
+                            <CloseSignalForm signalId={s.id} />
+                          ) : null}
+                        </div>
+                      </div>
+
+                      <SignalCardNews
+                        symbol={s.symbol}
+                        events={newsBySignalId[s.id] ?? []}
+                        windowHours={newsContextHours}
+                      />
                     </div>
-                    <Link
-                      href={`/signals/${s.id}`}
-                      className="inline-flex min-h-11 items-center text-sm font-medium text-primary underline-offset-4 hover:underline"
-                      aria-label={t("viewDetailAria", { symbol: s.symbol })}
-                    >
-                      {t("viewDetail")} →
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            </li>
-          ))}
-        </ul>
+
+                    <div className="flex flex-col gap-3 border-t border-border/40 bg-muted/5 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+                      <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
+                        <span className="inline-flex items-center gap-1">
+                          <ThumbsUp className="size-3.5 shrink-0" aria-hidden />
+                          {s.likes}
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <ThumbsDown className="size-3.5 shrink-0" aria-hidden />
+                          {s.dislikes}
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <MessageCircle
+                            className="size-3.5 shrink-0"
+                            aria-hidden
+                          />
+                          {s.commentCount}
+                        </span>
+                      </div>
+                      <Link
+                        href={`/signals/${s.id}`}
+                        className="inline-flex min-h-11 items-center gap-1 text-sm font-medium text-primary underline-offset-4 hover:underline"
+                        aria-label={t("viewDetailAria", { symbol: s.symbol })}
+                      >
+                        {t("viewDetail")}
+                        <ChevronRight className="size-4 shrink-0" aria-hidden />
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {totalMatching > 0 && (page > 1 || hasMore) ? (
+          <div className="mt-6 flex flex-col gap-3 border-t border-border/40 pt-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+            <p className="text-sm text-muted-foreground">
+              {t("paginationRange", {
+                from: rangeFrom,
+                to: rangeTo,
+                total: totalMatching,
+              })}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {page > 1 ? (
+                <Link
+                  href={prevHref}
+                  scroll={false}
+                  className={buttonVariants({ variant: "outline", size: "sm" })}
+                >
+                  {t("paginationPrevious")}
+                </Link>
+              ) : null}
+              {hasMore ? (
+                <Link
+                  href={nextHref}
+                  scroll={false}
+                  className={buttonVariants({ variant: "default", size: "sm" })}
+                >
+                  {t("loadMore")}
+                </Link>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
       </section>
     </div>
   );

@@ -355,14 +355,14 @@ export function SignalCreateForm({
             </select>
           </div>
           <div>
-            <Label htmlFor="signal-tier">Tier</Label>
+            <Label htmlFor="signal-tier">{t("tierLabel")}</Label>
             <select id="signal-tier" name="tier" className={selectClass}>
               <option value="FREE">FREE</option>
               <option value="VIP">VIP</option>
             </select>
           </div>
           <div>
-            <Label htmlFor="signal-entry">Entry</Label>
+            <Label htmlFor="signal-entry">{t("entryField")}</Label>
             <Input
               id="signal-entry"
               name="entry"
@@ -373,7 +373,7 @@ export function SignalCreateForm({
             />
           </div>
           <div>
-            <Label htmlFor="signal-sl">Stop loss</Label>
+            <Label htmlFor="signal-sl">{t("stopLossField")}</Label>
             <Input
               id="signal-sl"
               name="stopLoss"
@@ -382,15 +382,37 @@ export function SignalCreateForm({
               className="mt-1.5 font-mono"
             />
           </div>
-          <div>
-            <Label htmlFor="signal-tp">Take profit</Label>
-            <Input
-              id="signal-tp"
-              name="takeProfit"
-              type="number"
-              step="any"
-              className="mt-1.5 font-mono"
-            />
+          <div className="sm:col-span-2 grid gap-4 sm:grid-cols-3">
+            <div>
+              <Label htmlFor="signal-tp1">{t("tp1Field")}</Label>
+              <Input
+                id="signal-tp1"
+                name="takeProfit"
+                type="number"
+                step="any"
+                className="mt-1.5 font-mono"
+              />
+            </div>
+            <div>
+              <Label htmlFor="signal-tp2">{t("tp2Field")}</Label>
+              <Input
+                id="signal-tp2"
+                name="takeProfit2"
+                type="number"
+                step="any"
+                className="mt-1.5 font-mono"
+              />
+            </div>
+            <div>
+              <Label htmlFor="signal-tp3">{t("tp3Field")}</Label>
+              <Input
+                id="signal-tp3"
+                name="takeProfit3"
+                type="number"
+                step="any"
+                className="mt-1.5 font-mono"
+              />
+            </div>
           </div>
           <div className="sm:col-span-2">
             <Label htmlFor="signal-notes">{t("notes")}</Label>

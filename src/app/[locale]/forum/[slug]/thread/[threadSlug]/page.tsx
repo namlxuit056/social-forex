@@ -143,7 +143,7 @@ export default async function ForumThreadPage({ params }: Props) {
         </p>
       )}
 
-      <PageCtaRow heading={tCommon("next")} items={ctaRow} />
+      <PageCtaRow heading={tCommon("ctaDiscovery")} items={ctaRow} />
     </div>
   );
 }

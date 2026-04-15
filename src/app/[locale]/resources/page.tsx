@@ -56,7 +56,7 @@ export default async function ResourcesPage({
           </li>
         ))}
       </ul>
-      <PageCtaRow heading={tCommon("next")} items={ctaRow} />
+      <PageCtaRow heading={tCommon("ctaDiscovery")} items={ctaRow} />
     </div>
   );
 }

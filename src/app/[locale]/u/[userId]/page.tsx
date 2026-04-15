@@ -109,7 +109,7 @@ export default async function PublicProfilePage({ params }: Props) {
         </div>
       </dl>
 
-      <PageCtaRow heading={tCommon("next")} items={ctaRow} />
+      <PageCtaRow heading={tCommon("ctaDiscovery")} items={ctaRow} />
     </div>
   );
 }

@@ -127,7 +127,7 @@ export default async function HeatmapPage({
         </table>
       </div>
       <p className="text-xs text-muted-foreground">{sourceLabel}</p>
-      <PageCtaRow heading={tCommon("next")} items={ctaRow} />
+      <PageCtaRow heading={tCommon("ctaDiscovery")} items={ctaRow} />
     </div>
   );
 }

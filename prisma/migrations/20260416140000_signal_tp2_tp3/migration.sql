@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Signal" ADD COLUMN "takeProfit2" DOUBLE PRECISION;
+ALTER TABLE "Signal" ADD COLUMN "takeProfit3" DOUBLE PRECISION;

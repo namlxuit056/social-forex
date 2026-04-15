@@ -69,7 +69,7 @@ export default async function AcademyPage({
         ))}
       </ul>
       <Disclaimer variant="compact" />
-      <PageCtaRow heading={tCommon("next")} items={ctaRow} />
+      <PageCtaRow heading={tCommon("ctaDiscovery")} items={ctaRow} />
     </div>
   );
 }
