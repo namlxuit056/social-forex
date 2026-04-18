@@ -12,9 +12,11 @@ const DEFAULT_SYMBOL = "EURUSD";
 
 interface Props {
   locale: string;
+  /** When false, only watchlist + chart (e.g. dashboard). Chart page uses full layout + AI. */
+  showAiPanel?: boolean;
 }
 
-function ChartContainerInner({ locale }: Props) {
+function ChartContainerInner({ locale, showAiPanel = true }: Props) {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -40,15 +42,15 @@ function ChartContainerInner({ locale }: Props) {
           <TradingViewEmbed symbol={symbol} locale={tvLocale} />
         </div>
       </div>
-      <AiAnalysisPanel symbol={symbol} />
+      {showAiPanel ? <AiAnalysisPanel symbol={symbol} /> : null}
     </div>
   );
 }
 
-export function ChartContainer({ locale }: Props) {
+export function ChartContainer({ locale, showAiPanel = true }: Props) {
   return (
     <SessionProvider>
-      <ChartContainerInner locale={locale} />
+      <ChartContainerInner locale={locale} showAiPanel={showAiPanel} />
     </SessionProvider>
   );
 }

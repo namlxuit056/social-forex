@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import {
   ArrowRight,
   BarChart3,
@@ -9,8 +10,7 @@ import {
   Wrench,
 } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
-import { redirect } from "next/navigation";
+import { Link, redirect } from "@/i18n/navigation";
 import { auth } from "@/auth";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -23,7 +23,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { DashboardTradingViewWidget } from "@/components/dashboard/tradingview-widget";
+import { ChartContainer } from "@/components/charts/chart-container";
 import { Disclaimer } from "@/components/layout/disclaimer";
 import { prisma } from "@/lib/prisma";
 
@@ -49,11 +49,16 @@ export default async function DashboardPage({
   const tc = await getTranslations("common");
 
   const session = await auth();
-  if (!session?.user?.id) {
-    redirect("/auth/signin?callbackUrl=/dashboard");
+  const userId = session?.user?.id;
+  if (!userId) {
+    redirect({
+      href: {
+        pathname: "/auth/signin",
+        query: { callbackUrl: "/dashboard" },
+      },
+      locale,
+    });
   }
-
-  const userId = session.user.id;
 
   const [user, activeSignals, closedSignals, unreadDm] = await Promise.all([
     prisma.user.findUnique({
@@ -105,6 +110,9 @@ export default async function DashboardPage({
           </h1>
           <p className="mt-2 max-w-xl text-muted-foreground">
             {t("subtitle")}
+          </p>
+          <p className="mt-2 max-w-xl text-xs text-muted-foreground/90">
+            {t("signalStatsHint")}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -177,11 +185,59 @@ export default async function DashboardPage({
         </Card>
       </section>
 
+      {activeSignals === 0 && totalClosed === 0 ? (
+        <section
+          className="rounded-xl border border-dashed border-border/80 bg-muted/15 px-4 py-5 sm:px-6"
+          aria-labelledby="dashboard-empty-signals-heading"
+        >
+          <h2
+            id="dashboard-empty-signals-heading"
+            className="font-heading text-base font-medium text-foreground"
+          >
+            {t("emptySignalsTitle")}
+          </h2>
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            {t("emptySignalsBody")}
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link
+              href="/start"
+              className={cn(
+                buttonVariants({ variant: "default", size: "sm" }),
+                "text-xs font-medium",
+              )}
+            >
+              {t("emptySignalsCtaStart")}
+            </Link>
+            <Link
+              href="/quotes"
+              className={cn(
+                buttonVariants({ variant: "secondary", size: "sm" }),
+                "text-xs font-medium",
+              )}
+            >
+              {t("emptySignalsCtaQuotes")}
+            </Link>
+            <Link
+              href="/calendar"
+              className={cn(
+                buttonVariants({ variant: "secondary", size: "sm" }),
+                "text-xs font-medium",
+              )}
+            >
+              {t("emptySignalsCtaCalendar")}
+            </Link>
+          </div>
+        </section>
+      ) : null}
+
       <section className="space-y-3">
         <h2 className="font-heading text-lg font-medium text-foreground">
           {t("chartTitle")}
         </h2>
-        <DashboardTradingViewWidget />
+        <Suspense>
+          <ChartContainer locale={locale} showAiPanel={false} />
+        </Suspense>
       </section>
 
       <section>

@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
+import { localizedHref } from "@/lib/localized-href";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,9 +21,13 @@ import { safeCallbackPath } from "@/lib/safe-redirect";
 
 export function SignInForm() {
   const t = useTranslations("auth");
+  const locale = useLocale();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = safeCallbackPath(searchParams.get("callbackUrl"));
+  const callbackUrl = safeCallbackPath(
+    searchParams.get("callbackUrl"),
+    localizedHref("/dashboard", locale),
+  );
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -51,12 +57,9 @@ export function SignInForm() {
     <Card className="border-border/80 bg-card/80 shadow-lg ring-1 ring-primary/10 backdrop-blur-sm">
       <CardHeader className="space-y-1">
         <CardTitle className="font-heading text-xl tracking-tight">
-          Truy cập tài khoản
+          {t("signInCardTitle")}
         </CardTitle>
-        <CardDescription>
-          Dữ liệu được mã hóa khi chuyển tải. Không chia sẻ mật khẩu với bên thứ
-          ba.
-        </CardDescription>
+        <CardDescription>{t("signInDescription")}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={onSubmit} className="space-y-4">
@@ -74,7 +77,7 @@ export function SignInForm() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="signin-password">Mật khẩu</Label>
+            <Label htmlFor="signin-password">{t("password")}</Label>
             <Input
               id="signin-password"
               type="password"
