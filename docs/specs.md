@@ -534,3 +534,173 @@ Route: `/[locale]/u/[userId]` (`src/app/[locale]/u/[userId]/page.tsx`). Trang đ
 - **UX/UI:** wireframe mobile + desktop; cập nhật `docs/design-system.md` (pattern **Public profile hero**, spacing, avatar size, section headings).
 - **Senior Dev:** refactor `page.tsx` + component tách nhỏ; metadata; i18n; kiểm tra a11y (heading order, alt ảnh).
 - **PM:** tách Issue: P0 layout + P1 deep links + P2 list virtualization nếu cần.
+
+---
+
+# PM — Mức độ hài lòng với tính năng hiện tại (feedback & làm rõ)
+
+**Ngày cập nhật:** 2026-04-12  
+**Nguồn:** Product owner / PM — *“vẫn chưa hài lòng các tính năng hiện”*.
+
+## 1. Bối cảnh
+
+Sản phẩm đã có **nền tảng đủ dùng** (quotes, calendar, academy, forum, signals, VIP, profile, v.v.) nhưng **chưa đạt kỳ vọng trải nghiệm hoặc giá trị khác biệt** ở một số khối. Tài liệu này **không** kết luận nguyên nhân cụ thể — cần **làm rõ** trước khi phân bổ sprint.
+
+## 2. Khung phân loại “chưa hài lòng” (để chốt ưu tiên)
+
+| Nhóm | Ví dụ biểu hiện | Hướng làm rõ |
+|------|-----------------|--------------|
+| **Độ sâu (depth)** | Có tính năng nhưng thiếu workflow hoàn chỉnh (vd. signal detail, journal, VIP). | User story + acceptance criteria theo luồng end-to-end. |
+| **Độ hoàn thiện (polish)** | UI lệch, copy, hiệu năng (FCP), lỗi edge case. | UX/UI + QA; tiêu chí đo lường (Core Web Vitals, v.v.). |
+| **Khác biệt (differentiation)** | Giống công cụ free khác, thiếu “lý do quay lại”. | Định vị sản phẩm + 1–2 killer use case. |
+| **Tin cậy & vận hành** | Thanh toán VIP sandbox, cảnh báo lỗi production, nội dung webinar trống. | Roadmap F2/F3 trong `docs/TODO.md`. |
+| **Rõ ràng giá trị** | User không hiểu VIP / signal / forum mang lại gì trong 30 giây. | Onboarding, empty state, messaging. |
+
+## 3. Danh mục tính năng hiện có (để gắn mức ưu tiên)
+
+*(Rà nhanh — không phải đánh giá kỹ thuật.)*
+
+- **Công cụ & dữ liệu:** Live quotes, economic calendar, calculators, chart embed, heatmap, sentiment, backtest (Monte Carlo).
+- **Nội dung:** Academy, resources, brokers, partners, webinar (có thể empty).
+- **Cộng đồng:** Forum, signals (room + detail + ảnh), leaderboard, messages, notifications, follow, public profile `/u/…`.
+- **Tài khoản:** Auth, profile, VIP gate, admin (nếu dùng).
+- **Vận hành & chất lượng:** SEO, disclaimer, analytics/speed insights (Vercel), CI.
+
+## 4. Câu hỏi PM cần trả lời (trước khi dev lớn)
+
+1. **Khu vực nào** gây thất vọng nhất: *signals / forum / VIP / công cụ / tốc độ / khác*?
+2. **Người dùng mục tiêu** ưu tiên trong 1–2 tháng tới: *người mới / trader có kinh nghiệm / người tìm cộng đồng*?
+3. **Một** kết quả đo được mong muốn (vd. tăng tỷ lệ đăng ký, tăng signal đóng có ghi nhận, giảm bounce trang chủ)?
+4. Có **giới hạn** (thời gian, compliance, không làm payment, v.v.) không?
+
+## 5. Bước tiếp theo (đề xuất quy trình)
+
+1. **Phiên 30–45 phút:** liệt kê top 3 “đau” + top 3 “muốn có” — ghi vào bảng dưới đây (hoặc Issue GitHub).
+2. **Cập nhật** mục tương ứng trong `docs/TODO.md` (Giai đoạn F) và **tách epic** có acceptance criteria.
+3. **UX/UI** wireframe chỉ cho epic được chọn; **Senior Dev** chỉ sau khi spec chốt.
+
+### Bảng ghi nhanh (PM điền)
+
+| Ưu tiên | Khu vực | Vấn đề / mong muốn | Đo lường thành công (nếu có) |
+|--------|---------|---------------------|------------------------------|
+| P0 | | | |
+| P1 | | | |
+| P2 | | | |
+
+## 6. Tham chiếu
+
+- Backlog tổng: `docs/TODO.md` — **Giai đoạn F**.
+- Các spec theo màn đã có trong file này (Exness, calendar, signal ảnh, profile public, v.v.).
+
+## 7. Đề xuất ý tưởng (PM — hướng mở rộng giá trị)
+
+*Gợi ý định hướng; chọn 1–2 trục để tránh scatter. Ước lượng effort: **S** nhỏ, **M** trung, **L** lớn.*
+
+### A — “Một vòng lặp” rõ ràng (retention)
+
+| Ý tưởng | Giá trị user | Effort | Ghi chú |
+|--------|----------------|--------|---------|
+| **Start here → Academy checkpoint** | Người mới biết bước tiếp theo sau mỗi bài. | M | Nối `/start` với bài academy + tick “đã đọc” (local hoặc DB). |
+| **Signal watchlist nhẹ** | Từ quotes → “theo dõi cặp này” → feed signal lọc theo watchlist (đã có favorites một phần). | M | Tăng lý do quay lại hàng ngày. |
+| **Digest tuần** (email hoặc in-app) | Tóm tắt: lịch nóng, 1 bài academy, 3 thread nổi. | L | Cần nội dung + infra email (đã có backlog F2). |
+
+### B — Độ sâu “social trading” (khác biệt)
+
+| Ý tưởng | Giá trị user | Effort | Ghi chú |
+|--------|----------------|--------|---------|
+| **Lọc signal theo `authorId`** (URL/API) | Không trùng tên; link profile → đúng từng trader. | M | Spec kỹ thuật riêng; tăng tin cậy. |
+| **Bảng “đang follow”** trên dashboard | Một màn chỉ signal từ người đã follow. | M | Giảm nhiễu so với room toàn nền tảng. |
+| **Chứng từ uy tín** (profile) | Export ảnh / share card win rate (đã có performance card — thêm OG image). | M | Viral nhẹ, không hứa lợi nhuận. |
+
+### C — Tin cậy & tiền (đã có trong F2)
+
+| Ý tưởng | Giá trị user | Effort | Ghi chú |
+|--------|----------------|--------|---------|
+| **VIP thanh toán thật** + email nhắc | Giảm ma sát nâng cấp; minh bạch ngày hết hạn. | L | Sandbox → prod; webhook `vipUntil`. |
+| **Badge / copy “Educational only”** nhất quán | Giảm hiểu nhầm tư vấn đầu tư. | S | Copy + design system. |
+
+### D — Nội dung & sự kiện (F4)
+
+| Ý tưởng | Giá trị user | Effort | Ghi chú |
+|--------|----------------|--------|---------|
+| **Webinar** một buổi thật hoặc embed + lịch | Lý do đăng ký / quay lại. | M–L | Đã có backlog. |
+| **Chuỗi bài academy** theo chủ đề (risk → session → tin) | Nội dung “có đầu có đuôi”. | S–M | Editorial, không chỉ code. |
+
+### E — Vận hành & chất lượng (F3)
+
+| Ý tưởng | Giá trị user | Effort | Ghi chú |
+|--------|----------------|--------|---------|
+| **Sentry (hoặc tương đương)** | Lỗi production không “im lặng”. | M | |
+| **Staging + smoke checklist** | Giảm regression trước khi ship. | M | |
+
+### Gợi ý chọn 2 trục (nếu chỉ có 1 sprint mạnh)
+
+1. **Trục A + B nhẹ:** “Start → Academy checkpoint” + **authorId** cho signal — vừa retention vừa tin cậy.  
+2. **Trục B + F2:** **Follow feed** + **VIP roadmap** — nếu mục tiêu là doanh thu + cộng đồng.  
+3. **Trục D + polish:** **Webinar** + **FCP/UX** — nếu mục tiêu là brand và trải nghiệm đầu.
+
+---
+
+# PM — Thu hút người mới (acquisition & activation)
+
+**Ưu tiên chiến lược:** tăng **số người lần đầu** hiểu giá trị sản phẩm và **hoàn thành một hành động có ý nghĩa** (xem dữ liệu thật, xong 1 bài học, hoặc đăng ký sau khi thấy lợi ích) — không ép đăng ký trước khi có “aha moment”.
+
+## 1. Chân dung & giả định
+
+- **Người mới:** tìm **ty giá / lịch / học nhanh**, ngại rủi ro, chưa tin “signal” hay VIP.
+- **Giả định:** phần lớn traffic organic / referral; **mobile** đáng kể; **EN + VI** đồng đẳng.
+
+## 2. Thông điệp cốt lõi (30 giây đầu)
+
+- **Một câu:** “Công cụ và bài học cho người mới bắt đầu forex — dữ liệu live, không hype; cộng đồng khi bạn sẵn sàng.”
+- **Không** hứa lợi nhuận; **có** disclaimer ngắn gần CTA mạnh.
+
+## 3. Phễu đề xuất
+
+| Giai đoạn | Mục tiêu | Gợi ý sản phẩm (MVP → mở rộng) |
+|-----------|----------|----------------------------------|
+| **Tìm thấy** | SEO, snippet, OG rõ | Trang chủ + `/start` + academy bài đầu có meta tốt (đã có nền tảng — rà soát title/description theo từ khóa “forex beginner”, “lịch kinh tế”, VN/EN). |
+| **Vào trang** | FCP/LCP chấp nhận được | Tiếp tục tối ưu font/script (layout); tránh hero quá nặng. |
+| **Giá trị đầu tiên không cần tài khoản** | “Aha” trong 1–2 phút | **Quotes** hoặc **Calendar** hoặc **1 calculator** — CTA rõ: “Học bước tiếp theo” → `/start` hoặc academy bài 1. |
+| **Chuyển đăng ký** | Sau khi đã dùng | Form đăng ký nhắc lợi ích: lưu watchlist, forum, signal (copy i18n); không chặn nội dung học thuần. |
+| **Kích hoạt ngày 1** | Quay lại | (P2) email digest / nhắc “bài 2 academy”; hoặc banner nhẹ “tiếp tục lộ trình”. |
+
+## 4. Gói MVP đề xuất (chọn 2–3 mục cho sprint đầu)
+
+1. **Trang chủ + `/start`:** một **lộ trình 3 bước** nhìn thấy ngay (vd. Risk → Calendar → Academy) + nút dẫn sâu; đo **click-through** tới `/start` hoặc academy.  
+2. **Academy:** **bài đầu** + CTA “bài tiếp theo” luôn hiển thị; empty state thân thiện nếu user chưa đăng nhập.  
+3. **Social proof nhẹ:** số người dùng công cụ / “được xây cho người mới” (chỉ khi **có số liệu thật** hoặc copy định tính — không bịa).  
+4. **VIP:** không đẩy popup sớm; **một dòng** trên trang chủ hoặc signals: “VIP mở khóa …” + link `/profile` (đã có pattern — thống nhất tone).  
+
+## 5. Chỉ số gợi ý (có thể đo dần)
+
+- **Activation:** % session có ít nhất một trong: xem quotes, xem calendar, mở 1 bài academy.  
+- **Intent:** CTR từ trang chủ → `/start` hoặc academy.  
+- **Đăng ký:** conversion visit → register (kênh analytics hiện có).  
+
+## 6. Ngoài phạm vi (giai đoạn này)
+
+- Quảng cáo trả phí, influencer (chưa có trong spec).  
+- App native.  
+- Thay đổi lớn business model (giữ educational positioning).
+
+## 7. Tiêu chí chấp nhận (PM)
+
+- [x] Có **một** luồng “người mới” được mô tả trong copy (trang chủ hoặc `/start`) — EN + VI. *(Section 3 bước trên home + milestone `/start`.)*  
+- [x] Không **bắt** đăng nhập để xem quotes/calendar/academy công khai (đúng với positioning hiện tại).  
+- [ ] Disclaimer rủi ro **hiển thị** gần CTA mạnh (home/signals) — đã có footer; kiểm tra đủ trên hero nếu thêm CTA broker/signal.  
+
+## 8. Handoff
+
+- **UX/UI:** wireframe trang chủ + `/start` (mobile first); checklist “first session”.  
+- **Content:** rà 3–5 từ khóa / snippet cho trang chủ & academy bài 1.  
+- **Senior Dev:** chỉ sau khi wireframe + copy chốt; ưu tiên đo sự kiện analytics nếu chưa có.
+
+## 9. SEO & snippet (đã chốt — triển khai trong `messages`)
+
+| Khoá | EN (`home.metaKeywords`) | VI (`home.metaKeywords`) |
+|------|---------------------------|----------------------------|
+| Trọng tâm | forex beginner, economic calendar, live forex quotes, learn forex, forex risk management, forex academy | forex cho người mới, lịch kinh tế forex, tỷ giá live, học forex, quản lý rủi ro forex, academy forex |
+
+- **Title / description:** `home.metaTitle`, `home.metaDescription` — dùng trong `generateMetadata` trang chủ (`src/app/[locale]/page.tsx`).  
+- **`/start`:** giữ `start.metaTitle` / `start.metaDescription` hiện có; bổ sung nội dung **milestone** (bước 1–3) trên UI, không đổi URL.

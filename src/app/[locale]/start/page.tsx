@@ -5,60 +5,16 @@ import { PageCtaRow } from "@/components/layout/page-cta-row";
 import { FaqJsonLd } from "@/components/seo/faq-json-ld";
 import { AiAssistantPromptCard } from "@/components/start/ai-assistant-prompt-card";
 import { buttonVariants } from "@/components/ui/button";
+import { getExnessAffiliateUrl } from "@/lib/exness-affiliate";
+import {
+  EXNESS_MT5_PLATFORM_URL,
+  getMt5DownloadUrl,
+} from "@/lib/start-broker-links";
 import { absoluteUrl, getSiteUrl } from "@/lib/site-url";
 import { cn } from "@/lib/utils";
 import { pageCtaItems } from "@/lib/page-cta-i18n";
 
-const steps = [
-  {
-    titleKey: "step1_title" as const,
-    bodyKey: "step1_body" as const,
-    links: [
-      { href: "/academy/risk-1pct" as const, labelKey: "step1_linkAcademy" as const },
-      { href: "/tools" as const, labelKey: "step1_linkTools" as const },
-    ],
-  },
-  {
-    titleKey: "step2_title" as const,
-    bodyKey: "step2_body" as const,
-    links: [
-      { href: "/academy/spread-liquidity" as const, labelKey: "step2_linkAcademy" as const },
-      { href: "/quotes" as const, labelKey: "step2_linkQuotes" as const },
-    ],
-  },
-  {
-    titleKey: "step3_title" as const,
-    bodyKey: "step3_body" as const,
-    links: [
-      { href: "/calendar" as const, labelKey: "step3_linkCalendar" as const },
-      { href: "/academy/news-trading" as const, labelKey: "step3_linkAcademy" as const },
-    ],
-  },
-  {
-    titleKey: "step4_title" as const,
-    bodyKey: "step4_body" as const,
-    links: [
-      { href: "/chart" as const, labelKey: "step4_linkChart" as const },
-      { href: "/heatmap" as const, labelKey: "step4_linkHeatmap" as const },
-    ],
-  },
-  {
-    titleKey: "step5_title" as const,
-    bodyKey: "step5_body" as const,
-    links: [
-      { href: "/brokers" as const, labelKey: "step5_linkBrokers" as const },
-      { href: "/resources" as const, labelKey: "step5_linkResources" as const },
-    ],
-  },
-  {
-    titleKey: "step6_title" as const,
-    bodyKey: "step6_body" as const,
-    links: [
-      { href: "/forum" as const, labelKey: "step6_linkForum" as const },
-      { href: "/signals" as const, labelKey: "step6_linkSignals" as const },
-    ],
-  },
-] as const;
+const AFFILIATE_REL = "noopener noreferrer sponsored nofollow" as const;
 
 export async function generateMetadata({
   params,
@@ -86,6 +42,9 @@ export default async function StartPage({
   const ctaRow = await pageCtaItems("learn", "explore");
 
   const origin = getSiteUrl();
+  const exnessAffiliateUrl = getExnessAffiliateUrl();
+  const mt5DownloadUrl = getMt5DownloadUrl(locale);
+
   const faqItems = [
     { question: t("schemaFaq.q1"), answer: t("schemaFaq.a1") },
     { question: t("schemaFaq.q2"), answer: t("schemaFaq.a2") },
@@ -98,7 +57,6 @@ export default async function StartPage({
     startUrl: absoluteUrl("/start", locale),
     calendarUrl: absoluteUrl("/calendar", locale),
     quotesUrl: absoluteUrl("/quotes", locale),
-    riskLessonUrl: absoluteUrl("/academy/risk-1pct", locale),
     academyUrl: absoluteUrl("/academy", locale),
     llmsUrl: `${origin}/llms.txt`,
   });
@@ -116,6 +74,132 @@ export default async function StartPage({
         </p>
       </header>
 
+
+      <ol className="space-y-6">
+        <li className="relative rounded-xl border border-border bg-card/40 p-5 pl-6 ring-1 ring-foreground/5 md:p-6 md:pl-8">
+          <span
+            className="absolute left-0 top-5 flex size-8 -translate-x-1/2 items-center justify-center rounded-full border border-primary/40 bg-primary/10 text-xs font-semibold text-primary md:top-6"
+            aria-hidden
+          >
+            1
+          </span>
+          <h2 className="font-heading text-lg font-medium text-foreground">
+            {t("brokerStep1_title")}
+          </h2>
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            {t("brokerStep1_body")}
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <a
+              href={exnessAffiliateUrl}
+              target="_blank"
+              rel={AFFILIATE_REL}
+              className={cn(
+                buttonVariants({ variant: "default", size: "sm" }),
+                "text-xs font-medium",
+              )}
+            >
+              {t("brokerStep1_cta")}
+            </a>
+          </div>
+        </li>
+
+        <li className="relative rounded-xl border border-border bg-card/40 p-5 pl-6 ring-1 ring-foreground/5 md:p-6 md:pl-8">
+          <span
+            className="absolute left-0 top-5 flex size-8 -translate-x-1/2 items-center justify-center rounded-full border border-primary/40 bg-primary/10 text-xs font-semibold text-primary md:top-6"
+            aria-hidden
+          >
+            2
+          </span>
+          <h2 className="font-heading text-lg font-medium text-foreground">
+            {t("brokerStep2_title")}
+          </h2>
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            {t("brokerStep2_body")}
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <a
+              href={mt5DownloadUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(
+                buttonVariants({ variant: "secondary", size: "sm" }),
+                "text-xs font-medium",
+              )}
+            >
+              {t("brokerStep2_cta_mt5")}
+            </a>
+            <a
+              href={EXNESS_MT5_PLATFORM_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(
+                buttonVariants({ variant: "secondary", size: "sm" }),
+                "text-xs font-medium",
+              )}
+            >
+              {t("brokerStep2_cta_exness")}
+            </a>
+          </div>
+        </li>
+
+        <li className="relative rounded-xl border border-border bg-card/40 p-5 pl-6 ring-1 ring-foreground/5 md:p-6 md:pl-8">
+          <span
+            className="absolute left-0 top-5 flex size-8 -translate-x-1/2 items-center justify-center rounded-full border border-primary/40 bg-primary/10 text-xs font-semibold text-primary md:top-6"
+            aria-hidden
+          >
+            3
+          </span>
+          <h2 className="font-heading text-lg font-medium text-foreground">
+            {t("brokerStep3_title")}
+          </h2>
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            {t("brokerStep3_body")}
+          </p>
+        </li>
+
+        <li className="relative rounded-xl border border-border bg-card/40 p-5 pl-6 ring-1 ring-foreground/5 md:p-6 md:pl-8">
+          <span
+            className="absolute left-0 top-5 flex size-8 -translate-x-1/2 items-center justify-center rounded-full border border-primary/40 bg-primary/10 text-xs font-semibold text-primary md:top-6"
+            aria-hidden
+          >
+            4
+          </span>
+          <h2 className="font-heading text-lg font-medium text-foreground">
+            {t("brokerStep4_title")}
+          </h2>
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            {t("brokerStep4_body")}
+          </p>
+        </li>
+
+        <li className="relative rounded-xl border border-border bg-card/40 p-5 pl-6 ring-1 ring-foreground/5 md:p-6 md:pl-8">
+          <span
+            className="absolute left-0 top-5 flex size-8 -translate-x-1/2 items-center justify-center rounded-full border border-primary/40 bg-primary/10 text-xs font-semibold text-primary md:top-6"
+            aria-hidden
+          >
+            5
+          </span>
+          <h2 className="font-heading text-lg font-medium text-foreground">
+            {t("brokerStep5_title")}
+          </h2>
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            {t("brokerStep5_body")}
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link
+              href="/quotes"
+              className={cn(
+                buttonVariants({ variant: "secondary", size: "sm" }),
+                "text-xs font-medium",
+              )}
+            >
+              {t("brokerStep5_ctaQuotes")}
+            </Link>
+          </div>
+        </li>
+      </ol>
+
       <AiAssistantPromptCard
         title={t("aiAssistantTitle")}
         intro={t("aiAssistantIntro")}
@@ -123,42 +207,6 @@ export default async function StartPage({
         copyLabel={t("aiAssistantCopy")}
         copiedLabel={t("aiAssistantCopied")}
       />
-
-      <ol className="space-y-6">
-        {steps.map((step, index) => (
-          <li
-            key={step.titleKey}
-            className="relative rounded-xl border border-border bg-card/40 p-5 pl-6 ring-1 ring-foreground/5 md:p-6 md:pl-8"
-          >
-            <span
-              className="absolute left-0 top-5 flex size-8 -translate-x-1/2 items-center justify-center rounded-full border border-primary/40 bg-primary/10 text-xs font-semibold text-primary md:top-6"
-              aria-hidden
-            >
-              {index + 1}
-            </span>
-            <h2 className="font-heading text-lg font-medium text-foreground">
-              {t(step.titleKey)}
-            </h2>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              {t(step.bodyKey)}
-            </p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {step.links.map((l) => (
-                <Link
-                  key={l.href}
-                  href={l.href}
-                  className={cn(
-                    buttonVariants({ variant: "secondary", size: "sm" }),
-                    "text-xs font-medium",
-                  )}
-                >
-                  {t(l.labelKey)}
-                </Link>
-              ))}
-            </div>
-          </li>
-        ))}
-      </ol>
 
       <div className="rounded-xl border border-dashed border-border/80 bg-muted/20 p-5 text-center">
         <p className="text-sm text-muted-foreground">{t("closingHint")}</p>

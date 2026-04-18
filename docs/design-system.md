@@ -211,4 +211,63 @@ Nhãn chữ lấy từ `calendar.impactLow` / `impactMedShort` / `impactHigh` (i
 
 ---
 
+## Trang chủ + Start — người mới (mobile first)
+
+**Tham chiếu spec:** `docs/specs.md` — *PM — Thu hút người mới*.  
+**Route:** `/[locale]` (home), `/[locale]/start`.
+
+### Wireframe — home (≤640px)
+
+```
+┌─────────────────────────────────────────────┐
+│ badge (uppercase, primary)                   │
+│ H1 headline (2–3 dòng)                       │
+│ subtitle (muted, max-w prose)                │
+├─────────────────────────────────────────────┤
+│ [ Primary LG ]  Start here        (full width)│
+│ ┌───────────────┬───────────────┐            │
+│ │ Academy       │ Calendar      │  grid 2 col │
+│ │ Quotes (full width row 2)     │            │
+├─────────────────────────────────────────────┤
+│ [ Exness CTA ] (full width max-w-md)         │
+├─────────────────────────────────────────────┤
+│ Section: “New here? Three steps first”       │
+│ ┌─────┐ ┌─────┐ ┌─────┐                      │
+│ │ 1   │ │ 2   │ │ 3   │  stack → 3 rows      │
+│ │risk │ │cal  │ │aca  │  hoặc 1 col mobile   │
+│ └─────┘ └─────┘ └─────┘                      │
+│ [ Outline ] Full 6-step path → /start        │
+├─────────────────────────────────────────────┤
+│ 3 cards: Your first week / Tools / Quotes    │
+└─────────────────────────────────────────────┘
+```
+
+### Wireframe — `/start` (≤640px)
+
+```
+┌─────────────────────────────────────────────┐
+│ H1 Start here                                │
+│ subtitle + intro (muted)                     │
+├─────────────────────────────────────────────┤
+│ Milestone card (primary/5 border)            │
+│ “Begin with steps 1–3” + body               │
+├─────────────────────────────────────────────┤
+│ AI prompt card (optional copy)               │
+├─────────────────────────────────────────────┤
+│ OL steps 1…6 (numbered circle left)        │
+│   each: title, body, 2 secondary buttons     │
+├─────────────────────────────────────────────┤
+│ dashed card → Academy index                  │
+│ Disclaimer compact + PageCtaRow              │
+└─────────────────────────────────────────────┘
+```
+
+### Pattern
+
+- **Hero CTA:** một **primary** full width mobile; **outline** trong **grid 2 cột**; Exness **full width** max để dễ chạm.  
+- **Newcomer path:** `NewcomerPathSection` — 3 thẻ + CTA “Full path”; icon nhỏ + số thứ tự.  
+- **Start milestone:** một **card** nhấn (border `primary/25`) trước danh sách 6 bước.
+
+---
+
 *Cập nhật khi ship từng phase trong `docs/specs.md` (Signal Room UX/UI).*

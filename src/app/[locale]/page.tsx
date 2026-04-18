@@ -1,6 +1,7 @@
 import { BarChart3, BookOpen, ExternalLink, Shield } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import { NewcomerPathSection } from "@/components/home/newcomer-path";
 import { FaqJsonLd } from "@/components/seo/faq-json-ld";
 import { buttonVariants } from "@/components/ui/button";
 import { getExnessAffiliateUrl } from "@/lib/exness-affiliate";
@@ -26,6 +27,26 @@ const blocks = [
     icon: Shield,
   },
 ] as const;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("home");
+  const rawKeywords = t("metaKeywords");
+  const keywords = rawKeywords
+    .split(",")
+    .map((k) => k.trim())
+    .filter(Boolean);
+  return {
+    title: t("metaTitle"),
+    description: t("metaDescription"),
+    ...(keywords.length > 0 ? { keywords } : {}),
+  };
+}
 
 export default async function HomePage({
   params,
@@ -70,46 +91,54 @@ export default async function HomePage({
         <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
           {tHome("subtitle")}
         </p>
-        <div className="mt-10 flex flex-wrap justify-center gap-3">
-          <Link href="/start" className={cn(buttonVariants({ size: "lg" }))}>
+        <div className="mx-auto mt-10 flex w-full max-w-xl flex-col items-stretch gap-3 sm:max-w-none sm:items-center">
+          <Link
+            href="/start"
+            className={cn(
+              buttonVariants({ size: "lg" }),
+              "w-full justify-center sm:w-auto sm:min-w-48",
+            )}
+          >
             {tHome("cta_start")}
           </Link>
-          <Link
-            href="/academy"
-            className={cn(
-              buttonVariants({ variant: "outline", size: "lg" }),
-              "border-border",
-            )}
-          >
-            {tHome("cta_academy")}
-          </Link>
-          <Link
-            href="/calendar"
-            className={cn(
-              buttonVariants({ variant: "outline", size: "lg" }),
-              "border-border",
-            )}
-          >
-            {tHome("cta_calendar")}
-          </Link>
-          <Link
-            href="/quotes"
-            className={cn(
-              buttonVariants({ variant: "outline", size: "lg" }),
-              "border-border",
-            )}
-          >
-            {tHome("cta_quotes")}
-          </Link>
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:justify-center sm:gap-3">
+            <Link
+              href="/academy"
+              className={cn(
+                buttonVariants({ variant: "outline", size: "default" }),
+                "w-full justify-center border-border sm:min-h-11",
+              )}
+            >
+              {tHome("cta_academy")}
+            </Link>
+            <Link
+              href="/calendar"
+              className={cn(
+                buttonVariants({ variant: "outline", size: "default" }),
+                "w-full justify-center border-border sm:min-h-11",
+              )}
+            >
+              {tHome("cta_calendar")}
+            </Link>
+            <Link
+              href="/quotes"
+              className={cn(
+                buttonVariants({ variant: "outline", size: "default" }),
+                "col-span-2 w-full justify-center border-border sm:col-span-1 sm:min-h-11",
+              )}
+            >
+              {tHome("cta_quotes")}
+            </Link>
+          </div>
         </div>
-        <div className="mt-10 flex justify-center px-4">
+        <div className="mt-8 flex justify-center px-4">
           <a
             href={exnessAffiliateUrl}
             target="_blank"
             rel="noopener noreferrer sponsored nofollow"
             className={cn(
               buttonVariants({ variant: "default", size: "lg" }),
-              "inline-flex items-center gap-2 shadow-md shadow-primary/25 ring-2 ring-primary/35 transition-[box-shadow,transform] hover:shadow-lg hover:shadow-primary/30 hover:ring-primary/50",
+              "inline-flex w-full max-w-md items-center justify-center gap-2 shadow-md shadow-primary/25 ring-2 ring-primary/35 transition-[box-shadow,transform] hover:shadow-lg hover:shadow-primary/30 hover:ring-primary/50 sm:w-auto",
             )}
           >
             <ExternalLink className="size-4 shrink-0" aria-hidden />
@@ -117,6 +146,8 @@ export default async function HomePage({
           </a>
         </div>
       </section>
+
+      <NewcomerPathSection />
 
       <section className="grid gap-6 md:grid-cols-3">
         {blocks.map((b) => (
