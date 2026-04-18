@@ -357,6 +357,7 @@
     "loadMore": "Tải thêm",
     "paginationPrevious": "Trang trước",
     "paginationRange": "{from}–{to} / {total} tín hiệu",
+    "paginationPageOf": "Trang {page} / {totalPages}",
     "listFilteredEmpty": "Không có tín hiệu trong bộ lọc hoặc khung ngày hiện tại. Thử “Mọi ngày” hoặc đổi bộ lọc.",
     "statusActive": "Đang mở",
     "statusClosedWin": "Đóng (TP)",
@@ -498,6 +499,13 @@
     "email": "Email",
     "publicProfile": "Hồ sơ công khai",
     "viewProfile": "Xem trang /u/…",
+    "publicSubtitle": "Trader trên Social Forex",
+    "publicMetaTitle": "{name} — Social Forex",
+    "publicMetaDescription": "Hồ sơ công khai của {name} trên Social Forex — thống kê tín hiệu, follower và hoạt động cộng đồng.",
+    "publicMetaNotFoundTitle": "Hồ sơ — Social Forex",
+    "followersLoadMore": "Xem thêm {count} người",
+    "followersShowLess": "Thu gọn",
+    "forumBrowseCta": "Xem diễn đàn",
     "inbox": "Hộp thư",
     "vip": "VIP",
     "vipActive": "Đang hoạt động đến {date}",
@@ -532,7 +540,8 @@
       "insufficient": "Đang có {count} signal đã đóng. Win rate hiển thị khi có ít nhất {min} signal đã đóng.",
       "winRateLabel": "Tỷ lệ thắng",
       "winsLosses": "{wins} thắng · {losses} thua · {total} đã đóng",
-      "viewSignals": "Mở phòng tín hiệu"
+      "viewSignals": "Mở phòng tín hiệu",
+      "viewSignalsByAuthor": "Xem tín hiệu của trader này"
     }
   },
   "notifications": {

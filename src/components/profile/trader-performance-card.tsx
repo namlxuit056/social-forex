@@ -10,7 +10,19 @@ import {
 } from "@/lib/signals/public-performance-stats";
 import { TrendingUp } from "lucide-react";
 
-export async function TraderPerformanceCard({ userId }: { userId: string }) {
+type Props = {
+  userId: string;
+  /** Primary CTA target (e.g. `/signals` or `/signals?author=…`). */
+  signalsListHref: string;
+  /** Button label — use `traderStats.viewSignalsByAuthor` when href filters by author. */
+  signalsCtaLabel: string;
+};
+
+export async function TraderPerformanceCard({
+  userId,
+  signalsListHref,
+  signalsCtaLabel,
+}: Props) {
   const t = await getTranslations("profile");
   const { wins, losses, total } = await getClosedSignalStatsForAuthor(userId);
   const showRate = total >= TRADER_STATS_MIN_SAMPLE;
@@ -62,13 +74,13 @@ export async function TraderPerformanceCard({ userId }: { userId: string }) {
         )}
 
         <Link
-          href="/signals"
+          href={signalsListHref}
           className={cn(
             buttonVariants({ variant: "outline", size: "sm" }),
-            "inline-flex w-full sm:w-auto",
+            "inline-flex w-full min-h-11 sm:w-auto",
           )}
         >
-          {t("traderStats.viewSignals")}
+          {signalsCtaLabel}
         </Link>
       </CardContent>
     </Card>

@@ -357,6 +357,7 @@
     "loadMore": "Load more",
     "paginationPrevious": "Previous page",
     "paginationRange": "{from}–{to} of {total} signals",
+    "paginationPageOf": "Page {page} of {totalPages}",
     "listFilteredEmpty": "No signals for the current filters or date range. Try “Any date” or adjust filters.",
     "statusActive": "Active",
     "statusClosedWin": "Closed (TP)",
@@ -498,6 +499,13 @@
     "email": "Email",
     "publicProfile": "Public profile",
     "viewProfile": "View /u/… page",
+    "publicSubtitle": "Trader on Social Forex",
+    "publicMetaTitle": "{name} — Social Forex",
+    "publicMetaDescription": "Public profile of {name} on Social Forex — signal performance, followers, and community.",
+    "publicMetaNotFoundTitle": "Profile — Social Forex",
+    "followersLoadMore": "Show {count} more",
+    "followersShowLess": "Show less",
+    "forumBrowseCta": "Browse the forum",
     "inbox": "Inbox",
     "vip": "VIP",
     "vipActive": "Active until {date}",
@@ -532,7 +540,8 @@
       "insufficient": "{count} closed signal(s) on record. Win rate is shown after at least {min} closed signals.",
       "winRateLabel": "Win rate",
       "winsLosses": "{wins} wins · {losses} losses · {total} closed",
-      "viewSignals": "Open signal room"
+      "viewSignals": "Open signal room",
+      "viewSignalsByAuthor": "View this trader’s signals"
     }
   },
   "notifications": {

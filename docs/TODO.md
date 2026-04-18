@@ -87,7 +87,7 @@
 
 ### F1 — Signal & social
 
-- [ ] Signal list: sort (mới nhất / symbol / tier) + pagination hoặc “Load more” + skeleton.
+- [x] Signal list: sort (mới nhất / symbol / tier) + pagination hoặc “Load more” + skeleton.
 - [ ] Trang chi tiết signal: rà soát comment/reaction/report, metadata SEO.
 - [ ] Ảnh signal P2: xóa Blob khi xóa signal; (optional) báo cáo ảnh.
 
@@ -100,7 +100,7 @@
 
 - [ ] Error tracking (vd. Sentry) + alert deploy/build.
 - [ ] Staging + checklist smoke.
-- [ ] PageCtaRow: heading có nghĩa (i18n), bỏ “→” vô nghĩa.
+- [x] PageCtaRow: heading có nghĩa (i18n), bỏ “→” vô nghĩa (`common.ctaDiscovery` trên các trang).
 
 ### F4 — Nội dung
 

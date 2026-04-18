@@ -23,6 +23,7 @@ export default async function WebinarPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("webinar");
+  const tCommon = await getTranslations("common");
   const ctaRow = await pageCtaItems("learn", "community");
 
   return (
@@ -39,7 +40,7 @@ export default async function WebinarPage({
         description={t("emptyHint")}
         primary={{ href: "/academy", label: "Academy" }}
       />
-      <PageCtaRow heading={t("inMeantime")} items={ctaRow} />
+      <PageCtaRow heading={tCommon("ctaDiscovery")} items={ctaRow} />
     </div>
   );
 }

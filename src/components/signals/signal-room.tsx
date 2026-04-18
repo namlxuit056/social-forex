@@ -117,6 +117,7 @@ export function SignalRoom({
   sort,
   page,
   pageSize,
+  totalPages,
   totalMatching,
   totalUnfiltered,
   hasMore,
@@ -138,6 +139,7 @@ export function SignalRoom({
   sort: SignalListSort;
   page: number;
   pageSize: number;
+  totalPages: number;
   totalMatching: number;
   totalUnfiltered: number;
   hasMore: boolean;
@@ -851,13 +853,20 @@ export function SignalRoom({
 
         {totalMatching > 0 && (page > 1 || hasMore) ? (
           <div className="mt-6 flex flex-col gap-3 border-t border-border/40 pt-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-            <p className="text-sm text-muted-foreground">
-              {t("paginationRange", {
-                from: rangeFrom,
-                to: rangeTo,
-                total: totalMatching,
-              })}
-            </p>
+            <div className="space-y-1">
+              <p className="text-sm text-muted-foreground">
+                {t("paginationRange", {
+                  from: rangeFrom,
+                  to: rangeTo,
+                  total: totalMatching,
+                })}
+              </p>
+              {totalPages > 1 ? (
+                <p className="text-xs text-muted-foreground/90">
+                  {t("paginationPageOf", { page, totalPages })}
+                </p>
+              ) : null}
+            </div>
             <div className="flex flex-wrap gap-2">
               {page > 1 ? (
                 <Link

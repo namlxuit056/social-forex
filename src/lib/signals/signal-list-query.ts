@@ -162,7 +162,8 @@ export function buildSignalOrderBy(
     case "symbol":
       return [{ symbol: "asc" }, { id: "asc" }];
     case "tier":
-      return [{ tier: "asc" }, { createdAt: "desc" }, { id: "desc" }];
+      /* VIP trước FREE (enum: FREE < VIP → desc đưa VIP lên) */
+      return [{ tier: "desc" }, { createdAt: "desc" }, { id: "desc" }];
     default:
       return [{ createdAt: "desc" }, { id: "desc" }];
   }

@@ -120,10 +120,69 @@ Nhãn chữ lấy từ `calendar.impactLow` / `impactMedShort` / `impactHigh` (i
 
 ---
 
+## Public profile — `/[locale]/u/[userId]`
+
+**Tham chiếu spec:** `docs/specs.md` — *Trang hồ sơ công khai `/u/[userId]`: làm lại UX/UI (P2)*.
+
+### Thứ tự section (dọc trang)
+
+1. **Profile hero** — nhận diện + hành động (Follow / Message / Sign in).
+2. **Trader performance card** — thống kê signal đã đóng (RSC).
+3. **Stats strip** — Followers · Following · Threads (`dl` grid 3 cột).
+4. **Optional:** link ngắn tới **Forum** khi `threadCount > 0` (không giả deep-link theo author nếu chưa có API).
+5. **Followers list** — tối đa N bản ghi server; UI **co giãn** (12 mục + “Show more”) để giảm DOM ban đầu trên mobile.
+6. **PageCtaRow** — discovery.
+
+### Wireframe — mobile (≤640px)
+
+```
+┌── Card hero (rounded-xl border bg-card/50) ─────────────┐
+│ ┌──────┐                                                 │
+│ │avatar│  H1 display name (truncate)                      │
+│ │ 20   │  text-xs muted: subtitle “Trader on …”          │
+│ │ sm   │  Member since {date}                            │
+│ └──────┘  Bio (prose muted, max-w readable)              │
+│                                                           │
+│ [ Follow ] [ Message ]   hoặc   [ Sign in to follow ]     │
+│ (flex-wrap gap-2; nút sm, đủ vùng chạm)                   │
+└───────────────────────────────────────────────────────────┘
+```
+
+### Wireframe — desktop (≥640px)
+
+```
+┌── Card hero ──────────────────────────────────────────────┐
+│ ┌────────┐   H1 + subtitle + date                         │  ┌ actions ─┐
+│ │ avatar │   bio                                           │  │ Follow   │
+│ │ 20×20  │                                                 │  │ Message  │
+│ │ (lg)   │                                                 │  └──────────┘
+│ └────────┘                                                 │
+└─────────────────────────────────────────────────────────────┘
+```
+
+- **Avatar:** `size-20` (`5rem`) desktop; `size-16` mobile nếu cần cân đối — giữ đồng bộ với `rounded-full`, `ring-1 ring-border`, fallback chữ cái `text-sm font-semibold`.
+- **H1:** `font-heading text-2xl font-semibold` — một H1 duy nhất trên trang.
+
+### Performance card (trên profile)
+
+- Nút chính: **`/signals?author=…`** khi có **display name** hợp lệ để lọc theo tác giả (contains name/email — xem spec kỹ thuật); fallback `/signals` nếu không có tên.
+- Copy nút: `traderStats.viewSignalsByAuthor` vs `viewSignals` (i18n).
+
+### Followers block
+
+- Heading H2 `text-lg` + danh sách dạng grid `gap-2 sm:grid-cols-2`.
+- **Load more:** `Button variant="ghost" size="sm"` hoặc link-styled; không tăng số bản ghi server — chỉ mở rộng hiển thị client trong giới hạn đã fetch.
+
+### Skeleton (`u/[userId]/loading.tsx`)
+
+- Khối hero placeholder (avatar circle + lines), một card performance placeholder, strip 3 ô, vài dòng follower — `animate-pulse`, `bg-muted/40`.
+
+---
+
 ## Public profile — thẻ uy tín trader (*performance card*)
 
 **Tham chiếu spec:** `docs/specs.md` — *Thẻ uy tín trader (public performance) trên `/u/[userId]`*.  
-**Vị trí:** `/[locale]/u/[userId]` — ưu tiên dưới bio, trên (hoặc xen kẽ hợp lý với) grid follower/following/thread.
+**Vị trí:** Ngay **dưới profile hero**, **trên** grid follower/following/thread.
 
 ### Wireframe
 
@@ -137,7 +196,7 @@ Nhãn chữ lấy từ `calendar.impactLow` / `impactMedShort` / `impactHigh` (i
 │ [ Ít mẫu ]   Copy “chưa đủ lệnh đóng để hiển thị %” │
 │ [ Zero ]     Empty state ngắn                        │
 ├────────────────────────────────────────────────────┤
-│ [outline] → Signal room (P1: filter theo tác giả)   │
+│ [outline] → `/signals` hoặc `/signals?author=…`     │
 └────────────────────────────────────────────────────┘
 ```
 

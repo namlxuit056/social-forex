@@ -1,18 +1,46 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
+import { ProfileFollowersSection } from "@/components/profile/profile-followers-section";
+import { PublicProfileHero } from "@/components/profile/public-profile-hero";
 import { auth } from "@/auth";
 import { TraderPerformanceCard } from "@/components/profile/trader-performance-card";
 import { FollowButton } from "@/components/social/follow-button";
 import { buttonVariants } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
+import {
+  getPublicDisplayLabel,
+  getSignalsAuthorQuery,
+} from "@/lib/profile/display";
 import { pageCtaItems } from "@/lib/page-cta-i18n";
+import { buildSignalsListHref } from "@/lib/signals/signal-list-query";
 import { cn } from "@/lib/utils";
 
 type Props = { params: Promise<{ locale: string; userId: string }> };
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale, userId } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("profile");
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { name: true, email: true },
+  });
+  if (!user) {
+    return { title: t("publicMetaNotFoundTitle") };
+  }
+
+  const displayName = getPublicDisplayLabel(user.name, user.email);
+  return {
+    title: t("publicMetaTitle", { name: displayName }),
+    description: t("publicMetaDescription", { name: displayName }),
+  };
+}
 
 export default async function PublicProfilePage({ params }: Props) {
   const { locale, userId } = await params;
@@ -31,10 +59,23 @@ export default async function PublicProfilePage({ params }: Props) {
       name: true,
       email: true,
       bio: true,
+      image: true,
       createdAt: true,
     },
   });
   if (!user) notFound();
+
+  const displayLabel = getPublicDisplayLabel(user.name, user.email);
+  const authorQuery = getSignalsAuthorQuery(user.name);
+  const signalsListHref = authorQuery
+    ? buildSignalsListHref({
+        pathname: "/signals",
+        author: authorQuery,
+      })
+    : "/signals";
+  const signalsCtaLabel = authorQuery
+    ? t("traderStats.viewSignalsByAuthor")
+    : t("traderStats.viewSignals");
 
   const [followerCount, followingCount, threadCount, isFollowing, followerRows] =
     await Promise.all([
@@ -66,44 +107,56 @@ export default async function PublicProfilePage({ params }: Props) {
 
   const isSelf = session?.user?.id === userId;
 
+  const followerItems = followerRows.map((row) => ({
+    id: row.id,
+    userId: row.follower.id,
+    label: row.follower.name ?? row.follower.email ?? "—",
+    image: row.follower.image,
+  }));
+
   return (
     <div className="space-y-8">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="font-heading text-2xl font-semibold text-foreground">
-            {user.name ?? user.email ?? "Trader"}
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {t("publicJoined", {
-              date: new Date(user.createdAt).toLocaleDateString(dateLocale),
-            })}
-          </p>
-          {user.bio && <p className="mt-3 text-muted-foreground">{user.bio}</p>}
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {session?.user && !isSelf && (
-            <>
-              <FollowButton userId={userId} isFollowing={!!isFollowing} />
+      <PublicProfileHero
+        displayLabel={displayLabel}
+        imageUrl={user.image}
+        subtitle={t("publicSubtitle")}
+        joinedLine={t("publicJoined", {
+          date: new Date(user.createdAt).toLocaleDateString(dateLocale),
+        })}
+        bio={user.bio}
+        actions={
+          <>
+            {session?.user && !isSelf && (
+              <>
+                <FollowButton userId={userId} isFollowing={!!isFollowing} />
+                <Link
+                  href={`/messages/${userId}`}
+                  className={cn(
+                    buttonVariants({ variant: "outline", size: "sm" }),
+                    "min-h-11 sm:min-h-9",
+                  )}
+                >
+                  {t("messageUser")}
+                </Link>
+              </>
+            )}
+            {!session?.user && (
               <Link
-                href={`/messages/${userId}`}
-                className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+                href="/auth/signin"
+                className={cn(buttonVariants({ size: "sm" }), "min-h-11 sm:min-h-9")}
               >
-                {t("messageUser")}
+                {t("loginToFollow")}
               </Link>
-            </>
-          )}
-          {!session?.user && (
-            <Link
-              href="/auth/signin"
-              className={cn(buttonVariants({ size: "sm" }))}
-            >
-              {t("loginToFollow")}
-            </Link>
-          )}
-        </div>
-      </div>
+            )}
+          </>
+        }
+      />
 
-      <TraderPerformanceCard userId={userId} />
+      <TraderPerformanceCard
+        userId={userId}
+        signalsListHref={signalsListHref}
+        signalsCtaLabel={signalsCtaLabel}
+      />
 
       <dl className="grid grid-cols-3 gap-4 rounded-xl border border-border bg-card/50 p-4 text-center text-sm ring-1 ring-foreground/5">
         <div>
@@ -120,63 +173,22 @@ export default async function PublicProfilePage({ params }: Props) {
         </div>
       </dl>
 
+      {threadCount > 0 ? (
+        <p className="text-sm text-muted-foreground">
+          <Link
+            href="/forum"
+            className="font-medium text-primary underline-offset-4 hover:underline"
+          >
+            {t("forumBrowseCta")}
+          </Link>
+        </p>
+      ) : null}
+
       {followerCount > 0 ? (
-        <div className="space-y-3">
-          <h2 className="font-heading text-lg font-semibold text-foreground">
-            {t("followersListTitle")}
-          </h2>
-          {followerCount > followerRows.length ? (
-            <p className="text-xs text-muted-foreground">
-              {t("followersListTruncated", {
-                shown: followerRows.length,
-                total: followerCount,
-              })}
-            </p>
-          ) : null}
-          <ul className="grid gap-2 sm:grid-cols-2">
-            {followerRows.map((row) => {
-              const label =
-                row.follower.name ?? row.follower.email ?? "—";
-              const initials = (() => {
-                const raw = label.trim();
-                if (!raw || raw === "—") return "?";
-                const parts = raw.split(/\s+/).filter(Boolean);
-                if (parts.length >= 2) {
-                  return `${parts[0]?.[0] ?? ""}${parts[1]?.[0] ?? ""}`.toUpperCase().slice(0, 2);
-                }
-                return raw.slice(0, 2).toUpperCase();
-              })();
-              return (
-                <li key={row.id}>
-                  <Link
-                    href={`/u/${row.follower.id}`}
-                    className="flex items-center gap-3 rounded-lg border border-border/60 bg-muted/15 px-3 py-2 transition-colors hover:bg-muted/40"
-                  >
-                    <span className="inline-flex size-9 shrink-0 overflow-hidden rounded-full bg-muted ring-1 ring-border">
-                      {row.follower.image ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={row.follower.image}
-                          alt=""
-                          className="size-full object-cover"
-                          loading="lazy"
-                          referrerPolicy="no-referrer"
-                        />
-                      ) : (
-                        <span className="flex size-full items-center justify-center text-[0.65rem] font-semibold uppercase text-muted-foreground">
-                          {initials}
-                        </span>
-                      )}
-                    </span>
-                    <span className="min-w-0 truncate font-medium text-primary">
-                      {label}
-                    </span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
+        <ProfileFollowersSection
+          items={followerItems}
+          totalCount={followerCount}
+        />
       ) : null}
 
       <PageCtaRow heading={tCommon("ctaDiscovery")} items={ctaRow} />

@@ -265,6 +265,7 @@ export default async function SignalsPage({
         sort={sort}
         page={page}
         pageSize={SIGNAL_LIST_PAGE_SIZE}
+        totalPages={totalPages}
         totalMatching={totalMatching}
         totalUnfiltered={totalUnfiltered}
         hasMore={hasMore}

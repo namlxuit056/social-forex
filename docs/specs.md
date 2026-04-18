@@ -477,3 +477,60 @@ Trong hai hướng “đặc biệt” đã đề xuất:
 - **Senior Dev:** hàm aggregate hoặc query tối ưu; component RSC trên `u/[userId]/page.tsx`; i18n.  
 - **PM:** GitHub Issue epic; nhãn `feature`, `profile`, `signals`, `i18n`.  
 - **QA:** seed hoặc staging với user 0 / 3 / 10 lệnh đóng.
+
+---
+
+# Spec — Trang hồ sơ công khai `/u/[userId]`: làm lại UX/UI (P2)
+
+## Bối cảnh
+
+Route: `/[locale]/u/[userId]` (`src/app/[locale]/u/[userId]/page.tsx`). Trang đã có **thẻ performance** (`TraderPerformanceCard`) theo spec *Thẻ uy tín trader*; phần còn lại vẫn mang tính **danh sách dài + header phẳng**, trên **mobile** dễ cảm giác “wall of text” và thiếu **điểm nhìn** (identity) so với các màn social/profile phổ biến.
+
+## Mục tiêu sản phẩm
+
+1. **Nhận diện nhanh:** visitor biết đang xem **ai** (tên + ảnh đại diện nếu có + vai trò “trader trên Social Forex”) trong **một khối** (profile hero / card), không chỉ một dòng H1.
+2. **Hành động rõ:** Follow / Nhắn tin / Đăng nhập vẫn nổi; thêm **đường dẫn có ý nghĩa** tới nội dung của **chính user đó** (signals, forum) khi có dữ liệu — tránh CTA chung chung chỉ mở `/signals` không ngữ cảnh.
+3. **Mobile & DOM:** giảm cảm giác kéo dài vô tận — **thu gọn / phân trang / “Xem thêm”** cho danh sách follower (và các block danh sách tương lai); skeleton khi tải nếu có phần client-fetch.
+4. **SEO & chia sẻ:** `title` / `description` (và tùy chọn OG) phản ánh **tên hiển thị** + “Social Forex”, không để mặc định chung cả site.
+
+## Phạm vi đề xuất (chia nhóm)
+
+### P0 — UX structure & nhận diện
+
+- **Profile header:** layout một cột trên mobile, hai cột trên desktop: **avatar** (fallback chữ cái như danh sách follower), tên, “Member since”, bio; nhóm nút hành động **cùng hàng hoặc stack** rõ ràng (touch target ≥ 44px nếu UX chốt).
+- **Thứ tự thông tin (đề xuất PM):** identity + actions → **TraderPerformanceCard** → **số liệu social** (followers / following / threads) → followers list → discovery CTA. *(Điều chỉnh nếu A/B hoặc data cho thấy social proof cần lên trước.)*
+
+### P1 — Nội dung & liên kết theo user
+
+- **Signals:** nút/link “Xem signal của [tên]” trỏ tới `/signals?author=…` với giá trị **ổn định** (vd. tên hiển thị đã trim). Ghi chú kỹ thuật: filter `author` hiện match **name/email contains** — nếu trùng tên giữa user, PM chấp nhận rủi ro hoặc backlog **query `authorId`** (spec riêng).
+- **Forum:** nếu `threadCount > 0`, hiển thị link tới forum với filter theo author **nếu** đã có route/query tương ứng; nếu chưa có → chỉ hiển thị số **Threads** + backlog “deep link”.
+
+### P2 — Hiệu năng & polish
+
+- Follower list: giới hạn hiển thị ban đầu (vd. 12) + “Load more” hoặc trang con `/u/[id]/followers` (UX chốt).
+- **Skeleton:** `loading.tsx` cho segment `u/[userId]` nếu chuyển sang pattern suspense/partial loading.
+- Badge **VIP** (chỉ hiển thị khi policy cho phép lộ trạng thái subscription công khai — cần xác nhận compliance).
+
+## Ngoài phạm vi (không gộp vào epic này)
+
+- Chỉnh sửa **công thức** win rate / `TRADER_STATS_MIN_SAMPLE` (đã có spec riêng).
+- Tin nhắn trực tiếp, follow API — chỉ thay **presentation**.
+
+## Rủi ro & giả định
+
+- **Ảnh đại diện:** lấy từ `User.image` (Auth) nếu schema có; không hiển thị email công khai.
+- **Trùng tên** khi filter signal theo chuỗi `author`: ghi rõ trong UI hoặc ưu tiên backlog `authorId`.
+
+## Tiêu chí chấp nhận (QA)
+
+- [ ] Mobile (375px): header không vỡ layout; nút không chồng khó bấm.
+- [ ] Có avatar hoặc fallback; tên và ngày tham gia đọc được trong 1–2 giây nhìn.
+- [ ] CTA tới signal room **có ngữ cảnh** (lọc theo tác giả bằng cơ chế đã chốt) hoặc copy giải thích rõ nếu vẫn link chung.
+- [ ] `generateMetadata` (hoặc tương đương App Router) cho `title`/`description` theo locale.
+- [ ] `en` + `vi`: mọi chuỗi mới trong namespace `profile` hoặc `common` tùy quy ước.
+
+## Handoff
+
+- **UX/UI:** wireframe mobile + desktop; cập nhật `docs/design-system.md` (pattern **Public profile hero**, spacing, avatar size, section headings).
+- **Senior Dev:** refactor `page.tsx` + component tách nhỏ; metadata; i18n; kiểm tra a11y (heading order, alt ảnh).
+- **PM:** tách Issue: P0 layout + P1 deep links + P2 list virtualization nếu cần.

@@ -161,4 +161,12 @@ describe("buildSignalsListHref", () => {
     expect(href).toContain("period=week");
     expect(href).not.toContain("tz=");
   });
+
+  it("includes author query when set", () => {
+    const href = buildSignalsListHref({
+      pathname: "/signals",
+      author: "Ana",
+    });
+    expect(href).toContain("author=Ana");
+  });
 });
