@@ -60,9 +60,9 @@ export function ChartWatchlist({ activeSymbol, onSelect }: Props) {
   }
 
   const list = (
-    <div className="flex h-full flex-col">
+    <div className="flex min-h-0 flex-1 flex-col">
       {/* Tabs */}
-      <div className="flex border-b border-border/60">
+      <div className="shrink-0 border-b border-border/60">
         <button
           onClick={() => setTab("favorites")}
           className={cn(
@@ -93,8 +93,8 @@ export function ChartWatchlist({ activeSymbol, onSelect }: Props) {
         </button>
       </div>
 
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto">
+      {/* Content — min-h-0 required so flex child can shrink and scroll on mobile */}
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain [touch-action:pan-y] [-webkit-overflow-scrolling:touch]">
         {tab === "favorites" ? (
           favDefs.length === 0 ? (
             <p className="px-3 py-6 text-center text-xs text-muted-foreground">
@@ -171,14 +171,14 @@ export function ChartWatchlist({ activeSymbol, onSelect }: Props) {
           />
         </Button>
         {mobileOpen && (
-          <div className="mt-1 max-h-[50vh] overflow-hidden rounded-lg border border-border bg-background shadow-lg">
+          <div className="mt-1 flex max-h-[50vh] min-h-0 flex-col overflow-hidden rounded-lg border border-border bg-background shadow-lg">
             {list}
           </div>
         )}
       </div>
 
-      {/* Desktop sidebar */}
-      <div className="hidden w-64 shrink-0 overflow-hidden rounded-lg border border-border bg-background lg:block">
+      {/* Desktop sidebar — min-h matches chart embed so list can scroll inside */}
+      <div className="hidden min-h-[560px] w-64 shrink-0 overflow-hidden rounded-lg border border-border bg-background lg:flex lg:flex-col">
         {list}
       </div>
     </>
