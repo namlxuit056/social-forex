@@ -2,13 +2,14 @@ import { getTranslations } from "next-intl/server";
 
 const GROUPS = {
   explore: ["/quotes", "/tools", "/dashboard"],
-  trading: ["/chart", "/calendar", "/signals"],
+  trading: ["/desk", "/chart", "/calendar", "/signals"],
   community: ["/forum", "/leaderboard", "/messages"],
   learn: ["/start", "/academy", "/resources", "/webinar"],
   risk: ["/brokers", "/partners", "/profile"],
 } as const;
 
 const LABEL_KEY: Record<string, string> = {
+  "/desk": "labelDesk",
   "/quotes": "labelQuotes",
   "/tools": "labelTools",
   "/dashboard": "labelDashboard",

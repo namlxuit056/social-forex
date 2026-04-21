@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils";
 import { prisma } from "@/lib/prisma";
 
 const primaryNavKeys = [
+  { href: "/desk", key: "desk" },
   { href: "/quotes", key: "quotes" },
   { href: "/calendar", key: "calendar" },
   { href: "/chart", key: "chart" },

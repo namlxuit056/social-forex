@@ -22,6 +22,7 @@
     "notificationsBellAria": "Notifications"
   },
   "nav": {
+    "desk": "Live desk",
     "quotes": "Live Quotes",
     "calendar": "Calendar",
     "tools": "Tools",
@@ -227,6 +228,20 @@
       "fmpPaywallSample": "FMP requires a paid plan. Showing sample data.",
       "fmpSyncFailedSample": "Could not sync FMP ({message}). Showing sample."
     }
+  },
+  "desk": {
+    "metaTitle": "Live desk",
+    "metaDescription": "Live forex quotes, economic calendar with timezone toggle, and TradingView chart with watchlist — one page. Educational only.",
+    "title": "Live desk",
+    "subtitle": "Quotes refresh automatically, the calendar supports Vietnam / UTC timezones, and the chart includes the same watchlist as the Chart page — without a broker login on Social Forex.",
+    "jumpNavAria": "Jump to section",
+    "jumpQuotes": "Quotes",
+    "jumpCalendar": "Calendar",
+    "jumpChart": "Chart",
+    "sectionQuotes": "Live quotes",
+    "sectionCalendar": "Economic calendar",
+    "sectionChart": "Chart & watchlist",
+    "openFullPage": "Open full page →"
   },
   "tools": {
     "title": "Trading Calculators",
@@ -820,6 +835,7 @@
   },
   "pageCtas": {
     "labelStartHere": "Start here",
+    "labelDesk": "Live desk",
     "labelQuotes": "Live quotes",
     "labelTools": "Tools",
     "labelDashboard": "Dashboard",

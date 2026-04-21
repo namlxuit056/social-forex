@@ -22,6 +22,7 @@
     "notificationsBellAria": "Thông báo"
   },
   "nav": {
+    "desk": "Bàn live",
     "quotes": "Tỷ giá live",
     "calendar": "Lịch kinh tế",
     "tools": "Công cụ",
@@ -227,6 +228,20 @@
       "fmpPaywallSample": "FMP cần gói trả phí. Đang hiển thị dữ liệu mẫu.",
       "fmpSyncFailedSample": "Không đồng bộ FMP ({message}). Hiển thị mẫu."
     }
+  },
+  "desk": {
+    "metaTitle": "Bàn live",
+    "metaDescription": "Tỷ giá forex, lịch kinh tế có chọn múi giờ, biểu đồ TradingView và watchlist cặp — trên một trang. Chỉ mang tính giáo dục.",
+    "title": "Bàn live",
+    "subtitle": "Tỷ giá tự làm mới, lịch hỗ trợ VN / UTC, biểu đồ dùng cùng watchlist như trang Chart — không cần đăng nhập sàn trên Social Forex.",
+    "jumpNavAria": "Chuyển nhanh tới mục",
+    "jumpQuotes": "Tỷ giá",
+    "jumpCalendar": "Lịch kinh tế",
+    "jumpChart": "Biểu đồ",
+    "sectionQuotes": "Tỷ giá live",
+    "sectionCalendar": "Lịch kinh tế",
+    "sectionChart": "Biểu đồ & watchlist",
+    "openFullPage": "Mở trang đầy đủ →"
   },
   "tools": {
     "title": "Công cụ tính toán",
@@ -820,6 +835,7 @@
   },
   "pageCtas": {
     "labelStartHere": "Bắt đầu tại đây",
+    "labelDesk": "Bàn live",
     "labelQuotes": "Tỷ giá live",
     "labelTools": "Công cụ",
     "labelDashboard": "Dashboard",

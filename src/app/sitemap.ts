@@ -8,6 +8,7 @@ const BASE = getSiteUrl();
 const staticPaths = [
   { path: "", changeFrequency: "daily" as const, priority: 1.0 },
   { path: "/start", changeFrequency: "weekly" as const, priority: 0.95 },
+  { path: "/desk", changeFrequency: "hourly" as const, priority: 0.92 },
   { path: "/quotes", changeFrequency: "hourly" as const, priority: 0.9 },
   { path: "/calendar", changeFrequency: "hourly" as const, priority: 0.9 },
   { path: "/chart", changeFrequency: "daily" as const, priority: 0.7 },

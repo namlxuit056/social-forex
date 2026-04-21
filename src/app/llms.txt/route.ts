@@ -30,6 +30,7 @@ export function GET() {
     "## Canonical URLs",
     `- Beginner path: ${abs("/start", routing.defaultLocale)}`,
     `- Beginner path (EN): ${abs("/start", "en")}`,
+    `- Live desk (quotes + calendar + chart): ${abs("/desk", routing.defaultLocale)} | ${abs("/desk", "en")}`,
     `- Live quotes: ${abs("/quotes", routing.defaultLocale)} | ${abs("/quotes", "en")}`,
     `- Economic calendar: ${abs("/calendar", routing.defaultLocale)} | ${abs("/calendar", "en")}`,
     `- Academy: ${abs("/academy", routing.defaultLocale)} | ${abs("/academy", "en")}`,
