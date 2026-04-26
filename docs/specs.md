@@ -704,3 +704,27 @@ Sản phẩm đã có **nền tảng đủ dùng** (quotes, calendar, academy, f
 
 - **Title / description:** `home.metaTitle`, `home.metaDescription` — dùng trong `generateMetadata` trang chủ (`src/app/[locale]/page.tsx`).  
 - **`/start`:** giữ `start.metaTitle` / `start.metaDescription` hiện có; bổ sung nội dung **milestone** (bước 1–3) trên UI, không đổi URL.
+
+---
+
+## 10. Trang chi tiết tín hiệu — SEO & tin cậy (sprint PM, 2026-04)
+
+### Mục tiêu
+
+- Chia sẻ link signal lên mạng xã hội / Google có **title, mô tả, ảnh OG** rõ ràng.
+- **Canonical + hreflang** (vi / en / x-default) tránh trùng lặp URL.
+- **JSON-LD Article** hỗ trợ rich result cơ bản.
+- **Disclaimer** ngắn ở cuối trang (đồng bộ `Disclaimer` compact).
+
+### Đã triển khai (code)
+
+- `generateMetadata`: `description`, `openGraph` (article), `twitter`, `alternates.canonical` + `languages`, ảnh OG từ ảnh đầu tiên (nếu có).
+- `SignalArticleJsonLd` + copy `detailMetaDescription` / `detailMetaTitle` nhất quán với meta.
+- Helper `signal-detail-meta.ts` cho nhãn trạng thái / tier trong meta.
+- i18n: `detailMetaDescription`, `detailMetaTierFree` / `detailMetaTierVip`, `detailMetaOgImageAlt`, `authorFallback`.
+
+### Tiêu chí chấp nhận
+
+- [x] View source / thẻ meta: có `description`, `og:*`, `twitter:*`, `link rel="canonical"`, `hreflang`.
+- [x] Trang có JSON-LD `Article` hợp lệ (headline, description, datePublished, author, url).
+- [x] Cuối trang có disclaimer compact.

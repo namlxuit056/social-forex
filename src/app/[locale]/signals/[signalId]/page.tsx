@@ -1,11 +1,15 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { auth } from "@/auth";
+import { Disclaimer } from "@/components/layout/disclaimer";
 import { prisma } from "@/lib/prisma";
 import { isVipActive } from "@/lib/vip";
+import { routing } from "@/i18n/routing";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { SignalArticleJsonLd } from "@/components/seo/signal-article-json-ld";
 import { SignalImageGallery } from "@/components/signals/signal-image-gallery";
 import { SignalNewsContext } from "@/components/signals/signal-news-context";
 import {
@@ -14,6 +18,7 @@ import {
   getUpcomingHighImpactEvents,
 } from "@/lib/calendar/news-context-db";
 import { symbolToCurrencies } from "@/lib/signals/symbol-currencies";
+import { signalStatusLabel, signalTierLabel } from "@/lib/signals/signal-detail-meta";
 import { absoluteUrl } from "@/lib/site-url";
 import { signalLevelDetail } from "@/components/signals/signal-level-classes";
 import { SignalShareCopy } from "@/components/signals/signal-share-copy";
@@ -45,20 +50,72 @@ export async function generateMetadata({
   params,
 }: {
   params: Promise<{ locale: string; signalId: string }>;
-}) {
+}): Promise<Metadata> {
   const { locale, signalId } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("signals");
   const signal = await prisma.signal.findUnique({
     where: { id: signalId },
-    select: { symbol: true, direction: true },
+    select: {
+      symbol: true,
+      direction: true,
+      status: true,
+      tier: true,
+      images: {
+        take: 1,
+        orderBy: { sortOrder: "asc" as const },
+        select: { url: true },
+      },
+    },
   });
-  if (!signal) return { title: t("title") };
+  if (!signal) {
+    return { title: t("title") };
+  }
+  const statusText = signalStatusLabel(t, signal.status);
+  const tierText = signalTierLabel(t, signal.tier);
+  const description = t("detailMetaDescription", {
+    symbol: signal.symbol,
+    direction: signal.direction,
+    status: statusText,
+    tier: tierText,
+  });
+  const title = t("detailMetaTitle", {
+    symbol: signal.symbol,
+    direction: signal.direction,
+  });
+  const canonical = absoluteUrl(`/signals/${signalId}`, locale);
+  const languageUrls = Object.fromEntries(
+    routing.locales.map((l) => [l, absoluteUrl(`/signals/${signalId}`, l)]),
+  ) as Record<string, string>;
+  const ogImage = signal.images[0]?.url;
+  const imageAlt = t("detailMetaOgImageAlt", {
+    symbol: signal.symbol,
+    direction: signal.direction,
+  });
   return {
-    title: t("detailMetaTitle", {
-      symbol: signal.symbol,
-      direction: signal.direction,
-    }),
+    title,
+    description,
+    alternates: {
+      canonical,
+      languages: {
+        ...languageUrls,
+        "x-default": absoluteUrl(`/signals/${signalId}`, routing.defaultLocale),
+      },
+    },
+    openGraph: {
+      type: "article",
+      siteName: "Social Forex",
+      title,
+      description,
+      url: canonical,
+      ...(ogImage ? { images: [{ url: ogImage, alt: imageAlt }] } : {}),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      ...(ogImage ? { images: [ogImage] } : {}),
+    },
   };
 }
 
@@ -106,6 +163,16 @@ export default async function SignalDetailPage({
   const masked =
     signal.tier === "VIP" && !canViewVip && userId !== signal.authorId;
   const shareUrl = absoluteUrl(`/signals/${signalId}`, locale);
+  const metaDescription = t("detailMetaDescription", {
+    symbol: signal.symbol,
+    direction: signal.direction,
+    status: signalStatusLabel(t, signal.status),
+    tier: signalTierLabel(t, signal.tier),
+  });
+  const metaTitle = t("detailMetaTitle", {
+    symbol: signal.symbol,
+    direction: signal.direction,
+  });
   const imageCount = signal.images.length;
   const imageUrls = masked ? [] : signal.images.map((i) => i.url);
   const isAuthor = userId === signal.authorId;
@@ -141,8 +208,19 @@ export default async function SignalDetailPage({
         })
       : [];
 
+  const authorName =
+    signal.author.name ?? signal.author.email ?? t("authorFallback");
+
   return (
     <div className="space-y-6">
+      <SignalArticleJsonLd
+        url={shareUrl}
+        headline={metaTitle}
+        description={metaDescription}
+        datePublished={signal.createdAt.toISOString()}
+        authorName={authorName}
+        imageUrl={signal.images[0]?.url ?? null}
+      />
       <Link
         href="/signals"
         className="inline-block text-sm text-muted-foreground hover:text-foreground"
@@ -170,8 +248,7 @@ export default async function SignalDetailPage({
           </div>
 
           <p className="text-sm text-muted-foreground">
-            {signal.author.name ?? signal.author.email} ·{" "}
-            {new Date(signal.createdAt).toLocaleString(locale)}
+            {authorName} · {new Date(signal.createdAt).toLocaleString(locale)}
           </p>
           {signal.status !== "ACTIVE" && signal.closedAt ? (
             <p className="text-sm text-muted-foreground">
@@ -312,6 +389,8 @@ export default async function SignalDetailPage({
         comments={comments}
         loggedIn={!!userId}
       />
+
+      <Disclaimer variant="compact" />
     </div>
   );
 }
