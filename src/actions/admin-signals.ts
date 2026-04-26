@@ -6,6 +6,7 @@ import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { deleteVercelBlobUrls } from "@/lib/vercel-blob-delete";
 
 async function requireStaff(userId: string) {
   const user = await prisma.user.findUnique({
@@ -39,11 +40,22 @@ export async function adminDeleteSignal(
 
   const { signalId } = parsed.data;
 
+  const existing = await prisma.signal.findUnique({
+    where: { id: signalId },
+    select: { id: true, images: { select: { url: true } } },
+  });
+  if (!existing) {
+    return { error: t("deleteSignalFailed") };
+  }
+  const imageUrls = existing.images.map((i) => i.url);
+
   try {
     await prisma.signal.delete({ where: { id: signalId } });
   } catch {
     return { error: t("deleteSignalFailed") };
   }
+
+  await deleteVercelBlobUrls(imageUrls);
 
   revalidatePath("/signals");
   revalidatePath(`/signals/${signalId}`);

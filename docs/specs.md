@@ -722,6 +722,7 @@ Sản phẩm đã có **nền tảng đủ dùng** (quotes, calendar, academy, f
 - `SignalArticleJsonLd` + copy `detailMetaDescription` / `detailMetaTitle` nhất quán với meta.
 - Helper `signal-detail-meta.ts` cho nhãn trạng thái / tier trong meta.
 - i18n: `detailMetaDescription`, `detailMetaTierFree` / `detailMetaTierVip`, `detailMetaOgImageAlt`, `authorFallback`.
+- **Xóa ảnh Vercel Blob** khi admin xóa signal (`adminDeleteSignal` → `deleteVercelBlobUrls` sau `prisma.signal.delete`).
 
 ### Tiêu chí chấp nhận
 

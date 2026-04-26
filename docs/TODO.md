@@ -89,7 +89,7 @@
 
 - [x] Signal list: sort (mới nhất / symbol / tier) + pagination hoặc “Load more” + skeleton.
 - [ ] Trang chi tiết signal: rà soát comment/reaction/report, metadata SEO.
-- [ ] Ảnh signal P2: xóa Blob khi xóa signal; (optional) báo cáo ảnh.
+- [x] Ảnh signal P2: xóa Blob khi xóa signal (admin); (optional) báo cáo ảnh.
 
 ### F2 — Monetization & tin cậy
 
