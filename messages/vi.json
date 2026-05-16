@@ -57,6 +57,18 @@
     "title": "Tuyên bố miễn trừ trách nhiệm",
     "body": "Tín hiệu, phân tích và nội dung trên trang này chỉ mang tính chất tham khảo và giáo dục, <b>không phải tư vấn đầu tư</b>. Bạn tự chịu trách nhiệm về mọi quyết định giao dịch."
   },
+  "goldAiPopup": {
+    "eyebrow": "Tính năng mới",
+    "title": "AI phân tích giá vàng XAUUSD",
+    "description": "Xem kịch bản vàng với TradingView M15/H1/H4, checklist trước lệnh, điểm chất lượng, cảnh báo tin tức và tính lot theo SL.",
+    "featureTrend": "Đọc xu hướng vàng đa khung thời gian",
+    "featureRisk": "Tự tính risk, SL pip và lot gợi ý",
+    "featureSignal": "Đăng tín hiệu từ AI sau một lần bấm",
+    "disclaimer": "Phân tích chỉ mang tính giáo dục, không phải tư vấn đầu tư. Hãy kiểm tra lại trên nền tảng broker trước khi giao dịch.",
+    "primaryCta": "Thử phân tích vàng",
+    "secondaryCta": "Để sau",
+    "closeAria": "Đóng giới thiệu AI vàng"
+  },
   "notFound": {
     "title": "404 — Không tìm thấy",
     "description": "Trang bạn tìm không tồn tại hoặc đã bị di chuyển. Kiểm tra URL hoặc quay về trang chính."

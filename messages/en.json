@@ -57,6 +57,18 @@
     "title": "Disclaimer",
     "body": "Signals, analysis and content on this page are for informational and educational purposes only, <b>not investment advice</b>. You are solely responsible for your trading decisions."
   },
+  "goldAiPopup": {
+    "eyebrow": "New feature",
+    "title": "AI gold analysis for XAUUSD",
+    "description": "Review a gold scenario with TradingView M15/H1/H4, pre-trade checklist, quality score, news risk and SL-based lot sizing.",
+    "featureTrend": "Read multi-timeframe gold trend",
+    "featureRisk": "Auto-calculate risk, SL pips and suggested lots",
+    "featureSignal": "Post an AI signal in one click",
+    "disclaimer": "Analysis is educational only, not investment advice. Verify all levels on your broker platform before trading.",
+    "primaryCta": "Analyze gold",
+    "secondaryCta": "Maybe later",
+    "closeAria": "Close gold AI intro"
+  },
   "notFound": {
     "title": "404 — Not found",
     "description": "The page you're looking for doesn't exist or has been moved. Check the URL or go back to the homepage."

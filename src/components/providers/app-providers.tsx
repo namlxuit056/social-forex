@@ -3,6 +3,7 @@
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
+import { GoldAiPopup } from "@/components/onboarding/gold-ai-popup";
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
   return (
@@ -14,6 +15,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
     >
       <SessionProvider>
         {children}
+        <GoldAiPopup />
         <Toaster position="top-center" richColors closeButton />
       </SessionProvider>
     </ThemeProvider>
