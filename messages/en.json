@@ -331,6 +331,10 @@
     "commentPlaceholder": "Write a comment…",
     "noComments": "No comments yet",
     "loginToComment": "Sign in to comment",
+    "commentHiddenBadge": "Hidden",
+    "commentRemovedForAuthor": "This comment was removed by moderators.",
+    "hideComment": "Hide",
+    "unhideComment": "Unhide",
     "like": "Like",
     "dislike": "Dislike",
     "viewDetail": "View detail",
@@ -574,7 +578,14 @@
       "winsLosses": "{wins} wins · {losses} losses · {total} closed",
       "viewSignals": "Open signal room",
       "viewSignalsByAuthor": "View this trader’s signals"
-    }
+    },
+    "pinnedSignals": "Pinned signals",
+    "pinnedSignalsEmpty": "No pinned signals yet.",
+    "pinSignal": "Pin signal",
+    "unpinSignal": "Unpin signal",
+    "pinLimitReachedHint": "You’ve reached the limit of {max} pinned signals.",
+    "pinSignalAria": "Pin {symbol} signal to profile",
+    "unpinSignalAria": "Unpin {symbol} signal from profile"
   },
   "notifications": {
     "title": "Notifications",
@@ -686,7 +697,10 @@
     "markReviewed": "Mark reviewed",
     "dismiss": "Dismiss",
     "noReports": "No reports.",
-    "viewThread": "View thread"
+    "viewThread": "View thread",
+    "reportTargetSignalComment": "Signal comment",
+    "viewSignal": "View signal",
+    "signalSymbol": "Symbol"
   },
   "vip": {
     "title": "Upgrade to VIP",
@@ -804,6 +818,8 @@
     "userNotFound": "No user found for email: {email}",
     "reportReasonInvalid": "Reason is invalid.",
     "reportMissingTarget": "Missing report target.",
+    "reportOneTarget": "Report one item at a time (post, thread, or comment).",
+    "reportTargetNotFound": "That post, thread, or comment is no longer available.",
     "forumCategoryNotFound": "Category doesn't exist.",
     "replyInvalid": "Invalid reply.",
     "messageBodyInvalid": "Message content is invalid.",
@@ -827,7 +843,9 @@
     "blobNotConfigured": "File storage is not configured (BLOB_READ_WRITE_TOKEN).",
     "blobUploadFailed": "Could not upload to storage.",
     "emailTaken": "This email is already registered.",
-    "accountCreateFailed": "Could not create account."
+    "accountCreateFailed": "Could not create account.",
+    "pinLimitReached": "You can pin up to {max} signals.",
+    "signalNotFound": "Signal not found."
   },
   "siteMeta": {
     "titleDefault": "Social Forex — Learn forex with tools & data",

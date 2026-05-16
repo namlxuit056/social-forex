@@ -7,6 +7,7 @@ import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
+import { isAtPinLimit, MAX_PINS } from "@/lib/signals/pin-signal-limit";
 
 // --- Comments ---
 
@@ -77,4 +78,53 @@ export async function toggleSignalReaction(formData: FormData) {
 
   revalidatePath(`/signals/${signalId}`);
   revalidatePath("/signals");
+}
+
+// --- Pin Signal ---
+
+const pinSignalSchema = z.object({ signalId: z.string().min(1) });
+
+export async function togglePinSignal(
+  formData: FormData,
+): Promise<{ ok: boolean; pinned?: boolean; error?: string }> {
+  const session = await auth();
+  if (!session?.user?.id) redirect("/auth/signin");
+  const userId = session.user.id;
+
+  const rl = rateLimit(`sig-pin:${userId}`, 20, 60_000);
+  if (!rl.ok) return { ok: false, error: "rateLimitOneMinute" };
+
+  const parsed = pinSignalSchema.safeParse({ signalId: formData.get("signalId") });
+  if (!parsed.success) return { ok: false, error: "invalidData" };
+  const { signalId } = parsed.data;
+
+  const signal = await prisma.signal.findUnique({ where: { id: signalId }, select: { id: true, authorId: true } });
+  if (!signal) return { ok: false, error: "signalNotFound" };
+
+  const existing = await prisma.userPinnedSignal.findUnique({
+    where: { userId_signalId: { userId, signalId } },
+  });
+
+  if (existing) {
+    await prisma.userPinnedSignal.delete({ where: { id: existing.id } });
+    revalidatePath(`/u/${userId}`);
+    return { ok: true, pinned: false };
+  }
+
+  const count = await prisma.userPinnedSignal.count({ where: { userId } });
+  if (isAtPinLimit(count)) return { ok: false, error: "pinLimitReached" };
+
+  try {
+    await prisma.userPinnedSignal.create({
+      data: { userId, signalId, sortOrder: count },
+    });
+  } catch (e: unknown) {
+    if (typeof e === "object" && e !== null && "code" in e && (e as { code: string }).code === "P2002") {
+      return { ok: true, pinned: true };
+    }
+    throw e;
+  }
+
+  revalidatePath(`/u/${userId}`);
+  return { ok: true, pinned: true };
 }

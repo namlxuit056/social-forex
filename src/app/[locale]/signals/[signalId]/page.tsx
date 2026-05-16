@@ -26,6 +26,8 @@ import { SignalCloseForm } from "@/components/signals/signal-close-form";
 import { SignalEditForm } from "@/components/signals/signal-edit-form";
 import { SignalReactions } from "./signal-reactions";
 import { SignalComments } from "./signal-comments";
+import { PinSignalButton } from "@/components/signals/pin-signal-button";
+import { isAtPinLimit } from "@/lib/signals/pin-signal-limit";
 
 const SIGNAL_EDIT_WINDOW_MS = 48 * 60 * 60 * 1000;
 
@@ -130,12 +132,37 @@ export default async function SignalDetailPage({
   setRequestLocale(locale);
   const t = await getTranslations("signals");
 
+  const session = await auth();
+  const userId = session?.user?.id;
+
+  const dbUser = userId
+    ? await prisma.user.findUnique({
+        where: { id: userId },
+        select: { vipUntil: true, role: true },
+      })
+    : null;
+
+  const isMod = dbUser?.role === "MOD" || dbUser?.role === "ADMIN";
+
+  const commentWhere =
+    isMod === true
+      ? {}
+      : userId
+        ? {
+            OR: [
+              { hidden: false },
+              { AND: [{ hidden: true }, { authorId: userId }] },
+            ],
+          }
+        : { hidden: false };
+
   const signal = await prisma.signal.findUnique({
     where: { id: signalId },
     include: {
       author: { select: { id: true, name: true, email: true } },
       reactions: { select: { userId: true, type: true } },
       comments: {
+        where: commentWhere,
         orderBy: { createdAt: "asc" },
         include: { author: { select: { id: true, name: true, email: true } } },
       },
@@ -148,16 +175,6 @@ export default async function SignalDetailPage({
   });
 
   if (!signal) notFound();
-
-  const session = await auth();
-  const userId = session?.user?.id;
-
-  const dbUser = userId
-    ? await prisma.user.findUnique({
-        where: { id: userId },
-        select: { vipUntil: true },
-      })
-    : null;
 
   const canViewVip = isVipActive(dbUser?.vipUntil);
   const masked =
@@ -188,12 +205,25 @@ export default async function SignalDetailPage({
     ? signal.reactions.find((r) => r.userId === userId)?.type ?? null
     : null;
 
+  const [existingPin, pinCount] = userId
+    ? await Promise.all([
+        prisma.userPinnedSignal.findUnique({
+          where: { userId_signalId: { userId, signalId } },
+          select: { id: true },
+        }),
+        prisma.userPinnedSignal.count({ where: { userId } }),
+      ])
+    : [null, 0];
+  const isPinned = !!existingPin;
+  const atPinLimit = isAtPinLimit(pinCount);
+
   const comments = signal.comments.map((c) => ({
     id: c.id,
     body: c.body,
     authorLabel: c.author.name ?? c.author.email ?? "—",
     authorId: c.author.id,
     createdAt: c.createdAt.toISOString(),
+    hidden: c.hidden,
   }));
 
   const newsCurrencies = symbolToCurrencies(signal.symbol);
@@ -366,13 +396,22 @@ export default async function SignalDetailPage({
             </div>
           ) : null}
 
-          <SignalReactions
-            signalId={signalId}
-            likes={likes}
-            dislikes={dislikes}
-            userReaction={userReaction}
-            loggedIn={!!userId}
-          />
+          <div className="flex items-center gap-2 flex-wrap">
+            <SignalReactions
+              signalId={signalId}
+              likes={likes}
+              dislikes={dislikes}
+              userReaction={userReaction}
+              loggedIn={!!userId}
+            />
+            <PinSignalButton
+              signalId={signalId}
+              signalSymbol={signal.symbol}
+              isPinned={isPinned}
+              loggedIn={!!userId}
+              atLimit={atPinLimit}
+            />
+          </div>
         </CardContent>
       </Card>
 
@@ -388,6 +427,8 @@ export default async function SignalDetailPage({
         signalId={signalId}
         comments={comments}
         loggedIn={!!userId}
+        isMod={isMod}
+        currentUserId={userId}
       />
 
       <Disclaimer variant="compact" />

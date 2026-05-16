@@ -7,6 +7,7 @@ import { ProfileFollowersSection } from "@/components/profile/profile-followers-
 import { PublicProfileHero } from "@/components/profile/public-profile-hero";
 import { auth } from "@/auth";
 import { TraderPerformanceCard } from "@/components/profile/trader-performance-card";
+import { PinnedSignalsSection } from "@/components/profile/pinned-signals-section";
 import { FollowButton } from "@/components/social/follow-button";
 import { buttonVariants } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
@@ -76,6 +77,13 @@ export default async function PublicProfilePage({ params }: Props) {
   const signalsCtaLabel = authorQuery
     ? t("traderStats.viewSignalsByAuthor")
     : t("traderStats.viewSignals");
+
+  const viewerDbUser = session?.user?.id
+    ? await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { vipUntil: true },
+      })
+    : null;
 
   const [followerCount, followingCount, threadCount, isFollowing, followerRows] =
     await Promise.all([
@@ -156,6 +164,12 @@ export default async function PublicProfilePage({ params }: Props) {
         userId={userId}
         signalsListHref={signalsListHref}
         signalsCtaLabel={signalsCtaLabel}
+      />
+
+      <PinnedSignalsSection
+        profileUserId={userId}
+        viewerVipUntil={viewerDbUser?.vipUntil}
+        viewerUserId={session?.user?.id}
       />
 
       <dl className="grid grid-cols-3 gap-4 rounded-xl border border-border bg-card/50 p-4 text-center text-sm ring-1 ring-foreground/5">

@@ -331,6 +331,10 @@
     "commentPlaceholder": "Viết bình luận…",
     "noComments": "Chưa có bình luận",
     "loginToComment": "Đăng nhập để bình luận",
+    "commentHiddenBadge": "Đã ẩn",
+    "commentRemovedForAuthor": "Bình luận này đã bị gỡ bởi người kiểm duyệt.",
+    "hideComment": "Ẩn",
+    "unhideComment": "Hiện lại",
     "like": "Thích",
     "dislike": "Không thích",
     "viewDetail": "Xem chi tiết",
@@ -574,7 +578,14 @@
       "winsLosses": "{wins} thắng · {losses} thua · {total} đã đóng",
       "viewSignals": "Mở phòng tín hiệu",
       "viewSignalsByAuthor": "Xem tín hiệu của trader này"
-    }
+    },
+    "pinnedSignals": "Tín hiệu đã ghim",
+    "pinnedSignalsEmpty": "Chưa có tín hiệu nào được ghim.",
+    "pinSignal": "Ghim tín hiệu",
+    "unpinSignal": "Bỏ ghim",
+    "pinLimitReachedHint": "Bạn đã đạt giới hạn {max} tín hiệu được ghim.",
+    "pinSignalAria": "Ghim tín hiệu {symbol} lên hồ sơ",
+    "unpinSignalAria": "Bỏ ghim tín hiệu {symbol} khỏi hồ sơ"
   },
   "notifications": {
     "title": "Thông báo",
@@ -686,7 +697,10 @@
     "markReviewed": "Đã xem xét",
     "dismiss": "Bỏ qua",
     "noReports": "Không có báo cáo nào.",
-    "viewThread": "Xem thread"
+    "viewThread": "Xem thread",
+    "reportTargetSignalComment": "Bình luận tín hiệu",
+    "viewSignal": "Xem tín hiệu",
+    "signalSymbol": "Cặp"
   },
   "vip": {
     "title": "Nâng cấp VIP",
@@ -804,6 +818,8 @@
     "userNotFound": "Không tìm thấy user với email: {email}",
     "reportReasonInvalid": "Lý do không hợp lệ.",
     "reportMissingTarget": "Thiếu đối tượng báo cáo.",
+    "reportOneTarget": "Chỉ chọn một đối tượng (bài, chủ đề hoặc bình luận).",
+    "reportTargetNotFound": "Bài viết, chủ đề hoặc bình luận không còn tồn tại.",
     "forumCategoryNotFound": "Danh mục không tồn tại.",
     "replyInvalid": "Bình luận không hợp lệ.",
     "messageBodyInvalid": "Nội dung tin nhắn không hợp lệ.",
@@ -827,7 +843,9 @@
     "blobNotConfigured": "BLOB_READ_WRITE_TOKEN chưa cấu hình hoặc đang rỗng.",
     "blobUploadFailed": "Không thể ghi lên Vercel Blob.",
     "emailTaken": "Email đã được đăng ký.",
-    "accountCreateFailed": "Không thể tạo tài khoản."
+    "accountCreateFailed": "Không thể tạo tài khoản.",
+    "pinLimitReached": "Bạn chỉ có thể ghim tối đa {max} tín hiệu.",
+    "signalNotFound": "Không tìm thấy tín hiệu."
   },
   "siteMeta": {
     "titleDefault": "Social Forex — Học forex với công cụ & dữ liệu",

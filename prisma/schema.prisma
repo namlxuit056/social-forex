@@ -58,6 +58,7 @@ model User {
   notifications       Notification[] @relation("NotificationRecipient")
   notificationsAsActor Notification[] @relation("NotificationActor")
   signalEditLogs   SignalEditLog[]
+  pinnedSignals    UserPinnedSignal[]
 
   /// Thông báo in-app: tín hiệu từ trader đang follow
   notifySignalFollow Boolean @default(true)
@@ -176,6 +177,7 @@ model Signal {
   images     SignalImage[]
   editLogs   SignalEditLog[]
   notifications Notification[]
+  pinnedBy   UserPinnedSignal[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -236,13 +238,15 @@ model SignalImage {
 }
 
 model SignalComment {
-  id       String @id @default(cuid())
+  id     String  @id @default(cuid())
   signalId String
   authorId String
   body     String
+  hidden   Boolean @default(false)
 
-  signal Signal @relation(fields: [signalId], references: [id], onDelete: Cascade)
-  author User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  signal  Signal  @relation(fields: [signalId], references: [id], onDelete: Cascade)
+  author  User    @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  reports ForumReport[]
 
   createdAt DateTime @default(now())
 
@@ -323,6 +327,7 @@ model ForumReport {
   reporterId String
   postId     String?
   threadId   String?
+  signalCommentId String?
   reason     String
   status     ReportStatus @default(OPEN)
   reviewedBy String?
@@ -331,11 +336,13 @@ model ForumReport {
   reporter User        @relation("ForumReporter", fields: [reporterId], references: [id], onDelete: Cascade)
   post     ForumPost?  @relation(fields: [postId], references: [id], onDelete: SetNull)
   thread   ForumThread? @relation(fields: [threadId], references: [id], onDelete: SetNull)
+  signalComment SignalComment? @relation(fields: [signalCommentId], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([status, createdAt])
+  @@index([signalCommentId])
 }
 
 model VipAuditLog {
@@ -361,6 +368,20 @@ model UserFavoriteSymbol {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, symbol])
+  @@index([userId, sortOrder])
+}
+
+model UserPinnedSignal {
+  id        String   @id @default(cuid())
+  userId    String
+  signalId  String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  signal Signal @relation(fields: [signalId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, signalId])
   @@index([userId, sortOrder])
 }
 
