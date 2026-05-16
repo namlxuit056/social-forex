@@ -3,14 +3,12 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
-import { Sparkles, Lock, Loader2 } from "lucide-react";
+import { Sparkles, Loader2 } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { AiSuggestionCard } from "@/components/ai/ai-suggestion-card";
 import type { AiSuggestResponse, AiSuggestError } from "@/lib/ai/types";
-
-const FREE_SYMBOL = "EURUSD";
 
 interface Props {
   symbol: string;
@@ -138,8 +136,6 @@ export function AiAnalysisPanel({ symbol }: Props) {
     void postFromAi();
   }, [data, router, t]);
 
-  const isLocked = symbol !== FREE_SYMBOL && !session?.user;
-
   return (
     <div className="space-y-3">
       <div className="rounded-xl border border-border/70 bg-card/45 px-4 py-3">
@@ -160,7 +156,7 @@ export function AiAnalysisPanel({ symbol }: Props) {
       <div className="flex items-center gap-3">
         <Button
           onClick={analyze}
-          disabled={loading || cooldown > 0 || isLocked}
+          disabled={loading || cooldown > 0}
           size="sm"
           className={cn(
             "gap-1.5",
@@ -183,17 +179,9 @@ export function AiAnalysisPanel({ symbol }: Props) {
             </>
           )}
         </Button>
-
-        {isLocked && (
-          <span className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Lock className="size-3" />
-            {t("freeHint")}
-          </span>
-        )}
-
-        {symbol === FREE_SYMBOL && !session?.user && (
+        {!session?.user && (
           <span className="text-[10px] text-muted-foreground">
-            Free: EURUSD
+            {t("freeHint")}
           </span>
         )}
       </div>

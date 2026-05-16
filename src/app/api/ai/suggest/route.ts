@@ -12,7 +12,7 @@ import type { AiSuggestResponse, AiSuggestError } from "@/lib/ai/types";
 import { localeFromRequest } from "@/lib/api-locale";
 import { pickAi } from "@/lib/messages-pick";
 
-const FREE_SYMBOL = "EURUSD";
+const DEFAULT_SYMBOL = "EURUSD";
 
 function errorJson(
   error: string,
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
   const userId = session?.user?.id;
 
   const body = (await req.json().catch(() => ({}))) as { symbol?: string };
-  const symbol = (body.symbol ?? FREE_SYMBOL).toUpperCase();
+  const symbol = (body.symbol ?? DEFAULT_SYMBOL).toUpperCase();
 
   if (!QUOTE_BY_SYMBOL[symbol]) {
     return errorJson(ai.apiSymbolUnsupported, 400);
@@ -51,15 +51,6 @@ export async function POST(req: NextRequest) {
       select: { vipUntil: true },
     });
     isVip = isVipActive(user?.vipUntil);
-  }
-
-  if (symbol !== FREE_SYMBOL && !isVip) {
-    return errorJson(
-      ai.apiVipOnlySymbol
-        .replace("{symbol}", symbol)
-        .replace("{freeSymbol}", FREE_SYMBOL),
-      403,
-    );
   }
 
   const rateLimitKey = userId
