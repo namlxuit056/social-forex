@@ -93,6 +93,7 @@ export async function POST(req: NextRequest) {
       quote,
       technicalContext,
       newsContext,
+      loc,
     );
 
     const response: AiSuggestResponse = {

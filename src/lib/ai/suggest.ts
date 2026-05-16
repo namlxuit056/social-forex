@@ -4,9 +4,10 @@ import { aiSuggestionSchema, type AiSuggestion } from "@/lib/ai/types";
 import { SYSTEM_PROMPT, buildUserPrompt } from "@/lib/ai/prompt";
 import type { TradingViewTechnicalContext } from "@/lib/ai/tradingview-context";
 import type { AiNewsContext } from "@/lib/ai/news-context";
+import type { AppLocale } from "@/lib/api-locale";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
-const CACHE_SCHEMA_VERSION = "checklist-v1";
+const CACHE_SCHEMA_VERSION = "localized-checklist-v1";
 const cache = new Map<string, { suggestion: AiSuggestion; at: number }>();
 
 type AiProvider = "groq" | "openai";
@@ -56,8 +57,9 @@ export async function getAiSuggestion(
   quote: QuoteRow,
   tradingViewContext?: TradingViewTechnicalContext | null,
   newsContext?: AiNewsContext | null,
+  locale: AppLocale = "vi",
 ): Promise<AiSuggestion> {
-  const cacheKey = `${CACHE_SCHEMA_VERSION}:${quote.symbol}`;
+  const cacheKey = `${CACHE_SCHEMA_VERSION}:${locale}:${quote.symbol}`;
   const cached = cache.get(cacheKey);
   if (cached && Date.now() - cached.at < CACHE_TTL_MS) {
     return cached.suggestion;
@@ -83,7 +85,7 @@ export async function getAiSuggestion(
     response_format: { type: "json_object" },
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
-      { role: "user", content: buildUserPrompt(quote, tradingViewContext, newsContext) },
+      { role: "user", content: buildUserPrompt(quote, tradingViewContext, newsContext, locale) },
     ],
   });
 
