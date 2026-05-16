@@ -43,3 +43,20 @@ export type AiSuggestError = {
   error: string;
   retryAfterMs?: number;
 };
+
+export const aiAdvisorMessageSchema = z.object({
+  role: z.enum(["user", "assistant"]),
+  content: z.string().trim().min(1).max(2000),
+});
+
+export const aiAdvisorRequestSchema = z.object({
+  messages: z.array(aiAdvisorMessageSchema).min(1).max(12),
+});
+
+export type AiAdvisorMessage = z.infer<typeof aiAdvisorMessageSchema>;
+
+export type AiAdvisorResponse = {
+  message: AiAdvisorMessage;
+  generatedAt: string;
+  disclaimer: string;
+};
