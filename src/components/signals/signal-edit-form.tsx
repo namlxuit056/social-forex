@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { updateSignal } from "@/actions/signals";
@@ -33,11 +33,15 @@ export function SignalEditForm({
   const router = useRouter();
   const [state, formAction] = useActionState(updateSignal, editInitial);
   const deadline = new Date(editDeadlineIso);
+  const deadlineTime = deadline.getTime();
+  const [expired, setExpired] = useState(false);
 
   useEffect(() => {
     if (state?.ok) router.refresh();
   }, [state?.ok, router]);
-  const expired = Date.now() > deadline.getTime();
+  useEffect(() => {
+    setExpired(Date.now() > deadlineTime);
+  }, [deadlineTime]);
 
   if (expired) {
     return (
