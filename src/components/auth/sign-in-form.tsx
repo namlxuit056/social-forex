@@ -3,9 +3,8 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import { localizedHref } from "@/lib/localized-href";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,16 +16,14 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { safeCallbackPath } from "@/lib/safe-redirect";
+import { safeLocalizedCallbackPath } from "@/lib/safe-redirect";
 
 export function SignInForm() {
   const t = useTranslations("auth");
-  const locale = useLocale();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = safeCallbackPath(
+  const callbackUrl = safeLocalizedCallbackPath(
     searchParams.get("callbackUrl"),
-    localizedHref("/dashboard", locale),
   );
 
   const [email, setEmail] = useState("");
