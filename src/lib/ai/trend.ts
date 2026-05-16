@@ -4,7 +4,7 @@ import type { TradingViewTechnicalContext } from "@/lib/ai/tradingview-context";
 import { createAiClient, resolveAiProvider } from "@/lib/ai/provider";
 import type { QuoteRow } from "@/lib/quotes/types";
 
-const CACHE_TTL_MS = 10 * 60 * 1000;
+const CACHE_TTL_MS = 60 * 60 * 1000;
 const CACHE_SCHEMA_VERSION = "daily-trend-v1";
 const cache = new Map<string, { trend: AiDailyTrend; at: number }>();
 

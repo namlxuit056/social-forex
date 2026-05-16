@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
@@ -61,6 +61,8 @@ type TrendState =
   | { status: "ready"; payload: AiTrendResult }
   | { status: "error"; message: string };
 
+const TREND_REFRESH_MS = 60 * 60 * 1000;
+
 function formatWarning(
   t: (key: string, values?: Record<string, string>) => string,
   key?: QuotesWarningKey,
@@ -102,6 +104,10 @@ export function LiveQuotesTable({
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [trendBySymbol, setTrendBySymbol] = useState<Record<string, TrendState>>({});
+  const trendSymbolsKey = useMemo(
+    () => Array.from(new Set(rows.map((row) => row.symbol))).sort().join(","),
+    [rows],
+  );
 
   const applyPayload = useCallback(
     (data: PollPayload) => {
@@ -207,6 +213,28 @@ export function LiveQuotesTable({
     [t],
   );
 
+  useEffect(() => {
+    const symbols = trendSymbolsKey.split(",").filter(Boolean);
+    if (symbols.length === 0) return;
+
+    let cancelled = false;
+
+    const loadTrends = async () => {
+      for (const symbol of symbols) {
+        if (cancelled) return;
+        await requestTrend(symbol);
+      }
+    };
+
+    void loadTrends();
+    const id = setInterval(loadTrends, TREND_REFRESH_MS);
+
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, [requestTrend, trendSymbolsKey]);
+
   function renderTrend(symbol: string, compact = false) {
     const state = trendBySymbol[symbol] ?? { status: "idle" };
     if (state.status === "ready") {
@@ -259,20 +287,10 @@ export function LiveQuotesTable({
     }
 
     return (
-      <Button
-        type="button"
-        variant="outline"
-        size="xs"
-        onClick={() => requestTrend(symbol)}
-        disabled={state.status === "loading"}
-      >
-        {state.status === "loading" ? (
-          <Loader2 className="size-3.5 animate-spin" aria-hidden />
-        ) : (
-          <Sparkles className="size-3.5" aria-hidden />
-        )}
-        {state.status === "loading" ? t("aiTrendLoading") : t("aiTrendButton")}
-      </Button>
+      <span className="inline-flex items-center gap-1.5 rounded-md bg-muted/40 px-2 py-1 text-xs text-muted-foreground">
+        <Loader2 className="size-3.5 animate-spin" aria-hidden />
+        {t("aiTrendLoading")}
+      </span>
     );
   }
 

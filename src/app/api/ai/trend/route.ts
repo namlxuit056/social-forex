@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
 
   const rateLimitKey = `ai-trend:${req.headers.get("x-forwarded-for") ?? "unknown"}`;
   const windowMs = 5 * 60_000;
-  const { ok, remaining } = rateLimit(rateLimitKey, 15, windowMs);
+  const { ok, remaining } = rateLimit(rateLimitKey, 60, windowMs);
   if (!ok) {
     return errorJson(ai.apiRateLimitFree, 429, remaining === 0 ? windowMs : undefined);
   }
