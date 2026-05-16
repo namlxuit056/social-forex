@@ -79,7 +79,9 @@ export default async function HeatmapPage({
   const grid = buildStrengthMatrix(allQuotes);
 
   const sourceLabel =
-    source === "massive"
+    source === "tradingview"
+      ? t("source_tradingview")
+      : source === "massive"
       ? t("source_massive")
       : source === "yahoo"
         ? t("source_yahoo")

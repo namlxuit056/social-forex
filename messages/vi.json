@@ -112,7 +112,7 @@
     "block_tools_title": "Công cụ & Dữ liệu",
     "block_tools_desc": "Position size, pivot, margin — kèm tỷ giá live và lịch kinh tế cập nhật liên tục.",
     "block_quotes_title": "Tỷ giá & Phân tích",
-    "block_quotes_desc": "Bảng giá forex, vàng, chỉ số từ Yahoo Finance. Biểu đồ TradingView nhúng trực tiếp."
+    "block_quotes_desc": "Bảng giá forex, vàng, năng lượng và crypto từ TradingView, kèm biểu đồ nhúng trực tiếp."
   },
   "schemaFaqHome": {
     "q1": "Social Forex là gì?",
@@ -167,7 +167,7 @@
   },
   "quotes": {
     "title": "Bảng tỷ giá",
-    "description": "Tỷ giá forex, vàng, chỉ số và crypto cập nhật liên tục. Dữ liệu được tự động làm mới mỗi 15 giây.",
+    "description": "Tỷ giá forex, vàng, năng lượng và crypto từ TradingView, cập nhật liên tục. Dữ liệu được tự động làm mới mỗi 15 giây.",
     "groupMajor": "Major",
     "groupMinor": "Minor / Cross",
     "groupMetal": "Kim loại",
@@ -177,6 +177,7 @@
     "updated": "Cập nhật:",
     "timezoneNote": "({tz})",
     "labelSource": "Nguồn:",
+    "sourceTradingView": "TradingView",
     "sourceMassive": "Massive API",
     "sourceYahoo": "Yahoo Finance",
     "sourceMock": "Mock",
@@ -531,6 +532,7 @@
   "heatmap": {
     "title": "Heatmap — sức mạnh tiền tệ",
     "description": "Sức mạnh tương đối giữa 8 đồng tiền chính, tính từ dữ liệu tỷ giá {source}. Giá trị gần 1 = base mạnh, gần 0 = base yếu.",
+    "source_tradingview": "TradingView (live)",
     "source_yahoo": "Yahoo Finance (live)",
     "source_massive": "Massive API (live)",
     "source_mock": "Dữ liệu mô phỏng"

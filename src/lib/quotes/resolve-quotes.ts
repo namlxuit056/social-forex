@@ -1,4 +1,5 @@
 import { buildQuotes } from "@/lib/quotes/providers/mock";
+import { fetchTradingViewQuotes } from "@/lib/quotes/providers/tradingview";
 import { fetchYahooQuotes } from "@/lib/quotes/providers/yahoo";
 import { fetchMassiveQuotes } from "@/lib/quotes/providers/massive";
 import type { QuotesApiResponse } from "@/lib/quotes/types";
@@ -10,11 +11,12 @@ function tickFromTime() {
   return Math.floor(Date.now() / 3000);
 }
 
-function envProvider(): "massive" | "yahoo" | "mock" {
+function envProvider(): "tradingview" | "massive" | "yahoo" | "mock" {
   const p = process.env.QUOTES_PROVIDER?.toLowerCase();
   if (p === "mock") return "mock";
   if (p === "massive") return "massive";
-  return "yahoo";
+  if (p === "yahoo") return "yahoo";
+  return "tradingview";
 }
 
 export async function resolveQuotes(): Promise<QuotesApiResponse> {
@@ -38,8 +40,17 @@ export async function resolveQuotes(): Promise<QuotesApiResponse> {
   }
 
   const fetcher =
-    provider === "massive" ? fetchMassiveQuotes : fetchYahooQuotes;
-  const source = provider === "massive" ? ("massive" as const) : ("yahoo" as const);
+    provider === "massive"
+      ? fetchMassiveQuotes
+      : provider === "yahoo"
+        ? fetchYahooQuotes
+        : fetchTradingViewQuotes;
+  const source =
+    provider === "massive"
+      ? ("massive" as const)
+      : provider === "yahoo"
+        ? ("yahoo" as const)
+        : ("tradingview" as const);
 
   try {
     const quotes = await fetcher();

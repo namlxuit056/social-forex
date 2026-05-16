@@ -9,7 +9,12 @@ export type QuoteRow = {
   changePct: number;
 };
 
-export type QuotesSource = "yahoo" | "massive" | "mock" | "mock_fallback";
+export type QuotesSource =
+  | "tradingview"
+  | "yahoo"
+  | "massive"
+  | "mock"
+  | "mock_fallback";
 
 export type QuotesWarningKey = "mockData" | "providerFallback";
 

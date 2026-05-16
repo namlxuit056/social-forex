@@ -112,7 +112,7 @@
     "block_tools_title": "Tools & Data",
     "block_tools_desc": "Position size, pivot, margin — with live quotes and continuously updating economic calendar.",
     "block_quotes_title": "Quotes & Analysis",
-    "block_quotes_desc": "Forex, gold, index prices from Yahoo Finance. TradingView charts embedded directly."
+    "block_quotes_desc": "Forex, gold, energy and crypto prices from TradingView, with charts embedded directly."
   },
   "schemaFaqHome": {
     "q1": "What is Social Forex?",
@@ -167,7 +167,7 @@
   },
   "quotes": {
     "title": "Live Quotes",
-    "description": "Forex, gold, index and crypto prices updated continuously. Data auto-refreshes every 15 seconds.",
+    "description": "Forex, gold, energy and crypto prices from TradingView, updated continuously. Data auto-refreshes every 15 seconds.",
     "groupMajor": "Major",
     "groupMinor": "Minor / Cross",
     "groupMetal": "Metals",
@@ -177,6 +177,7 @@
     "updated": "Updated:",
     "timezoneNote": "({tz})",
     "labelSource": "Source:",
+    "sourceTradingView": "TradingView",
     "sourceMassive": "Massive API",
     "sourceYahoo": "Yahoo Finance",
     "sourceMock": "Mock",
@@ -531,6 +532,7 @@
   "heatmap": {
     "title": "Heatmap — Currency Strength",
     "description": "Relative strength among 8 major currencies, calculated from {source} data. Values near 1 = strong base, near 0 = weak base.",
+    "source_tradingview": "TradingView (live)",
     "source_yahoo": "Yahoo Finance (live)",
     "source_massive": "Massive API (live)",
     "source_mock": "Simulated data"

@@ -124,7 +124,9 @@ export function LiveQuotesTable({
   const groups = ["major", "minor", "metal", "energy", "crypto"] as const;
 
   const sourceLabel =
-    source === "massive"
+    source === "tradingview"
+      ? t("sourceTradingView")
+      : source === "massive"
       ? t("sourceMassive")
       : source === "yahoo"
         ? t("sourceYahoo")
