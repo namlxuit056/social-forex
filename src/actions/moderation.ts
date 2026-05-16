@@ -6,12 +6,20 @@ import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { routing } from "@/i18n/routing";
 
 const reportSchema = z.object({
   postId: z.string().min(1).optional(),
   threadId: z.string().min(1).optional(),
+  signalCommentId: z.string().min(1).optional(),
   reason: z.string().min(3).max(500),
 });
+
+function revalidateSignalDetail(signalId: string) {
+  for (const l of routing.locales) {
+    revalidatePath(`/${l}/signals/${signalId}`);
+  }
+}
 
 export async function reportPost(
   _prev: { error?: string; ok?: boolean } | null,
@@ -25,18 +33,42 @@ export async function reportPost(
   const parsed = reportSchema.safeParse({
     postId: formData.get("postId") || undefined,
     threadId: formData.get("threadId") || undefined,
+    signalCommentId: formData.get("signalCommentId") || undefined,
     reason: formData.get("reason"),
   });
   if (!parsed.success) return { error: t("reportReasonInvalid") };
 
-  const { postId, threadId, reason } = parsed.data;
-  if (!postId && !threadId) return { error: t("reportMissingTarget") };
+  const { postId, threadId, signalCommentId, reason } = parsed.data;
+  const n = [postId, threadId, signalCommentId].filter(Boolean).length;
+  if (n === 0) return { error: t("reportMissingTarget") };
+  if (n > 1) return { error: t("reportOneTarget") };
+
+  if (signalCommentId) {
+    const c = await prisma.signalComment.findUnique({
+      where: { id: signalCommentId },
+      select: { id: true },
+    });
+    if (!c) return { error: t("reportTargetNotFound") };
+  } else if (postId) {
+    const p = await prisma.forumPost.findUnique({
+      where: { id: postId },
+      select: { id: true },
+    });
+    if (!p) return { error: t("reportTargetNotFound") };
+  } else if (threadId) {
+    const th = await prisma.forumThread.findUnique({
+      where: { id: threadId },
+      select: { id: true },
+    });
+    if (!th) return { error: t("reportTargetNotFound") };
+  }
 
   await prisma.forumReport.create({
     data: {
       reporterId: session.user.id,
       postId: postId ?? null,
       threadId: threadId ?? null,
+      signalCommentId: signalCommentId ?? null,
       reason,
     },
   });
@@ -94,6 +126,50 @@ export async function unhidePost(formData: FormData) {
   });
 
   revalidatePath(`/forum/${post.thread.category.slug}/thread/${post.thread.slug}`);
+}
+
+export async function hideSignalComment(formData: FormData) {
+  const session = await auth();
+  if (!session?.user?.id) redirect("/auth/signin");
+  if (!(await requireMod(session.user.id))) return;
+
+  const commentId = formData.get("signalCommentId");
+  if (typeof commentId !== "string" || !commentId) return;
+
+  const comment = await prisma.signalComment.findUnique({
+    where: { id: commentId },
+    select: { signalId: true },
+  });
+  if (!comment) return;
+
+  await prisma.signalComment.update({
+    where: { id: commentId },
+    data: { hidden: true },
+  });
+  revalidateSignalDetail(comment.signalId);
+  revalidatePath("/admin/reports");
+}
+
+export async function unhideSignalComment(formData: FormData) {
+  const session = await auth();
+  if (!session?.user?.id) redirect("/auth/signin");
+  if (!(await requireMod(session.user.id))) return;
+
+  const commentId = formData.get("signalCommentId");
+  if (typeof commentId !== "string" || !commentId) return;
+
+  const comment = await prisma.signalComment.findUnique({
+    where: { id: commentId },
+    select: { signalId: true },
+  });
+  if (!comment) return;
+
+  await prisma.signalComment.update({
+    where: { id: commentId },
+    data: { hidden: false },
+  });
+  revalidateSignalDetail(comment.signalId);
+  revalidatePath("/admin/reports");
 }
 
 export async function deleteThread(formData: FormData) {

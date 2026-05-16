@@ -70,6 +70,13 @@ export default async function AdminReportsPage({
           category: { select: { slug: true } },
         },
       },
+      signalComment: {
+        select: {
+          id: true,
+          body: true,
+          signal: { select: { id: true, symbol: true } },
+        },
+      },
     },
     take: 100,
   });
@@ -110,6 +117,10 @@ export default async function AdminReportsPage({
               : r.post?.thread
                 ? `/forum/${r.post.thread.category.slug}/thread/${r.post.thread.slug}`
                 : null;
+
+            const signalUrl = r.signalComment
+              ? `/signals/${r.signalComment.signal.id}`
+              : null;
 
             return (
               <Card key={r.id} className="border-border/60">
@@ -153,6 +164,17 @@ export default async function AdminReportsPage({
                         </em>
                       </span>
                     )}
+                    {r.signalComment && (
+                      <span>
+                        {t("reportTargetSignalComment")} (
+                        {t("signalSymbol")}:{" "}
+                        <strong>{r.signalComment.signal.symbol}</strong>
+                        ):{" "}
+                        <em className="line-clamp-1 max-w-md text-xs">
+                          {r.signalComment.body.slice(0, 120)}
+                        </em>
+                      </span>
+                    )}
                     {threadUrl && (
                       <Link
                         href={threadUrl}
@@ -160,6 +182,15 @@ export default async function AdminReportsPage({
                         target="_blank"
                       >
                         {t("viewThread")} →
+                      </Link>
+                    )}
+                    {signalUrl && (
+                      <Link
+                        href={signalUrl}
+                        className="text-primary hover:underline"
+                        target="_blank"
+                      >
+                        {t("viewSignal")} →
                       </Link>
                     )}
                   </div>
