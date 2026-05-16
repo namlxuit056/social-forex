@@ -7,7 +7,7 @@ import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
-import { isAtPinLimit, MAX_PINS } from "@/lib/signals/pin-signal-limit";
+import { isAtPinLimit } from "@/lib/signals/pin-signal-limit";
 
 // --- Comments ---
 

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Lock, MessageCircle, UserRound } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { auth } from "@/auth";
@@ -9,10 +9,13 @@ import { prisma } from "@/lib/prisma";
 import { isVipActive } from "@/lib/vip";
 import { routing } from "@/i18n/routing";
 import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { SignalArticleJsonLd } from "@/components/seo/signal-article-json-ld";
 import { SignalImageGallery } from "@/components/signals/signal-image-gallery";
 import { SignalNewsContext } from "@/components/signals/signal-news-context";
+import { TraderPerformanceCard } from "@/components/profile/trader-performance-card";
+import { FollowButton } from "@/components/social/follow-button";
 import {
   getNewsContextHours,
   getNewsContextWindow,
@@ -29,6 +32,7 @@ import { SignalReactions } from "./signal-reactions";
 import { SignalComments } from "./signal-comments";
 import { PinSignalButton } from "@/components/signals/pin-signal-button";
 import { isAtPinLimit } from "@/lib/signals/pin-signal-limit";
+import { cn } from "@/lib/utils";
 
 const SIGNAL_EDIT_WINDOW_MS = 48 * 60 * 60 * 1000;
 
@@ -64,6 +68,9 @@ export async function generateMetadata({
       direction: true,
       status: true,
       tier: true,
+      createdAt: true,
+      updatedAt: true,
+      author: { select: { name: true, email: true } },
       images: {
         take: 1,
         orderBy: { sortOrder: "asc" as const },
@@ -90,14 +97,17 @@ export async function generateMetadata({
   const languageUrls = Object.fromEntries(
     routing.locales.map((l) => [l, absoluteUrl(`/signals/${signalId}`, l)]),
   ) as Record<string, string>;
-  const ogImage = signal.images[0]?.url;
+  const ogImage = signal.tier === "FREE" ? signal.images[0]?.url : undefined;
   const imageAlt = t("detailMetaOgImageAlt", {
     symbol: signal.symbol,
     direction: signal.direction,
   });
+  const authorName = signal.author.name ?? signal.author.email ?? "Social Forex";
   return {
     title,
     description,
+    authors: [{ name: authorName }],
+    keywords: [signal.symbol, signal.direction, statusText, tierText, "forex signal"],
     alternates: {
       canonical,
       languages: {
@@ -111,6 +121,11 @@ export async function generateMetadata({
       title,
       description,
       url: canonical,
+      publishedTime: signal.createdAt.toISOString(),
+      modifiedTime: signal.updatedAt.toISOString(),
+      authors: [authorName],
+      section: "Signals",
+      tags: [signal.symbol, signal.direction, statusText, tierText],
       ...(ogImage ? { images: [{ url: ogImage, alt: imageAlt }] } : {}),
     },
     twitter: {
@@ -132,6 +147,7 @@ export default async function SignalDetailPage({
   const { locale, signalId } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("signals");
+  const tProfile = await getTranslations("profile");
 
   const session = await auth();
   const userId = session?.user?.id;
@@ -197,8 +213,7 @@ export default async function SignalDetailPage({
   const editDeadline = new Date(
     signal.createdAt.getTime() + SIGNAL_EDIT_WINDOW_MS,
   );
-  const editLogs =
-    isAuthor && signal.editLogs.length > 0 ? signal.editLogs : [];
+  const editLogs = !masked && signal.editLogs.length > 0 ? signal.editLogs : [];
 
   const likes = signal.reactions.filter((r) => r.type === "LIKE").length;
   const dislikes = signal.reactions.filter((r) => r.type === "DISLIKE").length;
@@ -206,17 +221,28 @@ export default async function SignalDetailPage({
     ? signal.reactions.find((r) => r.userId === userId)?.type ?? null
     : null;
 
-  const [existingPin, pinCount] = userId
+  const [existingPin, pinCount, following] = userId
     ? await Promise.all([
         prisma.userPinnedSignal.findUnique({
           where: { userId_signalId: { userId, signalId } },
           select: { id: true },
         }),
         prisma.userPinnedSignal.count({ where: { userId } }),
+        prisma.userFollow.findUnique({
+          where: {
+            followerId_followingId: {
+              followerId: userId,
+              followingId: signal.authorId,
+            },
+          },
+          select: { id: true },
+        }),
       ])
-    : [null, 0];
+    : [null, 0, null];
   const isPinned = !!existingPin;
   const atPinLimit = isAtPinLimit(pinCount);
+  const canContactAuthor = !!userId && !isAuthor;
+  const isFollowingAuthor = !!following;
 
   const comments = signal.comments.map((c) => ({
     id: c.id,
@@ -302,6 +328,38 @@ export default async function SignalDetailPage({
             </div>
 
             <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+              {!isAuthor ? (
+                <Link
+                  href={`/u/${signal.authorId}`}
+                  className={cn(
+                    buttonVariants({ variant: "outline", size: "sm" }),
+                    "h-9 gap-1.5 text-[0.8rem]",
+                  )}
+                  aria-label={t("authorProfileAria", { name: authorName })}
+                >
+                  <UserRound className="size-3.5" aria-hidden />
+                  <span className="hidden sm:inline">{t("authorProfile")}</span>
+                </Link>
+              ) : null}
+              {canContactAuthor ? (
+                <>
+                  <FollowButton
+                    userId={signal.authorId}
+                    isFollowing={isFollowingAuthor}
+                    className="h-9"
+                  />
+                  <Link
+                    href={`/messages/${signal.authorId}`}
+                    className={cn(
+                      buttonVariants({ variant: "outline", size: "sm" }),
+                      "h-9 gap-1.5 text-[0.8rem]",
+                    )}
+                  >
+                    <MessageCircle className="size-3.5" aria-hidden />
+                    <span className="hidden sm:inline">{t("messageAuthor")}</span>
+                  </Link>
+                </>
+              ) : null}
               <SignalReactions
                 signalId={signalId}
                 likes={likes}
@@ -342,7 +400,28 @@ export default async function SignalDetailPage({
           />
 
           {masked ? (
-            <p className="text-sm text-amber-400/90">{t("maskedMessage")}</p>
+            <div className="flex flex-col gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-start gap-3">
+                <Lock className="mt-0.5 size-4 shrink-0 text-amber-500" aria-hidden />
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-foreground">
+                    {t("maskedTitle")}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {t("maskedMessage")}
+                  </p>
+                </div>
+              </div>
+              <Link
+                href="/upgrade-vip"
+                className={cn(
+                  buttonVariants({ variant: "default", size: "sm" }),
+                  "min-h-9 w-full sm:w-auto",
+                )}
+              >
+                {t("upgradeVipCta")}
+              </Link>
+            </div>
           ) : (
             <>
               <section
@@ -483,12 +562,19 @@ export default async function SignalDetailPage({
         />
       ) : null}
 
+      <TraderPerformanceCard
+        userId={signal.authorId}
+        signalsListHref={`/signals?author=${encodeURIComponent(authorName)}`}
+        signalsCtaLabel={tProfile("traderStats.viewSignalsByAuthor")}
+      />
+
       <SignalComments
         signalId={signalId}
         comments={comments}
         loggedIn={!!userId}
         isMod={isMod}
         currentUserId={userId}
+        locale={locale}
       />
 
       <Disclaimer variant="compact" />

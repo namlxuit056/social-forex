@@ -1,15 +1,18 @@
 "use client";
 
 import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { useTranslations } from "next-intl";
+import { MessageCircle } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { addSignalComment } from "@/actions/signal-social";
 import { hideSignalComment, unhideSignalComment } from "@/actions/moderation";
 import { ReportSignalCommentButton } from "@/components/signals/report-signal-comment-button";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 interface Comment {
   id: string;
@@ -26,6 +29,18 @@ interface Props {
   loggedIn: boolean;
   isMod: boolean;
   currentUserId?: string;
+  locale: string;
+}
+
+function CommentSubmitButton() {
+  const t = useTranslations("signals");
+  const { pending } = useFormStatus();
+
+  return (
+    <Button type="submit" size="sm" disabled={pending}>
+      {pending ? t("commentPosting") : t("comment")}
+    </Button>
+  );
 }
 
 export function SignalComments({
@@ -34,9 +49,10 @@ export function SignalComments({
   loggedIn,
   isMod,
   currentUserId,
+  locale,
 }: Props) {
   const t = useTranslations("signals");
-  const [state, formAction, isPending] = useActionState(
+  const [state, formAction] = useActionState(
     addSignalComment,
     null,
   );
@@ -50,7 +66,22 @@ export function SignalComments({
       </CardHeader>
       <CardContent className="space-y-4">
         {comments.length === 0 && (
-          <p className="text-sm text-muted-foreground">{t("noComments")}</p>
+          <div className="rounded-lg border border-dashed border-border/70 bg-muted/15 p-4">
+            <div className="flex gap-3">
+              <MessageCircle
+                className="mt-0.5 size-4 shrink-0 text-muted-foreground"
+                aria-hidden
+              />
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-foreground">
+                  {t("noCommentsTitle")}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {loggedIn ? t("noCommentsHint") : t("noCommentsLoginHint")}
+                </p>
+              </div>
+            </div>
+          </div>
         )}
 
         {comments.map((c) => {
@@ -76,7 +107,7 @@ export function SignalComments({
                   {c.authorLabel}
                 </Link>
                 <span>·</span>
-                <span>{new Date(c.createdAt).toLocaleString()}</span>
+                <span>{new Date(c.createdAt).toLocaleString(locale)}</span>
                 {c.hidden && isMod && (
                   <Badge variant="secondary" className="text-[10px]">
                     {t("commentHiddenBadge")}
@@ -153,14 +184,18 @@ export function SignalComments({
             {state?.error && (
               <p className="text-sm text-destructive">{state.error}</p>
             )}
-            <Button type="submit" size="sm" disabled={isPending}>
-              {isPending ? "…" : t("comment")}
-            </Button>
+            <CommentSubmitButton />
           </form>
         ) : (
-          <p className="text-sm text-muted-foreground">
+          <Link
+            href="/auth/signin"
+            className={cn(
+              buttonVariants({ variant: "outline", size: "sm" }),
+              "min-h-9",
+            )}
+          >
             {t("loginToComment")}
-          </p>
+          </Link>
         )}
       </CardContent>
     </Card>

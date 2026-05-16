@@ -24,7 +24,7 @@ export function SignalReactions({
   const t = useTranslations("signals");
 
   return (
-    <div className="flex items-center gap-2 border-t border-border/40 pt-4">
+    <div className="flex items-center gap-2">
       <form action={toggleSignalReaction}>
         <input type="hidden" name="signalId" value={signalId} />
         <input type="hidden" name="type" value="LIKE" />
@@ -33,6 +33,8 @@ export function SignalReactions({
           size="sm"
           variant="outline"
           disabled={!loggedIn}
+          aria-label={t("like")}
+          title={loggedIn ? t("like") : t("loginToReact")}
           className={cn(
             "h-8 gap-1.5 text-xs",
             userReaction === "LIKE" &&
@@ -51,6 +53,8 @@ export function SignalReactions({
           size="sm"
           variant="outline"
           disabled={!loggedIn}
+          aria-label={t("dislike")}
+          title={loggedIn ? t("dislike") : t("loginToReact")}
           className={cn(
             "h-8 gap-1.5 text-xs",
             userReaction === "DISLIKE" &&
@@ -63,7 +67,7 @@ export function SignalReactions({
       </form>
       {!loggedIn && (
         <span className="text-xs text-muted-foreground">
-          {t("loginToComment")}
+          {t("loginToReact")}
         </span>
       )}
     </div>
