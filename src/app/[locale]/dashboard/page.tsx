@@ -4,8 +4,9 @@ import {
   BarChart3,
   BookOpen,
   ClipboardList,
+  MessageCircle,
   MessageSquare,
-  Radio,
+  PlusCircle,
   Trophy,
   Wrench,
 } from "lucide-react";
@@ -87,16 +88,63 @@ export default async function DashboardPage({
   const winRate = totalClosed > 0 ? Math.round((wins / totalClosed) * 1000) / 10 : null;
 
   const quickLinks = [
-    { href: "/quotes" as const, titleKey: "nav.quotes", desc: "—", icon: BarChart3 },
-    { href: "/signals" as const, titleKey: "nav.signals", desc: "—", icon: Radio },
-    { href: "/forum" as const, titleKey: "nav.forum", desc: "—", icon: MessageSquare },
-    { href: "/leaderboard" as const, titleKey: "nav.leaderboard", desc: "—", icon: Trophy },
-    { href: "/journal" as const, titleKey: "nav.journal", desc: "—", icon: ClipboardList },
-    { href: "/academy" as const, titleKey: "nav.academy", desc: "—", icon: BookOpen },
-    { href: "/tools" as const, titleKey: "nav.tools", desc: "—", icon: Wrench },
+    {
+      href: "/signals" as const,
+      title: t("actionPostSignal"),
+      desc: t("actionPostSignalDesc"),
+      icon: PlusCircle,
+      tone: "primary",
+    },
+    {
+      href: "/desk" as const,
+      title: t("actionOpenDesk"),
+      desc: t("actionOpenDeskDesc"),
+      icon: BarChart3,
+      tone: "default",
+    },
+    {
+      href: "/journal" as const,
+      title: t("actionJournal"),
+      desc: t("actionJournalDesc"),
+      icon: ClipboardList,
+      tone: "default",
+    },
+    {
+      href: "/messages" as const,
+      title: t("actionMessages"),
+      desc: unreadDm > 0 ? t("actionMessagesUnread", { count: unreadDm }) : t("actionMessagesDesc"),
+      icon: MessageCircle,
+      tone: unreadDm > 0 ? "primary" : "default",
+    },
+    {
+      href: "/leaderboard" as const,
+      title: t("actionPerformance"),
+      desc: t("actionPerformanceDesc"),
+      icon: Trophy,
+      tone: "default",
+    },
+    {
+      href: "/academy" as const,
+      title: t("actionAcademy"),
+      desc: t("actionAcademyDesc"),
+      icon: BookOpen,
+      tone: "default",
+    },
+    {
+      href: "/forum" as const,
+      title: t("actionForum"),
+      desc: t("actionForumDesc"),
+      icon: MessageSquare,
+      tone: "default",
+    },
+    {
+      href: "/tools" as const,
+      title: t("actionTools"),
+      desc: t("actionToolsDesc"),
+      icon: Wrench,
+      tone: "default",
+    },
   ];
-
-  const tn = await getTranslations("nav");
 
   return (
     <div className="space-y-10">
@@ -240,24 +288,61 @@ export default async function DashboardPage({
         </Suspense>
       </section>
 
-      <section>
-        <h2 className="mb-4 font-heading text-lg font-medium text-foreground">
-          {t("shortcuts")}
-        </h2>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <section className="space-y-4">
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className="font-heading text-lg font-medium text-foreground">
+              {t("shortcuts")}
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {t("shortcutsHint")}
+            </p>
+          </div>
+          <Link
+            href="/desk"
+            className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+          >
+            {t("openDesk")}
+          </Link>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {quickLinks.map((item) => (
-            <Link key={item.href} href={item.href}>
-              <Card className="h-full transition hover:ring-1 hover:ring-primary/30">
+            <Link
+              key={item.href}
+              href={item.href}
+              className="group rounded-xl outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            >
+              <Card
+                className={cn(
+                  "h-full border-border/60 bg-card/70 transition hover:bg-card hover:ring-1 hover:ring-primary/30",
+                  item.tone === "primary" && "border-primary/25 bg-primary/8",
+                )}
+              >
                 <CardHeader className="flex flex-row items-start gap-3 space-y-0">
-                  <div className="rounded-lg bg-muted p-2 ring-1 ring-border">
-                    <item.icon className="size-4 text-primary" aria-hidden />
+                  <div
+                    className={cn(
+                      "rounded-lg bg-muted p-2 ring-1 ring-border",
+                      item.tone === "primary" && "bg-primary/15 ring-primary/25",
+                    )}
+                  >
+                    <item.icon
+                      className={cn(
+                        "size-4 text-primary",
+                        item.tone !== "primary" && "text-muted-foreground group-hover:text-primary",
+                      )}
+                      aria-hidden
+                    />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <CardTitle className="text-base">
-                      {tn(item.titleKey.split(".")[1] as "quotes" | "signals" | "forum" | "leaderboard" | "journal" | "academy" | "tools")}
-                    </CardTitle>
+                    <CardTitle className="text-base">{item.title}</CardTitle>
+                    <CardDescription className="mt-1 text-xs leading-relaxed">
+                      {item.desc}
+                    </CardDescription>
                   </div>
-                  <ArrowRight className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+                  <ArrowRight
+                    className="size-4 shrink-0 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-primary"
+                    aria-hidden
+                  />
                 </CardHeader>
               </Card>
             </Link>

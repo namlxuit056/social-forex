@@ -211,7 +211,112 @@ export function LiveQuotesTable({
           return (
             <section key={g}>
               <h3 className="mb-2 text-sm font-medium text-primary">{label}</h3>
-              <div className="overflow-x-auto rounded-lg border border-border">
+              <div className="grid gap-2 md:hidden">
+                {subset.map((r) => (
+                  <article
+                    key={r.symbol}
+                    className={cn(
+                      "rounded-lg border border-border bg-card/60 p-3 shadow-xs",
+                      isFavorite(r.symbol) && "border-primary/30 bg-primary/7",
+                    )}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-base font-semibold text-foreground">
+                            {r.symbol}
+                          </span>
+                          {isFavorite(r.symbol) ? (
+                            <Star
+                              className="size-3.5 text-amber-400"
+                              fill="currentColor"
+                              aria-hidden
+                            />
+                          ) : null}
+                        </div>
+                        <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                          {r.name}
+                        </p>
+                      </div>
+                      <span
+                        className={cn(
+                          "rounded-md px-2 py-1 font-mono text-xs font-medium",
+                          r.changePct >= 0
+                            ? "bg-primary/12 text-primary"
+                            : "bg-destructive/12 text-destructive",
+                        )}
+                      >
+                        {r.changePct >= 0 ? "+" : ""}
+                        {r.changePct}%
+                      </span>
+                    </div>
+
+                    <div className="mt-3 grid grid-cols-2 gap-2">
+                      <div className="rounded-md bg-muted/35 px-3 py-2">
+                        <p className="text-[10px] uppercase text-muted-foreground">
+                          {t("colBid")}
+                        </p>
+                        <p className="mt-0.5 font-mono text-sm font-medium text-primary">
+                          {r.bid}
+                        </p>
+                      </div>
+                      <div className="rounded-md bg-muted/35 px-3 py-2">
+                        <p className="text-[10px] uppercase text-muted-foreground">
+                          {t("colAsk")}
+                        </p>
+                        <p className="mt-0.5 font-mono text-sm font-medium text-chart-3">
+                          {r.ask}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 flex items-center justify-between gap-2 border-t border-border/50 pt-2">
+                      <div className="flex items-center gap-0.5">
+                        <Link
+                          href={`/chart?symbol=${encodeURIComponent(r.symbol)}`}
+                          aria-label={t("rowOpenChart", { symbol: r.symbol })}
+                          className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "size-8")}
+                        >
+                          <LineChart className="size-4" />
+                        </Link>
+                        <Link
+                          href={calendarHrefForSymbol(r.symbol)}
+                          aria-label={t("rowOpenCalendar", { symbol: r.symbol })}
+                          className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "size-8")}
+                        >
+                          <Calendar className="size-4" />
+                        </Link>
+                        <Link
+                          href={`/signals?symbol=${encodeURIComponent(r.symbol)}`}
+                          aria-label={t("rowOpenSignals", { symbol: r.symbol })}
+                          className={cn(buttonVariants({ variant: "ghost", size: "icon" }), "size-8")}
+                        >
+                          <Radio className="size-4" />
+                        </Link>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className={cn("size-8", isFavorite(r.symbol) && "text-amber-400")}
+                        aria-label={
+                          isFavorite(r.symbol)
+                            ? t("rowUnpinWatchlist", { symbol: r.symbol })
+                            : t("rowPinWatchlist", { symbol: r.symbol })
+                        }
+                        aria-pressed={isFavorite(r.symbol)}
+                        onClick={() => handlePin(r.symbol)}
+                      >
+                        <Star
+                          className="size-4"
+                          fill={isFavorite(r.symbol) ? "currentColor" : "none"}
+                        />
+                      </Button>
+                    </div>
+                  </article>
+                ))}
+              </div>
+              <div className="hidden overflow-x-auto rounded-lg border border-border md:block">
                 <table className="w-full min-w-[720px] text-left text-sm">
                   <thead className="bg-muted/50 text-muted-foreground">
                     <tr>

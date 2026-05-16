@@ -1,0 +1,99 @@
+{
+  "story": "Cho phép user pin signal lên profile",
+  "tasks": [
+    {
+      "id": "T001",
+      "title": "Thêm model UserPinnedSignal vào Prisma schema",
+      "description": "Thêm model `UserPinnedSignal` vào `prisma/schema.prisma` với các field: id (cuid), userId, signalId, sortOrder (default 0), createdAt. Thêm relation `pinnedSignals UserPinnedSignal[]` vào model `User` và `pinnedBy UserPinnedSignal[]` vào model `Signal`. Đặt `onDelete: Cascade` trên cả hai FK. Thêm `@@unique([userId, signalId])` và `@@index([userId, sortOrder])`.",
+      "files": ["prisma/schema.prisma"],
+      "estimate_hours": 0.5,
+      "depends_on": []
+    },
+    {
+      "id": "T002",
+      "title": "Tạo migration SQL cho bảng UserPinnedSignal",
+      "description": "Tạo file migration tại `prisma/migrations/20260516120000_user_pinned_signals/migration.sql` với SQL CREATE TABLE, CREATE UNIQUE INDEX, CREATE INDEX, và 2 ALTER TABLE ADD CONSTRAINT (FK tới User và Signal với ON DELETE CASCADE). Chạy `npm run db:migrate` để apply migration lên DB local.",
+      "files": [
+        "prisma/migrations/20260516120000_user_pinned_signals/migration.sql"
+      ],
+      "estimate_hours": 0.5,
+      "depends_on": ["T001"]
+    },
+    {
+      "id": "T003",
+      "title": "Regenerate Prisma client sau migration",
+      "description": "Chạy `npm run db:generate` để regenerate Prisma client tại `src/generated/prisma/` bao gồm type `UserPinnedSignal` và các method `prisma.userPinnedSignal.*`. Verify TypeScript không còn báo lỗi với model mới.",
+      "files": ["src/generated/prisma/"],
+      "estimate_hours": 0.25,
+      "depends_on": ["T002"]
+    },
+    {
+      "id": "T004",
+      "title": "Tạo utility pin-signal-limit và unit test",
+      "description": "Tạo `src/lib/signals/pin-signal-limit.ts` export `MAX_PINS = 6` và `isAtPinLimit(count: number): boolean`. Tạo `src/lib/signals/pin-signal-limit.test.ts` với 3 test cases: dưới limit trả false, đúng bằng limit trả true, vượt limit trả true. Chạy `npx vitest run src/lib/signals/pin-signal-limit.test.ts` để xác nhận pass.",
+      "files": [
+        "src/lib/signals/pin-signal-limit.ts",
+        "src/lib/signals/pin-signal-limit.test.ts"
+      ],
+      "estimate_hours": 0.5,
+      "depends_on": ["T003"]
+    },
+    {
+      "id": "T005",
+      "title": "Thêm i18n keys cho tính năng pin signal",
+      "description": "Thêm vào `messages/en.json` và `messages/vi.json`: key `errors.pinLimitReached` (en: 'You can pin up to 6 signals.' / vi: 'Bạn chỉ có thể ghim tối đa 6 tín hiệu.'), và 6 key dưới namespace `profile`: `pinnedSignals`, `pinnedSignalsEmpty`, `pinSignal`, `unpinSignal`, `pinLimitReachedHint` (có param `{max}`), `pinSignalAria`, `unpinSignalAria` (có param `{symbol}`). Hai file phải sync nhau.",
+      "files": ["messages/en.json", "messages/vi.json"],
+      "estimate_hours": 0.5,
+      "depends_on": ["T003"]
+    },
+    {
+      "id": "T006",
+      "title": "Thêm server action togglePinSignal",
+      "description": "Thêm function `togglePinSignal` vào `src/actions/signal-social.ts`. Flow: auth() → redirect nếu chưa login; rateLimit('sig-pin:{userId}', 20, 60000); zod validate signalId; kiểm tra signal tồn tại; findUnique existing pin → nếu có thì delete + return {ok:true, pinned:false}; nếu không: count pins, nếu >= MAX_PINS return error 'pinLimitReached'; create với sortOrder=count (try/catch P2002); revalidatePath('/u/{userId}'). Import MAX_PINS từ pin-signal-limit.ts.",
+      "files": [
+        "src/actions/signal-social.ts",
+        "src/lib/signals/pin-signal-limit.ts"
+      ],
+      "estimate_hours": 1.5,
+      "depends_on": ["T004", "T005"]
+    },
+    {
+      "id": "T007",
+      "title": "Tạo client component PinSignalButton",
+      "description": "Tạo `src/components/signals/pin-signal-button.tsx` (\"use client\"). Props: signalId, signalSymbol, isPinned, loggedIn, atLimit. Render null nếu !loggedIn. Dùng native <form action={togglePinSignal}>, hidden input signalId, Button variant='outline' size='sm' với icon Pin/PinOff (lucide-react). Disabled khi !isPinned && atLimit. Class amber khi isPinned. aria-label và title từ i18n keys profile.*.",
+      "files": ["src/components/signals/pin-signal-button.tsx"],
+      "estimate_hours": 1,
+      "depends_on": ["T005", "T006"]
+    },
+    {
+      "id": "T008",
+      "title": "Tạo server component PinnedSignalsSection",
+      "description": "Tạo `src/components/profile/pinned-signals-section.tsx` (async server component). Props: profileUserId, viewerVipUntil, viewerUserId. Query `prisma.userPinnedSignal.findMany` với orderBy sortOrder asc, take 6, select signal fields (id, symbol, direction, tier, status, entry). Return null nếu pins.length === 0. Render <section> với heading 'pinnedSignals'. Mỗi item là Link tới /signals/{id}, hiện symbol, direction badge, tier badge. Ẩn entry nếu VIP signal và viewer không phải VIP và không phải chủ profile.",
+      "files": ["src/components/profile/pinned-signals-section.tsx"],
+      "estimate_hours": 1.5,
+      "depends_on": ["T003", "T005"]
+    },
+    {
+      "id": "T009",
+      "title": "Tích hợp PinSignalButton vào signal detail page",
+      "description": "Trong `src/app/[locale]/signals/[signalId]/page.tsx`: sau khi đã fetch signal, thêm Promise.all query `prisma.userPinnedSignal.findUnique({where:{userId_signalId:{userId,signalId}}})` và `prisma.userPinnedSignal.count({where:{userId}})` — chỉ khi userId tồn tại. Tính `atPinLimit = pinCount >= MAX_PINS`. Render `<PinSignalButton>` trong card actions, bên cạnh reactions, với các props isPinned, loggedIn, atLimit.",
+      "files": [
+        "src/app/[locale]/signals/[signalId]/page.tsx",
+        "src/components/signals/pin-signal-button.tsx"
+      ],
+      "estimate_hours": 1,
+      "depends_on": ["T006", "T007"]
+    },
+    {
+      "id": "T010",
+      "title": "Tích hợp PinnedSignalsSection vào public profile page",
+      "description": "Trong `src/app/[locale]/u/[userId]/page.tsx`: thêm query viewer's VIP (`prisma.user.findUnique({where:{id:session.user.id}, select:{vipUntil:true}})`) — chỉ khi session tồn tại. Render `<PinnedSignalsSection profileUserId={userId} viewerVipUntil={viewerDbUser?.vipUntil} viewerUserId={session?.user?.id}/>` ngay sau TraderPerformanceCard, trước phần follower grid.",
+      "files": [
+        "src/app/[locale]/u/[userId]/page.tsx",
+        "src/components/profile/pinned-signals-section.tsx"
+      ],
+      "estimate_hours": 1,
+      "depends_on": ["T006", "T008"]
+    }
+  ]
+}

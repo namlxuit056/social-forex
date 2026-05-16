@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { Bell, Shield } from "lucide-react";
+import { Bell, BookOpen, ChartCandlestick, MessageSquare, Shield, Wrench } from "lucide-react";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { MobileNav } from "@/components/layout/mobile-nav";
@@ -11,29 +11,41 @@ import { cn } from "@/lib/utils";
 import { prisma } from "@/lib/prisma";
 
 const primaryNavKeys = [
-  { href: "/desk", key: "desk" },
+  { href: "/desk", key: "desk", icon: ChartCandlestick },
+  { href: "/signals", key: "signals", icon: Shield },
+  { href: "/forum", key: "forum", icon: MessageSquare },
+  { href: "/academy", key: "academy", icon: BookOpen },
+] as const;
+
+const marketNavKeys = [
   { href: "/quotes", key: "quotes" },
   { href: "/calendar", key: "calendar" },
   { href: "/chart", key: "chart" },
   { href: "/tools", key: "tools" },
-  { href: "/signals", key: "signals" },
-  { href: "/forum", key: "forum" },
-] as const;
-
-const secondaryNavKeys = [
-  { href: "/start", key: "startHere" },
   { href: "/heatmap", key: "heatmap" },
   { href: "/sentiment", key: "sentiment" },
+] as const;
+
+const communityNavKeys = [
   { href: "/leaderboard", key: "leaderboard" },
   { href: "/journal", key: "journal" },
   { href: "/backtest", key: "backtest" },
-  { href: "/academy", key: "academy" },
+  { href: "/messages", key: "messages" },
+  { href: "/forum/search", key: "searchTopics" },
+] as const;
+
+const learningNavKeys = [
+  { href: "/start", key: "startHere" },
   { href: "/webinar", key: "webinar" },
   { href: "/resources", key: "resources" },
   { href: "/brokers", key: "brokers" },
-  { href: "/messages", key: "messages" },
   { href: "/partners", key: "partners" },
-  { href: "/forum/search", key: "searchTopics" },
+] as const;
+
+const secondaryNavGroups = [
+  { icon: Wrench, items: marketNavKeys },
+  { icon: MessageSquare, items: communityNavKeys },
+  { icon: BookOpen, items: learningNavKeys },
 ] as const;
 
 export async function SiteHeader() {
@@ -71,13 +83,14 @@ export async function SiteHeader() {
         </Link>
 
         {/* Desktop primary nav */}
-        <nav className="ml-2 hidden items-center gap-0.5 lg:flex">
+        <nav className="ml-2 hidden items-center gap-1 lg:flex">
           {primaryNavKeys.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="rounded-md px-2.5 py-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
+              <item.icon className="size-3.5" aria-hidden />
               {t(item.key)}
             </Link>
           ))}
@@ -156,13 +169,13 @@ export async function SiteHeader() {
         </div>
       </div>
 
-      {/* Mobile & tablet: menu luôn thấy (cuộn ngang) */}
+      {/* Mobile & tablet: one compact rail for the high-frequency routes. */}
       <div className="border-t border-border/40 bg-muted/25 lg:hidden">
         <nav
           aria-label={t("scrollPrimaryAria")}
           className="scrollbar-none -mx-4 flex gap-1.5 overflow-x-auto px-4 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
-          {primaryNavKeys.map((item) => (
+          {[...primaryNavKeys, ...marketNavKeys.slice(0, 4)].map((item) => (
             <Link
               key={item.href}
               href={item.href}
@@ -172,33 +185,27 @@ export async function SiteHeader() {
             </Link>
           ))}
         </nav>
-        <nav
-          aria-label={t("scrollSecondaryAria")}
-          className="scrollbar-none -mx-4 flex gap-1 overflow-x-auto border-t border-border/30 px-4 py-1.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        >
-          {secondaryNavKeys.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="shrink-0 rounded-md px-2.5 py-1 text-[11px] font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground"
-            >
-              {t(item.key)}
-            </Link>
-          ))}
-        </nav>
       </div>
 
       {/* Desktop secondary nav */}
       <div className="hidden border-t border-border/40 bg-muted/30 lg:block">
-        <div className="mx-auto flex max-w-7xl items-center gap-0.5 px-4 py-1">
-          {secondaryNavKeys.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="rounded px-2 py-0.5 text-xs text-muted-foreground/80 transition-colors hover:bg-muted hover:text-foreground"
+        <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-1">
+          {secondaryNavGroups.map((group, groupIndex) => (
+            <div
+              key={groupIndex}
+              className="flex min-w-0 items-center gap-0.5 border-r border-border/50 pr-4 last:border-r-0 last:pr-0"
             >
-              {t(item.key)}
-            </Link>
+              <group.icon className="mr-1 size-3.5 shrink-0 text-muted-foreground/60" aria-hidden />
+              {group.items.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className="rounded px-2 py-0.5 text-xs text-muted-foreground/80 transition-colors hover:bg-muted hover:text-foreground"
+                >
+                  {t(item.key)}
+                </Link>
+              ))}
+            </div>
           ))}
         </div>
       </div>

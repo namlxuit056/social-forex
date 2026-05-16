@@ -379,8 +379,58 @@ export function EconomicCalendar({
           ` · ${Array.from(selectedCurrencies).join(", ")}`}
       </p>
 
+      {/* Mobile cards */}
+      <div className="grid gap-2 md:hidden">
+        {rows.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-border/80 bg-muted/15 px-4 py-8 text-center text-sm text-muted-foreground">
+            {t("emptyFilter")}
+          </div>
+        ) : (
+          rows.map(({ ev, status }) => {
+            const values =
+              [ev.forecast, ev.previous, ev.actual].filter(Boolean).join(" · ") ||
+              "—";
+            return (
+              <article
+                key={ev.id}
+                className={cn(
+                  "rounded-xl border border-border bg-card/60 p-3",
+                  status === "live" && "border-primary/35 bg-primary/7",
+                )}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-mono text-xs text-muted-foreground">
+                        {formatInTimeZone(new Date(ev.timeUtc), tz, "MMM d HH:mm")}
+                      </span>
+                      <span className="rounded bg-muted px-2 py-0.5 font-mono text-xs font-medium text-foreground">
+                        {ev.currency}
+                      </span>
+                    </div>
+                    <h3 className="mt-2 text-sm font-medium leading-snug text-foreground">
+                      {ev.title}
+                    </h3>
+                  </div>
+                  <div className="flex shrink-0 flex-col items-end gap-1">
+                    {statusBadgeRow(status)}
+                    {impactBadge(ev.impact)}
+                  </div>
+                </div>
+                <div className="mt-3 rounded-md bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
+                  <span className="font-medium text-foreground/80">
+                    {t("tableValues")}:
+                  </span>{" "}
+                  {values}
+                </div>
+              </article>
+            );
+          })
+        )}
+      </div>
+
       {/* Table */}
-      <div className="overflow-x-auto rounded-xl border border-border">
+      <div className="hidden overflow-x-auto rounded-xl border border-border md:block">
         <table className="w-full min-w-[800px] text-left text-sm">
           <thead className="bg-muted/50 text-muted-foreground">
             <tr>
