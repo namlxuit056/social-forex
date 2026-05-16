@@ -103,6 +103,8 @@ export function AiAnalysisPanel({ symbol }: Props) {
             stopLoss: s.stopLoss,
             takeProfit: s.takeProfit,
             confidence: s.confidence,
+            qualityScore: s.qualityScore,
+            tradeChecklist: s.tradeChecklist,
             reasoning: s.reasoning,
           }),
         });

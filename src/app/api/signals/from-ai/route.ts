@@ -15,6 +15,17 @@ const fromAiSignalSchema = z.object({
   stopLoss: z.coerce.number().positive().optional(),
   takeProfit: z.coerce.number().positive().optional(),
   confidence: z.number().min(1).max(5).optional(),
+  qualityScore: z.number().min(0).max(100).optional(),
+  tradeChecklist: z
+    .array(
+      z.object({
+        label: z.string().min(3).max(80),
+        status: z.enum(["pass", "warn", "fail"]),
+        detail: z.string().min(3).max(180),
+      }),
+    )
+    .max(6)
+    .optional(),
   reasoning: z.string().min(10).max(1500),
 });
 
@@ -44,8 +55,13 @@ export async function POST(req: NextRequest) {
   }
 
   const data = parsed.data;
+  const checklist =
+    data.tradeChecklist?.map(
+      (item) => `- [${item.status.toUpperCase()}] ${item.label}: ${item.detail}`,
+    ) ?? [];
   const notes = [
-    `AI Forex Expert${data.confidence ? ` (confidence: ${data.confidence}/5)` : ""}`,
+    `AI Forex Expert${data.confidence ? ` (confidence: ${data.confidence}/5)` : ""}${data.qualityScore !== undefined ? ` · quality: ${data.qualityScore}/100` : ""}`,
+    ...(checklist.length > 0 ? ["", "Trade checklist:", ...checklist] : []),
     "",
     data.reasoning,
   ].join("\n");

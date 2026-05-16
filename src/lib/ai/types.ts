@@ -7,6 +7,17 @@ export const aiSuggestionSchema = z.object({
   stopLoss: z.number().positive(),
   takeProfit: z.number().positive(),
   confidence: z.number().min(1).max(5),
+  qualityScore: z.number().min(0).max(100),
+  tradeChecklist: z
+    .array(
+      z.object({
+        label: z.string().min(3).max(80),
+        status: z.enum(["pass", "warn", "fail"]),
+        detail: z.string().min(3).max(180),
+      }),
+    )
+    .min(4)
+    .max(6),
   reasoning: z.string().min(10).max(1500),
   keyLevels: z
     .object({

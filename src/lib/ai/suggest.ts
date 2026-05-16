@@ -5,6 +5,7 @@ import { SYSTEM_PROMPT, buildUserPrompt } from "@/lib/ai/prompt";
 import type { TradingViewTechnicalContext } from "@/lib/ai/tradingview-context";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
+const CACHE_SCHEMA_VERSION = "checklist-v1";
 const cache = new Map<string, { suggestion: AiSuggestion; at: number }>();
 
 type AiProvider = "groq" | "openai";
@@ -54,7 +55,8 @@ export async function getAiSuggestion(
   quote: QuoteRow,
   tradingViewContext?: TradingViewTechnicalContext | null,
 ): Promise<AiSuggestion> {
-  const cached = cache.get(quote.symbol);
+  const cacheKey = `${CACHE_SCHEMA_VERSION}:${quote.symbol}`;
+  const cached = cache.get(cacheKey);
   if (cached && Date.now() - cached.at < CACHE_TTL_MS) {
     return cached.suggestion;
   }
@@ -75,7 +77,7 @@ export async function getAiSuggestion(
   const response = await client.chat.completions.create({
     model: config.model,
     temperature: 0.3,
-    max_tokens: 600,
+    max_tokens: 900,
     response_format: { type: "json_object" },
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
@@ -102,6 +104,6 @@ export async function getAiSuggestion(
     );
   }
 
-  cache.set(quote.symbol, { suggestion: result.data, at: Date.now() });
+  cache.set(cacheKey, { suggestion: result.data, at: Date.now() });
   return result.data;
 }

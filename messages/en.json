@@ -768,6 +768,8 @@
     "stopLoss": "Stop Loss (SL)",
     "takeProfit": "Take Profit (TP)",
     "confidence": "Confidence",
+    "qualityScore": "Quality score",
+    "tradeChecklist": "Pre-trade checklist",
     "reasoning": "Analysis",
     "support": "Support",
     "resistance": "Resistance",

@@ -8,6 +8,9 @@ import {
   Target,
   AlertTriangle,
   Loader2,
+  CheckCircle2,
+  CircleAlert,
+  XCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { AiSuggestResponse } from "@/lib/ai/types";
@@ -60,6 +63,32 @@ function riskRewardRatio({
 function formatMetric(value: number | null, digits = 1): string {
   if (value === null) return "n/a";
   return value.toFixed(digits);
+}
+
+function scoreClass(score: number) {
+  if (score >= 75) return "text-emerald-600 dark:text-emerald-300";
+  if (score >= 55) return "text-yellow-600 dark:text-yellow-300";
+  return "text-red-600 dark:text-red-300";
+}
+
+function checklistClass(status: "pass" | "warn" | "fail") {
+  if (status === "pass") {
+    return "border-emerald-500/20 bg-emerald-500/5 text-emerald-700 dark:text-emerald-300";
+  }
+  if (status === "warn") {
+    return "border-yellow-500/25 bg-yellow-500/5 text-yellow-700 dark:text-yellow-300";
+  }
+  return "border-red-500/25 bg-red-500/5 text-red-700 dark:text-red-300";
+}
+
+function ChecklistIcon({ status }: { status: "pass" | "warn" | "fail" }) {
+  if (status === "pass") {
+    return <CheckCircle2 className="mt-0.5 size-3.5 shrink-0" aria-hidden />;
+  }
+  if (status === "warn") {
+    return <CircleAlert className="mt-0.5 size-3.5 shrink-0" aria-hidden />;
+  }
+  return <XCircle className="mt-0.5 size-3.5 shrink-0" aria-hidden />;
 }
 
 function TrendPill({ frame }: { frame: TradingViewTechnicalFrame }) {
@@ -142,6 +171,9 @@ export function AiSuggestionCard({
             {t("confidence")}
           </div>
           <ConfidenceStars level={suggestion.confidence} />
+          <div className={cn("mt-0.5 text-xs font-bold", scoreClass(suggestion.qualityScore))}>
+            {suggestion.qualityScore}/100
+          </div>
         </div>
       </div>
 
@@ -190,6 +222,38 @@ export function AiSuggestionCard({
           </span>
         </div>
       )}
+
+      <div className="border-b border-border px-4 py-3">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+          <span className="text-[10px] font-semibold uppercase text-muted-foreground">
+            {t("tradeChecklist")}
+          </span>
+          <span className={cn("text-xs font-bold", scoreClass(suggestion.qualityScore))}>
+            {t("qualityScore")}: {suggestion.qualityScore}/100
+          </span>
+        </div>
+        <div className="grid gap-2 sm:grid-cols-2">
+          {suggestion.tradeChecklist.map((item) => (
+            <div
+              key={`${item.label}-${item.status}`}
+              className={cn(
+                "flex gap-2 rounded-md border px-2.5 py-2",
+                checklistClass(item.status),
+              )}
+            >
+              <ChecklistIcon status={item.status} />
+              <div className="min-w-0">
+                <div className="text-[11px] font-semibold leading-snug">
+                  {item.label}
+                </div>
+                <div className="mt-0.5 text-[10px] leading-relaxed opacity-85">
+                  {item.detail}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
 
       {data.technicalContext && (
         <div className="border-b border-border bg-muted/20 px-4 py-3">

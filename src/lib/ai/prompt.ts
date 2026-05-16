@@ -15,6 +15,10 @@ RULES:
 - TP must target at least 1.5:1 reward-to-risk ratio whenever possible
 - keyLevels.support must be below current mid price; keyLevels.resistance must be above current mid price
 - Confidence is 1 (very low) to 5 (very high)
+- qualityScore is 0-100 and must reflect whether the setup is worth taking, not whether the market will be profitable
+- Give high scores only when multi-timeframe bias, R:R, SL placement, execution timing, and spread/news risk are all acceptable
+- tradeChecklist must contain 5 items in Vietnamese: multi-timeframe trend, entry timing, R:R, SL invalidation, and risk/news/spread warning
+- Checklist status: "pass" = good condition, "warn" = acceptable but needs caution, "fail" = setup should likely be skipped or delayed
 - Reasoning must be in Vietnamese, 3-5 concise sentences, written like an expert forex analyst. Include: bias, entry logic, SL invalidation, TP/risk-reward, and one caution
 - For metals, energy, indices, and crypto, adjust SL/TP ranges proportionally to the asset price and do not reuse FX pip logic
 - Never recommend confidence above 4 without very strong signals
@@ -30,6 +34,10 @@ RESPONSE JSON SCHEMA:
   "stopLoss": number,
   "takeProfit": number,
   "confidence": 1-5,
+  "qualityScore": 0-100,
+  "tradeChecklist": [
+    { "label": "string (Vietnamese)", "status": "pass" | "warn" | "fail", "detail": "string (Vietnamese)" }
+  ],
   "reasoning": "string (Vietnamese)",
   "keyLevels": { "support": number, "resistance": number }
 }
@@ -84,5 +92,5 @@ Change: ${quote.changePct >= 0 ? "+" : ""}${quote.changePct.toFixed(2)}%
 
 ${formatTradingViewContext(tradingViewContext)}
 
-Return one conservative setup only. The reasoning must sound like a professional forex expert explaining bias, execution, invalidation, target, and risk warning in Vietnamese.`;
+Return one conservative setup only. Include the trade checklist and quality score before the reasoning mentally, then write the reasoning like a professional forex expert explaining bias, execution, invalidation, target, and risk warning in Vietnamese.`;
 }

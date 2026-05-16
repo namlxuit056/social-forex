@@ -768,6 +768,8 @@
     "stopLoss": "Cắt lỗ (SL)",
     "takeProfit": "Chốt lời (TP)",
     "confidence": "Độ tin cậy",
+    "qualityScore": "Điểm chất lượng",
+    "tradeChecklist": "Checklist trước khi vào lệnh",
     "reasoning": "Phân tích",
     "support": "Hỗ trợ",
     "resistance": "Kháng cự",
