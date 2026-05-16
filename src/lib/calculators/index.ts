@@ -9,11 +9,24 @@ export type PipContext = {
   contractSize?: number;
 };
 
-function pipSize(symbol: string): number {
+export function pipSize(symbol: string): number {
   const s = symbol.toUpperCase();
   if (s.includes("JPY")) return 0.01;
   if (s.startsWith("XAU") || s.includes("GOLD")) return 0.1;
+  if (s.startsWith("XAG") || s.includes("SILVER")) return 0.01;
+  if (s.includes("OIL")) return 0.01;
+  if (s.startsWith("BTC") || s.startsWith("ETH")) return 1;
   return 0.0001;
+}
+
+export function stopLossPips(params: {
+  symbol: string;
+  entry: number;
+  stopLoss: number;
+}): number {
+  const distance = Math.abs(params.entry - params.stopLoss);
+  const pip = pipSize(params.symbol);
+  return Number((distance / pip).toFixed(1));
 }
 
 export function positionSizeLots(params: {
@@ -32,6 +45,19 @@ export function positionSizeLots(params: {
     price,
     quote,
   } = params;
+  if (
+    !Number.isFinite(balance) ||
+    !Number.isFinite(riskPct) ||
+    !Number.isFinite(stopLossPips) ||
+    !Number.isFinite(price) ||
+    balance <= 0 ||
+    riskPct <= 0 ||
+    stopLossPips <= 0 ||
+    price <= 0
+  ) {
+    return { lots: 0, riskAmount: 0, pipValuePerLot: 0 };
+  }
+
   const riskAmount = (balance * riskPct) / 100;
   const pip = pipSize(symbol);
   const contract = 100000;

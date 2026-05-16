@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
   TrendingUp,
@@ -11,8 +12,10 @@ import {
   CheckCircle2,
   CircleAlert,
   XCircle,
+  Calculator,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { positionSizeLots, stopLossPips } from "@/lib/calculators";
 import type { AiSuggestResponse } from "@/lib/ai/types";
 import type { TradingViewTechnicalFrame } from "@/lib/ai/tradingview-context";
 
@@ -63,6 +66,12 @@ function riskRewardRatio({
 function formatMetric(value: number | null, digits = 1): string {
   if (value === null) return "n/a";
   return value.toFixed(digits);
+}
+
+function quoteCurrency(symbol: string): "USD" | "JPY" | "other" {
+  const upper = symbol.toUpperCase();
+  if (upper.includes("JPY")) return "JPY";
+  return "USD";
 }
 
 function scoreClass(score: number) {
@@ -119,7 +128,13 @@ function TrendPill({ frame }: { frame: TradingViewTechnicalFrame }) {
 
 interface Props {
   data: AiSuggestResponse;
-  onPostSignal?: () => void;
+  onPostSignal?: (riskPlan: {
+    accountBalance: number;
+    riskPct: number;
+    slPips: number;
+    riskAmount: number;
+    lots: number;
+  }) => void;
   showPostButton?: boolean;
   postPending?: boolean;
 }
@@ -134,6 +149,25 @@ export function AiSuggestionCard({
   const { suggestion, symbol, disclaimer } = data;
   const isLong = suggestion.direction === "LONG";
   const rr = riskRewardRatio(suggestion);
+  const [accountBalance, setAccountBalance] = useState(1000);
+  const [riskPct, setRiskPct] = useState(1);
+  const riskPlan = useMemo(() => {
+    const slPips = stopLossPips({
+      symbol,
+      entry: suggestion.entry,
+      stopLoss: suggestion.stopLoss,
+    });
+    const position = positionSizeLots({
+      balance: accountBalance,
+      riskPct,
+      stopLossPips: slPips,
+      symbol,
+      price: suggestion.entry,
+      quote: quoteCurrency(symbol),
+    });
+
+    return { slPips, ...position };
+  }, [accountBalance, riskPct, suggestion.entry, suggestion.stopLoss, symbol]);
 
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-background shadow-sm">
@@ -273,6 +307,67 @@ export function AiSuggestionCard({
         </div>
       )}
 
+      <div className="border-b border-border px-4 py-3">
+        <div className="mb-3 flex items-center gap-2">
+          <Calculator className="size-4 text-primary" aria-hidden />
+          <span className="text-[10px] font-semibold uppercase text-muted-foreground">
+            {t("riskCalculator")}
+          </span>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-[1fr_1fr_1.4fr]">
+          <label className="block min-w-0">
+            <span className="text-[10px] font-medium uppercase text-muted-foreground">
+              {t("accountBalance")}
+            </span>
+            <input
+              type="number"
+              min="0"
+              step="100"
+              value={accountBalance}
+              onChange={(event) => setAccountBalance(Number(event.target.value))}
+              className="mt-1 h-8 w-full rounded-md border border-input bg-transparent px-2.5 font-mono text-xs outline-none transition focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            />
+          </label>
+          <label className="block min-w-0">
+            <span className="text-[10px] font-medium uppercase text-muted-foreground">
+              {t("riskPercent")}
+            </span>
+            <input
+              type="number"
+              min="0"
+              max="10"
+              step="0.1"
+              value={riskPct}
+              onChange={(event) => setRiskPct(Number(event.target.value))}
+              className="mt-1 h-8 w-full rounded-md border border-input bg-transparent px-2.5 font-mono text-xs outline-none transition focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            />
+          </label>
+          <dl className="grid grid-cols-3 gap-2 rounded-md border border-border/70 bg-muted/20 px-3 py-2 text-[10px]">
+            <div>
+              <dt className="text-muted-foreground">{t("slDistance")}</dt>
+              <dd className="mt-0.5 font-mono font-semibold text-foreground">
+                {riskPlan.slPips}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground">{t("riskAmount")}</dt>
+              <dd className="mt-0.5 font-mono font-semibold text-foreground">
+                ${riskPlan.riskAmount}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-muted-foreground">{t("suggestedLots")}</dt>
+              <dd className="mt-0.5 font-mono font-bold text-emerald-600 dark:text-emerald-300">
+                {riskPlan.lots}
+              </dd>
+            </div>
+          </dl>
+        </div>
+        <p className="mt-2 text-[10px] leading-relaxed text-muted-foreground">
+          {t("riskCalculatorHint")}
+        </p>
+      </div>
+
       {/* Reasoning */}
       <div className="px-4 py-3">
         <div className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
@@ -291,7 +386,15 @@ export function AiSuggestionCard({
         </p>
         {showPostButton && onPostSignal && (
           <button
-            onClick={onPostSignal}
+            onClick={() =>
+              onPostSignal({
+                accountBalance,
+                riskPct,
+                slPips: riskPlan.slPips,
+                riskAmount: riskPlan.riskAmount,
+                lots: riskPlan.lots,
+              })
+            }
             disabled={postPending}
             className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition hover:bg-primary/90 disabled:pointer-events-none disabled:opacity-70"
           >

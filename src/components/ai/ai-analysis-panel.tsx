@@ -82,7 +82,13 @@ export function AiAnalysisPanel({ symbol }: Props) {
     }
   }, [symbol, t]);
 
-  const handlePostSignal = useCallback(() => {
+  const handlePostSignal = useCallback((riskPlan?: {
+    accountBalance: number;
+    riskPct: number;
+    slPips: number;
+    riskAmount: number;
+    lots: number;
+  }) => {
     if (!data?.suggestion) return;
     const currentData = data;
     const s = data.suggestion;
@@ -105,6 +111,7 @@ export function AiAnalysisPanel({ symbol }: Props) {
             confidence: s.confidence,
             qualityScore: s.qualityScore,
             tradeChecklist: s.tradeChecklist,
+            riskPlan,
             reasoning: s.reasoning,
           }),
         });

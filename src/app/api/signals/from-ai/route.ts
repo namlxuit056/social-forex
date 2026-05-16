@@ -26,6 +26,15 @@ const fromAiSignalSchema = z.object({
     )
     .max(6)
     .optional(),
+  riskPlan: z
+    .object({
+      accountBalance: z.number().positive(),
+      riskPct: z.number().positive(),
+      slPips: z.number().nonnegative(),
+      riskAmount: z.number().nonnegative(),
+      lots: z.number().nonnegative(),
+    })
+    .optional(),
   reasoning: z.string().min(10).max(1500),
 });
 
@@ -59,9 +68,20 @@ export async function POST(req: NextRequest) {
     data.tradeChecklist?.map(
       (item) => `- [${item.status.toUpperCase()}] ${item.label}: ${item.detail}`,
     ) ?? [];
+  const riskPlan = data.riskPlan
+    ? [
+        "",
+        "Risk plan:",
+        `- Balance: $${data.riskPlan.accountBalance}`,
+        `- Risk: ${data.riskPlan.riskPct}% ($${data.riskPlan.riskAmount})`,
+        `- SL distance: ${data.riskPlan.slPips} pips`,
+        `- Suggested lots: ${data.riskPlan.lots}`,
+      ]
+    : [];
   const notes = [
     `AI Forex Expert${data.confidence ? ` (confidence: ${data.confidence}/5)` : ""}${data.qualityScore !== undefined ? ` · quality: ${data.qualityScore}/100` : ""}`,
     ...(checklist.length > 0 ? ["", "Trade checklist:", ...checklist] : []),
+    ...riskPlan,
     "",
     data.reasoning,
   ].join("\n");
