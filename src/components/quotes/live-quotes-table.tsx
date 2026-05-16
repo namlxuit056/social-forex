@@ -10,7 +10,10 @@ import {
   LineChart,
   Loader2,
   Radio,
+  Sparkles,
   Star,
+  TrendingDown,
+  TrendingUp,
 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { useFavorites } from "@/hooks/use-favorites";
@@ -38,6 +41,25 @@ type PollPayload = {
   warningParams?: { source: string; message: string };
   error?: string;
 };
+
+type AiTrendPayload = {
+  symbol: string;
+  trend?: AiTrendResult;
+  error?: string;
+};
+
+type AiTrendResult = {
+  direction: "UP" | "DOWN";
+  confidence: number;
+  summary: string;
+  invalidation: string;
+};
+
+type TrendState =
+  | { status: "idle" }
+  | { status: "loading" }
+  | { status: "ready"; payload: AiTrendResult }
+  | { status: "error"; message: string };
 
 function formatWarning(
   t: (key: string, values?: Record<string, string>) => string,
@@ -79,6 +101,7 @@ export function LiveQuotesTable({
   const [warning, setWarning] = useState<string | undefined>(initialWarning);
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const [trendBySymbol, setTrendBySymbol] = useState<Record<string, TrendState>>({});
 
   const applyPayload = useCallback(
     (data: PollPayload) => {
@@ -148,6 +171,110 @@ export function LiveQuotesTable({
     },
     [session?.user, tChart, toggle],
   );
+
+  const requestTrend = useCallback(
+    async (symbol: string) => {
+      setTrendBySymbol((prev) => ({
+        ...prev,
+        [symbol]: { status: "loading" },
+      }));
+
+      try {
+        const res = await fetch("/api/ai/trend", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ symbol }),
+        });
+        const data = (await res.json()) as AiTrendPayload;
+        const trend = data.trend;
+        if (!res.ok || !trend) {
+          throw new Error(data.error ?? `HTTP ${res.status}`);
+        }
+        setTrendBySymbol((prev) => ({
+          ...prev,
+          [symbol]: { status: "ready", payload: trend },
+        }));
+      } catch (e) {
+        setTrendBySymbol((prev) => ({
+          ...prev,
+          [symbol]: {
+            status: "error",
+            message: e instanceof Error ? e.message : t("aiTrendError"),
+          },
+        }));
+      }
+    },
+    [t],
+  );
+
+  function renderTrend(symbol: string, compact = false) {
+    const state = trendBySymbol[symbol] ?? { status: "idle" };
+    if (state.status === "ready") {
+      const isUp = state.payload.direction === "UP";
+      const Icon = isUp ? TrendingUp : TrendingDown;
+
+      return (
+        <div className={cn("space-y-1", compact ? "w-full" : "max-w-72")}>
+          <div
+            className={cn(
+              "inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium",
+              isUp
+                ? "bg-primary/12 text-primary"
+                : "bg-destructive/12 text-destructive",
+            )}
+          >
+            <Icon className="size-3.5" aria-hidden />
+            {isUp ? t("aiTrendUp") : t("aiTrendDown")}
+            <span className="text-foreground/60">
+              {state.payload.confidence}/5
+            </span>
+          </div>
+          <p className="text-xs leading-relaxed text-muted-foreground">
+            {state.payload.summary}
+          </p>
+          <p className="text-[11px] leading-relaxed text-muted-foreground/80">
+            {t("aiTrendInvalidation")} {state.payload.invalidation}
+          </p>
+        </div>
+      );
+    }
+
+    if (state.status === "error") {
+      return (
+        <div className={cn("space-y-1", compact ? "w-full" : "max-w-64")}>
+          <Button
+            type="button"
+            variant="outline"
+            size="xs"
+            onClick={() => requestTrend(symbol)}
+          >
+            <Sparkles className="size-3.5" aria-hidden />
+            {t("aiTrendRetry")}
+          </Button>
+          <p className="line-clamp-2 text-xs text-destructive">
+            {state.message}
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <Button
+        type="button"
+        variant="outline"
+        size="xs"
+        onClick={() => requestTrend(symbol)}
+        disabled={state.status === "loading"}
+      >
+        {state.status === "loading" ? (
+          <Loader2 className="size-3.5 animate-spin" aria-hidden />
+        ) : (
+          <Sparkles className="size-3.5" aria-hidden />
+        )}
+        {state.status === "loading" ? t("aiTrendLoading") : t("aiTrendButton")}
+      </Button>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -272,6 +399,13 @@ export function LiveQuotesTable({
                       </div>
                     </div>
 
+                    <div className="mt-3 rounded-md bg-muted/25 px-3 py-2">
+                      <p className="mb-2 text-[10px] uppercase text-muted-foreground">
+                        {t("colAiTrend")}
+                      </p>
+                      {renderTrend(r.symbol, true)}
+                    </div>
+
                     <div className="mt-3 flex items-center justify-between gap-2 border-t border-border/50 pt-2">
                       <div className="flex items-center gap-0.5">
                         <Link
@@ -319,13 +453,14 @@ export function LiveQuotesTable({
                 ))}
               </div>
               <div className="hidden overflow-x-auto rounded-lg border border-border md:block">
-                <table className="w-full min-w-[720px] text-left text-sm">
+                <table className="w-full min-w-[980px] text-left text-sm">
                   <thead className="bg-muted/50 text-muted-foreground">
                     <tr>
                       <th className="px-3 py-2 font-medium">{t("colPair")}</th>
                       <th className="px-3 py-2 font-medium">{t("colBid")}</th>
                       <th className="px-3 py-2 font-medium">{t("colAsk")}</th>
                       <th className="px-3 py-2 font-medium">{t("colChange")}</th>
+                      <th className="px-3 py-2 font-medium">{t("colAiTrend")}</th>
                       <th className="w-px whitespace-nowrap px-2 py-2 text-end font-medium">
                         {t("colActions")}
                       </th>
@@ -362,6 +497,9 @@ export function LiveQuotesTable({
                         >
                           {r.changePct >= 0 ? "+" : ""}
                           {r.changePct}%
+                        </td>
+                        <td className="px-3 py-2 align-top">
+                          {renderTrend(r.symbol)}
                         </td>
                         <td className="px-2 py-1.5">
                           <div className="flex items-center justify-end gap-0.5">
