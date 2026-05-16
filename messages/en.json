@@ -775,6 +775,7 @@
     "tradingViewContext": "TradingView M15 / H1 / H4",
     "keyLevels": "Key levels",
     "postSignal": "Post signal from AI",
+    "postingSignal": "Posting…",
     "disclaimer": "AI suggestions are for reference only, not investment advice.",
     "unavailable": "AI not available",
     "unavailableHint": "AI analysis requires OPENAI_API_KEY configuration.",
@@ -791,6 +792,9 @@
     "apiNoQuote": "No price data for this symbol.",
     "apiAnalyzeFailed": "Could not analyze right now: {message}",
     "apiUnknownError": "Unknown AI error",
+    "apiSignalLoginRequired": "Sign in to post an AI signal.",
+    "apiSignalCreated": "AI signal posted.",
+    "apiSignalCreateFailed": "Could not post the AI signal right now.",
     "apiDisclaimer": "AI suggestions are for education only, not investment advice. You are solely responsible for your trading decisions."
   },
   "journal": {

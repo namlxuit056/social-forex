@@ -7,6 +7,7 @@ import {
   Shield,
   Target,
   AlertTriangle,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { AiSuggestResponse } from "@/lib/ai/types";
@@ -91,12 +92,14 @@ interface Props {
   data: AiSuggestResponse;
   onPostSignal?: () => void;
   showPostButton?: boolean;
+  postPending?: boolean;
 }
 
 export function AiSuggestionCard({
   data,
   onPostSignal,
   showPostButton,
+  postPending,
 }: Props) {
   const t = useTranslations("ai");
   const { suggestion, symbol, disclaimer } = data;
@@ -225,9 +228,17 @@ export function AiSuggestionCard({
         {showPostButton && onPostSignal && (
           <button
             onClick={onPostSignal}
-            className="shrink-0 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition hover:bg-primary/90"
+            disabled={postPending}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition hover:bg-primary/90 disabled:pointer-events-none disabled:opacity-70"
           >
-            {t("postSignal")}
+            {postPending ? (
+              <>
+                <Loader2 className="size-3 animate-spin" aria-hidden />
+                {t("postingSignal")}
+              </>
+            ) : (
+              t("postSignal")
+            )}
           </button>
         )}
       </div>

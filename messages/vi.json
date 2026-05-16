@@ -775,6 +775,7 @@
     "tradingViewContext": "TradingView M15 / H1 / H4",
     "keyLevels": "Mức giá quan trọng",
     "postSignal": "Đăng tín hiệu từ AI",
+    "postingSignal": "Đang đăng…",
     "disclaimer": "Đề xuất AI chỉ mang tính tham khảo, không phải tư vấn đầu tư.",
     "unavailable": "AI chưa được kích hoạt",
     "unavailableHint": "Tính năng phân tích AI cần cấu hình OPENAI_API_KEY.",
@@ -791,6 +792,9 @@
     "apiNoQuote": "Không có dữ liệu giá cho symbol này.",
     "apiAnalyzeFailed": "Không thể phân tích lúc này: {message}",
     "apiUnknownError": "Lỗi AI không xác định",
+    "apiSignalLoginRequired": "Bạn cần đăng nhập để đăng tín hiệu từ AI.",
+    "apiSignalCreated": "Đã đăng tín hiệu từ AI.",
+    "apiSignalCreateFailed": "Không thể đăng tín hiệu từ AI lúc này.",
     "apiDisclaimer": "Đề xuất AI chỉ mang tính tham khảo và giáo dục, không phải tư vấn đầu tư. Bạn tự chịu trách nhiệm về mọi quyết định giao dịch."
   },
   "journal": {

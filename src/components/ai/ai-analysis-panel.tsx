@@ -2,9 +2,9 @@
 
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Sparkles, Lock, Loader2 } from "lucide-react";
+import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { AiSuggestionCard } from "@/components/ai/ai-suggestion-card";
@@ -24,6 +24,7 @@ export function AiAnalysisPanel({ symbol }: Props) {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<AiSuggestResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [postingSignal, setPostingSignal] = useState(false);
   const [cooldown, setCooldown] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -83,17 +84,49 @@ export function AiAnalysisPanel({ symbol }: Props) {
 
   const handlePostSignal = useCallback(() => {
     if (!data?.suggestion) return;
+    const currentData = data;
     const s = data.suggestion;
-    const params = new URLSearchParams({
-      symbol: data.symbol,
-      direction: s.direction,
-      entry: String(s.entry),
-      stopLoss: String(s.stopLoss),
-      takeProfit: String(s.takeProfit),
-      notes: `AI suggestion (confidence: ${s.confidence}/5)`,
-    });
-    router.push(`/signals?${params.toString()}`);
-  }, [data, router]);
+
+    async function postFromAi() {
+      setPostingSignal(true);
+      setError(null);
+
+      try {
+        const res = await fetch("/api/signals/from-ai", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            symbol: currentData.symbol,
+            direction: s.direction,
+            entry: s.entry,
+            stopLoss: s.stopLoss,
+            takeProfit: s.takeProfit,
+            confidence: s.confidence,
+            reasoning: s.reasoning,
+          }),
+        });
+
+        const result = (await res.json().catch(() => ({}))) as {
+          signalId?: string;
+          error?: string;
+        };
+
+        if (!res.ok || !result.signalId) {
+          setError(result.error ?? t("apiSignalCreateFailed"));
+          return;
+        }
+
+        router.push(`/signals/${result.signalId}`);
+      } catch {
+        setError(t("apiSignalCreateFailed"));
+      } finally {
+        setPostingSignal(false);
+      }
+    }
+
+    void postFromAi();
+  }, [data, router, t]);
 
   const isLocked = symbol !== FREE_SYMBOL && !session?.user;
 
@@ -168,6 +201,7 @@ export function AiAnalysisPanel({ symbol }: Props) {
           data={data}
           showPostButton={!!session?.user}
           onPostSignal={handlePostSignal}
+          postPending={postingSignal}
         />
       )}
     </div>
