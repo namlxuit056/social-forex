@@ -111,6 +111,7 @@ export function AiAnalysisPanel({ symbol }: Props) {
             confidence: s.confidence,
             qualityScore: s.qualityScore,
             tradeChecklist: s.tradeChecklist,
+            newsContext: currentData.newsContext,
             riskPlan,
             reasoning: s.reasoning,
           }),

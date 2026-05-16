@@ -13,6 +13,7 @@ import {
   CircleAlert,
   XCircle,
   Calculator,
+  CalendarClock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { positionSizeLots, stopLossPips } from "@/lib/calculators";
@@ -72,6 +73,22 @@ function quoteCurrency(symbol: string): "USD" | "JPY" | "other" {
   const upper = symbol.toUpperCase();
   if (upper.includes("JPY")) return "JPY";
   return "USD";
+}
+
+function newsRiskClass(risk: "low" | "medium" | "high") {
+  if (risk === "high") {
+    return "border-red-500/25 bg-red-500/5 text-red-700 dark:text-red-300";
+  }
+  if (risk === "medium") {
+    return "border-yellow-500/25 bg-yellow-500/5 text-yellow-700 dark:text-yellow-300";
+  }
+  return "border-emerald-500/20 bg-emerald-500/5 text-emerald-700 dark:text-emerald-300";
+}
+
+function formatNewsTime(minutesFromNow: number) {
+  const minutes = Math.abs(minutesFromNow);
+  if (minutesFromNow < 0) return `${minutes}m ago`;
+  return `in ${minutes}m`;
 }
 
 function scoreClass(score: number) {
@@ -304,6 +321,49 @@ export function AiSuggestionCard({
               <TrendPill key={frame.timeframe} frame={frame} />
             ))}
           </div>
+        </div>
+      )}
+
+      {data.newsContext && (
+        <div className="border-b border-border px-4 py-3">
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase text-muted-foreground">
+              <CalendarClock className="size-3.5" aria-hidden />
+              {t("newsRisk")}
+            </span>
+            <span
+              className={cn(
+                "rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase",
+                newsRiskClass(data.newsContext.riskLevel),
+              )}
+            >
+              {t(`newsRisk_${data.newsContext.riskLevel}`)}
+            </span>
+          </div>
+          {data.newsContext.events.length > 0 ? (
+            <div className="space-y-1.5">
+              {data.newsContext.events.slice(0, 3).map((event) => (
+                <div
+                  key={event.id}
+                  className={cn(
+                    "flex flex-wrap items-center gap-x-2 gap-y-1 rounded-md border px-2.5 py-2 text-[10px]",
+                    newsRiskClass(event.impact === "high" ? "high" : "medium"),
+                  )}
+                >
+                  <span className="font-bold">{event.currency}</span>
+                  <span className="font-semibold uppercase">{event.impact}</span>
+                  <span className="text-foreground">{event.title}</span>
+                  <span className="ml-auto font-mono opacity-80">
+                    {formatNewsTime(event.minutesFromNow)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs leading-relaxed text-muted-foreground">
+              {t("newsRiskNone")}
+            </p>
+          )}
         </div>
       )}
 

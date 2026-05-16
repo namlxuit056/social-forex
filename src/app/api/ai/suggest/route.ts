@@ -7,6 +7,7 @@ import { resolveQuotes } from "@/lib/quotes/resolve-quotes";
 import { QUOTE_BY_SYMBOL } from "@/lib/quotes/definitions";
 import { getAiSuggestion, AiUnavailableError } from "@/lib/ai/suggest";
 import { getTradingViewTechnicalContext } from "@/lib/ai/tradingview-context";
+import { getAiNewsContext } from "@/lib/ai/news-context";
 import type { AiSuggestResponse, AiSuggestError } from "@/lib/ai/types";
 import { localeFromRequest } from "@/lib/api-locale";
 import { pickAi } from "@/lib/messages-pick";
@@ -87,12 +88,18 @@ export async function POST(req: NextRequest) {
     const technicalContext = await getTradingViewTechnicalContext(quote).catch(
       () => null,
     );
-    const suggestion = await getAiSuggestion(quote, technicalContext);
+    const newsContext = await getAiNewsContext(symbol).catch(() => null);
+    const suggestion = await getAiSuggestion(
+      quote,
+      technicalContext,
+      newsContext,
+    );
 
     const response: AiSuggestResponse = {
       symbol,
       suggestion,
       ...(technicalContext ? { technicalContext } : {}),
+      ...(newsContext ? { newsContext } : {}),
       generatedAt: new Date().toISOString(),
       disclaimer: ai.apiDisclaimer,
     };

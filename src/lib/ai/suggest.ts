@@ -3,6 +3,7 @@ import type { QuoteRow } from "@/lib/quotes/types";
 import { aiSuggestionSchema, type AiSuggestion } from "@/lib/ai/types";
 import { SYSTEM_PROMPT, buildUserPrompt } from "@/lib/ai/prompt";
 import type { TradingViewTechnicalContext } from "@/lib/ai/tradingview-context";
+import type { AiNewsContext } from "@/lib/ai/news-context";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const CACHE_SCHEMA_VERSION = "checklist-v1";
@@ -54,6 +55,7 @@ export class AiUnavailableError extends Error {
 export async function getAiSuggestion(
   quote: QuoteRow,
   tradingViewContext?: TradingViewTechnicalContext | null,
+  newsContext?: AiNewsContext | null,
 ): Promise<AiSuggestion> {
   const cacheKey = `${CACHE_SCHEMA_VERSION}:${quote.symbol}`;
   const cached = cache.get(cacheKey);
@@ -81,7 +83,7 @@ export async function getAiSuggestion(
     response_format: { type: "json_object" },
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
-      { role: "user", content: buildUserPrompt(quote, tradingViewContext) },
+      { role: "user", content: buildUserPrompt(quote, tradingViewContext, newsContext) },
     ],
   });
 

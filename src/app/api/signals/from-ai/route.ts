@@ -35,6 +35,22 @@ const fromAiSignalSchema = z.object({
       lots: z.number().nonnegative(),
     })
     .optional(),
+  newsContext: z
+    .object({
+      riskLevel: z.enum(["low", "medium", "high"]),
+      events: z
+        .array(
+          z.object({
+            currency: z.string(),
+            title: z.string(),
+            impact: z.enum(["medium", "high"]),
+            minutesFromNow: z.number(),
+            timeUtc: z.string(),
+          }),
+        )
+        .optional(),
+    })
+    .optional(),
   reasoning: z.string().min(10).max(1500),
 });
 
@@ -78,9 +94,23 @@ export async function POST(req: NextRequest) {
         `- Suggested lots: ${data.riskPlan.lots}`,
       ]
     : [];
+  const newsEvents = data.newsContext?.events?.slice(0, 5) ?? [];
+  const newsRisk = data.newsContext
+    ? [
+        "",
+        `News risk: ${data.newsContext.riskLevel.toUpperCase()}`,
+        ...(newsEvents.length > 0
+          ? newsEvents.map((event) => {
+              const direction = event.minutesFromNow >= 0 ? "in" : "ago";
+              return `- ${event.currency} ${event.impact.toUpperCase()}: ${event.title} (${direction} ${Math.abs(event.minutesFromNow)}m)`;
+            })
+          : ["- No related medium/high impact news in the monitored window."]),
+      ]
+    : [];
   const notes = [
     `AI Forex Expert${data.confidence ? ` (confidence: ${data.confidence}/5)` : ""}${data.qualityScore !== undefined ? ` · quality: ${data.qualityScore}/100` : ""}`,
     ...(checklist.length > 0 ? ["", "Trade checklist:", ...checklist] : []),
+    ...newsRisk,
     ...riskPlan,
     "",
     data.reasoning,

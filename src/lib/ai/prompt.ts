@@ -1,5 +1,6 @@
 import type { QuoteRow } from "@/lib/quotes/types";
 import type { TradingViewTechnicalContext } from "@/lib/ai/tradingview-context";
+import type { AiNewsContext } from "@/lib/ai/news-context";
 
 export const SYSTEM_PROMPT = `You are an expert forex market analyst for Social Forex. Act like a senior technical analyst and risk manager, not a generic chatbot.
 
@@ -10,6 +11,7 @@ RULES:
 - Base analysis only on the current price data and TradingView technical context provided
 - Weigh M15, H1, and H4 together. H4 defines broader bias, H1 defines setup quality, M15 helps execution timing
 - Explain the market bias as a professional forex analyst: multi-timeframe trend, RSI/EMA structure, candle behavior, momentum, nearby support/resistance, spread/risk quality, and invalidation
+- Use economic-calendar news context as a risk filter. High-impact related news soon should lower qualityScore and become a warn/fail checklist item
 - Calculate entry near current price. Prefer waiting for a small pullback or breakout retest when the spread/change suggests poor immediate execution
 - SL must be logical for the asset class and volatility: normally within 0.3-1.5% for FX majors/minors, wider for metals/energy/crypto when needed, never unrealistically tight
 - TP must target at least 1.5:1 reward-to-risk ratio whenever possible
@@ -70,9 +72,34 @@ Summary: ${context.summary}
 ${frames}`;
 }
 
+function formatNewsContext(context?: AiNewsContext | null) {
+  if (!context) {
+    return "Economic calendar news context: unavailable. Do not assume there is no news risk.";
+  }
+
+  const events =
+    context.events.length === 0
+      ? "No related medium/high impact events in the monitored window."
+      : context.events
+          .map((event) => {
+            const direction = event.minutesFromNow >= 0 ? "in" : "ago";
+            return `${event.currency} ${event.impact.toUpperCase()}: ${event.title} (${direction} ${Math.abs(event.minutesFromNow)} minutes, ${event.timeUtc})`;
+          })
+          .join("\n");
+
+  return `Economic calendar news context:
+Source: ${context.source}
+Currencies: ${context.currencies.join(", ") || "n/a"}
+Window: ${context.windowMinutes.lookback}m back / ${context.windowMinutes.lookahead}m ahead
+Risk Level: ${context.riskLevel}
+Summary: ${context.summary}
+${events}`;
+}
+
 export function buildUserPrompt(
   quote: QuoteRow,
   tradingViewContext?: TradingViewTechnicalContext | null,
+  newsContext?: AiNewsContext | null,
 ): string {
   const mid = (quote.bid + quote.ask) / 2;
   const spread = quote.ask - quote.bid;
@@ -91,6 +118,8 @@ Spread % of Mid: ${spreadPct.toFixed(4)}%
 Change: ${quote.changePct >= 0 ? "+" : ""}${quote.changePct.toFixed(2)}%
 
 ${formatTradingViewContext(tradingViewContext)}
+
+${formatNewsContext(newsContext)}
 
 Return one conservative setup only. Include the trade checklist and quality score before the reasoning mentally, then write the reasoning like a professional forex expert explaining bias, execution, invalidation, target, and risk warning in Vietnamese.`;
 }
