@@ -5,6 +5,7 @@ import { Bell, BookOpen, ChartCandlestick, MessageSquare, Shield, Wrench } from 
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { MobileNav } from "@/components/layout/mobile-nav";
+import { SiteNavLink } from "@/components/layout/site-nav-link";
 import { SiteLogo } from "@/components/layout/site-logo";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -85,14 +86,15 @@ export async function SiteHeader() {
         {/* Desktop primary nav */}
         <nav className="ml-2 hidden items-center gap-1 lg:flex">
           {primaryNavKeys.map((item) => (
-            <Link
+            <SiteNavLink
               key={item.href}
               href={item.href}
-              className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              className="inline-flex min-h-9 items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              activeClassName="bg-primary/10 text-primary ring-1 ring-primary/20"
             >
               <item.icon className="size-3.5" aria-hidden />
               {t(item.key)}
-            </Link>
+            </SiteNavLink>
           ))}
         </nav>
 
@@ -127,7 +129,7 @@ export async function SiteHeader() {
                 href="/dashboard"
                 className={cn(
                   buttonVariants({ size: "sm" }),
-                  "h-8 text-xs",
+                  "text-xs",
                 )}
               >
                 {tc("dashboard")}
@@ -157,7 +159,7 @@ export async function SiteHeader() {
                 href="/auth/register"
                 className={cn(
                   buttonVariants({ size: "sm" }),
-                  "h-8 shrink-0 text-xs",
+                  "shrink-0 text-xs",
                 )}
               >
                 {tc("signUp")}
@@ -176,13 +178,14 @@ export async function SiteHeader() {
           className="scrollbar-none -mx-4 flex gap-1.5 overflow-x-auto px-4 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {[...primaryNavKeys, ...marketNavKeys.slice(0, 4)].map((item) => (
-            <Link
+            <SiteNavLink
               key={item.href}
               href={item.href}
-              className="shrink-0 rounded-full bg-muted/90 px-3 py-1.5 text-xs font-medium text-foreground shadow-sm ring-1 ring-border/50 transition hover:bg-primary/15 hover:text-primary"
+              className="shrink-0 rounded-full bg-muted/90 px-3 py-2 text-xs font-medium text-foreground shadow-sm ring-1 ring-border/50 transition hover:bg-primary/15 hover:text-primary"
+              activeClassName="bg-primary/15 text-primary ring-primary/35"
             >
               {t(item.key)}
-            </Link>
+            </SiteNavLink>
           ))}
         </nav>
       </div>
@@ -197,13 +200,14 @@ export async function SiteHeader() {
             >
               <group.icon className="mr-1 size-3.5 shrink-0 text-muted-foreground/60" aria-hidden />
               {group.items.map((item) => (
-                <Link
+                <SiteNavLink
                   key={item.href}
                   href={item.href}
-                  className="rounded px-2 py-0.5 text-xs text-muted-foreground/80 transition-colors hover:bg-muted hover:text-foreground"
+                  className="rounded px-2 py-1 text-xs text-muted-foreground/80 transition-colors hover:bg-muted hover:text-foreground"
+                  activeClassName="bg-primary/10 text-primary"
                 >
                   {t(item.key)}
-                </Link>
+                </SiteNavLink>
               ))}
             </div>
           ))}

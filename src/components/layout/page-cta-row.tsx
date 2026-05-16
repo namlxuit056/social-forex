@@ -17,6 +17,8 @@ export function PageCtaRow({
   items: readonly PageCtaItem[];
   className?: string;
 }) {
+  const visibleItems = items.slice(0, 4);
+
   return (
     <div
       className={cn(
@@ -28,7 +30,7 @@ export function PageCtaRow({
         {heading}
       </p>
       <div className="mt-3 flex flex-wrap gap-2">
-        {items.map((c, i) => (
+        {visibleItems.map((c, i) => (
           <Link
             key={`${c.href}-${c.label}`}
             href={c.href}

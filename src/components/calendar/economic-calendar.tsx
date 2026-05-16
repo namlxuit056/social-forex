@@ -54,7 +54,7 @@ export function EconomicCalendar({
   const intlLocale = useLocale();
 
   const [zone, setZone] = useState<Zone>("vn");
-  const [dateRange, setDateRange] = useState<DateRange>("today");
+  const [dateRange, setDateRange] = useState<DateRange>("week");
   const [selectedCurrencies, setSelectedCurrencies] = useState<Set<string>>(
     () => new Set(initialSelectedCurrencies),
   );
@@ -252,7 +252,7 @@ export function EconomicCalendar({
               type="button"
               variant={dateRange === "today" ? "default" : "ghost"}
               size="sm"
-              className="h-7 rounded-md px-3 text-xs"
+              className="rounded-md px-3 text-xs"
               onClick={() => setDateRange("today")}
             >
               {t("filterToday")}
@@ -261,7 +261,7 @@ export function EconomicCalendar({
               type="button"
               variant={dateRange === "week" ? "default" : "ghost"}
               size="sm"
-              className="h-7 rounded-md px-3 text-xs"
+              className="rounded-md px-3 text-xs"
               onClick={() => setDateRange("week")}
             >
               {t("filterWeek")}
@@ -284,7 +284,7 @@ export function EconomicCalendar({
                 type="button"
                 onClick={() => toggleImpact(opt.value)}
                 className={cn(
-                  "rounded-md border px-2.5 py-1 text-xs font-medium transition-all",
+                  "min-h-9 rounded-md border px-2.5 py-1.5 text-xs font-medium transition-all",
                   selectedImpacts.has(opt.value)
                     ? opt.color
                     : "border-transparent bg-muted/40 text-muted-foreground/50",
@@ -311,7 +311,7 @@ export function EconomicCalendar({
                 type="button"
                 onClick={() => toggleCurrency(c)}
                 className={cn(
-                  "rounded-md border px-2 py-0.5 text-xs font-medium transition-all",
+                  "min-h-8 rounded-md border px-2.5 py-1 text-xs font-medium transition-all",
                   selectedCurrencies.size === 0 || selectedCurrencies.has(c)
                     ? "border-primary/30 bg-primary/10 text-primary"
                     : "border-transparent bg-muted/40 text-muted-foreground/50",
@@ -324,7 +324,7 @@ export function EconomicCalendar({
               <button
                 type="button"
                 onClick={() => setSelectedCurrencies(new Set())}
-                className="rounded-md px-2 py-0.5 text-xs text-muted-foreground/60 underline-offset-2 hover:text-foreground hover:underline"
+                className="min-h-8 rounded-md px-2.5 py-1 text-xs text-muted-foreground/60 underline-offset-2 hover:text-foreground hover:underline"
               >
                 {t("allCurrencies")}
               </button>
@@ -350,7 +350,7 @@ export function EconomicCalendar({
               type="button"
               variant={zone === "vn" ? "default" : "ghost"}
               size="sm"
-              className="h-7 rounded-md px-2.5 text-xs"
+              className="rounded-md px-2.5 text-xs"
               onClick={() => startTransition(() => setZone("vn"))}
             >
               VN
@@ -359,7 +359,7 @@ export function EconomicCalendar({
               type="button"
               variant={zone === "utc" ? "default" : "ghost"}
               size="sm"
-              className="h-7 rounded-md px-2.5 text-xs"
+              className="rounded-md px-2.5 text-xs"
               onClick={() => startTransition(() => setZone("utc"))}
             >
               UTC
