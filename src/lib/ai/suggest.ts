@@ -2,6 +2,7 @@ import OpenAI from "openai";
 import type { QuoteRow } from "@/lib/quotes/types";
 import { aiSuggestionSchema, type AiSuggestion } from "@/lib/ai/types";
 import { SYSTEM_PROMPT, buildUserPrompt } from "@/lib/ai/prompt";
+import type { TradingViewTechnicalContext } from "@/lib/ai/tradingview-context";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const cache = new Map<string, { suggestion: AiSuggestion; at: number }>();
@@ -51,6 +52,7 @@ export class AiUnavailableError extends Error {
 
 export async function getAiSuggestion(
   quote: QuoteRow,
+  tradingViewContext?: TradingViewTechnicalContext | null,
 ): Promise<AiSuggestion> {
   const cached = cache.get(quote.symbol);
   if (cached && Date.now() - cached.at < CACHE_TTL_MS) {
@@ -77,7 +79,7 @@ export async function getAiSuggestion(
     response_format: { type: "json_object" },
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
-      { role: "user", content: buildUserPrompt(quote) },
+      { role: "user", content: buildUserPrompt(quote, tradingViewContext) },
     ],
   });
 

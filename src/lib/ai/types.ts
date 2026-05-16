@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { TradingViewTechnicalContext } from "@/lib/ai/tradingview-context";
 
 export const aiSuggestionSchema = z.object({
   direction: z.enum(["LONG", "SHORT"]),
@@ -20,6 +21,7 @@ export type AiSuggestion = z.infer<typeof aiSuggestionSchema>;
 export type AiSuggestResponse = {
   symbol: string;
   suggestion: AiSuggestion;
+  technicalContext?: TradingViewTechnicalContext;
   generatedAt: string;
   disclaimer: string;
 };

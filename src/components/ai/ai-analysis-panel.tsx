@@ -99,6 +99,20 @@ export function AiAnalysisPanel({ symbol }: Props) {
 
   return (
     <div className="space-y-3">
+      <div className="rounded-xl border border-border/70 bg-card/45 px-4 py-3">
+        <div className="flex items-start gap-2">
+          <Sparkles className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
+          <div>
+            <h2 className="font-heading text-sm font-semibold text-foreground">
+              {t("expertTitle")}
+            </h2>
+            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+              {t("expertSubtitle")}
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Analyze button */}
       <div className="flex items-center gap-3">
         <Button

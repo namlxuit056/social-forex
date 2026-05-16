@@ -1,16 +1,27 @@
 import type { QuoteRow } from "@/lib/quotes/types";
+import type { TradingViewTechnicalContext } from "@/lib/ai/tradingview-context";
 
-export const SYSTEM_PROMPT = `You are a professional forex technical analyst. You analyze current market data and provide trading suggestions.
+export const SYSTEM_PROMPT = `You are an expert forex market analyst for Social Forex. Act like a senior technical analyst and risk manager, not a generic chatbot.
+
+Your job is to turn live quote data plus TradingView technical context into a disciplined educational trading scenario. Be conservative, precise, and transparent about uncertainty.
 
 RULES:
 - Always respond in valid JSON matching the exact schema below
-- Base analysis on the current price data provided (bid, ask, change%)
-- Calculate entry near current price, SL within 1-3% of entry, TP with at least 1.5:1 reward-to-risk ratio
+- Base analysis only on the current price data and TradingView technical context provided
+- Weigh M15, H1, and H4 together. H4 defines broader bias, H1 defines setup quality, M15 helps execution timing
+- Explain the market bias as a professional forex analyst: multi-timeframe trend, RSI/EMA structure, candle behavior, momentum, nearby support/resistance, spread/risk quality, and invalidation
+- Calculate entry near current price. Prefer waiting for a small pullback or breakout retest when the spread/change suggests poor immediate execution
+- SL must be logical for the asset class and volatility: normally within 0.3-1.5% for FX majors/minors, wider for metals/energy/crypto when needed, never unrealistically tight
+- TP must target at least 1.5:1 reward-to-risk ratio whenever possible
+- keyLevels.support must be below current mid price; keyLevels.resistance must be above current mid price
 - Confidence is 1 (very low) to 5 (very high)
-- Reasoning must be concise (2-4 sentences) in Vietnamese, explaining the technical basis
-- For metals/commodities, adjust SL/TP ranges proportionally to the asset price
+- Reasoning must be in Vietnamese, 3-5 concise sentences, written like an expert forex analyst. Include: bias, entry logic, SL invalidation, TP/risk-reward, and one caution
+- For metals, energy, indices, and crypto, adjust SL/TP ranges proportionally to the asset price and do not reuse FX pip logic
 - Never recommend confidence above 4 without very strong signals
+- If the data is mixed, choose confidence 2-3 and say why
+- If TradingView context is missing or incomplete, explicitly lower confidence and rely on the live quote snapshot
 - This is NOT investment advice — this is educational analysis only
+- Do not promise profit, certainty, or guaranteed outcomes
 
 RESPONSE JSON SCHEMA:
 {
@@ -25,11 +36,41 @@ RESPONSE JSON SCHEMA:
 
 Respond ONLY with the JSON object, no markdown, no extra text.`;
 
-export function buildUserPrompt(quote: QuoteRow): string {
+function formatNumber(value: number | null, digits = 5) {
+  if (value === null) return "n/a";
+  return value.toFixed(value >= 100 ? 2 : digits);
+}
+
+function formatTradingViewContext(context?: TradingViewTechnicalContext | null) {
+  if (!context) {
+    return "TradingView technical context: unavailable. Use lower confidence and state that the plan is based mainly on the live quote snapshot.";
+  }
+
+  const frames = context.frames
+    .map(
+      (frame) =>
+        `${frame.timeframe}: trend=${frame.trend}, recommendation=${formatNumber(frame.recommendation, 2)}, MA=${formatNumber(frame.maRecommendation, 2)}, oscillator=${formatNumber(frame.oscillatorRecommendation, 2)}, RSI=${formatNumber(frame.rsi, 1)} (${frame.rsiState}), EMA bias=${frame.emaBias}, EMA20=${formatNumber(frame.ema20)}, EMA50=${formatNumber(frame.ema50)}, EMA200=${formatNumber(frame.ema200)}, ATR=${formatNumber(frame.atr)}, ADX=${formatNumber(frame.adx, 1)}, MACD=${formatNumber(frame.macd)}, MACD signal=${formatNumber(frame.macdSignal)}, candle=${frame.candlePattern}, OHLC=${formatNumber(frame.open)}/${formatNumber(frame.high)}/${formatNumber(frame.low)}/${formatNumber(frame.close)}, volume=${formatNumber(frame.volume, 0)}, change=${formatNumber(frame.changePct, 2)}%`,
+    )
+    .join("\n");
+
+  return `TradingView technical context:
+Source: ${context.source}
+TradingView Symbol: ${context.tradingViewSymbol}
+Market Scanner: ${context.market}
+Updated At: ${context.updatedAt}
+Summary: ${context.summary}
+${frames}`;
+}
+
+export function buildUserPrompt(
+  quote: QuoteRow,
+  tradingViewContext?: TradingViewTechnicalContext | null,
+): string {
   const mid = (quote.bid + quote.ask) / 2;
   const spread = quote.ask - quote.bid;
+  const spreadPct = mid > 0 ? (spread / mid) * 100 : 0;
 
-  return `Analyze this trading pair and provide an entry suggestion:
+  return `Analyze this market like an expert forex analyst and provide a disciplined educational trading plan.
 
 Symbol: ${quote.symbol}
 Name: ${quote.name}
@@ -38,7 +79,10 @@ Current Bid: ${quote.bid}
 Current Ask: ${quote.ask}
 Mid Price: ${mid.toFixed(quote.bid > 100 ? 2 : 5)}
 Spread: ${spread.toFixed(quote.bid > 100 ? 2 : 5)}
+Spread % of Mid: ${spreadPct.toFixed(4)}%
 Change: ${quote.changePct >= 0 ? "+" : ""}${quote.changePct.toFixed(2)}%
 
-Provide your analysis as a JSON object.`;
+${formatTradingViewContext(tradingViewContext)}
+
+Return one conservative setup only. The reasoning must sound like a professional forex expert explaining bias, execution, invalidation, target, and risk warning in Vietnamese.`;
 }

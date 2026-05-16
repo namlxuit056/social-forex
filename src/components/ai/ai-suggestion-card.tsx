@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { AiSuggestResponse } from "@/lib/ai/types";
+import type { TradingViewTechnicalFrame } from "@/lib/ai/tradingview-context";
 
 function ConfidenceStars({ level }: { level: number }) {
   return (
@@ -35,6 +36,57 @@ function formatPrice(value: number): string {
   return value.toFixed(5);
 }
 
+function riskRewardRatio({
+  direction,
+  entry,
+  stopLoss,
+  takeProfit,
+}: {
+  direction: "LONG" | "SHORT";
+  entry: number;
+  stopLoss: number;
+  takeProfit: number;
+}): string {
+  const risk =
+    direction === "LONG" ? entry - stopLoss : stopLoss - entry;
+  const reward =
+    direction === "LONG" ? takeProfit - entry : entry - takeProfit;
+
+  if (risk <= 0 || reward <= 0) return "—";
+  return `1:${(reward / risk).toFixed(2)}`;
+}
+
+function formatMetric(value: number | null, digits = 1): string {
+  if (value === null) return "n/a";
+  return value.toFixed(digits);
+}
+
+function TrendPill({ frame }: { frame: TradingViewTechnicalFrame }) {
+  const trendClass =
+    frame.trend === "bullish"
+      ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+      : frame.trend === "bearish"
+        ? "border-red-500/25 bg-red-500/10 text-red-700 dark:text-red-300"
+        : "border-border bg-muted/60 text-muted-foreground";
+
+  return (
+    <div className={cn("rounded-md border px-2 py-1.5", trendClass)}>
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-[10px] font-semibold uppercase">
+          {frame.timeframe}
+        </span>
+        <span className="text-[10px] capitalize">{frame.trend}</span>
+      </div>
+      <div className="mt-1 text-[10px] leading-relaxed opacity-90">
+        RSI {formatMetric(frame.rsi)} · EMA {frame.emaBias}
+      </div>
+      <div className="mt-0.5 line-clamp-1 text-[10px] opacity-80">
+        {frame.candlePattern}
+      </div>
+    </div>
+  );
+}
+
 interface Props {
   data: AiSuggestResponse;
   onPostSignal?: () => void;
@@ -49,6 +101,7 @@ export function AiSuggestionCard({
   const t = useTranslations("ai");
   const { suggestion, symbol, disclaimer } = data;
   const isLong = suggestion.direction === "LONG";
+  const rr = riskRewardRatio(suggestion);
 
   return (
     <div className="overflow-hidden rounded-xl border border-border bg-background shadow-sm">
@@ -112,7 +165,7 @@ export function AiSuggestionCard({
 
       {/* Key levels */}
       {suggestion.keyLevels && (
-        <div className="flex items-center gap-4 border-b border-border px-4 py-2">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-border px-4 py-2">
           <span className="text-[10px] font-medium uppercase text-muted-foreground">
             {t("keyLevels")}
           </span>
@@ -128,6 +181,28 @@ export function AiSuggestionCard({
               {formatPrice(suggestion.keyLevels.resistance)}
             </strong>
           </span>
+          <span className="text-xs text-muted-foreground">
+            {t("riskReward")}:{" "}
+            <strong className="text-foreground">{rr}</strong>
+          </span>
+        </div>
+      )}
+
+      {data.technicalContext && (
+        <div className="border-b border-border bg-muted/20 px-4 py-3">
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+            <span className="text-[10px] font-semibold uppercase text-muted-foreground">
+              {t("tradingViewContext")}
+            </span>
+            <span className="text-[10px] text-muted-foreground">
+              {data.technicalContext.tradingViewSymbol}
+            </span>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-3">
+            {data.technicalContext.frames.map((frame) => (
+              <TrendPill key={frame.timeframe} frame={frame} />
+            ))}
+          </div>
         </div>
       )}
 

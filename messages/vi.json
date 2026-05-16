@@ -756,9 +756,11 @@
     "accountEmailLabel": "Email tài khoản của bạn:"
   },
   "ai": {
-    "analyzeButton": "Phân tích AI",
+    "expertTitle": "AI chuyên gia Forex",
+    "expertSubtitle": "Phân tích theo phong cách chuyên gia: xu hướng, vùng giá quan trọng, điểm vào, SL/TP, R:R và cảnh báo rủi ro.",
+    "analyzeButton": "Phân tích như chuyên gia",
     "analyzing": "Đang phân tích...",
-    "title": "Đề xuất AI",
+    "title": "Kịch bản chuyên gia AI",
     "direction": "Hướng",
     "long": "LONG (Mua)",
     "short": "SHORT (Bán)",
@@ -769,6 +771,8 @@
     "reasoning": "Phân tích",
     "support": "Hỗ trợ",
     "resistance": "Kháng cự",
+    "riskReward": "R:R",
+    "tradingViewContext": "TradingView M15 / H1 / H4",
     "keyLevels": "Mức giá quan trọng",
     "postSignal": "Đăng tín hiệu từ AI",
     "disclaimer": "Đề xuất AI chỉ mang tính tham khảo, không phải tư vấn đầu tư.",

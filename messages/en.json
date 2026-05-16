@@ -756,9 +756,11 @@
     "accountEmailLabel": "Your account email:"
   },
   "ai": {
-    "analyzeButton": "AI Analysis",
+    "expertTitle": "Forex Expert AI",
+    "expertSubtitle": "Expert-style analysis: trend bias, key levels, entry, SL/TP, R:R and risk warning.",
+    "analyzeButton": "Analyze like an expert",
     "analyzing": "Analyzing...",
-    "title": "AI Suggestion",
+    "title": "AI Expert Scenario",
     "direction": "Direction",
     "long": "LONG (Buy)",
     "short": "SHORT (Sell)",
@@ -769,6 +771,8 @@
     "reasoning": "Analysis",
     "support": "Support",
     "resistance": "Resistance",
+    "riskReward": "R:R",
+    "tradingViewContext": "TradingView M15 / H1 / H4",
     "keyLevels": "Key levels",
     "postSignal": "Post signal from AI",
     "disclaimer": "AI suggestions are for reference only, not investment advice.",
