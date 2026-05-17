@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Script from "next/script";
+import { useRouter } from "next/navigation";
 import { CheckCircle2, Loader2, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { VIP_PLANS, type VipPlanKey } from "@/lib/vip-plans";
@@ -50,6 +51,7 @@ export function PayPalVipCheckout({
   clientId: string | undefined;
   copy: Copy;
 }) {
+  const router = useRouter();
   const [planKey, setPlanKey] = useState<VipPlanKey>("quarterly");
   const [scriptReady, setScriptReady] = useState(false);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -99,6 +101,7 @@ export function PayPalVipCheckout({
           return;
         }
         setStatus("success");
+        router.refresh();
       },
       onError: () => setStatus("error"),
     });
@@ -109,7 +112,7 @@ export function PayPalVipCheckout({
     return () => {
       paypalButton.close?.();
     };
-  }, [canRenderPayPal, planKey]);
+  }, [canRenderPayPal, planKey, router]);
 
   return (
     <section className="space-y-5 rounded-xl border border-border bg-card/50 p-6">
