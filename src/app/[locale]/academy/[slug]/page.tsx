@@ -5,10 +5,56 @@ import { BackLink } from "@/components/layout/back-link";
 import { Disclaimer } from "@/components/layout/disclaimer";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
 import { Badge } from "@/components/ui/badge";
-import { academyLessons } from "@/lib/content/academy";
+import { getAcademyLesson, getAcademyLessons } from "@/lib/content/academy";
 import { pageCtaItems } from "@/lib/page-cta-i18n";
+import { absoluteUrl } from "@/lib/site-url";
+import { routing } from "@/i18n/routing";
 
 type Props = { params: Promise<{ slug: string; locale: string }> };
+
+export async function generateStaticParams() {
+  return routing.locales.flatMap((locale) =>
+    getAcademyLessons(locale).map((lesson) => ({
+      locale,
+      slug: lesson.slug,
+    })),
+  );
+}
+
+export async function generateMetadata({ params }: Props) {
+  const { slug, locale } = await params;
+  setRequestLocale(locale);
+  const lesson = getAcademyLesson(slug, locale);
+  if (!lesson) return {};
+
+  return {
+    title: lesson.title,
+    description: lesson.summary,
+    keywords: lesson.keywords,
+    alternates: {
+      canonical: absoluteUrl(`/academy/${slug}`, locale),
+      languages: {
+        vi: absoluteUrl(`/academy/${slug}`, "vi"),
+        en: absoluteUrl(`/academy/${slug}`, "en"),
+        "x-default": absoluteUrl(`/academy/${slug}`, routing.defaultLocale),
+      },
+    },
+    openGraph: {
+      type: "article",
+      title: lesson.title,
+      description: lesson.summary,
+      url: absoluteUrl(`/academy/${slug}`, locale),
+      siteName: "Social Forex",
+      section: "Academy",
+      tags: lesson.keywords,
+    },
+    twitter: {
+      card: "summary",
+      title: lesson.title,
+      description: lesson.summary,
+    },
+  };
+}
 
 export default async function AcademyLessonPage({ params }: Props) {
   const { slug, locale } = await params;
@@ -17,7 +63,7 @@ export default async function AcademyLessonPage({ params }: Props) {
   const tCommon = await getTranslations("common");
   const ctaRow = await pageCtaItems("learn", "trading");
 
-  const lesson = academyLessons.find((l) => l.slug === slug);
+  const lesson = getAcademyLesson(slug, locale);
   if (!lesson) notFound();
 
   const levelLabel: Record<string, string> = {
