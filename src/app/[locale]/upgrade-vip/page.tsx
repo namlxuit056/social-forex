@@ -16,6 +16,7 @@ import { EmptyState } from "@/components/layout/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { PayPalVipCheckout } from "@/components/vip/paypal-vip-checkout";
+import { getPayPalPublicClientId } from "@/lib/paypal-vip";
 import { cn } from "@/lib/utils";
 
 export async function generateMetadata({
@@ -108,10 +109,7 @@ export default async function UpgradeVipPage({
       </div>
 
       <PayPalVipCheckout
-        clientId={
-          process.env.NEXT_PUBLIC_PAYPAL_SANDBOX_CLIENT_ID ||
-          process.env.PAYPAL_CLIENT_ID
-        }
+        clientId={getPayPalPublicClientId()}
         copy={{
           selectPlan: t("selectPlan"),
           monthly: t("planMonthly"),

@@ -93,7 +93,7 @@
 
 ### F2 — Monetization & tin cậy
 
-- [ ] Thanh toán VIP (sandbox → production) + webhook `vipUntil`.
+- [x] Thanh toán VIP (sandbox → production) + webhook `vipUntil`.
 - [ ] Email xác nhận / nhắc VIP (optional).
 
 ### F3 — Vận hành

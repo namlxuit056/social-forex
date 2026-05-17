@@ -1,12 +1,11 @@
 import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { prisma } from "@/lib/prisma";
 import {
-  addVipDays,
   capturePayPalVipOrder,
   getSuccessfulCapture,
 } from "@/lib/paypal-vip";
+import { fulfillVipPayment } from "@/lib/vip-payment";
 import { getVipPlan } from "@/lib/vip-plans";
 
 export async function POST(req: NextRequest) {
@@ -34,7 +33,8 @@ export async function POST(req: NextRequest) {
   let captureData;
   try {
     captureData = await capturePayPalVipOrder(body.orderId);
-  } catch {
+  } catch (error) {
+    console.error("PayPal VIP capture failed", error);
     return NextResponse.json({ error: "paypal_capture_failed" }, { status: 502 });
   }
 
@@ -48,34 +48,24 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "amount_mismatch" }, { status: 400 });
   }
 
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { vipUntil: true },
+  const result = await fulfillVipPayment({
+    providerOrderId: body.orderId,
+    providerCaptureId: capture.id,
+    userId: session.user.id,
+    planKey: plan.key,
+    amount: amount.value,
+    currency: amount.currency_code,
+    source: "capture",
+    rawPayload: captureData,
   });
-  const vipUntil = addVipDays(user?.vipUntil, plan.days);
-
-  await prisma.$transaction([
-    prisma.user.update({
-      where: { id: session.user.id },
-      data: { vipUntil },
-    }),
-    prisma.vipAuditLog.create({
-      data: {
-        adminId: session.user.id,
-        userId: session.user.id,
-        action: "paypal_sandbox_capture",
-        days: plan.days,
-        vipUntil,
-        note: `order=${body.orderId};capture=${capture.id ?? "unknown"};plan=${plan.key}`,
-      },
-    }),
-  ]);
 
   revalidatePath("/upgrade-vip");
   revalidatePath("/profile");
 
   return NextResponse.json({
     ok: true,
-    vipUntil: vipUntil.toISOString(),
+    fulfilled: result.fulfilled,
+    alreadyFulfilled: result.alreadyFulfilled,
+    vipUntil: result.vipUntil.toISOString(),
   });
 }

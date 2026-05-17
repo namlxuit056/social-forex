@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { createPayPalVipOrder } from "@/lib/paypal-vip";
+import { recordCreatedVipPayment } from "@/lib/vip-payment";
 import { getVipPlan } from "@/lib/vip-plans";
 
 export async function POST(req: NextRequest) {
@@ -33,8 +34,14 @@ export async function POST(req: NextRequest) {
       userId: session.user.id,
       userEmail: user?.email,
     });
+    await recordCreatedVipPayment({
+      providerOrderId: order.id,
+      userId: session.user.id,
+      planKey: plan.key,
+    });
     return NextResponse.json({ id: order.id });
-  } catch {
+  } catch (error) {
+    console.error("PayPal VIP create order failed", error);
     return NextResponse.json({ error: "paypal_unavailable" }, { status: 502 });
   }
 }

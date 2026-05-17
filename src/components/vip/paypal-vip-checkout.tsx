@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Script from "next/script";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle2, Loader2, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { VIP_PLANS, type VipPlanKey } from "@/lib/vip-plans";
@@ -52,9 +52,12 @@ export function PayPalVipCheckout({
   copy: Copy;
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [planKey, setPlanKey] = useState<VipPlanKey>("quarterly");
   const [scriptReady, setScriptReady] = useState(false);
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">(
+    searchParams.get("payment") === "success" ? "success" : "idle",
+  );
   const buttonRef = useRef<HTMLDivElement>(null);
   const paypalButtonRef = useRef<ReturnType<PayPalNamespace["Buttons"]> | null>(null);
 
@@ -101,6 +104,7 @@ export function PayPalVipCheckout({
           return;
         }
         setStatus("success");
+        router.replace("?payment=success", { scroll: false });
         router.refresh();
       },
       onError: () => setStatus("error"),

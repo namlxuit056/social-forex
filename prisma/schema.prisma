@@ -27,6 +27,13 @@ enum SignalStatus {
   CANCELLED
 }
 
+enum VipPaymentStatus {
+  CREATED
+  CAPTURED
+  FULFILLED
+  FAILED
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -48,22 +55,23 @@ model User {
   posts   ForumPost[]
   signals Signal[]
 
-  sentMessages     DirectMessage[] @relation("SentMessages")
-  receivedMessages DirectMessage[] @relation("ReceivedMessages")
-  forumReports     ForumReport[]   @relation("ForumReporter")
-  favoriteSymbols  UserFavoriteSymbol[]
-  signalComments   SignalComment[]
-  signalReactions  SignalReaction[]
-  tradeJournals    TradeJournal[]
-  notifications       Notification[] @relation("NotificationRecipient")
-  notificationsAsActor Notification[] @relation("NotificationActor")
-  signalEditLogs   SignalEditLog[]
-  pinnedSignals    UserPinnedSignal[]
+  sentMessages         DirectMessage[]      @relation("SentMessages")
+  receivedMessages     DirectMessage[]      @relation("ReceivedMessages")
+  forumReports         ForumReport[]        @relation("ForumReporter")
+  favoriteSymbols      UserFavoriteSymbol[]
+  signalComments       SignalComment[]
+  signalReactions      SignalReaction[]
+  tradeJournals        TradeJournal[]
+  notifications        Notification[]       @relation("NotificationRecipient")
+  notificationsAsActor Notification[]       @relation("NotificationActor")
+  signalEditLogs       SignalEditLog[]
+  pinnedSignals        UserPinnedSignal[]
+  vipPayments          VipPayment[]
 
   /// Thông báo in-app: tín hiệu từ trader đang follow
-  notifySignalFollow Boolean @default(true)
+  notifySignalFollow       Boolean @default(true)
   /// Thông báo khi có tín hiệu trùng symbol trong watchlist (favorites)
-  notifySignalFavoriteSym Boolean @default(true)
+  notifySignalFavoriteSym  Boolean @default(true)
   /// (VIP) Thông báo khi có tín hiệu VIP mới trên nền tảng
   notifySignalVipBroadcast Boolean @default(false)
 
@@ -143,13 +151,13 @@ model ForumThread {
 }
 
 model ForumPost {
-  id       String      @id @default(cuid())
+  id       String        @id @default(cuid())
   threadId String
   authorId String
   body     String
-  hidden   Boolean     @default(false)
-  thread   ForumThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
-  author   User        @relation(fields: [authorId], references: [id])
+  hidden   Boolean       @default(false)
+  thread   ForumThread   @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  author   User          @relation(fields: [authorId], references: [id])
   reports  ForumReport[]
 
   createdAt DateTime @default(now())
@@ -157,39 +165,39 @@ model ForumPost {
 }
 
 model Signal {
-  id         String       @id @default(cuid())
-  authorId    String
-  symbol      String
-  direction   String
-  entry       Float
-  stopLoss    Float?
-  takeProfit  Float?
-  takeProfit2 Float?
-  takeProfit3 Float?
-  tier       SignalTier   @default(FREE)
-  status     SignalStatus @default(ACTIVE)
-  notes      String?
+  id            String             @id @default(cuid())
+  authorId      String
+  symbol        String
+  direction     String
+  entry         Float
+  stopLoss      Float?
+  takeProfit    Float?
+  takeProfit2   Float?
+  takeProfit3   Float?
+  tier          SignalTier         @default(FREE)
+  status        SignalStatus       @default(ACTIVE)
+  notes         String?
   /// Thời điểm đóng lệnh (khi chuyển khỏi ACTIVE)
-  closedAt   DateTime?
-  author     User         @relation(fields: [authorId], references: [id])
-  comments   SignalComment[]
-  reactions  SignalReaction[]
-  images     SignalImage[]
-  editLogs   SignalEditLog[]
+  closedAt      DateTime?
+  author        User               @relation(fields: [authorId], references: [id])
+  comments      SignalComment[]
+  reactions     SignalReaction[]
+  images        SignalImage[]
+  editLogs      SignalEditLog[]
   notifications Notification[]
-  pinnedBy   UserPinnedSignal[]
+  pinnedBy      UserPinnedSignal[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model SignalEditLog {
-  id       String   @id @default(cuid())
-  signalId String
-  userId   String
-  field    String
-  oldValue String?
-  newValue String?
+  id        String   @id @default(cuid())
+  signalId  String
+  userId    String
+  field     String
+  oldValue  String?
+  newValue  String?
   createdAt DateTime @default(now())
 
   signal Signal @relation(fields: [signalId], references: [id], onDelete: Cascade)
@@ -204,16 +212,16 @@ enum NotificationKind {
 }
 
 model Notification {
-  id        String   @id @default(cuid())
-  userId    String
-  kind      NotificationKind @default(SIGNAL_NEW)
+  id          String           @id @default(cuid())
+  userId      String
+  kind        NotificationKind @default(SIGNAL_NEW)
   /// SIGNAL_NEW: trùng signalId; USER_FOLLOWED: "f:{followerId}"
-  dedupeKey String
-  signalId  String?
+  dedupeKey   String
+  signalId    String?
   /// Người follow (chỉ dùng khi kind = USER_FOLLOWED)
   actorUserId String?
-  readAt    DateTime?
-  createdAt DateTime @default(now())
+  readAt      DateTime?
+  createdAt   DateTime         @default(now())
 
   user   User    @relation("NotificationRecipient", fields: [userId], references: [id], onDelete: Cascade)
   signal Signal? @relation(fields: [signalId], references: [id], onDelete: Cascade)
@@ -238,14 +246,14 @@ model SignalImage {
 }
 
 model SignalComment {
-  id     String  @id @default(cuid())
+  id       String  @id @default(cuid())
   signalId String
   authorId String
   body     String
   hidden   Boolean @default(false)
 
-  signal  Signal  @relation(fields: [signalId], references: [id], onDelete: Cascade)
-  author  User    @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  signal  Signal        @relation(fields: [signalId], references: [id], onDelete: Cascade)
+  author  User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
   reports ForumReport[]
 
   createdAt DateTime @default(now())
@@ -293,10 +301,10 @@ model TradeJournal {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  openedAt  DateTime @default(now())
+  openedAt  DateTime  @default(now())
   closedAt  DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   @@index([userId, openedAt])
 }
@@ -323,19 +331,19 @@ enum ReportStatus {
 }
 
 model ForumReport {
-  id         String       @id @default(cuid())
-  reporterId String
-  postId     String?
-  threadId   String?
+  id              String       @id @default(cuid())
+  reporterId      String
+  postId          String?
+  threadId        String?
   signalCommentId String?
-  reason     String
-  status     ReportStatus @default(OPEN)
-  reviewedBy String?
-  reviewNote String?
+  reason          String
+  status          ReportStatus @default(OPEN)
+  reviewedBy      String?
+  reviewNote      String?
 
-  reporter User        @relation("ForumReporter", fields: [reporterId], references: [id], onDelete: Cascade)
-  post     ForumPost?  @relation(fields: [postId], references: [id], onDelete: SetNull)
-  thread   ForumThread? @relation(fields: [threadId], references: [id], onDelete: SetNull)
+  reporter      User           @relation("ForumReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  post          ForumPost?     @relation(fields: [postId], references: [id], onDelete: SetNull)
+  thread        ForumThread?   @relation(fields: [threadId], references: [id], onDelete: SetNull)
   signalComment SignalComment? @relation(fields: [signalCommentId], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
@@ -356,6 +364,42 @@ model VipAuditLog {
   createdAt DateTime @default(now())
 
   @@index([userId, createdAt])
+}
+
+model VipPayment {
+  id                String           @id @default(cuid())
+  userId            String
+  provider          String           @default("PAYPAL")
+  providerOrderId   String           @unique
+  providerCaptureId String?          @unique
+  planKey           String
+  amount            String
+  currency          String           @default("USD")
+  status            VipPaymentStatus @default(CREATED)
+  vipUntil          DateTime?
+  fulfilledAt       DateTime?
+  rawPayload        Json?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
+}
+
+model VipWebhookEvent {
+  id              String    @id @default(cuid())
+  provider        String    @default("PAYPAL")
+  providerEventId String    @unique
+  eventType       String
+  providerOrderId String?
+  processedAt     DateTime?
+  rawPayload      Json?
+  createdAt       DateTime  @default(now())
+
+  @@index([eventType, createdAt])
+  @@index([providerOrderId])
 }
 
 model UserFavoriteSymbol {
