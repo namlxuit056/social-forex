@@ -4,8 +4,8 @@ import type { TradingViewTechnicalContext } from "@/lib/ai/tradingview-context";
 import { createAiClient, resolveAiProvider } from "@/lib/ai/provider";
 import type { QuoteRow } from "@/lib/quotes/types";
 
-const CACHE_TTL_MS = 60 * 60 * 1000;
-const CACHE_SCHEMA_VERSION = "daily-trend-v1";
+export const AI_DAILY_TREND_CACHE_TTL_MS = 60 * 60 * 1000;
+export const AI_DAILY_TREND_CACHE_SCHEMA_VERSION = "daily-trend-v1";
 const cache = new Map<string, { trend: AiDailyTrend; at: number }>();
 
 export const aiDailyTrendSchema = z.object({
@@ -96,9 +96,9 @@ export async function getAiDailyTrend(
   context?: TradingViewTechnicalContext | null,
   locale: AppLocale = "vi",
 ): Promise<AiDailyTrend> {
-  const cacheKey = `${CACHE_SCHEMA_VERSION}:${locale}:${quote.symbol}`;
+  const cacheKey = `${AI_DAILY_TREND_CACHE_SCHEMA_VERSION}:${locale}:${quote.symbol}`;
   const cached = cache.get(cacheKey);
-  if (cached && Date.now() - cached.at < CACHE_TTL_MS) {
+  if (cached && Date.now() - cached.at < AI_DAILY_TREND_CACHE_TTL_MS) {
     return cached.trend;
   }
 

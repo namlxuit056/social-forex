@@ -450,3 +450,19 @@ model EconomicCalendarEvent {
 
   @@index([timeUtc])
 }
+
+/// Cache nhận định AI trend trong ngày để tránh gọi lại model quá thường xuyên.
+model AiTrendCache {
+  id            String   @id @default(cuid())
+  symbol        String
+  locale        String
+  schemaVersion String
+  trend         Json
+  generatedAt   DateTime
+  expiresAt     DateTime
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([symbol, locale, schemaVersion])
+  @@index([expiresAt])
+}

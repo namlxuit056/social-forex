@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { localeFromRequest } from "@/lib/api-locale";
 import { getAiDailyTrend, AiTrendUnavailableError } from "@/lib/ai/trend";
+import {
+  getCachedAiDailyTrend,
+  setCachedAiDailyTrend,
+} from "@/lib/ai/trend-cache";
 import type { AiSuggestError } from "@/lib/ai/types";
 import { getTradingViewTechnicalContext } from "@/lib/ai/tradingview-context";
 import { pickAi } from "@/lib/messages-pick";
@@ -31,6 +35,17 @@ export async function POST(req: NextRequest) {
     return errorJson(ai.apiSymbolUnsupported, 400);
   }
 
+  const cached = await getCachedAiDailyTrend(symbol, loc);
+  if (cached) {
+    return NextResponse.json({
+      symbol,
+      trend: cached.trend,
+      generatedAt: cached.generatedAt.toISOString(),
+      cached: true,
+      disclaimer: ai.apiDisclaimer,
+    });
+  }
+
   const rateLimitKey = `ai-trend:${req.headers.get("x-forwarded-for") ?? "unknown"}`;
   const windowMs = 5 * 60_000;
   const { ok, remaining } = rateLimit(rateLimitKey, 60, windowMs);
@@ -49,11 +64,14 @@ export async function POST(req: NextRequest) {
       () => null,
     );
     const trend = await getAiDailyTrend(quote, technicalContext, loc);
+    const generatedAt = new Date();
+    await setCachedAiDailyTrend({ symbol, locale: loc, trend, generatedAt });
 
     return NextResponse.json({
       symbol,
       trend,
-      generatedAt: new Date().toISOString(),
+      generatedAt: generatedAt.toISOString(),
+      cached: false,
       disclaimer: ai.apiDisclaimer,
     });
   } catch (e) {

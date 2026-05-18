@@ -45,6 +45,8 @@ type PollPayload = {
 type AiTrendPayload = {
   symbol: string;
   trend?: AiTrendResult;
+  generatedAt?: string;
+  cached?: boolean;
   error?: string;
 };
 
