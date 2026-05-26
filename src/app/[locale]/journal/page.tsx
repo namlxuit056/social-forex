@@ -1,7 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { SignupPrompt } from "@/components/analytics/signup-prompt";
 import { EmptyState } from "@/components/layout/empty-state";
 import { JournalStats } from "./journal-stats";
 import { JournalTable } from "./journal-table";
@@ -43,6 +43,13 @@ export default async function JournalPage({
           title={t("loginRequired")}
           description={t("loginHint")}
           primary={{ href: "/auth/signin?callbackUrl=/journal", label: t("loginRequired") }}
+        />
+        <SignupPrompt
+          surface="journal"
+          title={t("signupPromptTitle")}
+          description={t("signupPromptDesc")}
+          ctaLabel={t("signupPromptCta")}
+          href="/auth/register?callbackUrl=/journal"
         />
       </div>
     );

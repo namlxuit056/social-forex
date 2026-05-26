@@ -1,7 +1,8 @@
 import { getTranslations } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
+import { TrackedLink } from "@/components/analytics/tracked-link";
 import { BookOpen, Calendar, Shield } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
+import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
 import { cn } from "@/lib/utils";
 
 const icons = [Shield, Calendar, BookOpen] as const;
@@ -64,29 +65,41 @@ export async function NewcomerPathSection() {
               <p className="mt-1.5 flex-1 text-sm leading-relaxed text-muted-foreground">
                 {t(step.descKey)}
               </p>
-              <Link
+              <TrackedLink
                 href={step.href}
+                eventName={ANALYTICS_EVENTS.homepageCtaClick}
+                eventProperties={{
+                  cta: step.ctaKey,
+                  destination: step.href,
+                  surface: "newcomer_path",
+                }}
                 className={cn(
                   buttonVariants({ variant: "secondary", size: "sm" }),
                   "mt-4 w-full justify-center sm:w-auto",
                 )}
               >
                 {t(step.ctaKey)}
-              </Link>
+              </TrackedLink>
             </li>
           );
         })}
       </ol>
       <div className="mt-6 flex justify-center border-t border-border/60 pt-5">
-        <Link
+        <TrackedLink
           href="/start"
+          eventName={ANALYTICS_EVENTS.homepageCtaClick}
+          eventProperties={{
+            cta: "newcomer_full_path",
+            destination: "/start",
+            surface: "newcomer_path",
+          }}
           className={cn(
             buttonVariants({ variant: "outline", size: "sm" }),
             "w-full max-w-md sm:w-auto",
           )}
         >
           {t("newcomerFullPathCta")}
-        </Link>
+        </TrackedLink>
       </div>
     </section>
   );

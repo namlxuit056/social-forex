@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { track } from "@vercel/analytics";
 import { signIn } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
@@ -16,6 +17,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
 
 export function RegisterForm() {
   const t = useTranslations("auth");
@@ -27,10 +29,15 @@ export function RegisterForm() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    track(ANALYTICS_EVENTS.registerView, { surface: "register_page" });
+  }, []);
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setLoading(true);
+    track(ANALYTICS_EVENTS.registerSubmit, { surface: "register_page" });
     const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -39,6 +46,10 @@ export function RegisterForm() {
     const data = (await res.json()) as { error?: string };
     if (!res.ok) {
       setLoading(false);
+      track(ANALYTICS_EVENTS.registerFailure, {
+        reason: data.error ? "api_error" : "unknown",
+        surface: "register_page",
+      });
       const msg = data.error ?? t("registerFailed");
       setError(msg);
       toast.error(t("registerFailTitle"), { description: msg });
@@ -51,11 +62,16 @@ export function RegisterForm() {
     });
     setLoading(false);
     if (sign?.error) {
+      track(ANALYTICS_EVENTS.registerFailure, {
+        reason: "signin_after_create",
+        surface: "register_page",
+      });
       const msg = t("createdSignInFailed");
       setError(msg);
       toast.warning(t("manualSignInTitle"), { description: msg });
       return;
     }
+    track(ANALYTICS_EVENTS.registerSuccess, { surface: "register_page" });
     toast.success(t("welcomeToast"));
     router.push(localizedHref("/dashboard", locale));
     router.refresh();
@@ -67,9 +83,15 @@ export function RegisterForm() {
         <CardTitle className="font-heading text-xl tracking-tight">
           {t("registerTitle")}
         </CardTitle>
-        <CardDescription>{t("registerPolicy")}</CardDescription>
+        <CardDescription>{t("registerValueProp")}</CardDescription>
       </CardHeader>
       <CardContent>
+        <ul className="mb-5 grid gap-2 rounded-lg border border-border/70 bg-muted/25 p-3 text-sm text-muted-foreground">
+          <li>{t("registerBenefitWatchlist")}</li>
+          <li>{t("registerBenefitProgress")}</li>
+          <li>{t("registerBenefitJournal")}</li>
+          <li>{t("registerBenefitFollow")}</li>
+        </ul>
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="register-name">{t("name")}</Label>
@@ -122,6 +144,9 @@ export function RegisterForm() {
           >
             {loading ? t("creatingAccount") : t("submitRegister")}
           </Button>
+          <p className="text-xs leading-relaxed text-muted-foreground">
+            {t("registerPolicy")}
+          </p>
         </form>
       </CardContent>
     </Card>
