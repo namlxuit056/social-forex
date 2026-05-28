@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
+import { SignupPrompt } from "@/components/analytics/signup-prompt";
 import { Link } from "@/i18n/navigation";
 import {
   AlertCircle,
@@ -338,6 +339,16 @@ export function LiveQuotesTable({
         <p className="text-xs text-muted-foreground">
           {t("watchlistPinnedHint")}
         </p>
+      ) : null}
+
+      {favoritesLoaded && !session?.user ? (
+        <SignupPrompt
+          surface="watchlist"
+          title={t("signupPromptWatchlistTitle")}
+          description={t("signupPromptWatchlistDesc")}
+          ctaLabel={t("signupPromptWatchlistCta")}
+          className="bg-card/55"
+        />
       ) : null}
 
       <div className="space-y-6">

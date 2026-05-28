@@ -1,4 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { SignupPrompt } from "@/components/analytics/signup-prompt";
 import { EconomicCalendar } from "@/components/calendar/economic-calendar";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
 import { parseCalendarCurrencySearchParams } from "@/lib/calendar/parse-currency-search-params";
@@ -61,6 +62,12 @@ export default async function CalendarPage({
         warning={warningText ?? undefined}
         syncedAt={cal.syncedAt}
         initialSelectedCurrencies={initialCurrencies}
+      />
+      <SignupPrompt
+        surface="calendar_reminders"
+        title={t("signupPromptTitle")}
+        description={t("signupPromptDesc")}
+        ctaLabel={t("signupPromptCta")}
       />
       <PageCtaRow heading={tCommon("ctaDiscovery")} items={ctaRow} />
     </div>

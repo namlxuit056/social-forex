@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import { SignupPrompt } from "@/components/analytics/signup-prompt";
 import { BackLink } from "@/components/layout/back-link";
 import { Disclaimer } from "@/components/layout/disclaimer";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
@@ -141,6 +142,14 @@ export default async function AcademyLessonPage({ params }: Props) {
         </div>
 
         <Disclaimer variant="compact" />
+
+        <SignupPrompt
+          surface="academy_progress"
+          title={t("signupPromptTitle")}
+          description={t("signupPromptDesc")}
+          ctaLabel={t("signupPromptCta")}
+          className="not-prose"
+        />
 
         <p className="text-sm text-muted-foreground">
           <Link href="/academy" className="font-medium text-primary hover:underline">

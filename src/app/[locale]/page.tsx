@@ -1,9 +1,11 @@
 import { BarChart3, BookOpen, ExternalLink, Shield } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import { TrackedLink } from "@/components/analytics/tracked-link";
 import { NewcomerPathSection } from "@/components/home/newcomer-path";
 import { FaqJsonLd } from "@/components/seo/faq-json-ld";
 import { buttonVariants } from "@/components/ui/button";
+import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
 import { getExnessAffiliateUrl } from "@/lib/exness-affiliate";
 import { cn } from "@/lib/utils";
 
@@ -93,53 +95,63 @@ export default async function HomePage({
         </p>
         <div className="mx-auto mt-10 flex w-full max-w-xl flex-col items-stretch gap-3 sm:max-w-none sm:items-center">
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-            <Link
+            <TrackedLink
               href="/start"
+              eventName={ANALYTICS_EVENTS.homepageCtaClick}
+              eventProperties={{ cta: "start_here", destination: "/start" }}
               className={cn(
                 buttonVariants({ size: "lg" }),
                 "w-full justify-center sm:w-auto sm:min-w-48",
               )}
             >
               {tHome("cta_start")}
-            </Link>
-            <Link
+            </TrackedLink>
+            <TrackedLink
               href="/desk"
+              eventName={ANALYTICS_EVENTS.homepageCtaClick}
+              eventProperties={{ cta: "live_desk", destination: "/desk" }}
               className={cn(
                 buttonVariants({ variant: "outline", size: "lg" }),
                 "w-full justify-center border-border sm:w-auto sm:min-w-48",
               )}
             >
               {tHome("cta_desk")}
-            </Link>
+            </TrackedLink>
           </div>
           <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:justify-center sm:gap-3">
-            <Link
+            <TrackedLink
               href="/academy"
+              eventName={ANALYTICS_EVENTS.homepageCtaClick}
+              eventProperties={{ cta: "academy", destination: "/academy" }}
               className={cn(
                 buttonVariants({ variant: "outline", size: "default" }),
                 "w-full justify-center border-border",
               )}
             >
               {tHome("cta_academy")}
-            </Link>
-            <Link
+            </TrackedLink>
+            <TrackedLink
               href="/quotes"
+              eventName={ANALYTICS_EVENTS.homepageCtaClick}
+              eventProperties={{ cta: "quotes", destination: "/quotes" }}
               className={cn(
                 buttonVariants({ variant: "outline", size: "default" }),
                 "w-full justify-center border-border",
               )}
             >
               {tHome("cta_quotes")}
-            </Link>
-            <Link
+            </TrackedLink>
+            <TrackedLink
               href="/calendar"
+              eventName={ANALYTICS_EVENTS.homepageCtaClick}
+              eventProperties={{ cta: "calendar", destination: "/calendar" }}
               className={cn(
                 buttonVariants({ variant: "outline", size: "default" }),
                 "w-full justify-center border-border",
               )}
             >
               {tHome("cta_calendar")}
-            </Link>
+            </TrackedLink>
           </div>
         </div>
       </section>

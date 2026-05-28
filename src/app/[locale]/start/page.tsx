@@ -1,10 +1,12 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
+import { SignupPrompt } from "@/components/analytics/signup-prompt";
+import { TrackedAnchor, TrackedLink } from "@/components/analytics/tracked-link";
 import { Disclaimer } from "@/components/layout/disclaimer";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
 import { FaqJsonLd } from "@/components/seo/faq-json-ld";
 import { AiAssistantPromptCard } from "@/components/start/ai-assistant-prompt-card";
 import { buttonVariants } from "@/components/ui/button";
+import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
 import { getExnessAffiliateUrl } from "@/lib/exness-affiliate";
 import {
   EXNESS_MT5_PLATFORM_URL,
@@ -74,6 +76,12 @@ export default async function StartPage({
         </p>
       </header>
 
+      <SignupPrompt
+        surface="start_progress"
+        title={t("signupPromptTitle")}
+        description={t("signupPromptDesc")}
+        ctaLabel={t("signupPromptCta")}
+      />
 
       <ol className="space-y-6">
         <li className="relative rounded-xl border border-border bg-card/40 p-5 pl-6 ring-1 ring-foreground/5 md:p-6 md:pl-8">
@@ -90,17 +98,22 @@ export default async function StartPage({
             {t("brokerStep1_body")}
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
-            <a
+            <TrackedAnchor
               href={exnessAffiliateUrl}
               target="_blank"
               rel={AFFILIATE_REL}
+              eventName={ANALYTICS_EVENTS.startCtaClick}
+              eventProperties={{
+                cta: "exness_registration",
+                destination: "external_exness",
+              }}
               className={cn(
                 buttonVariants({ variant: "default", size: "sm" }),
                 "text-xs font-medium",
               )}
             >
               {t("brokerStep1_cta")}
-            </a>
+            </TrackedAnchor>
           </div>
         </li>
 
@@ -118,28 +131,38 @@ export default async function StartPage({
             {t("brokerStep2_body")}
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
-            <a
+            <TrackedAnchor
               href={mt5DownloadUrl}
               target="_blank"
               rel="noopener noreferrer"
+              eventName={ANALYTICS_EVENTS.startCtaClick}
+              eventProperties={{
+                cta: "mt5_download",
+                destination: "external_mt5",
+              }}
               className={cn(
                 buttonVariants({ variant: "secondary", size: "sm" }),
                 "text-xs font-medium",
               )}
             >
               {t("brokerStep2_cta_mt5")}
-            </a>
-            <a
+            </TrackedAnchor>
+            <TrackedAnchor
               href={EXNESS_MT5_PLATFORM_URL}
               target="_blank"
               rel="noopener noreferrer"
+              eventName={ANALYTICS_EVENTS.startCtaClick}
+              eventProperties={{
+                cta: "exness_mt5_page",
+                destination: "external_exness_mt5",
+              }}
               className={cn(
                 buttonVariants({ variant: "secondary", size: "sm" }),
                 "text-xs font-medium",
               )}
             >
               {t("brokerStep2_cta_exness")}
-            </a>
+            </TrackedAnchor>
           </div>
         </li>
 
@@ -187,15 +210,20 @@ export default async function StartPage({
             {t("brokerStep5_body")}
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
-            <Link
+            <TrackedLink
               href="/quotes"
+              eventName={ANALYTICS_EVENTS.startCtaClick}
+              eventProperties={{
+                cta: "xauusd_quotes",
+                destination: "/quotes",
+              }}
               className={cn(
                 buttonVariants({ variant: "secondary", size: "sm" }),
                 "text-xs font-medium",
               )}
             >
               {t("brokerStep5_ctaQuotes")}
-            </Link>
+            </TrackedLink>
           </div>
         </li>
       </ol>
@@ -210,15 +238,17 @@ export default async function StartPage({
 
       <div className="rounded-xl border border-dashed border-border/80 bg-muted/20 p-5 text-center">
         <p className="text-sm text-muted-foreground">{t("closingHint")}</p>
-        <Link
+        <TrackedLink
           href="/academy"
+          eventName={ANALYTICS_EVENTS.startCtaClick}
+          eventProperties={{ cta: "academy_after_start", destination: "/academy" }}
           className={cn(
             buttonVariants({ variant: "default", size: "sm" }),
             "mt-4 inline-flex",
           )}
         >
           {t("ctaAcademyIndex")}
-        </Link>
+        </TrackedLink>
       </div>
 
       <Disclaimer variant="compact" />
