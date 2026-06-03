@@ -36,6 +36,27 @@ string PositionTypeName(long type)
    return "UNKNOWN";
 }
 
+string OrderTypeName(long type)
+{
+   if(type == ORDER_TYPE_BUY_LIMIT)
+      return "BUY_LIMIT";
+   if(type == ORDER_TYPE_SELL_LIMIT)
+      return "SELL_LIMIT";
+   if(type == ORDER_TYPE_BUY_STOP)
+      return "BUY_STOP";
+   if(type == ORDER_TYPE_SELL_STOP)
+      return "SELL_STOP";
+   if(type == ORDER_TYPE_BUY_STOP_LIMIT)
+      return "BUY_STOP_LIMIT";
+   if(type == ORDER_TYPE_SELL_STOP_LIMIT)
+      return "SELL_STOP_LIMIT";
+   if(type == ORDER_TYPE_BUY)
+      return "BUY";
+   if(type == ORDER_TYPE_SELL)
+      return "SELL";
+   return "UNKNOWN";
+}
+
 string AccountJson()
 {
    string json = "{";
@@ -75,6 +96,7 @@ string PositionsJson()
 
       json += "{";
       json += "\"ticket\":" + JsonString(IntegerToString((long)ticket)) + ",";
+      json += "\"identifier\":" + JsonString(IntegerToString((long)PositionGetInteger(POSITION_IDENTIFIER))) + ",";
       json += "\"symbol\":" + JsonString(PositionGetString(POSITION_SYMBOL)) + ",";
       json += "\"type\":" + JsonString(PositionTypeName(PositionGetInteger(POSITION_TYPE))) + ",";
       json += "\"volume\":" + DoubleToString(PositionGetDouble(POSITION_VOLUME), 2) + ",";
@@ -92,12 +114,53 @@ string PositionsJson()
    return json;
 }
 
+string OrdersJson()
+{
+   string json = "[";
+   int total = OrdersTotal();
+   bool first = true;
+
+   for(int i = 0; i < total; i++)
+   {
+      ulong ticket = OrderGetTicket(i);
+      if(ticket == 0)
+         continue;
+      if(!OrderSelect(ticket))
+         continue;
+
+      long type = OrderGetInteger(ORDER_TYPE);
+      if(type == ORDER_TYPE_BUY || type == ORDER_TYPE_SELL)
+         continue;
+
+      if(!first)
+         json += ",";
+      first = false;
+
+      datetime opened_at = (datetime)OrderGetInteger(ORDER_TIME_SETUP);
+
+      json += "{";
+      json += "\"ticket\":" + JsonString(IntegerToString((long)ticket)) + ",";
+      json += "\"symbol\":" + JsonString(OrderGetString(ORDER_SYMBOL)) + ",";
+      json += "\"type\":" + JsonString(OrderTypeName(type)) + ",";
+      json += "\"volume\":" + DoubleToString(OrderGetDouble(ORDER_VOLUME_CURRENT), 2) + ",";
+      json += "\"priceOpen\":" + DoubleToString(OrderGetDouble(ORDER_PRICE_OPEN), 5) + ",";
+      json += "\"stopLoss\":" + DoubleToString(OrderGetDouble(ORDER_SL), 5) + ",";
+      json += "\"takeProfit\":" + DoubleToString(OrderGetDouble(ORDER_TP), 5) + ",";
+      json += "\"openedAt\":" + JsonString(TimeToString(opened_at, TIME_DATE | TIME_SECONDS));
+      json += "}";
+   }
+
+   json += "]";
+   return json;
+}
+
 string BuildPayload()
 {
    string json = "{";
    json += "\"token\":" + JsonString(BridgeToken) + ",";
    json += "\"account\":" + AccountJson() + ",";
    json += "\"positions\":" + PositionsJson() + ",";
+   json += "\"orders\":" + OrdersJson() + ",";
    json += "\"terminal\":{";
    json += "\"name\":" + JsonString(TerminalInfoString(TERMINAL_NAME)) + ",";
    json += "\"build\":" + IntegerToString((int)TerminalInfoInteger(TERMINAL_BUILD));

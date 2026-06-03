@@ -21,10 +21,16 @@ enum SignalTier {
 }
 
 enum SignalStatus {
+  PENDING
   ACTIVE
   CLOSED_WIN
   CLOSED_LOSS
   CANCELLED
+}
+
+enum Mt5SignalKind {
+  PENDING_ORDER
+  OPEN_POSITION
 }
 
 enum VipPaymentStatus {
@@ -188,6 +194,7 @@ model Signal {
   editLogs      SignalEditLog[]
   notifications Notification[]
   pinnedBy      UserPinnedSignal[]
+  mt5Link       Mt5SignalLink?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -502,12 +509,14 @@ model Mt5Connection {
   freeMargin      Float?
   leverage        Int?
   openPositions   Int       @default(0)
+  pendingOrders   Int       @default(0)
   lastError       String?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
   user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   snapshots Mt5Snapshot[]
+  signalLinks Mt5SignalLink[]
 
   @@index([userId, revokedAt])
   @@index([lastSeenAt])
@@ -518,9 +527,27 @@ model Mt5Snapshot {
   connectionId String
   account      Json
   positions    Json
+  orders       Json     @default("[]")
   receivedAt   DateTime @default(now())
 
   connection Mt5Connection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
 
   @@index([connectionId, receivedAt])
+}
+
+model Mt5SignalLink {
+  id           String        @id @default(cuid())
+  connectionId String
+  signalId     String        @unique
+  mt5Ticket    String
+  kind         Mt5SignalKind
+  lastSeenAt   DateTime      @default(now())
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  connection Mt5Connection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  signal     Signal        @relation(fields: [signalId], references: [id], onDelete: Cascade)
+
+  @@unique([connectionId, mt5Ticket])
+  @@index([connectionId, kind])
 }

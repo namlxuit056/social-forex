@@ -38,7 +38,7 @@ type SignalRow = {
   takeProfit2: number | null;
   takeProfit3: number | null;
   tier: "FREE" | "VIP";
-  status: "ACTIVE" | "CLOSED_WIN" | "CLOSED_LOSS" | "CANCELLED";
+  status: "PENDING" | "ACTIVE" | "CLOSED_WIN" | "CLOSED_LOSS" | "CANCELLED";
   notes: string | null;
   masked: boolean;
   authorLabel: string;
@@ -62,6 +62,8 @@ function statusLabel(
   t: (key: string) => string,
 ): string {
   switch (status) {
+    case "PENDING":
+      return t("statusPending");
     case "ACTIVE":
       return t("statusActive");
     case "CLOSED_WIN":
@@ -77,6 +79,8 @@ function statusLabel(
 
 function statusBadgeClass(status: SignalRow["status"]): string {
   switch (status) {
+    case "PENDING":
+      return "border-amber-500/45 bg-amber-500/15 text-amber-200";
     case "ACTIVE":
       return "border-emerald-500/40 bg-emerald-500/15 text-emerald-200";
     case "CLOSED_WIN":
@@ -509,6 +513,7 @@ export function SignalRoom({
                     className={toolbarSelectClass}
                   >
                     <option value="all">{t("filterStatusAll")}</option>
+                    <option value="PENDING">{t("filterStatusPending")}</option>
                     <option value="ACTIVE">{t("filterStatusActive")}</option>
                     <option value="CLOSED_WIN">{t("filterStatusClosedWin")}</option>
                     <option value="CLOSED_LOSS">

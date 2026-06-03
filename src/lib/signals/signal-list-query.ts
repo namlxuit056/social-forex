@@ -12,6 +12,7 @@ export type SignalListSort = "newest" | "symbol" | "tier";
 export type SignalListTz = "vn" | "utc";
 
 const VALID_STATUS = [
+  "PENDING",
   "ACTIVE",
   "CLOSED_WIN",
   "CLOSED_LOSS",

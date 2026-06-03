@@ -8,6 +8,7 @@ import { PublicProfileHero } from "@/components/profile/public-profile-hero";
 import { auth } from "@/auth";
 import { TraderPerformanceCard } from "@/components/profile/trader-performance-card";
 import { PinnedSignalsSection } from "@/components/profile/pinned-signals-section";
+import { Mt5SyncedSignalsSection } from "@/components/profile/mt5-synced-signals-section";
 import { FollowButton } from "@/components/social/follow-button";
 import { buttonVariants } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
@@ -171,6 +172,8 @@ export default async function PublicProfilePage({ params }: Props) {
         viewerVipUntil={viewerDbUser?.vipUntil}
         viewerUserId={session?.user?.id}
       />
+
+      <Mt5SyncedSignalsSection profileUserId={userId} t={t} />
 
       <dl className="grid grid-cols-3 gap-4 rounded-xl border border-border bg-card/50 p-4 text-center text-sm ring-1 ring-foreground/5">
         <div>

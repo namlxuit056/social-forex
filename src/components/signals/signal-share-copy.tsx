@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 type SignalStatus =
+  | "PENDING"
   | "ACTIVE"
   | "CLOSED_WIN"
   | "CLOSED_LOSS"
@@ -23,6 +24,8 @@ function statusLine(
   t: (key: string) => string,
 ): string {
   switch (status) {
+    case "PENDING":
+      return t("statusPending");
     case "ACTIVE":
       return t("statusActive");
     case "CLOSED_WIN":

@@ -32,6 +32,10 @@ The EA sends:
 - account login, server, name, company, currency
 - balance, equity, margin, free margin, leverage
 - open positions with ticket, symbol, type, volume, entry, current price, SL, TP, profit, swap, opened time
+- pending orders with ticket, symbol, order type, volume, entry, SL, TP, setup time
+
+Social Forex creates/updates a FREE signal for each MT5 pending order or open
+position. Pending orders use `PENDING`; open positions use `ACTIVE`.
 
 ## Safety
 

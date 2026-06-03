@@ -1,4 +1,5 @@
 const STATUS_I18N = {
+  PENDING: "statusPending",
   ACTIVE: "statusActive",
   CLOSED_WIN: "statusClosedWin",
   CLOSED_LOSS: "statusClosedLoss",

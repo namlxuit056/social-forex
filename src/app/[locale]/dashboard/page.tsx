@@ -38,10 +38,12 @@ function parseFollowFeedMode(value: string | string[] | undefined): FollowFeedMo
 }
 
 function signalStatusText(
-  status: "ACTIVE" | "CLOSED_WIN" | "CLOSED_LOSS" | "CANCELLED",
+  status: "PENDING" | "ACTIVE" | "CLOSED_WIN" | "CLOSED_LOSS" | "CANCELLED",
   t: (key: string) => string,
 ) {
   switch (status) {
+    case "PENDING":
+      return t("followFeedStatusPending");
     case "ACTIVE":
       return t("followFeedStatusActive");
     case "CLOSED_WIN":
