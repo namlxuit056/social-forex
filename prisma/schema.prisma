@@ -308,7 +308,8 @@ model TradeJournal {
   pnl        Float?
   notes      String?
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mt5Link Mt5SignalLink?
 
   openedAt  DateTime  @default(now())
   closedAt  DateTime?
@@ -547,9 +548,11 @@ model Mt5SignalLink {
   lastSeenAt   DateTime      @default(now())
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+  journalId    String?       @unique
 
   connection Mt5Connection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
   signal     Signal        @relation(fields: [signalId], references: [id], onDelete: Cascade)
+  journal    TradeJournal? @relation(fields: [journalId], references: [id], onDelete: SetNull)
 
   @@unique([connectionId, mt5Ticket])
   @@index([connectionId, kind])

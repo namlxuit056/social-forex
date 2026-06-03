@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { useActionState } from "react";
 import { useTranslations } from "next-intl";
 import { Plus, X } from "lucide-react";
@@ -19,7 +19,12 @@ import {
 export function JournalForm() {
   const t = useTranslations("journal");
   const [open, setOpen] = useState(false);
+  const [, startTransition] = useTransition();
   const [state, formAction, isPending] = useActionState(createTrade, null);
+
+  useEffect(() => {
+    if (state?.ok) startTransition(() => setOpen(false));
+  }, [state?.ok, startTransition]);
 
   if (!open) {
     return (
@@ -152,11 +157,6 @@ export function JournalForm() {
           {state?.error && (
             <p className="text-sm text-destructive sm:col-span-2 lg:col-span-3">
               {state.error}
-            </p>
-          )}
-          {state?.ok && (
-            <p className="text-sm text-emerald-500 sm:col-span-2 lg:col-span-3">
-              {t("saved")}
             </p>
           )}
           <div className="sm:col-span-2 lg:col-span-3">

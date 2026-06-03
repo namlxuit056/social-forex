@@ -296,7 +296,7 @@ export async function POST(request: NextRequest) {
             mt5Ticket,
           },
         },
-        select: { id: true, signalId: true },
+        select: { id: true, signalId: true, journalId: true },
       });
 
       if (existing) {
@@ -314,13 +314,48 @@ export async function POST(request: NextRequest) {
           },
           select: { id: true },
         });
+
+        let { journalId } = existing;
+        if (!journalId) {
+          const journal = await tx.tradeJournal.create({
+            data: {
+              userId: connection.userId,
+              symbol: position.symbol.toUpperCase(),
+              direction: directionFromMt5Type(position.type),
+              entry: position.priceOpen,
+              stopLoss: position.stopLoss,
+              takeProfit: position.takeProfit,
+              lotSize: position.volume,
+              result: "PENDING",
+              openedAt: position.openedAt ? new Date(position.openedAt) : now,
+            },
+            select: { id: true },
+          });
+          journalId = journal.id;
+        }
+
         await tx.mt5SignalLink.update({
           where: { id: existing.id },
-          data: { kind: "OPEN_POSITION", lastProfit: position.profit, lastSeenAt: now },
+          data: { kind: "OPEN_POSITION", lastProfit: position.profit, lastSeenAt: now, journalId },
         });
         touchedSignalIds.push(signal.id);
         continue;
       }
+
+      const journal = await tx.tradeJournal.create({
+        data: {
+          userId: connection.userId,
+          symbol: position.symbol.toUpperCase(),
+          direction: directionFromMt5Type(position.type),
+          entry: position.priceOpen,
+          stopLoss: position.stopLoss,
+          takeProfit: position.takeProfit,
+          lotSize: position.volume,
+          result: "PENDING",
+          openedAt: position.openedAt ? new Date(position.openedAt) : now,
+        },
+        select: { id: true },
+      });
 
       const signal = await tx.signal.create({
         data: {
@@ -340,6 +375,7 @@ export async function POST(request: NextRequest) {
               kind: "OPEN_POSITION",
               lastProfit: position.profit,
               lastSeenAt: now,
+              journalId: journal.id,
             },
           },
         },
@@ -359,9 +395,12 @@ export async function POST(request: NextRequest) {
         kind: true,
         lastProfit: true,
         signalId: true,
+        journalId: true,
         signal: { select: { status: true } },
       },
     });
+
+    let journalTouched = false;
 
     for (const link of liveLinks) {
       if (link.kind === "PENDING_ORDER" && link.signal.status === "PENDING" && !pendingMt5Tickets.has(link.mt5Ticket)) {
@@ -389,6 +428,24 @@ export async function POST(request: NextRequest) {
           },
           select: { id: true },
         });
+
+        if (link.journalId) {
+          const profit = link.lastProfit;
+          const result =
+            typeof profit === "number"
+              ? profit > 0
+                ? "WIN"
+                : profit < 0
+                  ? "LOSS"
+                  : "BREAKEVEN"
+              : "PENDING";
+          await tx.tradeJournal.update({
+            where: { id: link.journalId },
+            data: { result, pnl: profit, closedAt: now },
+          });
+          journalTouched = true;
+        }
+
         closedSignalIds.push(signal.id);
       }
     }
@@ -398,6 +455,7 @@ export async function POST(request: NextRequest) {
   const changedSignalIds = Array.from(new Set([...touchedSignalIds, ...closedSignalIds]));
   if (changedSignalIds.length > 0) {
     revalidatePath("/signals");
+    revalidatePath("/journal");
     revalidatePath(`/u/${connection.userId}`);
     for (const signalId of changedSignalIds) {
       revalidatePath(`/signals/${signalId}`);
