@@ -1068,6 +1068,8 @@
     "signupPromptTitle": "Bắt đầu journal riêng",
     "signupPromptDesc": "Tạo tài khoản để lưu trade demo, ghi chú, win rate và bước tiếp theo sau mỗi buổi luyện.",
     "signupPromptCta": "Lưu journal",
+    "all": "Tất cả",
+    "emptyFilter": "Không có giao dịch nào khớp với bộ lọc.",
     "saved": "Đã lưu giao dịch.",
     "deleted": "Đã xóa giao dịch.",
     "closeTrade": "Đóng lệnh",

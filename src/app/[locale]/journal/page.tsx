@@ -5,7 +5,7 @@ import { SignupPrompt } from "@/components/analytics/signup-prompt";
 import { EmptyState } from "@/components/layout/empty-state";
 import { JournalStats } from "./journal-stats";
 import { JournalTable } from "./journal-table";
-import { JournalForm } from "./journal-form";
+import { JournalHeader } from "./journal-header";
 import { JournalLivePanel, type LivePosition } from "./journal-live-panel";
 
 export async function generateMetadata({
@@ -134,12 +134,7 @@ export default async function JournalPage({
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="font-heading text-2xl font-semibold text-foreground">
-          {t("title")}
-        </h1>
-        <p className="mt-2 text-muted-foreground">{t("description")}</p>
-      </div>
+      <JournalHeader />
 
       <JournalStats
         total={trades.length}
@@ -156,8 +151,6 @@ export default async function JournalPage({
         positions={livePositions}
         locale={locale}
       />
-
-      <JournalForm />
 
       {trades.length === 0 ? (
         <EmptyState title={t("empty")} description={t("emptyHint")} />

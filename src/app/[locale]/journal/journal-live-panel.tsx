@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { Activity, RefreshCw, TrendingUp, Wallet, Shield } from "lucide-react";
@@ -46,12 +46,15 @@ function fmt(value: number | null, digits = 2): string {
 export function JournalLivePanel({ account, positions, locale }: Props) {
   const t = useTranslations("journal");
   const router = useRouter();
+  const [spinning, setSpinning] = useState(false);
 
   useEffect(() => {
     if (!account) return;
     const id = window.setInterval(() => {
       if (document.visibilityState !== "visible") return;
+      setSpinning(true);
       router.refresh();
+      window.setTimeout(() => setSpinning(false), 700);
     }, REFRESH_MS);
     return () => window.clearInterval(id);
   }, [account, router]);
@@ -121,7 +124,7 @@ export function JournalLivePanel({ account, positions, locale }: Props) {
           {t("accountInfo")}
         </h2>
         <div className="flex items-center gap-1.5 rounded-md border border-border bg-muted/25 px-2 py-1 text-xs text-muted-foreground">
-          <RefreshCw className="size-3.5" />
+          <RefreshCw className={cn("size-3.5 transition-transform", spinning && "animate-spin")} />
           {t("autoRefresh")}
         </div>
       </div>
