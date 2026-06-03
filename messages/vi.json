@@ -4,6 +4,7 @@
     "signUp": "Đăng ký",
     "signOut": "Đăng xuất",
     "accountMenuAria": "Menu tài khoản",
+    "menuAria": "Menu điều hướng",
     "home": "Về trang chủ",
     "next": "Tiếp theo",
     "ctaDiscovery": "Khám phá thêm",
@@ -45,6 +46,9 @@
     "journal": "Nhật ký",
     "challenge": "Thử thách 7 ngày",
     "startHere": "Bắt đầu tại đây",
+    "marketTools": "Thị trường",
+    "community": "Cộng đồng",
+    "learning": "Học tập",
     "scrollPrimaryAria": "Mục chính",
     "scrollSecondaryAria": "Liên kết và công cụ thêm"
   },

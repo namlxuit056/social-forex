@@ -114,9 +114,9 @@ export async function SiteHeader() {
                 className="relative inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition hover:bg-muted hover:text-foreground"
                 aria-label={tc("notificationsBellAria")}
               >
-                <Bell className="size-[1.125rem]" aria-hidden />
+                <Bell className="size-4.5" aria-hidden />
                 {unreadNotifications > 0 ? (
-                  <span className="absolute -right-0.5 -top-0.5 flex min-w-[1rem] items-center justify-center rounded-full bg-primary px-1 text-[0.6rem] font-semibold leading-none text-primary-foreground">
+                  <span className="absolute -right-0.5 -top-0.5 flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[0.6rem] font-semibold leading-none text-primary-foreground">
                     {unreadNotifications > 99 ? "99+" : unreadNotifications}
                   </span>
                 ) : null}
@@ -169,7 +169,7 @@ export async function SiteHeader() {
             </>
           )}
 
-          {session?.user ? <MobileNav isStaff={isStaff} /> : null}
+          <MobileNav isStaff={isStaff} isAuthenticated={!!session?.user} />
         </div>
       </div>
 

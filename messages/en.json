@@ -4,6 +4,7 @@
     "signUp": "Sign up",
     "signOut": "Sign out",
     "accountMenuAria": "Account menu",
+    "menuAria": "Navigation menu",
     "home": "Go home",
     "next": "Next",
     "ctaDiscovery": "Explore more",
@@ -45,6 +46,9 @@
     "journal": "Journal",
     "challenge": "7-day challenge",
     "startHere": "Start here",
+    "marketTools": "Market",
+    "community": "Community",
+    "learning": "Learning",
     "scrollPrimaryAria": "Primary sections",
     "scrollSecondaryAria": "More links and tools"
   },
