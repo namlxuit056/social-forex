@@ -4,6 +4,7 @@ import {
   BarChart3,
   BookOpen,
   ClipboardList,
+  Cable,
   Lock,
   MessageCircle,
   MessageSquare,
@@ -165,6 +166,13 @@ export default async function DashboardPage({
       title: t("actionJournal"),
       desc: t("actionJournalDesc"),
       icon: ClipboardList,
+      tone: "default",
+    },
+    {
+      href: "/mt5" as const,
+      title: t("actionMt5"),
+      desc: t("actionMt5Desc"),
+      icon: Cable,
       tone: "default",
     },
     {

@@ -103,6 +103,17 @@ export default async function ProfilePage({
               </Link>
             </dd>
           </div>
+          <div className="flex flex-wrap gap-2">
+            <dt className="text-muted-foreground">{t("mt5Bridge")}</dt>
+            <dd>
+              <Link
+                href="/mt5"
+                className={cn(buttonVariants({ variant: "link", size: "sm" }), "h-auto px-0")}
+              >
+                {t("manageMt5Bridge")}
+              </Link>
+            </dd>
+          </div>
           <div className="flex gap-4">
             <dt className="text-muted-foreground">{t("vip")}</dt>
             <dd className={vip ? "text-primary" : "text-muted-foreground"}>

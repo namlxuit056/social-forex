@@ -68,6 +68,7 @@ model User {
   pinnedSignals        UserPinnedSignal[]
   vipPayments          VipPayment[]
   demoChallenges       UserDemoChallenge[]
+  mt5Connections       Mt5Connection[]
 
   /// Thông báo in-app: tín hiệu từ trader đang follow
   notifySignalFollow       Boolean @default(true)
@@ -480,4 +481,46 @@ model AiTrendCache {
 
   @@unique([symbol, locale, schemaVersion])
   @@index([expiresAt])
+}
+
+model Mt5Connection {
+  id              String    @id @default(cuid())
+  userId          String
+  name            String    @default("MT5 Bridge")
+  tokenHash       String    @unique
+  tokenLast4      String
+  revokedAt       DateTime?
+  lastSeenAt      DateTime?
+  accountLogin    String?
+  accountServer   String?
+  accountName     String?
+  accountCompany  String?
+  accountCurrency String?
+  balance         Float?
+  equity          Float?
+  margin          Float?
+  freeMargin      Float?
+  leverage        Int?
+  openPositions   Int       @default(0)
+  lastError       String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  snapshots Mt5Snapshot[]
+
+  @@index([userId, revokedAt])
+  @@index([lastSeenAt])
+}
+
+model Mt5Snapshot {
+  id           String   @id @default(cuid())
+  connectionId String
+  account      Json
+  positions    Json
+  receivedAt   DateTime @default(now())
+
+  connection Mt5Connection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+
+  @@index([connectionId, receivedAt])
 }
