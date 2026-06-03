@@ -2,6 +2,7 @@ import { UserPlus } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { RegisterForm } from "@/components/auth/register-form";
+import { safeLocalizedCallbackPath } from "@/lib/safe-redirect";
 
 export async function generateMetadata({
   params,
@@ -16,12 +17,19 @@ export async function generateMetadata({
 
 export default async function RegisterPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams?: Promise<{ callbackUrl?: string | string[] }>;
 }) {
   const { locale } = await params;
+  const query = await searchParams;
   setRequestLocale(locale);
   const t = await getTranslations("auth");
+  const rawCallbackUrl = Array.isArray(query?.callbackUrl)
+    ? query?.callbackUrl[0]
+    : query?.callbackUrl;
+  const callbackUrl = safeLocalizedCallbackPath(rawCallbackUrl, "/dashboard");
 
   return (
     <div className="mx-auto max-w-md space-y-8">
@@ -33,7 +41,7 @@ export default async function RegisterPage({
           {t("registerTitle")}
         </h1>
       </div>
-      <RegisterForm />
+      <RegisterForm callbackUrl={callbackUrl} />
       <p className="text-center text-sm text-muted-foreground">
         {t("hasAccount")}{" "}
         <Link

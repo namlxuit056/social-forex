@@ -36,6 +36,7 @@ const communityNavKeys = [
 ] as const;
 
 const learningNavKeys = [
+  { href: "/challenge", key: "challenge" },
   { href: "/start", key: "startHere" },
   { href: "/webinar", key: "webinar" },
   { href: "/resources", key: "resources" },

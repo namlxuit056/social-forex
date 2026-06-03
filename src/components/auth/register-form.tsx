@@ -19,7 +19,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
 
-export function RegisterForm() {
+export function RegisterForm({
+  callbackUrl = "/dashboard",
+}: {
+  callbackUrl?: string;
+}) {
   const t = useTranslations("auth");
   const locale = useLocale();
   const router = useRouter();
@@ -73,7 +77,7 @@ export function RegisterForm() {
     }
     track(ANALYTICS_EVENTS.registerSuccess, { surface: "register_page" });
     toast.success(t("welcomeToast"));
-    router.push(localizedHref("/dashboard", locale));
+    router.push(localizedHref(callbackUrl, locale));
     router.refresh();
   }
 

@@ -168,6 +168,13 @@ export default async function DashboardPage({
       tone: "default",
     },
     {
+      href: "/challenge" as const,
+      title: t("actionChallenge"),
+      desc: t("actionChallengeDesc"),
+      icon: Trophy,
+      tone: "primary",
+    },
+    {
       href: "/messages" as const,
       title: t("actionMessages"),
       desc: unreadDm > 0 ? t("actionMessagesUnread", { count: unreadDm }) : t("actionMessagesDesc"),
