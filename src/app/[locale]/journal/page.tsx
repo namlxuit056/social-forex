@@ -147,7 +147,11 @@ export default async function JournalPage({
         avgPnl={avgPnl}
       />
 
-      <JournalPerformanceChart trades={serialized} locale={locale} />
+      <JournalPerformanceChart
+        trades={serialized}
+        locale={locale}
+        accountBalance={mt5Connection?.balance ?? mt5Connection?.equity ?? null}
+      />
 
       <JournalLivePanel
         account={mt5Account}

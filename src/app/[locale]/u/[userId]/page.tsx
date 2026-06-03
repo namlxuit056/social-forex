@@ -9,6 +9,7 @@ import { auth } from "@/auth";
 import { TraderPerformanceCard } from "@/components/profile/trader-performance-card";
 import { PinnedSignalsSection } from "@/components/profile/pinned-signals-section";
 import { Mt5SyncedSignalsSection } from "@/components/profile/mt5-synced-signals-section";
+import { PublicTradingOverview } from "@/components/profile/public-trading-overview";
 import { FollowButton } from "@/components/social/follow-button";
 import { buttonVariants } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
@@ -166,6 +167,8 @@ export default async function PublicProfilePage({ params }: Props) {
         signalsListHref={signalsListHref}
         signalsCtaLabel={signalsCtaLabel}
       />
+
+      <PublicTradingOverview profileUserId={userId} locale={locale} t={t} />
 
       <PinnedSignalsSection
         profileUserId={userId}
