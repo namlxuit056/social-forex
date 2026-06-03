@@ -511,6 +511,7 @@ model Mt5Connection {
   leverage        Int?
   openPositions   Int       @default(0)
   pendingOrders   Int       @default(0)
+  lastPositions   Json      @default("[]")
   lastTradeHash   String?
   lastSnapshotAt  DateTime?
   lastError       String?

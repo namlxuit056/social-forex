@@ -187,6 +187,7 @@ export async function POST(request: NextRequest) {
         leverage: account.leverage,
         openPositions: positions.length,
         pendingOrders: orders.length,
+        lastPositions: positions as never,
         lastTradeHash: nextTradeHash,
         lastSnapshotAt: shouldCreateSnapshot ? now : undefined,
       },

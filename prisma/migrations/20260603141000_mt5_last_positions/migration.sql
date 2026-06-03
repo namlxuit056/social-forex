@@ -1,0 +1,2 @@
+ALTER TABLE "Mt5Connection"
+  ADD COLUMN IF NOT EXISTS "lastPositions" JSONB NOT NULL DEFAULT '[]';

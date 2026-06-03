@@ -65,12 +65,6 @@ export default async function JournalPage({
     prisma.mt5Connection.findFirst({
       where: { userId: session.user.id, revokedAt: null },
       orderBy: { lastSeenAt: "desc" },
-      include: {
-        snapshots: {
-          orderBy: { receivedAt: "desc" },
-          take: 1,
-        },
-      },
     }),
   ]);
 
@@ -85,10 +79,9 @@ export default async function JournalPage({
       ? Math.round((wins / (wins + losses)) * 100)
       : 0;
 
-  const latestSnapshot = mt5Connection?.snapshots[0];
   const livePositions: LivePosition[] = [];
-  if (latestSnapshot && Array.isArray(latestSnapshot.positions)) {
-    for (const p of latestSnapshot.positions as Record<string, unknown>[]) {
+  if (mt5Connection && Array.isArray(mt5Connection.lastPositions)) {
+    for (const p of mt5Connection.lastPositions as Record<string, unknown>[]) {
       const ticket = p.ticket != null ? String(p.ticket) : null;
       const symbol = typeof p.symbol === "string" ? p.symbol : null;
       const type = typeof p.type === "string" ? p.type : null;
