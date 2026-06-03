@@ -1,0 +1,2 @@
+export const DEMO_CHALLENGE_DAYS = 7;
+export const DEMO_CHALLENGE_REWARD_DAYS = 7;

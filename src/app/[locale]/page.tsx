@@ -96,15 +96,15 @@ export default async function HomePage({
         <div className="mx-auto mt-10 flex w-full max-w-xl flex-col items-stretch gap-3 sm:max-w-none sm:items-center">
           <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
             <TrackedLink
-              href="/start"
+              href="/challenge"
               eventName={ANALYTICS_EVENTS.homepageCtaClick}
-              eventProperties={{ cta: "start_here", destination: "/start" }}
+              eventProperties={{ cta: "demo_challenge", destination: "/challenge" }}
               className={cn(
                 buttonVariants({ size: "lg" }),
                 "w-full justify-center sm:w-auto sm:min-w-48",
               )}
             >
-              {tHome("cta_start")}
+              {tHome("cta_challenge")}
             </TrackedLink>
             <TrackedLink
               href="/desk"

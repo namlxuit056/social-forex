@@ -67,6 +67,7 @@ model User {
   signalEditLogs       SignalEditLog[]
   pinnedSignals        UserPinnedSignal[]
   vipPayments          VipPayment[]
+  demoChallenges       UserDemoChallenge[]
 
   /// Thông báo in-app: tín hiệu từ trader đang follow
   notifySignalFollow       Boolean @default(true)
@@ -427,6 +428,20 @@ model UserPinnedSignal {
 
   @@unique([userId, signalId])
   @@index([userId, sortOrder])
+}
+
+model UserDemoChallenge {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  completedDays   Int[]     @default([])
+  completedAt     DateTime?
+  rewardGrantedAt DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([rewardGrantedAt])
 }
 
 /// Bản ghi singleton — lần đồng bộ lịch kinh tế (FMP) gần nhất.
