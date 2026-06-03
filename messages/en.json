@@ -788,7 +788,18 @@
     "account": "Account",
     "equity": "Equity",
     "positions": "Open positions",
-    "snapshotReceived": "Latest snapshot received at {date}."
+    "snapshotReceived": "Latest snapshot received at {date}.",
+    "openPositionsTitle": "Running positions",
+    "openPositionsEmpty": "The latest snapshot has no open positions. If MT5 has active trades, check the EA Experts tab and confirm the response positions count is above 0.",
+    "colTicket": "Ticket",
+    "colSymbol": "Symbol",
+    "colType": "Type",
+    "colVolume": "Lot",
+    "colEntry": "Entry",
+    "colCurrent": "Current",
+    "colSl": "SL",
+    "colTp": "TP",
+    "colProfit": "P/L"
   },
   "notifications": {
     "title": "Notifications",

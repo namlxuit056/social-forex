@@ -788,7 +788,18 @@
     "account": "Tài khoản",
     "equity": "Equity",
     "positions": "Lệnh mở",
-    "snapshotReceived": "Snapshot gần nhất nhận lúc {date}."
+    "snapshotReceived": "Snapshot gần nhất nhận lúc {date}.",
+    "openPositionsTitle": "Lệnh đang chạy",
+    "openPositionsEmpty": "Snapshot mới nhất không có position đang mở. Nếu MT5 đang có lệnh, kiểm tra tab Experts của EA xem response positions có lớn hơn 0 không.",
+    "colTicket": "Ticket",
+    "colSymbol": "Symbol",
+    "colType": "Loại",
+    "colVolume": "Lot",
+    "colEntry": "Entry",
+    "colCurrent": "Giá hiện tại",
+    "colSl": "SL",
+    "colTp": "TP",
+    "colProfit": "P/L"
   },
   "notifications": {
     "title": "Thông báo",

@@ -19,6 +19,20 @@ import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
+type Mt5Position = {
+  ticket: string;
+  symbol: string;
+  type: string;
+  volume: number | null;
+  priceOpen: number | null;
+  priceCurrent: number | null;
+  stopLoss: number | null;
+  takeProfit: number | null;
+  profit: number | null;
+  swap: number | null;
+  openedAt: string | null;
+};
+
 export async function generateMetadata({
   params,
 }: {
@@ -32,6 +46,47 @@ export async function generateMetadata({
 
 function formatDate(date: Date | null, locale: string) {
   return date ? date.toLocaleString(locale) : "—";
+}
+
+function asNumber(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (typeof value === "string" && value.trim() !== "") {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
+}
+
+function asPosition(value: unknown): Mt5Position | null {
+  if (!value || typeof value !== "object") return null;
+  const row = value as Record<string, unknown>;
+  const ticket = typeof row.ticket === "string" ? row.ticket : String(row.ticket ?? "");
+  const symbol = typeof row.symbol === "string" ? row.symbol : "";
+  const type = typeof row.type === "string" ? row.type : "";
+  if (!ticket || !symbol || !type) return null;
+
+  return {
+    ticket,
+    symbol,
+    type,
+    volume: asNumber(row.volume),
+    priceOpen: asNumber(row.priceOpen),
+    priceCurrent: asNumber(row.priceCurrent),
+    stopLoss: asNumber(row.stopLoss),
+    takeProfit: asNumber(row.takeProfit),
+    profit: asNumber(row.profit),
+    swap: asNumber(row.swap),
+    openedAt: typeof row.openedAt === "string" ? row.openedAt : null,
+  };
+}
+
+function snapshotPositions(value: unknown): Mt5Position[] {
+  if (!Array.isArray(value)) return [];
+  return value.map(asPosition).filter((p): p is Mt5Position => Boolean(p));
+}
+
+function formatMaybeNumber(value: number | null, digits = 2) {
+  return value == null ? "—" : value.toFixed(digits);
 }
 
 export default async function Mt5Page({
@@ -156,6 +211,7 @@ export default async function Mt5Page({
           <div className="grid gap-4">
             {connections.map((connection) => {
               const latest = connection.snapshots[0];
+              const positions = snapshotPositions(latest?.positions);
               const active = Boolean(connection.lastSeenAt && !connection.revokedAt);
               return (
                 <Card key={connection.id} className="border-border/70 bg-card/70">
@@ -216,10 +272,85 @@ export default async function Mt5Page({
                     </div>
 
                     {latest ? (
-                      <div className="rounded-lg border border-border/70 bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
-                        {t("snapshotReceived", {
-                          date: latest.receivedAt.toLocaleString(locale),
-                        })}
+                      <div className="space-y-3">
+                        <div className="rounded-lg border border-border/70 bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
+                          {t("snapshotReceived", {
+                            date: latest.receivedAt.toLocaleString(locale),
+                          })}
+                        </div>
+                        <div className="space-y-2">
+                          <h3 className="text-sm font-medium text-foreground">
+                            {t("openPositionsTitle")}
+                          </h3>
+                          {positions.length > 0 ? (
+                            <div className="overflow-x-auto rounded-lg border border-border/70">
+                              <table className="w-full min-w-[760px] text-left text-xs">
+                                <thead className="bg-muted/40 text-muted-foreground">
+                                  <tr>
+                                    <th className="px-3 py-2 font-medium">{t("colTicket")}</th>
+                                    <th className="px-3 py-2 font-medium">{t("colSymbol")}</th>
+                                    <th className="px-3 py-2 font-medium">{t("colType")}</th>
+                                    <th className="px-3 py-2 text-right font-medium">{t("colVolume")}</th>
+                                    <th className="px-3 py-2 text-right font-medium">{t("colEntry")}</th>
+                                    <th className="px-3 py-2 text-right font-medium">{t("colCurrent")}</th>
+                                    <th className="px-3 py-2 text-right font-medium">{t("colSl")}</th>
+                                    <th className="px-3 py-2 text-right font-medium">{t("colTp")}</th>
+                                    <th className="px-3 py-2 text-right font-medium">{t("colProfit")}</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-border/60">
+                                  {positions.map((position) => (
+                                    <tr key={position.ticket} className="bg-card/40">
+                                      <td className="px-3 py-2 font-mono text-muted-foreground">
+                                        {position.ticket}
+                                      </td>
+                                      <td className="px-3 py-2 font-medium text-foreground">
+                                        {position.symbol}
+                                      </td>
+                                      <td className="px-3 py-2">
+                                        <Badge
+                                          variant={position.type === "BUY" ? "default" : "outline"}
+                                          className="font-mono"
+                                        >
+                                          {position.type}
+                                        </Badge>
+                                      </td>
+                                      <td className="px-3 py-2 text-right font-mono text-foreground">
+                                        {formatMaybeNumber(position.volume, 2)}
+                                      </td>
+                                      <td className="px-3 py-2 text-right font-mono text-foreground">
+                                        {formatMaybeNumber(position.priceOpen, 5)}
+                                      </td>
+                                      <td className="px-3 py-2 text-right font-mono text-foreground">
+                                        {formatMaybeNumber(position.priceCurrent, 5)}
+                                      </td>
+                                      <td className="px-3 py-2 text-right font-mono text-foreground">
+                                        {formatMaybeNumber(position.stopLoss, 5)}
+                                      </td>
+                                      <td className="px-3 py-2 text-right font-mono text-foreground">
+                                        {formatMaybeNumber(position.takeProfit, 5)}
+                                      </td>
+                                      <td
+                                        className={cn(
+                                          "px-3 py-2 text-right font-mono",
+                                          (position.profit ?? 0) >= 0
+                                            ? "text-chart-1"
+                                            : "text-destructive",
+                                        )}
+                                      >
+                                        {formatMaybeNumber(position.profit, 2)}
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          ) : (
+                            <div className="rounded-lg border border-dashed border-border/80 bg-muted/15 px-3 py-3 text-sm text-muted-foreground">
+                              {t("openPositionsEmpty")}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     ) : null}
                   </CardContent>
