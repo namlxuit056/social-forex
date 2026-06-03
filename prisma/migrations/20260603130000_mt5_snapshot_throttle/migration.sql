@@ -1,0 +1,3 @@
+ALTER TABLE "Mt5Connection"
+  ADD COLUMN IF NOT EXISTS "lastTradeHash" TEXT,
+  ADD COLUMN IF NOT EXISTS "lastSnapshotAt" TIMESTAMP(3);

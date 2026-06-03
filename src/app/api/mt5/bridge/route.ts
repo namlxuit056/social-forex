@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
+import { createHash } from "crypto";
 import { z } from "zod";
 import { hashMt5BridgeToken, MT5_BRIDGE_TOKEN_PREFIX } from "@/lib/mt5-bridge";
 import { prisma } from "@/lib/prisma";
@@ -71,6 +72,53 @@ function noteForMt5(kind: "pending" | "active", ticket: string, volume: number) 
   return `Synced from MT5 ${label}. Ticket: ${ticket}. Volume: ${volume}. Read-only bridge.`;
 }
 
+function stableStringify(value: unknown): string {
+  if (Array.isArray(value)) {
+    return `[${value.map((item) => stableStringify(item)).join(",")}]`;
+  }
+
+  if (value && typeof value === "object") {
+    const record = value as Record<string, unknown>;
+    return `{${Object.keys(record)
+      .sort()
+      .map((key) => `${JSON.stringify(key)}:${stableStringify(record[key])}`)
+      .join(",")}}`;
+  }
+
+  return JSON.stringify(value);
+}
+
+function tradeHash(positions: z.infer<typeof positionSchema>[], orders: z.infer<typeof pendingOrderSchema>[]) {
+  const normalizedPositions = positions
+    .map((position) => ({
+      ticket: position.ticket,
+      identifier: position.identifier,
+      symbol: position.symbol.toUpperCase(),
+      type: position.type.toUpperCase(),
+      volume: position.volume,
+      priceOpen: position.priceOpen,
+      stopLoss: position.stopLoss ?? null,
+      takeProfit: position.takeProfit ?? null,
+    }))
+    .sort((a, b) => `${a.identifier ?? a.ticket}`.localeCompare(`${b.identifier ?? b.ticket}`));
+
+  const normalizedOrders = orders
+    .map((order) => ({
+      ticket: order.ticket,
+      symbol: order.symbol.toUpperCase(),
+      type: order.type.toUpperCase(),
+      volume: order.volume,
+      priceOpen: order.priceOpen,
+      stopLoss: order.stopLoss ?? null,
+      takeProfit: order.takeProfit ?? null,
+    }))
+    .sort((a, b) => a.ticket.localeCompare(b.ticket));
+
+  return createHash("sha256")
+    .update(stableStringify({ positions: normalizedPositions, orders: normalizedOrders }))
+    .digest("hex");
+}
+
 export async function POST(request: NextRequest) {
   let body: unknown;
   try {
@@ -92,7 +140,7 @@ export async function POST(request: NextRequest) {
   const tokenHash = hashMt5BridgeToken(token);
   const connection = await prisma.mt5Connection.findUnique({
     where: { tokenHash },
-    select: { id: true, userId: true, revokedAt: true },
+    select: { id: true, userId: true, revokedAt: true, lastTradeHash: true, lastSnapshotAt: true },
   });
 
   if (!connection || connection.revokedAt) {
@@ -101,6 +149,11 @@ export async function POST(request: NextRequest) {
 
   const { account, positions, orders } = parsed.data;
   const now = new Date();
+  const nextTradeHash = tradeHash(positions, orders);
+  const tradeChanged = connection.lastTradeHash !== nextTradeHash;
+  const snapshotExpired =
+    !connection.lastSnapshotAt || now.getTime() - connection.lastSnapshotAt.getTime() >= 60_000;
+  const shouldCreateSnapshot = tradeChanged || snapshotExpired;
 
   const touchedSignalIds: string[] = [];
 
@@ -122,17 +175,23 @@ export async function POST(request: NextRequest) {
         leverage: account.leverage,
         openPositions: positions.length,
         pendingOrders: orders.length,
+        lastTradeHash: nextTradeHash,
+        lastSnapshotAt: shouldCreateSnapshot ? now : undefined,
       },
     });
 
-    await tx.mt5Snapshot.create({
-      data: {
-        connectionId: connection.id,
-        account,
-        positions,
-        orders,
-      },
-    });
+    if (shouldCreateSnapshot) {
+      await tx.mt5Snapshot.create({
+        data: {
+          connectionId: connection.id,
+          account,
+          positions,
+          orders,
+        },
+      });
+    }
+
+    if (!tradeChanged) return;
 
     for (const order of orders) {
       const existing = await tx.mt5SignalLink.findUnique({
@@ -255,10 +314,12 @@ export async function POST(request: NextRequest) {
   });
 
   revalidatePath("/mt5");
-  revalidatePath("/signals");
-  revalidatePath(`/u/${connection.userId}`);
-  for (const signalId of touchedSignalIds) {
-    revalidatePath(`/signals/${signalId}`);
+  if (touchedSignalIds.length > 0) {
+    revalidatePath("/signals");
+    revalidatePath(`/u/${connection.userId}`);
+    for (const signalId of touchedSignalIds) {
+      revalidatePath(`/signals/${signalId}`);
+    }
   }
 
   return NextResponse.json({
@@ -267,5 +328,7 @@ export async function POST(request: NextRequest) {
     positions: positions.length,
     orders: orders.length,
     signals: touchedSignalIds.length,
+    snapshotCreated: shouldCreateSnapshot,
+    tradeChanged,
   });
 }

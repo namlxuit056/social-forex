@@ -510,6 +510,8 @@ model Mt5Connection {
   leverage        Int?
   openPositions   Int       @default(0)
   pendingOrders   Int       @default(0)
+  lastTradeHash   String?
+  lastSnapshotAt  DateTime?
   lastError       String?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
