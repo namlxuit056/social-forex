@@ -1072,7 +1072,22 @@
     "deleted": "Trade deleted.",
     "closeTrade": "Close trade",
     "deleteTrade": "Delete",
-    "deleteConfirm": "Delete this trade?"
+    "deleteConfirm": "Delete this trade?",
+    "livePositions": "Open positions (realtime)",
+    "noLivePositions": "No open positions",
+    "accountInfo": "Account info",
+    "balance": "Balance",
+    "equity": "Equity",
+    "margin": "Margin",
+    "freeMargin": "Free margin",
+    "noMt5Connected": "MT5 not connected",
+    "noMt5Hint": "Connect MT5 to see live capital info and open positions.",
+    "connectMt5": "Connect MT5",
+    "lastSync": "Last synced",
+    "autoRefresh": "Auto-refreshing every 5s",
+    "colCurrent": "Current price",
+    "colProfit": "Profit",
+    "colTicket": "Ticket"
   },
   "errors": {
     "invalidData": "Invalid data.",

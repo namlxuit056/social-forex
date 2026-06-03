@@ -6,6 +6,7 @@ import { EmptyState } from "@/components/layout/empty-state";
 import { JournalStats } from "./journal-stats";
 import { JournalTable } from "./journal-table";
 import { JournalForm } from "./journal-form";
+import { JournalLivePanel, type LivePosition } from "./journal-live-panel";
 
 export async function generateMetadata({
   params,
@@ -55,11 +56,23 @@ export default async function JournalPage({
     );
   }
 
-  const trades = await prisma.tradeJournal.findMany({
-    where: { userId: session.user.id },
-    orderBy: { openedAt: "desc" },
-    take: 200,
-  });
+  const [trades, mt5Connection] = await Promise.all([
+    prisma.tradeJournal.findMany({
+      where: { userId: session.user.id },
+      orderBy: { openedAt: "desc" },
+      take: 200,
+    }),
+    prisma.mt5Connection.findFirst({
+      where: { userId: session.user.id, revokedAt: null },
+      orderBy: { lastSeenAt: "desc" },
+      include: {
+        snapshots: {
+          orderBy: { receivedAt: "desc" },
+          take: 1,
+        },
+      },
+    }),
+  ]);
 
   const closed = trades.filter((t) => t.result !== "PENDING");
   const wins = closed.filter((t) => t.result === "WIN").length;
@@ -71,6 +84,44 @@ export default async function JournalPage({
     wins + losses > 0
       ? Math.round((wins / (wins + losses)) * 100)
       : 0;
+
+  const latestSnapshot = mt5Connection?.snapshots[0];
+  const livePositions: LivePosition[] = [];
+  if (latestSnapshot && Array.isArray(latestSnapshot.positions)) {
+    for (const p of latestSnapshot.positions as Record<string, unknown>[]) {
+      const ticket = p.ticket != null ? String(p.ticket) : null;
+      const symbol = typeof p.symbol === "string" ? p.symbol : null;
+      const type = typeof p.type === "string" ? p.type : null;
+      if (!ticket || !symbol || !type) continue;
+      const num = (v: unknown) => {
+        const n = Number(v);
+        return Number.isFinite(n) ? n : null;
+      };
+      livePositions.push({
+        ticket,
+        symbol,
+        type,
+        volume: num(p.volume),
+        priceOpen: num(p.priceOpen),
+        priceCurrent: num(p.priceCurrent),
+        stopLoss: num(p.stopLoss),
+        takeProfit: num(p.takeProfit),
+        profit: num(p.profit),
+      });
+    }
+  }
+
+  const mt5Account = mt5Connection
+    ? {
+        balance: mt5Connection.balance,
+        equity: mt5Connection.equity,
+        margin: mt5Connection.margin,
+        freeMargin: mt5Connection.freeMargin,
+        currency: mt5Connection.accountCurrency,
+        openPositions: mt5Connection.openPositions,
+        lastSeenAt: mt5Connection.lastSeenAt?.toISOString() ?? null,
+      }
+    : null;
 
   const serialized = trades.map((t) => ({
     id: t.id,
@@ -105,6 +156,12 @@ export default async function JournalPage({
         winRate={winRate}
         totalPnl={totalPnl}
         avgPnl={avgPnl}
+      />
+
+      <JournalLivePanel
+        account={mt5Account}
+        positions={livePositions}
+        locale={locale}
       />
 
       <JournalForm />

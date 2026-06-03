@@ -1072,7 +1072,22 @@
     "deleted": "Đã xóa giao dịch.",
     "closeTrade": "Đóng lệnh",
     "deleteTrade": "Xóa",
-    "deleteConfirm": "Xóa giao dịch này?"
+    "deleteConfirm": "Xóa giao dịch này?",
+    "livePositions": "Lệnh đang mở (realtime)",
+    "noLivePositions": "Không có lệnh đang mở",
+    "accountInfo": "Thông tin tài khoản",
+    "balance": "Số dư",
+    "equity": "Equity",
+    "margin": "Ký quỹ",
+    "freeMargin": "Margin tự do",
+    "noMt5Connected": "Chưa kết nối MT5",
+    "noMt5Hint": "Kết nối MT5 để xem thông tin vốn và lệnh realtime.",
+    "connectMt5": "Kết nối MT5",
+    "lastSync": "Đồng bộ lần cuối",
+    "autoRefresh": "Tự động cập nhật mỗi 5s",
+    "colCurrent": "Giá hiện tại",
+    "colProfit": "Profit",
+    "colTicket": "Ticket"
   },
   "errors": {
     "invalidData": "Dữ liệu không hợp lệ.",
