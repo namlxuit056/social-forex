@@ -1093,7 +1093,19 @@
     "autoRefresh": "Tự động cập nhật mỗi 5s",
     "colCurrent": "Giá hiện tại",
     "colProfit": "Profit",
-    "colTicket": "Ticket"
+    "colTicket": "Ticket",
+    "performanceChart": "Biểu đồ hiệu suất",
+    "chartDay": "Ngày",
+    "chartMonth": "Tháng",
+    "chartYear": "Năm",
+    "chartCustom": "Custom",
+    "chartFrom": "Từ ngày",
+    "chartTo": "Đến ngày",
+    "chartNetPnl": "Net P&L",
+    "chartTrades": "Số lệnh",
+    "chartWinRate": "Win rate",
+    "chartBestWorst": "Tốt nhất / tệ nhất",
+    "chartEmpty": "Chưa có giao dịch đã đóng trong khoảng thời gian này."
   },
   "errors": {
     "invalidData": "Dữ liệu không hợp lệ.",

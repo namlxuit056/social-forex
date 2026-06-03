@@ -401,8 +401,6 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    let journalTouched = false;
-
     for (const link of liveLinks) {
       if (link.kind === "PENDING_ORDER" && link.signal.status === "PENDING" && !pendingMt5Tickets.has(link.mt5Ticket)) {
         const signal = await tx.signal.update({
@@ -444,7 +442,6 @@ export async function POST(request: NextRequest) {
             where: { id: link.journalId },
             data: { result, pnl: profit, closedAt: now },
           });
-          journalTouched = true;
         }
 
         closedSignalIds.push(signal.id);

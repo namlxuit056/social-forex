@@ -1093,7 +1093,19 @@
     "autoRefresh": "Auto-refreshing every 5s",
     "colCurrent": "Current price",
     "colProfit": "Profit",
-    "colTicket": "Ticket"
+    "colTicket": "Ticket",
+    "performanceChart": "Performance chart",
+    "chartDay": "Day",
+    "chartMonth": "Month",
+    "chartYear": "Year",
+    "chartCustom": "Custom",
+    "chartFrom": "From",
+    "chartTo": "To",
+    "chartNetPnl": "Net P&L",
+    "chartTrades": "Trades",
+    "chartWinRate": "Win rate",
+    "chartBestWorst": "Best / worst",
+    "chartEmpty": "No closed trades in this range yet."
   },
   "errors": {
     "invalidData": "Invalid data.",
