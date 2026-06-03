@@ -9,6 +9,12 @@ type Props = {
   joinedLine: string;
   bio: string | null;
   actions: ReactNode;
+  followerCount: number;
+  followingCount: number;
+  threadCount: number;
+  followersLabel: string;
+  followingLabel: string;
+  threadsLabel: string;
 };
 
 export function PublicProfileHero({
@@ -18,19 +24,27 @@ export function PublicProfileHero({
   joinedLine,
   bio,
   actions,
+  followerCount,
+  followingCount,
+  threadCount,
+  followersLabel,
+  followingLabel,
+  threadsLabel,
 }: Props) {
   const initials = getInitialsFromLabel(displayLabel);
 
   return (
     <section
-      className="rounded-xl border border-border bg-card/50 p-4 ring-1 ring-foreground/5 sm:p-6"
+      className="overflow-hidden rounded-xl border border-border bg-card/50 ring-1 ring-foreground/5"
       aria-labelledby="public-profile-heading"
     >
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex min-w-0 gap-4 sm:gap-5">
+      <div className="h-24 bg-linear-to-br from-primary/25 via-primary/10 to-muted/40 sm:h-32" />
+
+      <div className="px-4 pb-4 sm:px-6 sm:pb-6">
+        <div className="-mt-8 mb-3 flex items-end justify-between sm:-mt-10">
           <div
             className={cn(
-              "relative shrink-0 overflow-hidden rounded-full bg-muted ring-1 ring-border",
+              "relative shrink-0 overflow-hidden rounded-full bg-muted ring-2 ring-card",
               "size-16 sm:size-20",
             )}
           >
@@ -54,25 +68,39 @@ export function PublicProfileHero({
               </span>
             )}
           </div>
-          <div className="min-w-0 flex-1">
-            <h1
-              id="public-profile-heading"
-              className="font-heading text-2xl font-semibold tracking-tight text-foreground"
-            >
-              {displayLabel}
-            </h1>
-            <p className="mt-0.5 text-xs text-muted-foreground">{subtitle}</p>
-            <p className="mt-1 text-sm text-muted-foreground">{joinedLine}</p>
-            {bio ? (
-              <p className="mt-3 max-w-prose whitespace-pre-wrap text-sm text-muted-foreground">
-                {bio}
-              </p>
-            ) : null}
+          <div className="flex flex-wrap gap-2">{actions}</div>
+        </div>
+
+        <div>
+          <h1
+            id="public-profile-heading"
+            className="font-heading text-xl font-semibold tracking-tight text-foreground sm:text-2xl"
+          >
+            {displayLabel}
+          </h1>
+          <p className="mt-0.5 text-xs text-muted-foreground">{subtitle}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{joinedLine}</p>
+          {bio ? (
+            <p className="mt-3 max-w-prose whitespace-pre-wrap text-sm text-muted-foreground">
+              {bio}
+            </p>
+          ) : null}
+        </div>
+
+        <dl className="mt-4 flex gap-6 border-t border-border/50 pt-4">
+          <div>
+            <dd className="text-lg font-semibold text-foreground">{followerCount}</dd>
+            <dt className="text-xs text-muted-foreground">{followersLabel}</dt>
           </div>
-        </div>
-        <div className="flex flex-wrap gap-2 sm:min-w-48 sm:justify-end sm:pt-1">
-          {actions}
-        </div>
+          <div>
+            <dd className="text-lg font-semibold text-foreground">{followingCount}</dd>
+            <dt className="text-xs text-muted-foreground">{followingLabel}</dt>
+          </div>
+          <div>
+            <dd className="text-lg font-semibold text-foreground">{threadCount}</dd>
+            <dt className="text-xs text-muted-foreground">{threadsLabel}</dt>
+          </div>
+        </dl>
       </div>
     </section>
   );

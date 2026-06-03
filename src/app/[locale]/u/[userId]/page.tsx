@@ -134,6 +134,12 @@ export default async function PublicProfilePage({ params }: Props) {
           date: new Date(user.createdAt).toLocaleDateString(dateLocale),
         })}
         bio={user.bio}
+        followerCount={followerCount}
+        followingCount={followingCount}
+        threadCount={threadCount}
+        followersLabel={t("followers")}
+        followingLabel={t("following")}
+        threadsLabel={t("threads")}
         actions={
           <>
             {session?.user && !isSelf && (
@@ -162,6 +168,12 @@ export default async function PublicProfilePage({ params }: Props) {
         }
       />
 
+      <PinnedSignalsSection
+        profileUserId={userId}
+        viewerVipUntil={viewerDbUser?.vipUntil}
+        viewerUserId={session?.user?.id}
+      />
+
       <TraderPerformanceCard
         userId={userId}
         signalsListHref={signalsListHref}
@@ -170,39 +182,7 @@ export default async function PublicProfilePage({ params }: Props) {
 
       <PublicTradingOverview profileUserId={userId} locale={locale} t={t} />
 
-      <PinnedSignalsSection
-        profileUserId={userId}
-        viewerVipUntil={viewerDbUser?.vipUntil}
-        viewerUserId={session?.user?.id}
-      />
-
       <Mt5SyncedSignalsSection profileUserId={userId} t={t} />
-
-      <dl className="grid grid-cols-3 gap-4 rounded-xl border border-border bg-card/50 p-4 text-center text-sm ring-1 ring-foreground/5">
-        <div>
-          <dt className="text-muted-foreground">{t("followers")}</dt>
-          <dd className="text-lg font-medium text-foreground">{followerCount}</dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">{t("following")}</dt>
-          <dd className="text-lg font-medium text-foreground">{followingCount}</dd>
-        </div>
-        <div>
-          <dt className="text-muted-foreground">{t("threads")}</dt>
-          <dd className="text-lg font-medium text-foreground">{threadCount}</dd>
-        </div>
-      </dl>
-
-      {threadCount > 0 ? (
-        <p className="text-sm text-muted-foreground">
-          <Link
-            href="/forum"
-            className="font-medium text-primary underline-offset-4 hover:underline"
-          >
-            {t("forumBrowseCta")}
-          </Link>
-        </p>
-      ) : null}
 
       {followerCount > 0 ? (
         <ProfileFollowersSection
