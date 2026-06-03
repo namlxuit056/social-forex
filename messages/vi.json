@@ -777,6 +777,7 @@
     "riskNote": "Không nhập mật khẩu MT5 vào Social Forex. MVP này chỉ nhận dữ liệu read-only từ EA; không có lệnh giao dịch tự động.",
     "connectionsTitle": "Kết nối của bạn",
     "connectionsDesc": "Theo dõi trạng thái heartbeat và snapshot MT5 gần nhất.",
+    "autoRefresh": "Tự cập nhật mỗi 5s",
     "openJournal": "Mở journal",
     "empty": "Chưa có token bridge nào. Tạo token, cài EA và heartbeat đầu tiên sẽ hiện ở đây.",
     "statusRevoked": "Đã thu hồi",

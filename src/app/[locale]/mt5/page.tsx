@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { auth } from "@/auth";
 import { revokeMt5Connection } from "@/actions/mt5-bridge";
 import { CreateMt5ConnectionForm } from "./create-connection-form";
+import { Mt5AutoRefresh } from "./mt5-auto-refresh";
 import { Link, redirect } from "@/i18n/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -195,12 +196,15 @@ export default async function Mt5Page({
               {t("connectionsDesc")}
             </p>
           </div>
-          <Link
-            href="/journal"
-            className="text-sm font-medium text-primary hover:underline"
-          >
-            {t("openJournal")}
-          </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            <Mt5AutoRefresh label={t("autoRefresh")} />
+            <Link
+              href="/journal"
+              className="text-sm font-medium text-primary hover:underline"
+            >
+              {t("openJournal")}
+            </Link>
+          </div>
         </div>
 
         {connections.length === 0 ? (

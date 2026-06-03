@@ -777,6 +777,7 @@
     "riskNote": "Do not enter your MT5 password into Social Forex. This MVP receives read-only data from the EA; no automated trading is included.",
     "connectionsTitle": "Your connections",
     "connectionsDesc": "Track heartbeat status and the latest MT5 snapshot.",
+    "autoRefresh": "Auto-refresh every 5s",
     "openJournal": "Open journal",
     "empty": "No bridge token yet. Create a token, install the EA, and the first heartbeat will appear here.",
     "statusRevoked": "Revoked",
