@@ -543,6 +543,7 @@ model Mt5SignalLink {
   signalId     String        @unique
   mt5Ticket    String
   kind         Mt5SignalKind
+  lastProfit   Float?
   lastSeenAt   DateTime      @default(now())
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt

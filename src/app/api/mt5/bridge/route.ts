@@ -72,6 +72,15 @@ function noteForMt5(kind: "pending" | "active", ticket: string, volume: number) 
   return `Synced from MT5 ${label}. Ticket: ${ticket}. Volume: ${volume}. Read-only bridge.`;
 }
 
+function closeNoteForMt5(kind: "cancelled" | "closed", ticket: string, profit?: number | null) {
+  if (kind === "cancelled") {
+    return `Synced from MT5 pending order. Ticket: ${ticket}. Order is no longer pending in MT5.`;
+  }
+
+  const profitText = typeof profit === "number" ? ` Last seen profit: ${profit}.` : "";
+  return `Synced from MT5 open position. Ticket: ${ticket}. Position is no longer open in MT5.${profitText}`;
+}
+
 function stableStringify(value: unknown): string {
   if (Array.isArray(value)) {
     return `[${value.map((item) => stableStringify(item)).join(",")}]`;
@@ -154,8 +163,11 @@ export async function POST(request: NextRequest) {
   const snapshotExpired =
     !connection.lastSnapshotAt || now.getTime() - connection.lastSnapshotAt.getTime() >= 60_000;
   const shouldCreateSnapshot = tradeChanged || snapshotExpired;
+  const activeMt5Tickets = new Set(positions.map((position) => position.identifier ?? position.ticket));
+  const pendingMt5Tickets = new Set(orders.map((order) => order.ticket));
 
   const touchedSignalIds: string[] = [];
+  const closedSignalIds: string[] = [];
 
   await prisma.$transaction(async (tx) => {
     await tx.mt5Connection.update({
@@ -191,6 +203,28 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    for (const order of orders) {
+      await tx.mt5SignalLink.updateMany({
+        where: {
+          connectionId: connection.id,
+          mt5Ticket: order.ticket,
+          kind: "PENDING_ORDER",
+        },
+        data: { lastSeenAt: now },
+      });
+    }
+
+    for (const position of positions) {
+      await tx.mt5SignalLink.updateMany({
+        where: {
+          connectionId: connection.id,
+          mt5Ticket: position.identifier ?? position.ticket,
+          kind: "OPEN_POSITION",
+        },
+        data: { lastProfit: position.profit, lastSeenAt: now },
+      });
+    }
+
     if (!tradeChanged) return;
 
     for (const order of orders) {
@@ -221,7 +255,7 @@ export async function POST(request: NextRequest) {
         });
         await tx.mt5SignalLink.update({
           where: { id: existing.id },
-          data: { kind: "PENDING_ORDER", lastSeenAt: now },
+          data: { kind: "PENDING_ORDER", lastProfit: null, lastSeenAt: now },
         });
         touchedSignalIds.push(signal.id);
         continue;
@@ -238,14 +272,15 @@ export async function POST(request: NextRequest) {
           tier: "FREE",
           status: "PENDING",
           notes: noteForMt5("pending", order.ticket, order.volume),
-          mt5Link: {
-            create: {
-              connectionId: connection.id,
-              mt5Ticket: order.ticket,
-              kind: "PENDING_ORDER",
-              lastSeenAt: now,
-            },
+        mt5Link: {
+          create: {
+            connectionId: connection.id,
+            mt5Ticket: order.ticket,
+            kind: "PENDING_ORDER",
+            lastProfit: null,
+            lastSeenAt: now,
           },
+        },
         },
         select: { id: true },
       });
@@ -281,7 +316,7 @@ export async function POST(request: NextRequest) {
         });
         await tx.mt5SignalLink.update({
           where: { id: existing.id },
-          data: { kind: "OPEN_POSITION", lastSeenAt: now },
+          data: { kind: "OPEN_POSITION", lastProfit: position.profit, lastSeenAt: now },
         });
         touchedSignalIds.push(signal.id);
         continue;
@@ -303,6 +338,7 @@ export async function POST(request: NextRequest) {
               connectionId: connection.id,
               mt5Ticket,
               kind: "OPEN_POSITION",
+              lastProfit: position.profit,
               lastSeenAt: now,
             },
           },
@@ -311,13 +347,59 @@ export async function POST(request: NextRequest) {
       });
       touchedSignalIds.push(signal.id);
     }
+
+    const liveLinks = await tx.mt5SignalLink.findMany({
+      where: {
+        connectionId: connection.id,
+        signal: { status: { in: ["PENDING", "ACTIVE"] } },
+      },
+      select: {
+        id: true,
+        mt5Ticket: true,
+        kind: true,
+        lastProfit: true,
+        signalId: true,
+        signal: { select: { status: true } },
+      },
+    });
+
+    for (const link of liveLinks) {
+      if (link.kind === "PENDING_ORDER" && link.signal.status === "PENDING" && !pendingMt5Tickets.has(link.mt5Ticket)) {
+        const signal = await tx.signal.update({
+          where: { id: link.signalId },
+          data: {
+            status: "CANCELLED",
+            closedAt: now,
+            notes: closeNoteForMt5("cancelled", link.mt5Ticket),
+          },
+          select: { id: true },
+        });
+        closedSignalIds.push(signal.id);
+        continue;
+      }
+
+      if (link.kind === "OPEN_POSITION" && link.signal.status === "ACTIVE" && !activeMt5Tickets.has(link.mt5Ticket)) {
+        const status = typeof link.lastProfit === "number" && link.lastProfit < 0 ? "CLOSED_LOSS" : "CLOSED_WIN";
+        const signal = await tx.signal.update({
+          where: { id: link.signalId },
+          data: {
+            status,
+            closedAt: now,
+            notes: closeNoteForMt5("closed", link.mt5Ticket, link.lastProfit),
+          },
+          select: { id: true },
+        });
+        closedSignalIds.push(signal.id);
+      }
+    }
   });
 
   revalidatePath("/mt5");
-  if (touchedSignalIds.length > 0) {
+  const changedSignalIds = Array.from(new Set([...touchedSignalIds, ...closedSignalIds]));
+  if (changedSignalIds.length > 0) {
     revalidatePath("/signals");
     revalidatePath(`/u/${connection.userId}`);
-    for (const signalId of touchedSignalIds) {
+    for (const signalId of changedSignalIds) {
       revalidatePath(`/signals/${signalId}`);
     }
   }
@@ -327,7 +409,8 @@ export async function POST(request: NextRequest) {
     receivedAt: now.toISOString(),
     positions: positions.length,
     orders: orders.length,
-    signals: touchedSignalIds.length,
+    signals: changedSignalIds.length,
+    closedSignals: closedSignalIds.length,
     snapshotCreated: shouldCreateSnapshot,
     tradeChanged,
   });
