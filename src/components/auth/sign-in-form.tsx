@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,11 +15,12 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { localizedHref } from "@/lib/localized-href";
 import { safeLocalizedCallbackPath } from "@/lib/safe-redirect";
 
 export function SignInForm() {
   const t = useTranslations("auth");
-  const router = useRouter();
+  const locale = useLocale();
   const searchParams = useSearchParams();
   const callbackUrl = safeLocalizedCallbackPath(
     searchParams.get("callbackUrl"),
@@ -46,8 +46,7 @@ export function SignInForm() {
       return;
     }
     toast.success(t("signInSuccessToast"));
-    router.push(callbackUrl);
-    router.refresh();
+    window.location.assign(localizedHref(callbackUrl, locale));
   }
 
   return (
