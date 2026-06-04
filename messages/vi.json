@@ -1135,6 +1135,9 @@
     "chartAccountPercent": "% tài khoản",
     "chartTrades": "Số lệnh",
     "chartWinRate": "Win rate",
+    "chartBars": "Cột",
+    "chartEquity": "Equity",
+    "chartProfitFactor": "Profit Factor",
     "chartBestWorst": "Tốt nhất / tệ nhất",
     "chartEmpty": "Chưa có giao dịch đã đóng trong khoảng thời gian này."
   },

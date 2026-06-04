@@ -1135,6 +1135,9 @@
     "chartAccountPercent": "Account %",
     "chartTrades": "Trades",
     "chartWinRate": "Win rate",
+    "chartBars": "Bars",
+    "chartEquity": "Equity",
+    "chartProfitFactor": "Profit Factor",
     "chartBestWorst": "Best / worst",
     "chartEmpty": "No closed trades in this range yet."
   },
