@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/auth";
 import { localeFromRequest } from "@/lib/api-locale";
 import { getAiDailyTrend, AiTrendUnavailableError } from "@/lib/ai/trend";
 import {
@@ -20,6 +21,11 @@ function errorJson(error: string, status: number, retryAfterMs?: number) {
 export async function POST(req: NextRequest) {
   const loc = localeFromRequest(req);
   const ai = pickAi(loc);
+
+  const session = await auth();
+  if (!session?.user?.id) {
+    return errorJson(ai.apiTrendLoginRequired, 401);
+  }
 
   const hasAiKey =
     !!process.env.GROQ_API_KEY?.trim() ||

@@ -3,8 +3,8 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
-import { Sparkles, Loader2 } from "lucide-react";
-import { useRouter } from "@/i18n/navigation";
+import { Sparkles, Loader2, Lock } from "lucide-react";
+import { Link, useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { AiSuggestionCard } from "@/components/ai/ai-suggestion-card";
@@ -15,9 +15,10 @@ interface Props {
 }
 
 export function AiAnalysisPanel({ symbol }: Props) {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const router = useRouter();
   const t = useTranslations("ai");
+  const tc = useTranslations("common");
 
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<AiSuggestResponse | null>(null);
@@ -52,6 +53,11 @@ export function AiAnalysisPanel({ symbol }: Props) {
   }
 
   const analyze = useCallback(async () => {
+    if (!session?.user) {
+      setError(t("loginRequiredHint"));
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
@@ -78,7 +84,7 @@ export function AiAnalysisPanel({ symbol }: Props) {
     } finally {
       setLoading(false);
     }
-  }, [symbol, t]);
+  }, [session?.user, symbol, t]);
 
   const handlePostSignal = useCallback((riskPlan?: {
     accountBalance: number;
@@ -136,6 +142,9 @@ export function AiAnalysisPanel({ symbol }: Props) {
     void postFromAi();
   }, [data, router, t]);
 
+  const isGuest = status !== "loading" && !session?.user;
+  const isAnalyzeDisabled = loading || cooldown > 0 || status === "loading" || isGuest;
+
   return (
     <div className="space-y-3">
       <div className="rounded-xl border border-border/70 bg-card/45 px-4 py-3">
@@ -156,7 +165,7 @@ export function AiAnalysisPanel({ symbol }: Props) {
       <div className="flex items-center gap-3">
         <Button
           onClick={analyze}
-          disabled={loading || cooldown > 0}
+          disabled={isAnalyzeDisabled}
           size="sm"
           className={cn(
             "gap-1.5",
@@ -170,6 +179,11 @@ export function AiAnalysisPanel({ symbol }: Props) {
               <Loader2 className="size-3.5 animate-spin" />
               {t("analyzing")}
             </>
+          ) : isGuest ? (
+            <>
+              <Lock className="size-3.5" />
+              {t("loginRequiredButton")}
+            </>
           ) : cooldown > 0 ? (
             t("retryIn", { seconds: cooldown })
           ) : (
@@ -179,9 +193,18 @@ export function AiAnalysisPanel({ symbol }: Props) {
             </>
           )}
         </Button>
-        {!session?.user && (
+        {isGuest && (
           <span className="text-[10px] text-muted-foreground">
-            {t("freeHint")}
+            {t("loginRequiredHint")}{" "}
+            <Link
+              href={{
+                pathname: "/auth/signin",
+                query: { callbackUrl: `/chart?symbol=${symbol}` },
+              }}
+              className="font-medium text-primary underline-offset-4 hover:underline"
+            >
+              {tc("signIn")}
+            </Link>
           </span>
         )}
       </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useLocale, useTranslations } from "next-intl";
 import { SignupPrompt } from "@/components/analytics/signup-prompt";
@@ -10,6 +10,7 @@ import {
   Calendar,
   LineChart,
   Loader2,
+  Lock,
   Radio,
   Sparkles,
   Star,
@@ -64,8 +65,6 @@ type TrendState =
   | { status: "ready"; payload: AiTrendResult }
   | { status: "error"; message: string };
 
-const TREND_REFRESH_MS = 60 * 60 * 1000;
-
 function formatWarning(
   t: (key: string, values?: Record<string, string>) => string,
   key?: QuotesWarningKey,
@@ -93,8 +92,9 @@ export function LiveQuotesTable({
 }: Props) {
   const t = useTranslations("quotes");
   const tChart = useTranslations("chart");
+  const tc = useTranslations("common");
   const intlLocale = useLocale();
-  const { data: session } = useSession();
+  const { data: session, status: sessionStatus } = useSession();
   const { favorites, isFavorite, toggle, loaded: favoritesLoaded } =
     useFavorites();
 
@@ -107,10 +107,6 @@ export function LiveQuotesTable({
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [trendBySymbol, setTrendBySymbol] = useState<Record<string, TrendState>>({});
-  const trendSymbolsKey = useMemo(
-    () => Array.from(new Set(rows.map((row) => row.symbol))).sort().join(","),
-    [rows],
-  );
 
   const applyPayload = useCallback(
     (data: PollPayload) => {
@@ -181,8 +177,21 @@ export function LiveQuotesTable({
     [session?.user, tChart, toggle],
   );
 
+  const isGuest = sessionStatus !== "loading" && !session?.user;
+
   const requestTrend = useCallback(
     async (symbol: string) => {
+      if (!session?.user) {
+        setTrendBySymbol((prev) => ({
+          ...prev,
+          [symbol]: {
+            status: "error",
+            message: t("aiTrendLoginRequired"),
+          },
+        }));
+        return;
+      }
+
       setTrendBySymbol((prev) => ({
         ...prev,
         [symbol]: { status: "loading" },
@@ -213,30 +222,8 @@ export function LiveQuotesTable({
         }));
       }
     },
-    [t],
+    [session?.user, t],
   );
-
-  useEffect(() => {
-    const symbols = trendSymbolsKey.split(",").filter(Boolean);
-    if (symbols.length === 0) return;
-
-    let cancelled = false;
-
-    const loadTrends = async () => {
-      for (const symbol of symbols) {
-        if (cancelled) return;
-        await requestTrend(symbol);
-      }
-    };
-
-    void loadTrends();
-    const id = setInterval(loadTrends, TREND_REFRESH_MS);
-
-    return () => {
-      cancelled = true;
-      clearInterval(id);
-    };
-  }, [requestTrend, trendSymbolsKey]);
 
   function renderTrend(symbol: string, compact = false) {
     const state = trendBySymbol[symbol] ?? { status: "idle" };
@@ -278,13 +265,64 @@ export function LiveQuotesTable({
             variant="outline"
             size="xs"
             onClick={() => requestTrend(symbol)}
+            disabled={isGuest}
           >
-            <Sparkles className="size-3.5" aria-hidden />
-            {t("aiTrendRetry")}
+            {isGuest ? (
+              <Lock className="size-3.5" aria-hidden />
+            ) : (
+              <Sparkles className="size-3.5" aria-hidden />
+            )}
+            {isGuest ? t("aiTrendLoginButton") : t("aiTrendRetry")}
           </Button>
           <p className="line-clamp-2 text-xs text-destructive">
             {state.message}
           </p>
+          {isGuest ? (
+            <Link
+              href={{
+                pathname: "/auth/signin",
+                query: { callbackUrl: "/quotes" },
+              }}
+              className="text-xs font-medium text-primary underline-offset-4 hover:underline"
+            >
+              {tc("signIn")}
+            </Link>
+          ) : null}
+        </div>
+      );
+    }
+
+    if (state.status === "idle") {
+      return (
+        <div className={cn("space-y-1", compact ? "w-full" : "max-w-64")}>
+          <Button
+            type="button"
+            variant="outline"
+            size="xs"
+            onClick={() => requestTrend(symbol)}
+            disabled={sessionStatus === "loading" || isGuest}
+          >
+            {isGuest ? (
+              <Lock className="size-3.5" aria-hidden />
+            ) : (
+              <Sparkles className="size-3.5" aria-hidden />
+            )}
+            {isGuest ? t("aiTrendLoginButton") : t("aiTrendButton")}
+          </Button>
+          {isGuest ? (
+            <p className="text-xs leading-relaxed text-muted-foreground">
+              {t("aiTrendLoginRequired")}{" "}
+              <Link
+                href={{
+                  pathname: "/auth/signin",
+                  query: { callbackUrl: "/quotes" },
+                }}
+                className="font-medium text-primary underline-offset-4 hover:underline"
+              >
+                {tc("signIn")}
+              </Link>
+            </p>
+          ) : null}
         </div>
       );
     }
