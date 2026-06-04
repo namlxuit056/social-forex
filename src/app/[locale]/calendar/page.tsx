@@ -1,4 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { auth } from "@/auth";
 import { SignupPrompt } from "@/components/analytics/signup-prompt";
 import { EconomicCalendar } from "@/components/calendar/economic-calendar";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
@@ -31,7 +32,7 @@ export default async function CalendarPage({
   setRequestLocale(locale);
   const t = await getTranslations("calendar");
   const tCommon = await getTranslations("common");
-  const cal = await resolveCalendarEvents();
+  const [cal, session] = await Promise.all([resolveCalendarEvents(), auth()]);
 
   const initialCurrencies = parseCalendarCurrencySearchParams(sp);
   const calendarFilterKey =
@@ -63,12 +64,14 @@ export default async function CalendarPage({
         syncedAt={cal.syncedAt}
         initialSelectedCurrencies={initialCurrencies}
       />
-      <SignupPrompt
-        surface="calendar_reminders"
-        title={t("signupPromptTitle")}
-        description={t("signupPromptDesc")}
-        ctaLabel={t("signupPromptCta")}
-      />
+      {!session?.user?.id ? (
+        <SignupPrompt
+          surface="calendar_reminders"
+          title={t("signupPromptTitle")}
+          description={t("signupPromptDesc")}
+          ctaLabel={t("signupPromptCta")}
+        />
+      ) : null}
       <PageCtaRow heading={tCommon("ctaDiscovery")} items={ctaRow} />
     </div>
   );
