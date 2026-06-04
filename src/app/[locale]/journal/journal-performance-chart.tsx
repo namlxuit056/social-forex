@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useRef, useCallback } from "react";
 import { useTranslations } from "next-intl";
-import { BarChart3, TrendingUp, CalendarRange, Activity } from "lucide-react";
+import { BarChart3, TrendingUp, CalendarRange, Activity, Flame, TrendingDown } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -198,6 +198,23 @@ function axisLabels(maxAbs: number) {
   }));
 }
 
+// Compute current streak from all trades (not range-filtered), skipping BREAKEVEN
+function computeStreak(trades: JournalChartTrade[]): { count: number; type: "WIN" | "LOSS" | null } {
+  const wl = trades
+    .filter((t) => (t.result === "WIN" || t.result === "LOSS") && t.closedAt)
+    .sort((a, b) => new Date(b.closedAt!).getTime() - new Date(a.closedAt!).getTime());
+
+  if (wl.length === 0) return { count: 0, type: null };
+
+  const type = wl[0].result as "WIN" | "LOSS";
+  let count = 0;
+  for (const t of wl) {
+    if (t.result === type) count++;
+    else break;
+  }
+  return { count, type };
+}
+
 export function JournalPerformanceChart({
   trades,
   locale,
@@ -237,6 +254,9 @@ export function JournalPerformanceChart({
     [trades, locale, mode, customFrom, customTo],
   );
 
+  // Streak is computed from ALL trades regardless of date range
+  const streak = useMemo(() => computeStreak(trades), [trades]);
+
   const summary = useMemo(() => {
     const totalPnl = buckets.reduce((sum, b) => sum + b.pnl, 0);
     const tradeCount = buckets.reduce((sum, b) => sum + b.trades, 0);
@@ -265,6 +285,19 @@ export function JournalPerformanceChart({
       worst,
     };
   }, [buckets, trades, validAccountSize]);
+
+  // Max drawdown from equity curve in current range
+  const maxDrawdown = useMemo(() => {
+    if (equityPoints.length < 2) return null;
+    let peak = 0;
+    let maxDD = 0;
+    for (const pt of equityPoints) {
+      if (pt.cumPnl > peak) peak = pt.cumPnl;
+      const dd = pt.cumPnl - peak;
+      if (dd < maxDD) maxDD = dd;
+    }
+    return maxDD; // always <= 0
+  }, [equityPoints]);
 
   const barsChart = useMemo(() => {
     const values = buckets.map((b) =>
@@ -318,12 +351,45 @@ export function JournalPerformanceChart({
     const bottom = SVG_HEIGHT - CHART_BOTTOM;
     const areaPath = `${linePath} L${pts[pts.length - 1].x.toFixed(1)},${bottom} L${pts[0].x.toFixed(1)},${bottom} Z`;
     const labelStep = Math.max(1, Math.ceil(equityPoints.length / 8));
+
+    // Running peak for drawdown visualization
+    let peak = values[0] ?? 0;
+    const runningPeaks: number[] = [];
+    for (const v of values) {
+      if (v > peak) peak = v;
+      runningPeaks.push(peak);
+    }
+
+    // Drawdown area path: top edge = running peak, bottom edge = equity line
+    const ddPeakPath = pts
+      .map((pt, i) => {
+        const py = yForValue(runningPeaks[i] ?? 0, maxAbs);
+        return `${i === 0 ? "M" : "L"}${pt.x.toFixed(1)},${py.toFixed(1)}`;
+      })
+      .join(" ");
+    const ddEquityReverse = [...pts]
+      .reverse()
+      .map((pt) => `L${pt.x.toFixed(1)},${pt.y.toFixed(1)}`)
+      .join(" ");
+    const ddAreaPath = `${ddPeakPath} ${ddEquityReverse} Z`;
+
+    // Running peak line path (dashed gray)
+    const peakLinePath = pts
+      .map((pt, i) => {
+        const py = yForValue(runningPeaks[i] ?? 0, maxAbs);
+        return `${i === 0 ? "M" : "L"}${pt.x.toFixed(1)},${py.toFixed(1)}`;
+      })
+      .join(" ");
+
     return {
       maxAbs,
       zeroY,
       pts,
       linePath,
       areaPath,
+      ddAreaPath,
+      peakLinePath,
+      runningPeaks,
       values,
       axes: axisLabels(maxAbs),
       labelStep,
@@ -417,10 +483,14 @@ export function JournalPerformanceChart({
     const ep = equityPoints[hoveredIndex];
     if (!pt || !ep) return null;
     const value = equityChart.values[hoveredIndex] ?? 0;
+    const peakVal = equityChart.runningPeaks[hoveredIndex] ?? 0;
+    const ddVal = value - peakVal;
     const isPos = value >= 0;
     const label1 = metric === "percent" ? fmtPercent(value) : fmtCurrency(ep.cumPnl);
     const tx = Math.min(Math.max(pt.x, CHART_LEFT + 58), SVG_WIDTH - CHART_RIGHT - 58);
     const ty = CHART_TOP - 8;
+    const showDd = ddVal < -0.001;
+    const tooltipH = showDd ? 54 : 40;
     return (
       <g pointerEvents="none">
         <line
@@ -432,7 +502,7 @@ export function JournalPerformanceChart({
         <circle cx={pt.x} cy={pt.y} r="7" className={cn("opacity-20", isPos ? "fill-emerald-500" : "fill-red-500")} />
         <circle cx={pt.x} cy={pt.y} r="4" className={cn(isPos ? "fill-emerald-500" : "fill-red-500")} />
         <circle cx={pt.x} cy={pt.y} r="2" className="fill-card" />
-        <rect x={tx - 56} y={ty - 28} width={112} height={40} rx="5" className="fill-card stroke-border" strokeWidth="1" />
+        <rect x={tx - 58} y={ty - 28} width={116} height={tooltipH} rx="5" className="fill-card stroke-border" strokeWidth="1" />
         <text
           x={tx} y={ty - 12} textAnchor="middle"
           className={cn("text-[12px] font-bold", isPos ? "fill-emerald-500" : "fill-red-500")}
@@ -443,11 +513,20 @@ export function JournalPerformanceChart({
           {ep.label}
           {ep.tradePnl !== 0 ? ` · ${fmtCurrency(ep.tradePnl)}` : ""}
         </text>
+        {showDd && (
+          <text x={tx} y={ty + 18} textAnchor="middle" className="fill-red-400 text-[10px]">
+            DD {metric === "percent" && validAccountSize
+              ? fmtPercent((ddVal / validAccountSize) * 100)
+              : fmtCurrency(ddVal)}
+          </text>
+        )}
       </g>
     );
   }
 
   const activeAxes = chartType === "bars" ? barsChart.axes : (equityChart?.axes ?? barsChart.axes);
+  const isWinStreak = streak.type === "WIN";
+  const isLossStreak = streak.type === "LOSS";
 
   return (
     <Card className="border-border/60">
@@ -562,8 +641,8 @@ export function JournalPerformanceChart({
       </CardHeader>
 
       <CardContent className="space-y-5">
-        {/* Stats row */}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        {/* Stats row — 7 cards: Net P&L / Trades / Win Rate / Streak / Profit Factor / Max DD / Best-Worst */}
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-7">
           {/* Net P&L */}
           <div className="rounded-lg border border-border/60 p-3">
             <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
@@ -625,6 +704,49 @@ export function JournalPerformanceChart({
             </div>
           </div>
 
+          {/* Streak — computed from ALL trades, not range-filtered */}
+          <div
+            className={cn(
+              "rounded-lg border p-3 transition-colors",
+              isWinStreak
+                ? "border-emerald-500/30 bg-emerald-500/5"
+                : isLossStreak
+                  ? "border-red-500/30 bg-red-500/5"
+                  : "border-border/60",
+            )}
+          >
+            <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+              {t("chartStreak")}
+            </p>
+            {streak.count > 0 && streak.type ? (
+              <div className="mt-1.5 flex items-center gap-1.5">
+                {isWinStreak ? (
+                  <Flame className="size-5 shrink-0 text-emerald-500" />
+                ) : (
+                  <TrendingDown className="size-5 shrink-0 text-red-500" />
+                )}
+                <span
+                  className={cn(
+                    "font-mono text-xl font-bold tabular-nums",
+                    isWinStreak ? "text-emerald-500" : "text-red-500",
+                  )}
+                >
+                  {streak.count}
+                  {isWinStreak ? "W" : "L"}
+                </span>
+              </div>
+            ) : (
+              <p className="mt-1.5 font-mono text-xl font-bold text-muted-foreground">—</p>
+            )}
+            <p className="mt-0.5 text-[11px] text-muted-foreground/60">
+              {isWinStreak
+                ? t("chartStreakWin")
+                : isLossStreak
+                  ? t("chartStreakLoss")
+                  : ""}
+            </p>
+          </div>
+
           {/* Profit factor */}
           <div className="rounded-lg border border-border/60 p-3">
             <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
@@ -644,8 +766,29 @@ export function JournalPerformanceChart({
             </p>
           </div>
 
+          {/* Max Drawdown */}
+          <div className="rounded-lg border border-border/60 p-3">
+            <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+              {t("chartMaxDrawdown")}
+            </p>
+            <p
+              className={cn(
+                "mt-1.5 font-mono text-xl font-bold tabular-nums",
+                maxDrawdown === null || maxDrawdown === 0
+                  ? "text-muted-foreground"
+                  : "text-red-500",
+              )}
+            >
+              {maxDrawdown === null || maxDrawdown === 0
+                ? "—"
+                : metric === "percent" && validAccountSize
+                  ? fmtPercent((maxDrawdown / validAccountSize) * 100)
+                  : fmtCurrency(maxDrawdown)}
+            </p>
+          </div>
+
           {/* Best / Worst */}
-          <div className="col-span-2 rounded-lg border border-border/60 p-3 sm:col-span-2 lg:col-span-1">
+          <div className="col-span-2 rounded-lg border border-border/60 p-3 sm:col-span-3 lg:col-span-1">
             <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
               {t("chartBestWorst")}
             </p>
@@ -821,6 +964,19 @@ export function JournalPerformanceChart({
             {/* Equity curve */}
             {chartType === "equity" && equityChart && equityPoints.length > 1 && (
               <>
+                {/* Drawdown shaded area (between running peak and equity line) */}
+                <path d={equityChart.ddAreaPath} fill="rgba(239,68,68,0.10)" />
+
+                {/* Running peak dashed line */}
+                <path
+                  d={equityChart.peakLinePath}
+                  fill="none"
+                  strokeWidth="1"
+                  strokeDasharray="5 4"
+                  className="stroke-muted-foreground/35"
+                />
+
+                {/* Equity area fills (positive above zero / negative below zero) */}
                 <path
                   d={equityChart.areaPath}
                   clipPath="url(#jpca-clip-pos)"
@@ -831,6 +987,8 @@ export function JournalPerformanceChart({
                   clipPath="url(#jpca-clip-neg)"
                   fill="url(#jpca-grad-neg)"
                 />
+
+                {/* Main equity line */}
                 <path
                   d={equityChart.linePath}
                   fill="none"
@@ -839,6 +997,8 @@ export function JournalPerformanceChart({
                   strokeLinecap="round"
                   className={equityChart.positive ? "stroke-emerald-500" : "stroke-red-500"}
                 />
+
+                {/* X-axis labels */}
                 {equityChart.pts.map((pt, i) => {
                   if (i % equityChart.labelStep !== 0 && i !== equityPoints.length - 1)
                     return null;

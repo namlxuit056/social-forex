@@ -1138,6 +1138,10 @@
     "chartBars": "Cột",
     "chartEquity": "Equity",
     "chartProfitFactor": "Profit Factor",
+    "chartStreak": "Streak",
+    "chartStreakWin": "liên tiếp thắng",
+    "chartStreakLoss": "liên tiếp thua",
+    "chartMaxDrawdown": "Max Drawdown",
     "chartBestWorst": "Tốt nhất / tệ nhất",
     "chartEmpty": "Chưa có giao dịch đã đóng trong khoảng thời gian này."
   },

@@ -1138,6 +1138,10 @@
     "chartBars": "Bars",
     "chartEquity": "Equity",
     "chartProfitFactor": "Profit Factor",
+    "chartStreak": "Streak",
+    "chartStreakWin": "win streak",
+    "chartStreakLoss": "loss streak",
+    "chartMaxDrawdown": "Max Drawdown",
     "chartBestWorst": "Best / worst",
     "chartEmpty": "No closed trades in this range yet."
   },
