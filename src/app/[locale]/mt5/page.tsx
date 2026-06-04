@@ -1,4 +1,4 @@
-import { Activity, Cable, CircleSlash, Clock, KeyRound, Server } from "lucide-react";
+import { Activity, Cable, CircleSlash, Clock, Download, KeyRound, Server } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { auth } from "@/auth";
 import { revokeMt5Connection } from "@/actions/mt5-bridge";
@@ -165,7 +165,24 @@ export default async function Mt5Page({
             </CardTitle>
             <CardDescription>{t("setupDesc")}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4 text-sm">
+          <CardContent className="space-y-5 text-sm">
+            {/* Download */}
+            <div className="flex flex-col gap-2 rounded-lg border border-border/70 bg-muted/20 p-4">
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                {t("downloadLabel")}
+              </p>
+              <a
+                href="/downloads/social-forex.ex5"
+                download="social-forex.ex5"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 sm:w-auto"
+              >
+                <Download className="size-4 shrink-0" aria-hidden />
+                {t("downloadBtn")}
+              </a>
+              <p className="text-xs text-muted-foreground">{t("downloadHint")}</p>
+            </div>
+
+            {/* Bridge endpoint */}
             <div>
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 {t("endpointLabel")}
@@ -174,11 +191,36 @@ export default async function Mt5Page({
                 {endpoint}
               </code>
             </div>
-            <ol className="space-y-2 text-muted-foreground">
-              <li>{t("setupStep1")}</li>
-              <li>{t("setupStep2")}</li>
-              <li>{t("setupStep3")}</li>
-            </ol>
+
+            {/* Step-by-step guide */}
+            <div>
+              <p className="mb-2.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                {t("setupGuideTitle")}
+              </p>
+              <ol className="space-y-2.5">
+                {(
+                  [
+                    "setupStep1",
+                    "setupStep2",
+                    "setupStep3",
+                    "setupStep4",
+                    "setupStep5",
+                    "setupStep6",
+                    "setupStep7",
+                    "setupStep8",
+                    "setupStep9",
+                  ] as const
+                ).map((key, i) => (
+                  <li key={key} className="flex gap-2.5 text-muted-foreground">
+                    <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-muted text-[10px] font-bold text-foreground">
+                      {i + 1}
+                    </span>
+                    <span>{t(key)}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+
             <p className="rounded-lg border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-xs leading-relaxed text-muted-foreground">
               {t("riskNote")}
             </p>

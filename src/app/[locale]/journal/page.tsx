@@ -7,6 +7,7 @@ import { JournalStats } from "./journal-stats";
 import { JournalTable } from "./journal-table";
 import { JournalHeader } from "./journal-header";
 import { JournalLivePanel, type LivePosition } from "./journal-live-panel";
+import { JournalMt5Prompt } from "./journal-mt5-prompt";
 import { JournalPerformanceChart } from "./journal-performance-chart";
 
 export async function generateMetadata({
@@ -160,7 +161,7 @@ export default async function JournalPage({
       />
 
       {trades.length === 0 ? (
-        <EmptyState title={t("empty")} description={t("emptyHint")} />
+        <JournalMt5Prompt />
       ) : (
         <JournalTable trades={serialized} locale={locale} />
       )}
