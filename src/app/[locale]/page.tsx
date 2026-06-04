@@ -2,6 +2,7 @@ import { BarChart3, BookOpen, ExternalLink, Shield } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { TrackedLink } from "@/components/analytics/tracked-link";
+import { HomeTopTraders } from "@/components/home/home-top-traders";
 import { NewcomerPathSection } from "@/components/home/newcomer-path";
 import { FaqJsonLd } from "@/components/seo/faq-json-ld";
 import { buttonVariants } from "@/components/ui/button";
@@ -157,6 +158,8 @@ export default async function HomePage({
       </section>
 
       <NewcomerPathSection />
+
+      <HomeTopTraders />
 
       <section className="rounded-xl border border-border/70 bg-card/45 px-4 py-4 ring-1 ring-foreground/5 sm:flex sm:items-center sm:justify-between sm:gap-4">
         <div>
