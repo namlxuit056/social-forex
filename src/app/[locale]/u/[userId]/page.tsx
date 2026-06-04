@@ -182,7 +182,7 @@ export default async function PublicProfilePage({ params }: Props) {
 
       <PublicTradingOverview profileUserId={userId} locale={locale} t={t} />
 
-      <Mt5SyncedSignalsSection profileUserId={userId} t={t} />
+      <Mt5SyncedSignalsSection profileUserId={userId} locale={locale} t={t} />
 
       {followerCount > 0 ? (
         <ProfileFollowersSection

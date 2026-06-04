@@ -75,7 +75,7 @@ export async function PublicTradingOverview({
   locale: string;
   t: Translator;
 }) {
-  const [trades, mt5Connection] = await Promise.all([
+  const [trades, mt5Connection, latestSnapshot] = await Promise.all([
     prisma.tradeJournal.findMany({
       where: { userId: profileUserId },
       orderBy: { openedAt: "desc" },
@@ -91,12 +91,16 @@ export async function PublicTradingOverview({
         equity: true,
         openPositions: true,
         lastSeenAt: true,
-        lastPositions: true,
       },
+    }),
+    prisma.mt5Snapshot.findFirst({
+      where: { connection: { userId: profileUserId, revokedAt: null } },
+      orderBy: { receivedAt: "desc" },
+      select: { positions: true },
     }),
   ]);
 
-  const livePositions = parseLivePositions(mt5Connection?.lastPositions);
+  const livePositions = parseLivePositions(latestSnapshot?.positions);
 
   const serializedTrades = trades.map((trade) => ({
     pnl: trade.pnl,
