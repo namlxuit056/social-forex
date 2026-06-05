@@ -14,6 +14,16 @@ export const aiCalendarImpactSchema = z.object({
         whyItMatters: z.string().min(12).max(260),
         bias: z.enum(["bullish", "bearish", "mixed", "volatility"]),
         affectedPairs: z.array(z.string().min(3).max(16)).min(1).max(8),
+        pairScenarios: z
+          .array(
+            z.object({
+              pair: z.string().min(3).max(16),
+              actionBias: z.enum(["buy", "sell", "neutral"]),
+              reason: z.string().min(12).max(220),
+            }),
+          )
+          .min(1)
+          .max(8),
         watchLevel: z.string().min(8).max(220),
       }),
     )
@@ -75,9 +85,14 @@ Rules:
 - Compare forecast, previous, and actual when available. If actual is missing, explain what traders should watch at release time.
 - Bias must describe likely pressure on the currency, not a guaranteed trade.
 - affectedPairs must use only the appPairsToConsider list for that event.
+- pairScenarios must translate the currency bias into each affected pair:
+  - If USD is bullish, EURUSD/GBPUSD/AUDUSD/NZDUSD usually lean sell, USDJPY/USDCAD/USDCHF usually lean buy, XAUUSD/XAGUSD/BTCUSD/ETHUSD usually lean sell because they are quoted against USD.
+  - If USD is bearish, reverse those examples.
+  - For non-USD currencies, if the event currency is the base currency of a pair, bullish means pair leans buy and bearish means pair leans sell. If it is the quote currency, bullish means pair leans sell and bearish means pair leans buy.
+  - Use neutral when actual vs forecast is missing or the release is mainly a volatility event.
 - Prefer high and medium impact events; merge low-impact events into the summary unless they matter as a cluster.
 - Mention volatility risk around release time.
-- Do not give exact entry, stop loss, take profit, or promise a direction.
+- You may use buy/sell only as an educational bias/scenario. Do not give exact entry, stop loss, take profit, or promise a direction.
 
 Calendar events JSON:
 ${JSON.stringify(compact, null, 2)}
@@ -92,6 +107,13 @@ Return only valid JSON:
       "whyItMatters": "plain explanation of the indicator",
       "bias": "bullish" | "bearish" | "mixed" | "volatility",
       "affectedPairs": ["EURUSD", "XAUUSD"],
+      "pairScenarios": [
+        {
+          "pair": "EURUSD",
+          "actionBias": "buy" | "sell" | "neutral",
+          "reason": "short reason linking currency pressure to the pair direction"
+        }
+      ],
       "watchLevel": "what to compare at release time and what would shift bias"
     }
   ],
@@ -130,7 +152,7 @@ export async function getAiCalendarImpact(
       {
         role: "system",
         content:
-          "You are a conservative macro analyst for forex education. Respond only with JSON matching the requested schema. Do not provide investment advice or trade instructions.",
+          "You are a conservative macro analyst for forex education. Respond only with JSON matching the requested schema. You may describe buy/sell directional bias as an educational scenario, but do not provide investment advice, exact entries, stop losses, take profits, or certainty.",
       },
       { role: "user", content: buildPrompt(prioritized, locale) },
     ],

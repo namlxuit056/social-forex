@@ -343,6 +343,11 @@
       "mixed": "Mixed",
       "volatility": "Volatility risk"
     },
+    "aiAction": {
+      "buy": "Bias: buy",
+      "sell": "Bias: sell",
+      "neutral": "Wait / neutral"
+    },
     "signupPromptTitle": "Keep news checks with your plan",
     "signupPromptDesc": "Create an account to connect calendar/news reminders with your watchlist and journal workflow.",
     "signupPromptCta": "Save news workflow",

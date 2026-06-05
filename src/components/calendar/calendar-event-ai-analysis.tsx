@@ -19,6 +19,11 @@ type AiCalendarImpactResponse = {
       whyItMatters: string;
       bias: "bullish" | "bearish" | "mixed" | "volatility";
       affectedPairs: string[];
+      pairScenarios?: Array<{
+        pair: string;
+        actionBias: "buy" | "sell" | "neutral";
+        reason: string;
+      }>;
       watchLevel: string;
     }>;
     checklist: string[];
@@ -37,6 +42,12 @@ function biasClass(bias: string) {
   if (bias === "bearish") return "border-red-500/40 bg-red-500/12 text-red-200";
   if (bias === "volatility") return "border-amber-500/40 bg-amber-500/12 text-amber-100";
   return "border-sky-500/40 bg-sky-500/12 text-sky-100";
+}
+
+function actionClass(action: string) {
+  if (action === "buy") return "border-emerald-500/40 bg-emerald-500/12 text-emerald-200";
+  if (action === "sell") return "border-red-500/40 bg-red-500/12 text-red-200";
+  return "border-muted-foreground/35 bg-muted/35 text-muted-foreground";
 }
 
 export function CalendarEventAiAnalysis({ event, compact = false }: Props) {
@@ -152,16 +163,42 @@ export function CalendarEventAiAnalysis({ event, compact = false }: Props) {
                 </span>{" "}
                 {driver.watchLevel}
               </p>
-              <div className="flex flex-wrap gap-1">
-                {driver.affectedPairs.map((pair) => (
-                  <span
-                    key={pair}
-                    className="rounded bg-muted px-2 py-0.5 font-mono text-[11px] text-foreground/85"
-                  >
-                    {pair}
-                  </span>
-                ))}
-              </div>
+              {driver.pairScenarios && driver.pairScenarios.length > 0 ? (
+                <div className="space-y-1.5">
+                  {driver.pairScenarios.map((scenario) => (
+                    <div
+                      key={scenario.pair}
+                      className="rounded-md border border-border/60 bg-card/40 px-2.5 py-2"
+                    >
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="font-mono text-xs font-semibold text-foreground">
+                          {scenario.pair}
+                        </span>
+                        <Badge
+                          variant="outline"
+                          className={cn(actionClass(scenario.actionBias))}
+                        >
+                          {t(`aiAction.${scenario.actionBias}`)}
+                        </Badge>
+                      </div>
+                      <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                        {scenario.reason}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-1">
+                  {driver.affectedPairs.map((pair) => (
+                    <span
+                      key={pair}
+                      className="rounded bg-muted px-2 py-0.5 font-mono text-[11px] text-foreground/85"
+                    >
+                      {pair}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           ) : null}
 

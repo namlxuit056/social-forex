@@ -343,6 +343,11 @@
       "mixed": "Pha trộn",
       "volatility": "Rủi ro biến động"
     },
+    "aiAction": {
+      "buy": "Nghiêng buy",
+      "sell": "Nghiêng sell",
+      "neutral": "Chờ / trung lập"
+    },
     "signupPromptTitle": "Giữ phần kiểm tra tin cùng kế hoạch",
     "signupPromptDesc": "Tạo tài khoản để nối nhắc tin/lịch với watchlist và workflow journal của bạn.",
     "signupPromptCta": "Lưu workflow tin",
