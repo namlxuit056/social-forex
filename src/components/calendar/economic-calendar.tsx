@@ -51,6 +51,7 @@ function computeStatus(
 
 type Zone = "utc" | "vn";
 type DateRange = "today" | "week";
+type StatusFilter = CalendarEventStatus;
 
 type Props = {
   events: CalendarEvent[];
@@ -74,7 +75,10 @@ export function EconomicCalendar({
   const intlLocale = useLocale();
 
   const [zone, setZone] = useState<Zone>("vn");
-  const [dateRange, setDateRange] = useState<DateRange>("week");
+  const [dateRange, setDateRange] = useState<DateRange>("today");
+  const [selectedStatuses, setSelectedStatuses] = useState<Set<StatusFilter>>(
+    () => new Set(["live", "upcoming"]),
+  );
   const [selectedCurrencies, setSelectedCurrencies] = useState<Set<string>>(
     () => new Set(initialSelectedCurrencies),
   );
@@ -150,6 +154,28 @@ export function EconomicCalendar({
     [t],
   );
 
+  const statusOptions = useMemo(
+    () =>
+      [
+        {
+          value: "live" as const,
+          label: t("statusLive"),
+          color: "border-primary/30 bg-primary/15 text-primary",
+        },
+        {
+          value: "upcoming" as const,
+          label: t("statusUpcoming"),
+          color: "border-sky-400/30 bg-sky-400/10 text-sky-200",
+        },
+        {
+          value: "finished" as const,
+          label: t("statusDone"),
+          color: "border-border bg-muted text-muted-foreground",
+        },
+      ] as const,
+    [t],
+  );
+
   const sorted = useMemo(
     () =>
       [...events].sort(
@@ -188,11 +214,13 @@ export function EconomicCalendar({
 
   const rows = useMemo(
     () =>
-      filtered.map((ev) => ({
-        ev,
-        status: computeStatus(ev.timeUtc, now, ev.actual),
-      })),
-    [filtered, now],
+      filtered
+        .map((ev) => ({
+          ev,
+          status: computeStatus(ev.timeUtc, now, ev.actual),
+        }))
+        .filter(({ status }) => selectedStatuses.has(status)),
+    [filtered, now, selectedStatuses],
   );
 
   const tz = zone === "utc" ? "UTC" : "Asia/Ho_Chi_Minh";
@@ -226,6 +254,18 @@ export function EconomicCalendar({
         if (next.size > 1) next.delete(impact);
       } else {
         next.add(impact);
+      }
+      return next;
+    });
+  }
+
+  function toggleStatus(status: StatusFilter) {
+    setSelectedStatuses((prev) => {
+      const next = new Set(prev);
+      if (next.has(status)) {
+        if (next.size > 1) next.delete(status);
+      } else {
+        next.add(status);
       }
       return next;
     });
@@ -286,6 +326,33 @@ export function EconomicCalendar({
             >
               {t("filterWeek")}
             </Button>
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div className="hidden h-6 w-px bg-border sm:block" />
+
+        {/* Status filter */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-medium text-muted-foreground">
+            {t("labelStatus")}
+          </span>
+          <div className="flex flex-wrap gap-1">
+            {statusOptions.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => toggleStatus(opt.value)}
+                className={cn(
+                  "min-h-9 rounded-md border px-2.5 py-1.5 text-xs font-medium transition-all",
+                  selectedStatuses.has(opt.value)
+                    ? opt.color
+                    : "border-transparent bg-muted/40 text-muted-foreground/50",
+                )}
+              >
+                {opt.label}
+              </button>
+            ))}
           </div>
         </div>
 

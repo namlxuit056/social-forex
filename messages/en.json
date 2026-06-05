@@ -311,6 +311,7 @@
     "labelDate": "Date:",
     "filterToday": "Today",
     "filterWeek": "This week",
+    "labelStatus": "Status:",
     "labelImpact": "Impact:",
     "labelCurrency": "Currency:",
     "allCurrencies": "All",
