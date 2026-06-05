@@ -4,6 +4,7 @@ import { useMemo, useState, useRef, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { TrendingUp, Flame, TrendingDown } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FlyingDragonAnimation } from "@/components/profile/profile-creature-animations";
 import { cn } from "@/lib/utils";
 
 export interface PublicChartTrade {
@@ -260,8 +261,9 @@ export function PublicPerformanceChart({
   }
 
   return (
-    <Card className="border-border/60 bg-card/55">
-      <CardHeader className="pb-3">
+    <Card className="relative overflow-hidden border-border/60 bg-card/55">
+      <FlyingDragonAnimation />
+      <CardHeader className="relative pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
           <TrendingUp className="size-4 text-chart-3" />
           {t("profilePerformanceChart")}

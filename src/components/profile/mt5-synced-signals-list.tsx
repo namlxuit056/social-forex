@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Badge } from "@/components/ui/badge";
+import { RunningTigerAnimation } from "@/components/profile/profile-creature-animations";
 import { cn } from "@/lib/utils";
 
 type Mt5SignalItem = {
@@ -266,9 +267,12 @@ export function Mt5SyncedSignalsList({
       {activeItems.length > 0 ? (
         <div className="space-y-2">
           <div className="flex items-center gap-3">
-            <h3 className="whitespace-nowrap text-xs font-semibold uppercase text-emerald-300">
-              {t("mt5RunningNowTitle")}
-            </h3>
+            <div className="flex items-center gap-2">
+              <RunningTigerAnimation />
+              <h3 className="whitespace-nowrap text-xs font-semibold uppercase text-emerald-300">
+                {t("mt5RunningNowTitle")}
+              </h3>
+            </div>
             <div className="h-px flex-1 bg-emerald-500/25" />
             <span className="text-xs text-muted-foreground">
               {activeItems.length} {t("mt5Orders")}

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { MarketDuelAnimation } from "@/components/profile/market-duel-animation";
 import { getInitialsFromLabel } from "@/lib/profile/display";
 import { cn } from "@/lib/utils";
 
@@ -38,7 +39,9 @@ export function PublicProfileHero({
       className="overflow-hidden rounded-xl border border-border bg-card/50 ring-1 ring-foreground/5"
       aria-labelledby="public-profile-heading"
     >
-      <div className="h-24 bg-linear-to-br from-primary/25 via-primary/10 to-muted/40 sm:h-32" />
+      <div className="relative h-24 bg-linear-to-br from-primary/25 via-primary/10 to-muted/40 sm:h-32">
+        <MarketDuelAnimation />
+      </div>
 
       <div className="px-4 pb-4 sm:px-6 sm:pb-6">
         <div className="-mt-8 mb-3 flex items-end justify-between sm:-mt-10">
