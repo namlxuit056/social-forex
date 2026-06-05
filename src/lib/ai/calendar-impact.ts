@@ -13,7 +13,7 @@ export const aiCalendarImpactSchema = z.object({
         event: z.string().min(3).max(120),
         whyItMatters: z.string().min(12).max(260),
         bias: z.enum(["bullish", "bearish", "mixed", "volatility"]),
-        affectedPairs: z.array(z.string().min(3).max(16)).min(1).max(8),
+        affectedPairs: z.array(z.string().min(3).max(16)).min(1).max(12),
         pairScenarios: z
           .array(
             z.object({
@@ -23,7 +23,7 @@ export const aiCalendarImpactSchema = z.object({
             }),
           )
           .min(1)
-          .max(8),
+          .max(12),
         watchLevel: z.string().min(8).max(220),
       }),
     )
@@ -85,6 +85,7 @@ Rules:
 - Compare forecast, previous, and actual when available. If actual is missing, explain what traders should watch at release time.
 - Bias must describe likely pressure on the currency, not a guaranteed trade.
 - affectedPairs must use only the appPairsToConsider list for that event.
+- For affectedPairs and pairScenarios, choose the most relevant pairs only, maximum 12.
 - pairScenarios must translate the currency bias into each affected pair:
   - If USD is bullish, EURUSD/GBPUSD/AUDUSD/NZDUSD usually lean sell, USDJPY/USDCAD/USDCHF usually lean buy, XAUUSD/XAGUSD/BTCUSD/ETHUSD usually lean sell because they are quoted against USD.
   - If USD is bearish, reverse those examples.
