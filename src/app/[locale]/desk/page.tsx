@@ -130,6 +130,7 @@ export default async function DeskPage({
           source={cal.source}
           warning={calendarWarningText ?? undefined}
           syncedAt={cal.syncedAt}
+          serverNowIso={new Date().toISOString()}
           initialSelectedCurrencies={initialCurrencies}
         />
       </section>

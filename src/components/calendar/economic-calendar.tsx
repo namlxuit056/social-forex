@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { formatInTimeZone } from "date-fns-tz";
 import { Button } from "@/components/ui/button";
+import { CalendarAiImpactPanel } from "@/components/calendar/calendar-ai-impact-panel";
 import { cn } from "@/lib/utils";
 import type {
   CalendarEvent,
@@ -14,16 +15,33 @@ import type {
 
 const LIVE_WINDOW_MS = 90 * 60 * 1000;
 
-function useNow(intervalMs = 30_000) {
-  const [now, setNow] = useState(() => Date.now());
+function useSyncedNow(serverNowIso: string, intervalMs = 30_000) {
+  const [initialServerNowMs] = useState(() => {
+    const serverNowMs = new Date(serverNowIso).getTime();
+    return Number.isNaN(serverNowMs) ? Date.now() : serverNowMs;
+  });
+  const [mountedClientNowMs] = useState(() => Date.now());
+  const [now, setNow] = useState(initialServerNowMs);
+
   useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), intervalMs);
+    const tick = () => {
+      setNow(initialServerNowMs + (Date.now() - mountedClientNowMs));
+    };
+    const id = setInterval(tick, intervalMs);
+    tick();
     return () => clearInterval(id);
-  }, [intervalMs]);
+  }, [initialServerNowMs, intervalMs, mountedClientNowMs]);
+
   return now;
 }
 
-function computeStatus(timeUtc: string, nowMs: number): CalendarEventStatus {
+function computeStatus(
+  timeUtc: string,
+  nowMs: number,
+  actual?: string,
+): CalendarEventStatus {
+  if (actual?.trim()) return "finished";
+
   const t = new Date(timeUtc).getTime();
   if (Number.isNaN(t)) return "upcoming";
   if (nowMs < t) return "upcoming";
@@ -39,6 +57,7 @@ type Props = {
   source: CalendarSource;
   warning?: string;
   syncedAt?: string;
+  serverNowIso: string;
   /** Từ URL — set ban đầu; parent nên đổi `key` khi query đổi để reset filter. */
   initialSelectedCurrencies?: string[];
 };
@@ -48,6 +67,7 @@ export function EconomicCalendar({
   source,
   warning,
   syncedAt,
+  serverNowIso,
   initialSelectedCurrencies = [],
 }: Props) {
   const t = useTranslations("calendar");
@@ -62,7 +82,7 @@ export function EconomicCalendar({
     new Set(["high", "medium", "low"]),
   );
   const [isPending, startTransition] = useTransition();
-  const now = useNow();
+  const now = useSyncedNow(serverNowIso);
 
   const statusText = (s: CalendarEventStatus) =>
     s === "upcoming"
@@ -146,8 +166,8 @@ export function EconomicCalendar({
 
   const todayStr = useMemo(() => {
     const tz = zone === "utc" ? "UTC" : "Asia/Ho_Chi_Minh";
-    return formatInTimeZone(new Date(), tz, "yyyy-MM-dd");
-  }, [zone]);
+    return formatInTimeZone(new Date(now), tz, "yyyy-MM-dd");
+  }, [now, zone]);
 
   const filtered = useMemo(() => {
     const tz = zone === "utc" ? "UTC" : "Asia/Ho_Chi_Minh";
@@ -170,7 +190,7 @@ export function EconomicCalendar({
     () =>
       filtered.map((ev) => ({
         ev,
-        status: computeStatus(ev.timeUtc, now),
+        status: computeStatus(ev.timeUtc, now, ev.actual),
       })),
     [filtered, now],
   );
@@ -378,6 +398,8 @@ export function EconomicCalendar({
         {selectedCurrencies.size > 0 &&
           ` · ${Array.from(selectedCurrencies).join(", ")}`}
       </p>
+
+      <CalendarAiImpactPanel events={rows.map((row) => row.ev)} />
 
       {/* Mobile cards */}
       <div className="grid gap-2 md:hidden">

@@ -13,6 +13,7 @@ interface FFEvent {
   impact: string;
   forecast: string;
   previous: string;
+  actual?: string;
 }
 
 function mapImpact(raw: string): Impact {
@@ -62,6 +63,7 @@ export async function fetchInvestingCalendar(): Promise<CalendarEvent[]> {
         impact: mapImpact(ev.impact || "medium"),
         forecast: ev.forecast || undefined,
         previous: ev.previous || undefined,
+        actual: ev.actual || undefined,
       };
     });
 

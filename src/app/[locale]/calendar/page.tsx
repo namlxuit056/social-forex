@@ -62,6 +62,7 @@ export default async function CalendarPage({
         source={cal.source}
         warning={warningText ?? undefined}
         syncedAt={cal.syncedAt}
+        serverNowIso={new Date().toISOString()}
         initialSelectedCurrencies={initialCurrencies}
       />
       {!session?.user?.id ? (
