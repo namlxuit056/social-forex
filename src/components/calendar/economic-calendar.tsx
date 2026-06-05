@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { formatInTimeZone } from "date-fns-tz";
 import { Button } from "@/components/ui/button";
-import { CalendarAiImpactPanel } from "@/components/calendar/calendar-ai-impact-panel";
+import { CalendarEventAiAnalysis } from "@/components/calendar/calendar-event-ai-analysis";
 import { cn } from "@/lib/utils";
 import type {
   CalendarEvent,
@@ -399,8 +399,6 @@ export function EconomicCalendar({
           ` · ${Array.from(selectedCurrencies).join(", ")}`}
       </p>
 
-      <CalendarAiImpactPanel events={rows.map((row) => row.ev)} />
-
       {/* Mobile cards */}
       <div className="grid gap-2 md:hidden">
         {rows.length === 0 ? (
@@ -445,6 +443,7 @@ export function EconomicCalendar({
                   </span>{" "}
                   {values}
                 </div>
+                <CalendarEventAiAnalysis event={ev} compact />
               </article>
             );
           })
@@ -462,13 +461,14 @@ export function EconomicCalendar({
               <th className="px-4 py-3">{t("tableEvent")}</th>
               <th className="px-4 py-3">{t("tableImpact")}</th>
               <th className="px-4 py-3">{t("tableValues")}</th>
+              <th className="px-4 py-3">{t("tableAi")}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
             {rows.length === 0 ? (
               <tr>
                 <td
-                  colSpan={6}
+                  colSpan={7}
                   className="px-4 py-8 text-center text-muted-foreground"
                 >
                   {t("emptyFilter")}
@@ -498,6 +498,9 @@ export function EconomicCalendar({
                     {[ev.forecast, ev.previous, ev.actual]
                       .filter(Boolean)
                       .join(" · ") || "—"}
+                  </td>
+                  <td className="min-w-80 px-4 py-3 align-top">
+                    <CalendarEventAiAnalysis event={ev} />
                   </td>
                 </tr>
               ))
