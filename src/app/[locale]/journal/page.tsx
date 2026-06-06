@@ -9,6 +9,7 @@ import { JournalHeader } from "./journal-header";
 import { JournalLivePanel, type LivePosition } from "./journal-live-panel";
 import { JournalMt5Prompt } from "./journal-mt5-prompt";
 import { JournalPerformanceChart } from "./journal-performance-chart";
+import { JournalAiPanel } from "./journal-ai-panel";
 
 export async function generateMetadata({
   params,
@@ -147,6 +148,8 @@ export default async function JournalPage({
         totalPnl={totalPnl}
         avgPnl={avgPnl}
       />
+
+      <JournalAiPanel tradeCount={trades.length} />
 
       <JournalPerformanceChart
         trades={serialized}

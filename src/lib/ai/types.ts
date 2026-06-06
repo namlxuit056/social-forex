@@ -60,3 +60,33 @@ export type AiAdvisorResponse = {
   generatedAt: string;
   disclaimer: string;
 };
+
+export const aiJournalAnalysisSchema = z.object({
+  score: z.number().min(0).max(100),
+  summary: z.string().min(20).max(1200),
+  strengths: z.array(z.string().min(5).max(220)).min(1).max(5),
+  improvementAreas: z
+    .array(
+      z.object({
+        title: z.string().min(3).max(80),
+        priority: z.enum(["high", "medium", "low"]),
+        evidence: z.string().min(5).max(260),
+        action: z.string().min(5).max(260),
+      }),
+    )
+    .min(2)
+    .max(6),
+  riskFlags: z.array(z.string().min(5).max(220)).min(1).max(5),
+  patternInsights: z.array(z.string().min(5).max(260)).min(1).max(6),
+  nextReviewPlan: z.array(z.string().min(5).max(180)).min(3).max(5),
+});
+
+export type AiJournalAnalysis = z.infer<typeof aiJournalAnalysisSchema>;
+
+export type AiJournalAnalysisResponse = {
+  analysis: AiJournalAnalysis;
+  generatedAt: string;
+  tradeCount: number;
+  closedTradeCount: number;
+  disclaimer: string;
+};
