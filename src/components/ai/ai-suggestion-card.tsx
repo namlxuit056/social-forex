@@ -14,6 +14,7 @@ import {
   XCircle,
   Calculator,
   CalendarClock,
+  Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { positionSizeLots, stopLossPips } from "@/lib/calculators";
@@ -207,14 +208,22 @@ export function AiSuggestionCard({
             <h3 className="text-sm font-bold text-foreground">
               {t("title")} — {symbol}
             </h3>
-            <span
-              className={cn(
-                "text-xs font-semibold",
-                isLong ? "text-emerald-500" : "text-red-500",
+            <div className="flex items-center gap-2">
+              <span
+                className={cn(
+                  "text-xs font-semibold",
+                  isLong ? "text-emerald-500" : "text-red-500",
+                )}
+              >
+                {isLong ? t("long") : t("short")}
+              </span>
+              {suggestion.qualityScore >= 75 && (
+                <span className="inline-flex items-center gap-1 rounded-full border border-yellow-500/30 bg-yellow-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-yellow-600 dark:text-yellow-400">
+                  <Zap className="size-2.5" aria-hidden />
+                  {t("highAccuracy")}
+                </span>
               )}
-            >
-              {isLong ? t("long") : t("short")}
-            </span>
+            </div>
           </div>
         </div>
         <div className="text-right">

@@ -1095,7 +1095,8 @@
     "support": "Support",
     "resistance": "Resistance",
     "riskReward": "R:R",
-    "tradingViewContext": "TradingView M15 / H1 / H4",
+    "tradingViewContext": "TradingView D1 / H4 / H1 / M15",
+    "highAccuracy": "High Accuracy",
     "keyLevels": "Key levels",
     "postSignal": "Post signal from AI",
     "postingSignal": "Posting…",
@@ -1128,6 +1129,7 @@
     "apiSignalLoginRequired": "Sign in to post an AI signal.",
     "apiSignalCreated": "AI signal posted.",
     "apiSignalCreateFailed": "Could not post the AI signal right now.",
+    "apiEntryPriceViolation": "AI suggested an entry price that is not better than the current market price. Please analyze again.",
     "apiDisclaimer": "AI suggestions are for education only, not investment advice. You are solely responsible for your trading decisions."
   },
   "journal": {

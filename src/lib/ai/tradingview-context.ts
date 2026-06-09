@@ -2,12 +2,13 @@ import type { QuoteRow } from "@/lib/quotes/types";
 import { toTradingViewSymbol } from "@/lib/quotes/tradingview-symbols";
 
 type ScannerMarket = "forex" | "cfd" | "crypto";
-type TimeframeCode = "15" | "60" | "240";
+type TimeframeCode = "15" | "60" | "240" | "1D";
 
-const TIMEFRAMES: Array<{ code: TimeframeCode; label: "M15" | "H1" | "H4" }> = [
+const TIMEFRAMES: Array<{ code: TimeframeCode; label: "M15" | "H1" | "H4" | "D1" }> = [
   { code: "15", label: "M15" },
   { code: "60", label: "H1" },
   { code: "240", label: "H4" },
+  { code: "1D", label: "D1" },
 ];
 
 const METRICS = [
@@ -36,7 +37,7 @@ const METRICS = [
 type Metric = (typeof METRICS)[number];
 
 export type TradingViewTechnicalFrame = {
-  timeframe: "M15" | "H1" | "H4";
+  timeframe: "M15" | "H1" | "H4" | "D1";
   recommendation: number | null;
   maRecommendation: number | null;
   oscillatorRecommendation: number | null;

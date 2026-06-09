@@ -87,6 +87,15 @@ export async function POST(req: NextRequest) {
       loc,
     );
 
+    // Enforce better-price entry rule: LONG entry must be below bid, SHORT above ask
+    const entryViolation =
+      (suggestion.direction === "LONG" && suggestion.entry >= quote.bid) ||
+      (suggestion.direction === "SHORT" && suggestion.entry <= quote.ask);
+
+    if (entryViolation) {
+      return errorJson(ai.apiEntryPriceViolation, 422);
+    }
+
     const response: AiSuggestResponse = {
       symbol,
       suggestion,

@@ -1095,7 +1095,8 @@
     "support": "Hỗ trợ",
     "resistance": "Kháng cự",
     "riskReward": "R:R",
-    "tradingViewContext": "TradingView M15 / H1 / H4",
+    "tradingViewContext": "TradingView D1 / H4 / H1 / M15",
+    "highAccuracy": "Độ chính xác cao",
     "keyLevels": "Mức giá quan trọng",
     "postSignal": "Đăng tín hiệu từ AI",
     "postingSignal": "Đang đăng…",
@@ -1128,6 +1129,7 @@
     "apiSignalLoginRequired": "Bạn cần đăng nhập để đăng tín hiệu từ AI.",
     "apiSignalCreated": "Đã đăng tín hiệu từ AI.",
     "apiSignalCreateFailed": "Không thể đăng tín hiệu từ AI lúc này.",
+    "apiEntryPriceViolation": "AI đề xuất giá vào lệnh không tốt hơn thị trường hiện tại. Vui lòng phân tích lại.",
     "apiDisclaimer": "Đề xuất AI chỉ mang tính tham khảo và giáo dục, không phải tư vấn đầu tư. Bạn tự chịu trách nhiệm về mọi quyết định giao dịch."
   },
   "journal": {
