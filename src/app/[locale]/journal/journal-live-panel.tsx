@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "@/i18n/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Activity, RefreshCw, TrendingUp, Wallet, Shield } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
+import type { Mt5AccountResponse } from "@/app/api/mt5/account/route";
 
 export type LivePosition = {
   ticket: string;
@@ -43,21 +43,36 @@ function fmt(value: number | null, digits = 2): string {
   return value == null ? "—" : value.toFixed(digits);
 }
 
-export function JournalLivePanel({ account, positions, locale }: Props) {
+export function JournalLivePanel({ account: initialAccount, positions: initialPositions, locale }: Props) {
   const t = useTranslations("journal");
-  const router = useRouter();
+  const [account, setAccount] = useState<Mt5AccountInfo | null>(initialAccount);
+  const [positions, setPositions] = useState<LivePosition[]>(initialPositions);
   const [spinning, setSpinning] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const fetchAccount = useCallback(async () => {
+    if (document.visibilityState !== "visible") return;
+    setSpinning(true);
+    try {
+      const res = await fetch("/api/mt5/account", { credentials: "include" });
+      if (!res.ok) return;
+      const data = (await res.json()) as Mt5AccountResponse;
+      setAccount(data.account);
+      setPositions(data.positions);
+    } catch {
+      // silent — keep showing last known data
+    } finally {
+      window.setTimeout(() => setSpinning(false), 400);
+    }
+  }, []);
 
   useEffect(() => {
-    if (!account) return;
-    const id = window.setInterval(() => {
-      if (document.visibilityState !== "visible") return;
-      setSpinning(true);
-      router.refresh();
-      window.setTimeout(() => setSpinning(false), 700);
-    }, REFRESH_MS);
-    return () => window.clearInterval(id);
-  }, [account, router]);
+    if (!initialAccount) return;
+    timerRef.current = window.setInterval(() => void fetchAccount(), REFRESH_MS);
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [initialAccount, fetchAccount]);
 
   if (!account) {
     return (
