@@ -77,6 +77,7 @@ model User {
   mt5Connections       Mt5Connection[]
   pageVisits           UserPageVisit[]
   clientErrors         UserClientError[]
+  funnelEvents         FunnelEvent[]
 
   /// Thông báo in-app: tín hiệu từ trader đang follow
   notifySignalFollow       Boolean @default(true)
@@ -495,6 +496,32 @@ model UserClientError {
   @@index([userId, createdAt])
   @@index([path, createdAt])
   @@index([kind, createdAt])
+  @@index([createdAt])
+}
+
+model FunnelEvent {
+  id          String   @id @default(cuid())
+  eventName   String
+  visitorId   String?
+  userId      String?
+  path        String
+  fullPath    String?
+  locale      String?
+  surface     String?
+  cta         String?
+  destination String?
+  reason      String?
+  properties  Json?
+  referrer    String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([eventName, createdAt])
+  @@index([visitorId, createdAt])
+  @@index([userId, createdAt])
+  @@index([path, createdAt])
   @@index([createdAt])
 }
 

@@ -9,6 +9,7 @@ import {
   ANALYTICS_EVENTS,
   type AnalyticsProperties,
 } from "@/lib/analytics-events";
+import { trackInternalEvent } from "@/lib/internal-analytics";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -37,6 +38,7 @@ export function SignupPrompt({
 
   useEffect(() => {
     track(ANALYTICS_EVENTS.signupPromptView, eventProperties);
+    trackInternalEvent(ANALYTICS_EVENTS.signupPromptView, eventProperties);
   }, [eventProperties]);
 
   return (

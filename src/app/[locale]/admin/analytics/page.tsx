@@ -5,6 +5,7 @@ import {
   AlertTriangle,
   Clock,
   MousePointerClick,
+  Target,
   User,
 } from "lucide-react";
 import { auth } from "@/auth";
@@ -73,11 +74,15 @@ export default async function AdminAnalyticsPage({
   const [
     totalVisits,
     totalErrors,
+    totalFunnelEvents,
     visitGroups,
     errorGroups,
+    funnelGroups,
+    recentFunnelEvents,
   ] = await Promise.all([
     prisma.userPageVisit.count({ where: { createdAt: { gte: since } } }),
     prisma.userClientError.count({ where: { createdAt: { gte: since } } }),
+    prisma.funnelEvent.count({ where: { createdAt: { gte: since } } }),
     prisma.userPageVisit.groupBy({
       by: ["userId"],
       where: { createdAt: { gte: since } },
@@ -88,7 +93,46 @@ export default async function AdminAnalyticsPage({
       where: { createdAt: { gte: since } },
       _count: { _all: true },
     }),
+    prisma.funnelEvent.groupBy({
+      by: ["eventName"],
+      where: { createdAt: { gte: since } },
+      _count: { _all: true },
+      orderBy: { _count: { eventName: "desc" } },
+    }),
+    prisma.funnelEvent.findMany({
+      where: { createdAt: { gte: since } },
+      orderBy: { createdAt: "desc" },
+      take: 30,
+      select: {
+        id: true,
+        eventName: true,
+        path: true,
+        surface: true,
+        cta: true,
+        destination: true,
+        reason: true,
+        createdAt: true,
+        userId: true,
+        visitorId: true,
+      },
+    }),
   ]);
+
+  const funnelCountMap = new Map(
+    funnelGroups.map((row) => [row.eventName, row._count._all]),
+  );
+  const signupFunnel = [
+    "homepage_cta_click",
+    "signup_prompt_view",
+    "signup_prompt_click",
+    "register_view",
+    "register_submit",
+    "register_success",
+    "register_failure",
+  ].map((eventName) => ({
+    eventName,
+    count: funnelCountMap.get(eventName) ?? 0,
+  }));
 
   const userIds = [
     ...new Set([
@@ -182,6 +226,12 @@ export default async function AdminAnalyticsPage({
           ? "text-red-500 bg-red-500/10"
           : "text-muted-foreground bg-muted/50",
     },
+    {
+      label: t("analyticsFunnelEvents30d"),
+      value: totalFunnelEvents,
+      icon: Target,
+      className: "text-primary bg-primary/10",
+    },
   ];
 
   return (
@@ -196,7 +246,7 @@ export default async function AdminAnalyticsPage({
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-4">
         {stats.map((stat) => (
           <Card key={stat.label} className="border-border/60">
             <CardContent className="flex items-center gap-4 p-5">
@@ -214,6 +264,87 @@ export default async function AdminAnalyticsPage({
             </CardContent>
           </Card>
         ))}
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
+        <Card className="border-border/60">
+          <CardHeader>
+            <CardTitle>{t("analyticsSignupFunnel")}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {signupFunnel.map((event) => (
+              <div
+                key={event.eventName}
+                className="flex items-center justify-between gap-3 rounded-lg border border-border/60 px-3 py-2"
+              >
+                <span className="truncate font-mono text-xs text-foreground">
+                  {event.eventName}
+                </span>
+                <Badge variant={event.count > 0 ? "secondary" : "outline"}>
+                  {event.count}
+                </Badge>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        <Card className="border-border/60">
+          <CardHeader>
+            <CardTitle>{t("analyticsRecentFunnelEvents")}</CardTitle>
+          </CardHeader>
+          <CardContent className="overflow-x-auto p-0">
+            {recentFunnelEvents.length === 0 ? (
+              <p className="px-4 pb-4 text-sm text-muted-foreground">
+                {t("analyticsNoFunnelEvents")}
+              </p>
+            ) : (
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b text-left text-xs text-muted-foreground">
+                    <th className="px-4 py-2.5">{t("time")}</th>
+                    <th className="px-4 py-2.5">{t("analyticsEvent")}</th>
+                    <th className="px-4 py-2.5">{t("analyticsPage")}</th>
+                    <th className="px-4 py-2.5">{t("analyticsContext")}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/40">
+                  {recentFunnelEvents.map((event) => (
+                    <tr key={event.id} className="align-top">
+                      <td className="whitespace-nowrap px-4 py-3 text-xs text-muted-foreground">
+                        {formatDate(event.createdAt, locale)}
+                      </td>
+                      <td className="px-4 py-3">
+                        <Badge variant="secondary">{event.eventName}</Badge>
+                      </td>
+                      <td className="px-4 py-3 font-mono text-xs">
+                        {event.path}
+                      </td>
+                      <td className="px-4 py-3 text-xs text-muted-foreground">
+                        <div className="flex max-w-lg flex-wrap gap-1.5">
+                          {event.surface && (
+                            <Badge variant="outline">{event.surface}</Badge>
+                          )}
+                          {event.cta && (
+                            <Badge variant="outline">{event.cta}</Badge>
+                          )}
+                          {event.destination && (
+                            <Badge variant="outline">{event.destination}</Badge>
+                          )}
+                          {event.reason && (
+                            <Badge variant="destructive">{event.reason}</Badge>
+                          )}
+                          {!event.userId && event.visitorId && (
+                            <Badge variant="outline">{t("analyticsGuest")}</Badge>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">

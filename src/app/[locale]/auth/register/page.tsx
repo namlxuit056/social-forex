@@ -29,7 +29,7 @@ export default async function RegisterPage({
   const rawCallbackUrl = Array.isArray(query?.callbackUrl)
     ? query?.callbackUrl[0]
     : query?.callbackUrl;
-  const callbackUrl = safeLocalizedCallbackPath(rawCallbackUrl, "/dashboard");
+  const callbackUrl = safeLocalizedCallbackPath(rawCallbackUrl, "/challenge");
 
   return (
     <div className="mx-auto max-w-md space-y-8">

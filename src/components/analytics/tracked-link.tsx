@@ -7,6 +7,7 @@ import type {
   AnalyticsEventName,
   AnalyticsProperties,
 } from "@/lib/analytics-events";
+import { trackInternalEvent } from "@/lib/internal-analytics";
 
 type LinkProps = ComponentPropsWithoutRef<typeof Link>;
 
@@ -28,6 +29,7 @@ export function TrackedLink({
 }: TrackedLinkProps) {
   function handleClick(event: MouseEvent<HTMLAnchorElement>) {
     track(eventName, eventProperties);
+    trackInternalEvent(eventName, eventProperties);
     onClick?.(event);
   }
 
@@ -42,6 +44,7 @@ export function TrackedAnchor({
 }: TrackedAnchorProps) {
   function handleClick(event: MouseEvent<HTMLAnchorElement>) {
     track(eventName, eventProperties);
+    trackInternalEvent(eventName, eventProperties);
     onClick?.(event);
   }
 

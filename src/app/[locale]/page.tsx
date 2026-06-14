@@ -1,4 +1,12 @@
-import { BarChart3, BookOpen, ExternalLink, Shield } from "lucide-react";
+import {
+  BarChart3,
+  BookOpen,
+  CalendarCheck,
+  CheckCircle2,
+  ExternalLink,
+  NotebookPen,
+  Shield,
+} from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { TrackedLink } from "@/components/analytics/tracked-link";
@@ -31,6 +39,44 @@ const blocks = [
   },
 ] as const;
 
+const challengeDays = [
+  {
+    titleKey: "day1Title" as const,
+    href: "/calendar" as const,
+    icon: CalendarCheck,
+  },
+  {
+    titleKey: "day2Title" as const,
+    href: "/desk" as const,
+    icon: BarChart3,
+  },
+  {
+    titleKey: "day3Title" as const,
+    href: "/tools" as const,
+    icon: Shield,
+  },
+  {
+    titleKey: "day4Title" as const,
+    href: "/academy/risk-1pct" as const,
+    icon: BookOpen,
+  },
+  {
+    titleKey: "day5Title" as const,
+    href: "/journal" as const,
+    icon: NotebookPen,
+  },
+  {
+    titleKey: "day6Title" as const,
+    href: "/journal" as const,
+    icon: CheckCircle2,
+  },
+  {
+    titleKey: "day7Title" as const,
+    href: "/challenge" as const,
+    icon: CheckCircle2,
+  },
+] as const;
+
 export async function generateMetadata({
   params,
 }: {
@@ -60,6 +106,7 @@ export default async function HomePage({
   setRequestLocale(locale);
 
   const tHome = await getTranslations("home");
+  const tChallenge = await getTranslations("challenge");
   const tf = await getTranslations("schemaFaqHome");
   const exnessAffiliateUrl = getExnessAffiliateUrl();
 
@@ -94,67 +141,112 @@ export default async function HomePage({
         <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
           {tHome("subtitle")}
         </p>
-        <div className="mx-auto mt-10 flex w-full max-w-xl flex-col items-stretch gap-3 sm:max-w-none sm:items-center">
-          <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-            <TrackedLink
-              href="/challenge"
-              eventName={ANALYTICS_EVENTS.homepageCtaClick}
-              eventProperties={{ cta: "demo_challenge", destination: "/challenge" }}
-              className={cn(
-                buttonVariants({ size: "lg" }),
-                "w-full justify-center sm:w-auto sm:min-w-48",
-              )}
+        <div className="mx-auto mt-8 grid max-w-3xl gap-2 text-left sm:grid-cols-3">
+          {(["heroTrust1", "heroTrust2", "heroTrust3"] as const).map((key) => (
+            <div
+              key={key}
+              className="flex items-center gap-2 rounded-lg border border-border/70 bg-card/45 px-3 py-2 text-sm text-muted-foreground"
             >
-              {tHome("cta_challenge")}
-            </TrackedLink>
-            <TrackedLink
-              href="/desk"
-              eventName={ANALYTICS_EVENTS.homepageCtaClick}
-              eventProperties={{ cta: "live_desk", destination: "/desk" }}
-              className={cn(
-                buttonVariants({ variant: "outline", size: "lg" }),
-                "w-full justify-center border-border sm:w-auto sm:min-w-48",
-              )}
-            >
-              {tHome("cta_desk")}
-            </TrackedLink>
-          </div>
-          <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:justify-center sm:gap-3">
-            <TrackedLink
-              href="/academy"
-              eventName={ANALYTICS_EVENTS.homepageCtaClick}
-              eventProperties={{ cta: "academy", destination: "/academy" }}
-              className={cn(
-                buttonVariants({ variant: "outline", size: "default" }),
-                "w-full justify-center border-border",
-              )}
-            >
-              {tHome("cta_academy")}
-            </TrackedLink>
-            <TrackedLink
-              href="/quotes"
-              eventName={ANALYTICS_EVENTS.homepageCtaClick}
-              eventProperties={{ cta: "quotes", destination: "/quotes" }}
-              className={cn(
-                buttonVariants({ variant: "outline", size: "default" }),
-                "w-full justify-center border-border",
-              )}
-            >
-              {tHome("cta_quotes")}
-            </TrackedLink>
-            <TrackedLink
-              href="/calendar"
-              eventName={ANALYTICS_EVENTS.homepageCtaClick}
-              eventProperties={{ cta: "calendar", destination: "/calendar" }}
-              className={cn(
-                buttonVariants({ variant: "outline", size: "default" }),
-                "w-full justify-center border-border",
-              )}
-            >
-              {tHome("cta_calendar")}
-            </TrackedLink>
-          </div>
+              <CheckCircle2 className="size-4 shrink-0 text-primary" aria-hidden />
+              <span>{tHome(key)}</span>
+            </div>
+          ))}
         </div>
+        <div className="mx-auto mt-10 flex w-full max-w-xl flex-col gap-3 sm:flex-row sm:justify-center">
+          <TrackedLink
+            href="/challenge"
+            eventName={ANALYTICS_EVENTS.homepageCtaClick}
+            eventProperties={{
+              cta: "demo_challenge",
+              destination: "/challenge",
+              surface: "hero",
+            }}
+            className={cn(
+              buttonVariants({ size: "lg" }),
+              "w-full justify-center sm:w-auto sm:min-w-56",
+            )}
+          >
+            {tHome("cta_challenge")}
+          </TrackedLink>
+          <TrackedLink
+            href="/start"
+            eventName={ANALYTICS_EVENTS.homepageCtaClick}
+            eventProperties={{
+              cta: "start_guide",
+              destination: "/start",
+              surface: "hero",
+            }}
+            className={cn(
+              buttonVariants({ variant: "outline", size: "lg" }),
+              "w-full justify-center border-border sm:w-auto sm:min-w-56",
+            )}
+          >
+            {tHome("cta_start")}
+          </TrackedLink>
+        </div>
+      </section>
+
+      <section
+        aria-labelledby="challenge-preview-heading"
+        className="rounded-2xl border border-border bg-card/45 p-5 ring-1 ring-foreground/5 sm:p-6"
+      >
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2
+              id="challenge-preview-heading"
+              className="font-heading text-xl font-semibold tracking-tight text-foreground"
+            >
+              {tHome("challengePreviewTitle")}
+            </h2>
+            <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+              {tHome("challengePreviewDesc")}
+            </p>
+          </div>
+          <TrackedLink
+            href="/challenge"
+            eventName={ANALYTICS_EVENTS.homepageCtaClick}
+            eventProperties={{
+              cta: "challenge_preview",
+              destination: "/challenge",
+              surface: "challenge_preview",
+            }}
+            className={cn(
+              buttonVariants({ variant: "secondary", size: "sm" }),
+              "w-full justify-center sm:w-auto",
+            )}
+          >
+            {tHome("cta_challenge")}
+          </TrackedLink>
+        </div>
+        <ol className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-7">
+          {challengeDays.map((day, index) => {
+            const Icon = day.icon;
+            return (
+              <li key={day.titleKey} className="min-w-0">
+                <TrackedLink
+                  href={day.href}
+                  eventName={ANALYTICS_EVENTS.homepageCtaClick}
+                  eventProperties={{
+                    cta: `challenge_day_${index + 1}`,
+                    destination: day.href,
+                    surface: "challenge_preview",
+                  }}
+                  className="group flex h-full min-h-32 flex-col rounded-lg border border-border/70 bg-muted/20 p-3 transition hover:border-primary/30 hover:bg-muted/35"
+                >
+                  <div className="mb-3 flex items-center justify-between gap-2">
+                    <span className="inline-flex size-7 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary ring-1 ring-primary/25">
+                      {index + 1}
+                    </span>
+                    <Icon className="size-4 text-muted-foreground group-hover:text-primary" aria-hidden />
+                  </div>
+                  <h3 className="text-sm font-medium leading-snug text-foreground group-hover:text-primary">
+                    {tChallenge(day.titleKey)}
+                  </h3>
+                </TrackedLink>
+              </li>
+            );
+          })}
+        </ol>
       </section>
 
       <NewcomerPathSection />
