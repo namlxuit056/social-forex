@@ -6,6 +6,7 @@ import {
   Crown,
   Flag,
   TrendingUp,
+  Activity,
   ArrowRight,
 } from "lucide-react";
 import { auth } from "@/auth";
@@ -105,6 +106,7 @@ export default async function AdminDashboardPage({
     { href: "/admin/users", label: t("manageUsers"), icon: Users },
     { href: "/admin/reports", label: t("manageReports"), icon: Flag },
     { href: "/admin/signals", label: t("manageSignals"), icon: TrendingUp },
+    { href: "/admin/analytics", label: t("manageAnalytics"), icon: Activity },
   ];
 
   return (

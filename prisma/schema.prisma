@@ -75,6 +75,8 @@ model User {
   vipPayments          VipPayment[]
   demoChallenges       UserDemoChallenge[]
   mt5Connections       Mt5Connection[]
+  pageVisits           UserPageVisit[]
+  clientErrors         UserClientError[]
 
   /// Thông báo in-app: tín hiệu từ trader đang follow
   notifySignalFollow       Boolean @default(true)
@@ -451,6 +453,49 @@ model UserDemoChallenge {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([rewardGrantedAt])
+}
+
+enum ClientErrorKind {
+  ERROR_BOUNDARY
+  GLOBAL_ERROR
+  UNHANDLED_REJECTION
+}
+
+model UserPageVisit {
+  id        String   @id @default(cuid())
+  userId    String
+  path      String
+  fullPath  String
+  title     String?
+  referrer  String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([path, createdAt])
+  @@index([createdAt])
+}
+
+model UserClientError {
+  id        String          @id @default(cuid())
+  userId    String
+  path      String
+  fullPath  String?
+  kind      ClientErrorKind @default(GLOBAL_ERROR)
+  message   String
+  stack     String?
+  digest    String?
+  userAgent String?
+  createdAt DateTime        @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([path, createdAt])
+  @@index([kind, createdAt])
+  @@index([createdAt])
 }
 
 /// Bản ghi singleton — lần đồng bộ lịch kinh tế (FMP) gần nhất.

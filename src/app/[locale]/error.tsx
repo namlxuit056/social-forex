@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { trackClientError } from "@/components/analytics/user-activity-tracker";
 
 export default function ErrorPage({
   error,
@@ -19,6 +20,7 @@ export default function ErrorPage({
 
   useEffect(() => {
     console.error("[ErrorBoundary]", error);
+    trackClientError(error, "ERROR_BOUNDARY", error.digest);
   }, [error]);
 
   return (

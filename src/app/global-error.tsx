@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import en from "../../messages/en.json";
+import { trackClientError } from "@/components/analytics/user-activity-tracker";
 
 export default function GlobalError({
   error,
@@ -12,6 +14,10 @@ export default function GlobalError({
   const title = en.error.criticalTitle;
   const description = en.error.criticalDescription;
   const retry = en.common.retry;
+
+  useEffect(() => {
+    trackClientError(error, "ERROR_BOUNDARY", error.digest);
+  }, [error]);
 
   return (
     <html lang="en">
