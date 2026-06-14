@@ -48,7 +48,7 @@ export function JournalLivePanel({ account: initialAccount, positions: initialPo
   const [account, setAccount] = useState<Mt5AccountInfo | null>(initialAccount);
   const [positions, setPositions] = useState<LivePosition[]>(initialPositions);
   const [spinning, setSpinning] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timerRef = useRef<number | null>(null);
 
   const fetchAccount = useCallback(async () => {
     if (document.visibilityState !== "visible") return;
@@ -70,7 +70,7 @@ export function JournalLivePanel({ account: initialAccount, positions: initialPo
     if (!initialAccount) return;
     timerRef.current = window.setInterval(() => void fetchAccount(), REFRESH_MS);
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
+      if (timerRef.current) window.clearInterval(timerRef.current);
     };
   }, [initialAccount, fetchAccount]);
 
