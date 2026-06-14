@@ -1,10 +1,18 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
-import { Activity, AlertTriangle, Clock, MousePointerClick } from "lucide-react";
+import {
+  Activity,
+  AlertTriangle,
+  Clock,
+  MousePointerClick,
+  User,
+} from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "@/i18n/navigation";
+import { cn } from "@/lib/utils";
 
 export async function generateMetadata({
   params,
@@ -32,10 +40,13 @@ function displayUser(user: { email: string | null; name: string | null }) {
 
 export default async function AdminAnalyticsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ userId?: string }>;
 }) {
   const { locale } = await params;
+  const { userId: selectedUserId } = await searchParams;
   setRequestLocale(locale);
   const t = await getTranslations("admin");
 
@@ -61,52 +72,93 @@ export default async function AdminAnalyticsPage({
 
   const [
     totalVisits,
-    activeUsers,
     totalErrors,
-    topPages,
-    recentVisits,
-    recentErrors,
+    visitGroups,
+    errorGroups,
   ] = await Promise.all([
     prisma.userPageVisit.count({ where: { createdAt: { gte: since } } }),
+    prisma.userClientError.count({ where: { createdAt: { gte: since } } }),
     prisma.userPageVisit.groupBy({
       by: ["userId"],
       where: { createdAt: { gte: since } },
       _count: { _all: true },
     }),
-    prisma.userClientError.count({ where: { createdAt: { gte: since } } }),
-    prisma.userPageVisit.groupBy({
-      by: ["path"],
+    prisma.userClientError.groupBy({
+      by: ["userId"],
       where: { createdAt: { gte: since } },
       _count: { _all: true },
-      orderBy: { _count: { path: "desc" } },
-      take: 10,
-    }),
-    prisma.userPageVisit.findMany({
-      orderBy: { createdAt: "desc" },
-      take: 30,
-      select: {
-        id: true,
-        path: true,
-        fullPath: true,
-        title: true,
-        createdAt: true,
-        user: { select: { email: true, name: true } },
-      },
-    }),
-    prisma.userClientError.findMany({
-      orderBy: { createdAt: "desc" },
-      take: 30,
-      select: {
-        id: true,
-        path: true,
-        kind: true,
-        message: true,
-        digest: true,
-        createdAt: true,
-        user: { select: { email: true, name: true } },
-      },
     }),
   ]);
+
+  const userIds = [
+    ...new Set([
+      ...visitGroups.map((row) => row.userId),
+      ...errorGroups.map((row) => row.userId),
+    ]),
+  ];
+
+  const users = await prisma.user.findMany({
+    where: { id: { in: userIds } },
+    select: { id: true, email: true, name: true },
+  });
+
+  const userMap = new Map(users.map((user) => [user.id, user]));
+  const visitCountMap = new Map(
+    visitGroups.map((row) => [row.userId, row._count._all]),
+  );
+  const errorCountMap = new Map(
+    errorGroups.map((row) => [row.userId, row._count._all]),
+  );
+  const userRows = userIds
+    .map((userId) => ({
+      userId,
+      user: userMap.get(userId) ?? { email: null, name: null },
+      visits: visitCountMap.get(userId) ?? 0,
+      errors: errorCountMap.get(userId) ?? 0,
+    }))
+    .sort((a, b) => b.visits + b.errors - (a.visits + a.errors));
+
+  const selectedUser =
+    selectedUserId && userMap.has(selectedUserId)
+      ? userMap.get(selectedUserId)
+      : null;
+
+  const [selectedTopPages, selectedVisits, selectedErrors] = selectedUserId
+    ? await Promise.all([
+        prisma.userPageVisit.groupBy({
+          by: ["path"],
+          where: { userId: selectedUserId },
+          _count: { _all: true },
+          orderBy: { _count: { path: "desc" } },
+          take: 10,
+        }),
+        prisma.userPageVisit.findMany({
+          where: { userId: selectedUserId },
+          orderBy: { createdAt: "desc" },
+          take: 50,
+          select: {
+            id: true,
+            path: true,
+            fullPath: true,
+            title: true,
+            createdAt: true,
+          },
+        }),
+        prisma.userClientError.findMany({
+          where: { userId: selectedUserId },
+          orderBy: { createdAt: "desc" },
+          take: 50,
+          select: {
+            id: true,
+            path: true,
+            kind: true,
+            message: true,
+            digest: true,
+            createdAt: true,
+          },
+        }),
+      ])
+    : [[], [], []];
 
   const stats = [
     {
@@ -117,7 +169,7 @@ export default async function AdminAnalyticsPage({
     },
     {
       label: t("analyticsActiveUsers30d"),
-      value: activeUsers.length,
+      value: userRows.length,
       icon: Activity,
       className: "text-blue-500 bg-blue-500/10",
     },
@@ -164,128 +216,189 @@ export default async function AdminAnalyticsPage({
         ))}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
+      <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
         <Card className="border-border/60">
           <CardHeader>
-            <CardTitle>{t("analyticsTopPages")}</CardTitle>
+            <CardTitle>{t("analyticsUsers")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {topPages.length === 0 ? (
+            {userRows.length === 0 ? (
               <p className="text-sm text-muted-foreground">
                 {t("analyticsNoVisits")}
               </p>
             ) : (
-              topPages.map((page) => (
-                <div
-                  key={page.path}
-                  className="flex items-center justify-between gap-3 rounded-lg border border-border/60 px-3 py-2"
+              userRows.map((row) => (
+                <Link
+                  key={row.userId}
+                  href={`/admin/analytics?userId=${encodeURIComponent(row.userId)}`}
+                  className={cn(
+                    "flex items-center justify-between gap-3 rounded-lg border border-border/60 px-3 py-2 transition-colors hover:bg-muted/50",
+                    selectedUserId === row.userId && "border-primary/50 bg-primary/10",
+                  )}
                 >
-                  <span className="truncate font-mono text-xs text-foreground">
-                    {page.path}
+                  <span className="min-w-0">
+                    <span className="flex items-center gap-2 text-sm font-medium text-foreground">
+                      <User className="size-4 shrink-0 text-muted-foreground" />
+                      <span className="truncate">{displayUser(row.user)}</span>
+                    </span>
+                    <span className="mt-1 block truncate font-mono text-[11px] text-muted-foreground">
+                      {row.userId}
+                    </span>
                   </span>
-                  <Badge variant="secondary">
-                    {page._count._all} {t("analyticsVisits")}
-                  </Badge>
-                </div>
+                  <span className="flex shrink-0 gap-2">
+                    <Badge variant="secondary">
+                      {row.visits} {t("analyticsVisits")}
+                    </Badge>
+                    {row.errors > 0 && (
+                      <Badge variant="destructive">
+                        {row.errors} {t("analyticsErrors")}
+                      </Badge>
+                    )}
+                  </span>
+                </Link>
               ))
             )}
           </CardContent>
         </Card>
 
-        <Card className="border-border/60">
-          <CardHeader>
-            <CardTitle>{t("analyticsRecentVisits")}</CardTitle>
-          </CardHeader>
-          <CardContent className="overflow-x-auto p-0">
-            {recentVisits.length === 0 ? (
-              <p className="px-4 pb-4 text-sm text-muted-foreground">
-                {t("analyticsNoVisits")}
-              </p>
-            ) : (
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b text-left text-xs text-muted-foreground">
-                    <th className="px-4 py-2.5">{t("time")}</th>
-                    <th className="px-4 py-2.5">{t("user")}</th>
-                    <th className="px-4 py-2.5">{t("analyticsPage")}</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border/40">
-                  {recentVisits.map((visit) => (
-                    <tr key={visit.id}>
-                      <td className="whitespace-nowrap px-4 py-3 text-xs text-muted-foreground">
-                        <Clock className="mr-1 inline-block size-3" />
-                        {formatDate(visit.createdAt, locale)}
-                      </td>
-                      <td className="whitespace-nowrap px-4 py-3">
-                        {displayUser(visit.user)}
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="max-w-md truncate font-mono text-xs">
-                          {visit.fullPath}
-                        </div>
-                        {visit.title && (
-                          <div className="max-w-md truncate text-xs text-muted-foreground">
-                            {visit.title}
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card className="border-border/60">
-        <CardHeader>
-          <CardTitle>{t("analyticsRecentErrors")}</CardTitle>
-        </CardHeader>
-        <CardContent className="overflow-x-auto p-0">
-          {recentErrors.length === 0 ? (
-            <p className="px-4 pb-4 text-sm text-muted-foreground">
-              {t("analyticsNoErrors")}
-            </p>
+        <div className="space-y-6">
+          {!selectedUserId ? (
+            <Card className="border-dashed border-border/60">
+              <CardContent className="flex min-h-48 flex-col items-center justify-center gap-2 p-6 text-center">
+                <User className="size-8 text-muted-foreground/50" />
+                <p className="text-sm font-medium text-foreground">
+                  {t("analyticsSelectUser")}
+                </p>
+                <p className="max-w-sm text-xs text-muted-foreground">
+                  {t("analyticsSelectUserHint")}
+                </p>
+              </CardContent>
+            </Card>
           ) : (
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b text-left text-xs text-muted-foreground">
-                  <th className="px-4 py-2.5">{t("time")}</th>
-                  <th className="px-4 py-2.5">{t("user")}</th>
-                  <th className="px-4 py-2.5">{t("analyticsPage")}</th>
-                  <th className="px-4 py-2.5">{t("analyticsError")}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/40">
-                {recentErrors.map((error) => (
-                  <tr key={error.id} className="align-top">
-                    <td className="whitespace-nowrap px-4 py-3 text-xs text-muted-foreground">
-                      {formatDate(error.createdAt, locale)}
-                    </td>
-                    <td className="whitespace-nowrap px-4 py-3">
-                      {displayUser(error.user)}
-                    </td>
-                    <td className="px-4 py-3 font-mono text-xs">{error.path}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex flex-wrap gap-2">
-                        <Badge variant="destructive">{error.kind}</Badge>
-                        {error.digest && (
-                          <Badge variant="outline">{error.digest}</Badge>
-                        )}
+            <>
+              <Card className="border-border/60">
+                <CardHeader>
+                  <CardTitle>
+                    {t("analyticsUserDetail")}:{" "}
+                    {selectedUser
+                      ? displayUser(selectedUser)
+                      : selectedUserId.slice(0, 12)}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {selectedTopPages.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">
+                      {t("analyticsNoVisits")}
+                    </p>
+                  ) : (
+                    selectedTopPages.map((page) => (
+                      <div
+                        key={page.path}
+                        className="flex items-center justify-between gap-3 rounded-lg border border-border/60 px-3 py-2"
+                      >
+                        <span className="truncate font-mono text-xs text-foreground">
+                          {page.path}
+                        </span>
+                        <Badge variant="secondary">
+                          {page._count._all} {t("analyticsVisits")}
+                        </Badge>
                       </div>
-                      <p className="mt-2 max-w-3xl break-words text-xs text-muted-foreground">
-                        {error.message}
-                      </p>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    ))
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card className="border-border/60">
+                <CardHeader>
+                  <CardTitle>{t("analyticsRecentVisits")}</CardTitle>
+                </CardHeader>
+                <CardContent className="overflow-x-auto p-0">
+                  {selectedVisits.length === 0 ? (
+                    <p className="px-4 pb-4 text-sm text-muted-foreground">
+                      {t("analyticsNoVisits")}
+                    </p>
+                  ) : (
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b text-left text-xs text-muted-foreground">
+                          <th className="px-4 py-2.5">{t("time")}</th>
+                          <th className="px-4 py-2.5">{t("analyticsPage")}</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border/40">
+                        {selectedVisits.map((visit) => (
+                          <tr key={visit.id}>
+                            <td className="whitespace-nowrap px-4 py-3 text-xs text-muted-foreground">
+                              <Clock className="mr-1 inline-block size-3" />
+                              {formatDate(visit.createdAt, locale)}
+                            </td>
+                            <td className="px-4 py-3">
+                              <div className="max-w-md truncate font-mono text-xs">
+                                {visit.fullPath}
+                              </div>
+                              {visit.title && (
+                                <div className="max-w-md truncate text-xs text-muted-foreground">
+                                  {visit.title}
+                                </div>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card className="border-border/60">
+                <CardHeader>
+                  <CardTitle>{t("analyticsRecentErrors")}</CardTitle>
+                </CardHeader>
+                <CardContent className="overflow-x-auto p-0">
+                  {selectedErrors.length === 0 ? (
+                    <p className="px-4 pb-4 text-sm text-muted-foreground">
+                      {t("analyticsNoErrors")}
+                    </p>
+                  ) : (
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b text-left text-xs text-muted-foreground">
+                          <th className="px-4 py-2.5">{t("time")}</th>
+                          <th className="px-4 py-2.5">{t("analyticsPage")}</th>
+                          <th className="px-4 py-2.5">{t("analyticsError")}</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border/40">
+                        {selectedErrors.map((error) => (
+                          <tr key={error.id} className="align-top">
+                            <td className="whitespace-nowrap px-4 py-3 text-xs text-muted-foreground">
+                              {formatDate(error.createdAt, locale)}
+                            </td>
+                            <td className="px-4 py-3 font-mono text-xs">
+                              {error.path}
+                            </td>
+                            <td className="px-4 py-3">
+                              <div className="flex flex-wrap gap-2">
+                                <Badge variant="destructive">{error.kind}</Badge>
+                                {error.digest && (
+                                  <Badge variant="outline">{error.digest}</Badge>
+                                )}
+                              </div>
+                              <p className="mt-2 max-w-3xl break-words text-xs text-muted-foreground">
+                                {error.message}
+                              </p>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </CardContent>
+              </Card>
+            </>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }
