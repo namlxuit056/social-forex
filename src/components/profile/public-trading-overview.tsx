@@ -230,17 +230,67 @@ export async function PublicTradingOverview({
       </div>
 
       <Card className="border-border/60 bg-card/55">
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <History className="size-4 text-muted-foreground" />
-              {t("profileTradeHistoryTitle")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="overflow-x-auto p-0">
-            {trades.length === 0 ? (
-              <p className="px-4 pb-4 text-sm text-muted-foreground">{t("profileTradeHistoryEmpty")}</p>
-            ) : (
-              <table className="w-full min-w-150 text-sm">
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <History className="size-4 text-muted-foreground" />
+            {t("profileTradeHistoryTitle")}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          {trades.length === 0 ? (
+            <p className="px-4 pb-4 text-sm text-muted-foreground">
+              {t("profileTradeHistoryEmpty")}
+            </p>
+          ) : (
+            <>
+              <div className="space-y-2 px-4 pb-4 sm:hidden">
+                {trades.slice(0, 8).map((trade) => (
+                  <div
+                    key={trade.id}
+                    className="rounded-lg border border-border/60 bg-muted/15 p-3"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="font-mono text-sm font-semibold text-foreground">
+                          {trade.symbol}
+                        </p>
+                        <p className="mt-0.5 text-xs text-muted-foreground">
+                          {trade.direction} ·{" "}
+                          {trade.openedAt.toLocaleDateString(
+                            locale === "vi" ? "vi-VN" : "en-US",
+                            {
+                              month: "numeric",
+                              day: "numeric",
+                              year: "2-digit",
+                            },
+                          )}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <Badge
+                          variant="outline"
+                          className={cn(resultClass(trade.result))}
+                        >
+                          {resultLabel(trade.result, t)}
+                        </Badge>
+                        <p
+                          className={cn(
+                            "mt-2 font-mono text-xs font-medium",
+                            (trade.pnl ?? 0) >= 0
+                              ? "text-emerald-500"
+                              : "text-red-500",
+                          )}
+                        >
+                          {trade.pnl == null ? "—" : fmtCurrency(trade.pnl)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="hidden overflow-x-auto sm:block">
+                <table className="w-full min-w-150 text-sm">
                 <thead>
                   <tr className="border-b text-left text-xs text-muted-foreground">
                     <th className="px-4 py-2.5">{t("profileSymbol")}</th>
@@ -274,8 +324,10 @@ export async function PublicTradingOverview({
                   ))}
                 </tbody>
               </table>
-            )}
-          </CardContent>
+              </div>
+            </>
+          )}
+        </CardContent>
       </Card>
     </section>
   );

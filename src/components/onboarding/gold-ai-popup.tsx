@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { usePathname } from "next/navigation";
 import { BarChart3, Bot, ShieldCheck, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -11,6 +12,7 @@ const STORAGE_KEY = "social-forex:gold-ai-popup:v1";
 export function GoldAiPopup() {
   const t = useTranslations("goldAiPopup");
   const locale = useLocale();
+  const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
   const dismiss = useCallback(() => {
@@ -23,6 +25,8 @@ export function GoldAiPopup() {
   }, []);
 
   useEffect(() => {
+    if (pathname.includes("/u/")) return;
+
     try {
       if (window.localStorage.getItem(STORAGE_KEY)) return;
     } catch {
@@ -31,7 +35,7 @@ export function GoldAiPopup() {
 
     const timer = window.setTimeout(() => setOpen(true), 900);
     return () => window.clearTimeout(timer);
-  }, []);
+  }, [pathname]);
 
   useEffect(() => {
     if (!open) return;

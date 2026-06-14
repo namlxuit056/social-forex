@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Activity, RadioTower, Signal, TrendingUp, Users } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
 import { ProfileFollowersSection } from "@/components/profile/profile-followers-section";
@@ -22,7 +23,19 @@ import { pageCtaItems } from "@/lib/page-cta-i18n";
 import { buildSignalsListHref } from "@/lib/signals/signal-list-query";
 import { cn } from "@/lib/utils";
 
-type Props = { params: Promise<{ locale: string; userId: string }> };
+type ProfileTab = "overview" | "signals" | "mt5" | "followers";
+type Props = {
+  params: Promise<{ locale: string; userId: string }>;
+  searchParams?: Promise<{ tab?: string }>;
+};
+
+const PROFILE_TABS: ProfileTab[] = ["overview", "signals", "mt5", "followers"];
+
+function normalizeTab(value?: string): ProfileTab {
+  return PROFILE_TABS.includes(value as ProfileTab)
+    ? (value as ProfileTab)
+    : "overview";
+}
 
 export const dynamic = "force-dynamic";
 
@@ -46,8 +59,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function PublicProfilePage({ params }: Props) {
+export default async function PublicProfilePage({ params, searchParams }: Props) {
   const { locale, userId } = await params;
+  const { tab } = (await searchParams) ?? {};
+  const activeTab = normalizeTab(tab);
   setRequestLocale(locale);
   const t = await getTranslations("profile");
   const tCommon = await getTranslations("common");
@@ -88,7 +103,14 @@ export default async function PublicProfilePage({ params }: Props) {
       })
     : null;
 
-  const [followerCount, followingCount, threadCount, isFollowing, followerRows] =
+  const [
+    followerCount,
+    followingCount,
+    threadCount,
+    isFollowing,
+    followerRows,
+    hasMt5Sync,
+  ] =
     await Promise.all([
       prisma.userFollow.count({ where: { followingId: userId } }),
       prisma.userFollow.count({ where: { followerId: userId } }),
@@ -114,6 +136,10 @@ export default async function PublicProfilePage({ params }: Props) {
         orderBy: { id: "desc" },
         take: 48,
       }),
+      prisma.mt5Connection.findFirst({
+        where: { userId, revokedAt: null },
+        select: { id: true },
+      }),
     ]);
 
   const isSelf = session?.user?.id === userId;
@@ -125,8 +151,19 @@ export default async function PublicProfilePage({ params }: Props) {
     image: row.follower.image,
   }));
 
+  const heroBadges = [
+    t("profileBadgePublicTrader"),
+    ...(hasMt5Sync ? [t("mt5ReadOnlyBadge")] : []),
+  ];
+  const tabs = [
+    { value: "overview", label: t("profileTabOverview"), icon: TrendingUp },
+    { value: "signals", label: t("profileTabSignals"), icon: Signal },
+    { value: "mt5", label: t("profileTabMt5"), icon: RadioTower },
+    { value: "followers", label: t("profileTabFollowers"), icon: Users },
+  ] satisfies Array<{ value: ProfileTab; label: string; icon: typeof Activity }>;
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <PublicProfileHero
         displayLabel={displayLabel}
         imageUrl={user.image}
@@ -141,6 +178,7 @@ export default async function PublicProfilePage({ params }: Props) {
         followersLabel={t("followers")}
         followingLabel={t("following")}
         threadsLabel={t("threads")}
+        badges={heroBadges}
         actions={
           <>
             {session?.user && !isSelf && (
@@ -150,7 +188,7 @@ export default async function PublicProfilePage({ params }: Props) {
                   href={`/messages/${userId}`}
                   className={cn(
                     buttonVariants({ variant: "outline", size: "sm" }),
-                    "min-h-11 sm:min-h-9",
+                    "min-h-11 w-full justify-center sm:min-h-9 sm:w-auto",
                   )}
                 >
                   {t("messageUser")}
@@ -160,7 +198,10 @@ export default async function PublicProfilePage({ params }: Props) {
             {!session?.user && (
               <Link
                 href="/auth/signin"
-                className={cn(buttonVariants({ size: "sm" }), "min-h-11 sm:min-h-9")}
+                className={cn(
+                  buttonVariants({ size: "sm" }),
+                  "min-h-11 w-full justify-center sm:min-h-9 sm:w-auto",
+                )}
               >
                 {t("loginToFollow")}
               </Link>
@@ -171,27 +212,68 @@ export default async function PublicProfilePage({ params }: Props) {
 
       <ProfileTradingSummary profileUserId={userId} t={t} />
 
-      <PinnedSignalsSection
-        profileUserId={userId}
-        viewerVipUntil={viewerDbUser?.vipUntil}
-        viewerUserId={session?.user?.id}
-      />
+      <nav
+        aria-label={t("profileTabsLabel")}
+        className="sticky top-0 z-20 -mx-4 overflow-x-auto border-y border-border/60 bg-background/90 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/70 sm:static sm:mx-0 sm:rounded-lg sm:border sm:bg-card/35"
+      >
+        <div className="flex min-w-max gap-2">
+          {tabs.map((item) => {
+            const Icon = item.icon;
+            const active = activeTab === item.value;
+            return (
+              <Link
+                key={item.value}
+                href={`/u/${userId}?tab=${item.value}`}
+                aria-current={active ? "page" : undefined}
+                className={cn(
+                  "inline-flex min-h-10 items-center gap-2 rounded-md border px-3 text-sm font-medium transition-colors",
+                  active
+                    ? "border-primary/35 bg-primary/15 text-primary"
+                    : "border-transparent bg-muted/35 text-muted-foreground hover:bg-muted/60 hover:text-foreground",
+                )}
+              >
+                <Icon className="size-4" aria-hidden />
+                {item.label}
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
 
-      <TraderPerformanceCard
-        userId={userId}
-        signalsListHref={signalsListHref}
-        signalsCtaLabel={signalsCtaLabel}
-      />
+      {activeTab === "overview" ? (
+        <div className="grid gap-6 xl:grid-cols-[0.38fr_0.62fr]">
+          <TraderPerformanceCard
+            userId={userId}
+            signalsListHref={signalsListHref}
+            signalsCtaLabel={signalsCtaLabel}
+          />
+          <PublicTradingOverview profileUserId={userId} locale={locale} t={t} />
+        </div>
+      ) : null}
 
-      <PublicTradingOverview profileUserId={userId} locale={locale} t={t} />
+      {activeTab === "signals" ? (
+        <div className="space-y-6">
+          <PinnedSignalsSection
+            profileUserId={userId}
+            viewerVipUntil={viewerDbUser?.vipUntil}
+            viewerUserId={session?.user?.id}
+          />
+          <Mt5SyncedSignalsSection profileUserId={userId} locale={locale} t={t} />
+        </div>
+      ) : null}
 
-      <Mt5SyncedSignalsSection profileUserId={userId} locale={locale} t={t} />
+      {activeTab === "mt5" ? (
+        <Mt5SyncedSignalsSection profileUserId={userId} locale={locale} t={t} />
+      ) : null}
 
-      {followerCount > 0 ? (
-        <ProfileFollowersSection
-          items={followerItems}
-          totalCount={followerCount}
-        />
+      {activeTab === "followers" && followerCount > 0 ? (
+        <ProfileFollowersSection items={followerItems} totalCount={followerCount} />
+      ) : null}
+
+      {activeTab === "followers" && followerCount === 0 ? (
+        <section className="rounded-lg border border-dashed border-border/70 p-6 text-center text-sm text-muted-foreground">
+          {t("profileNoFollowers")}
+        </section>
       ) : null}
 
       <PageCtaRow heading={tCommon("ctaDiscovery")} items={ctaRow} />
