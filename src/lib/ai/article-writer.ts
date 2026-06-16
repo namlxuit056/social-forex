@@ -11,6 +11,18 @@ const articleSchema = z.object({
   body: z.string().min(900).max(9000),
 });
 
+const googleTrendsSchema = z.object({
+  default: z.object({
+    trendingSearchesDays: z.array(
+      z.object({
+        trendingSearches: z.array(
+          z.object({ title: z.object({ query: z.string() }) }),
+        ),
+      }),
+    ),
+  }),
+});
+
 function stripTags(value: string) {
   return value
     .replace(/<[^>]+>/g, " ")
@@ -83,13 +95,58 @@ async function fetchGoogleNewsTitles(seedKeywords: string[]) {
   return { titles, source: url };
 }
 
-export async function getTrendingForexKeywords(seedKeywords: string[]) {
-  const { titles, source } = await fetchGoogleNewsTitles(seedKeywords);
+async function fetchGoogleTrendingSearches(locale: ArticleLocale) {
+  const hl = locale === "vi" ? "vi" : "en-US";
+  const geo = locale === "vi" ? "VN" : "US";
+  const url = `https://trends.google.com/trends/api/dailytrends?hl=${hl}&geo=${geo}&ns=15`;
+  try {
+    const res = await fetch(url, {
+      headers: { "user-agent": "SocialForexBot/1.0", accept: "application/json" },
+      next: { revalidate: 60 * 60 * 3 },
+    });
+    if (!res.ok) return [];
+    const raw = await res.text();
+    // Google prefixes response with )]}' to prevent JSON hijacking
+    const json = JSON.parse(raw.slice(raw.indexOf("{")));
+    const parsed = googleTrendsSchema.safeParse(json);
+    if (!parsed.success) return [];
+    return parsed.data.default.trendingSearchesDays
+      .flatMap((day) => day.trendingSearches)
+      .map((s) => s.title.query)
+      .slice(0, 20);
+  } catch {
+    return [];
+  }
+}
+
+export async function getTrendingForexKeywords(
+  seedKeywords: string[],
+  locale: ArticleLocale = "vi",
+) {
+  const [{ titles, source }, googleTrends] = await Promise.all([
+    fetchGoogleNewsTitles(seedKeywords),
+    fetchGoogleTrendingSearches(locale),
+  ]);
+
   const counts = new Map<string, number>();
 
+  // Seed keywords always included with base weight
   for (const seed of seedKeywords) {
     counts.set(seed, (counts.get(seed) ?? 0) + 2);
   }
+  // Google Trends results get high weight — these are actual trending searches
+  for (const trend of googleTrends) {
+    const normalized = trend.trim();
+    if (normalized.length >= 2 && normalized.length <= 48) {
+      counts.set(normalized, (counts.get(normalized) ?? 0) + 3);
+    }
+    // Also extract individual words from trend phrases
+    for (const word of extractTitleWords(normalized)) {
+      const key = word.toUpperCase() === word ? word : word.toLowerCase();
+      counts.set(key, (counts.get(key) ?? 0) + 2);
+    }
+  }
+  // Google News article titles add supporting weight
   for (const title of titles) {
     for (const word of extractTitleWords(title)) {
       const normalized = word.toUpperCase() === word ? word : word.toLowerCase();
@@ -101,13 +158,20 @@ export async function getTrendingForexKeywords(seedKeywords: string[]) {
     .sort((a, b) => b[1] - a[1])
     .map(([keyword]) => keyword)
     .filter((keyword) => keyword.length <= 48)
-    .slice(0, 12);
+    .slice(0, 15);
 
-  return { keywords, trendSource: source };
+  return { keywords, trendSource: source, googleTrends: googleTrends.slice(0, 10) };
+}
+
+export async function fetchCurrentTrendingKeywords(
+  seedKeywords: string[],
+  locale: ArticleLocale = "vi",
+) {
+  return getTrendingForexKeywords(seedKeywords, locale);
 }
 
 async function uniqueSlug(base: string, locale: ArticleLocale) {
-  let slug = base || `forex-article-${Date.now()}`;
+  const slug = base || `forex-article-${Date.now()}`;
   for (let i = 0; i < 20; i++) {
     const candidate = i === 0 ? slug : `${slug}-${i + 1}`;
     const existing = await prisma.aiGeneratedArticle.findUnique({
@@ -225,7 +289,7 @@ export async function runAiArticleAutomation() {
   }
 
   const locale = setting.locale === "en" ? "en" : "vi";
-  const { keywords, trendSource } = await getTrendingForexKeywords(setting.seedKeywords);
+  const { keywords, trendSource } = await getTrendingForexKeywords(setting.seedKeywords, locale);
   const recent = await prisma.aiGeneratedArticle.findMany({
     where: {
       generatedAt: {
@@ -255,4 +319,23 @@ export async function runAiArticleAutomation() {
   });
 
   return result;
+}
+
+export async function generateArticleForCustomKeyword({
+  keyword,
+  locale,
+  status,
+}: {
+  keyword: string;
+  locale: ArticleLocale;
+  status: "DRAFT" | "PUBLISHED";
+}) {
+  const { keywords, trendSource } = await getTrendingForexKeywords([keyword], locale);
+  return generateAiForexArticle({
+    keyword,
+    locale,
+    status,
+    trendSource,
+    sourceKeywords: keywords,
+  });
 }

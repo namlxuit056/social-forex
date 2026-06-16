@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { academyLessons } from "@/lib/content/academy";
 import { routing } from "@/i18n/routing";
 import { getSiteUrl } from "@/lib/site-url";
+import { prisma } from "@/lib/prisma";
 
 const BASE = getSiteUrl();
 
@@ -23,9 +24,10 @@ const staticPaths = [
   { path: "/sentiment", changeFrequency: "daily" as const, priority: 0.5 },
   { path: "/heatmap", changeFrequency: "daily" as const, priority: 0.5 },
   { path: "/backtest", changeFrequency: "monthly" as const, priority: 0.4 },
+  { path: "/articles", changeFrequency: "daily" as const, priority: 0.75 },
 ];
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
   const entries: MetadataRoute.Sitemap = [
     {
@@ -56,6 +58,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
         priority: 0.7,
       });
     }
+  }
+
+  // Published AI articles per locale
+  const articles = await prisma.aiGeneratedArticle.findMany({
+    where: { status: "PUBLISHED" },
+    select: { slug: true, locale: true, publishedAt: true, updatedAt: true },
+    orderBy: { publishedAt: "desc" },
+  });
+
+  for (const article of articles) {
+    const prefix =
+      article.locale === routing.defaultLocale ? "" : `/${article.locale}`;
+    entries.push({
+      url: `${BASE}${prefix}/articles/${article.slug}`,
+      lastModified: article.updatedAt,
+      changeFrequency: "weekly",
+      priority: 0.72,
+    });
   }
 
   return entries;

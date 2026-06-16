@@ -57,8 +57,37 @@ export default async function ArticlePage({ params }: Props) {
   });
   if (!article || article.status !== "PUBLISHED") notFound();
 
+  const articleUrl = absoluteUrl(`/articles/${slug}`, locale);
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: article.title,
+    description: article.metaDescription,
+    keywords: article.sourceKeywords.join(", "),
+    datePublished: (article.publishedAt ?? article.generatedAt).toISOString(),
+    dateModified: article.updatedAt.toISOString(),
+    url: articleUrl,
+    inLanguage: locale,
+    author: {
+      "@type": "Organization",
+      name: "Social Forex",
+      url: absoluteUrl("", locale),
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Social Forex",
+      url: absoluteUrl("", locale),
+    },
+    mainEntityOfPage: { "@type": "WebPage", "@id": articleUrl },
+    about: { "@type": "Thing", name: article.keyword },
+  };
+
   return (
     <div className="space-y-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <BackLink href="/articles">{t("backToList")}</BackLink>
       <article className="max-w-2xl space-y-6">
         <div>

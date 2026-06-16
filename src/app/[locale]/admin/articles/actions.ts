@@ -5,7 +5,10 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { runAiArticleAutomation } from "@/lib/ai/article-writer";
+import {
+  generateArticleForCustomKeyword,
+  runAiArticleAutomation,
+} from "@/lib/ai/article-writer";
 
 async function requireAdmin() {
   const session = await auth();
@@ -92,4 +95,60 @@ export async function archiveAiArticle(formData: FormData) {
   });
   revalidatePath("/admin/articles");
   revalidatePath("/articles");
+}
+
+export async function deleteAiArticle(formData: FormData) {
+  await requireAdmin();
+  const id = formData.get("id");
+  if (typeof id !== "string") return;
+  await prisma.aiGeneratedArticle.delete({ where: { id } });
+  revalidatePath("/admin/articles");
+  revalidatePath("/articles");
+}
+
+const generateKeywordSchema = z.object({
+  keyword: z.string().min(2).max(100).trim(),
+  locale: z.enum(["vi", "en"]),
+  status: z.enum(["DRAFT", "PUBLISHED"]),
+});
+
+export async function generateArticleForKeyword(formData: FormData) {
+  await requireAdmin();
+  const parsed = generateKeywordSchema.safeParse({
+    keyword: formData.get("keyword"),
+    locale: formData.get("locale") || "vi",
+    status: formData.get("status") || "DRAFT",
+  });
+  if (!parsed.success) return { ok: false, error: "invalid_input" };
+
+  const result = await generateArticleForCustomKeyword(parsed.data);
+  revalidatePath("/admin/articles");
+  revalidatePath("/articles");
+  return result;
+}
+
+const updateArticleSchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(8).max(140).trim(),
+  summary: z.string().min(30).max(280).trim(),
+  metaDescription: z.string().min(50).max(180).trim(),
+  body: z.string().min(100).max(12000).trim(),
+});
+
+export async function updateAiArticle(formData: FormData) {
+  await requireAdmin();
+  const parsed = updateArticleSchema.safeParse({
+    id: formData.get("id"),
+    title: formData.get("title"),
+    summary: formData.get("summary"),
+    metaDescription: formData.get("metaDescription"),
+    body: formData.get("body"),
+  });
+  if (!parsed.success) return { ok: false, error: "invalid_input" };
+
+  const { id, ...data } = parsed.data;
+  await prisma.aiGeneratedArticle.update({ where: { id }, data });
+  revalidatePath("/admin/articles");
+  revalidatePath("/articles");
+  redirect("/admin/articles");
 }
