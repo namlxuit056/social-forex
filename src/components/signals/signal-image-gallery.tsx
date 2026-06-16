@@ -7,7 +7,7 @@ import { ImageIcon, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-function ImageLightbox({
+export function ImageLightbox({
   url,
   onClose,
   dialogLabel,

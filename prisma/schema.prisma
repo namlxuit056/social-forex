@@ -335,6 +335,7 @@ model DailyTradingPlan {
   userId         String
   planDate       DateTime
   watchedSymbols String[]        @default([])
+  symbolPlans    Json?
   bias           TradingPlanBias @default(WAIT)
   chartImageUrls String[]        @default([])
   keyLevels      String?

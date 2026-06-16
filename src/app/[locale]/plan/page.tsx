@@ -15,7 +15,11 @@ import {
 } from "@/components/ui/card";
 import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
-import { TradingPlanForm, type TradingPlanFormValue } from "./trading-plan-form";
+import {
+  TradingPlanForm,
+  type TradingPlanFormValue,
+  type TradingPlanSymbolPlan,
+} from "./trading-plan-form";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +36,30 @@ function parseDateParam(value: string | string[] | undefined) {
 function dateFromDateOnly(value: string) {
   const [year, month, day] = value.split("-").map(Number);
   return new Date(Date.UTC(year, month - 1, day));
+}
+
+function parseSymbolPlans(value: unknown): TradingPlanSymbolPlan[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item) => {
+      if (!item || typeof item !== "object") return null;
+      const record = item as Record<string, unknown>;
+      const symbol = typeof record.symbol === "string" ? record.symbol : "";
+      const bias = record.bias;
+      if (!symbol) return null;
+      return {
+        id: typeof record.id === "string" ? record.id : symbol,
+        symbol,
+        bias:
+          bias === "BULLISH" || bias === "BEARISH" || bias === "RANGE" || bias === "WAIT"
+            ? bias
+            : "WAIT",
+        keyLevels: typeof record.keyLevels === "string" ? record.keyLevels : null,
+        newsToAvoid: typeof record.newsToAvoid === "string" ? record.newsToAvoid : null,
+        notes: typeof record.notes === "string" ? record.notes : null,
+      } satisfies TradingPlanSymbolPlan;
+    })
+    .filter((item): item is TradingPlanSymbolPlan => item !== null);
 }
 
 export async function generateMetadata({
@@ -126,6 +154,7 @@ export default async function TradingPlanPage({
   const formValue: TradingPlanFormValue = {
     planDate: selectedDate,
     watchedSymbols: plan?.watchedSymbols ?? [],
+    symbolPlans: parseSymbolPlans(plan?.symbolPlans),
     bias: plan?.bias ?? "WAIT",
     chartImageUrls: plan?.chartImageUrls ?? [],
     keyLevels: plan?.keyLevels ?? null,

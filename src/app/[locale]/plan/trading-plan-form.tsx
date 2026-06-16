@@ -8,11 +8,14 @@ import {
   ExternalLink,
   Loader2,
   Pencil,
+  Plus,
   Save,
+  Trash2,
   X,
 } from "lucide-react";
 import { Link, usePathname } from "@/i18n/navigation";
 import { saveDailyTradingPlan } from "@/actions/trading-plan";
+import { ImageLightbox } from "@/components/signals/signal-image-gallery";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,10 +34,24 @@ import { cn } from "@/lib/utils";
 const SELECT_CLASS =
   "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
+const MAX_SYMBOL_PLANS = 12;
+
+type TradingPlanBias = "BULLISH" | "BEARISH" | "RANGE" | "WAIT";
+
+export type TradingPlanSymbolPlan = {
+  id: string;
+  symbol: string;
+  bias: TradingPlanBias;
+  keyLevels: string | null;
+  newsToAvoid: string | null;
+  notes: string | null;
+};
+
 export type TradingPlanFormValue = {
   planDate: string;
   watchedSymbols: string[];
-  bias: "BULLISH" | "BEARISH" | "RANGE" | "WAIT";
+  symbolPlans: TradingPlanSymbolPlan[];
+  bias: TradingPlanBias;
   chartImageUrls: string[];
   keyLevels: string | null;
   newsToAvoid: string | null;
@@ -64,9 +81,40 @@ const checklistKeys = [
 
 type PendingSlot = { id: string; previewUrl: string };
 
+function createBlankSymbolPlan(id = "symbol-1"): TradingPlanSymbolPlan {
+  return {
+    id,
+    symbol: "",
+    bias: "WAIT",
+    keyLevels: null,
+    newsToAvoid: null,
+    notes: null,
+  };
+}
+
+function normalizeSymbol(value: string) {
+  return value.trim().toUpperCase().replace(/[^A-Z0-9._:-]/g, "");
+}
+
+function symbolPlansFromPlan(plan: TradingPlanFormValue): TradingPlanSymbolPlan[] {
+  if (plan.symbolPlans.length > 0) return plan.symbolPlans;
+  if (plan.watchedSymbols.length > 0) {
+    return plan.watchedSymbols.map((symbol) => ({
+      id: symbol,
+      symbol,
+      bias: plan.bias,
+      keyLevels: plan.keyLevels,
+      newsToAvoid: plan.newsToAvoid,
+      notes: null,
+    }));
+  }
+  return [createBlankSymbolPlan()];
+}
+
 function hasPlanContent(plan: TradingPlanFormValue) {
   return (
     plan.watchedSymbols.length > 0 ||
+    plan.symbolPlans.length > 0 ||
     plan.chartImageUrls.length > 0 ||
     plan.keyLevels ||
     plan.newsToAvoid ||
@@ -83,16 +131,20 @@ function valueOrDash(value: string | number | null | undefined) {
 }
 
 function planFromFormData(formData: FormData): TradingPlanFormValue {
-  const watchedSymbols = String(formData.get("watchedSymbols") ?? "")
-    .split(/[\s,;]+/)
-    .map((symbol) => symbol.trim().toUpperCase())
-    .filter(Boolean);
+  const symbolPlans = parseSymbolPlansJson(String(formData.get("symbolPlans") ?? "[]"));
+  const watchedSymbols = symbolPlans.map((item) => item.symbol);
   const maxRiskRaw = formData.get("maxRiskPercent");
   const maxTradesRaw = formData.get("maxTrades");
+  const checkedNews = formData.get("checkedNews") === "on";
+  const checkedLevels = formData.get("checkedLevels") === "on";
+  const checkedRisk = formData.get("checkedRisk") === "on";
+  const checkedEmotion = formData.get("checkedEmotion") === "on";
+  const checkedJournal = formData.get("checkedJournal") === "on";
 
   return {
     planDate: String(formData.get("planDate") ?? ""),
     watchedSymbols,
+    symbolPlans,
     bias: (formData.get("bias") || "WAIT") as TradingPlanFormValue["bias"],
     chartImageUrls: formData.getAll("imageUrls").filter((url): url is string => typeof url === "string"),
     keyLevels: String(formData.get("keyLevels") ?? "").trim() || null,
@@ -103,13 +155,49 @@ function planFromFormData(formData: FormData): TradingPlanFormValue {
       maxTradesRaw === null || maxTradesRaw === "" ? null : Number(maxTradesRaw),
     sessionFocus: String(formData.get("sessionFocus") ?? "").trim() || null,
     notes: String(formData.get("notes") ?? "").trim() || null,
-    checkedNews: formData.get("checkedNews") === "on",
-    checkedLevels: formData.get("checkedLevels") === "on",
-    checkedRisk: formData.get("checkedRisk") === "on",
-    checkedEmotion: formData.get("checkedEmotion") === "on",
-    checkedJournal: formData.get("checkedJournal") === "on",
-    completedAt: null,
+    checkedNews,
+    checkedLevels,
+    checkedRisk,
+    checkedEmotion,
+    checkedJournal,
+    completedAt:
+      checkedNews && checkedLevels && checkedRisk && checkedEmotion && checkedJournal
+        ? new Date().toISOString()
+        : null,
   };
+}
+
+function parseSymbolPlansJson(value: string): TradingPlanSymbolPlan[] {
+  let raw: unknown;
+  try {
+    raw = JSON.parse(value);
+  } catch {
+    return [];
+  }
+  if (!Array.isArray(raw)) return [];
+  const seen = new Set<string>();
+  const plans: TradingPlanSymbolPlan[] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== "object") continue;
+    const record = item as Record<string, unknown>;
+    const symbol = normalizeSymbol(String(record.symbol ?? ""));
+    if (!symbol || seen.has(symbol)) continue;
+    const bias = record.bias;
+    seen.add(symbol);
+    plans.push({
+      id: typeof record.id === "string" ? record.id : symbol,
+      symbol,
+      bias:
+        bias === "BULLISH" || bias === "BEARISH" || bias === "RANGE" || bias === "WAIT"
+          ? bias
+          : "WAIT",
+      keyLevels: typeof record.keyLevels === "string" && record.keyLevels.trim() ? record.keyLevels.trim() : null,
+      newsToAvoid: typeof record.newsToAvoid === "string" && record.newsToAvoid.trim() ? record.newsToAvoid.trim() : null,
+      notes: typeof record.notes === "string" && record.notes.trim() ? record.notes.trim() : null,
+    });
+    if (plans.length >= MAX_SYMBOL_PLANS) break;
+  }
+  return plans;
 }
 
 function FieldSupportLink({
@@ -140,6 +228,8 @@ export function TradingPlanForm({ plan }: Props) {
   const [isEditing, setIsEditing] = useState(() => !hasPlanContent(plan));
   const [uploadedUrls, setUploadedUrls] = useState<string[]>(plan.chartImageUrls);
   const [pendingSlots, setPendingSlots] = useState<PendingSlot[]>([]);
+  const [symbolPlans, setSymbolPlans] = useState(() => symbolPlansFromPlan(plan));
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [checklist, setChecklist] = useState(
     () => Object.fromEntries(checklistKeys.map((key) => [key, plan[key]])) as Record<
       (typeof checklistKeys)[number],
@@ -174,6 +264,45 @@ export function TradingPlanForm({ plan }: Props) {
   const signInForUploadHref = `/auth/signin?callbackUrl=${encodeURIComponent(
     pathname?.startsWith("/") ? pathname : "/plan",
   )}`;
+  const serializedSymbolPlans = JSON.stringify(
+    symbolPlans
+      .map((item) => ({
+        ...item,
+        symbol: normalizeSymbol(item.symbol),
+      }))
+      .filter((item) => item.symbol),
+  );
+  const watchedSymbolsValue = symbolPlans
+    .map((item) => normalizeSymbol(item.symbol))
+    .filter(Boolean)
+    .join(", ");
+
+  const updateSymbolPlan = useCallback(
+    (id: string, patch: Partial<TradingPlanSymbolPlan>) => {
+      setSymbolPlans((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, ...patch } : item)),
+      );
+      setHasUnsavedChanges(true);
+    },
+    [],
+  );
+
+  const addSymbolPlan = useCallback(() => {
+    setSymbolPlans((prev) =>
+      prev.length >= MAX_SYMBOL_PLANS
+        ? prev
+        : [...prev, createBlankSymbolPlan(crypto.randomUUID())],
+    );
+    setHasUnsavedChanges(true);
+  }, []);
+
+  const removeSymbolPlan = useCallback((id: string) => {
+    setSymbolPlans((prev) => {
+      if (prev.length <= 1) return prev;
+      return prev.filter((item) => item.id !== id);
+    });
+    setHasUnsavedChanges(true);
+  }, []);
 
   const removeUrl = useCallback((url: string) => {
     setUploadedUrls((prev) => prev.filter((u) => u !== url));
@@ -375,25 +504,57 @@ export function TradingPlanForm({ plan }: Props) {
               </div>
             </div>
 
-            <section className="space-y-2">
-              <h3 className="text-sm font-medium text-foreground">
-                {t("watchedSymbols")}
-              </h3>
-              {readPlan.watchedSymbols.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {readPlan.watchedSymbols.map((symbol) => (
-                    <Badge key={symbol} variant="outline" className="font-mono">
-                      {symbol}
-                    </Badge>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">—</p>
-              )}
-            </section>
-
             <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(260px,0.42fr)]">
               <div className="space-y-4">
+                <section className="space-y-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <h3 className="text-sm font-medium text-foreground">
+                      {t("symbolPlansTitle")}
+                    </h3>
+                    <Badge variant="outline">
+                      {t("symbolCount", { count: readPlan.symbolPlans.length })}
+                    </Badge>
+                  </div>
+                  {readPlan.symbolPlans.map((item) => (
+                    <article
+                      key={item.id}
+                      className="rounded-lg border border-border/60 bg-background/35 p-4"
+                    >
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h4 className="font-mono text-base font-semibold text-foreground">
+                          {item.symbol}
+                        </h4>
+                        <Badge variant="outline">{biasLabel[item.bias]}</Badge>
+                      </div>
+                      <div className="mt-3 grid gap-3 md:grid-cols-3">
+                        <div>
+                          <p className="text-xs font-medium text-muted-foreground">
+                            {t("keyLevels")}
+                          </p>
+                          <p className="mt-1 whitespace-pre-line text-sm leading-6 text-foreground">
+                            {valueOrDash(item.keyLevels)}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs font-medium text-muted-foreground">
+                            {t("newsToAvoid")}
+                          </p>
+                          <p className="mt-1 whitespace-pre-line text-sm leading-6 text-foreground">
+                            {valueOrDash(item.newsToAvoid)}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-xs font-medium text-muted-foreground">
+                            {t("notes")}
+                          </p>
+                          <p className="mt-1 whitespace-pre-line text-sm leading-6 text-foreground">
+                            {valueOrDash(item.notes)}
+                          </p>
+                        </div>
+                      </div>
+                    </article>
+                  ))}
+                </section>
                 <section className="rounded-lg border border-border/60 bg-background/35 p-4">
                   <h3 className="text-sm font-medium text-foreground">
                     {t("sessionFocus")}
@@ -487,12 +648,18 @@ export function TradingPlanForm({ plan }: Props) {
                           key={url}
                           className="overflow-hidden rounded-md border border-border/60"
                         >
-                          {/* eslint-disable-next-line @next/next/no-img-element -- remote blob URLs */}
-                          <img
-                            src={url}
-                            alt=""
-                            className="aspect-video w-full object-cover"
-                          />
+                          <button
+                            type="button"
+                            onClick={() => setLightboxUrl(url)}
+                            className="block w-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element -- remote blob URLs */}
+                            <img
+                              src={url}
+                              alt=""
+                              className="aspect-video w-full object-cover"
+                            />
+                          </button>
                         </li>
                       ))}
                     </ul>
@@ -502,6 +669,14 @@ export function TradingPlanForm({ plan }: Props) {
             </div>
           </CardContent>
         </Card>
+        {lightboxUrl ? (
+          <ImageLightbox
+            url={lightboxUrl}
+            onClose={() => setLightboxUrl(null)}
+            dialogLabel={t("chartImages")}
+            closeLabel={tc("close")}
+          />
+        ) : null}
       </div>
     );
   }
@@ -518,6 +693,13 @@ export function TradingPlanForm({ plan }: Props) {
       {uploadedUrls.map((url) => (
         <input key={url} type="hidden" name="imageUrls" value={url} />
       ))}
+      <input type="hidden" name="watchedSymbols" value={watchedSymbolsValue} />
+      <input type="hidden" name="symbolPlans" value={serializedSymbolPlans} />
+      <input
+        type="hidden"
+        name="bias"
+        value={symbolPlans.find((item) => normalizeSymbol(item.symbol))?.bias ?? readPlan.bias}
+      />
 
       <Card className="border-border/70 bg-card/65">
         <CardHeader className="gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -552,25 +734,6 @@ export function TradingPlanForm({ plan }: Props) {
               defaultValue={readPlan.planDate}
               className="mt-1.5"
             />
-          </div>
-          <div className="lg:col-span-2">
-            <Label htmlFor="watchedSymbols">{t("watchedSymbols")}</Label>
-            <Input
-              id="watchedSymbols"
-              name="watchedSymbols"
-              defaultValue={readPlan.watchedSymbols.join(", ")}
-              placeholder="XAUUSD, EURUSD, GBPUSD"
-              className="mt-1.5 font-mono uppercase"
-            />
-          </div>
-          <div>
-            <Label htmlFor="bias">{t("bias")}</Label>
-            <select id="bias" name="bias" defaultValue={readPlan.bias} className={`mt-1.5 ${SELECT_CLASS}`}>
-              <option value="WAIT">{t("biasWait")}</option>
-              <option value="BULLISH">{t("biasBullish")}</option>
-              <option value="BEARISH">{t("biasBearish")}</option>
-              <option value="RANGE">{t("biasRange")}</option>
-            </select>
           </div>
           <div>
             <div className="flex items-center justify-between gap-3">
@@ -613,6 +776,122 @@ export function TradingPlanForm({ plan }: Props) {
               className="mt-1.5"
             />
           </div>
+        </CardContent>
+      </Card>
+
+      <Card className="border-border/70 bg-card/60">
+        <CardHeader className="gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <CardTitle className="text-base">{t("symbolPlansTitle")}</CardTitle>
+            <CardDescription className="mt-1">
+              {t("symbolPlansDesc")}
+            </CardDescription>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={addSymbolPlan}
+            disabled={symbolPlans.length >= MAX_SYMBOL_PLANS}
+          >
+            <Plus className="mr-2 size-4" aria-hidden />
+            {t("addSymbolPlan")}
+          </Button>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {symbolPlans.map((item, index) => (
+            <div
+              key={item.id}
+              className="rounded-lg border border-border/60 bg-background/35 p-4"
+            >
+              <div className="grid gap-3 md:grid-cols-[minmax(120px,0.5fr)_minmax(140px,0.5fr)_auto] md:items-end">
+                <div>
+                  <Label htmlFor={`symbol-${item.id}`}>{t("symbol")}</Label>
+                  <Input
+                    id={`symbol-${item.id}`}
+                    value={item.symbol}
+                    onChange={(event) =>
+                      updateSymbolPlan(item.id, {
+                        symbol: normalizeSymbol(event.target.value),
+                      })
+                    }
+                    placeholder={index === 0 ? "XAUUSD" : "EURUSD"}
+                    className="mt-1.5 font-mono uppercase"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor={`bias-${item.id}`}>{t("bias")}</Label>
+                  <select
+                    id={`bias-${item.id}`}
+                    value={item.bias}
+                    onChange={(event) =>
+                      updateSymbolPlan(item.id, {
+                        bias: event.target.value as TradingPlanBias,
+                      })
+                    }
+                    className={`mt-1.5 ${SELECT_CLASS}`}
+                  >
+                    <option value="WAIT">{t("biasWait")}</option>
+                    <option value="BULLISH">{t("biasBullish")}</option>
+                    <option value="BEARISH">{t("biasBearish")}</option>
+                    <option value="RANGE">{t("biasRange")}</option>
+                  </select>
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => removeSymbolPlan(item.id)}
+                  disabled={symbolPlans.length <= 1}
+                  aria-label={t("removeSymbolPlan")}
+                  className="justify-self-start text-muted-foreground hover:text-destructive md:justify-self-end"
+                >
+                  <Trash2 className="size-4" aria-hidden />
+                </Button>
+              </div>
+              <div className="mt-4 grid gap-3 lg:grid-cols-3">
+                <div>
+                  <Label htmlFor={`levels-${item.id}`}>{t("keyLevels")}</Label>
+                  <Textarea
+                    id={`levels-${item.id}`}
+                    value={item.keyLevels ?? ""}
+                    onChange={(event) =>
+                      updateSymbolPlan(item.id, { keyLevels: event.target.value })
+                    }
+                    rows={4}
+                    placeholder={t("keyLevelsPlaceholder")}
+                    className="mt-1.5"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor={`news-${item.id}`}>{t("newsToAvoid")}</Label>
+                  <Textarea
+                    id={`news-${item.id}`}
+                    value={item.newsToAvoid ?? ""}
+                    onChange={(event) =>
+                      updateSymbolPlan(item.id, { newsToAvoid: event.target.value })
+                    }
+                    rows={4}
+                    placeholder={t("newsPlaceholder")}
+                    className="mt-1.5"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor={`notes-${item.id}`}>{t("notes")}</Label>
+                  <Textarea
+                    id={`notes-${item.id}`}
+                    value={item.notes ?? ""}
+                    onChange={(event) =>
+                      updateSymbolPlan(item.id, { notes: event.target.value })
+                    }
+                    rows={4}
+                    placeholder={t("notesPlaceholder")}
+                    className="mt-1.5"
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
         </CardContent>
       </Card>
 
@@ -683,12 +962,18 @@ export function TradingPlanForm({ plan }: Props) {
                       key={url}
                       className="relative inline-block rounded-md border border-border/60"
                     >
-                      {/* eslint-disable-next-line @next/next/no-img-element -- remote blob URLs */}
-                      <img
-                        src={url}
-                        alt=""
-                        className="h-20 max-w-[140px] rounded-md object-cover"
-                      />
+                      <button
+                        type="button"
+                        onClick={() => setLightboxUrl(url)}
+                        className="block cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element -- remote blob URLs */}
+                        <img
+                          src={url}
+                          alt=""
+                          className="h-20 max-w-[140px] rounded-md object-cover"
+                        />
+                      </button>
                       <button
                         type="button"
                         onClick={() => removeUrl(url)}
@@ -853,6 +1138,14 @@ export function TradingPlanForm({ plan }: Props) {
           </Button>
         </div>
       </div>
+      {lightboxUrl ? (
+        <ImageLightbox
+          url={lightboxUrl}
+          onClose={() => setLightboxUrl(null)}
+          dialogLabel={t("chartImages")}
+          closeLabel={tc("close")}
+        />
+      ) : null}
     </form>
   );
 }

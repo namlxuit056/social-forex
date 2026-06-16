@@ -10,9 +10,19 @@ import { parseAndValidateImageUrls } from "@/lib/signal-images";
 
 const biasValues = ["BULLISH", "BEARISH", "RANGE", "WAIT"] as const;
 
+const symbolPlanSchema = z.object({
+  id: z.string().max(80).optional(),
+  symbol: z.string().min(2).max(32),
+  bias: z.enum(biasValues),
+  keyLevels: z.string().max(1200).optional().nullable(),
+  newsToAvoid: z.string().max(1200).optional().nullable(),
+  notes: z.string().max(1200).optional().nullable(),
+});
+
 const planSchema = z.object({
   planDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   watchedSymbols: z.string().max(300).optional().nullable(),
+  symbolPlans: z.string().max(20000).optional().nullable(),
   bias: z.enum(biasValues),
   keyLevels: z.string().max(2000).optional().nullable(),
   newsToAvoid: z.string().max(2000).optional().nullable(),
@@ -60,6 +70,39 @@ function normalizeSymbols(value: string | null | undefined) {
   return symbols;
 }
 
+function normalizeSymbol(value: string) {
+  return value.trim().toUpperCase().replace(/[^A-Z0-9._:-]/g, "");
+}
+
+function parseSymbolPlans(value: string | null | undefined) {
+  if (!value) return [];
+  let raw: unknown;
+  try {
+    raw = JSON.parse(value);
+  } catch {
+    return null;
+  }
+  const parsed = z.array(symbolPlanSchema).max(12).safeParse(raw);
+  if (!parsed.success) return null;
+
+  const seen = new Set<string>();
+  const plans = [];
+  for (const item of parsed.data) {
+    const symbol = normalizeSymbol(item.symbol);
+    if (symbol.length < 2 || seen.has(symbol)) continue;
+    seen.add(symbol);
+    plans.push({
+      id: item.id ?? symbol,
+      symbol,
+      bias: item.bias,
+      keyLevels: textOrNull(item.keyLevels),
+      newsToAvoid: textOrNull(item.newsToAvoid),
+      notes: textOrNull(item.notes),
+    });
+  }
+  return plans;
+}
+
 function textOrNull(value: unknown) {
   if (typeof value !== "string") return null;
   const trimmed = value.trim();
@@ -77,6 +120,7 @@ export async function saveDailyTradingPlan(
   const parsed = planSchema.safeParse({
     planDate: formData.get("planDate"),
     watchedSymbols: formData.get("watchedSymbols"),
+    symbolPlans: formData.get("symbolPlans"),
     bias: formData.get("bias") || "WAIT",
     keyLevels: formData.get("keyLevels"),
     newsToAvoid: formData.get("newsToAvoid"),
@@ -99,6 +143,13 @@ export async function saveDailyTradingPlan(
   const imageCheck = parseAndValidateImageUrls(formData.getAll("imageUrls"));
   if (!imageCheck.ok) return { error: t("invalidImage") };
 
+  const symbolPlans = parseSymbolPlans(parsed.data.symbolPlans);
+  if (symbolPlans === null) return { error: t("invalidData") };
+  const watchedSymbols =
+    symbolPlans.length > 0
+      ? symbolPlans.map((item) => item.symbol)
+      : normalizeSymbols(parsed.data.watchedSymbols);
+
   const completed =
     parsed.data.checkedNews &&
     parsed.data.checkedLevels &&
@@ -116,7 +167,8 @@ export async function saveDailyTradingPlan(
     create: {
       userId: session.user.id,
       planDate,
-      watchedSymbols: normalizeSymbols(parsed.data.watchedSymbols),
+      watchedSymbols,
+      symbolPlans,
       chartImageUrls: imageCheck.urls,
       bias: parsed.data.bias,
       keyLevels: textOrNull(parsed.data.keyLevels),
@@ -133,7 +185,8 @@ export async function saveDailyTradingPlan(
       completedAt: completed ? new Date() : null,
     },
     update: {
-      watchedSymbols: normalizeSymbols(parsed.data.watchedSymbols),
+      watchedSymbols,
+      symbolPlans,
       chartImageUrls: imageCheck.urls,
       bias: parsed.data.bias,
       keyLevels: textOrNull(parsed.data.keyLevels),
