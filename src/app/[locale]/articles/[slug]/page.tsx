@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { BackLink } from "@/components/layout/back-link";
 import { Disclaimer } from "@/components/layout/disclaimer";
 import { Badge } from "@/components/ui/badge";
 import { PageViewTracker } from "@/components/analytics/page-view-tracker";
 import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
+import { routing } from "@/i18n/routing";
 import { prisma } from "@/lib/prisma";
 import { absoluteUrl } from "@/lib/site-url";
 
@@ -57,7 +58,17 @@ export default async function ArticlePage({ params }: Props) {
   const article = await prisma.aiGeneratedArticle.findUnique({
     where: { locale_slug: { locale, slug } },
   });
-  if (!article || article.status !== "PUBLISHED") notFound();
+
+  // Fallback: article exists but was saved with a different locale (e.g. en slug accessed via /vi/)
+  if (!article || article.status !== "PUBLISHED") {
+    const fallback = await prisma.aiGeneratedArticle.findFirst({
+      where: { slug, status: "PUBLISHED" },
+    });
+    if (!fallback) notFound();
+    // Redirect to the correct locale-prefixed URL
+    const prefix = fallback.locale === routing.defaultLocale ? "" : `/${fallback.locale}`;
+    redirect(`${prefix}/articles/${slug}`);
+  }
 
   const articleUrl = absoluteUrl(`/articles/${slug}`, locale);
   const jsonLd = {
