@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   ExternalLink,
   Loader2,
+  Pencil,
   Save,
   X,
 } from "lucide-react";
@@ -63,6 +64,54 @@ const checklistKeys = [
 
 type PendingSlot = { id: string; previewUrl: string };
 
+function hasPlanContent(plan: TradingPlanFormValue) {
+  return (
+    plan.watchedSymbols.length > 0 ||
+    plan.chartImageUrls.length > 0 ||
+    plan.keyLevels ||
+    plan.newsToAvoid ||
+    plan.maxRiskPercent !== null ||
+    plan.maxTrades !== null ||
+    plan.sessionFocus ||
+    plan.notes ||
+    checklistKeys.some((key) => plan[key])
+  );
+}
+
+function valueOrDash(value: string | number | null | undefined) {
+  return value === null || value === undefined || value === "" ? "—" : value;
+}
+
+function planFromFormData(formData: FormData): TradingPlanFormValue {
+  const watchedSymbols = String(formData.get("watchedSymbols") ?? "")
+    .split(/[\s,;]+/)
+    .map((symbol) => symbol.trim().toUpperCase())
+    .filter(Boolean);
+  const maxRiskRaw = formData.get("maxRiskPercent");
+  const maxTradesRaw = formData.get("maxTrades");
+
+  return {
+    planDate: String(formData.get("planDate") ?? ""),
+    watchedSymbols,
+    bias: (formData.get("bias") || "WAIT") as TradingPlanFormValue["bias"],
+    chartImageUrls: formData.getAll("imageUrls").filter((url): url is string => typeof url === "string"),
+    keyLevels: String(formData.get("keyLevels") ?? "").trim() || null,
+    newsToAvoid: String(formData.get("newsToAvoid") ?? "").trim() || null,
+    maxRiskPercent:
+      maxRiskRaw === null || maxRiskRaw === "" ? null : Number(maxRiskRaw),
+    maxTrades:
+      maxTradesRaw === null || maxTradesRaw === "" ? null : Number(maxTradesRaw),
+    sessionFocus: String(formData.get("sessionFocus") ?? "").trim() || null,
+    notes: String(formData.get("notes") ?? "").trim() || null,
+    checkedNews: formData.get("checkedNews") === "on",
+    checkedLevels: formData.get("checkedLevels") === "on",
+    checkedRisk: formData.get("checkedRisk") === "on",
+    checkedEmotion: formData.get("checkedEmotion") === "on",
+    checkedJournal: formData.get("checkedJournal") === "on",
+    completedAt: null,
+  };
+}
+
 function FieldSupportLink({
   href,
   label,
@@ -86,6 +135,9 @@ export function TradingPlanForm({ plan }: Props) {
   const tc = useTranslations("common");
   const pathname = usePathname();
   const [state, formAction, isPending] = useActionState(saveDailyTradingPlan, null);
+  const [readPlan, setReadPlan] = useState(plan);
+  const [pendingReadPlan, setPendingReadPlan] = useState<TradingPlanFormValue | null>(null);
+  const [isEditing, setIsEditing] = useState(() => !hasPlanContent(plan));
   const [uploadedUrls, setUploadedUrls] = useState<string[]>(plan.chartImageUrls);
   const [pendingSlots, setPendingSlots] = useState<PendingSlot[]>([]);
   const [checklist, setChecklist] = useState(
@@ -100,10 +152,24 @@ export function TradingPlanForm({ plan }: Props) {
   const [uploadNeedsSignIn, setUploadNeedsSignIn] = useState(false);
   const completedCount = checklistKeys.filter((key) => checklist[key]).length;
   const progressPercent = Math.round((completedCount / checklistKeys.length) * 100);
+  const readCompletedCount = checklistKeys.filter((key) => readPlan[key]).length;
+  const readProgressPercent = Math.round(
+    (readCompletedCount / checklistKeys.length) * 100,
+  );
+  const biasLabel = {
+    WAIT: t("biasWait"),
+    BULLISH: t("biasBullish"),
+    BEARISH: t("biasBearish"),
+    RANGE: t("biasRange"),
+  } satisfies Record<TradingPlanFormValue["bias"], string>;
 
   useEffect(() => {
-    if (state?.ok) setHasUnsavedChanges(false);
-  }, [state?.ok]);
+    if (state?.ok) {
+      setHasUnsavedChanges(false);
+      setReadPlan(pendingReadPlan ?? plan);
+      setIsEditing(false);
+    }
+  }, [pendingReadPlan, plan, state?.ok]);
 
   const signInForUploadHref = `/auth/signin?callbackUrl=${encodeURIComponent(
     pathname?.startsWith("/") ? pathname : "/plan",
@@ -255,9 +321,197 @@ export function TradingPlanForm({ plan }: Props) {
       : null,
   );
 
+  if (!isEditing) {
+    return (
+      <div className="space-y-5">
+        {state?.ok ? <p className="text-sm text-primary">{t("saved")}</p> : null}
+
+        <Card className="border-border/70 bg-card/65">
+          <CardHeader className="gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <CalendarClock className="size-4 text-primary" aria-hidden />
+                {t("summaryTitle")}
+              </CardTitle>
+              <CardDescription className="mt-1">
+                {t("summaryDesc")}
+              </CardDescription>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setIsEditing(true)}
+            >
+              <Pencil className="mr-2 size-4" aria-hidden />
+              {t("editPlan")}
+            </Button>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="rounded-lg border border-border/60 bg-background/45 p-3">
+                <p className="text-xs text-muted-foreground">{t("planDate")}</p>
+                <p className="mt-1 font-mono text-sm font-medium text-foreground">
+                  {readPlan.planDate}
+                </p>
+              </div>
+              <div className="rounded-lg border border-border/60 bg-background/45 p-3">
+                <p className="text-xs text-muted-foreground">{t("bias")}</p>
+                <p className="mt-1 text-sm font-medium text-foreground">
+                  {biasLabel[readPlan.bias]}
+                </p>
+              </div>
+              <div className="rounded-lg border border-border/60 bg-background/45 p-3">
+                <p className="text-xs text-muted-foreground">{t("maxRiskPercent")}</p>
+                <p className="mt-1 font-mono text-sm font-medium text-foreground">
+                  {readPlan.maxRiskPercent === null ? "—" : `${readPlan.maxRiskPercent}%`}
+                </p>
+              </div>
+              <div className="rounded-lg border border-border/60 bg-background/45 p-3">
+                <p className="text-xs text-muted-foreground">{t("maxTrades")}</p>
+                <p className="mt-1 font-mono text-sm font-medium text-foreground">
+                  {valueOrDash(readPlan.maxTrades)}
+                </p>
+              </div>
+            </div>
+
+            <section className="space-y-2">
+              <h3 className="text-sm font-medium text-foreground">
+                {t("watchedSymbols")}
+              </h3>
+              {readPlan.watchedSymbols.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {readPlan.watchedSymbols.map((symbol) => (
+                    <Badge key={symbol} variant="outline" className="font-mono">
+                      {symbol}
+                    </Badge>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">—</p>
+              )}
+            </section>
+
+            <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(260px,0.42fr)]">
+              <div className="space-y-4">
+                <section className="rounded-lg border border-border/60 bg-background/35 p-4">
+                  <h3 className="text-sm font-medium text-foreground">
+                    {t("sessionFocus")}
+                  </h3>
+                  <p className="mt-2 whitespace-pre-line text-sm leading-6 text-muted-foreground">
+                    {valueOrDash(readPlan.sessionFocus)}
+                  </p>
+                </section>
+                <section className="rounded-lg border border-border/60 bg-background/35 p-4">
+                  <h3 className="text-sm font-medium text-foreground">
+                    {t("keyLevels")}
+                  </h3>
+                  <p className="mt-2 whitespace-pre-line text-sm leading-6 text-muted-foreground">
+                    {valueOrDash(readPlan.keyLevels)}
+                  </p>
+                </section>
+                <section className="rounded-lg border border-border/60 bg-background/35 p-4">
+                  <h3 className="text-sm font-medium text-foreground">
+                    {t("newsToAvoid")}
+                  </h3>
+                  <p className="mt-2 whitespace-pre-line text-sm leading-6 text-muted-foreground">
+                    {valueOrDash(readPlan.newsToAvoid)}
+                  </p>
+                </section>
+                {readPlan.notes ? (
+                  <section className="rounded-lg border border-border/60 bg-background/35 p-4">
+                    <h3 className="text-sm font-medium text-foreground">
+                      {t("notes")}
+                    </h3>
+                    <p className="mt-2 whitespace-pre-line text-sm leading-6 text-muted-foreground">
+                      {readPlan.notes}
+                    </p>
+                  </section>
+                ) : null}
+              </div>
+
+              <aside className="space-y-4">
+                <section className="rounded-lg border border-border/70 bg-muted/15 p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <h3 className="text-sm font-medium text-foreground">
+                      {t("checklistTitle")}
+                    </h3>
+                    <Badge
+                      variant={
+                        readCompletedCount === checklistKeys.length
+                          ? "default"
+                          : "outline"
+                      }
+                    >
+                      {t("progress", {
+                        count: readCompletedCount,
+                        total: checklistKeys.length,
+                      })}
+                    </Badge>
+                  </div>
+                  <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
+                    <div
+                      className="h-full rounded-full bg-primary"
+                      style={{ width: `${readProgressPercent}%` }}
+                    />
+                  </div>
+                  <ul className="mt-4 space-y-2">
+                    {checklistKeys.map((key) => (
+                      <li
+                        key={key}
+                        className="flex items-start gap-2 text-sm text-muted-foreground"
+                      >
+                        <CheckCircle2
+                          className={cn(
+                            "mt-0.5 size-4 shrink-0",
+                            readPlan[key] ? "text-primary" : "text-muted-foreground/45",
+                          )}
+                          aria-hidden
+                        />
+                        <span className={readPlan[key] ? "text-foreground" : undefined}>
+                          {t(`${key}Title`)}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+
+                {readPlan.chartImageUrls.length > 0 ? (
+                  <section className="space-y-2">
+                    <h3 className="text-sm font-medium text-foreground">
+                      {t("chartImages")}
+                    </h3>
+                    <ul className="grid grid-cols-2 gap-2">
+                      {readPlan.chartImageUrls.map((url) => (
+                        <li
+                          key={url}
+                          className="overflow-hidden rounded-md border border-border/60"
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element -- remote blob URLs */}
+                          <img
+                            src={url}
+                            alt=""
+                            className="aspect-video w-full object-cover"
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                ) : null}
+              </aside>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <form
       action={formAction}
+      onSubmit={(event) => {
+        setPendingReadPlan(planFromFormData(new FormData(event.currentTarget)));
+      }}
       onChange={() => setHasUnsavedChanges(true)}
       className="space-y-5 pb-24 sm:pb-0"
     >
@@ -276,7 +530,7 @@ export function TradingPlanForm({ plan }: Props) {
               {t("planCardDesc")}
             </CardDescription>
           </div>
-          {plan.completedAt ? (
+          {readPlan.completedAt ? (
             <Badge className="w-fit bg-primary/20 text-primary hover:bg-primary/25">
               <CheckCircle2 className="mr-1 size-3.5" aria-hidden />
               {t("completed")}
@@ -295,7 +549,7 @@ export function TradingPlanForm({ plan }: Props) {
               name="planDate"
               type="date"
               required
-              defaultValue={plan.planDate}
+              defaultValue={readPlan.planDate}
               className="mt-1.5"
             />
           </div>
@@ -304,14 +558,14 @@ export function TradingPlanForm({ plan }: Props) {
             <Input
               id="watchedSymbols"
               name="watchedSymbols"
-              defaultValue={plan.watchedSymbols.join(", ")}
+              defaultValue={readPlan.watchedSymbols.join(", ")}
               placeholder="XAUUSD, EURUSD, GBPUSD"
               className="mt-1.5 font-mono uppercase"
             />
           </div>
           <div>
             <Label htmlFor="bias">{t("bias")}</Label>
-            <select id="bias" name="bias" defaultValue={plan.bias} className={`mt-1.5 ${SELECT_CLASS}`}>
+            <select id="bias" name="bias" defaultValue={readPlan.bias} className={`mt-1.5 ${SELECT_CLASS}`}>
               <option value="WAIT">{t("biasWait")}</option>
               <option value="BULLISH">{t("biasBullish")}</option>
               <option value="BEARISH">{t("biasBearish")}</option>
@@ -330,7 +584,7 @@ export function TradingPlanForm({ plan }: Props) {
               min="0"
               max="100"
               step="0.1"
-              defaultValue={plan.maxRiskPercent ?? ""}
+              defaultValue={readPlan.maxRiskPercent ?? ""}
               placeholder="1"
               className="mt-1.5 font-mono"
             />
@@ -344,7 +598,7 @@ export function TradingPlanForm({ plan }: Props) {
               min="1"
               max="99"
               step="1"
-              defaultValue={plan.maxTrades ?? ""}
+              defaultValue={readPlan.maxTrades ?? ""}
               placeholder="2"
               className="mt-1.5 font-mono"
             />
@@ -354,7 +608,7 @@ export function TradingPlanForm({ plan }: Props) {
             <Input
               id="sessionFocus"
               name="sessionFocus"
-              defaultValue={plan.sessionFocus ?? ""}
+              defaultValue={readPlan.sessionFocus ?? ""}
               placeholder={t("sessionFocusPlaceholder")}
               className="mt-1.5"
             />
@@ -378,7 +632,7 @@ export function TradingPlanForm({ plan }: Props) {
                 id="keyLevels"
                 name="keyLevels"
                 rows={5}
-                defaultValue={plan.keyLevels ?? ""}
+                defaultValue={readPlan.keyLevels ?? ""}
                 placeholder={t("keyLevelsPlaceholder")}
                 className="mt-1.5"
               />
@@ -480,7 +734,7 @@ export function TradingPlanForm({ plan }: Props) {
                 id="newsToAvoid"
                 name="newsToAvoid"
                 rows={4}
-                defaultValue={plan.newsToAvoid ?? ""}
+                defaultValue={readPlan.newsToAvoid ?? ""}
                 placeholder={t("newsPlaceholder")}
                 className="mt-1.5"
               />
@@ -491,7 +745,7 @@ export function TradingPlanForm({ plan }: Props) {
                 id="notes"
                 name="notes"
                 rows={4}
-                defaultValue={plan.notes ?? ""}
+                defaultValue={readPlan.notes ?? ""}
                 placeholder={t("notesPlaceholder")}
                 className="mt-1.5"
               />
