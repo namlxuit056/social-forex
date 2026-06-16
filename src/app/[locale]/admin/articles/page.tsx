@@ -14,12 +14,12 @@ import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import {
   archiveAiArticle,
-  deleteAiArticle,
   generateArticleForKeyword,
   publishAiArticle,
   runAiArticleAutomationNow,
   updateAiArticleAutomation,
 } from "./actions";
+import { DeleteArticleButton } from "./delete-button";
 
 export const dynamic = "force-dynamic";
 
@@ -403,24 +403,11 @@ export default async function AdminAiArticlesPage({
                         </Button>
                       </form>
                     )}
-                    <form
-                      action={deleteAiArticle}
-                      onSubmit={(e) => {
-                        if (!confirm(t("aiArticlesDeleteConfirm"))) {
-                          e.preventDefault();
-                        }
-                      }}
-                    >
-                      <input type="hidden" name="id" value={article.id} />
-                      <Button
-                        type="submit"
-                        size="sm"
-                        variant="ghost"
-                        className="text-destructive hover:text-destructive"
-                      >
-                        {t("delete")}
-                      </Button>
-                    </form>
+                    <DeleteArticleButton
+                      id={article.id}
+                      confirmText={t("aiArticlesDeleteConfirm")}
+                      label={t("delete")}
+                    />
                   </div>
                 </article>
               ))
