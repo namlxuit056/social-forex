@@ -119,12 +119,11 @@ export async function generateArticleForKeyword(formData: FormData) {
     locale: formData.get("locale") || "vi",
     status: formData.get("status") || "DRAFT",
   });
-  if (!parsed.success) return { ok: false, error: "invalid_input" };
+  if (!parsed.success) return;
 
-  const result = await generateArticleForCustomKeyword(parsed.data);
+  await generateArticleForCustomKeyword(parsed.data);
   revalidatePath("/admin/articles");
   revalidatePath("/articles");
-  return result;
 }
 
 const updateArticleSchema = z.object({
@@ -144,7 +143,7 @@ export async function updateAiArticle(formData: FormData) {
     metaDescription: formData.get("metaDescription"),
     body: formData.get("body"),
   });
-  if (!parsed.success) return { ok: false, error: "invalid_input" };
+  if (!parsed.success) return;
 
   const { id, ...data } = parsed.data;
   await prisma.aiGeneratedArticle.update({ where: { id }, data });
