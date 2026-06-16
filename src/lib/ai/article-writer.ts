@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { createAiClient, resolveAiProvider } from "@/lib/ai/provider";
+import { fetchArticleImage } from "@/lib/ai/article-images";
 import { prisma } from "@/lib/prisma";
 
 type ArticleLocale = "vi" | "en";
@@ -253,7 +254,11 @@ export async function generateAiForexArticle({
   const parsed = articleSchema.safeParse(json);
   if (!parsed.success) return { ok: false as const, error: "invalid_ai_response" };
 
-  const slug = await uniqueSlug(slugify(parsed.data.title), locale);
+  const [slug, image] = await Promise.all([
+    uniqueSlug(slugify(parsed.data.title), locale),
+    fetchArticleImage(keyword),
+  ]);
+
   const article = await prisma.aiGeneratedArticle.create({
     data: {
       ...parsed.data,
@@ -263,6 +268,8 @@ export async function generateAiForexArticle({
       status,
       trendSource,
       sourceKeywords,
+      imageUrl: image?.url ?? null,
+      imageAlt: image?.alt ?? null,
       publishedAt: status === "PUBLISHED" ? new Date() : null,
     },
   });
@@ -279,22 +286,22 @@ export async function runAiArticleAutomation() {
 
   if (!setting.enabled) return { ok: true, skipped: "disabled" };
 
+  // Daily limit = number of keyword topics (bilingual = 2 articles per topic)
   const since = new Date();
   since.setUTCHours(0, 0, 0, 0);
-  const generatedToday = await prisma.aiGeneratedArticle.count({
-    where: { generatedAt: { gte: since } },
+  const topicsToday = await prisma.aiGeneratedArticle.count({
+    where: { generatedAt: { gte: since }, locale: "vi" },
   });
-  if (generatedToday >= setting.maxArticlesPerDay) {
+  if (topicsToday >= setting.maxArticlesPerDay) {
     return { ok: true, skipped: "daily_limit" };
   }
 
-  const locale = setting.locale === "en" ? "en" : "vi";
-  const { keywords, trendSource } = await getTrendingForexKeywords(setting.seedKeywords, locale);
+  // Always use vi as primary locale for trending keyword lookup
+  const { keywords, trendSource } = await getTrendingForexKeywords(setting.seedKeywords, "vi");
   const recent = await prisma.aiGeneratedArticle.findMany({
     where: {
-      generatedAt: {
-        gte: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
-      },
+      generatedAt: { gte: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000) },
+      locale: "vi",
     },
     select: { keyword: true },
   });
@@ -305,37 +312,42 @@ export async function runAiArticleAutomation() {
     setting.seedKeywords[0] ??
     "forex risk management";
 
-  const result = await generateAiForexArticle({
-    keyword,
-    locale,
-    status: setting.autoPublish ? "PUBLISHED" : "DRAFT",
-    trendSource,
-    sourceKeywords: keywords,
-  });
+  const articleStatus = setting.autoPublish ? "PUBLISHED" : "DRAFT";
+
+  // Generate both VI and EN in parallel (bilingual)
+  const [viResult, enResult] = await Promise.all([
+    generateAiForexArticle({ keyword, locale: "vi", status: articleStatus, trendSource, sourceKeywords: keywords }),
+    generateAiForexArticle({ keyword, locale: "en", status: articleStatus, trendSource, sourceKeywords: keywords }),
+  ]);
 
   await prisma.aiArticleAutomationSetting.update({
     where: { id: "default" },
     data: { lastRunAt: new Date() },
   });
 
-  return result;
+  return { ok: true as const, vi: viResult, en: enResult };
 }
 
 export async function generateArticleForCustomKeyword({
   keyword,
   locale,
   status,
+  bilingual = true,
 }: {
   keyword: string;
   locale: ArticleLocale;
   status: "DRAFT" | "PUBLISHED";
+  bilingual?: boolean;
 }) {
   const { keywords, trendSource } = await getTrendingForexKeywords([keyword], locale);
-  return generateAiForexArticle({
-    keyword,
-    locale,
-    status,
-    trendSource,
-    sourceKeywords: keywords,
-  });
+  if (!bilingual) {
+    return generateAiForexArticle({ keyword, locale, status, trendSource, sourceKeywords: keywords });
+  }
+  // Generate for both locales in parallel
+  const otherLocale: ArticleLocale = locale === "vi" ? "en" : "vi";
+  const [primary, other] = await Promise.all([
+    generateAiForexArticle({ keyword, locale, status, trendSource, sourceKeywords: keywords }),
+    generateAiForexArticle({ keyword, locale: otherLocale, status, trendSource, sourceKeywords: keywords }),
+  ]);
+  return { ok: true as const, primary, other };
 }

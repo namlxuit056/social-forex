@@ -592,6 +592,8 @@ model AiGeneratedArticle {
   status          AiArticleStatus @default(DRAFT)
   trendSource     String?
   sourceKeywords  String[]        @default([])
+  imageUrl        String?
+  imageAlt        String?
   generatedAt     DateTime        @default(now())
   publishedAt     DateTime?
   createdAt       DateTime        @default(now())

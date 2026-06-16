@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import Image from "next/image";
 import { BackLink } from "@/components/layout/back-link";
 import { Disclaimer } from "@/components/layout/disclaimer";
 import { Badge } from "@/components/ui/badge";
@@ -36,11 +37,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       section: "AI Articles",
       tags: article.sourceKeywords,
       publishedTime: article.publishedAt?.toISOString(),
+      ...(article.imageUrl && {
+        images: [{ url: article.imageUrl, width: 1200, height: 630, alt: article.imageAlt ?? article.keyword }],
+      }),
     },
     twitter: {
-      card: "summary",
+      card: article.imageUrl ? "summary_large_image" : "summary",
       title: article.title,
       description: article.metaDescription,
+      ...(article.imageUrl && { images: [article.imageUrl] }),
     },
   };
 }
@@ -81,6 +86,9 @@ export default async function ArticlePage({ params }: Props) {
     dateModified: article.updatedAt.toISOString(),
     url: articleUrl,
     inLanguage: locale,
+    ...(article.imageUrl && {
+      image: { "@type": "ImageObject", url: article.imageUrl, width: 1200, height: 630 },
+    }),
     author: {
       "@type": "Organization",
       name: "Social Forex",
@@ -119,6 +127,19 @@ export default async function ArticlePage({ params }: Props) {
           </h1>
           <p className="mt-2 text-muted-foreground">{article.summary}</p>
         </div>
+
+        {article.imageUrl && (
+          <div className="overflow-hidden rounded-xl border border-border/60">
+            <Image
+              src={article.imageUrl}
+              alt={article.imageAlt ?? article.keyword}
+              width={1200}
+              height={630}
+              className="w-full object-cover"
+              priority
+            />
+          </div>
+        )}
 
         <div className="prose prose-invert max-w-none text-sm leading-relaxed text-foreground/90">
           {article.body.split("\n").map((line, i) => {
