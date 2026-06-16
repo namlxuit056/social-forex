@@ -8,6 +8,7 @@ import {
   TrendingUp,
   Activity,
   ArrowRight,
+  Bot,
 } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
@@ -107,6 +108,7 @@ export default async function AdminDashboardPage({
     { href: "/admin/reports", label: t("manageReports"), icon: Flag },
     { href: "/admin/signals", label: t("manageSignals"), icon: TrendingUp },
     { href: "/admin/analytics", label: t("manageAnalytics"), icon: Activity },
+    { href: "/admin/articles", label: t("manageAiArticles"), icon: Bot },
   ];
 
   return (

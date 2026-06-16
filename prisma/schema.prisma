@@ -40,6 +40,12 @@ enum VipPaymentStatus {
   FAILED
 }
 
+enum AiArticleStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -560,6 +566,40 @@ model FunnelEvent {
   @@index([userId, createdAt])
   @@index([path, createdAt])
   @@index([createdAt])
+}
+
+model AiArticleAutomationSetting {
+  id               String    @id @default("default")
+  enabled          Boolean   @default(false)
+  autoPublish      Boolean   @default(false)
+  locale           String    @default("vi")
+  seedKeywords     String[]  @default(["forex", "XAUUSD", "gold trading", "EURUSD", "forex news"])
+  maxArticlesPerDay Int      @default(1)
+  lastRunAt        DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+model AiGeneratedArticle {
+  id              String          @id @default(cuid())
+  slug            String
+  locale          String          @default("vi")
+  keyword         String
+  title           String
+  summary         String
+  body            String
+  metaDescription String
+  status          AiArticleStatus @default(DRAFT)
+  trendSource     String?
+  sourceKeywords  String[]        @default([])
+  generatedAt     DateTime        @default(now())
+  publishedAt     DateTime?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  @@unique([locale, slug])
+  @@index([locale, status, publishedAt])
+  @@index([keyword, generatedAt])
 }
 
 /// Bản ghi singleton — lần đồng bộ lịch kinh tế (FMP) gần nhất.
