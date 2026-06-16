@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useCallback, useState } from "react";
 import { useTranslations } from "next-intl";
-import { CalendarClock, CheckCircle2, Save } from "lucide-react";
+import { CalendarClock, CheckCircle2, Loader2, Save, X } from "lucide-react";
+import { Link, usePathname } from "@/i18n/navigation";
 import { saveDailyTradingPlan } from "@/actions/trading-plan";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { effectiveImageMime, SIGNAL_IMAGE_LIMITS } from "@/lib/signal-images";
 import { cn } from "@/lib/utils";
 
 const SELECT_CLASS =
@@ -25,6 +27,7 @@ export type TradingPlanFormValue = {
   planDate: string;
   watchedSymbols: string[];
   bias: "BULLISH" | "BEARISH" | "RANGE" | "WAIT";
+  chartImageUrls: string[];
   keyLevels: string | null;
   newsToAvoid: string | null;
   maxRiskPercent: number | null;
@@ -51,14 +54,174 @@ const checklistKeys = [
   "checkedJournal",
 ] as const;
 
+type PendingSlot = { id: string; previewUrl: string };
+
 export function TradingPlanForm({ plan }: Props) {
   const t = useTranslations("tradingPlan");
   const tc = useTranslations("common");
+  const pathname = usePathname();
   const [state, formAction, isPending] = useActionState(saveDailyTradingPlan, null);
+  const [uploadedUrls, setUploadedUrls] = useState<string[]>(plan.chartImageUrls);
+  const [pendingSlots, setPendingSlots] = useState<PendingSlot[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadNeedsSignIn, setUploadNeedsSignIn] = useState(false);
   const completedCount = checklistKeys.filter((key) => plan[key]).length;
+
+  const signInForUploadHref = `/auth/signin?callbackUrl=${encodeURIComponent(
+    pathname?.startsWith("/") ? pathname : "/plan",
+  )}`;
+
+  const removeUrl = useCallback((url: string) => {
+    setUploadedUrls((prev) => prev.filter((u) => u !== url));
+  }, []);
+
+  const revokeAndRemoveSlot = useCallback((slot: PendingSlot) => {
+    URL.revokeObjectURL(slot.previewUrl);
+    setPendingSlots((prev) => prev.filter((s) => s.id !== slot.id));
+  }, []);
+
+  const revokeBatchFromIndex = useCallback((batch: PendingSlot[], fromIndex: number) => {
+    for (let j = fromIndex; j < batch.length; j++) {
+      URL.revokeObjectURL(batch[j].previewUrl);
+    }
+    const drop = new Set(batch.slice(fromIndex).map((s) => s.id));
+    setPendingSlots((prev) => prev.filter((s) => !drop.has(s.id)));
+  }, []);
+
+  const onPickFiles = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const picked = e.target.files;
+      const snapshot = picked?.length ? Array.from(picked) : [];
+      e.target.value = "";
+      if (snapshot.length === 0) return;
+
+      setUploadError(null);
+      setUploadNeedsSignIn(false);
+      const remaining =
+        SIGNAL_IMAGE_LIMITS.MAX_IMAGES - uploadedUrls.length - pendingSlots.length;
+      if (remaining <= 0) return;
+
+      const rawList = snapshot.slice(0, remaining);
+      const valid: File[] = [];
+      for (const file of rawList) {
+        if (!effectiveImageMime(file)) {
+          setUploadError(t("imageInvalidType"));
+          return;
+        }
+        if (file.size > SIGNAL_IMAGE_LIMITS.MAX_BYTES) {
+          setUploadError(t("imageTooLarge"));
+          return;
+        }
+        valid.push(file);
+      }
+      if (valid.length === 0) return;
+
+      const batch: PendingSlot[] = valid.map((file) => ({
+        id: crypto.randomUUID(),
+        previewUrl: URL.createObjectURL(file),
+      }));
+      setPendingSlots((prev) => [...prev, ...batch]);
+      setUploading(true);
+
+      try {
+        for (let i = 0; i < valid.length; i++) {
+          const file = valid[i];
+          const slot = batch[i];
+          const fd = new FormData();
+          fd.append("file", file);
+
+          const res = await fetch(
+            new URL("/api/signal-images/upload", window.location.origin).toString(),
+            {
+              method: "POST",
+              body: fd,
+              credentials: "include",
+            },
+          );
+
+          let data: { url?: string; error?: string; message?: string } = {};
+          try {
+            data = (await res.json()) as typeof data;
+          } catch {
+            /* non-JSON response */
+          }
+
+          if (res.status === 401) {
+            setUploadNeedsSignIn(true);
+            setUploadError(t("imageUploadNeedLogin"));
+            revokeBatchFromIndex(batch, i);
+            break;
+          }
+
+          if (res.status === 503 && data.error === "not_configured") {
+            setUploadNeedsSignIn(false);
+            setUploadError(t("imagesNotConfigured"));
+            revokeBatchFromIndex(batch, i);
+            break;
+          }
+
+          if (!res.ok) {
+            setUploadNeedsSignIn(false);
+            const hint =
+              data.message ??
+              (data.error === "rate_limited"
+                ? t("imageUploadRateLimited")
+                : null) ??
+              data.error ??
+              t("imageUploadFailed");
+            setUploadError(hint);
+            revokeBatchFromIndex(batch, i);
+            break;
+          }
+
+          if (data.url) {
+            setUploadedUrls((prev) =>
+              [...prev, data.url!].slice(0, SIGNAL_IMAGE_LIMITS.MAX_IMAGES),
+            );
+          }
+          revokeAndRemoveSlot(slot);
+        }
+      } catch {
+        setUploadNeedsSignIn(false);
+        setUploadError(t("imageUploadFailed"));
+        setPendingSlots((prev) => {
+          const batchIds = new Set(batch.map((b) => b.id));
+          return prev.filter((slot) => {
+            if (batchIds.has(slot.id)) {
+              URL.revokeObjectURL(slot.previewUrl);
+              return false;
+            }
+            return true;
+          });
+        });
+      } finally {
+        setUploading(false);
+      }
+    },
+    [
+      uploadedUrls.length,
+      pendingSlots.length,
+      t,
+      revokeAndRemoveSlot,
+      revokeBatchFromIndex,
+    ],
+  );
+
+  const fileInputClass = cn(
+    "h-8 max-w-xs min-w-0 cursor-pointer rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm transition-colors outline-none file:mr-2 file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm dark:bg-input/30",
+    uploading ||
+      uploadedUrls.length + pendingSlots.length >= SIGNAL_IMAGE_LIMITS.MAX_IMAGES
+      ? "pointer-events-none opacity-50"
+      : null,
+  );
 
   return (
     <form action={formAction} className="space-y-5">
+      {uploadedUrls.map((url) => (
+        <input key={url} type="hidden" name="imageUrls" value={url} />
+      ))}
+
       <Card className="border-border/70 bg-card/65">
         <CardHeader className="gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
@@ -170,6 +333,91 @@ export function TradingPlanForm({ plan }: Props) {
                 placeholder={t("keyLevelsPlaceholder")}
                 className="mt-1.5"
               />
+            </div>
+            <div>
+              <Label htmlFor="chartImages">{t("chartImages")}</Label>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {t("chartImagesHint")}
+              </p>
+              <div className="mt-2">
+                <input
+                  id="chartImages"
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
+                  multiple
+                  disabled={
+                    uploading ||
+                    uploadedUrls.length + pendingSlots.length >=
+                      SIGNAL_IMAGE_LIMITS.MAX_IMAGES
+                  }
+                  onChange={onPickFiles}
+                  className={fileInputClass}
+                />
+              </div>
+              {uploadError ? (
+                <p className="mt-2 text-sm text-destructive">
+                  {uploadError}
+                  {uploadNeedsSignIn ? (
+                    <>
+                      {" "}
+                      <Link
+                        href={signInForUploadHref}
+                        className="font-medium underline underline-offset-2 hover:text-destructive/90"
+                      >
+                        {t("imageUploadSignInLink")}
+                      </Link>
+                    </>
+                  ) : null}
+                </p>
+              ) : null}
+              {(uploadedUrls.length > 0 || pendingSlots.length > 0) ? (
+                <ul className="mt-3 flex flex-wrap gap-2">
+                  {uploadedUrls.map((url) => (
+                    <li
+                      key={url}
+                      className="relative inline-block rounded-md border border-border/60"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element -- remote blob URLs */}
+                      <img
+                        src={url}
+                        alt=""
+                        className="h-20 max-w-[140px] rounded-md object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeUrl(url)}
+                        className="absolute -right-1.5 -top-1.5 flex size-6 items-center justify-center rounded-full border border-border bg-background text-muted-foreground shadow hover:bg-destructive hover:text-destructive-foreground"
+                        aria-label={t("removeImage")}
+                      >
+                        <X className="size-3.5" aria-hidden />
+                      </button>
+                    </li>
+                  ))}
+                  {pendingSlots.map((slot) => (
+                    <li
+                      key={slot.id}
+                      className="relative inline-block overflow-hidden rounded-md border border-primary/30 ring-2 ring-primary/20"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={slot.previewUrl}
+                        alt=""
+                        className="h-20 max-w-[140px] rounded-md object-cover opacity-90"
+                      />
+                      <div
+                        className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-background/55 backdrop-blur-[2px]"
+                        aria-live="polite"
+                        aria-busy="true"
+                      >
+                        <Loader2 className="size-5 animate-spin text-primary" />
+                        <span className="max-w-[110px] truncate px-1 text-center text-[10px] font-medium text-foreground">
+                          {t("imagesUploading")}
+                        </span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
             </div>
             <div>
               <Label htmlFor="newsToAvoid">{t("newsToAvoid")}</Label>

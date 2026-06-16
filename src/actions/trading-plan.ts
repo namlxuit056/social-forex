@@ -6,6 +6,7 @@ import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { parseAndValidateImageUrls } from "@/lib/signal-images";
 
 const biasValues = ["BULLISH", "BEARISH", "RANGE", "WAIT"] as const;
 
@@ -95,6 +96,9 @@ export async function saveDailyTradingPlan(
   const planDate = parseDateOnly(parsed.data.planDate);
   if (!planDate) return { error: t("invalidData") };
 
+  const imageCheck = parseAndValidateImageUrls(formData.getAll("imageUrls"));
+  if (!imageCheck.ok) return { error: t("invalidImage") };
+
   const completed =
     parsed.data.checkedNews &&
     parsed.data.checkedLevels &&
@@ -113,6 +117,7 @@ export async function saveDailyTradingPlan(
       userId: session.user.id,
       planDate,
       watchedSymbols: normalizeSymbols(parsed.data.watchedSymbols),
+      chartImageUrls: imageCheck.urls,
       bias: parsed.data.bias,
       keyLevels: textOrNull(parsed.data.keyLevels),
       newsToAvoid: textOrNull(parsed.data.newsToAvoid),
@@ -129,6 +134,7 @@ export async function saveDailyTradingPlan(
     },
     update: {
       watchedSymbols: normalizeSymbols(parsed.data.watchedSymbols),
+      chartImageUrls: imageCheck.urls,
       bias: parsed.data.bias,
       keyLevels: textOrNull(parsed.data.keyLevels),
       newsToAvoid: textOrNull(parsed.data.newsToAvoid),

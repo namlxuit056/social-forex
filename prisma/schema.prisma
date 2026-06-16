@@ -336,6 +336,7 @@ model DailyTradingPlan {
   planDate       DateTime
   watchedSymbols String[]        @default([])
   bias           TradingPlanBias @default(WAIT)
+  chartImageUrls String[]        @default([])
   keyLevels      String?
   newsToAvoid    String?
   maxRiskPercent Float?

@@ -1,0 +1,1 @@
+ALTER TABLE "DailyTradingPlan" ADD COLUMN "chartImageUrls" TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[];

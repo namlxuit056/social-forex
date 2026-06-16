@@ -127,6 +127,7 @@ export default async function TradingPlanPage({
     planDate: selectedDate,
     watchedSymbols: plan?.watchedSymbols ?? [],
     bias: plan?.bias ?? "WAIT",
+    chartImageUrls: plan?.chartImageUrls ?? [],
     keyLevels: plan?.keyLevels ?? null,
     newsToAvoid: plan?.newsToAvoid ?? null,
     maxRiskPercent: plan?.maxRiskPercent ?? null,
