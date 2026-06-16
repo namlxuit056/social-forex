@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { AnalyticsProvider } from "@/components/analytics/analytics-provider";
 import { getSiteUrl } from "@/lib/site-url";
 import "./globals.css";
 
@@ -43,15 +43,7 @@ export default function RootLayout({
     >
       <body className="min-h-full font-sans antialiased">
         {children}
-        <Analytics
-          beforeSend={(event) => {
-            // Exclude admin and API traffic from Vercel Analytics
-            if (event.url.includes("/admin") || event.url.includes("/api/")) {
-              return null;
-            }
-            return event;
-          }}
-        />
+        <AnalyticsProvider />
         <SpeedInsights />
       </body>
     </html>
