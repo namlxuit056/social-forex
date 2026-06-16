@@ -188,6 +188,8 @@
     "checkedJournalTitle": "Ready to journal",
     "checkedJournalDesc": "If you take a trade, you will record the reason, chart image, and result.",
     "saved": "Plan saved.",
+    "readyToSave": "Ready to save",
+    "unsavedChanges": "Unsaved changes",
     "invalidData": "The trading plan data is invalid.",
     "invalidImage": "The chart image is invalid.",
     "supportCalendar": "Calendar",

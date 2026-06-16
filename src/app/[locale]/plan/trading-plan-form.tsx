@@ -1,8 +1,15 @@
 "use client";
 
-import { useActionState, useCallback, useState } from "react";
+import { useActionState, useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { CalendarClock, CheckCircle2, Loader2, Save, X } from "lucide-react";
+import {
+  CalendarClock,
+  CheckCircle2,
+  ExternalLink,
+  Loader2,
+  Save,
+  X,
+} from "lucide-react";
 import { Link, usePathname } from "@/i18n/navigation";
 import { saveDailyTradingPlan } from "@/actions/trading-plan";
 import { Badge } from "@/components/ui/badge";
@@ -56,6 +63,24 @@ const checklistKeys = [
 
 type PendingSlot = { id: string; previewUrl: string };
 
+function FieldSupportLink({
+  href,
+  label,
+}: {
+  href: "/calendar" | "/chart" | "/tools";
+  label: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="inline-flex items-center gap-1 text-xs font-medium text-primary underline-offset-4 hover:underline"
+    >
+      {label}
+      <ExternalLink className="size-3" aria-hidden />
+    </Link>
+  );
+}
+
 export function TradingPlanForm({ plan }: Props) {
   const t = useTranslations("tradingPlan");
   const tc = useTranslations("common");
@@ -63,10 +88,22 @@ export function TradingPlanForm({ plan }: Props) {
   const [state, formAction, isPending] = useActionState(saveDailyTradingPlan, null);
   const [uploadedUrls, setUploadedUrls] = useState<string[]>(plan.chartImageUrls);
   const [pendingSlots, setPendingSlots] = useState<PendingSlot[]>([]);
+  const [checklist, setChecklist] = useState(
+    () => Object.fromEntries(checklistKeys.map((key) => [key, plan[key]])) as Record<
+      (typeof checklistKeys)[number],
+      boolean
+    >,
+  );
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadNeedsSignIn, setUploadNeedsSignIn] = useState(false);
-  const completedCount = checklistKeys.filter((key) => plan[key]).length;
+  const completedCount = checklistKeys.filter((key) => checklist[key]).length;
+  const progressPercent = Math.round((completedCount / checklistKeys.length) * 100);
+
+  useEffect(() => {
+    if (state?.ok) setHasUnsavedChanges(false);
+  }, [state?.ok]);
 
   const signInForUploadHref = `/auth/signin?callbackUrl=${encodeURIComponent(
     pathname?.startsWith("/") ? pathname : "/plan",
@@ -74,6 +111,7 @@ export function TradingPlanForm({ plan }: Props) {
 
   const removeUrl = useCallback((url: string) => {
     setUploadedUrls((prev) => prev.filter((u) => u !== url));
+    setHasUnsavedChanges(true);
   }, []);
 
   const revokeAndRemoveSlot = useCallback((slot: PendingSlot) => {
@@ -98,6 +136,7 @@ export function TradingPlanForm({ plan }: Props) {
 
       setUploadError(null);
       setUploadNeedsSignIn(false);
+      setHasUnsavedChanges(true);
       const remaining =
         SIGNAL_IMAGE_LIMITS.MAX_IMAGES - uploadedUrls.length - pendingSlots.length;
       if (remaining <= 0) return;
@@ -217,7 +256,11 @@ export function TradingPlanForm({ plan }: Props) {
   );
 
   return (
-    <form action={formAction} className="space-y-5">
+    <form
+      action={formAction}
+      onChange={() => setHasUnsavedChanges(true)}
+      className="space-y-5 pb-24 sm:pb-0"
+    >
       {uploadedUrls.map((url) => (
         <input key={url} type="hidden" name="imageUrls" value={url} />
       ))}
@@ -276,7 +319,10 @@ export function TradingPlanForm({ plan }: Props) {
             </select>
           </div>
           <div>
-            <Label htmlFor="maxRiskPercent">{t("maxRiskPercent")}</Label>
+            <div className="flex items-center justify-between gap-3">
+              <Label htmlFor="maxRiskPercent">{t("maxRiskPercent")}</Label>
+              <FieldSupportLink href="/tools" label={t("supportTools")} />
+            </div>
             <Input
               id="maxRiskPercent"
               name="maxRiskPercent"
@@ -324,7 +370,10 @@ export function TradingPlanForm({ plan }: Props) {
           </CardHeader>
           <CardContent className="grid gap-4">
             <div>
-              <Label htmlFor="keyLevels">{t("keyLevels")}</Label>
+              <div className="flex items-center justify-between gap-3">
+                <Label htmlFor="keyLevels">{t("keyLevels")}</Label>
+                <FieldSupportLink href="/chart" label={t("supportChart")} />
+              </div>
               <Textarea
                 id="keyLevels"
                 name="keyLevels"
@@ -335,7 +384,10 @@ export function TradingPlanForm({ plan }: Props) {
               />
             </div>
             <div>
-              <Label htmlFor="chartImages">{t("chartImages")}</Label>
+              <div className="flex items-center justify-between gap-3">
+                <Label htmlFor="chartImages">{t("chartImages")}</Label>
+                <FieldSupportLink href="/chart" label={t("supportChart")} />
+              </div>
               <p className="mt-1 text-xs text-muted-foreground">
                 {t("chartImagesHint")}
               </p>
@@ -420,7 +472,10 @@ export function TradingPlanForm({ plan }: Props) {
               ) : null}
             </div>
             <div>
-              <Label htmlFor="newsToAvoid">{t("newsToAvoid")}</Label>
+              <div className="flex items-center justify-between gap-3">
+                <Label htmlFor="newsToAvoid">{t("newsToAvoid")}</Label>
+                <FieldSupportLink href="/calendar" label={t("supportCalendar")} />
+              </div>
               <Textarea
                 id="newsToAvoid"
                 name="newsToAvoid"
@@ -446,8 +501,29 @@ export function TradingPlanForm({ plan }: Props) {
 
         <Card className="border-border/70 bg-muted/15">
           <CardHeader>
-            <CardTitle className="text-base">{t("checklistTitle")}</CardTitle>
-            <CardDescription>{t("checklistDesc")}</CardDescription>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <CardTitle className="text-base">{t("checklistTitle")}</CardTitle>
+                <CardDescription className="mt-1">
+                  {t("checklistDesc")}
+                </CardDescription>
+              </div>
+              <Badge
+                variant={completedCount === checklistKeys.length ? "default" : "outline"}
+                className="shrink-0"
+              >
+                {t("progress", { count: completedCount, total: checklistKeys.length })}
+              </Badge>
+            </div>
+            <div
+              className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted"
+              aria-hidden
+            >
+              <div
+                className="h-full rounded-full bg-primary transition-all"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
           </CardHeader>
           <CardContent className="space-y-3">
             {checklistKeys.map((key) => (
@@ -455,13 +531,17 @@ export function TradingPlanForm({ plan }: Props) {
                 key={key}
                 className={cn(
                   "flex gap-3 rounded-md border border-border/70 bg-background/55 px-3 py-3 text-sm transition hover:border-primary/30",
-                  plan[key] && "border-primary/25 bg-primary/8",
+                  checklist[key] && "border-primary/25 bg-primary/8",
                 )}
               >
                 <input
                   type="checkbox"
                   name={key}
-                  defaultChecked={plan[key]}
+                  checked={checklist[key]}
+                  onChange={(event) => {
+                    setChecklist((prev) => ({ ...prev, [key]: event.target.checked }));
+                    setHasUnsavedChanges(true);
+                  }}
                   className="mt-0.5 size-4 rounded border-border accent-primary"
                 />
                 <span>
@@ -479,13 +559,45 @@ export function TradingPlanForm({ plan }: Props) {
       </div>
 
       {state?.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
-      {state?.ok ? <p className="text-sm text-primary">{t("saved")}</p> : null}
+      {hasUnsavedChanges ? (
+        <p className="text-sm text-amber-300">{t("unsavedChanges")}</p>
+      ) : state?.ok ? (
+        <p className="text-sm text-primary">{t("saved")}</p>
+      ) : null}
 
-      <div className="flex justify-end">
-        <Button type="submit" disabled={isPending}>
+      <div className="hidden justify-end sm:flex">
+        <Button type="submit" disabled={isPending || uploading}>
           <Save className="mr-2 size-4" aria-hidden />
           {isPending ? tc("loading") : tc("save")}
         </Button>
+      </div>
+
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-background/95 p-3 shadow-lg backdrop-blur sm:hidden">
+        <div className="mx-auto flex max-w-6xl items-center gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-medium text-foreground">
+              {t("progress", { count: completedCount, total: checklistKeys.length })}
+            </p>
+            <p
+              className={cn(
+                "truncate text-xs",
+                hasUnsavedChanges ? "text-amber-300" : "text-muted-foreground",
+              )}
+            >
+              {hasUnsavedChanges ? t("unsavedChanges") : state?.ok ? t("saved") : t("readyToSave")}
+            </p>
+            <div className="mt-2 h-1 overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full bg-primary transition-all"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+          </div>
+          <Button type="submit" disabled={isPending || uploading} className="min-w-24">
+            <Save className="mr-2 size-4" aria-hidden />
+            {isPending ? tc("loading") : tc("save")}
+          </Button>
+        </div>
       </div>
     </form>
   );
