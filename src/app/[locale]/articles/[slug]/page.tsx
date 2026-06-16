@@ -4,6 +4,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { BackLink } from "@/components/layout/back-link";
 import { Disclaimer } from "@/components/layout/disclaimer";
 import { Badge } from "@/components/ui/badge";
+import { PageViewTracker } from "@/components/analytics/page-view-tracker";
+import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
 import { prisma } from "@/lib/prisma";
 import { absoluteUrl } from "@/lib/site-url";
 
@@ -87,6 +89,10 @@ export default async function ArticlePage({ params }: Props) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <PageViewTracker
+        eventName={ANALYTICS_EVENTS.articleRead}
+        properties={{ keyword: article.keyword, locale, slug }}
       />
       <BackLink href="/articles">{t("backToList")}</BackLink>
       <article className="max-w-2xl space-y-6">

@@ -43,7 +43,15 @@ export default function RootLayout({
     >
       <body className="min-h-full font-sans antialiased">
         {children}
-        <Analytics />
+        <Analytics
+          beforeSend={(event) => {
+            // Exclude admin and API traffic from Vercel Analytics
+            if (event.url.includes("/admin") || event.url.includes("/api/")) {
+              return null;
+            }
+            return event;
+          }}
+        />
         <SpeedInsights />
       </body>
     </html>
