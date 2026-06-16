@@ -3,11 +3,12 @@ import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, Bot } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { ArticleEditor } from "@/components/articles/article-editor";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { Textarea } from "@/components/ui/textarea"; // used for summary + metaDescription
 import { Link } from "@/i18n/navigation";
 import { updateAiArticle } from "../actions";
 
@@ -121,13 +122,10 @@ export default async function EditAiArticlePage({ params }: Props) {
             </div>
 
             <div>
-              <Label htmlFor="body">{t("aiArticlesFieldBody")}</Label>
-              <Textarea
-                id="body"
+              <Label className="mb-1.5 block">{t("aiArticlesFieldBody")}</Label>
+              <ArticleEditor
                 name="body"
                 defaultValue={article.body}
-                rows={24}
-                className="mt-1.5 font-mono text-xs"
                 required
               />
               <p className="mt-1 text-xs text-muted-foreground">

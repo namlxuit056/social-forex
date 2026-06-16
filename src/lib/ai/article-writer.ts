@@ -77,23 +77,40 @@ function extractTitleWords(title: string) {
     .filter((word) => word.length >= 3 && !stop.has(word.toLowerCase()));
 }
 
-async function fetchGoogleNewsTitles(seedKeywords: string[]) {
+type NewsItem = { title: string; description: string; link: string };
+
+async function fetchGoogleNewsItems(seedKeywords: string[]): Promise<{ items: NewsItem[]; source: string }> {
   const query = encodeURIComponent(
     `(${seedKeywords.slice(0, 8).join(" OR ")}) when:7d`,
   );
   const url = `https://news.google.com/rss/search?q=${query}&hl=en-US&gl=US&ceid=US:en`;
-  const res = await fetch(url, {
-    headers: { "user-agent": "SocialForexBot/1.0" },
-    next: { revalidate: 60 * 60 },
-  });
-  if (!res.ok) return { titles: [], source: url };
+  try {
+    const res = await fetch(url, {
+      headers: { "user-agent": "SocialForexBot/1.0" },
+      next: { revalidate: 60 * 60 },
+    });
+    if (!res.ok) return { items: [], source: url };
 
-  const xml = await res.text();
-  const titles = [...xml.matchAll(/<title><!\[CDATA\[(.*?)\]\]><\/title>|<title>(.*?)<\/title>/g)]
-    .map((match) => stripTags(match[1] ?? match[2] ?? ""))
-    .filter((title) => title && !title.includes("Google News"))
-    .slice(0, 30);
-  return { titles, source: url };
+    const xml = await res.text();
+    // Extract <item> blocks
+    const itemBlocks = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)].map((m) => m[1]);
+    const items: NewsItem[] = itemBlocks
+      .map((block) => {
+        const titleMatch = block.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>|<title>(.*?)<\/title>/);
+        const descMatch = block.match(/<description><!\[CDATA\[([\s\S]*?)\]\]><\/description>|<description>([\s\S]*?)<\/description>/);
+        const linkMatch = block.match(/<link>(.*?)<\/link>/);
+        const title = stripTags(titleMatch?.[1] ?? titleMatch?.[2] ?? "").trim();
+        const description = stripTags(descMatch?.[1] ?? descMatch?.[2] ?? "").slice(0, 300).trim();
+        const link = (linkMatch?.[1] ?? "").trim();
+        return { title, description, link };
+      })
+      .filter((item) => item.title && !item.title.includes("Google News"))
+      .slice(0, 10);
+
+    return { items, source: url };
+  } catch {
+    return { items: [], source: url };
+  }
 }
 
 async function fetchGoogleTrendingSearches(locale: ArticleLocale) {
@@ -124,32 +141,28 @@ export async function getTrendingForexKeywords(
   seedKeywords: string[],
   locale: ArticleLocale = "vi",
 ) {
-  const [{ titles, source }, googleTrends] = await Promise.all([
-    fetchGoogleNewsTitles(seedKeywords),
+  const [{ items: newsItems, source }, googleTrends] = await Promise.all([
+    fetchGoogleNewsItems(seedKeywords),
     fetchGoogleTrendingSearches(locale),
   ]);
 
   const counts = new Map<string, number>();
 
-  // Seed keywords always included with base weight
   for (const seed of seedKeywords) {
     counts.set(seed, (counts.get(seed) ?? 0) + 2);
   }
-  // Google Trends results get high weight — these are actual trending searches
   for (const trend of googleTrends) {
     const normalized = trend.trim();
     if (normalized.length >= 2 && normalized.length <= 48) {
       counts.set(normalized, (counts.get(normalized) ?? 0) + 3);
     }
-    // Also extract individual words from trend phrases
     for (const word of extractTitleWords(normalized)) {
       const key = word.toUpperCase() === word ? word : word.toLowerCase();
       counts.set(key, (counts.get(key) ?? 0) + 2);
     }
   }
-  // Google News article titles add supporting weight
-  for (const title of titles) {
-    for (const word of extractTitleWords(title)) {
+  for (const item of newsItems) {
+    for (const word of extractTitleWords(item.title)) {
       const normalized = word.toUpperCase() === word ? word : word.toLowerCase();
       counts.set(normalized, (counts.get(normalized) ?? 0) + 1);
     }
@@ -161,7 +174,7 @@ export async function getTrendingForexKeywords(
     .filter((keyword) => keyword.length <= 48)
     .slice(0, 15);
 
-  return { keywords, trendSource: source, googleTrends: googleTrends.slice(0, 10) };
+  return { keywords, trendSource: source, googleTrends: googleTrends.slice(0, 10), newsItems };
 }
 
 export async function fetchCurrentTrendingKeywords(
@@ -184,27 +197,36 @@ async function uniqueSlug(base: string, locale: ArticleLocale) {
   return `${slug}-${Date.now()}`;
 }
 
-function buildArticlePrompt(keyword: string, locale: ArticleLocale) {
+function buildArticlePrompt(keyword: string, locale: ArticleLocale, newsItems: NewsItem[]) {
   const language =
     locale === "vi"
       ? "Vietnamese, natural for beginner and intermediate forex traders in Vietnam"
       : "English, natural for beginner and intermediate forex traders";
 
+  const newsContext =
+    newsItems.length > 0
+      ? `\nRecent news context — synthesize these into the article, do NOT copy verbatim:\n${newsItems
+          .slice(0, 6)
+          .map((item, i) => `${i + 1}. ${item.title}${item.description ? ` — ${item.description}` : ""}`)
+          .join("\n")}\n`
+      : "";
+
   return `Write an educational SEO article for Social Forex.
 
 Keyword: ${keyword}
 Language: ${language}
-
+${newsContext}
 Rules:
 - Return valid JSON only: title, summary, metaDescription, body.
 - Body must be markdown with H2 sections.
-- Explain context, why traders care, practical checklist, common mistakes, and risk management.
+- The article must reflect current market context from the news above, not generic information.
+- Explain what's happening, why traders care, practical checklist, common mistakes, and risk management.
 - Do not give direct buy/sell recommendations.
 - Do not promise profit, certainty, signal accuracy, or guaranteed outcomes.
 - Include an educational risk disclaimer in the final section.
 - Keep tone practical, clear, and not clickbait.
 - Mention that readers should verify data on their broker/calendar/chart.
-- Avoid copying news articles. Summarize generally and teach process.
+- Do not copy news article sentences. Synthesize and teach the process.
 `;
 }
 
@@ -214,12 +236,14 @@ export async function generateAiForexArticle({
   status,
   trendSource,
   sourceKeywords,
+  newsItems = [],
 }: {
   keyword: string;
   locale: ArticleLocale;
   status: "DRAFT" | "PUBLISHED";
   trendSource?: string;
   sourceKeywords: string[];
+  newsItems?: NewsItem[];
 }) {
   const config = resolveAiProvider();
   if (!config) {
@@ -237,7 +261,7 @@ export async function generateAiForexArticle({
         content:
           "You are an SEO editor for an educational forex website. You write cautious, non-advisory, original articles.",
       },
-      { role: "user", content: buildArticlePrompt(keyword, locale) },
+      { role: "user", content: buildArticlePrompt(keyword, locale, newsItems) },
     ],
   });
 
@@ -297,7 +321,7 @@ export async function runAiArticleAutomation() {
   }
 
   // Always use vi as primary locale for trending keyword lookup
-  const { keywords, trendSource } = await getTrendingForexKeywords(setting.seedKeywords, "vi");
+  const { keywords, trendSource, newsItems } = await getTrendingForexKeywords(setting.seedKeywords, "vi");
   const recent = await prisma.aiGeneratedArticle.findMany({
     where: {
       generatedAt: { gte: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000) },
@@ -314,10 +338,10 @@ export async function runAiArticleAutomation() {
 
   const articleStatus = setting.autoPublish ? "PUBLISHED" : "DRAFT";
 
-  // Generate both VI and EN in parallel (bilingual)
+  // Generate both VI and EN in parallel with real news context
   const [viResult, enResult] = await Promise.all([
-    generateAiForexArticle({ keyword, locale: "vi", status: articleStatus, trendSource, sourceKeywords: keywords }),
-    generateAiForexArticle({ keyword, locale: "en", status: articleStatus, trendSource, sourceKeywords: keywords }),
+    generateAiForexArticle({ keyword, locale: "vi", status: articleStatus, trendSource, sourceKeywords: keywords, newsItems }),
+    generateAiForexArticle({ keyword, locale: "en", status: articleStatus, trendSource, sourceKeywords: keywords, newsItems }),
   ]);
 
   await prisma.aiArticleAutomationSetting.update({
@@ -339,15 +363,14 @@ export async function generateArticleForCustomKeyword({
   status: "DRAFT" | "PUBLISHED";
   bilingual?: boolean;
 }) {
-  const { keywords, trendSource } = await getTrendingForexKeywords([keyword], locale);
+  const { keywords, trendSource, newsItems } = await getTrendingForexKeywords([keyword], locale);
   if (!bilingual) {
-    return generateAiForexArticle({ keyword, locale, status, trendSource, sourceKeywords: keywords });
+    return generateAiForexArticle({ keyword, locale, status, trendSource, sourceKeywords: keywords, newsItems });
   }
-  // Generate for both locales in parallel
   const otherLocale: ArticleLocale = locale === "vi" ? "en" : "vi";
   const [primary, other] = await Promise.all([
-    generateAiForexArticle({ keyword, locale, status, trendSource, sourceKeywords: keywords }),
-    generateAiForexArticle({ keyword, locale: otherLocale, status, trendSource, sourceKeywords: keywords }),
+    generateAiForexArticle({ keyword, locale, status, trendSource, sourceKeywords: keywords, newsItems }),
+    generateAiForexArticle({ keyword, locale: otherLocale, status, trendSource, sourceKeywords: keywords, newsItems }),
   ]);
   return { ok: true as const, primary, other };
 }
