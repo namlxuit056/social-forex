@@ -993,7 +993,7 @@
     "setupStep2": "Tải file social-forex.ex5 ở trên, copy vào thư mục MQL5/Experts của MT5.",
     "setupStep3": "Khởi động lại MT5 hoặc nhấn chuột phải vào Navigator → Refresh.",
     "setupStep4": "Vào Tools → Options → Expert Advisors → tick Allow WebRequest for listed URL.",
-    "setupStep5": "Thêm domain Social Forex vào danh sách, ví dụ: https://social-forex.vercel.app",
+    "setupStep5": "Thêm domain Social Forex vào danh sách, ví dụ: https://toolforex.xyz",
     "setupStep6": "Kéo EA SocialForexBridge từ Navigator vào bất kỳ chart nào.",
     "setupStep7": "Trong cửa sổ cài EA: đặt BridgeEndpoint = endpoint bên dưới.",
     "setupStep8": "Đặt BridgeToken = token vừa tạo, HeartbeatSeconds = 30 (hoặc cao hơn).",

@@ -993,7 +993,7 @@
     "setupStep2": "Download social-forex.ex5 above and copy it into the MT5 MQL5/Experts folder.",
     "setupStep3": "Restart MT5 or right-click Navigator → Refresh.",
     "setupStep4": "Go to Tools → Options → Expert Advisors → tick Allow WebRequest for listed URL.",
-    "setupStep5": "Add your Social Forex domain to the list, e.g. https://social-forex.vercel.app",
+    "setupStep5": "Add your Social Forex domain to the list, e.g. https://toolforex.xyz",
     "setupStep6": "Drag SocialForexBridge from the Navigator onto any chart.",
     "setupStep7": "In the EA settings dialog: set BridgeEndpoint to the endpoint shown below.",
     "setupStep8": "Set BridgeToken to the token you created, HeartbeatSeconds to 30 or higher.",

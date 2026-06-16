@@ -6,7 +6,7 @@ Bổ sung cho `DESIGN-TOKENS.md` (màu, type). Tài liệu này mô tả **bố 
 
 ## Signal Room — `/[locale]/signals`
 
-**Tham chiếu:** [social-forex.vercel.app/en/signals](https://social-forex.vercel.app/en/signals)
+**Tham chiếu:** [toolforex.xyz/en/signals](https://toolforex.xyz/en/signals)
 
 ### Cột dọc trang (desktop ≥1024px)
 

@@ -1,7 +1,7 @@
 import { routing } from "@/i18n/routing";
 
 /** Production default when `NEXT_PUBLIC_SITE_URL` is unset (Vercel preview / prod). */
-const DEFAULT_ORIGIN = "https://social-forex.vercel.app";
+const DEFAULT_ORIGIN = "https://toolforex.xyz";
 
 /** Canonical site origin, no trailing slash. */
 export function getSiteUrl(): string {

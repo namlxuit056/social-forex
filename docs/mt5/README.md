@@ -14,7 +14,7 @@ It does not place trades and does not need your MT5 password.
 5. Open `Tools -> Options -> Expert Advisors`.
 6. Enable `Allow WebRequest for listed URL`.
 7. Add your Social Forex origin, for example:
-   - `https://social-forex.vercel.app`
+   - `https://toolforex.xyz`
    - or your production domain
 8. Attach `SocialForexBridge` to any chart.
 9. Set:

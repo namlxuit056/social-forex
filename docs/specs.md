@@ -136,7 +136,7 @@ Là **trader đăng signal**, tôi muốn **đính kèm một hoặc vài ảnh*
 
 # Spec — Signal Room (`/[locale]/signals`) — UX / UI (kế hoạch PM)
 
-**Tham chiếu live:** [Signal Room (EN)](https://social-forex.vercel.app/en/signals)
+**Tham chiếu live:** [Signal Room (EN)](https://toolforex.xyz/en/signals)
 
 ## Bối cảnh & vấn đề hiện tại
 
