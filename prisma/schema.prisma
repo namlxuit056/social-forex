@@ -74,6 +74,7 @@ model User {
   pinnedSignals        UserPinnedSignal[]
   vipPayments          VipPayment[]
   demoChallenges       UserDemoChallenge[]
+  dailyTradingPlans    DailyTradingPlan[]
   mt5Connections       Mt5Connection[]
   pageVisits           UserPageVisit[]
   clientErrors         UserClientError[]
@@ -297,6 +298,13 @@ enum TradeResult {
   PENDING
 }
 
+enum TradingPlanBias {
+  BULLISH
+  BEARISH
+  RANGE
+  WAIT
+}
+
 model TradeJournal {
   id         String      @id @default(cuid())
   userId     String
@@ -320,6 +328,33 @@ model TradeJournal {
   updatedAt DateTime  @updatedAt
 
   @@index([userId, openedAt])
+}
+
+model DailyTradingPlan {
+  id             String          @id @default(cuid())
+  userId         String
+  planDate       DateTime
+  watchedSymbols String[]        @default([])
+  bias           TradingPlanBias @default(WAIT)
+  keyLevels      String?
+  newsToAvoid    String?
+  maxRiskPercent Float?
+  maxTrades      Int?
+  sessionFocus   String?
+  notes          String?
+  checkedNews    Boolean         @default(false)
+  checkedLevels  Boolean         @default(false)
+  checkedRisk    Boolean         @default(false)
+  checkedEmotion Boolean         @default(false)
+  checkedJournal Boolean         @default(false)
+  completedAt    DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, planDate])
+  @@index([userId, planDate])
 }
 
 model DirectMessage {

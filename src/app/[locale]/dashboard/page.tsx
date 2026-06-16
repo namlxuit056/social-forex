@@ -6,6 +6,7 @@ import {
   ClipboardList,
   Cable,
   CheckCircle2,
+  ClipboardCheck,
   Lock,
   MessageCircle,
   MessageSquare,
@@ -200,6 +201,13 @@ export default async function DashboardPage({
       desc: t("actionOpenDeskDesc"),
       icon: BarChart3,
       tone: "default",
+    },
+    {
+      href: "/plan" as const,
+      title: t("actionPlan"),
+      desc: t("actionPlanDesc"),
+      icon: ClipboardCheck,
+      tone: "primary",
     },
     {
       href: "/journal" as const,

@@ -29,6 +29,7 @@ const marketNavKeys = [
 
 const communityNavKeys = [
   { href: "/leaderboard", key: "leaderboard" },
+  { href: "/plan", key: "plan" },
   { href: "/journal", key: "journal" },
   { href: "/mt5", key: "mt5" },
   { href: "/backtest", key: "backtest" },
