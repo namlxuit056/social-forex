@@ -1,6 +1,8 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+import { AlertCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -41,12 +43,17 @@ export function ArticleEditForm({
   const [body, setBody] = useState(defaultBody);
   const editorRef = useRef<ArticleEditorCKHandle>(null);
 
+  const [state, formAction, pending] = useActionState(updateAiArticle, null);
+
+  useEffect(() => {
+    if (state && "error" in state) {
+      toast.error(state.error);
+    }
+  }, [state]);
+
   const seoFields = { keyword, title, summary, metaDescription, body };
 
-  function applyFix(
-    field: "title" | "summary" | "metaDescription",
-    value: string,
-  ) {
+  function applyFix(field: "title" | "summary" | "metaDescription", value: string) {
     if (field === "title") setTitle(value);
     else if (field === "summary") setSummary(value);
     else if (field === "metaDescription") setMetaDescription(value);
@@ -60,8 +67,15 @@ export function ArticleEditForm({
           <CardTitle className="text-base">Nội dung bài viết</CardTitle>
         </CardHeader>
         <CardContent>
-          <form action={updateAiArticle} className="space-y-5">
+          <form action={formAction} className="space-y-5">
             <input type="hidden" name="id" value={id} />
+
+            {state && "error" in state && (
+              <div className="flex items-center gap-2 rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+                <AlertCircle className="size-3.5 shrink-0" />
+                {state.error}
+              </div>
+            )}
 
             <div>
               <Label htmlFor="title">
@@ -155,7 +169,10 @@ export function ArticleEditForm({
             </div>
 
             <div className="flex gap-3 pt-2">
-              <Button type="submit">Lưu thay đổi</Button>
+              <Button type="submit" disabled={pending} className="gap-2">
+                {pending && <Loader2 className="size-3.5 animate-spin" />}
+                {pending ? "Đang lưu..." : "Lưu thay đổi"}
+              </Button>
               <Link
                 href={cancelHref}
                 className="inline-flex h-9 items-center rounded-md border border-input px-4 text-sm hover:bg-accent"
@@ -183,7 +200,7 @@ export function ArticleEditForm({
             </CardContent>
           </Card>
 
-          <Card className="border-border/70">
+          <Card className="border-border/70 mt-3">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm">AI Content Review</CardTitle>
               <p className="text-xs text-muted-foreground">

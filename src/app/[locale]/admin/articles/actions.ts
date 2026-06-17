@@ -131,10 +131,15 @@ const updateArticleSchema = z.object({
   title: z.string().min(8).max(140).trim(),
   summary: z.string().min(30).max(280).trim(),
   metaDescription: z.string().min(50).max(180).trim(),
-  body: z.string().min(100).max(80000).trim(),
+  body: z.string().min(100).max(200000).trim(),
 });
 
-export async function updateAiArticle(formData: FormData) {
+export type UpdateArticleState = { error: string } | { ok: true } | null;
+
+export async function updateAiArticle(
+  _prev: UpdateArticleState,
+  formData: FormData,
+): Promise<UpdateArticleState> {
   await requireAdmin();
   const parsed = updateArticleSchema.safeParse({
     id: formData.get("id"),
@@ -143,10 +148,17 @@ export async function updateAiArticle(formData: FormData) {
     metaDescription: formData.get("metaDescription"),
     body: formData.get("body"),
   });
-  if (!parsed.success) return;
+  if (!parsed.success) {
+    const first = parsed.error.issues[0];
+    return { error: `${first?.path.join(".") ?? "field"}: ${first?.message ?? "Invalid"}` };
+  }
 
   const { id, ...data } = parsed.data;
-  await prisma.aiGeneratedArticle.update({ where: { id }, data });
+  try {
+    await prisma.aiGeneratedArticle.update({ where: { id }, data });
+  } catch {
+    return { error: "Lỗi cơ sở dữ liệu. Vui lòng thử lại." };
+  }
   revalidatePath("/admin/articles");
   revalidatePath("/articles");
   redirect("/admin/articles");
