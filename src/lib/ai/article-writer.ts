@@ -2,6 +2,13 @@ import { marked } from "marked";
 import { z } from "zod";
 import { createAiClient, resolveAiProvider } from "@/lib/ai/provider";
 import { fetchArticleImage } from "@/lib/ai/article-images";
+import { webSearch, buildForexSearchQuery } from "@/lib/ai/web-search";
+import {
+  extractSymbolFromKeyword,
+  getSymbolTechnicalContext,
+  formatTechnicalContextBlock,
+  fetchChartImage,
+} from "@/lib/ai/forex-chart";
 import { prisma } from "@/lib/prisma";
 
 // Convert AI-generated markdown body to HTML for storage.
@@ -220,7 +227,17 @@ async function uniqueSlug(base: string, locale: ArticleLocale) {
   return `${slug}-${Date.now()}`;
 }
 
-function buildArticlePrompt(keyword: string, locale: ArticleLocale, newsItems: NewsItem[]) {
+type ArticleContext = {
+  newsItems: NewsItem[];
+  searchResults: { title: string; url: string; content: string }[];
+  technicalSummary: string | null;
+};
+
+function buildArticlePrompt(
+  keyword: string,
+  locale: ArticleLocale,
+  ctx: ArticleContext,
+) {
   const language =
     locale === "vi"
       ? "Vietnamese, natural for beginner and intermediate forex traders in Vietnam"
@@ -228,19 +245,43 @@ function buildArticlePrompt(keyword: string, locale: ArticleLocale, newsItems: N
 
   const today = new Date().toISOString().slice(0, 10);
 
-  const hasNews = newsItems.length > 0;
+  // ── TradingView technical block ──────────────────────────────────────────
+  const technicalBlock = ctx.technicalSummary
+    ? `## Live TradingView Technical Analysis (MUST reference specific numbers from this in the article body)
+${ctx.technicalSummary}`
+    : "";
+
+  // ── Web search block ─────────────────────────────────────────────────────
+  const searchBlock =
+    ctx.searchResults.length > 0
+      ? `## Latest expert analysis from top forex sites (synthesize — do NOT copy verbatim)
+${ctx.searchResults
+  .map(
+    (r, i) =>
+      `${i + 1}. "${r.title}"
+   ${r.content.slice(0, 500)}`,
+  )
+  .join("\n\n")}`
+      : "";
+
+  // ── Google News block ────────────────────────────────────────────────────
+  const hasNews = ctx.newsItems.length > 0;
   const newsBlock = hasNews
-    ? `## Recent news to synthesize (published within the last 7 days — do NOT copy sentences verbatim, but MUST reference specific events/facts from this list in the article body):
-${newsItems
+    ? `## Recent Google News (last 7 days — reference specific events, do NOT copy verbatim)
+${ctx.newsItems
   .slice(0, 6)
   .map((item, i) => `${i + 1}. ${item.title}${item.description ? ` — ${item.description}` : ""}`)
   .join("\n")}`
-    : `## No live news available — write based on typical recurring patterns and current macro context as of ${today}. Still be specific: mention plausible current drivers (Fed rate expectations, USD strength/weakness, geopolitical tensions) rather than generic bullet points.`;
+    : `## No live news — use plausible current macro context as of ${today} (Fed expectations, USD sentiment, geopolitical tensions).`;
 
   return `Write an educational SEO article for Social Forex. Today's date: ${today}.
 
 Keyword: ${keyword}
 Language: ${language}
+
+${technicalBlock}
+
+${searchBlock}
 
 ${newsBlock}
 
@@ -249,17 +290,19 @@ Return valid JSON only with these keys: title, summary, metaDescription, body.
 
 ## Content requirements
 - title: concise, keyword-rich, under 70 characters. Do NOT start with generic phrases like "Tìm hiểu về" or "Introduction to".
-- summary: 1-2 sentences summarizing what's happening RIGHT NOW and why traders care today. Must be specific, not generic.
+- summary: 1-2 sentences on what is happening RIGHT NOW and why traders care today. Specific, not generic.
 - metaDescription: 150-160 characters, action-oriented, includes the keyword.
-- body: markdown with H2 (##) sections. Minimum 5 sections covering:
-  1. What's happening in the market RIGHT NOW (specific, time-anchored — reference news items if available)
+- body: markdown with H2 (##) sections. Minimum 6 sections:
+  1. What is happening RIGHT NOW (cite specific price levels, indicators, news from the context above)
   2. Why this matters for traders (concrete impact on price action or sentiment)
-  3. Practical checklist (what to watch, what indicators/levels to track)
-  4. Common mistakes traders make with this topic
-  5. Risk management (stop-loss sizing, position sizing, capital rules)
-  6. Risk disclaimer (final section — educational only, not financial advice)
+  3. Technical analysis breakdown (reference specific RSI, EMA, key levels from the live data above if available)
+  4. Practical checklist (what to watch, what indicators/levels to track)
+  5. Common mistakes traders make with this topic
+  6. Risk management (stop-loss sizing, position sizing, capital rules)
+  7. Risk disclaimer (final section — educational only, not financial advice)
 
 ## Hard rules
+- MUST use specific numbers from the technical analysis block (RSI, EMA levels, price) — do not make up numbers.
 - NEVER write generic intros like "XAU là mã tiền tệ quốc tế cho vàng" without immediately connecting to current context.
 - NEVER use empty filler bullet points. Every bullet must contain a specific fact, level, or action.
 - Do NOT give direct buy/sell recommendations or promise profit.
@@ -288,6 +331,21 @@ export async function generateAiForexArticle({
     return { ok: false as const, error: "missing_ai_provider" };
   }
 
+  // ── Gather rich context in parallel ──────────────────────────────────────
+  const symbolInfo = extractSymbolFromKeyword(keyword);
+  const searchQuery = buildForexSearchQuery(keyword);
+
+  const [searchResults, technicalCtx, chartImage] = await Promise.all([
+    webSearch(searchQuery),
+    symbolInfo ? getSymbolTechnicalContext(symbolInfo.symbol, symbolInfo.group) : null,
+    symbolInfo ? fetchChartImage(symbolInfo.symbol) : null,
+  ]);
+
+  const technicalSummary = technicalCtx ? formatTechnicalContextBlock(technicalCtx) : null;
+
+  const ctx: ArticleContext = { newsItems, searchResults, technicalSummary };
+
+  // ── Generate article ─────────────────────────────────────────────────────
   const client = createAiClient(config);
   const completion = await client.chat.completions.create({
     model: config.model,
@@ -297,9 +355,9 @@ export async function generateAiForexArticle({
       {
         role: "system",
         content:
-          "You are an SEO editor for an educational forex website. You write cautious, non-advisory, original articles.",
+          "You are an SEO editor for an educational forex website. You write cautious, non-advisory, original articles. When live technical data is provided, you MUST cite the exact numbers.",
       },
-      { role: "user", content: buildArticlePrompt(keyword, locale, newsItems) },
+      { role: "user", content: buildArticlePrompt(keyword, locale, ctx) },
     ],
   });
 
@@ -316,11 +374,14 @@ export async function generateAiForexArticle({
   const parsed = articleSchema.safeParse(json);
   if (!parsed.success) return { ok: false as const, error: "invalid_ai_response" };
 
-  const [slug, image, bodyHtml] = await Promise.all([
+  // ── Resolve image: real chart > Unsplash/Pexels ──────────────────────────
+  const [slug, fallbackImage, bodyHtml] = await Promise.all([
     uniqueSlug(slugify(parsed.data.title), locale),
-    fetchArticleImage(keyword),
+    chartImage ? null : fetchArticleImage(keyword),
     markdownToHtml(parsed.data.body),
   ]);
+
+  const finalImage = chartImage ?? fallbackImage;
 
   const article = await prisma.aiGeneratedArticle.create({
     data: {
@@ -332,8 +393,8 @@ export async function generateAiForexArticle({
       status,
       trendSource,
       sourceKeywords,
-      imageUrl: image?.url ?? null,
-      imageAlt: image?.alt ?? null,
+      imageUrl: finalImage?.url ?? null,
+      imageAlt: finalImage?.alt ?? null,
       publishedAt: status === "PUBLISHED" ? new Date() : null,
     },
   });
