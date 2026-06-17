@@ -104,27 +104,19 @@ export interface ArticleEditorCKHandle {
 }
 
 type Props = {
-  name: string;
   defaultValue: string;
   onValueChange?: (html: string) => void;
-  required?: boolean;
 };
 
 export const ArticleEditorCK = forwardRef<ArticleEditorCKHandle, Props>(
-  function ArticleEditorCK({ name, defaultValue, onValueChange, required }, ref) {
+  function ArticleEditorCK({ defaultValue, onValueChange }, ref) {
     const editorRef = useRef<Editor | null>(null);
-    const hiddenRef = useRef<HTMLInputElement>(null);
-
-    function syncOut(html: string) {
-      if (hiddenRef.current) hiddenRef.current.value = html;
-      onValueChange?.(html);
-    }
 
     useImperativeHandle(ref, () => ({
       setData(html: string) {
         if (!editorRef.current) return;
         editorRef.current.setData(html);
-        syncOut(html);
+        onValueChange?.(html);
       },
       insertImage(url: string, alt: string) {
         if (!editorRef.current) return;
@@ -132,7 +124,7 @@ export const ArticleEditorCK = forwardRef<ArticleEditorCKHandle, Props>(
         const img = `<figure class="image"><img src="${url}" alt="${alt}"><figcaption>${alt}</figcaption></figure>`;
         const next = current + img;
         editorRef.current.setData(next);
-        syncOut(next);
+        onValueChange?.(next);
       },
     }));
 
@@ -174,10 +166,8 @@ export const ArticleEditorCK = forwardRef<ArticleEditorCKHandle, Props>(
           config={EDITOR_CONFIG}
           data={defaultValue}
           onReady={(editor) => { editorRef.current = editor; }}
-          onChange={(_event, editor) => syncOut(editor.getData())}
+          onChange={(_event, editor) => onValueChange?.(editor.getData())}
         />
-
-        <input ref={hiddenRef} type="hidden" name={name} defaultValue={defaultValue} required={required} />
       </div>
     );
   },

@@ -156,12 +156,12 @@ export function ArticleEditForm({
                   ({body.replace(/<[^>]+>/g, " ").split(/\s+/).filter(Boolean).length} từ)
                 </span>
               </Label>
+              {/* Controlled hidden input — always reflects current body state */}
+              <input type="hidden" name="body" value={body} onChange={() => {}} />
               <ArticleEditorCK
                 ref={editorRef}
-                name="body"
                 defaultValue={defaultBody}
                 onValueChange={setBody}
-                required
               />
               <p className="mt-1 text-xs text-muted-foreground">
                 Tối ưu: 5+ mục H2, 600+ từ, có disclaimer rủi ro cuối bài.
