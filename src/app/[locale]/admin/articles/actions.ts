@@ -131,7 +131,7 @@ const updateArticleSchema = z.object({
   title: z.string().min(8).max(140).trim(),
   summary: z.string().min(30).max(280).trim(),
   metaDescription: z.string().min(50).max(180).trim(),
-  body: z.string().min(100).max(12000).trim(),
+  body: z.string().min(100).max(80000).trim(),
 });
 
 export async function updateAiArticle(formData: FormData) {

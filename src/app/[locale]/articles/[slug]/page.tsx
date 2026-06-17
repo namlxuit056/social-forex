@@ -141,50 +141,11 @@ export default async function ArticlePage({ params }: Props) {
           </div>
         )}
 
-        <div className="prose prose-invert max-w-none text-sm leading-relaxed text-foreground/90">
-          {article.body.split("\n").map((line, i) => {
-            if (line.startsWith("## ")) {
-              return (
-                <h2
-                  key={i}
-                  className="mb-3 mt-8 font-heading text-lg font-semibold text-foreground"
-                >
-                  {line.replace("## ", "")}
-                </h2>
-              );
-            }
-            if (line.startsWith("### ")) {
-              return (
-                <h3
-                  key={i}
-                  className="mb-2 mt-6 font-heading text-base font-medium text-foreground"
-                >
-                  {line.replace("### ", "")}
-                </h3>
-              );
-            }
-            if (line.startsWith("- ")) {
-              return (
-                <li key={i} className="ml-4 list-disc text-foreground/80">
-                  {renderInlineMarkdown(line.replace(/^- /, ""))}
-                </li>
-              );
-            }
-            if (/^\d+\. /.test(line)) {
-              return (
-                <li key={i} className="ml-4 list-decimal text-foreground/80">
-                  {renderInlineMarkdown(line.replace(/^\d+\. /, ""))}
-                </li>
-              );
-            }
-            if (line.trim() === "") return <div key={i} className="h-2" />;
-            return (
-              <p key={i} className="text-foreground/80">
-                {renderInlineMarkdown(line)}
-              </p>
-            );
-          })}
-        </div>
+        <div
+          className="article-body prose prose-invert max-w-none text-sm leading-relaxed text-foreground/90"
+          // Body is authored by admin/AI only — trusted HTML source
+          dangerouslySetInnerHTML={{ __html: article.body }}
+        />
 
         <Disclaimer variant="compact" />
       </article>
@@ -192,16 +153,3 @@ export default async function ArticlePage({ params }: Props) {
   );
 }
 
-function renderInlineMarkdown(text: string) {
-  const parts = text.split(/(\*\*[^*]+\*\*)/g);
-  return parts.map((part, i) => {
-    if (part.startsWith("**") && part.endsWith("**")) {
-      return (
-        <strong key={i} className="font-semibold text-foreground">
-          {part.slice(2, -2)}
-        </strong>
-      );
-    }
-    return part;
-  });
-}

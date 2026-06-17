@@ -1,7 +1,15 @@
+import { marked } from "marked";
 import { z } from "zod";
 import { createAiClient, resolveAiProvider } from "@/lib/ai/provider";
 import { fetchArticleImage } from "@/lib/ai/article-images";
 import { prisma } from "@/lib/prisma";
+
+// Convert AI-generated markdown body to HTML for storage.
+// The editor (CKEditor) stores/reads HTML; AI generates markdown (better quality).
+async function markdownToHtml(markdown: string): Promise<string> {
+  const html = await marked.parse(markdown, { async: true });
+  return html;
+}
 
 type ArticleLocale = "vi" | "en";
 
@@ -308,14 +316,16 @@ export async function generateAiForexArticle({
   const parsed = articleSchema.safeParse(json);
   if (!parsed.success) return { ok: false as const, error: "invalid_ai_response" };
 
-  const [slug, image] = await Promise.all([
+  const [slug, image, bodyHtml] = await Promise.all([
     uniqueSlug(slugify(parsed.data.title), locale),
     fetchArticleImage(keyword),
+    markdownToHtml(parsed.data.body),
   ]);
 
   const article = await prisma.aiGeneratedArticle.create({
     data: {
       ...parsed.data,
+      body: bodyHtml,
       slug,
       locale,
       keyword,

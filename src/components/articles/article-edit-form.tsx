@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Link } from "@/i18n/navigation";
-import { ArticleEditor } from "./article-editor";
+import { ArticleEditorCK } from "./article-editor-ck";
 import { ArticleSeoPanel } from "./article-seo-panel";
 import { updateAiArticle } from "@/app/[locale]/admin/articles/actions";
 
@@ -137,17 +137,17 @@ export function ArticleEditForm({
               <Label className="mb-1.5 block">
                 Nội dung{" "}
                 <span className="font-normal text-muted-foreground">
-                  ({body.split(/\s+/).filter(Boolean).length} từ)
+                  ({body.replace(/<[^>]+>/g, " ").split(/\s+/).filter(Boolean).length} từ)
                 </span>
               </Label>
-              <ArticleEditor
+              <ArticleEditorCK
                 name="body"
                 defaultValue={defaultBody}
                 onValueChange={setBody}
                 required
               />
               <p className="mt-1 text-xs text-muted-foreground">
-                Markdown. Tối ưu: 5+ mục H2, 600+ từ, có disclaimer cuối bài.
+                Tối ưu: 5+ mục H2, 600+ từ, có disclaimer rủi ro cuối bài.
               </p>
             </div>
 
