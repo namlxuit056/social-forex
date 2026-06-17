@@ -116,6 +116,7 @@ const TOOLBAR = [
 ];
 
 const EDITOR_CONFIG = {
+  licenseKey: "GPL",
   plugins: PLUGINS,
   extraPlugins: [uploadAdapterPlugin],
   toolbar: { items: TOOLBAR },
