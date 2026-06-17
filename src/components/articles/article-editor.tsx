@@ -9,6 +9,7 @@ type Props = {
   name: string;
   defaultValue: string;
   required?: boolean;
+  onValueChange?: (value: string) => void;
 };
 
 type Tab = "write" | "preview";
@@ -147,7 +148,7 @@ const TOOLBAR = [
   },
 ] as const;
 
-export function ArticleEditor({ name, defaultValue, required }: Props) {
+export function ArticleEditor({ name, defaultValue, required, onValueChange }: Props) {
   const [tab, setTab] = useState<Tab>("write");
   const [value, setValue] = useState(defaultValue);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -220,7 +221,10 @@ export function ArticleEditor({ name, defaultValue, required }: Props) {
           name={name}
           value={value}
           required={required}
-          onChange={(e) => setValue(e.target.value)}
+          onChange={(e) => {
+            setValue(e.target.value);
+            onValueChange?.(e.target.value);
+          }}
           rows={28}
           className="w-full resize-y bg-transparent px-3 py-3 font-mono text-xs leading-relaxed text-foreground outline-none placeholder:text-muted-foreground"
           spellCheck={false}

@@ -113,6 +113,20 @@ async function fetchGoogleNewsItems(seedKeywords: string[]): Promise<{ items: Ne
   }
 }
 
+// Only pass trending terms that are relevant to forex/finance.
+// Google Trends VN returns viral/entertainment topics that corrupt the keyword pool.
+const FOREX_RELEVANCE_PATTERNS = [
+  /\b(forex|xau|gold|vàng|usd|eur|gbp|jpy|aud|cad|chf|nzd|btc|crypto)\b/i,
+  /\b(lãi suất|lạm phát|fed|interest rate|inflation|gdp|oil|crude|dầu)\b/i,
+  /\b(chứng khoán|cổ phiếu|nasdaq|s&p|dow|stock|invest|đầu tư)\b/i,
+  /\b(ngân hàng|central bank|monetary|tài chính|finance|economy|kinh tế)\b/i,
+  /\b(trade|trading|giao dịch|market|thị trường|breakout|bullish|bearish)\b/i,
+];
+
+function isForexRelevant(term: string): boolean {
+  return FOREX_RELEVANCE_PATTERNS.some((p) => p.test(term));
+}
+
 async function fetchGoogleTrendingSearches(locale: ArticleLocale) {
   const hl = locale === "vi" ? "vi" : "en-US";
   const geo = locale === "vi" ? "VN" : "US";
@@ -131,6 +145,7 @@ async function fetchGoogleTrendingSearches(locale: ArticleLocale) {
     return parsed.data.default.trendingSearchesDays
       .flatMap((day) => day.trendingSearches)
       .map((s) => s.title.query)
+      .filter(isForexRelevant)
       .slice(0, 20);
   } catch {
     return [];
@@ -203,30 +218,45 @@ function buildArticlePrompt(keyword: string, locale: ArticleLocale, newsItems: N
       ? "Vietnamese, natural for beginner and intermediate forex traders in Vietnam"
       : "English, natural for beginner and intermediate forex traders";
 
-  const newsContext =
-    newsItems.length > 0
-      ? `\nRecent news context — synthesize these into the article, do NOT copy verbatim:\n${newsItems
-          .slice(0, 6)
-          .map((item, i) => `${i + 1}. ${item.title}${item.description ? ` — ${item.description}` : ""}`)
-          .join("\n")}\n`
-      : "";
+  const today = new Date().toISOString().slice(0, 10);
 
-  return `Write an educational SEO article for Social Forex.
+  const hasNews = newsItems.length > 0;
+  const newsBlock = hasNews
+    ? `## Recent news to synthesize (published within the last 7 days — do NOT copy sentences verbatim, but MUST reference specific events/facts from this list in the article body):
+${newsItems
+  .slice(0, 6)
+  .map((item, i) => `${i + 1}. ${item.title}${item.description ? ` — ${item.description}` : ""}`)
+  .join("\n")}`
+    : `## No live news available — write based on typical recurring patterns and current macro context as of ${today}. Still be specific: mention plausible current drivers (Fed rate expectations, USD strength/weakness, geopolitical tensions) rather than generic bullet points.`;
+
+  return `Write an educational SEO article for Social Forex. Today's date: ${today}.
 
 Keyword: ${keyword}
 Language: ${language}
-${newsContext}
-Rules:
-- Return valid JSON only: title, summary, metaDescription, body.
-- Body must be markdown with H2 sections.
-- The article must reflect current market context from the news above, not generic information.
-- Explain what's happening, why traders care, practical checklist, common mistakes, and risk management.
-- Do not give direct buy/sell recommendations.
-- Do not promise profit, certainty, signal accuracy, or guaranteed outcomes.
-- Include an educational risk disclaimer in the final section.
-- Keep tone practical, clear, and not clickbait.
-- Mention that readers should verify data on their broker/calendar/chart.
-- Do not copy news article sentences. Synthesize and teach the process.
+
+${newsBlock}
+
+## Output format
+Return valid JSON only with these keys: title, summary, metaDescription, body.
+
+## Content requirements
+- title: concise, keyword-rich, under 70 characters. Do NOT start with generic phrases like "Tìm hiểu về" or "Introduction to".
+- summary: 1-2 sentences summarizing what's happening RIGHT NOW and why traders care today. Must be specific, not generic.
+- metaDescription: 150-160 characters, action-oriented, includes the keyword.
+- body: markdown with H2 (##) sections. Minimum 5 sections covering:
+  1. What's happening in the market RIGHT NOW (specific, time-anchored — reference news items if available)
+  2. Why this matters for traders (concrete impact on price action or sentiment)
+  3. Practical checklist (what to watch, what indicators/levels to track)
+  4. Common mistakes traders make with this topic
+  5. Risk management (stop-loss sizing, position sizing, capital rules)
+  6. Risk disclaimer (final section — educational only, not financial advice)
+
+## Hard rules
+- NEVER write generic intros like "XAU là mã tiền tệ quốc tế cho vàng" without immediately connecting to current context.
+- NEVER use empty filler bullet points. Every bullet must contain a specific fact, level, or action.
+- Do NOT give direct buy/sell recommendations or promise profit.
+- Mention that readers should verify data on their broker platform, economic calendar, and chart.
+- Keep tone practical and direct. No clickbait. No vague platitudes.
 `;
 }
 
