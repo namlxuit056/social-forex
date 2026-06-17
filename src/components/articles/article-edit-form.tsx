@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Link } from "@/i18n/navigation";
-import { ArticleEditorCK } from "./article-editor-ck";
+import { ArticleEditorCK, type ArticleEditorCKHandle } from "./article-editor-ck";
 import { ArticleSeoPanel } from "./article-seo-panel";
+import { ArticleContentAnalyzer } from "./article-content-analyzer";
 import { updateAiArticle } from "@/app/[locale]/admin/articles/actions";
 
 type Props = {
@@ -38,6 +39,7 @@ export function ArticleEditForm({
   const [summary, setSummary] = useState(defaultSummary);
   const [metaDescription, setMetaDescription] = useState(defaultMetaDescription);
   const [body, setBody] = useState(defaultBody);
+  const editorRef = useRef<ArticleEditorCKHandle>(null);
 
   const seoFields = { keyword, title, summary, metaDescription, body };
 
@@ -141,6 +143,7 @@ export function ArticleEditForm({
                 </span>
               </Label>
               <ArticleEditorCK
+                ref={editorRef}
                 name="body"
                 defaultValue={defaultBody}
                 onValueChange={setBody}
@@ -177,6 +180,24 @@ export function ArticleEditForm({
             </CardHeader>
             <CardContent>
               <ArticleSeoPanel fields={seoFields} onApplyFix={applyFix} />
+            </CardContent>
+          </Card>
+
+          <Card className="border-border/70">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm">AI Content Review</CardTitle>
+              <p className="text-xs text-muted-foreground">
+                Phân tích nội dung và gợi ý cải thiện
+              </p>
+            </CardHeader>
+            <CardContent>
+              <ArticleContentAnalyzer
+                keyword={keyword}
+                title={title}
+                locale={locale}
+                getBody={() => body}
+                editorRef={editorRef}
+              />
             </CardContent>
           </Card>
         </div>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import Image from "next/image";
+import { marked } from "marked";
 import { BackLink } from "@/components/layout/back-link";
 import { Disclaimer } from "@/components/layout/disclaimer";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +11,15 @@ import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
 import { routing } from "@/i18n/routing";
 import { prisma } from "@/lib/prisma";
 import { absoluteUrl } from "@/lib/site-url";
+
+function ensureHtml(body: string): string {
+  const trimmed = body.trimStart();
+  // Already HTML if starts with a tag
+  if (trimmed.startsWith("<")) return body;
+  // Looks like markdown — convert
+  const html = marked.parse(trimmed, { async: false }) as string;
+  return html;
+}
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
 
@@ -144,7 +154,7 @@ export default async function ArticlePage({ params }: Props) {
         <div
           className="article-body prose prose-invert max-w-none text-sm leading-relaxed text-foreground/90"
           // Body is authored by admin/AI only — trusted HTML source
-          dangerouslySetInnerHTML={{ __html: article.body }}
+          dangerouslySetInnerHTML={{ __html: ensureHtml(article.body) }}
         />
 
         <Disclaimer variant="compact" />
