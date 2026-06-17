@@ -49,6 +49,10 @@ Optional (AI suggestions feature):
 
 Image uploads: `BLOB_READ_WRITE_TOKEN` (Vercel Blob)
 
+AI Article enrichment (optional):
+- `TAVILY_API_KEY` — Web search for latest forex news/analysis (tavily.com, free 1000 req/month)
+- `CHART_IMG_API_KEY` — TradingView chart screenshots via chart-img.com (requires BLOB_READ_WRITE_TOKEN)
+
 ## Architecture
 
 ### Stack
