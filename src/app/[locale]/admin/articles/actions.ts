@@ -161,5 +161,6 @@ export async function updateAiArticle(
   }
   revalidatePath("/admin/articles");
   revalidatePath("/articles");
-  redirect("/admin/articles");
+  revalidatePath(`/admin/articles/${id}`);
+  return { ok: true };
 }

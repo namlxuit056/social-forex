@@ -5,7 +5,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { fetchCurrentTrendingKeywords } from "@/lib/ai/article-writer";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,6 +20,7 @@ import {
   updateAiArticleAutomation,
 } from "./actions";
 import { DeleteArticleButton } from "./delete-button";
+import { SubmitButton } from "./submit-button";
 
 export const dynamic = "force-dynamic";
 
@@ -211,15 +212,20 @@ export default async function AdminAiArticlesPage({
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  <Button type="submit">{t("saveSettings")}</Button>
+                  <SubmitButton pendingLabel="Đang lưu cấu hình...">
+                    {t("saveSettings")}
+                  </SubmitButton>
                 </div>
               </form>
 
               <form action={runAiArticleAutomationNow} className="mt-3">
-                <Button type="submit" variant="outline">
+                <SubmitButton
+                  variant="outline"
+                  pendingLabel="Đang chạy AI..."
+                >
                   <Play className="mr-2 size-4" aria-hidden />
                   {t("aiArticlesRunNow")}
-                </Button>
+                </SubmitButton>
               </form>
 
               <p className="mt-3 text-xs text-muted-foreground">
@@ -314,10 +320,10 @@ export default async function AdminAiArticlesPage({
                     </select>
                   </div>
                 </div>
-                <Button type="submit" className="w-full">
+                <SubmitButton className="w-full" pendingLabel="Đang viết bài...">
                   <Bot className="mr-2 size-4" aria-hidden />
                   {t("aiArticlesGenerateNow")}
-                </Button>
+                </SubmitButton>
               </form>
             </CardContent>
           </Card>
@@ -372,9 +378,9 @@ export default async function AdminAiArticlesPage({
                     {article.status !== "PUBLISHED" && (
                       <form action={publishAiArticle}>
                         <input type="hidden" name="id" value={article.id} />
-                        <Button type="submit" size="sm">
+                        <SubmitButton size="sm" pendingLabel="Đang publish...">
                           {t("publish")}
-                        </Button>
+                        </SubmitButton>
                       </form>
                     )}
                     {article.status === "PUBLISHED" && (
@@ -398,9 +404,13 @@ export default async function AdminAiArticlesPage({
                     {article.status !== "ARCHIVED" && (
                       <form action={archiveAiArticle}>
                         <input type="hidden" name="id" value={article.id} />
-                        <Button type="submit" size="sm" variant="ghost">
+                        <SubmitButton
+                          size="sm"
+                          variant="ghost"
+                          pendingLabel="Đang ẩn..."
+                        >
                           {t("archive")}
-                        </Button>
+                        </SubmitButton>
                       </form>
                     )}
                     <DeleteArticleButton

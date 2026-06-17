@@ -103,7 +103,7 @@ export function ArticleContentAnalyzer({ keyword, title, locale, getBody, editor
   function insertImage(index: number, caption: string) {
     const img = imageResults[index];
     if (!img) return;
-    editorRef.current?.insertImage(img.url, caption);
+    editorRef.current?.insertImage(img.url, caption, result?.imageSuggestions[index]?.location);
   }
 
   return (

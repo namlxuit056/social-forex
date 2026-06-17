@@ -48,6 +48,8 @@ export function ArticleEditForm({
   useEffect(() => {
     if (state && "error" in state) {
       toast.error(state.error);
+    } else if (state?.ok) {
+      toast.success("Đã lưu thay đổi.");
     }
   }, [state]);
 

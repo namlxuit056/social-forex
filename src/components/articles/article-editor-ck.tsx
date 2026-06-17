@@ -98,9 +98,58 @@ const EDITOR_CONFIG = {
   link: { addTargetToExternalLinks: true },
 };
 
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function normalizeText(value: string) {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+function imageHtml(url: string, alt: string) {
+  const safeUrl = escapeHtml(url);
+  const safeAlt = escapeHtml(alt);
+  return `<figure class="image"><img src="${safeUrl}" alt="${safeAlt}"><figcaption>${safeAlt}</figcaption></figure>`;
+}
+
+function insertImageNearLocation(html: string, url: string, alt: string, location?: string) {
+  if (!location?.trim()) return null;
+
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  const locationText = normalizeText(location);
+  const headings = [...doc.body.querySelectorAll("h2, h3")];
+  const target = headings.find((heading) => {
+    const headingText = normalizeText(heading.textContent ?? "");
+    return (
+      headingText.length > 0 &&
+      (locationText.includes(headingText) || headingText.includes(locationText))
+    );
+  });
+
+  if (!target) return null;
+
+  const template = doc.createElement("template");
+  template.innerHTML = imageHtml(url, alt);
+  const figure = template.content.firstElementChild;
+  if (!figure) return null;
+
+  target.insertAdjacentElement("afterend", figure);
+  return doc.body.innerHTML;
+}
+
 export interface ArticleEditorCKHandle {
   setData: (html: string) => void;
-  insertImage: (url: string, alt: string) => void;
+  insertImage: (url: string, alt: string, location?: string) => void;
 }
 
 type Props = {
@@ -118,12 +167,25 @@ export const ArticleEditorCK = forwardRef<ArticleEditorCKHandle, Props>(
         editorRef.current.setData(html);
         onValueChange?.(html);
       },
-      insertImage(url: string, alt: string) {
-        if (!editorRef.current) return;
-        const current = editorRef.current.getData();
-        const img = `<figure class="image"><img src="${url}" alt="${alt}"><figcaption>${alt}</figcaption></figure>`;
-        const next = current + img;
-        editorRef.current.setData(next);
+      insertImage(url: string, alt: string, location?: string) {
+        const editor = editorRef.current;
+        if (!editor) return;
+
+        const current = editor.getData();
+        const locationMatch = insertImageNearLocation(current, url, alt, location);
+        if (locationMatch) {
+          editor.setData(locationMatch);
+          onValueChange?.(locationMatch);
+          return;
+        }
+
+        editor.model.change(() => {
+          const viewFragment = editor.data.processor.toView(imageHtml(url, alt));
+          const modelFragment = editor.data.toModel(viewFragment);
+          editor.model.insertContent(modelFragment, editor.model.document.selection);
+        });
+
+        const next = editor.getData();
         onValueChange?.(next);
       },
     }));
