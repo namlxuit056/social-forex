@@ -92,7 +92,7 @@ const PLUGINS = [
   Paragraph,
   Table,
   TableToolbar,
-] as const;
+];
 
 const TOOLBAR = [
   "heading",
