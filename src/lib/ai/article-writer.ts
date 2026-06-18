@@ -229,7 +229,7 @@ async function uniqueSlug(base: string, locale: ArticleLocale) {
 
 type ArticleContext = {
   newsItems: NewsItem[];
-  searchResults: { title: string; url: string; content: string }[];
+  searchResults: { title: string; url: string; content: string; publishedDate?: string }[];
   technicalSummary: string | null;
 };
 
