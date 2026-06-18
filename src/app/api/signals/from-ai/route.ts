@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 import { notifySignalSubscribers } from "@/lib/signals/notify-on-signal-create";
+import { notifyTelegramNewSignal } from "@/lib/telegram";
 import { localeFromRequest } from "@/lib/api-locale";
 import { pickAi, pickErrors } from "@/lib/messages-pick";
 
@@ -130,6 +131,10 @@ export async function POST(req: NextRequest) {
     select: {
       id: true,
       symbol: true,
+      direction: true,
+      entry: true,
+      stopLoss: true,
+      takeProfit: true,
       tier: true,
       authorId: true,
     },
@@ -145,6 +150,16 @@ export async function POST(req: NextRequest) {
   } catch {
     // Non-blocking: signal already created.
   }
+
+  await notifyTelegramNewSignal({
+    id: signal.id,
+    symbol: signal.symbol,
+    direction: signal.direction,
+    entry: signal.entry,
+    stopLoss: signal.stopLoss,
+    takeProfit: signal.takeProfit,
+    tier: signal.tier,
+  });
 
   revalidatePath("/signals");
   revalidatePath(`/signals/${signal.id}`);

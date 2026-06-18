@@ -4,6 +4,10 @@ import { createHash } from "crypto";
 import { z } from "zod";
 import { hashMt5BridgeToken, MT5_BRIDGE_TOKEN_PREFIX } from "@/lib/mt5-bridge";
 import { prisma } from "@/lib/prisma";
+import {
+  notifyTelegramNewSignal,
+  notifyTelegramClosedSignal,
+} from "@/lib/telegram";
 
 const accountSchema = z.object({
   login: z.union([z.string(), z.number()]).transform(String),
@@ -168,6 +172,9 @@ export async function POST(request: NextRequest) {
 
   const touchedSignalIds: string[] = [];
   const closedSignalIds: string[] = [];
+  const newMt5Signals: Parameters<typeof notifyTelegramNewSignal>[0][] = [];
+  const closedMt5Signals: Parameters<typeof notifyTelegramClosedSignal>[0][] =
+    [];
 
   await prisma.$transaction(async (tx) => {
     await tx.mt5Connection.update({
@@ -285,6 +292,15 @@ export async function POST(request: NextRequest) {
         },
         select: { id: true },
       });
+      newMt5Signals.push({
+        id: signal.id,
+        symbol: order.symbol.toUpperCase(),
+        direction: directionFromMt5Type(order.type),
+        entry: order.priceOpen,
+        stopLoss: order.stopLoss,
+        takeProfit: order.takeProfit,
+        tier: "FREE",
+      });
       touchedSignalIds.push(signal.id);
     }
 
@@ -382,6 +398,15 @@ export async function POST(request: NextRequest) {
         },
         select: { id: true },
       });
+      newMt5Signals.push({
+        id: signal.id,
+        symbol: position.symbol.toUpperCase(),
+        direction: directionFromMt5Type(position.type),
+        entry: position.priceOpen,
+        stopLoss: position.stopLoss,
+        takeProfit: position.takeProfit,
+        tier: "FREE",
+      });
       touchedSignalIds.push(signal.id);
     }
 
@@ -397,7 +422,7 @@ export async function POST(request: NextRequest) {
         lastProfit: true,
         signalId: true,
         journalId: true,
-        signal: { select: { status: true } },
+        signal: { select: { status: true, symbol: true, direction: true } },
       },
     });
 
@@ -411,6 +436,12 @@ export async function POST(request: NextRequest) {
             notes: closeNoteForMt5("cancelled", link.mt5Ticket),
           },
           select: { id: true },
+        });
+        closedMt5Signals.push({
+          id: signal.id,
+          symbol: link.signal.symbol,
+          direction: link.signal.direction,
+          status: "CANCELLED",
         });
         closedSignalIds.push(signal.id);
         continue;
@@ -426,6 +457,13 @@ export async function POST(request: NextRequest) {
             notes: closeNoteForMt5("closed", link.mt5Ticket, link.lastProfit),
           },
           select: { id: true },
+        });
+        closedMt5Signals.push({
+          id: signal.id,
+          symbol: link.signal.symbol,
+          direction: link.signal.direction,
+          status,
+          profit: link.lastProfit,
         });
 
         if (link.journalId) {
@@ -448,6 +486,12 @@ export async function POST(request: NextRequest) {
       }
     }
   });
+
+  // Send Telegram notifications outside the DB transaction
+  await Promise.allSettled([
+    ...newMt5Signals.map((s) => notifyTelegramNewSignal(s)),
+    ...closedMt5Signals.map((s) => notifyTelegramClosedSignal(s)),
+  ]);
 
   revalidatePath("/mt5");
   const changedSignalIds = Array.from(new Set([...touchedSignalIds, ...closedSignalIds]));

@@ -10,6 +10,10 @@ import { isVipActive } from "@/lib/vip";
 import { rateLimit } from "@/lib/rate-limit";
 import { parseAndValidateImageUrls } from "@/lib/signal-images";
 import { notifySignalSubscribers } from "@/lib/signals/notify-on-signal-create";
+import {
+  notifyTelegramNewSignal,
+  notifyTelegramClosedSignal,
+} from "@/lib/telegram";
 
 const SIGNAL_EDIT_WINDOW_MS = 48 * 60 * 60 * 1000;
 
@@ -112,6 +116,18 @@ export async function createSignal(
     // Non-blocking: signal already created
   }
 
+  await notifyTelegramNewSignal({
+    id: signal.id,
+    symbol: signal.symbol,
+    direction: signal.direction,
+    entry: signal.entry,
+    stopLoss: signal.stopLoss,
+    takeProfit: signal.takeProfit,
+    takeProfit2: signal.takeProfit2,
+    takeProfit3: signal.takeProfit3,
+    tier: signal.tier,
+  });
+
   revalidatePath("/signals");
   revalidatePath(`/signals/${signal.id}`);
   revalidatePath("/leaderboard");
@@ -157,6 +173,13 @@ export async function closeSignal(
   await prisma.signal.update({
     where: { id: signalId },
     data: { status, closedAt: new Date() },
+  });
+
+  await notifyTelegramClosedSignal({
+    id: signal.id,
+    symbol: signal.symbol,
+    direction: signal.direction,
+    status,
   });
 
   revalidatePath("/signals");
