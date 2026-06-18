@@ -15,7 +15,17 @@ type Trade = {
   openedAt: string;
 };
 
-type Translator = (key: string) => string;
+type Labels = {
+  symbol: string;
+  direction: string;
+  result: string;
+  pnl: string;
+  opened: string;
+  win: string;
+  loss: string;
+  breakeven: string;
+  pending: string;
+};
 
 const PAGE_SIZE = 10;
 
@@ -31,21 +41,21 @@ function resultClass(result: string) {
   return "border-sky-500/40 bg-sky-500/15 text-sky-200";
 }
 
-function resultLabel(result: string, t: Translator) {
-  if (result === "WIN") return t("tradeResultWin");
-  if (result === "LOSS") return t("tradeResultLoss");
-  if (result === "BREAKEVEN") return t("tradeResultBreakeven");
-  return t("tradeResultPending");
+function resultLabel(result: string, labels: Labels) {
+  if (result === "WIN") return labels.win;
+  if (result === "LOSS") return labels.loss;
+  if (result === "BREAKEVEN") return labels.breakeven;
+  return labels.pending;
 }
 
 export function TradeHistoryPaginated({
   trades,
   locale,
-  t,
+  labels,
 }: {
   trades: Trade[];
   locale: string;
-  t: Translator;
+  labels: Labels;
 }) {
   const [page, setPage] = useState(0);
   const totalPages = Math.ceil(trades.length / PAGE_SIZE);
@@ -71,7 +81,7 @@ export function TradeHistoryPaginated({
               </div>
               <div className="text-right">
                 <Badge variant="outline" className={cn(resultClass(trade.result))}>
-                  {resultLabel(trade.result, t)}
+                  {resultLabel(trade.result, labels)}
                 </Badge>
                 <p
                   className={cn(
@@ -105,7 +115,7 @@ export function TradeHistoryPaginated({
                 <td className="px-4 py-2.5 text-xs text-muted-foreground">{trade.direction}</td>
                 <td className="px-4 py-2.5">
                   <Badge variant="outline" className={cn(resultClass(trade.result))}>
-                    {resultLabel(trade.result, t)}
+                    {resultLabel(trade.result, labels)}
                   </Badge>
                 </td>
                 <td
