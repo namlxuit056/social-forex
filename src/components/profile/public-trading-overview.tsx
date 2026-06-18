@@ -239,7 +239,21 @@ export async function PublicTradingOverview({
               {t("profileTradeHistoryEmpty")}
             </p>
           ) : (
-            <TradeHistoryPaginated trades={serializedTradeRows} locale={locale} t={t} />
+            <TradeHistoryPaginated
+              trades={serializedTradeRows}
+              locale={locale}
+              labels={{
+                symbol: t("profileSymbol"),
+                direction: t("profileDirection"),
+                result: t("profileResult"),
+                pnl: t("profilePnl"),
+                opened: t("profileOpened"),
+                win: t("tradeResultWin"),
+                loss: t("tradeResultLoss"),
+                breakeven: t("tradeResultBreakeven"),
+                pending: t("tradeResultPending"),
+              }}
+            />
           )}
         </CardContent>
       </Card>

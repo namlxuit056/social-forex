@@ -101,11 +101,11 @@ export function TradeHistoryPaginated({
         <table className="w-full min-w-150 text-sm">
           <thead>
             <tr className="border-b text-left text-xs text-muted-foreground">
-              <th className="px-4 py-2.5">{t("profileSymbol")}</th>
-              <th className="px-4 py-2.5">{t("profileDirection")}</th>
-              <th className="px-4 py-2.5">{t("profileResult")}</th>
-              <th className="px-4 py-2.5">{t("profilePnl")}</th>
-              <th className="px-4 py-2.5">{t("profileOpened")}</th>
+              <th className="px-4 py-2.5">{labels.symbol}</th>
+              <th className="px-4 py-2.5">{labels.direction}</th>
+              <th className="px-4 py-2.5">{labels.result}</th>
+              <th className="px-4 py-2.5">{labels.pnl}</th>
+              <th className="px-4 py-2.5">{labels.opened}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border/40">
