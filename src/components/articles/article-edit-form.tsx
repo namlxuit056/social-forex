@@ -198,7 +198,7 @@ export function ArticleEditForm({
               </p>
             </CardHeader>
             <CardContent>
-              <ArticleSeoPanel fields={seoFields} onApplyFix={applyFix} />
+              <ArticleSeoPanel fields={seoFields} locale={locale} onApplyFix={applyFix} />
             </CardContent>
           </Card>
 

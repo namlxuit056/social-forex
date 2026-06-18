@@ -12,6 +12,7 @@ const bodySchema = z.object({
   summary: z.string().min(1).max(500),
   metaDescription: z.string().min(1).max(300),
   body: z.string().min(1).max(15000),
+  locale: z.enum(["vi", "en"]).optional().default("vi"),
 });
 
 const seoResultSchema = z.object({
@@ -49,7 +50,8 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: "invalid_input" }, { status: 400 });
   }
 
-  const { keyword, title, summary, metaDescription, body } = parsed.data;
+  const { keyword, title, summary, metaDescription, body, locale } = parsed.data;
+  const language = locale === "en" ? "English" : "Vietnamese";
 
   const config = resolveAiProvider();
   if (!config) {
@@ -60,11 +62,13 @@ export async function POST(req: NextRequest) {
   const h2Count = (body.match(/^## /gm) ?? []).length;
   const titleLen = title.length;
   const metaLen = metaDescription.length;
-  const hasDisclaimer = /disclaimer|rủi ro|cảnh báo/i.test(body);
+  const hasDisclaimer = /disclaimer|rủi ro|cảnh báo|risk warning|risk disclaimer/i.test(body);
   const keywordLower = keyword.toLowerCase();
   const keywordInTitle = title.toLowerCase().includes(keywordLower);
 
   const prompt = `You are an SEO specialist for a forex educational website. Analyze this article and return a JSON report.
+
+Article language: ${language}
 
 Context:
 - Keyword: "${keyword}"
@@ -82,8 +86,8 @@ Return JSON only (no markdown):
     {
       "field": <"title"|"summary"|"metaDescription"|"body">,
       "severity": <"error"|"warning"|"info">,
-      "message": <specific issue description in Vietnamese>,
-      "fix": <replacement text if applicable, null otherwise>
+      "message": <specific issue description in ${language}>,
+      "fix": <replacement text in ${language} if applicable, null otherwise>
     }
   ]
 }
@@ -100,12 +104,12 @@ Scoring rules (deduct from 100):
 
 Issue rules:
 - Report issues only if they actually apply
-- For title/summary/metaDescription issues where a fix is clear, provide the improved replacement text as "fix"
+- For title/summary/metaDescription issues where a fix is clear, provide the improved replacement text as "fix" (must be in ${language})
 - For body issues, "fix" should be null; describe what to add in "message"
 - Use severity "error" for issues that directly hurt SEO rankings
 - Use severity "warning" for best-practice violations
 - Use severity "info" for minor improvements
-- Write all messages in Vietnamese
+- Write ALL messages and fixes in ${language} only
 - Be specific: quote the problematic phrase, suggest the exact fix`;
 
   const client = createAiClient(config);

@@ -2,7 +2,7 @@ import { marked } from "marked";
 import { z } from "zod";
 import { createAiClient, resolveAiProvider } from "@/lib/ai/provider";
 import { fetchArticleImage } from "@/lib/ai/article-images";
-import { webSearch, buildForexSearchQuery } from "@/lib/ai/web-search";
+import { webSearchDeep, buildForexSearchQuery, buildForexTechnicalQuery } from "@/lib/ai/web-search";
 import {
   extractSymbolFromKeyword,
   getSymbolTechnicalContext,
@@ -115,12 +115,12 @@ async function fetchGoogleNewsItems(seedKeywords: string[]): Promise<{ items: Ne
         const descMatch = block.match(/<description><!\[CDATA\[([\s\S]*?)\]\]><\/description>|<description>([\s\S]*?)<\/description>/);
         const linkMatch = block.match(/<link>(.*?)<\/link>/);
         const title = stripTags(titleMatch?.[1] ?? titleMatch?.[2] ?? "").trim();
-        const description = stripTags(descMatch?.[1] ?? descMatch?.[2] ?? "").slice(0, 300).trim();
+        const description = stripTags(descMatch?.[1] ?? descMatch?.[2] ?? "").slice(0, 400).trim();
         const link = (linkMatch?.[1] ?? "").trim();
         return { title, description, link };
       })
       .filter((item) => item.title && !item.title.includes("Google News"))
-      .slice(0, 10);
+      .slice(0, 15);
 
     return { items, source: url };
   } catch {
@@ -258,8 +258,8 @@ ${ctx.technicalSummary}`
 ${ctx.searchResults
   .map(
     (r, i) =>
-      `${i + 1}. "${r.title}"
-   ${r.content.slice(0, 500)}`,
+      `${i + 1}. "${r.title}"${r.publishedDate ? ` (${r.publishedDate.slice(0, 10)})` : ""}
+   ${r.content.slice(0, 800)}`,
   )
   .join("\n\n")}`
       : "";
@@ -269,7 +269,7 @@ ${ctx.searchResults
   const newsBlock = hasNews
     ? `## Recent Google News (last 7 days — reference specific events, do NOT copy verbatim)
 ${ctx.newsItems
-  .slice(0, 6)
+  .slice(0, 10)
   .map((item, i) => `${i + 1}. ${item.title}${item.description ? ` — ${item.description}` : ""}`)
   .join("\n")}`
     : `## No live news — use plausible current macro context as of ${today} (Fed expectations, USD sentiment, geopolitical tensions).`;
@@ -334,9 +334,10 @@ export async function generateAiForexArticle({
   // ── Gather rich context in parallel ──────────────────────────────────────
   const symbolInfo = extractSymbolFromKeyword(keyword);
   const searchQuery = buildForexSearchQuery(keyword);
+  const technicalQuery = buildForexTechnicalQuery(keyword);
 
   const [searchResults, technicalCtx, chartImage] = await Promise.all([
-    webSearch(searchQuery),
+    webSearchDeep(searchQuery, technicalQuery),
     symbolInfo ? getSymbolTechnicalContext(symbolInfo.symbol, symbolInfo.group) : null,
     symbolInfo ? fetchChartImage(symbolInfo.symbol) : null,
   ]);

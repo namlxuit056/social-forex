@@ -25,6 +25,7 @@ type Fields = {
 
 type Props = {
   fields: Fields;
+  locale: string;
   onApplyFix: (field: keyof Omit<Fields, "keyword" | "body">, value: string) => void;
 };
 
@@ -115,7 +116,7 @@ function ScoreRing({ score }: { score: number }) {
   );
 }
 
-export function ArticleSeoPanel({ fields, onApplyFix }: Props) {
+export function ArticleSeoPanel({ fields, locale, onApplyFix }: Props) {
   const [result, setResult] = useState<SeoCheckResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -133,7 +134,7 @@ export function ArticleSeoPanel({ fields, onApplyFix }: Props) {
       const res = await fetch("/api/ai/articles/seo-check", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(fields),
+        body: JSON.stringify({ ...fields, locale }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = (await res.json()) as SeoCheckResult;

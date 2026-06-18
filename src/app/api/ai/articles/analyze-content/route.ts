@@ -101,8 +101,8 @@ Rules for rewrittenBody:
 - Start with a compelling intro paragraph (no H2)
 - Use concrete examples, numbers, and current market context
 - Every bullet point must contain a specific fact or action
-- Include internal references like "theo dõi lịch kinh tế", "kiểm tra trên biểu đồ", "xác nhận với broker"
-- End with a risk disclaimer section
+- Include internal references like ${locale === "vi" ? '"theo dõi lịch kinh tế", "kiểm tra trên biểu đồ", "xác nhận với broker"' : '"check the economic calendar", "verify on your chart", "confirm with your broker"'}
+- End with a risk disclaimer section in ${lang}
 - imageSuggestions: suggest 2-3 image placements that would enhance understanding`;
 
   const client = createAiClient(config);
