@@ -19,6 +19,15 @@ export function pipSize(symbol: string): number {
   return 0.0001;
 }
 
+export function contractSize(symbol: string): number {
+  const s = symbol.toUpperCase();
+  if (s.startsWith("XAU") || s.includes("GOLD")) return 100;
+  if (s.startsWith("XAG") || s.includes("SILVER")) return 5000;
+  if (s.includes("OIL")) return 1000;
+  if (s.startsWith("BTC") || s.startsWith("ETH")) return 1;
+  return 100000;
+}
+
 export function stopLossPips(params: {
   symbol: string;
   entry: number;
@@ -60,7 +69,7 @@ export function positionSizeLots(params: {
 
   const riskAmount = (balance * riskPct) / 100;
   const pip = pipSize(symbol);
-  const contract = 100000;
+  const contract = contractSize(symbol);
   let pipValuePerLot: number;
   if (quote === "JPY") {
     pipValuePerLot = (contract * pip) / price;
