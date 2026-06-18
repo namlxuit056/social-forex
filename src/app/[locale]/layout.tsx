@@ -5,6 +5,7 @@ import { getMessages, getTranslations, setRequestLocale } from "next-intl/server
 import { routing } from "@/i18n/routing";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
+import { TelegramFloatButton } from "@/components/layout/telegram-float-button";
 import { AppProviders } from "@/components/providers/app-providers";
 import { getSiteUrl } from "@/lib/site-url";
 
@@ -72,6 +73,7 @@ export default async function LocaleLayout({
           {children}
         </main>
         <SiteFooter />
+        <TelegramFloatButton />
       </AppProviders>
     </NextIntlClientProvider>
   );
