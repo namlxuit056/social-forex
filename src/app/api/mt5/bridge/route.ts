@@ -300,6 +300,7 @@ export async function POST(request: NextRequest) {
         stopLoss: order.stopLoss,
         takeProfit: order.takeProfit,
         tier: "FREE",
+        status: "PENDING",
       });
       touchedSignalIds.push(signal.id);
     }
@@ -406,6 +407,7 @@ export async function POST(request: NextRequest) {
         stopLoss: position.stopLoss,
         takeProfit: position.takeProfit,
         tier: "FREE",
+        status: "ACTIVE",
       });
       touchedSignalIds.push(signal.id);
     }

@@ -13,6 +13,7 @@ import { notifySignalSubscribers } from "@/lib/signals/notify-on-signal-create";
 import {
   notifyTelegramNewSignal,
   notifyTelegramClosedSignal,
+  notifyTelegramUpdatedSignal,
 } from "@/lib/telegram";
 
 const SIGNAL_EDIT_WINDOW_MS = 48 * 60 * 60 * 1000;
@@ -126,6 +127,7 @@ export async function createSignal(
     takeProfit2: signal.takeProfit2,
     takeProfit3: signal.takeProfit3,
     tier: signal.tier,
+    status: "ACTIVE",
   });
 
   revalidatePath("/signals");
@@ -324,6 +326,13 @@ export async function updateSignal(
       }
     },
   );
+
+  await notifyTelegramUpdatedSignal({
+    id: signalId,
+    symbol: signal.symbol,
+    direction: signal.direction,
+    changes: logs,
+  });
 
   revalidatePath("/signals");
   revalidatePath(`/signals/${signalId}`);

@@ -159,6 +159,7 @@ export async function POST(req: NextRequest) {
     stopLoss: signal.stopLoss,
     takeProfit: signal.takeProfit,
     tier: signal.tier,
+    status: "ACTIVE",
   });
 
   revalidatePath("/signals");

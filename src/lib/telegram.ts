@@ -20,6 +20,13 @@ async function send(text: string): Promise<void> {
   }
 }
 
+const FIELD_LABEL: Record<string, string> = {
+  stopLoss: "SL",
+  takeProfit: "TP1",
+  takeProfit2: "TP2",
+  takeProfit3: "TP3",
+};
+
 export async function notifyTelegramNewSignal(signal: {
   id: string;
   symbol: string;
@@ -30,12 +37,18 @@ export async function notifyTelegramNewSignal(signal: {
   takeProfit2?: number | null;
   takeProfit3?: number | null;
   tier: string;
+  status?: "PENDING" | "ACTIVE";
 }): Promise<void> {
   if (!BOT_TOKEN) return;
+  const isPending = signal.status === "PENDING";
   const dir = signal.direction === "LONG" ? "BUY 📈" : "SELL 📉";
   const tier = signal.tier === "VIP" ? " 💎 VIP" : "";
+  const statusLabel = isPending
+    ? "🟡 <b>LỆNH CHỜ (PENDING)</b>"
+    : `🟢 <b>LỆNH MỚI${tier}</b>`;
+
   const lines = [
-    `🔔 <b>TIN HIEU MOI${tier}</b>`,
+    statusLabel,
     "",
     `📌 <b>${signal.symbol}</b> | ${dir}`,
     `💰 Entry: <b>${signal.entry}</b>`,
@@ -44,6 +57,37 @@ export async function notifyTelegramNewSignal(signal: {
   if (signal.takeProfit2) lines.push(`🎯 TP2: ${signal.takeProfit2}`);
   if (signal.takeProfit3) lines.push(`🎯 TP3: ${signal.takeProfit3}`);
   if (signal.stopLoss) lines.push(`🛑 SL: ${signal.stopLoss}`);
+  lines.push("", `🔗 ${SITE_URL}/vi/signals/${signal.id}`);
+  try {
+    await send(lines.join("\n"));
+  } catch {
+    // Non-blocking
+  }
+}
+
+export async function notifyTelegramUpdatedSignal(signal: {
+  id: string;
+  symbol: string;
+  direction: string;
+  changes: { field: string; oldValue: string | null; newValue: string | null }[];
+}): Promise<void> {
+  if (!BOT_TOKEN) return;
+  // Chỉ gửi khi có thay đổi SL/TP (bỏ qua notes)
+  const relevant = signal.changes.filter((c) => c.field in FIELD_LABEL);
+  if (relevant.length === 0) return;
+
+  const dir = signal.direction === "LONG" ? "BUY" : "SELL";
+  const lines = [
+    `✏️ <b>CẬP NHẬT LỆNH</b>`,
+    "",
+    `📌 <b>${signal.symbol}</b> | ${dir} | Đang chạy`,
+  ];
+  for (const c of relevant) {
+    const label = FIELD_LABEL[c.field];
+    const from = c.oldValue ?? "—";
+    const to = c.newValue ?? "xóa";
+    lines.push(`${label === "SL" ? "🛑" : "🎯"} ${label}: ${from} → <b>${to}</b>`);
+  }
   lines.push("", `🔗 ${SITE_URL}/vi/signals/${signal.id}`);
   try {
     await send(lines.join("\n"));
@@ -63,7 +107,7 @@ export async function notifyTelegramClosedSignal(signal: {
   if (signal.status === "CANCELLED") return;
   const isWin = signal.status === "CLOSED_WIN";
   const icon = isWin ? "✅" : "❌";
-  const label = isWin ? "CHOT LOI (TP HIT)" : "DUNG LO (SL HIT)";
+  const label = isWin ? "CHỐT LỜI (TP HIT)" : "DỪNG LỖ (SL HIT)";
   const dir = signal.direction === "LONG" ? "BUY" : "SELL";
   const lines = [
     `${icon} <b>${label}</b>`,
