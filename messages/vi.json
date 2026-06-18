@@ -462,13 +462,63 @@
     "title": "Bàn live",
     "subtitle": "Tỷ giá tự làm mới, lịch hỗ trợ VN / UTC, biểu đồ dùng cùng watchlist như trang Chart — không cần đăng nhập sàn trên Social Forex.",
     "jumpNavAria": "Chuyển nhanh tới mục",
+    "jumpPreTrade": "Trước lệnh",
     "jumpQuotes": "Tỷ giá",
     "jumpCalendar": "Lịch kinh tế",
     "jumpChart": "Biểu đồ",
     "sectionQuotes": "Tỷ giá live",
     "sectionCalendar": "Lịch kinh tế",
     "sectionChart": "Biểu đồ & watchlist",
-    "openFullPage": "Mở trang đầy đủ →"
+    "openFullPage": "Mở trang đầy đủ →",
+    "preTradeTitle": "Bàn trước lệnh",
+    "preTradeSubtitle": "Chọn cặp, kiểm tra rủi ro tin tức, tính lot theo stop loss và tick checklist kỷ luật trước khi trade.",
+    "readyBadge": "Quy trình đã sẵn sàng",
+    "notReadyBadge": "Cần kiểm tra trước",
+    "setupTitle": "Thị trường và risk setup",
+    "setupDesc": "Dùng giá live làm bối cảnh, rồi xác định entry và stop trước khi tính lot.",
+    "symbolLabel": "Thị trường",
+    "midPrice": "Giá giữa",
+    "spread": "Spread",
+    "riskHint": "Lot size chỉ là ước tính. Contract, đòn bẩy, spread và khớp lệnh có thể khác theo từng broker.",
+    "balance": "Vốn ($)",
+    "riskPct": "Rủi ro (%)",
+    "entry": "Entry",
+    "stopLoss": "Stop loss",
+    "riskResultTitle": "Position size",
+    "riskResultDesc": "Tính từ mức rủi ro tài khoản và khoảng cách stop loss.",
+    "slPips": "Khoảng cách SL (pip)",
+    "riskMoney": "Số tiền rủi ro",
+    "pipValue": "Pip value / lot",
+    "suggestedLots": "Lot gợi ý",
+    "useInPlan": "Dùng trong daily plan",
+    "newsTitle": "Tin liên quan ({hours}h)",
+    "newsDesc": "Sự kiện impact trung bình/cao của các đồng tiền liên quan tới thị trường này.",
+    "newsEmpty": "Không có sự kiện impact trung bình/cao trong khung đang theo dõi.",
+    "highImpactWarning": "Có tin impact cao gần thị trường này. Cân nhắc đứng ngoài hoặc giảm risk cho tới khi biến động ổn định.",
+    "checklistTitle": "Checklist kỷ luật",
+    "checklistDesc": "Đã hoàn thành {done}/{total} mục.",
+    "checklist": {
+      "news": {
+        "title": "Đã kiểm tra khung tin",
+        "desc": "Bạn biết tin impact cao có thể ảnh hưởng tới cặp này hay không."
+      },
+      "levels": {
+        "title": "Đã đánh dấu key level",
+        "desc": "Entry, điểm sai và vùng mục tiêu rõ ràng trước khi đặt lệnh."
+      },
+      "risk": {
+        "title": "Risk được tính trước",
+        "desc": "Lot đến từ khoảng cách stop và rủi ro tài khoản, không đến từ cảm xúc."
+      },
+      "mindset": {
+        "title": "Tâm lý ổn định",
+        "desc": "Không revenge trade, không FOMO, không cố gỡ sau lệnh thua."
+      },
+      "journal": {
+        "title": "Sẵn sàng ghi journal",
+        "desc": "Nếu vào lệnh, bạn sẽ ghi lại lý do và kết quả."
+      }
+    }
   },
   "tools": {
     "title": "Công cụ tính toán",

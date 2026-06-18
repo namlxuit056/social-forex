@@ -3,13 +3,20 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { ChartContainer } from "@/components/charts/chart-container";
 import { EconomicCalendar } from "@/components/calendar/economic-calendar";
+import { PreTradeDesk } from "@/components/desk/pre-trade-desk";
 import { Disclaimer } from "@/components/layout/disclaimer";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
 import { LiveQuotesTable } from "@/components/quotes/live-quotes-table";
+import {
+  getNewsContextHours,
+  getNewsContextWindow,
+  getUpcomingHighAndMediumImpactEvents,
+} from "@/lib/calendar/news-context-db";
 import { parseCalendarCurrencySearchParams } from "@/lib/calendar/parse-currency-search-params";
 import { resolveCalendarEvents } from "@/lib/calendar/resolve-calendar";
 import { pageCtaItems } from "@/lib/page-cta-i18n";
 import { resolveQuotes } from "@/lib/quotes/resolve-quotes";
+import { symbolToCurrencies } from "@/lib/signals/symbol-currencies";
 
 export const dynamic = "force-dynamic";
 
@@ -39,10 +46,31 @@ export default async function DeskPage({
   const tCal = await getTranslations("calendar");
   const tCommon = await getTranslations("common");
 
-  const [initialQuotes, cal] = await Promise.all([
-    resolveQuotes(),
-    resolveCalendarEvents(),
-  ]);
+  const [initialQuotes, cal] = await Promise.all([resolveQuotes(), resolveCalendarEvents()]);
+  const newsContextHours = getNewsContextHours();
+  const newsWindow = getNewsContextWindow();
+  const deskCurrencies = new Set<string>();
+  for (const quote of initialQuotes.quotes) {
+    for (const currency of symbolToCurrencies(quote.symbol)) {
+      deskCurrencies.add(currency);
+    }
+  }
+  const deskNewsRows =
+    deskCurrencies.size > 0
+      ? await getUpcomingHighAndMediumImpactEvents({
+          currencies: [...deskCurrencies],
+          from: newsWindow.from,
+          to: newsWindow.to,
+          limit: 80,
+        })
+      : [];
+  const deskNewsEvents = deskNewsRows.map((event) => ({
+    id: event.id,
+    timeUtc: event.timeUtc.toISOString(),
+    currency: event.currency,
+    title: event.title,
+    impact: event.impact,
+  }));
 
   const initialWarning =
     initialQuotes.warningKey === "mockData"
@@ -77,6 +105,12 @@ export default async function DeskPage({
           className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-primary"
           aria-label={t("jumpNavAria")}
         >
+          <a
+            href="#pre-trade-desk-title"
+            className="underline-offset-4 hover:underline"
+          >
+            {t("jumpPreTrade")}
+          </a>
           <a href="#desk-quotes" className="underline-offset-4 hover:underline">
             {t("jumpQuotes")}
           </a>
@@ -91,6 +125,12 @@ export default async function DeskPage({
           </a>
         </nav>
       </header>
+
+      <PreTradeDesk
+        quotes={initialQuotes.quotes}
+        newsEvents={deskNewsEvents}
+        newsContextHours={newsContextHours}
+      />
 
       <section id="desk-quotes" className="scroll-mt-24 space-y-4">
         <div className="flex flex-col gap-1 border-b border-border/60 pb-2 sm:flex-row sm:items-end sm:justify-between">

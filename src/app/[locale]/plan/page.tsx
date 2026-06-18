@@ -62,6 +62,26 @@ function parseSymbolPlans(value: unknown): TradingPlanSymbolPlan[] {
     .filter((item): item is TradingPlanSymbolPlan => item !== null);
 }
 
+function parsePrefillText(value: string | string[] | undefined, maxLength: number) {
+  const raw = Array.isArray(value) ? value[0] : value;
+  if (!raw) return null;
+  const trimmed = raw.trim();
+  return trimmed.length > 0 ? trimmed.slice(0, maxLength) : null;
+}
+
+function parsePrefillSymbol(value: string | string[] | undefined) {
+  const raw = parsePrefillText(value, 32);
+  if (!raw) return null;
+  const symbol = raw.toUpperCase().replace(/[^A-Z0-9._:-]/g, "");
+  return symbol.length >= 2 ? symbol : null;
+}
+
+function parsePrefillRisk(value: string | string[] | undefined) {
+  const raw = Array.isArray(value) ? value[0] : value;
+  const n = raw ? Number(raw) : NaN;
+  return Number.isFinite(n) && n > 0 && n <= 100 ? n : null;
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -78,7 +98,12 @@ export default async function TradingPlanPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams?: Promise<{ date?: string | string[] }>;
+  searchParams?: Promise<{
+    date?: string | string[];
+    symbol?: string | string[];
+    riskPct?: string | string[];
+    news?: string | string[];
+  }>;
 }) {
   const { locale } = await params;
   const sp = await searchParams;
@@ -151,15 +176,40 @@ export default async function TradingPlanPage({
       ].filter(Boolean).length
     : 0;
 
+  const prefillSymbol = parsePrefillSymbol(sp?.symbol);
+  const prefillRiskPct = parsePrefillRisk(sp?.riskPct);
+  const prefillNews = parsePrefillText(sp?.news, 1200);
+  const savedSymbolPlans = parseSymbolPlans(plan?.symbolPlans);
+  const symbolPlans =
+    savedSymbolPlans.length > 0
+      ? savedSymbolPlans
+      : prefillSymbol
+        ? [
+            {
+              id: prefillSymbol,
+              symbol: prefillSymbol,
+              bias: "WAIT" as const,
+              keyLevels: null,
+              newsToAvoid: prefillNews,
+              notes: null,
+            },
+          ]
+        : [];
+
   const formValue: TradingPlanFormValue = {
     planDate: selectedDate,
-    watchedSymbols: plan?.watchedSymbols ?? [],
-    symbolPlans: parseSymbolPlans(plan?.symbolPlans),
+    watchedSymbols:
+      plan?.watchedSymbols && plan.watchedSymbols.length > 0
+        ? plan.watchedSymbols
+        : prefillSymbol
+          ? [prefillSymbol]
+          : [],
+    symbolPlans,
     bias: plan?.bias ?? "WAIT",
     chartImageUrls: plan?.chartImageUrls ?? [],
     keyLevels: plan?.keyLevels ?? null,
-    newsToAvoid: plan?.newsToAvoid ?? null,
-    maxRiskPercent: plan?.maxRiskPercent ?? null,
+    newsToAvoid: plan?.newsToAvoid ?? prefillNews,
+    maxRiskPercent: plan?.maxRiskPercent ?? prefillRiskPct,
     maxTrades: plan?.maxTrades ?? null,
     sessionFocus: plan?.sessionFocus ?? null,
     notes: plan?.notes ?? null,

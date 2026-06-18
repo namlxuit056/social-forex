@@ -462,13 +462,63 @@
     "title": "Live desk",
     "subtitle": "Quotes refresh automatically, the calendar supports Vietnam / UTC timezones, and the chart includes the same watchlist as the Chart page — without a broker login on Social Forex.",
     "jumpNavAria": "Jump to section",
+    "jumpPreTrade": "Pre-trade",
     "jumpQuotes": "Quotes",
     "jumpCalendar": "Calendar",
     "jumpChart": "Chart",
     "sectionQuotes": "Live quotes",
     "sectionCalendar": "Economic calendar",
     "sectionChart": "Chart & watchlist",
-    "openFullPage": "Open full page →"
+    "openFullPage": "Open full page →",
+    "preTradeTitle": "Pre-trade desk",
+    "preTradeSubtitle": "Pick a market, check news risk, size the stop, and run the discipline checklist before you trade.",
+    "readyBadge": "Process ready",
+    "notReadyBadge": "Check before trading",
+    "setupTitle": "Market and risk setup",
+    "setupDesc": "Use current live prices as context, then define entry and stop before calculating lot size.",
+    "symbolLabel": "Market",
+    "midPrice": "Mid price",
+    "spread": "Spread",
+    "riskHint": "Lot size is an estimate. Contract specs, leverage, spreads and execution can differ by broker.",
+    "balance": "Balance ($)",
+    "riskPct": "Risk (%)",
+    "entry": "Entry",
+    "stopLoss": "Stop loss",
+    "riskResultTitle": "Position size",
+    "riskResultDesc": "Calculated from account risk and stop-loss distance.",
+    "slPips": "SL distance (pips)",
+    "riskMoney": "Money at risk",
+    "pipValue": "Pip value / lot",
+    "suggestedLots": "Suggested lots",
+    "useInPlan": "Use in daily plan",
+    "newsTitle": "Related news ({hours}h)",
+    "newsDesc": "Medium/high impact events for the currencies linked to this market.",
+    "newsEmpty": "No related medium/high impact events in the monitored window.",
+    "highImpactWarning": "High-impact news is near this market. Consider standing aside or reducing risk until volatility settles.",
+    "checklistTitle": "Discipline checklist",
+    "checklistDesc": "{done}/{total} checks complete.",
+    "checklist": {
+      "news": {
+        "title": "News window checked",
+        "desc": "You know whether high-impact events can affect this pair."
+      },
+      "levels": {
+        "title": "Key levels marked",
+        "desc": "Entry, invalidation, and target areas are clear before the order."
+      },
+      "risk": {
+        "title": "Risk is sized first",
+        "desc": "Lot size comes from stop distance and account risk, not from emotion."
+      },
+      "mindset": {
+        "title": "Mindset is stable",
+        "desc": "No revenge trade, FOMO, or forced recovery after a loss."
+      },
+      "journal": {
+        "title": "Journal is ready",
+        "desc": "If you take the trade, you will record the reason and outcome."
+      }
+    }
   },
   "tools": {
     "title": "Trading Calculators",
