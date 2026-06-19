@@ -213,7 +213,10 @@
     "statPlannedDesc": "Within the last 7 days.",
     "statCompleted": "Completed days",
     "statCompletedDesc": "Full checklist in the last 7 days.",
-    "recentTitle": "Recent plans"
+    "recentTitle": "Recent plans",
+    "aiAnalyzeChart": "AI analyze chart",
+    "aiAnalyzing": "Analyzing...",
+    "aiAnalysisError": "AI could not analyze the chart. Please try again."
   },
   "challenge": {
     "metaTitle": "7-day demo trading challenge",

@@ -213,7 +213,10 @@
     "statPlannedDesc": "Tính trong 7 ngày gần nhất.",
     "statCompleted": "Ngày hoàn thành",
     "statCompletedDesc": "Checklist đủ trong 7 ngày gần nhất.",
-    "recentTitle": "Plan gần đây"
+    "recentTitle": "Plan gần đây",
+    "aiAnalyzeChart": "AI phân tích chart",
+    "aiAnalyzing": "Đang phân tích...",
+    "aiAnalysisError": "AI không thể phân tích. Vui lòng thử lại."
   },
   "challenge": {
     "metaTitle": "Thử thách 7 ngày luyện trade demo",

@@ -3,6 +3,7 @@
 import { useActionState, useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
+  BrainCircuit,
   CalendarClock,
   CheckCircle2,
   ExternalLink,
@@ -236,10 +237,16 @@ export function TradingPlanForm({ plan }: Props) {
       boolean
     >,
   );
+  const [keyLevels, setKeyLevels] = useState(readPlan.keyLevels ?? "");
+  const [newsToAvoid, setNewsToAvoid] = useState(readPlan.newsToAvoid ?? "");
+  const [notes, setNotes] = useState(readPlan.notes ?? "");
+  const [sessionFocus, setSessionFocus] = useState(readPlan.sessionFocus ?? "");
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadNeedsSignIn, setUploadNeedsSignIn] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
   const completedCount = checklistKeys.filter((key) => checklist[key]).length;
   const progressPercent = Math.round((completedCount / checklistKeys.length) * 100);
   const readCompletedCount = checklistKeys.filter((key) => readPlan[key]).length;
@@ -441,6 +448,85 @@ export function TradingPlanForm({ plan }: Props) {
       revokeBatchFromIndex,
     ],
   );
+
+  const onAnalyzeCharts = useCallback(async () => {
+    setIsAnalyzing(true);
+    setAnalysisError(null);
+    const symbols = symbolPlans.map((p) => p.symbol).filter(Boolean);
+    try {
+      const res = await fetch("/api/ai/plan-analysis", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ imageUrls: uploadedUrls, symbols }),
+      });
+      const data = (await res.json()) as {
+        error?: string;
+        bias?: string;
+        keyLevels?: string | null;
+        sessionFocus?: string | null;
+        notes?: string | null;
+        symbolPlans?: Array<{
+          symbol: string;
+          bias?: string;
+          keyLevels?: string | null;
+          newsToAvoid?: string | null;
+          notes?: string | null;
+        }>;
+      };
+      if (!res.ok || data.error) {
+        setAnalysisError(data.error ?? t("aiAnalysisError"));
+        return;
+      }
+      if (data.keyLevels) {
+        setKeyLevels((prev) => (prev ? `${prev}\n\n${data.keyLevels}` : (data.keyLevels ?? "")));
+      }
+      if (data.sessionFocus) setSessionFocus(data.sessionFocus);
+      if (data.notes) {
+        setNotes((prev) => (prev ? `${prev}\n\n${data.notes}` : (data.notes ?? "")));
+      }
+      if (data.symbolPlans && data.symbolPlans.length > 0) {
+        setSymbolPlans((prev) => {
+          const updated = [...prev];
+          for (const aiPlan of data.symbolPlans!) {
+            const idx = updated.findIndex(
+              (p) => p.symbol === aiPlan.symbol.toUpperCase(),
+            );
+            const validBias = (b: string | undefined) =>
+              b === "BULLISH" || b === "BEARISH" || b === "RANGE" || b === "WAIT"
+                ? (b as "BULLISH" | "BEARISH" | "RANGE" | "WAIT")
+                : undefined;
+            if (idx >= 0) {
+              updated[idx] = {
+                ...updated[idx],
+                ...(validBias(aiPlan.bias) ? { bias: validBias(aiPlan.bias)! } : {}),
+                ...(aiPlan.keyLevels ? { keyLevels: aiPlan.keyLevels } : {}),
+                ...(aiPlan.newsToAvoid ? { newsToAvoid: aiPlan.newsToAvoid } : {}),
+                ...(aiPlan.notes ? { notes: aiPlan.notes } : {}),
+              };
+            }
+          }
+          return updated;
+        });
+      } else if (data.bias) {
+        const validBias = (b: string) =>
+          b === "BULLISH" || b === "BEARISH" || b === "RANGE" || b === "WAIT"
+            ? (b as "BULLISH" | "BEARISH" | "RANGE" | "WAIT")
+            : undefined;
+        const bias = validBias(data.bias);
+        if (bias) {
+          setSymbolPlans((prev) =>
+            prev.map((p, i) => (i === 0 ? { ...p, bias } : p)),
+          );
+        }
+      }
+      setHasUnsavedChanges(true);
+    } catch {
+      setAnalysisError(t("aiAnalysisError"));
+    } finally {
+      setIsAnalyzing(false);
+    }
+  }, [uploadedUrls, symbolPlans, t]);
 
   const fileInputClass = cn(
     "h-8 max-w-xs min-w-0 cursor-pointer rounded-lg border border-input bg-transparent px-2.5 py-1 text-sm transition-colors outline-none file:mr-2 file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm dark:bg-input/30",
@@ -771,7 +857,8 @@ export function TradingPlanForm({ plan }: Props) {
             <Input
               id="sessionFocus"
               name="sessionFocus"
-              defaultValue={readPlan.sessionFocus ?? ""}
+              value={sessionFocus}
+              onChange={(e) => { setSessionFocus(e.target.value); setHasUnsavedChanges(true); }}
               placeholder={t("sessionFocusPlaceholder")}
               className="mt-1.5"
             />
@@ -911,7 +998,8 @@ export function TradingPlanForm({ plan }: Props) {
                 id="keyLevels"
                 name="keyLevels"
                 rows={5}
-                defaultValue={readPlan.keyLevels ?? ""}
+                value={keyLevels}
+                onChange={(e) => { setKeyLevels(e.target.value); setHasUnsavedChanges(true); }}
                 placeholder={t("keyLevelsPlaceholder")}
                 className="mt-1.5"
               />
@@ -1009,6 +1097,29 @@ export function TradingPlanForm({ plan }: Props) {
                   ))}
                 </ul>
               ) : null}
+
+              {(uploadedUrls.length > 0 || symbolPlans.some((p) => p.symbol)) ? (
+                <div className="mt-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={onAnalyzeCharts}
+                    disabled={isAnalyzing || uploading}
+                    className="gap-2"
+                  >
+                    {isAnalyzing ? (
+                      <Loader2 className="size-4 animate-spin" aria-hidden />
+                    ) : (
+                      <BrainCircuit className="size-4" aria-hidden />
+                    )}
+                    {isAnalyzing ? t("aiAnalyzing") : t("aiAnalyzeChart")}
+                  </Button>
+                  {analysisError ? (
+                    <p className="mt-2 text-sm text-destructive">{analysisError}</p>
+                  ) : null}
+                </div>
+              ) : null}
             </div>
             <div>
               <div className="flex items-center justify-between gap-3">
@@ -1019,7 +1130,8 @@ export function TradingPlanForm({ plan }: Props) {
                 id="newsToAvoid"
                 name="newsToAvoid"
                 rows={4}
-                defaultValue={readPlan.newsToAvoid ?? ""}
+                value={newsToAvoid}
+                onChange={(e) => { setNewsToAvoid(e.target.value); setHasUnsavedChanges(true); }}
                 placeholder={t("newsPlaceholder")}
                 className="mt-1.5"
               />
@@ -1030,7 +1142,8 @@ export function TradingPlanForm({ plan }: Props) {
                 id="notes"
                 name="notes"
                 rows={4}
-                defaultValue={readPlan.notes ?? ""}
+                value={notes}
+                onChange={(e) => { setNotes(e.target.value); setHasUnsavedChanges(true); }}
                 placeholder={t("notesPlaceholder")}
                 className="mt-1.5"
               />
