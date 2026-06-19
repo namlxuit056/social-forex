@@ -71,6 +71,107 @@ function buildMessage(
   return lines.join("\n");
 }
 
+type Mt5Position = {
+  ticket?: string | number;
+  symbol?: string;
+  type?: string;
+  volume?: number;
+  priceOpen?: number;
+  priceCurrent?: number;
+  stopLoss?: number;
+  takeProfit?: number;
+  profit?: number;
+  swap?: number;
+  openedAt?: string;
+};
+
+async function buildRunMessage(): Promise<string> {
+  const staleThreshold = new Date(Date.now() - 10 * 60 * 1000); // 10 minutes
+
+  const connections = await prisma.mt5Connection.findMany({
+    where: {
+      revokedAt: null,
+      lastSnapshotAt: { gte: staleThreshold },
+      openPositions: { gt: 0 },
+    },
+    select: {
+      name: true,
+      accountName: true,
+      accountCurrency: true,
+      equity: true,
+      lastPositions: true,
+      lastSnapshotAt: true,
+    },
+    orderBy: { lastSnapshotAt: "desc" },
+    take: 10,
+  });
+
+  if (connections.length === 0) {
+    return "<b>📊 LỆNH ĐANG CHẠY</b>\n\nKhông có lệnh nào đang mở hoặc MT5 offline.";
+  }
+
+  const lines: string[] = ["<b>📊 LỆNH ĐANG CHẠY</b>", ""];
+  let grandTotal = 0;
+  let totalPositions = 0;
+
+  for (const conn of connections) {
+    const positions = Array.isArray(conn.lastPositions)
+      ? (conn.lastPositions as Mt5Position[])
+      : [];
+    if (positions.length === 0) continue;
+
+    const label = conn.accountName ?? conn.name;
+    const currency = conn.accountCurrency ?? "USD";
+    const equity = conn.equity !== null ? `  Equity: ${conn.equity.toFixed(2)} ${currency}` : "";
+    lines.push(`<b>📌 ${label}</b>${equity}`);
+
+    let connTotal = 0;
+    for (const pos of positions) {
+      const symbol = pos.symbol ?? "—";
+      const type = pos.type ?? "—";
+      const vol = pos.volume !== undefined ? pos.volume.toFixed(2) : "—";
+      const open = pos.priceOpen !== undefined ? pos.priceOpen : null;
+      const current = pos.priceCurrent !== undefined ? pos.priceCurrent : null;
+      const sl = pos.stopLoss ?? 0;
+      const tp = pos.takeProfit ?? 0;
+      const profit = pos.profit ?? 0;
+      const swap = pos.swap ?? 0;
+      const net = profit + swap;
+
+      const emoji = type === "BUY" ? "🟢" : type === "SELL" ? "🔴" : "⚪️";
+      const profitSign = net >= 0 ? "+" : "";
+      const priceStr =
+        open !== null && current !== null
+          ? `${open} → ${current}`
+          : open !== null
+          ? `${open}`
+          : "—";
+      const slTpStr = [sl !== 0 ? `SL ${sl}` : null, tp !== 0 ? `TP ${tp}` : null]
+        .filter(Boolean)
+        .join(" | ");
+
+      lines.push(`${emoji} <b>${type} ${symbol}</b>  ${vol} lot`);
+      lines.push(`   ${priceStr}   P&L: <b>${profitSign}${net.toFixed(2)}</b>`);
+      if (slTpStr) lines.push(`   ${slTpStr}`);
+
+      connTotal += net;
+      totalPositions++;
+    }
+    grandTotal += connTotal;
+
+    const connSign = connTotal >= 0 ? "+" : "";
+    lines.push(`   <i>Subtotal: ${connSign}${connTotal.toFixed(2)} ${currency}</i>`);
+    lines.push("");
+  }
+
+  const sign = grandTotal >= 0 ? "+" : "";
+  lines.push(`━━━━━━━━━━━━━━━━`);
+  lines.push(`💰 Tổng P&L đang mở: <b>${sign}${grandTotal.toFixed(2)}</b>  (${totalPositions} lệnh)`);
+  lines.push(`🕐 ${new Date().toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}`);
+
+  return lines.join("\n");
+}
+
 export async function POST(req: NextRequest) {
   if (WEBHOOK_SECRET) {
     const token = req.headers.get("x-telegram-bot-api-secret-token");
@@ -115,6 +216,9 @@ export async function POST(req: NextRequest) {
   } else if (command === "/all") {
     const stats = await getStats();
     await sendReply(chatId, buildMessage("📊 THỐNG KÊ TOÀN BỘ", stats), messageId);
+  } else if (command === "/run") {
+    const msg = await buildRunMessage();
+    await sendReply(chatId, msg, messageId);
   }
 
   return NextResponse.json({ ok: true });
