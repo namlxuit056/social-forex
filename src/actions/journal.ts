@@ -6,6 +6,7 @@ import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { updateStreak } from "@/lib/streak";
 
 const tradeSchema = z.object({
   symbol: z.string().min(2).max(32),
@@ -73,6 +74,12 @@ export async function createTrade(
       closedAt: d.closedAt,
     },
   });
+
+  try {
+    await updateStreak(session.user.id, "journal");
+  } catch {
+    // Non-blocking
+  }
 
   revalidatePath("/journal");
   return { ok: true };

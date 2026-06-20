@@ -93,6 +93,14 @@ model User {
   /// (VIP) Thông báo khi có tín hiệu VIP mới trên nền tảng
   notifySignalVipBroadcast Boolean @default(false)
 
+  streakJournal        Int       @default(0)
+  streakPlan           Int       @default(0)
+  streakSignal         Int       @default(0)
+  lastJournalDate      DateTime?
+  lastPlanDate         DateTime?
+  lastSignalDate       DateTime?
+  notifyStreakReminder Boolean   @default(true)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -228,6 +236,7 @@ model SignalEditLog {
 enum NotificationKind {
   SIGNAL_NEW
   USER_FOLLOWED
+  STREAK_REMINDER
 }
 
 model Notification {

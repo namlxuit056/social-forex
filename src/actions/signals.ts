@@ -10,6 +10,7 @@ import { isVipActive } from "@/lib/vip";
 import { rateLimit } from "@/lib/rate-limit";
 import { parseAndValidateImageUrls } from "@/lib/signal-images";
 import { notifySignalSubscribers } from "@/lib/signals/notify-on-signal-create";
+import { updateStreak } from "@/lib/streak";
 import {
   notifyTelegramNewSignal,
   notifyTelegramClosedSignal,
@@ -133,6 +134,13 @@ export async function createSignal(
   revalidatePath("/signals");
   revalidatePath(`/signals/${signal.id}`);
   revalidatePath("/leaderboard");
+
+  try {
+    await updateStreak(userId, "signal");
+  } catch {
+    // Non-blocking
+  }
+
   redirect("/signals");
 }
 

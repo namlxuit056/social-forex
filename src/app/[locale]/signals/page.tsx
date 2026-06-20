@@ -99,7 +99,7 @@ export default async function SignalsPage({
       skip: (page - 1) * SIGNAL_LIST_PAGE_SIZE,
       take: SIGNAL_LIST_PAGE_SIZE + 1,
       include: {
-        author: { select: { name: true, email: true, image: true } },
+        author: { select: { name: true, email: true, image: true, streakSignal: true } },
         reactions: { select: { type: true } },
         _count: { select: { comments: true } },
         images: { orderBy: { sortOrder: "asc" }, select: { url: true } },
@@ -180,6 +180,7 @@ export default async function SignalsPage({
       imageCount: s.images.length,
       createdAt: s.createdAt.toISOString(),
       authorHasMt5: mt5Set.has(s.authorId),
+      authorStreakSignal: s.author?.streakSignal ?? 0,
     };
   });
 

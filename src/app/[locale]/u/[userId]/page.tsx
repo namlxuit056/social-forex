@@ -12,6 +12,7 @@ import { PinnedSignalsSection } from "@/components/profile/pinned-signals-sectio
 import { Mt5SyncedSignalsSection } from "@/components/profile/mt5-synced-signals-section";
 import { PublicTradingOverview } from "@/components/profile/public-trading-overview";
 import { ProfileTradingSummary } from "@/components/profile/profile-trading-summary";
+import { StreakBadge } from "@/components/signals/streak-badge";
 import { FollowButton } from "@/components/social/follow-button";
 import { buttonVariants } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
@@ -80,6 +81,9 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
       bio: true,
       image: true,
       createdAt: true,
+      streakJournal: true,
+      streakPlan: true,
+      streakSignal: true,
     },
   });
   if (!user) notFound();
@@ -209,6 +213,26 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
           </>
         }
       />
+
+      {(user.streakJournal > 0 || user.streakPlan > 0 || user.streakSignal > 0) && (
+        <div className="flex flex-wrap gap-3 rounded-lg border border-border/60 bg-card/40 px-4 py-3">
+          {user.streakJournal > 0 && (
+            <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              Nhật ký: <StreakBadge count={user.streakJournal} type="journal" />
+            </span>
+          )}
+          {user.streakPlan > 0 && (
+            <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              Kế hoạch: <StreakBadge count={user.streakPlan} type="plan" />
+            </span>
+          )}
+          {user.streakSignal > 0 && (
+            <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              Signal: <StreakBadge count={user.streakSignal} type="signal" />
+            </span>
+          )}
+        </div>
+      )}
 
       <ProfileTradingSummary profileUserId={userId} t={t} />
 

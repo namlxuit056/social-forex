@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { ChevronRight, MessageCircle, ShieldCheck, ThumbsDown, ThumbsUp } from "lucide-react";
+import { StreakBadge } from "@/components/signals/streak-badge";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { SignalCloseForm } from "@/components/signals/signal-close-form";
 import { SignalCardNews } from "@/components/signals/signal-card-news";
@@ -57,6 +58,7 @@ type SignalRow = {
   createdAt: string;
   /** Tác giả có MT5 active (revokedAt = null). */
   authorHasMt5?: boolean;
+  authorStreakSignal?: number;
 };
 
 function statusLabel(
@@ -702,6 +704,9 @@ export function SignalRoom({
                                 <ShieldCheck className="size-2.5" />
                                 MT5
                               </Badge>
+                            )}
+                            {(s.authorStreakSignal ?? 0) >= 3 && (
+                              <StreakBadge count={s.authorStreakSignal!} type="signal" />
                             )}
                             {currentUserId && !s.isAuthor ? (
                               <FollowButton

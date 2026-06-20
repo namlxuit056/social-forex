@@ -7,6 +7,7 @@ import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { parseAndValidateImageUrls } from "@/lib/signal-images";
+import { updateStreak } from "@/lib/streak";
 
 const biasValues = ["BULLISH", "BEARISH", "RANGE", "WAIT"] as const;
 
@@ -203,6 +204,12 @@ export async function saveDailyTradingPlan(
       completedAt: completed ? new Date() : null,
     },
   });
+
+  try {
+    await updateStreak(session.user.id, "plan");
+  } catch {
+    // Non-blocking
+  }
 
   revalidatePath("/plan");
   revalidatePath("/dashboard");
