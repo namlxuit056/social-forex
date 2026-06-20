@@ -831,7 +831,13 @@
     "trader": "Trader",
     "wins": "Wins",
     "losses": "Losses",
-    "winRate": "Win rate"
+    "winRate": "Win rate",
+    "filter30d": "30 days",
+    "filter90d": "90 days",
+    "filterAll": "All time",
+    "profitFactor": "Profit Factor",
+    "mt5Verified": "MT5",
+    "minTradesHint": "Only traders with ≥ 3 closed signals"
   },
   "sentiment": {
     "title": "Market Sentiment",
@@ -955,7 +961,12 @@
       "winRateLabel": "Win rate",
       "winsLosses": "{wins} wins · {losses} losses · {total} closed",
       "viewSignals": "Open signal room",
-      "viewSignalsByAuthor": "View this trader’s signals"
+      "viewSignalsByAuthor": "View this trader’s signals",
+      "avgRRLabel": "Avg R:R",
+      "avgRREmpty": "Missing SL/TP",
+      "avgRRSignals": "{total} signals",
+      "consistencyLabel": "Consistency",
+      "consistencyValue": "{active}/{total} days"
     },
     "pinnedSignals": "Pinned signals",
     "pinnedSignalsEmpty": "No pinned signals yet.",
@@ -1255,7 +1266,7 @@
     "colAuthor": "Author",
     "colCreated": "Created",
     "colActions": "Actions",
-    "viewSignal": "View",
+    "viewSignal": "View signal",
     "colName": "Name",
     "users": "Members",
     "usersDesc": "Member list, search and role management.",
@@ -1281,7 +1292,6 @@
     "noReports": "No reports.",
     "viewThread": "View thread",
     "reportTargetSignalComment": "Signal comment",
-    "viewSignal": "View signal",
     "signalSymbol": "Symbol"
   },
   "vip": {

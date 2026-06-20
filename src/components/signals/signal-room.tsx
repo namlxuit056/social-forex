@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
-import { ChevronRight, MessageCircle, ThumbsDown, ThumbsUp } from "lucide-react";
+import { ChevronRight, MessageCircle, ShieldCheck, ThumbsDown, ThumbsUp } from "lucide-react";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { SignalCloseForm } from "@/components/signals/signal-close-form";
 import { SignalCardNews } from "@/components/signals/signal-card-news";
@@ -55,6 +55,8 @@ type SignalRow = {
   imageUrls: string[];
   imageCount: number;
   createdAt: string;
+  /** Tác giả có MT5 active (revokedAt = null). */
+  authorHasMt5?: boolean;
 };
 
 function statusLabel(
@@ -692,6 +694,15 @@ export function SignalRoom({
                                 {s.authorLabel}
                               </span>
                             </Link>
+                            {s.authorHasMt5 && (
+                              <Badge
+                                variant="outline"
+                                className="gap-1 border-emerald-500/30 bg-emerald-500/8 text-emerald-400 text-[10px] px-1.5 py-0.5 h-5"
+                              >
+                                <ShieldCheck className="size-2.5" />
+                                MT5
+                              </Badge>
+                            )}
                             {currentUserId && !s.isAuthor ? (
                               <FollowButton
                                 userId={s.authorId}

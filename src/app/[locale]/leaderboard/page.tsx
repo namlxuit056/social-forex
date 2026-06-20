@@ -1,4 +1,4 @@
-import { Trophy } from "lucide-react";
+import { ShieldCheck, Trophy } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { EmptyState } from "@/components/layout/empty-state";
@@ -19,6 +19,13 @@ export async function generateMetadata({
 
 export const dynamic = "force-dynamic";
 
+function getSince(tf: string): Date | undefined {
+  const now = Date.now();
+  if (tf === "30d") return new Date(now - 30 * 86400_000);
+  if (tf === "90d") return new Date(now - 90 * 86400_000);
+  return undefined;
+}
+
 type Row = {
   userId: string;
   name: string;
@@ -26,22 +33,36 @@ type Row = {
   losses: number;
   total: number;
   winRate: number | null;
+  profitFactor: number | null;
+  hasMt5: boolean;
 };
 
 export default async function LeaderboardPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams?: Promise<{ timeframe?: string }>;
 }) {
   const { locale } = await params;
+  const resolvedSearchParams = await searchParams;
   setRequestLocale(locale);
   const t = await getTranslations("leaderboard");
   const tCommon = await getTranslations("common");
   const ctaEmpty = await pageCtaItems("community", "explore");
   const ctaTable = await pageCtaItems("community", "trading");
 
+  const tf = ["30d", "90d"].includes(resolvedSearchParams?.timeframe ?? "")
+    ? resolvedSearchParams!.timeframe
+    : "all";
+
+  const since = getSince(tf ?? "all");
+
   const closed = await prisma.signal.findMany({
-    where: { status: { in: ["CLOSED_WIN", "CLOSED_LOSS"] } },
+    where: {
+      status: { in: ["CLOSED_WIN", "CLOSED_LOSS"] },
+      ...(since ? { closedAt: { gte: since } } : {}),
+    },
     select: {
       authorId: true,
       status: true,
@@ -59,13 +80,71 @@ export default async function LeaderboardPage({
     map.set(s.authorId, cur);
   }
 
-  const rows: Row[] = [...map.entries()].map(([userId, v]) => {
-    const total = v.wins + v.losses;
-    const winRate = total > 0 ? Math.round((v.wins / total) * 1000) / 10 : null;
-    return { userId, name: v.label, wins: v.wins, losses: v.losses, total, winRate };
+  const userIds = [...map.keys()];
+
+  // Query profit factor data from TradeJournal
+  const journalRows = await prisma.tradeJournal.findMany({
+    where: {
+      userId: { in: userIds },
+      result: { in: ["WIN", "LOSS"] },
+      pnl: { not: null },
+      ...(since ? { closedAt: { gte: since } } : {}),
+    },
+    select: { userId: true, result: true, pnl: true },
   });
 
-  rows.sort((a, b) => (b.total !== a.total ? b.total - a.total : (b.winRate ?? 0) - (a.winRate ?? 0)));
+  const pfMap = new Map<string, { grossWin: number; grossLoss: number }>();
+  for (const row of journalRows) {
+    const cur = pfMap.get(row.userId) ?? { grossWin: 0, grossLoss: 0 };
+    if (row.result === "WIN") cur.grossWin += row.pnl ?? 0;
+    else cur.grossLoss += Math.abs(row.pnl ?? 0);
+    pfMap.set(row.userId, cur);
+  }
+
+  // Query MT5 connections
+  const mt5Rows = await prisma.mt5Connection.findMany({
+    where: { userId: { in: userIds }, revokedAt: null },
+    select: { userId: true },
+  });
+  const mt5Set = new Set(mt5Rows.map((r) => r.userId));
+
+  const rows: Row[] = [...map.entries()]
+    .map(([userId, v]) => {
+      const total = v.wins + v.losses;
+      const winRate = total > 0 ? Math.round((v.wins / total) * 1000) / 10 : null;
+      const pfData = pfMap.get(userId);
+      const profitFactor =
+        pfData && pfData.grossLoss > 0
+          ? pfData.grossWin / pfData.grossLoss
+          : pfData && pfData.grossWin > 0
+            ? null
+            : null;
+      return {
+        userId,
+        name: v.label,
+        wins: v.wins,
+        losses: v.losses,
+        total,
+        winRate,
+        profitFactor,
+        hasMt5: mt5Set.has(userId),
+      };
+    })
+    .filter((r) => r.total >= 3);
+
+  rows.sort((a, b) => {
+    const aPF = a.profitFactor ?? -Infinity;
+    const bPF = b.profitFactor ?? -Infinity;
+    if (bPF !== aPF) return bPF - aPF;
+    if ((b.winRate ?? 0) !== (a.winRate ?? 0)) return (b.winRate ?? 0) - (a.winRate ?? 0);
+    return b.total - a.total;
+  });
+
+  const filters = [
+    { key: "30d", label: t("filter30d") },
+    { key: "90d", label: t("filter90d") },
+    { key: "all", label: t("filterAll") },
+  ] as const;
 
   return (
     <div className="space-y-8">
@@ -74,6 +153,25 @@ export default async function LeaderboardPage({
           {t("title")}
         </h1>
         <p className="mt-2 text-muted-foreground">{t("description")}</p>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        {filters.map((f) => {
+          const isActive = tf === f.key;
+          return (
+            <Link
+              key={f.key}
+              href={`/leaderboard?timeframe=${f.key}`}
+              className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors ${
+                isActive
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
+              }`}
+            >
+              {f.label}
+            </Link>
+          );
+        })}
       </div>
 
       {rows.length === 0 ? (
@@ -89,7 +187,7 @@ export default async function LeaderboardPage({
       ) : (
         <>
           <div className="overflow-x-auto rounded-xl border border-border">
-            <table className="w-full min-w-[520px] text-left text-sm">
+            <table className="w-full min-w-160 text-left text-sm">
               <thead className="bg-muted/50 text-muted-foreground">
                 <tr>
                   <th className="px-4 py-3">{t("rank")}</th>
@@ -97,6 +195,8 @@ export default async function LeaderboardPage({
                   <th className="px-4 py-3">{t("wins")}</th>
                   <th className="px-4 py-3">{t("losses")}</th>
                   <th className="px-4 py-3">{t("winRate")}</th>
+                  <th className="px-4 py-3">{t("profitFactor")}</th>
+                  <th className="px-4 py-3">{t("mt5Verified")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -111,11 +211,30 @@ export default async function LeaderboardPage({
                     <td className="px-4 py-3 text-primary">{r.wins}</td>
                     <td className="px-4 py-3 text-destructive">{r.losses}</td>
                     <td className="px-4 py-3 font-mono">{r.winRate !== null ? `${r.winRate}%` : "—"}</td>
+                    <td
+                      className={`px-4 py-3 font-mono ${
+                        r.profitFactor === null
+                          ? "text-muted-foreground"
+                          : r.profitFactor >= 1
+                            ? "text-emerald-400"
+                            : "text-red-400"
+                      }`}
+                    >
+                      {r.profitFactor !== null ? r.profitFactor.toFixed(2) : "—"}
+                    </td>
+                    <td className="px-4 py-3">
+                      {r.hasMt5 ? (
+                        <ShieldCheck className="size-4 text-emerald-400" />
+                      ) : (
+                        <span className="text-muted-foreground">—</span>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+          <p className="text-xs text-muted-foreground">{t("minTradesHint")}</p>
           <PageCtaRow heading={tCommon("ctaDiscovery")} items={ctaTable} />
         </>
       )}

@@ -831,7 +831,13 @@
     "trader": "Trader",
     "wins": "Thắng",
     "losses": "Thua",
-    "winRate": "Tỷ lệ thắng"
+    "winRate": "Tỷ lệ thắng",
+    "filter30d": "30 ngày",
+    "filter90d": "90 ngày",
+    "filterAll": "Tất cả",
+    "profitFactor": "Profit Factor",
+    "mt5Verified": "MT5",
+    "minTradesHint": "Chỉ hiển thị trader có ≥ 3 lệnh đóng"
   },
   "sentiment": {
     "title": "Tâm lý thị trường",
@@ -955,7 +961,12 @@
       "winRateLabel": "Tỷ lệ thắng",
       "winsLosses": "{wins} thắng · {losses} thua · {total} đã đóng",
       "viewSignals": "Mở phòng tín hiệu",
-      "viewSignalsByAuthor": "Xem tín hiệu của trader này"
+      "viewSignalsByAuthor": "Xem tín hiệu của trader này",
+      "avgRRLabel": "Avg R:R",
+      "avgRREmpty": "Thiếu SL/TP",
+      "avgRRSignals": "{total} tín hiệu",
+      "consistencyLabel": "Hoạt động",
+      "consistencyValue": "{active}/{total} ngày"
     },
     "pinnedSignals": "Tín hiệu đã ghim",
     "pinnedSignalsEmpty": "Chưa có tín hiệu nào được ghim.",
@@ -1255,7 +1266,7 @@
     "colAuthor": "Người đăng",
     "colCreated": "Ngày tạo",
     "colActions": "Thao tác",
-    "viewSignal": "Xem",
+    "viewSignal": "Xem tín hiệu",
     "colName": "Tên",
     "users": "Thành viên",
     "usersDesc": "Danh sách thành viên, tìm kiếm và thay đổi vai trò.",
@@ -1281,7 +1292,6 @@
     "noReports": "Không có báo cáo nào.",
     "viewThread": "Xem thread",
     "reportTargetSignalComment": "Bình luận tín hiệu",
-    "viewSignal": "Xem tín hiệu",
     "signalSymbol": "Cặp"
   },
   "vip": {

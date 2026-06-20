@@ -142,6 +142,14 @@ export default async function SignalsPage({
     followingIdSet = new Set(follows.map((f) => f.followingId));
   }
 
+  // Lấy tập userId có MT5 active — 1 query cho cả trang
+  const mt5UserIds = await prisma.mt5Connection.findMany({
+    where: { revokedAt: null },
+    select: { userId: true },
+    distinct: ["userId"],
+  });
+  const mt5Set = new Set(mt5UserIds.map((r) => r.userId));
+
   const signals = rows.map((s) => {
     const isAuthor = userId === s.authorId;
     const masked = s.tier === "VIP" && !canViewVip && !isAuthor;
@@ -171,6 +179,7 @@ export default async function SignalsPage({
       imageUrls,
       imageCount: s.images.length,
       createdAt: s.createdAt.toISOString(),
+      authorHasMt5: mt5Set.has(s.authorId),
     };
   });
 
