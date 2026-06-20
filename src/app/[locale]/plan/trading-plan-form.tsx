@@ -28,12 +28,16 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { effectiveImageMime, SIGNAL_IMAGE_LIMITS } from "@/lib/signal-images";
 import { cn } from "@/lib/utils";
-
-const SELECT_CLASS =
-  "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
 const MAX_SYMBOL_PLANS = 12;
 
@@ -237,11 +241,16 @@ export function TradingPlanForm({ plan }: Props) {
       boolean
     >,
   );
-  const [keyLevels, setKeyLevels] = useState(readPlan.keyLevels ?? "");
-  const [newsToAvoid, setNewsToAvoid] = useState(readPlan.newsToAvoid ?? "");
   const [notes, setNotes] = useState(readPlan.notes ?? "");
   const [sessionFocus, setSessionFocus] = useState(readPlan.sessionFocus ?? "");
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  useEffect(() => {
+    if (!hasUnsavedChanges) return;
+    const handler = (e: BeforeUnloadEvent) => { e.preventDefault(); };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [hasUnsavedChanges]);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadNeedsSignIn, setUploadNeedsSignIn] = useState(false);
@@ -478,9 +487,6 @@ export function TradingPlanForm({ plan }: Props) {
         setAnalysisError(data.error ?? t("aiAnalysisError"));
         return;
       }
-      if (data.keyLevels) {
-        setKeyLevels((prev) => (prev ? `${prev}\n\n${data.keyLevels}` : (data.keyLevels ?? "")));
-      }
       if (data.sessionFocus) setSessionFocus(data.sessionFocus);
       if (data.notes) {
         setNotes((prev) => (prev ? `${prev}\n\n${data.notes}` : (data.notes ?? "")));
@@ -508,17 +514,21 @@ export function TradingPlanForm({ plan }: Props) {
           }
           return updated;
         });
-      } else if (data.bias) {
-        const validBias = (b: string) =>
-          b === "BULLISH" || b === "BEARISH" || b === "RANGE" || b === "WAIT"
-            ? (b as "BULLISH" | "BEARISH" | "RANGE" | "WAIT")
-            : undefined;
-        const bias = validBias(data.bias);
-        if (bias) {
-          setSymbolPlans((prev) =>
-            prev.map((p, i) => (i === 0 ? { ...p, bias } : p)),
-          );
-        }
+      } else {
+        setSymbolPlans((prev) =>
+          prev.map((p, i) => {
+            if (i !== 0) return p;
+            const validBias = (b: string | undefined) =>
+              b === "BULLISH" || b === "BEARISH" || b === "RANGE" || b === "WAIT"
+                ? (b as "BULLISH" | "BEARISH" | "RANGE" | "WAIT")
+                : undefined;
+            return {
+              ...p,
+              ...(validBias(data.bias) ? { bias: validBias(data.bias)! } : {}),
+              ...(data.keyLevels ? { keyLevels: data.keyLevels } : {}),
+            };
+          }),
+        );
       }
       setHasUnsavedChanges(true);
     } catch {
@@ -649,22 +659,6 @@ export function TradingPlanForm({ plan }: Props) {
                     {valueOrDash(readPlan.sessionFocus)}
                   </p>
                 </section>
-                <section className="rounded-lg border border-border/60 bg-background/35 p-4">
-                  <h3 className="text-sm font-medium text-foreground">
-                    {t("keyLevels")}
-                  </h3>
-                  <p className="mt-2 whitespace-pre-line text-sm leading-6 text-muted-foreground">
-                    {valueOrDash(readPlan.keyLevels)}
-                  </p>
-                </section>
-                <section className="rounded-lg border border-border/60 bg-background/35 p-4">
-                  <h3 className="text-sm font-medium text-foreground">
-                    {t("newsToAvoid")}
-                  </h3>
-                  <p className="mt-2 whitespace-pre-line text-sm leading-6 text-muted-foreground">
-                    {valueOrDash(readPlan.newsToAvoid)}
-                  </p>
-                </section>
                 {readPlan.notes ? (
                   <section className="rounded-lg border border-border/60 bg-background/35 p-4">
                     <h3 className="text-sm font-medium text-foreground">
@@ -716,7 +710,16 @@ export function TradingPlanForm({ plan }: Props) {
                           aria-hidden
                         />
                         <span className={readPlan[key] ? "text-foreground" : undefined}>
-                          {t(`${key}Title`)}
+                          {key === "checkedJournal" ? (
+                            <Link
+                              href="/journal"
+                              className="underline-offset-4 hover:underline"
+                            >
+                              {t(`${key}Title`)}
+                            </Link>
+                          ) : (
+                            t(`${key}Title`)
+                          )}
                         </span>
                       </li>
                     ))}
@@ -908,21 +911,22 @@ export function TradingPlanForm({ plan }: Props) {
                 </div>
                 <div>
                   <Label htmlFor={`bias-${item.id}`}>{t("bias")}</Label>
-                  <select
-                    id={`bias-${item.id}`}
+                  <Select
                     value={item.bias}
-                    onChange={(event) =>
-                      updateSymbolPlan(item.id, {
-                        bias: event.target.value as TradingPlanBias,
-                      })
+                    onValueChange={(value) =>
+                      updateSymbolPlan(item.id, { bias: value as TradingPlanBias })
                     }
-                    className={`mt-1.5 ${SELECT_CLASS}`}
                   >
-                    <option value="WAIT">{t("biasWait")}</option>
-                    <option value="BULLISH">{t("biasBullish")}</option>
-                    <option value="BEARISH">{t("biasBearish")}</option>
-                    <option value="RANGE">{t("biasRange")}</option>
-                  </select>
+                    <SelectTrigger id={`bias-${item.id}`} className="mt-1.5">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="WAIT">{t("biasWait")}</SelectItem>
+                      <SelectItem value="BULLISH">{t("biasBullish")}</SelectItem>
+                      <SelectItem value="BEARISH">{t("biasBearish")}</SelectItem>
+                      <SelectItem value="RANGE">{t("biasRange")}</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <Button
                   type="button"
@@ -991,21 +995,6 @@ export function TradingPlanForm({ plan }: Props) {
           <CardContent className="grid gap-4">
             <div>
               <div className="flex items-center justify-between gap-3">
-                <Label htmlFor="keyLevels">{t("keyLevels")}</Label>
-                <FieldSupportLink href="/chart" label={t("supportChart")} />
-              </div>
-              <Textarea
-                id="keyLevels"
-                name="keyLevels"
-                rows={5}
-                value={keyLevels}
-                onChange={(e) => { setKeyLevels(e.target.value); setHasUnsavedChanges(true); }}
-                placeholder={t("keyLevelsPlaceholder")}
-                className="mt-1.5"
-              />
-            </div>
-            <div>
-              <div className="flex items-center justify-between gap-3">
                 <Label htmlFor="chartImages">{t("chartImages")}</Label>
                 <FieldSupportLink href="/chart" label={t("supportChart")} />
               </div>
@@ -1059,7 +1048,7 @@ export function TradingPlanForm({ plan }: Props) {
                         <img
                           src={url}
                           alt=""
-                          className="h-20 max-w-[140px] rounded-md object-cover"
+                          className="h-20 max-w-35 rounded-md object-cover"
                         />
                       </button>
                       <button
@@ -1081,7 +1070,7 @@ export function TradingPlanForm({ plan }: Props) {
                       <img
                         src={slot.previewUrl}
                         alt=""
-                        className="h-20 max-w-[140px] rounded-md object-cover opacity-90"
+                        className="h-20 max-w-35 rounded-md object-cover opacity-90"
                       />
                       <div
                         className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-background/55 backdrop-blur-[2px]"
@@ -1089,7 +1078,7 @@ export function TradingPlanForm({ plan }: Props) {
                         aria-busy="true"
                       >
                         <Loader2 className="size-5 animate-spin text-primary" />
-                        <span className="max-w-[110px] truncate px-1 text-center text-[10px] font-medium text-foreground">
+                        <span className="max-w-27.5 truncate px-1 text-center text-[10px] font-medium text-foreground">
                           {t("imagesUploading")}
                         </span>
                       </div>
@@ -1098,7 +1087,7 @@ export function TradingPlanForm({ plan }: Props) {
                 </ul>
               ) : null}
 
-              {(uploadedUrls.length > 0 || symbolPlans.some((p) => p.symbol)) ? (
+              {uploadedUrls.length > 0 ? (
                 <div className="mt-3">
                   <Button
                     type="button"
@@ -1120,21 +1109,6 @@ export function TradingPlanForm({ plan }: Props) {
                   ) : null}
                 </div>
               ) : null}
-            </div>
-            <div>
-              <div className="flex items-center justify-between gap-3">
-                <Label htmlFor="newsToAvoid">{t("newsToAvoid")}</Label>
-                <FieldSupportLink href="/calendar" label={t("supportCalendar")} />
-              </div>
-              <Textarea
-                id="newsToAvoid"
-                name="newsToAvoid"
-                rows={4}
-                value={newsToAvoid}
-                onChange={(e) => { setNewsToAvoid(e.target.value); setHasUnsavedChanges(true); }}
-                placeholder={t("newsPlaceholder")}
-                className="mt-1.5"
-              />
             </div>
             <div>
               <Label htmlFor="notes">{t("notes")}</Label>

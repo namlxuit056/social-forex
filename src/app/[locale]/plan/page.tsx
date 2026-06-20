@@ -1,4 +1,4 @@
-import { CalendarDays, ChartCandlestick, ClipboardCheck, NotebookPen, ShieldCheck, Wrench } from "lucide-react";
+import { CalendarDays, ChartCandlestick, ClipboardCheck, ChevronLeft, ChevronRight, Flame, NotebookPen, ShieldCheck, Wrench } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { auth } from "@/auth";
 import { Link } from "@/i18n/navigation";
@@ -36,6 +36,30 @@ function parseDateParam(value: string | string[] | undefined) {
 function dateFromDateOnly(value: string) {
   const [year, month, day] = value.split("-").map(Number);
   return new Date(Date.UTC(year, month - 1, day));
+}
+
+function shiftDate(dateStr: string, days: number) {
+  const d = dateFromDateOnly(dateStr);
+  d.setUTCDate(d.getUTCDate() + days);
+  return dateOnly(d);
+}
+
+function computeStreak(sortedDescDates: string[], today: string): number {
+  if (sortedDescDates.length === 0) return 0;
+  const yesterday = shiftDate(today, -1);
+  const startDate = sortedDescDates[0] === today ? today : sortedDescDates[0] === yesterday ? yesterday : null;
+  if (!startDate) return 0;
+  let streak = 0;
+  let expected = startDate;
+  for (const d of sortedDescDates) {
+    if (d === expected) {
+      streak++;
+      expected = shiftDate(expected, -1);
+    } else if (d < expected) {
+      break;
+    }
+  }
+  return streak;
 }
 
 function parseSymbolPlans(value: unknown): TradingPlanSymbolPlan[] {
@@ -145,7 +169,7 @@ export default async function TradingPlanPage({
   const recentSince = new Date(selectedPlanDate);
   recentSince.setUTCDate(recentSince.getUTCDate() - 6);
 
-  const [plan, recentPlans] = await Promise.all([
+  const [plan, recentPlans, streakPlans] = await Promise.all([
     prisma.dailyTradingPlan.findUnique({
       where: {
         userId_planDate: {
@@ -162,7 +186,22 @@ export default async function TradingPlanPage({
       orderBy: { planDate: "desc" },
       select: { planDate: true, completedAt: true },
     }),
+    prisma.dailyTradingPlan.findMany({
+      where: {
+        userId: session.user.id,
+        completedAt: { not: null },
+      },
+      orderBy: { planDate: "desc" },
+      select: { planDate: true },
+      take: 90,
+    }),
   ]);
+
+  const today = dateOnly(new Date());
+  const prevDate = shiftDate(selectedDate, -1);
+  const nextDate = shiftDate(selectedDate, 1);
+  const isToday = selectedDate === today;
+  const streak = computeStreak(streakPlans.map((p) => dateOnly(p.planDate)), today);
 
   const completedDays = recentPlans.filter((item) => item.completedAt).length;
   const plannedDays = recentPlans.length;
@@ -254,7 +293,7 @@ export default async function TradingPlanPage({
         </div>
       </header>
 
-      <section className="grid gap-3 sm:grid-cols-3">
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="rounded-lg border-border/60 bg-card/60">
           <CardHeader className="pb-2">
             <CardDescription>{t("statChecklist")}</CardDescription>
@@ -289,7 +328,54 @@ export default async function TradingPlanPage({
             {t("statCompletedDesc")}
           </CardContent>
         </Card>
+        <Card className="rounded-lg border-border/60 bg-card/60">
+          <CardHeader className="pb-2">
+            <CardDescription>{t("statStreak")}</CardDescription>
+            <CardTitle className="flex items-center gap-2 font-mono text-2xl tabular-nums text-orange-500">
+              {streak}
+              {streak > 0 ? <Flame className="size-5 text-orange-400" aria-hidden /> : null}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-xs text-muted-foreground">
+            {t("statStreakDesc")}
+          </CardContent>
+        </Card>
       </section>
+
+      <nav className="flex items-center gap-2">
+        <Link
+          href={{ pathname: "/plan", query: { date: prevDate } }}
+          className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+        >
+          <ChevronLeft className="mr-1 size-4" aria-hidden />
+          {t("prevDay")}
+        </Link>
+        <span className="flex-1 text-center font-mono text-sm font-medium text-foreground tabular-nums">
+          {selectedDate}
+        </span>
+        {!isToday ? (
+          <>
+            <Link
+              href={{ pathname: "/plan", query: { date: nextDate } }}
+              className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+            >
+              {t("nextDay")}
+              <ChevronRight className="ml-1 size-4" aria-hidden />
+            </Link>
+            <Link
+              href="/plan"
+              className={cn(buttonVariants({ variant: "default", size: "sm" }))}
+            >
+              {t("todayNav")}
+            </Link>
+          </>
+        ) : (
+          <span className={cn(buttonVariants({ variant: "outline", size: "sm" }), "pointer-events-none opacity-40")}>
+            {t("nextDay")}
+            <ChevronRight className="ml-1 size-4" aria-hidden />
+          </span>
+        )}
+      </nav>
 
       <TradingPlanForm plan={formValue} />
 
