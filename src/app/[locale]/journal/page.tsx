@@ -10,6 +10,7 @@ import { JournalLivePanel, type LivePosition } from "./journal-live-panel";
 import { JournalMt5Prompt } from "./journal-mt5-prompt";
 import { JournalPerformanceChart } from "./journal-performance-chart";
 import { JournalAiPanel } from "./journal-ai-panel";
+import { RiskCalculator } from "@/components/tools/risk-calculator";
 
 export async function generateMetadata({
   params,
@@ -148,6 +149,8 @@ export default async function JournalPage({
         totalPnl={totalPnl}
         avgPnl={avgPnl}
       />
+
+      <RiskCalculator defaultBalance={mt5Account?.balance ?? null} />
 
       <JournalAiPanel tradeCount={trades.length} />
 

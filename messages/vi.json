@@ -1586,5 +1586,19 @@
   "language": {
     "vi": "Tiếng Việt",
     "en": "English"
+  },
+  "riskCalc": {
+    "title": "Tính toán rủi ro",
+    "symbol": "Cặp tiền",
+    "balance": "Số dư tài khoản",
+    "riskPct": "Rủi ro mỗi lệnh",
+    "entry": "Giá vào lệnh",
+    "stopLoss": "Stop Loss",
+    "dollarRisk": "Rủi ro ($)",
+    "pipDistance": "Khoảng cách pip",
+    "lotSize": "Lot size",
+    "pipValue": "Giá trị pip",
+    "fillHint": "Nhập đầy đủ thông tin để tính toán.",
+    "approximation": "* Ước tính dựa trên $10/pip/lot chuẩn. Kết quả có thể sai lệch với các cặp tiền có USD ở vị trí base (USDCAD, USDJPY...)."
   }
 }

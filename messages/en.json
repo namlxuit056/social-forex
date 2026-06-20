@@ -1586,5 +1586,19 @@
   "language": {
     "vi": "Tiếng Việt",
     "en": "English"
+  },
+  "riskCalc": {
+    "title": "Risk Calculator",
+    "symbol": "Symbol",
+    "balance": "Account Balance",
+    "riskPct": "Risk per Trade",
+    "entry": "Entry Price",
+    "stopLoss": "Stop Loss",
+    "dollarRisk": "Dollar Risk",
+    "pipDistance": "Pip Distance",
+    "lotSize": "Lot Size",
+    "pipValue": "Pip Value",
+    "fillHint": "Fill in all fields to calculate.",
+    "approximation": "* Estimate based on $10/pip/standard lot. May differ for USD-base pairs (USDCAD, USDJPY...)."
   }
 }

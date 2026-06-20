@@ -28,6 +28,7 @@ import { signalLevelDetail } from "@/components/signals/signal-level-classes";
 import { SignalShareCopy } from "@/components/signals/signal-share-copy";
 import { SignalCloseForm } from "@/components/signals/signal-close-form";
 import { SignalEditForm } from "@/components/signals/signal-edit-form";
+import { RiskCalculator } from "@/components/tools/risk-calculator";
 import { SignalReactions } from "./signal-reactions";
 import { SignalComments } from "./signal-comments";
 import { PinSignalButton } from "@/components/signals/pin-signal-button";
@@ -221,7 +222,7 @@ export default async function SignalDetailPage({
     ? signal.reactions.find((r) => r.userId === userId)?.type ?? null
     : null;
 
-  const [existingPin, pinCount, following] = userId
+  const [existingPin, pinCount, following, mt5Connection] = userId
     ? await Promise.all([
         prisma.userPinnedSignal.findUnique({
           where: { userId_signalId: { userId, signalId } },
@@ -237,8 +238,13 @@ export default async function SignalDetailPage({
           },
           select: { id: true },
         }),
+        prisma.mt5Connection.findFirst({
+          where: { userId, revokedAt: null },
+          select: { balance: true },
+          orderBy: { lastSeenAt: "desc" },
+        }),
       ])
-    : [null, 0, null];
+    : [null, 0, null, null];
   const isPinned = !!existingPin;
   const atPinLimit = isAtPinLimit(pinCount);
   const canContactAuthor = !!userId && !isAuthor;
@@ -493,6 +499,13 @@ export default async function SignalDetailPage({
                   </p>
                 </section>
               )}
+
+              <RiskCalculator
+                defaultSymbol={signal.symbol}
+                defaultEntry={signal.entry}
+                defaultStopLoss={signal.stopLoss}
+                defaultBalance={mt5Connection?.balance ?? null}
+              />
             </>
           )}
 
