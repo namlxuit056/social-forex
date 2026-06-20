@@ -4,6 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { Bell, BookOpen, ChartCandlestick, MessageSquare, Shield, Wrench } from "lucide-react";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { SiteNavLink } from "@/components/layout/site-nav-link";
 import { SiteLogo } from "@/components/layout/site-logo";
@@ -107,6 +108,7 @@ export async function SiteHeader() {
 
         {/* Right actions */}
         <div className="flex items-center gap-1.5">
+          <ThemeToggle />
           <LanguageSwitcher />
 
           {session?.user ? (
