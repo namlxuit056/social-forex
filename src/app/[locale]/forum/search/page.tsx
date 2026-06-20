@@ -67,7 +67,7 @@ export default async function ForumSearchPage({ params, searchParams }: Props) {
       </form>
 
       {query.length > 0 && query.length < 2 && (
-        <p className="text-sm text-amber-200/90">{t("searchMinChars")}</p>
+        <p className="text-sm text-amber-700 dark:text-amber-200/90">{t("searchMinChars")}</p>
       )}
 
       {query.length >= 2 && results.length === 0 && (

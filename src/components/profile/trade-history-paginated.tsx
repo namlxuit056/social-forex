@@ -35,10 +35,10 @@ function fmtCurrency(v: number) {
 }
 
 function resultClass(result: string) {
-  if (result === "WIN") return "border-emerald-500/40 bg-emerald-500/15 text-emerald-300";
-  if (result === "LOSS") return "border-red-500/40 bg-red-500/15 text-red-300";
-  if (result === "BREAKEVEN") return "border-amber-500/40 bg-amber-500/15 text-amber-200";
-  return "border-sky-500/40 bg-sky-500/15 text-sky-200";
+  if (result === "WIN") return "border-emerald-500/40 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300";
+  if (result === "LOSS") return "border-red-500/40 bg-red-500/15 text-red-700 dark:text-red-300";
+  if (result === "BREAKEVEN") return "border-amber-500/40 bg-amber-500/15 text-amber-700 dark:text-amber-200";
+  return "border-sky-500/40 bg-sky-500/15 text-sky-700 dark:text-sky-200";
 }
 
 function resultLabel(result: string, labels: Labels) {

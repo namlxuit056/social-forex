@@ -364,7 +364,7 @@ export function LiveQuotesTable({
             "flex gap-2 rounded-lg border px-3 py-2 text-sm",
             fetchError
               ? "border-destructive/40 bg-destructive/10 text-destructive"
-              : "border-amber-500/30 bg-amber-500/10 text-amber-100/90",
+              : "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-100/90",
           )}
           role="alert"
         >

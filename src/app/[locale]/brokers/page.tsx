@@ -275,7 +275,7 @@ export default async function BrokersPage({
             {copy.description}
           </p>
         </div>
-        <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-sm leading-6 text-amber-100">
+        <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-sm leading-6 text-amber-800 dark:text-amber-100">
           {copy.affiliateNotice}
         </div>
       </section>

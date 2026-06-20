@@ -234,15 +234,15 @@ export default async function SignalsPage({
       )}
 
       {session?.user && !canViewVip && hasVipSignals && (
-        <Card className="border-amber-500/30 bg-amber-950/20">
+        <Card className="border-amber-500/30 bg-amber-50 dark:bg-amber-950/20">
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
-              <Lock className="size-4 text-amber-400" />
-              <CardTitle className="text-base text-amber-200">
+              <Lock className="size-4 text-amber-500 dark:text-amber-400" />
+              <CardTitle className="text-base text-amber-800 dark:text-amber-200">
                 {t("vipLocked")}
               </CardTitle>
             </div>
-            <CardDescription className="text-amber-200/70">
+            <CardDescription className="text-amber-700 dark:text-amber-200/70">
               {t("vipLockedHint", { count: vipCount })}
             </CardDescription>
           </CardHeader>
@@ -251,7 +251,7 @@ export default async function SignalsPage({
               href="/profile"
               className={cn(
                 buttonVariants({ size: "sm", variant: "outline" }),
-                "border-amber-500/50 text-amber-200 hover:bg-amber-950/40",
+                "border-amber-500/50 text-amber-700 hover:bg-amber-100 dark:text-amber-200 dark:hover:bg-amber-950/40",
               )}
             >
               {t("upgradeVip")}

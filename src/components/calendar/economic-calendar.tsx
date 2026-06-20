@@ -98,7 +98,7 @@ export function EconomicCalendar({
   const impactBadge = (impact: Impact) => {
     const map = {
       low: "bg-muted text-muted-foreground",
-      medium: "bg-amber-500/15 text-amber-200/95",
+      medium: "bg-amber-500/15 text-amber-700 dark:text-amber-200/95",
       high: "bg-destructive/20 text-destructive",
     };
     const label =
@@ -143,7 +143,7 @@ export function EconomicCalendar({
         {
           value: "medium" as const,
           label: t("impactMedShort"),
-          color: "bg-amber-500/15 text-amber-200/95 border-amber-500/30",
+          color: "bg-amber-500/15 text-amber-700 dark:text-amber-200/95 border-amber-500/30",
         },
         {
           value: "low" as const,
@@ -165,7 +165,7 @@ export function EconomicCalendar({
         {
           value: "upcoming" as const,
           label: t("statusUpcoming"),
-          color: "border-sky-400/30 bg-sky-400/10 text-sky-200",
+          color: "border-sky-400/30 bg-sky-400/10 text-sky-700 dark:text-sky-200",
         },
         {
           value: "finished" as const,
@@ -293,7 +293,7 @@ export function EconomicCalendar({
 
       {warning ? (
         <p
-          className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-100/90"
+          className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-100/90"
           role="status"
         >
           {warning}

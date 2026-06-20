@@ -14,10 +14,10 @@ export function MarketDuelAnimation() {
     <>
       {ticker.map((t, i) => (
         <span key={i} className="flex items-center gap-1.5">
-          <span className={t.bull ? "text-emerald-300/75" : "text-red-300/75"}>{t.pair}</span>
-          <span className={`font-semibold ${t.bull ? "text-emerald-400" : "text-red-400"}`}>{t.price}</span>
-          <span className={`${t.bull ? "text-emerald-400/65" : "text-red-400/65"}`}>{t.change}</span>
-          {i < ticker.length - 1 && <span className="mx-2 text-white/15">·</span>}
+          <span className={t.bull ? "text-emerald-600 dark:text-emerald-300/75" : "text-red-600 dark:text-red-300/75"}>{t.pair}</span>
+          <span className={`font-semibold ${t.bull ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"}`}>{t.price}</span>
+          <span className={`${t.bull ? "text-emerald-600/65 dark:text-emerald-400/65" : "text-red-600/65 dark:text-red-400/65"}`}>{t.change}</span>
+          {i < ticker.length - 1 && <span className="mx-2 text-foreground/15">·</span>}
         </span>
       ))}
     </>

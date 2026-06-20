@@ -99,7 +99,7 @@ export function SignalImageGallery({
     return (
       <div
         className={cn(
-          "flex items-center gap-2 rounded-md border border-amber-500/30 bg-amber-950/20 px-3 py-2 text-sm text-amber-200/90",
+          "flex items-center gap-2 rounded-md border border-amber-500/30 bg-amber-50 dark:bg-amber-950/20 px-3 py-2 text-sm text-amber-700 dark:text-amber-200/90",
           className,
         )}
       >

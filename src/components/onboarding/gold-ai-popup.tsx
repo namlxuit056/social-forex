@@ -76,11 +76,11 @@ export function GoldAiPopup() {
             <X className="size-4" aria-hidden />
           </button>
           <div className="flex items-start gap-3 pr-9">
-            <div className="flex size-11 shrink-0 items-center justify-center rounded-lg border border-yellow-500/25 bg-yellow-500/10 text-yellow-300">
+            <div className="flex size-11 shrink-0 items-center justify-center rounded-lg border border-yellow-500/25 bg-yellow-500/10 text-yellow-600 dark:text-yellow-300">
               <Sparkles className="size-5" aria-hidden />
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-semibold uppercase text-yellow-300">
+              <p className="text-xs font-semibold uppercase text-yellow-600 dark:text-yellow-300">
                 {t("eyebrow")}
               </p>
               <h2

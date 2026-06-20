@@ -18,8 +18,8 @@ export async function Disclaimer({
   }
 
   return (
-    <div className="rounded-lg border border-amber-500/20 bg-amber-950/10 px-4 py-3 text-xs leading-relaxed text-muted-foreground">
-      <div className="flex items-center gap-1.5 font-medium text-amber-400/80">
+    <div className="rounded-lg border border-amber-500/20 bg-amber-50 dark:bg-amber-950/10 px-4 py-3 text-xs leading-relaxed text-muted-foreground">
+      <div className="flex items-center gap-1.5 font-medium text-amber-600 dark:text-amber-400/80">
         <TriangleAlert className="size-3.5" />
         {t("title")}
       </div>

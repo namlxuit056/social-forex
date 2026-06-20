@@ -19,7 +19,7 @@ function toImpact(s: string): Impact {
 
 const impactClass: Record<Impact, string> = {
   low: "bg-muted text-muted-foreground",
-  medium: "bg-amber-500/20 text-amber-100 ring-1 ring-amber-500/35",
+  medium: "bg-amber-500/20 text-amber-800 dark:text-amber-100 ring-1 ring-amber-500/35",
   high: "bg-destructive/25 text-destructive-foreground ring-2 ring-destructive/45",
 };
 

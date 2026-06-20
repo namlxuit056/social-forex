@@ -77,10 +77,10 @@ export function DemoBacktest() {
         </label>
       </div>
 
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
-        <p className="text-sm text-zinc-400">
+      <div className="rounded-xl border border-border bg-muted/15 p-4">
+        <p className="text-sm text-muted-foreground">
           Equity cuối (mô phỏng):{" "}
-          <span className="font-mono text-emerald-400">{final}</span> USD · Lợi nhuận
+          <span className="font-mono text-emerald-600 dark:text-emerald-400">{final}</span> USD · Lợi nhuận
           gần đúng: <span className="font-mono">{ret}%</span>
         </p>
         <div className="mt-4 flex h-40 items-end gap-px overflow-hidden rounded bg-zinc-950">

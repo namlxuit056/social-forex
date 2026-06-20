@@ -82,13 +82,13 @@ function statusLabel(
 function statusBadgeClass(status: SignalRow["status"]): string {
   switch (status) {
     case "PENDING":
-      return "border-amber-500/45 bg-amber-500/15 text-amber-200";
+      return "border-amber-500/45 bg-amber-500/15 text-amber-700 dark:text-amber-200";
     case "ACTIVE":
-      return "border-emerald-500/40 bg-emerald-500/15 text-emerald-200";
+      return "border-emerald-500/40 bg-emerald-500/15 text-emerald-700 dark:text-emerald-200";
     case "CLOSED_WIN":
-      return "border-sky-500/40 bg-sky-500/15 text-sky-200";
+      return "border-sky-500/40 bg-sky-500/15 text-sky-700 dark:text-sky-200";
     case "CLOSED_LOSS":
-      return "border-destructive/40 bg-destructive/15 text-red-300";
+      return "border-destructive/40 bg-destructive/15 text-red-700 dark:text-red-300";
     case "CANCELLED":
       return "border-muted-foreground/35 bg-muted/40 text-muted-foreground";
     default:
@@ -697,7 +697,7 @@ export function SignalRoom({
                             {s.authorHasMt5 && (
                               <Badge
                                 variant="outline"
-                                className="gap-1 border-emerald-500/30 bg-emerald-500/8 text-emerald-400 text-[10px] px-1.5 py-0.5 h-5"
+                                className="gap-1 border-emerald-500/30 bg-emerald-500/8 text-emerald-600 dark:text-emerald-400 text-[10px] px-1.5 py-0.5 h-5"
                               >
                                 <ShieldCheck className="size-2.5" />
                                 MT5

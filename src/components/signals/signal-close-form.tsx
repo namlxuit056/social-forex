@@ -22,7 +22,7 @@ export function SignalCloseForm({ signalId }: { signalId: string }) {
         value="CLOSED_WIN"
         size="sm"
         variant="outline"
-        className="h-8 gap-1 px-2 text-xs text-emerald-400 hover:text-emerald-300"
+        className="h-8 gap-1 px-2 text-xs text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
       >
         {t("closeTpHit")}
       </Button>

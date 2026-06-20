@@ -38,26 +38,26 @@ function statusTone(status: string): Tone {
   switch (status) {
     case "PENDING":
       return {
-        badge: "border-amber-500/45 bg-amber-500/15 text-amber-200",
-        panel: "border-amber-500/40 bg-amber-500/10 text-amber-100",
+        badge: "border-amber-500/45 bg-amber-500/15 text-amber-700 dark:text-amber-200",
+        panel: "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-100",
         rail: "bg-amber-400",
       };
     case "ACTIVE":
       return {
-        badge: "border-emerald-500/45 bg-emerald-500/15 text-emerald-200",
-        panel: "border-emerald-500/40 bg-emerald-500/10 text-emerald-100",
+        badge: "border-emerald-500/45 bg-emerald-500/15 text-emerald-700 dark:text-emerald-200",
+        panel: "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-100",
         rail: "bg-emerald-400",
       };
     case "CLOSED_WIN":
       return {
-        badge: "border-sky-500/45 bg-sky-500/15 text-sky-200",
-        panel: "border-sky-500/40 bg-sky-500/10 text-sky-100",
+        badge: "border-sky-500/45 bg-sky-500/15 text-sky-700 dark:text-sky-200",
+        panel: "border-sky-500/40 bg-sky-500/10 text-sky-700 dark:text-sky-100",
         rail: "bg-sky-400",
       };
     case "CLOSED_LOSS":
       return {
-        badge: "border-destructive/45 bg-destructive/15 text-red-300",
-        panel: "border-destructive/40 bg-destructive/10 text-red-200",
+        badge: "border-destructive/45 bg-destructive/15 text-red-700 dark:text-red-300",
+        panel: "border-destructive/40 bg-destructive/10 text-red-700 dark:text-red-200",
         rail: "bg-destructive",
       };
     default:
@@ -187,9 +187,9 @@ function SignalCard({
             className={cn(
               "font-mono",
               (item.lastProfit ?? 0) > 0
-                ? "text-emerald-300"
+                ? "text-emerald-600 dark:text-emerald-300"
                 : (item.lastProfit ?? 0) < 0
-                  ? "text-red-300"
+                  ? "text-red-600 dark:text-red-300"
                   : "text-foreground",
             )}
           >
@@ -269,7 +269,7 @@ export function Mt5SyncedSignalsList({
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
               <RunningTigerAnimation />
-              <h3 className="whitespace-nowrap text-xs font-semibold uppercase text-emerald-300">
+              <h3 className="whitespace-nowrap text-xs font-semibold uppercase text-emerald-700 dark:text-emerald-300">
                 {t("mt5RunningNowTitle")}
               </h3>
             </div>
