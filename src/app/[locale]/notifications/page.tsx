@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NotificationList } from "@/components/notifications/notification-list";
+import { PushNotificationManager } from "@/components/notifications/push-notification-manager";
 import { Button } from "@/components/ui/button";
 import { markAllNotificationsRead } from "@/actions/notifications";
 
@@ -71,6 +72,8 @@ export default async function NotificationsPage({
           </form>
         ) : null}
       </div>
+
+      <PushNotificationManager />
 
       <NotificationList items={items} locale={locale} />
     </div>

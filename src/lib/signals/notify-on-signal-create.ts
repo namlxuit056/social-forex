@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { isVipActive } from "@/lib/vip";
+import { sendPushToFollowers } from "@/lib/push";
 
 /**
  * In-app notifications: followers, watchlist symbol, optional VIP broadcast.
@@ -70,4 +71,14 @@ export async function notifySignalSubscribers(signal: {
       }),
     ),
   );
+
+  try {
+    await sendPushToFollowers(authorId, {
+      title: `${signal.symbol} ${signal.tier === "VIP" ? "⭐ " : ""}Signal mới`,
+      body: `Trader vừa đăng signal ${signal.symbol} — Xem ngay`,
+      url: `/signals/${signal.id}`,
+    });
+  } catch {
+    // Non-blocking
+  }
 }

@@ -111,6 +111,7 @@ model User {
   referredUsers        User[]    @relation("ReferralInvite")
   referralRewardsGiven ReferralEvent[] @relation("ReferralRewardReferrer")
   referralRewardsEarned ReferralEvent[] @relation("ReferralRewardReferee")
+  pushSubscriptions    UserPushSubscription[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -748,4 +749,17 @@ model ReferralEvent {
   @@unique([referrerId, refereeId])
   @@index([referrerId])
   @@index([refereeId])
+}
+
+model UserPushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }

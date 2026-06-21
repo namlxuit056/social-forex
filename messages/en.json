@@ -1133,7 +1133,14 @@
     "followYou": "{name} started following you",
     "followUnknownName": "Someone",
     "unreadBadge": "Unread",
-    "readBadge": "Read"
+    "readBadge": "Read",
+    "pushEnabled": "Push Notifications",
+    "pushEnabledHint": "You'll receive alerts for new signals and streak reminders.",
+    "pushDisabled": "Push Notifications are off",
+    "pushDisabledHint": "Enable to get alerts for new signals from traders you follow.",
+    "pushSubscribe": "Enable",
+    "pushUnsubscribe": "Disable",
+    "pushFailed": "Could not update push notification settings."
   },
   "auth": {
     "signInTitle": "Sign in",
