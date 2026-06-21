@@ -224,6 +224,7 @@ model Signal {
   notifications Notification[]
   pinnedBy      UserPinnedSignal[]
   mt5Link       Mt5SignalLink?
+  copiedJournals TradeJournal[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -345,6 +346,9 @@ model TradeJournal {
   pnl        Float?
   notes      String?
 
+  copiedFromSignalId String?
+  copiedFromSignal   Signal?  @relation(fields: [copiedFromSignalId], references: [id], onDelete: SetNull)
+
   user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   mt5Link Mt5SignalLink?
 
@@ -354,6 +358,7 @@ model TradeJournal {
   updatedAt DateTime  @updatedAt
 
   @@index([userId, openedAt])
+  @@index([copiedFromSignalId])
 }
 
 model DailyTradingPlan {

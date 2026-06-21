@@ -1519,7 +1519,11 @@
     "aiReviewPlan": "Next review plan",
     "aiPriority_high": "High priority",
     "aiPriority_medium": "Medium priority",
-    "aiPriority_low": "Low priority"
+    "aiPriority_low": "Low priority",
+    "copyFromSignal": "Copy to Journal",
+    "copiedFromSignal": "Copied from signal",
+    "signalCopiedCount": "{count} traders copied",
+    "signalCopiedEmpty": "Be the first to copy this signal"
   },
   "errors": {
     "invalidData": "Invalid data.",

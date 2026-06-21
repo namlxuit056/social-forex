@@ -32,6 +32,7 @@ import { RiskCalculator } from "@/components/tools/risk-calculator";
 import { SignalReactions } from "./signal-reactions";
 import { SignalComments } from "./signal-comments";
 import { PinSignalButton } from "@/components/signals/pin-signal-button";
+import { CopyToJournalButton } from "@/components/signals/copy-to-journal-button";
 import { isAtPinLimit } from "@/lib/signals/pin-signal-limit";
 import { cn } from "@/lib/utils";
 
@@ -380,6 +381,17 @@ export default async function SignalDetailPage({
                 loggedIn={!!userId}
                 atLimit={atPinLimit}
               />
+              {!isAuthor && !masked ? (
+                <CopyToJournalButton
+                  signalId={signalId}
+                  symbol={signal.symbol}
+                  direction={signal.direction}
+                  entry={signal.entry}
+                  stopLoss={signal.stopLoss}
+                  takeProfit={signal.takeProfit}
+                  loggedIn={!!userId}
+                />
+              ) : null}
               {isAuthor ? (
                 <SignalShareCopy
                   show

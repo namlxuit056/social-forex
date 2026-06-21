@@ -1519,7 +1519,11 @@
     "aiReviewPlan": "Kế hoạch review tiếp theo",
     "aiPriority_high": "Ưu tiên cao",
     "aiPriority_medium": "Ưu tiên vừa",
-    "aiPriority_low": "Ưu tiên thấp"
+    "aiPriority_low": "Ưu tiên thấp",
+    "copyFromSignal": "Copy vào Journal",
+    "copiedFromSignal": "Đã copy từ signal",
+    "signalCopiedCount": "{count} trader đã copy",
+    "signalCopiedEmpty": "Là người đầu tiên copy signal này"
   },
   "errors": {
     "invalidData": "Dữ liệu không hợp lệ.",

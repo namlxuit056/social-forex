@@ -3,7 +3,7 @@
 import { useEffect, useTransition } from "react";
 import { useActionState } from "react";
 import { useTranslations } from "next-intl";
-import { X } from "lucide-react";
+import { X, BookOpen } from "lucide-react";
 import { createTrade } from "@/actions/journal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,7 +19,22 @@ import {
 const SELECT_CLASS =
   "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
 
-export function JournalFormCard({ onClose }: { onClose: () => void }) {
+type PrefillData = {
+  symbol?: string;
+  direction?: string;
+  entry?: string;
+  stopLoss?: string;
+  takeProfit?: string;
+  from?: string;
+};
+
+export function JournalFormCard({
+  onClose,
+  prefill,
+}: {
+  onClose: () => void;
+  prefill?: PrefillData;
+}) {
   const t = useTranslations("journal");
   const [, startTransition] = useTransition();
   const [state, formAction, isPending] = useActionState(createTrade, null);
@@ -31,35 +46,76 @@ export function JournalFormCard({ onClose }: { onClose: () => void }) {
   return (
     <Card className="border-primary/20">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-base">{t("addTrade")}</CardTitle>
+        <CardTitle className="flex items-center gap-2 text-base">
+          {prefill?.from ? (
+            <>
+              <BookOpen className="size-4 text-primary" />
+              {t("copyFromSignal")}
+            </>
+          ) : (
+            t("addTrade")
+          )}
+        </CardTitle>
         <Button variant="ghost" size="icon" className="size-7" onClick={onClose}>
           <X className="size-4" />
         </Button>
       </CardHeader>
       <CardContent>
         <form action={formAction} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {prefill?.from && (
+            <input type="hidden" name="copiedFromSignalId" value={prefill.from} />
+          )}
           <div>
             <Label>{t("symbol")}</Label>
-            <Input name="symbol" required placeholder="XAUUSD" className="mt-1.5 font-mono uppercase" />
+            <Input
+              name="symbol"
+              required
+              placeholder="XAUUSD"
+              defaultValue={prefill?.symbol}
+              className="mt-1.5 font-mono uppercase"
+            />
           </div>
           <div>
             <Label>{t("direction")}</Label>
-            <select name="direction" className={`mt-1.5 ${SELECT_CLASS}`}>
+            <select
+              name="direction"
+              defaultValue={prefill?.direction}
+              className={`mt-1.5 ${SELECT_CLASS}`}
+            >
               <option value="LONG">LONG</option>
               <option value="SHORT">SHORT</option>
             </select>
           </div>
           <div>
             <Label>{t("entry")}</Label>
-            <Input name="entry" type="number" step="any" required className="mt-1.5 font-mono" />
+            <Input
+              name="entry"
+              type="number"
+              step="any"
+              required
+              defaultValue={prefill?.entry}
+              className="mt-1.5 font-mono"
+            />
           </div>
           <div>
             <Label>{t("stopLoss")}</Label>
-            <Input name="stopLoss" type="number" step="any" className="mt-1.5 font-mono" />
+            <Input
+              name="stopLoss"
+              type="number"
+              step="any"
+              defaultValue={prefill?.stopLoss}
+              className="mt-1.5 font-mono"
+            />
           </div>
           <div>
             <Label>{t("takeProfit")}</Label>
-            <Input name="takeProfit" type="number" step="any" className="mt-1.5 font-mono" />
+            <Input
+              name="takeProfit"
+              type="number"
+              step="any"
+              defaultValue={prefill?.takeProfit}
+              className="mt-1.5 font-mono"
+            />
           </div>
           <div>
             <Label>{t("lotSize")}</Label>

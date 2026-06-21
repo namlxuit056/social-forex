@@ -53,7 +53,7 @@ describe("Referral Stats", () => {
       referralCode: "ABC12345",
     };
 
-    vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser as any);
+    vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUser as never);
     vi.mocked(prisma.user.count).mockResolvedValue(5);
 
     const stats = await prisma.user.findUnique({
@@ -68,7 +68,6 @@ describe("Referral Stats", () => {
 describe("VIP Reward Logic", () => {
   it("calculates correct VIP days", () => {
     const REFERRER_DAYS = 7;
-    const REFEREE_DAYS = 3;
 
     const currentVip = new Date();
     const newVip = new Date(currentVip);

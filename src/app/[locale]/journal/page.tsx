@@ -27,10 +27,20 @@ export const dynamic = "force-dynamic";
 
 export default async function JournalPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams?: Promise<{
+    symbol?: string;
+    direction?: string;
+    entry?: string;
+    stopLoss?: string;
+    takeProfit?: string;
+    from?: string;
+  }>;
 }) {
   const { locale } = await params;
+  const query = await searchParams;
   setRequestLocale(locale);
   const t = await getTranslations("journal");
 
@@ -136,9 +146,20 @@ export default async function JournalPage({
     closedAt: t.closedAt?.toISOString() ?? null,
   }));
 
+  const prefill = query?.symbol
+    ? {
+        symbol: query.symbol,
+        direction: query.direction,
+        entry: query.entry,
+        stopLoss: query.stopLoss,
+        takeProfit: query.takeProfit,
+        from: query.from,
+      }
+    : undefined;
+
   return (
     <div className="space-y-8">
-      <JournalHeader />
+      <JournalHeader prefill={prefill} />
 
       <JournalStats
         total={trades.length}

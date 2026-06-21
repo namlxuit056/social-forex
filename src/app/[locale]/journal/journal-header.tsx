@@ -6,9 +6,18 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { JournalFormCard } from "./journal-form";
 
-export function JournalHeader() {
+type PrefillData = {
+  symbol?: string;
+  direction?: string;
+  entry?: string;
+  stopLoss?: string;
+  takeProfit?: string;
+  from?: string;
+};
+
+export function JournalHeader({ prefill }: { prefill?: PrefillData }) {
   const t = useTranslations("journal");
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(!!prefill?.symbol);
 
   return (
     <div className="space-y-4">
@@ -27,7 +36,12 @@ export function JournalHeader() {
         )}
       </div>
 
-      {open && <JournalFormCard onClose={() => setOpen(false)} />}
+      {open && (
+        <JournalFormCard
+          onClose={() => setOpen(false)}
+          prefill={prefill}
+        />
+      )}
     </div>
   );
 }

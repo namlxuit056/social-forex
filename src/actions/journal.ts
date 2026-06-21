@@ -73,6 +73,7 @@ export async function createTrade(
       notes: d.notes,
       openedAt: d.openedAt,
       closedAt: d.closedAt,
+      copiedFromSignalId: (formData.get("copiedFromSignalId") as string) || null,
     },
   });
 
