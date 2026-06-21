@@ -7,7 +7,6 @@ import {
   Cable,
   CheckCircle2,
   ClipboardCheck,
-  Lock,
   MessageCircle,
   MessageSquare,
   PlusCircle,
@@ -38,32 +37,7 @@ import { prisma } from "@/lib/prisma";
 import { isVipActive } from "@/lib/vip";
 import { DailyActivityWidget } from "@/components/dashboard/daily-activity-widget";
 import { ReferralWidget } from "@/components/dashboard/referral-widget";
-
-type FollowFeedMode = "latest" | "active";
-
-function parseFollowFeedMode(value: string | string[] | undefined): FollowFeedMode {
-  return value === "active" ? "active" : "latest";
-}
-
-function signalStatusText(
-  status: "PENDING" | "ACTIVE" | "CLOSED_WIN" | "CLOSED_LOSS" | "CANCELLED",
-  t: (key: string) => string,
-) {
-  switch (status) {
-    case "PENDING":
-      return t("followFeedStatusPending");
-    case "ACTIVE":
-      return t("followFeedStatusActive");
-    case "CLOSED_WIN":
-      return t("followFeedStatusWin");
-    case "CLOSED_LOSS":
-      return t("followFeedStatusLoss");
-    case "CANCELLED":
-      return t("followFeedStatusCancelled");
-    default:
-      return status;
-  }
-}
+import { FeedSection } from "@/components/dashboard/feed-section";
 
 export async function generateMetadata({
   params,
@@ -78,17 +52,13 @@ export async function generateMetadata({
 
 export default async function DashboardPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams?: Promise<{ follow?: string | string[] }>;
 }) {
   const { locale } = await params;
-  const query = await searchParams;
   setRequestLocale(locale);
   const t = await getTranslations("dashboard");
   const tc = await getTranslations("common");
-  const followFeedMode = parseFollowFeedMode(query?.follow);
 
   const session = await auth();
   const userId = session?.user?.id;
@@ -102,7 +72,7 @@ export default async function DashboardPage({
     });
   }
 
-  const [user, activeSignals, closedSignals, unreadDm, following] = await Promise.all([
+  const [user, activeSignals, closedSignals, unreadDm] = await Promise.all([
     prisma.user.findUnique({
       where: { id: userId },
       select: { name: true, email: true, vipUntil: true },
@@ -117,39 +87,10 @@ export default async function DashboardPage({
     prisma.directMessage.count({
       where: { recipientId: userId, readAt: null },
     }),
-    prisma.userFollow.findMany({
-      where: { followerId: userId },
-      select: { followingId: true },
-      orderBy: { id: "asc" },
-    }),
   ]);
 
   const displayName = user?.name ?? user?.email ?? "Trader";
   const vipActive = isVipActive(user?.vipUntil);
-  const followedTraderIds = following.map((f) => f.followingId);
-  const followedSignals =
-    followedTraderIds.length > 0
-      ? await prisma.signal.findMany({
-          where: {
-            authorId: { in: followedTraderIds },
-            ...(followFeedMode === "active" ? { status: "ACTIVE" as const } : {}),
-          },
-          orderBy: { createdAt: "desc" },
-          take: 6,
-          select: {
-            id: true,
-            symbol: true,
-            direction: true,
-            entry: true,
-            stopLoss: true,
-            takeProfit: true,
-            tier: true,
-            status: true,
-            createdAt: true,
-            author: { select: { id: true, name: true, email: true } },
-          },
-        })
-      : [];
 
   const wins = closedSignals.filter((s) => s.status === "CLOSED_WIN").length;
   const losses = closedSignals.filter((s) => s.status === "CLOSED_LOSS").length;
@@ -650,155 +591,7 @@ export default async function DashboardPage({
         </div>
       </section>
 
-      <section className="space-y-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h2 className="font-heading text-lg font-medium text-foreground">
-              {t("followFeedTitle")}
-            </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {t("followFeedHint")}
-            </p>
-          </div>
-          <div className="flex rounded-lg border border-border bg-muted/20 p-1">
-            {(["latest", "active"] as const).map((mode) => (
-              <Link
-                key={mode}
-                href={mode === "latest" ? "/dashboard" : "/dashboard?follow=active"}
-                className={cn(
-                  "rounded-md px-3 py-1.5 text-xs font-medium transition",
-                  followFeedMode === mode
-                    ? "bg-background text-foreground shadow-xs"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-                aria-current={followFeedMode === mode ? "page" : undefined}
-              >
-                {mode === "latest"
-                  ? t("followFeedFilterLatest")
-                  : t("followFeedFilterActive")}
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        {followedTraderIds.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-border/80 bg-muted/15 px-4 py-5 sm:px-6">
-            <h3 className="font-heading text-base font-medium text-foreground">
-              {t("followFeedNoFollowsTitle")}
-            </h3>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              {t("followFeedNoFollowsBody")}
-            </p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <Link
-                href="/leaderboard"
-                className={cn(buttonVariants({ variant: "default", size: "sm" }))}
-              >
-                {t("followFeedNoFollowsCtaLeaderboard")}
-              </Link>
-              <Link
-                href="/signals"
-                className={cn(buttonVariants({ variant: "secondary", size: "sm" }))}
-              >
-                {t("followFeedNoFollowsCtaSignals")}
-              </Link>
-            </div>
-          </div>
-        ) : followedSignals.length === 0 ? (
-          <div className="rounded-lg border border-border bg-card/50 px-4 py-5 sm:px-6">
-            <h3 className="font-heading text-base font-medium text-foreground">
-              {t("followFeedEmptyTitle")}
-            </h3>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              {followFeedMode === "active"
-                ? t("followFeedEmptyActiveBody")
-                : t("followFeedEmptyLatestBody")}
-            </p>
-          </div>
-        ) : (
-          <div className="divide-y divide-border/60 overflow-hidden rounded-lg border border-border/70 bg-card/45">
-            {followedSignals.map((signal) => {
-              const masked = signal.tier === "VIP" && !vipActive && signal.author.id !== userId;
-              const authorLabel =
-                signal.author.name ?? signal.author.email ?? t("followFeedTraderFallback");
-              const createdAt = signal.createdAt.toLocaleString(locale);
-              return (
-                <div
-                  key={signal.id}
-                  className="grid gap-3 px-4 py-3 transition hover:bg-muted/20 md:grid-cols-[minmax(0,1fr)_auto] md:items-center"
-                >
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Link
-                        href={`/signals/${signal.id}`}
-                        className="font-heading text-base font-semibold text-foreground hover:text-primary"
-                      >
-                        {signal.symbol} {signal.direction}
-                      </Link>
-                      <Badge variant={signal.tier === "VIP" ? "secondary" : "outline"}>
-                        {signal.tier}
-                      </Badge>
-                      <Badge variant="outline">
-                        {signalStatusText(signal.status, t)}
-                      </Badge>
-                    </div>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {t("followFeedByline", {
-                        trader: authorLabel,
-                        date: createdAt,
-                      })}
-                    </p>
-                  </div>
-                  <div className="flex flex-col gap-3 md:items-end">
-                    {masked ? (
-                      <div className="flex items-center gap-2 rounded-md border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-sm text-muted-foreground">
-                        <Lock className="size-4 shrink-0 text-amber-500" aria-hidden />
-                        {t("followFeedVipLocked")}
-                      </div>
-                    ) : (
-                      <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
-                        <span className="font-mono text-foreground">
-                          <span className="mr-1 text-[0.65rem] uppercase text-muted-foreground">
-                            {t("followFeedEntry")}
-                          </span>
-                          {signal.entry}
-                        </span>
-                        <span className="font-mono text-foreground">
-                          <span className="mr-1 text-[0.65rem] uppercase text-muted-foreground">
-                            {t("followFeedStopLoss")}
-                          </span>
-                          {signal.stopLoss ?? "—"}
-                        </span>
-                        <span className="font-mono text-foreground">
-                          <span className="mr-1 text-[0.65rem] uppercase text-muted-foreground">
-                            {t("followFeedTakeProfit")}
-                          </span>
-                          {signal.takeProfit ?? "—"}
-                        </span>
-                      </div>
-                    )}
-                    <div className="flex flex-wrap gap-2">
-                      <Link
-                        href={`/u/${signal.author.id}`}
-                        className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
-                      >
-                        {t("followFeedViewTrader")}
-                      </Link>
-                      <Link
-                        href={`/signals/${signal.id}`}
-                        className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
-                      >
-                        {t("followFeedOpenSignal")}
-                        <ArrowRight className="ml-1 size-4" aria-hidden />
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </section>
+      <FeedSection />
 
       <Separator />
       <Disclaimer variant="compact" />
