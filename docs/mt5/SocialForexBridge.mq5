@@ -178,8 +178,8 @@ bool SendSnapshot()
    }
 
    string body = BuildPayload();
-   char data[];
-   char result[];
+   uchar data[];
+   uchar result[];
    string result_headers;
    string headers = "Content-Type: application/json\r\n";
 

@@ -30,7 +30,7 @@ string JsonString(string value)
    return "\"" + JsonEscape(value) + "\"";
 }
 
-string ReadResponse(int handle)
+string FetchResponse()
 {
    uchar result[];
    uchar data[];
@@ -47,7 +47,14 @@ string ReadResponse(int handle)
 
    if(status == -1)
    {
-      Print("SocialForexCopyTrade: WebRequest failed. Error=", GetLastError());
+      Print("SocialForexCopyTrade: WebRequest failed. Error=", GetLastError(),
+            ". Add the URL in MT5 Options > Expert Advisors.");
+      return "";
+   }
+
+   if(status < 200 || status >= 300)
+   {
+      Print("SocialForexCopyTrade: HTTP ", status);
       return "";
    }
 
@@ -69,21 +76,55 @@ string FindJsonValue(string json, string key)
       pos++;
    }
 
-   if(StringGetCharacter(json, pos) == '"')
+   ushort first = StringGetCharacter(json, pos);
+
+   if(first == '"')
    {
       pos++;
       int start = pos;
       while(pos < StringLen(json))
       {
-         if(StringGetCharacter(json, pos) == '"')
-            break;
-         if(StringGetCharacter(json, pos) == '\\')
-            pos++;
+         ushort ch = StringGetCharacter(json, pos);
+         if(ch == '"') break;
+         if(ch == '\\') pos++;
          pos++;
       }
       return StringSubstr(json, start, pos - start);
    }
 
+   // Handle arrays [...] and objects {...} by counting brackets
+   if(first == '[' || first == '{')
+   {
+      ushort open = first;
+      ushort close = (open == '[') ? ']' : '}';
+      int depth = 0;
+      int start = pos;
+      bool inStr = false;
+      while(pos < StringLen(json))
+      {
+         ushort ch = StringGetCharacter(json, pos);
+         if(inStr)
+         {
+            if(ch == '\\') { pos++; }
+            else if(ch == '"') inStr = false;
+         }
+         else
+         {
+            if(ch == '"') inStr = true;
+            else if(ch == open) depth++;
+            else if(ch == close)
+            {
+               depth--;
+               if(depth == 0)
+                  return StringSubstr(json, start, pos - start + 1);
+            }
+         }
+         pos++;
+      }
+      return "";
+   }
+
+   // Scalar value (number, bool, null)
    int start = pos;
    while(pos < StringLen(json))
    {
@@ -120,7 +161,7 @@ double CalcLotSize(double balance, double riskPercent, double entry, double sl)
    return NormalizeDouble(lot, 2);
 }
 
-bool HasOpenPosition(string symbol, long signalType)
+bool HasOpenPosition(string symbol, long posType)
 {
    int total = PositionsTotal();
    for(int i = 0; i < total; i++)
@@ -130,7 +171,7 @@ bool HasOpenPosition(string symbol, long signalType)
       if(!PositionSelectByTicket(ticket)) continue;
       if(PositionGetString(POSITION_SYMBOL) != symbol) continue;
       if(PositionGetInteger(POSITION_MAGIC) != MagicNumber) continue;
-      if(PositionGetInteger(POSITION_TYPE) == signalType)
+      if(PositionGetInteger(POSITION_TYPE) == posType)
          return true;
    }
    return false;
@@ -170,18 +211,18 @@ bool OpenTrade(string symbol, string direction, double entry, double sl, double 
       price = SymbolInfoDouble(symbol, SYMBOL_BID);
 
    MqlTradeRequest request = {};
-   MqlTradeResult result = {};
+   MqlTradeResult  result  = {};
 
-   request.action = TRADE_ACTION_DEAL;
-   request.symbol = symbol;
-   request.volume = lot;
-   request.type = orderType;
-   request.price = price;
-   request.sl = sl;
-   request.tp = tp;
+   request.action    = TRADE_ACTION_DEAL;
+   request.symbol    = symbol;
+   request.volume    = lot;
+   request.type      = orderType;
+   request.price     = price;
+   request.sl        = sl;
+   request.tp        = tp;
    request.deviation = MaxSlippage;
-   request.magic = MagicNumber;
-   request.comment = "SocialForex Copy";
+   request.magic     = MagicNumber;
+   request.comment   = "SocialForex Copy";
 
    if(!OrderSend(request, result))
    {
@@ -190,36 +231,20 @@ bool OpenTrade(string symbol, string direction, double entry, double sl, double 
       return false;
    }
 
-   Print("SocialForexCopyTrade: Opened ", symbol, " ", direction, " lot=", lot,
-         " ticket=", result.order);
+   Print("SocialForexCopyTrade: Opened ", symbol, " ", direction,
+         " lot=", lot, " ticket=", result.order);
    return true;
 }
 
-void OnTick()
+void ProcessSignals(string response)
 {
-   if(CopyToken == "") return;
-
-   datetime now = TimeCurrent();
-   if(now - last_poll_at < MathMax(5, PollSeconds))
-      return;
-   last_poll_at = now;
-
-   string response = ReadResponse(0);
-   if(response == "") return;
-
-   Print("SocialForexCopyTrade: response=", response);
-
    string signalsStr = FindJsonValue(response, "signals");
    if(signalsStr == "" || signalsStr == "[]") return;
 
-   string mode = FindJsonValue(response, "mode");
-   string fixedLotStr = FindJsonValue(response, "fixedLot");
-   string riskPercentStr = FindJsonValue(response, "riskPercent");
-   string maxLotsStr = FindJsonValue(response, "maxLots");
-
-   double fixedLot = StringToDouble(fixedLotStr);
-   double riskPercent = StringToDouble(riskPercentStr);
-   double maxLots = StringToDouble(maxLotsStr);
+   string mode          = FindJsonValue(response, "mode");
+   double fixedLot      = StringToDouble(FindJsonValue(response, "fixedLot"));
+   double riskPercent   = StringToDouble(FindJsonValue(response, "riskPercent"));
+   double maxLots       = StringToDouble(FindJsonValue(response, "maxLots"));
    if(maxLots <= 0) maxLots = 10;
 
    double balance = AccountInfoDouble(ACCOUNT_BALANCE);
@@ -229,27 +254,48 @@ void OnTick()
    {
       int objStart = StringFind(signalsStr, "{", pos);
       if(objStart == -1) break;
-      int objEnd = StringFind(signalsStr, "}", objStart);
+
+      // Find matching closing brace (skip nested objects in string values)
+      int depth = 0;
+      bool inStr = false;
+      int objEnd = -1;
+      int i = objStart;
+      while(i < StringLen(signalsStr))
+      {
+         ushort ch = StringGetCharacter(signalsStr, i);
+         if(inStr)
+         {
+            if(ch == '\\') { i++; }
+            else if(ch == '"') inStr = false;
+         }
+         else
+         {
+            if(ch == '"') inStr = true;
+            else if(ch == '{') depth++;
+            else if(ch == '}')
+            {
+               depth--;
+               if(depth == 0) { objEnd = i; break; }
+            }
+         }
+         i++;
+      }
       if(objEnd == -1) break;
 
       string signalObj = StringSubstr(signalsStr, objStart, objEnd - objStart + 1);
       pos = objEnd + 1;
 
-      string signalId = FindJsonValue(signalObj, "id");
-      string symbol = FindJsonValue(signalObj, "symbol");
+      string signalId  = FindJsonValue(signalObj, "id");
+      string symbol    = FindJsonValue(signalObj, "symbol");
       string direction = FindJsonValue(signalObj, "direction");
-      string entryStr = FindJsonValue(signalObj, "entry");
-      string slStr = FindJsonValue(signalObj, "stopLoss");
-      string tpStr = FindJsonValue(signalObj, "takeProfit");
+      double entry     = StringToDouble(FindJsonValue(signalObj, "entry"));
+      double sl        = StringToDouble(FindJsonValue(signalObj, "stopLoss"));
+      double tp        = StringToDouble(FindJsonValue(signalObj, "takeProfit"));
 
       if(signalId == "" || symbol == "" || direction == "") continue;
 
-      if(StringFind(known_signal_ids, signalId) != -1)
+      if(StringFind(known_signal_ids, signalId + ",") != -1)
          continue;
-
-      double entry = StringToDouble(entryStr);
-      double sl = StringToDouble(slStr);
-      double tp = StringToDouble(tpStr);
 
       double lot;
       if(mode == "PERCENT")
@@ -258,16 +304,32 @@ void OnTick()
          lot = fixedLot;
 
       lot = MathMin(lot, maxLots);
-
       if(lot <= 0) lot = 0.01;
 
       bool opened = OpenTrade(symbol, direction, entry, sl, tp, lot);
       if(opened)
-      {
          known_signal_ids += signalId + ",";
-      }
    }
 }
+
+void PollAndProcess()
+{
+   if(CopyToken == "") return;
+
+   datetime now = TimeCurrent();
+   if(now - last_poll_at < MathMax(5, PollSeconds))
+      return;
+   last_poll_at = now;
+
+   string response = FetchResponse();
+   if(response == "") return;
+
+   Print("SocialForexCopyTrade: response=", response);
+   ProcessSignals(response);
+}
+
+void OnTick()  { PollAndProcess(); }
+void OnTimer() { PollAndProcess(); }
 
 int OnInit()
 {
@@ -279,16 +341,4 @@ int OnInit()
 void OnDeinit(const int reason)
 {
    EventKillTimer();
-}
-
-void OnTimer()
-{
-   datetime now = TimeCurrent();
-   if(now - last_poll_at < MathMax(5, PollSeconds))
-      return;
-   last_poll_at = now;
-
-   string response = ReadResponse(0);
-   if(response != "")
-      Print("SocialForexCopyTrade: polled OK");
 }
