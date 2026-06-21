@@ -32,14 +32,15 @@ string JsonString(string value)
 
 string ReadResponse(int handle)
 {
-   char result[];
+   uchar result[];
+   uchar data[];
    string result_headers;
    int status = WebRequest(
       "GET",
       ApiEndpoint + "?token=" + CopyToken,
       "Content-Type: application/json\r\n",
       10000,
-      NULL,
+      data,
       result,
       result_headers
    );
