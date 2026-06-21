@@ -136,7 +136,7 @@ string FindJsonValue(string json, string key)
    return StringSubstr(json, start, pos - start);
 }
 
-double CalcLotSize(double balance, double riskPercent, double entry, double sl)
+double CalcLotSize(string symbol, double balance, double riskPercent, double entry, double sl)
 {
    if(riskPercent <= 0 || entry <= 0 || sl <= 0)
       return 0.01;
@@ -145,14 +145,14 @@ double CalcLotSize(double balance, double riskPercent, double entry, double sl)
    double slDistance = MathAbs(entry - sl);
    if(slDistance <= 0) return 0.01;
 
-   double tickValue = SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_VALUE);
-   double tickSize = SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE);
+   double tickValue = SymbolInfoDouble(symbol, SYMBOL_TRADE_TICK_VALUE);
+   double tickSize  = SymbolInfoDouble(symbol, SYMBOL_TRADE_TICK_SIZE);
    if(tickValue <= 0 || tickSize <= 0) return 0.01;
 
-   double lot = riskAmount / (slDistance / tickSize * tickValue);
-   double minLot = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
-   double maxLot = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MAX);
-   double stepLot = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_STEP);
+   double lot      = riskAmount / (slDistance / tickSize * tickValue);
+   double minLot   = SymbolInfoDouble(symbol, SYMBOL_VOLUME_MIN);
+   double maxLot   = SymbolInfoDouble(symbol, SYMBOL_VOLUME_MAX);
+   double stepLot  = SymbolInfoDouble(symbol, SYMBOL_VOLUME_STEP);
 
    lot = MathFloor(lot / stepLot) * stepLot;
    lot = MathMax(lot, minLot);
@@ -190,7 +190,7 @@ bool OpenTrade(string symbol, string direction, double entry, double sl, double 
 
    if(!TerminalInfoInteger(TERMINAL_TRADE_ALLOWED))
    {
-      Print("SocialForexCopyTrade: Retcode 10027 — Algo Trading is disabled. Click the green play button on the MT5 toolbar.");
+      Print("SocialForexCopyTrade: Retcode 10027 - Algo Trading is disabled. Click the green play button on the MT5 toolbar.");
       return false;
    }
 
@@ -223,6 +223,28 @@ bool OpenTrade(string symbol, string direction, double entry, double sl, double 
    else
       price = SymbolInfoDouble(symbol, SYMBOL_BID);
 
+   // Clamp SL/TP to broker's minimum stop distance (prevents Retcode 10016)
+   int    digits  = (int)SymbolInfoInteger(symbol, SYMBOL_DIGITS);
+   double minDist = SymbolInfoInteger(symbol, SYMBOL_TRADE_STOPS_LEVEL)
+                    * SymbolInfoDouble(symbol, SYMBOL_POINT);
+   bool   isBuy   = (orderType == ORDER_TYPE_BUY);
+
+   double safeSL = 0;
+   if(sl > 0)
+   {
+      bool slOk = isBuy ? (price - sl >= minDist) : (sl - price >= minDist);
+      if(slOk) safeSL = NormalizeDouble(sl, digits);
+      else Print("SocialForexCopyTrade: SL ", sl, " too close (minDist=", minDist, ") - skipped");
+   }
+
+   double safeTP = 0;
+   if(tp > 0)
+   {
+      bool tpOk = isBuy ? (tp - price >= minDist) : (price - tp >= minDist);
+      if(tpOk) safeTP = NormalizeDouble(tp, digits);
+      else Print("SocialForexCopyTrade: TP ", tp, " too close (minDist=", minDist, ") - skipped");
+   }
+
    MqlTradeRequest request = {};
    MqlTradeResult  result  = {};
 
@@ -231,8 +253,8 @@ bool OpenTrade(string symbol, string direction, double entry, double sl, double 
    request.volume    = lot;
    request.type      = orderType;
    request.price     = price;
-   request.sl        = sl;
-   request.tp        = tp;
+   request.sl        = safeSL;
+   request.tp        = safeTP;
    request.deviation = MaxSlippage;
    request.magic     = MagicNumber;
    request.comment   = "SocialForex Copy";
@@ -312,7 +334,7 @@ void ProcessSignals(string response)
 
       double lot;
       if(mode == "PERCENT")
-         lot = CalcLotSize(balance, riskPercent, entry, sl);
+         lot = CalcLotSize(symbol, balance, riskPercent, entry, sl);
       else
          lot = fixedLot;
 

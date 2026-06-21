@@ -92,6 +92,7 @@ export default async function CopyTradePage({
       title: t("step6Title"),
       desc: t("step6Desc"),
       details: [t("step6Detail1"), t("step6Detail2"), t("step6Detail3")],
+      tip: t("step6AlgoNote"),
     },
   ];
 

@@ -54,7 +54,12 @@ Download `SocialForexCopyTrade.mq5` from the setup page.
 1. Go to `Tools -> Options -> Expert Advisors`
 2. ✅ Enable **Allow Algo Trading**
 3. ✅ Enable **Allow WebRequest for listed URL**
-4. Add: `https://toolforex.xyz`
+4. Add: `https://www.toolforex.xyz`
+
+> **Note — two separate switches:**
+> - The checkbox in Options above is a *permanent* global setting.
+> - The **Algo Trading toolbar button** (▶ green icon in the toolbar) is a *per-session* toggle that overrides everything. It must be **ON** (green) every time you open MT5.
+> - If the Journal tab shows `Retcode=10027`, it means the toolbar button is OFF — click it to turn it green.
 
 ### Step 7: Attach the EA
 
@@ -101,14 +106,22 @@ Download `SocialForexCopyTrade.mq5` from the setup page.
 
 ### EA not connecting
 - Check that `Allow WebRequest` is enabled in MT5 Options
-- Verify the URL `https://toolforex.xyz` is added to the allowed list
+- Verify the URL `https://www.toolforex.xyz` is added to the allowed list
 - Check the Experts tab for error messages
 
-### Trades not opening
-- Ensure `AllowAutoTrade` is enabled in MT5
-- Check that the symbol is available on your broker
-- Verify your account has sufficient margin
-- Check `MaxSlippage` setting — increase if orders are rejected
+### Trades not opening / `Retcode=10027`
+
+`Retcode=10027` means **"Autotrading disabled by client terminal"** — the Algo Trading button is OFF.
+
+Fix:
+1. Look at the MT5 toolbar — find the **▶ Algo Trading** button
+2. Click it so it turns **green**
+3. Also make sure `AllowAutoTrade = true` in the EA's input settings
+
+Other causes:
+- Symbol not available on your broker → check MT5 Market Watch
+- Insufficient margin → reduce lot size or top up your account
+- `MaxSlippage` too tight → increase to 50–100 points for volatile pairs
 
 ### How to stop copying
 1. Go to the trader's profile on Social Forex
