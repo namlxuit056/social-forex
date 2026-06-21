@@ -1721,6 +1721,8 @@
     "warningText": "Copy trading có rủi ro đáng kể. Hiệu quả trong quá khứ không đảm bảo kết quả tương lai. Chỉ đầu tư vốn bạn có thể chấp nhận mất. Bạn chịu trách nhiệm cho tất cả lệnh thực thi bởi EA.",
     "findTraders": "Tìm Trader để Copy",
     "downloadEA": "Tải EA Copy Trade",
+    "downloadEX5": "Tải EA (.ex5 đã biên dịch)",
+    "downloadMQ5": "Tải source code (.mq5)",
     "metaTitle": "Hướng dẫn Copy Trade MT5 — Social Forex",
     "metaDescription": "Hướng dẫn chi tiết cách copy trade tự động qua MetaTrader 5 từ Social Forex. Tìm trader, lấy token, cài EA và bắt đầu copy lệnh.",
     "badge": "Expert Advisor · MetaTrader 5",

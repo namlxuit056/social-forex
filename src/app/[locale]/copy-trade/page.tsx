@@ -155,12 +155,20 @@ export default async function CopyTradePage({
         <p className="mt-2 max-w-2xl text-muted-foreground">{t("heroDesc")}</p>
         <div className="mt-4 flex flex-wrap gap-3">
           <a
-            href="/docs/mt5/SocialForexCopyTrade.mq5"
-            download
+            href="/downloads/social-forex-cp.ex5"
+            download="social-forex-cp.ex5"
             className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
           >
             <Download className="size-4" />
-            {t("downloadEA")}
+            {t("downloadEX5")}
+          </a>
+          <a
+            href="/downloads/SocialForexCopyTrade.mq5"
+            download="SocialForexCopyTrade.mq5"
+            className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-muted"
+          >
+            <Download className="size-4" />
+            {t("downloadMQ5")}
           </a>
           <Link
             href="/leaderboard"
@@ -336,12 +344,20 @@ export default async function CopyTradePage({
       {/* Bottom CTA */}
       <div className="flex flex-wrap gap-3">
         <a
-          href="/docs/mt5/SocialForexCopyTrade.mq5"
-          download
+          href="/downloads/social-forex-cp.ex5"
+          download="social-forex-cp.ex5"
           className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
         >
           <Download className="size-4" />
-          {t("downloadEA")}
+          {t("downloadEX5")}
+        </a>
+        <a
+          href="/downloads/SocialForexCopyTrade.mq5"
+          download="SocialForexCopyTrade.mq5"
+          className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-muted"
+        >
+          <Download className="size-4" />
+          {t("downloadMQ5")}
         </a>
         <Link
           href="/leaderboard"

@@ -1721,6 +1721,8 @@
     "warningText": "Copy trading involves significant risk. Past performance does not guarantee future results. Only risk capital you can afford to lose. You are responsible for all trades executed by the EA.",
     "findTraders": "Find Traders to Copy",
     "downloadEA": "Download Copy Trade EA",
+    "downloadEX5": "Download EA (.ex5 compiled)",
+    "downloadMQ5": "Download source code (.mq5)",
     "metaTitle": "Copy Trade MT5 Guide — Social Forex",
     "metaDescription": "Step-by-step guide to auto copy trade via MetaTrader 5 from Social Forex. Find a trader, get your token, install the EA and start copying.",
     "badge": "Expert Advisor · MetaTrader 5",
