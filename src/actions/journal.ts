@@ -7,6 +7,7 @@ import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { updateStreak } from "@/lib/streak";
+import { addXp } from "@/lib/add-xp";
 
 const tradeSchema = z.object({
   symbol: z.string().min(2).max(32),
@@ -77,6 +78,13 @@ export async function createTrade(
 
   try {
     await updateStreak(session.user.id, "journal");
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { streakJournal: true },
+    });
+    if (user) {
+      await addXp(session.user.id, "journalCreate", user.streakJournal);
+    }
   } catch {
     // Non-blocking
   }

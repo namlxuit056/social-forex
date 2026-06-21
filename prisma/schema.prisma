@@ -101,6 +101,8 @@ model User {
   lastSignalDate       DateTime?
   notifyStreakReminder Boolean   @default(true)
 
+  xp                   Int       @default(0)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Activity, RadioTower, Signal, TrendingUp, Users } from "lucide-react";
+import { Activity, Award, RadioTower, Signal, TrendingUp, Users } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
 import { ProfileFollowersSection } from "@/components/profile/profile-followers-section";
@@ -16,6 +16,7 @@ import { StreakBadge } from "@/components/signals/streak-badge";
 import { FollowButton } from "@/components/social/follow-button";
 import { buttonVariants } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
+import { getLevel, getXpProgress } from "@/lib/xp";
 import {
   getPublicDisplayLabel,
   getSignalsAuthorQuery,
@@ -84,6 +85,7 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
       streakJournal: true,
       streakPlan: true,
       streakSignal: true,
+      xp: true,
     },
   });
   if (!user) notFound();
@@ -214,8 +216,21 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
         }
       />
 
-      {(user.streakJournal > 0 || user.streakPlan > 0 || user.streakSignal > 0) && (
-        <div className="flex flex-wrap gap-3 rounded-lg border border-border/60 bg-card/40 px-4 py-3">
+      {(user.streakJournal > 0 || user.streakPlan > 0 || user.streakSignal > 0 || user.xp > 0) && (
+        <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border/60 bg-card/40 px-4 py-3">
+          {user.xp > 0 && (
+            <div className="flex items-center gap-2 rounded-md bg-primary/10 px-3 py-1.5">
+              <Award className="size-4 text-primary" />
+              <span className="text-sm font-semibold text-primary">Lv.{getLevel(user.xp)}</span>
+              <div className="h-1.5 w-12 rounded-full bg-primary/20">
+                <div
+                  className="h-full rounded-full bg-primary"
+                  style={{ width: `${getXpProgress(user.xp)}%` }}
+                />
+              </div>
+              <span className="text-xs text-muted-foreground">{user.xp} XP</span>
+            </div>
+          )}
           {user.streakJournal > 0 && (
             <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
               Nhật ký: <StreakBadge count={user.streakJournal} type="journal" />

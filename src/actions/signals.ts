@@ -11,6 +11,7 @@ import { rateLimit } from "@/lib/rate-limit";
 import { parseAndValidateImageUrls } from "@/lib/signal-images";
 import { notifySignalSubscribers } from "@/lib/signals/notify-on-signal-create";
 import { updateStreak } from "@/lib/streak";
+import { addXp } from "@/lib/add-xp";
 import {
   notifyTelegramNewSignal,
   notifyTelegramClosedSignal,
@@ -137,6 +138,13 @@ export async function createSignal(
 
   try {
     await updateStreak(userId, "signal");
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { streakSignal: true },
+    });
+    if (user) {
+      await addXp(userId, "signalPost", user.streakSignal);
+    }
   } catch {
     // Non-blocking
   }
@@ -184,6 +192,20 @@ export async function closeSignal(
     where: { id: signalId },
     data: { status, closedAt: new Date() },
   });
+
+  if (status === "CLOSED_WIN") {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { streakSignal: true },
+      });
+      if (user) {
+        await addXp(userId, "signalWin", user.streakSignal);
+      }
+    } catch {
+      // Non-blocking
+    }
+  }
 
   await notifyTelegramClosedSignal({
     id: signal.id,

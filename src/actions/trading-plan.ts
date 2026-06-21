@@ -8,6 +8,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { parseAndValidateImageUrls } from "@/lib/signal-images";
 import { updateStreak } from "@/lib/streak";
+import { addXp } from "@/lib/add-xp";
 
 const biasValues = ["BULLISH", "BEARISH", "RANGE", "WAIT"] as const;
 
@@ -216,6 +217,15 @@ export async function saveDailyTradingPlan(
 
   try {
     await updateStreak(session.user.id, "plan");
+    if (completed) {
+      const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { streakPlan: true },
+      });
+      if (user) {
+        await addXp(session.user.id, "planComplete", user.streakPlan);
+      }
+    }
   } catch {
     // Non-blocking
   }

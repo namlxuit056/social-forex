@@ -1608,5 +1608,19 @@
     "pipValue": "Pip Value",
     "fillHint": "Fill in all fields to calculate.",
     "approximation": "* Estimate based on $10/pip/standard lot. May differ for USD-base pairs (USDCAD, USDJPY...)."
+  },
+  "gamification": {
+    "dailyActivity": "Daily Activity",
+    "xpEarned": "XP Earned",
+    "journalDone": "Journal completed",
+    "journalPending": "Journal pending",
+    "planDone": "Plan completed",
+    "planPending": "Plan pending",
+    "signalDone": "Signal posted",
+    "signalPending": "No signal yet",
+    "streakDays": "{count} day streak",
+    "totalXp": "Total XP",
+    "level": "Level",
+    "todayXp": "Today's XP"
   }
 }

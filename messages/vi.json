@@ -1608,5 +1608,19 @@
     "pipValue": "Giá trị pip",
     "fillHint": "Nhập đầy đủ thông tin để tính toán.",
     "approximation": "* Ước tính dựa trên $10/pip/lot chuẩn. Kết quả có thể sai lệch với các cặp tiền có USD ở vị trí base (USDCAD, USDJPY...)."
+  },
+  "gamification": {
+    "dailyActivity": "Hoạt động hôm nay",
+    "xpEarned": "XP đã kiếm",
+    "journalDone": "Đã ghi nhật ký",
+    "journalPending": "Chưa ghi nhật ký",
+    "planDone": "Đã lập kế hoạch",
+    "planPending": "Chưa lập kế hoạch",
+    "signalDone": "Đã đăng signal",
+    "signalPending": "Chưa có signal",
+    "streakDays": "{count} ngày liên tiếp",
+    "totalXp": "Tổng XP",
+    "level": "Cấp độ",
+    "todayXp": "XP hôm nay"
   }
 }

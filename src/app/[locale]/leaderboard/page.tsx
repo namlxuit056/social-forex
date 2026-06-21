@@ -6,6 +6,7 @@ import { PageCtaRow } from "@/components/layout/page-cta-row";
 import { StreakBadge } from "@/components/signals/streak-badge";
 import { prisma } from "@/lib/prisma";
 import { pageCtaItems } from "@/lib/page-cta-i18n";
+import { getLevel } from "@/lib/xp";
 
 export async function generateMetadata({
   params,
@@ -37,6 +38,7 @@ type Row = {
   profitFactor: number | null;
   hasMt5: boolean;
   streakSignal: number;
+  xp: number;
 };
 
 export default async function LeaderboardPage({
@@ -112,9 +114,10 @@ export default async function LeaderboardPage({
 
   const streakRows = await prisma.user.findMany({
     where: { id: { in: userIds } },
-    select: { id: true, streakSignal: true },
+    select: { id: true, streakSignal: true, xp: true },
   });
   const streakSignalMap = new Map(streakRows.map((r) => [r.id, r.streakSignal]));
+  const xpMap = new Map(streakRows.map((r) => [r.id, r.xp]));
 
   const rows: Row[] = [...map.entries()]
     .map(([userId, v]) => {
@@ -137,6 +140,7 @@ export default async function LeaderboardPage({
         profitFactor,
         hasMt5: mt5Set.has(userId),
         streakSignal: streakSignalMap.get(userId) ?? 0,
+        xp: xpMap.get(userId) ?? 0,
       };
     })
     .filter((r) => r.total >= 3);
@@ -207,6 +211,7 @@ export default async function LeaderboardPage({
                   <th className="px-4 py-3">{t("profitFactor")}</th>
                   <th className="px-4 py-3">{t("mt5Verified")}</th>
                   <th className="px-4 py-3">Streak</th>
+                  <th className="px-4 py-3">XP</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -245,6 +250,12 @@ export default async function LeaderboardPage({
                       ) : (
                         <span className="text-muted-foreground">—</span>
                       )}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-mono text-primary">{r.xp}</span>
+                        <span className="text-xs text-muted-foreground">Lv.{getLevel(r.xp)}</span>
+                      </div>
                     </td>
                   </tr>
                 ))}
