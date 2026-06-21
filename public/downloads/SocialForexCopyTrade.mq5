@@ -177,7 +177,92 @@ bool HasOpenPosition(string symbol, long posType)
    return false;
 }
 
-bool OpenTrade(string symbol, string direction, double entry, double sl, double tp, double lot)
+ulong FindPositionBySignalId(string signalId)
+{
+   string target = "SF:" + signalId;
+   int total = PositionsTotal();
+   for(int i = 0; i < total; i++)
+   {
+      ulong ticket = PositionGetTicket(i);
+      if(ticket == 0) continue;
+      if(!PositionSelectByTicket(ticket)) continue;
+      if(PositionGetInteger(POSITION_MAGIC) != MagicNumber) continue;
+      if(PositionGetString(POSITION_COMMENT) == target)
+         return ticket;
+   }
+   return 0;
+}
+
+bool SyncPositionStops(ulong ticket, string symbol, double newSL, double newTP)
+{
+   if(!PositionSelectByTicket(ticket)) return false;
+   double curSL  = PositionGetDouble(POSITION_SL);
+   double curTP  = PositionGetDouble(POSITION_TP);
+   double pt     = SymbolInfoDouble(symbol, SYMBOL_POINT);
+   if(MathAbs(curSL - newSL) <= pt && MathAbs(curTP - newTP) <= pt) return true;
+
+   bool   isBuy  = (PositionGetInteger(POSITION_TYPE) == POSITION_TYPE_BUY);
+   double price  = 0;
+   if(isBuy) price = SymbolInfoDouble(symbol, SYMBOL_BID);
+   else      price = SymbolInfoDouble(symbol, SYMBOL_ASK);
+   int    digits = SymbolInfoInteger(symbol, SYMBOL_DIGITS);
+   double ptD    = SymbolInfoDouble(symbol, SYMBOL_POINT);
+   long   stops  = SymbolInfoInteger(symbol, SYMBOL_TRADE_STOPS_LEVEL);
+   double minD   = stops * ptD;
+   bool   slOk   = isBuy ? (price - newSL >= minD) : (newSL - price >= minD);
+   bool   tpOk   = isBuy ? (newTP - price >= minD) : (price - newTP >= minD);
+   double safeSL = (newSL > 0 && slOk) ? NormalizeDouble(newSL, digits) : (newSL > 0 ? curSL : 0);
+   double safeTP = (newTP > 0 && tpOk) ? NormalizeDouble(newTP, digits) : (newTP > 0 ? curTP : 0);
+
+   MqlTradeRequest req = {};
+   MqlTradeResult  res = {};
+   req.action   = TRADE_ACTION_SLTP;
+   req.position = ticket;
+   req.symbol   = symbol;
+   req.sl       = safeSL;
+   req.tp       = safeTP;
+   if(!OrderSend(req, res))
+   {
+      Print("SocialForexCopyTrade: SyncStops failed ticket=", ticket, " err=", GetLastError(), " rc=", res.retcode);
+      return false;
+   }
+   Print("SocialForexCopyTrade: SyncStops ticket=", ticket, " SL=", safeSL, " TP=", safeTP);
+   return true;
+}
+
+bool ClosePosition(ulong ticket, string symbol)
+{
+   if(!PositionSelectByTicket(ticket)) return false;
+   double volume  = PositionGetDouble(POSITION_VOLUME);
+   long   posType = PositionGetInteger(POSITION_TYPE);
+
+   bool   isSell = (posType == POSITION_TYPE_BUY);
+   double price  = 0;
+   if(isSell) price = SymbolInfoDouble(symbol, SYMBOL_BID);
+   else       price = SymbolInfoDouble(symbol, SYMBOL_ASK);
+
+   MqlTradeRequest req = {};
+   MqlTradeResult  res = {};
+   req.action    = TRADE_ACTION_DEAL;
+   req.position  = ticket;
+   req.symbol    = symbol;
+   req.volume    = volume;
+   if(isSell) req.type = ORDER_TYPE_SELL;
+   else       req.type = ORDER_TYPE_BUY;
+   req.price     = price;
+   req.deviation = MaxSlippage;
+   req.magic     = MagicNumber;
+   req.comment   = "SF:Close";
+   if(!OrderSend(req, res))
+   {
+      Print("SocialForexCopyTrade: ClosePosition failed ticket=", ticket, " err=", GetLastError(), " rc=", res.retcode);
+      return false;
+   }
+   Print("SocialForexCopyTrade: Closed ticket=", ticket, " symbol=", symbol);
+   return true;
+}
+
+bool OpenTrade(string symbol, string direction, double entry, double sl, double tp, double lot, string signalId)
 {
    ENUM_ORDER_TYPE orderType = (direction == "LONG" || direction == "BUY") ? ORDER_TYPE_BUY : ORDER_TYPE_SELL;
    long posType = (orderType == ORDER_TYPE_BUY) ? POSITION_TYPE_BUY : POSITION_TYPE_SELL;
@@ -214,7 +299,7 @@ bool OpenTrade(string symbol, string direction, double entry, double sl, double 
 
    if(SymbolInfoInteger(symbol, SYMBOL_TRADE_MODE) != SYMBOL_TRADE_MODE_FULL)
    {
-      Print("SocialForexCopyTrade: Retcode 10018 - Market closed/restricted for ", symbol, ". TradeMode=", SymbolInfoInteger(symbol, SYMBOL_TRADE_MODE), ". Will retry next poll.");
+      Print("SocialForexCopyTrade: Retcode 10018 - Market closed/restricted. Retry next poll.");
       return false;
    }
    if(HasOpenPosition(symbol, posType))
@@ -223,33 +308,25 @@ bool OpenTrade(string symbol, string direction, double entry, double sl, double 
       return false;
    }
 
-   double price;
+   double price = 0;
    if(orderType == ORDER_TYPE_BUY)
       price = SymbolInfoDouble(symbol, SYMBOL_ASK);
    else
       price = SymbolInfoDouble(symbol, SYMBOL_BID);
 
    // Clamp SL/TP to broker's minimum stop distance (prevents Retcode 10016)
-   int    digits  = (int)SymbolInfoInteger(symbol, SYMBOL_DIGITS);
-   double minDist = SymbolInfoInteger(symbol, SYMBOL_TRADE_STOPS_LEVEL)
-                    * SymbolInfoDouble(symbol, SYMBOL_POINT);
+   int    digits  = SymbolInfoInteger(symbol, SYMBOL_DIGITS);
+   double ptSz    = SymbolInfoDouble(symbol, SYMBOL_POINT);
+   long   stopsLv = SymbolInfoInteger(symbol, SYMBOL_TRADE_STOPS_LEVEL);
+   double minDist = stopsLv * ptSz;
    bool   isBuy   = (orderType == ORDER_TYPE_BUY);
 
-   double safeSL = 0;
-   if(sl > 0)
-   {
-      bool slOk = isBuy ? (price - sl >= minDist) : (sl - price >= minDist);
-      if(slOk) safeSL = NormalizeDouble(sl, digits);
-      else Print("SocialForexCopyTrade: SL ", sl, " too close (minDist=", minDist, ") - skipped");
-   }
-
-   double safeTP = 0;
-   if(tp > 0)
-   {
-      bool tpOk = isBuy ? (tp - price >= minDist) : (price - tp >= minDist);
-      if(tpOk) safeTP = NormalizeDouble(tp, digits);
-      else Print("SocialForexCopyTrade: TP ", tp, " too close (minDist=", minDist, ") - skipped");
-   }
+   bool   slOk  = sl > 0 && (isBuy ? (price - sl >= minDist) : (sl - price >= minDist));
+   bool   tpOk  = tp > 0 && (isBuy ? (tp - price >= minDist) : (price - tp >= minDist));
+   double safeSL = slOk ? NormalizeDouble(sl, digits) : 0;
+   double safeTP = tpOk ? NormalizeDouble(tp, digits) : 0;
+   if(sl > 0 && !slOk) Print("SocialForexCopyTrade: SL too close - skipped");
+   if(tp > 0 && !tpOk) Print("SocialForexCopyTrade: TP too close - skipped");
 
    MqlTradeRequest request = {};
    MqlTradeResult  result  = {};
@@ -263,18 +340,27 @@ bool OpenTrade(string symbol, string direction, double entry, double sl, double 
    request.tp        = safeTP;
    request.deviation = MaxSlippage;
    request.magic     = MagicNumber;
-   request.comment   = "SocialForex Copy";
+   request.comment   = "SF:" + signalId;
 
    if(!OrderSend(request, result))
    {
-      Print("SocialForexCopyTrade: OrderSend failed. Error=", GetLastError(),
-            " Retcode=", result.retcode);
+      Print("SocialForexCopyTrade: OrderSend failed err=", GetLastError(), " rc=", result.retcode);
       return false;
    }
 
-   Print("SocialForexCopyTrade: Opened ", symbol, " ", direction,
-         " lot=", lot, " ticket=", result.order);
+   Print("SocialForexCopyTrade: Opened ", symbol, " ", direction, " lot=", lot, " ticket=", result.order);
    return true;
+}
+
+string RemoveFromList(string list, string id)
+{
+   string target = id + ",";
+   int p    = StringFind(list, target);
+   if(p == -1) return list;
+   int tlen = StringLen(target);
+   string lhs = StringSubstr(list, 0, p);
+   string rhs = StringSubstr(list, p + tlen);
+   return lhs + rhs;
 }
 
 void ProcessSignals(string response)
@@ -282,10 +368,10 @@ void ProcessSignals(string response)
    string signalsStr = FindJsonValue(response, "signals");
    if(signalsStr == "" || signalsStr == "[]") return;
 
-   string mode          = FindJsonValue(response, "mode");
-   double fixedLot      = StringToDouble(FindJsonValue(response, "fixedLot"));
-   double riskPercent   = StringToDouble(FindJsonValue(response, "riskPercent"));
-   double maxLots       = StringToDouble(FindJsonValue(response, "maxLots"));
+   string mode        = FindJsonValue(response, "mode");
+   double fixedLot    = StringToDouble(FindJsonValue(response, "fixedLot"));
+   double riskPercent = StringToDouble(FindJsonValue(response, "riskPercent"));
+   double maxLots     = StringToDouble(FindJsonValue(response, "maxLots"));
    if(maxLots <= 0) maxLots = 10;
 
    double balance = AccountInfoDouble(ACCOUNT_BALANCE);
@@ -296,7 +382,6 @@ void ProcessSignals(string response)
       int objStart = StringFind(signalsStr, "{", pos);
       if(objStart == -1) break;
 
-      // Find matching closing brace (skip nested objects in string values)
       int depth = 0;
       bool inStr = false;
       int objEnd = -1;
@@ -332,24 +417,35 @@ void ProcessSignals(string response)
       double entry     = StringToDouble(FindJsonValue(signalObj, "entry"));
       double sl        = StringToDouble(FindJsonValue(signalObj, "stopLoss"));
       double tp        = StringToDouble(FindJsonValue(signalObj, "takeProfit"));
+      string status    = FindJsonValue(signalObj, "status");
 
-      if(signalId == "" || symbol == "" || direction == "") continue;
+      if(signalId == "" || symbol == "") continue;
 
-      if(StringFind(known_signal_ids, signalId + ",") != -1)
-         continue;
+      bool  isClosed = (status == "CLOSED_WIN" || status == "CLOSED_LOSS");
+      bool  isKnown  = (StringFind(known_signal_ids, signalId + ",") != -1);
+      ulong ticket   = 0;
+      double lot     = fixedLot;
+      bool  opened   = false;
 
-      double lot;
-      if(mode == "PERCENT")
-         lot = CalcLotSize(symbol, balance, riskPercent, entry, sl);
-      else
-         lot = fixedLot;
-
-      lot = MathMin(lot, maxLots);
-      if(lot <= 0) lot = 0.01;
-
-      bool opened = OpenTrade(symbol, direction, entry, sl, tp, lot);
-      if(opened)
-         known_signal_ids += signalId + ",";
+      if(isClosed && isKnown)
+      {
+         ticket = FindPositionBySignalId(signalId);
+         if(ticket > 0) ClosePosition(ticket, symbol);
+         known_signal_ids = RemoveFromList(known_signal_ids, signalId);
+      }
+      else if(!isClosed && isKnown)
+      {
+         ticket = FindPositionBySignalId(signalId);
+         if(ticket > 0) SyncPositionStops(ticket, symbol, sl, tp);
+      }
+      else if(!isClosed && !isKnown && direction != "")
+      {
+         if(mode == "PERCENT") lot = CalcLotSize(symbol, balance, riskPercent, entry, sl);
+         lot = MathMin(lot, maxLots);
+         if(lot <= 0) lot = 0.01;
+         opened = OpenTrade(symbol, direction, entry, sl, tp, lot, signalId);
+         if(opened) known_signal_ids += signalId + ",";
+      }
    }
 }
 

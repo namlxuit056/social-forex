@@ -36,13 +36,21 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: "Invalid or inactive subscription" }, { status: 404 });
   }
 
+  const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
+
   const signals = await prisma.signal.findMany({
     where: {
       authorId: copyTrade.providerId,
-      status: "ACTIVE",
+      OR: [
+        { status: "ACTIVE" },
+        {
+          status: { in: ["CLOSED_WIN", "CLOSED_LOSS"] },
+          closedAt: { gte: since24h },
+        },
+      ],
     },
     orderBy: { createdAt: "desc" },
-    take: 10,
+    take: 20,
     select: {
       id: true,
       symbol: true,
@@ -50,8 +58,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       entry: true,
       stopLoss: true,
       takeProfit: true,
-      takeProfit2: true,
-      takeProfit3: true,
+      status: true,
       createdAt: true,
     },
   });
