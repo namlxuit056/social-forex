@@ -65,11 +65,13 @@ export function CopyTradeButton({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant={isSubscribed ? "outline" : "default"} size="sm" className="gap-1.5">
-          <Copy className="size-3.5" />
-          {isSubscribed ? t("manage") : t("copy")}
-        </Button>
+      <DialogTrigger
+        render={
+          <Button variant={isSubscribed ? "outline" : "default"} size="sm" className="gap-1.5" />
+        }
+      >
+        <Copy className="size-3.5" />
+        {isSubscribed ? t("manage") : t("copy")}
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
