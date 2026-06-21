@@ -265,7 +265,6 @@ bool ClosePosition(ulong ticket, string symbol)
 bool OpenTrade(string symbol, string direction, double entry, double sl, double tp, double lot, string signalId)
 {
    ENUM_ORDER_TYPE orderType = (direction == "LONG" || direction == "BUY") ? ORDER_TYPE_BUY : ORDER_TYPE_SELL;
-   long posType = (orderType == ORDER_TYPE_BUY) ? POSITION_TYPE_BUY : POSITION_TYPE_SELL;
 
    if(!AllowAutoTrade)
    {
@@ -302,12 +301,6 @@ bool OpenTrade(string symbol, string direction, double entry, double sl, double 
       Print("SocialForexCopyTrade: Retcode 10018 - Market closed/restricted. Retry next poll.");
       return false;
    }
-   if(HasOpenPosition(symbol, posType))
-   {
-      Print("SocialForexCopyTrade: Already have open position for ", symbol);
-      return false;
-   }
-
    double price = 0;
    if(orderType == ORDER_TYPE_BUY)
       price = SymbolInfoDouble(symbol, SYMBOL_ASK);
