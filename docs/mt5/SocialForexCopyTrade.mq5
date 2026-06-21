@@ -179,9 +179,30 @@ bool HasOpenPosition(string symbol, long posType)
 
 bool OpenTrade(string symbol, string direction, double entry, double sl, double tp, double lot)
 {
+   ENUM_ORDER_TYPE orderType = (direction == "LONG" || direction == "BUY") ? ORDER_TYPE_BUY : ORDER_TYPE_SELL;
+   long posType = (orderType == ORDER_TYPE_BUY) ? POSITION_TYPE_BUY : POSITION_TYPE_SELL;
+
    if(!AllowAutoTrade)
    {
-      Print("SocialForexCopyTrade: AutoTrade is disabled.");
+      Print("SocialForexCopyTrade: AllowAutoTrade = false. Set it to true in EA inputs.");
+      return false;
+   }
+
+   if(!TerminalInfoInteger(TERMINAL_TRADE_ALLOWED))
+   {
+      Print("SocialForexCopyTrade: Retcode 10027 — Algo Trading is disabled. Click the green play button on the MT5 toolbar.");
+      return false;
+   }
+
+   if(!MQLInfoInteger(MQL_TRADE_ALLOWED))
+   {
+      Print("SocialForexCopyTrade: Trading not allowed for this EA. Right-click chart -> Expert Advisors -> check Allow Algo Trading.");
+      return false;
+   }
+
+   if(!AccountInfoInteger(ACCOUNT_TRADE_ALLOWED))
+   {
+      Print("SocialForexCopyTrade: Account trading is disabled by the broker.");
       return false;
    }
 
@@ -190,14 +211,6 @@ bool OpenTrade(string symbol, string direction, double entry, double sl, double 
       Print("SocialForexCopyTrade: Cannot select symbol ", symbol);
       return false;
    }
-
-   ENUM_ORDER_TYPE orderType;
-   if(direction == "LONG" || direction == "BUY")
-      orderType = ORDER_TYPE_BUY;
-   else
-      orderType = ORDER_TYPE_SELL;
-
-   long posType = (orderType == ORDER_TYPE_BUY) ? POSITION_TYPE_BUY : POSITION_TYPE_SELL;
    if(HasOpenPosition(symbol, posType))
    {
       Print("SocialForexCopyTrade: Already have open position for ", symbol);
