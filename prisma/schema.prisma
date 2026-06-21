@@ -114,6 +114,7 @@ model User {
   pushSubscriptions    UserPushSubscription[]
   copyTradesAsFollower CopyTrade[] @relation("CopyTradeFollower")
   copyTradesAsProvider CopyTrade[] @relation("CopyTradeProvider")
+  aiTradeProposals     AiTradeProposal[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -700,6 +701,7 @@ model Mt5Connection {
   user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   snapshots Mt5Snapshot[]
   signalLinks Mt5SignalLink[]
+  aiTradeProposals AiTradeProposal[]
 
   @@index([userId, revokedAt])
   @@index([lastSeenAt])
@@ -736,6 +738,37 @@ model Mt5SignalLink {
 
   @@unique([connectionId, mt5Ticket])
   @@index([connectionId, kind])
+}
+
+model AiTradeProposal {
+  id           String    @id @default(cuid())
+  connectionId String
+  userId       String
+  symbol       String
+  timeframe    String
+  direction    String    // "LONG" | "SHORT"
+  entry        Float
+  stopLoss     Float?
+  takeProfit   Float?
+  confidence   Int?      // 1-5
+  qualityScore Float?    // 0-100
+  reasoning    String
+  checklist    Json?     // [{label, status, detail}]
+  keyLevels    Json?     // {support, resistance}
+  status       String    @default("PENDING_REVIEW")
+  // PENDING_REVIEW | CONFIRMED | REJECTED | EXECUTED
+  createdAt    DateTime  @default(now())
+  confirmedAt  DateTime?
+  executedAt   DateTime?
+  rejectedAt   DateTime?
+  signalId     String?
+  mt5Ticket    String?
+
+  connection Mt5Connection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  user       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status, createdAt])
+  @@index([connectionId, status])
 }
 
 model ReferralEvent {

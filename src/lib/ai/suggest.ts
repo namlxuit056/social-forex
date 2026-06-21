@@ -40,8 +40,8 @@ export async function getAiSuggestion(
 
   const response = await client.chat.completions.create({
     model: resolved.model,
-    temperature: 0.3,
-    max_tokens: 900,
+    ...(resolved.supportsTemperature ? { temperature: 0.3 } : {}),
+    max_tokens: resolved.maxTokens,
     response_format: { type: "json_object" },
     messages: [
       { role: "system", content: SYSTEM_PROMPT },

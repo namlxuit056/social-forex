@@ -17,6 +17,22 @@ import {
 import { prisma } from "@/lib/prisma";
 import { getSiteUrl } from "@/lib/site-url";
 import { cn } from "@/lib/utils";
+import { AiProposalsPanel } from "@/components/mt5/ai-proposals-panel";
+
+type AiProposal = {
+  id: string;
+  symbol: string;
+  timeframe: string;
+  direction: "LONG" | "SHORT";
+  entry: number;
+  stopLoss: number | null;
+  takeProfit: number | null;
+  confidence: number | null;
+  qualityScore: number | null;
+  reasoning: string;
+  checklist: { label: string; status: "pass" | "warn" | "fail"; detail: string }[] | null;
+  createdAt: Date;
+};
 
 export const dynamic = "force-dynamic";
 
@@ -115,6 +131,26 @@ export default async function Mt5Page({
         orderBy: { receivedAt: "desc" },
         take: 1,
       },
+    },
+  });
+
+  const pendingProposals = await prisma.aiTradeProposal.findMany({
+    where: { userId, status: "PENDING_REVIEW" },
+    orderBy: { createdAt: "desc" },
+    take: 20,
+    select: {
+      id: true,
+      symbol: true,
+      timeframe: true,
+      direction: true,
+      entry: true,
+      stopLoss: true,
+      takeProfit: true,
+      confidence: true,
+      qualityScore: true,
+      reasoning: true,
+      checklist: true,
+      createdAt: true,
     },
   });
 
@@ -405,6 +441,18 @@ export default async function Mt5Page({
             })}
           </div>
         )}
+      </section>
+
+      <section className="space-y-4">
+        <div>
+          <h2 className="font-heading text-xl font-semibold tracking-tight text-foreground">
+            AI Trade Proposals
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Tín hiệu do AI đề xuất từ chart data MT5 — xác nhận để tạo signal
+          </p>
+        </div>
+        <AiProposalsPanel proposals={pendingProposals as AiProposal[]} locale={locale} />
       </section>
     </div>
   );
