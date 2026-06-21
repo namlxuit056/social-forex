@@ -211,6 +211,12 @@ bool OpenTrade(string symbol, string direction, double entry, double sl, double 
       Print("SocialForexCopyTrade: Cannot select symbol ", symbol);
       return false;
    }
+
+   if(SymbolInfoInteger(symbol, SYMBOL_TRADE_MODE) != SYMBOL_TRADE_MODE_FULL)
+   {
+      Print("SocialForexCopyTrade: Retcode 10018 - Market closed/restricted for ", symbol, ". TradeMode=", SymbolInfoInteger(symbol, SYMBOL_TRADE_MODE), ". Will retry next poll.");
+      return false;
+   }
    if(HasOpenPosition(symbol, posType))
    {
       Print("SocialForexCopyTrade: Already have open position for ", symbol);
