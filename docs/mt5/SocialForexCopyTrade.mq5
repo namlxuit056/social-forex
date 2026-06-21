@@ -471,7 +471,23 @@ void OnTimer() { PollAndProcess(); }
 int OnInit()
 {
    EventSetTimer(MathMax(5, PollSeconds));
-   Print("SocialForexCopyTrade initialized. Token=", CopyToken);
+
+   // Rebuild known_signal_ids from existing EA-managed positions after restart
+   int total = PositionsTotal();
+   for(int idx = 0; idx < total; idx++)
+   {
+      ulong tk = PositionGetTicket(idx);
+      if(tk == 0) continue;
+      if(!PositionSelectByTicket(tk)) continue;
+      if(PositionGetInteger(POSITION_MAGIC) != MagicNumber) continue;
+      string cmt = PositionGetString(POSITION_COMMENT);
+      if(StringFind(cmt, "SF:") != 0) continue;
+      string sigId = StringSubstr(cmt, 3);
+      if(StringFind(known_signal_ids, sigId + ",") == -1)
+         known_signal_ids += sigId + ",";
+   }
+
+   Print("SocialForexCopyTrade initialized. Token=", CopyToken, " tracking=", known_signal_ids);
    return INIT_SUCCEEDED;
 }
 
