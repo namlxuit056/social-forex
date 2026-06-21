@@ -177,23 +177,6 @@ bool HasOpenPosition(string symbol, long posType)
    return false;
 }
 
-bool HasCopyTradePosition(string symbol, string direction)
-{
-   long wantType = (direction == "LONG" || direction == "BUY") ? POSITION_TYPE_BUY : POSITION_TYPE_SELL;
-   int total = PositionsTotal();
-   for(int i = 0; i < total; i++)
-   {
-      ulong tk = PositionGetTicket(i);
-      if(tk == 0) continue;
-      if(!PositionSelectByTicket(tk)) continue;
-      if(PositionGetString(POSITION_SYMBOL) != symbol) continue;
-      if(PositionGetInteger(POSITION_MAGIC) != MagicNumber) continue;
-      if(PositionGetInteger(POSITION_TYPE) != wantType) continue;
-      if(StringFind(PositionGetString(POSITION_COMMENT), "SF:") == 0) return true;
-   }
-   return false;
-}
-
 ulong FindPositionBySignalId(string signalId)
 {
    string target = "SF:" + signalId;
@@ -450,19 +433,11 @@ void ProcessSignals(string response)
       }
       else if(!isClosed && !isKnown && direction != "")
       {
-         if(HasCopyTradePosition(symbol, direction))
-         {
-            Print("SocialForexCopyTrade: Skip bridge re-post signal ", signalId, " - already have SF position for ", symbol);
-            known_signal_ids += signalId + ",";
-         }
-         else
-         {
-            if(mode == "PERCENT") lot = CalcLotSize(symbol, balance, riskPercent, entry, sl);
-            lot = MathMin(lot, maxLots);
-            if(lot <= 0) lot = 0.01;
-            opened = OpenTrade(symbol, direction, entry, sl, tp, lot, signalId);
-            if(opened) known_signal_ids += signalId + ",";
-         }
+         if(mode == "PERCENT") lot = CalcLotSize(symbol, balance, riskPercent, entry, sl);
+         lot = MathMin(lot, maxLots);
+         if(lot <= 0) lot = 0.01;
+         opened = OpenTrade(symbol, direction, entry, sl, tp, lot, signalId);
+         if(opened) known_signal_ids += signalId + ",";
       }
    }
 }
