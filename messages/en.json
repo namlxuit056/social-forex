@@ -158,6 +158,8 @@
     "symbolCount": "{count} symbols",
     "addSymbolPlan": "Add symbol",
     "removeSymbolPlan": "Remove symbol",
+    "symbolRequiredHint": "Enter at least one symbol so AI has context and the saved plan is clearer.",
+    "duplicateSymbolHint": "Duplicate symbol found: {symbols}. On save, only one plan per symbol will be kept.",
     "bias": "Bias",
     "biasWait": "Wait for more data",
     "biasBullish": "Bullish",
@@ -220,6 +222,7 @@
     "todayNav": "Today",
     "recentTitle": "Recent plans",
     "aiAnalyzeChart": "AI analyze chart",
+    "aiAnalyzePlan": "AI suggest from symbol",
     "aiAnalyzing": "Analyzing...",
     "aiAnalysisError": "AI could not analyze the chart. Please try again."
   },

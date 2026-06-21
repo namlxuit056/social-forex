@@ -1,4 +1,5 @@
 import { CalendarDays, ChartCandlestick, ClipboardCheck, ChevronLeft, ChevronRight, Flame, NotebookPen, ShieldCheck, Wrench } from "lucide-react";
+import { formatInTimeZone } from "date-fns-tz";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { auth } from "@/auth";
 import { Link } from "@/i18n/navigation";
@@ -23,13 +24,17 @@ import {
 
 export const dynamic = "force-dynamic";
 
-function dateOnly(value: Date) {
-  return value.toISOString().slice(0, 10);
+function dateOnly(value: Date, timeZone = "UTC") {
+  return formatInTimeZone(value, timeZone, "yyyy-MM-dd");
 }
 
-function parseDateParam(value: string | string[] | undefined) {
+function timeZoneForLocale(locale: string) {
+  return locale === "vi" ? "Asia/Ho_Chi_Minh" : "UTC";
+}
+
+function parseDateParam(value: string | string[] | undefined, today: string) {
   const raw = Array.isArray(value) ? value[0] : value;
-  if (!raw || !/^\d{4}-\d{2}-\d{2}$/.test(raw)) return dateOnly(new Date());
+  if (!raw || !/^\d{4}-\d{2}-\d{2}$/.test(raw)) return today;
   return raw;
 }
 
@@ -134,9 +139,12 @@ export default async function TradingPlanPage({
   setRequestLocale(locale);
   const t = await getTranslations("tradingPlan");
 
-  const selectedDate = parseDateParam(sp?.date);
+  const timeZone = timeZoneForLocale(locale);
+  const today = dateOnly(new Date(), timeZone);
+  const selectedDate = parseDateParam(sp?.date, today);
   const selectedPlanDate = dateFromDateOnly(selectedDate);
   const session = await auth();
+  const planPath = `/${locale}/plan`;
 
   if (!session?.user?.id) {
     return (
@@ -153,14 +161,17 @@ export default async function TradingPlanPage({
         <EmptyState
           title={t("loginRequired")}
           description={t("loginHint")}
-          primary={{ href: "/auth/signin?callbackUrl=/plan", label: t("loginRequired") }}
+          primary={{
+            href: `/auth/signin?callbackUrl=${encodeURIComponent(planPath)}`,
+            label: t("loginRequired"),
+          }}
         />
         <SignupPrompt
           surface="trading-plan"
           title={t("signupPromptTitle")}
           description={t("signupPromptDesc")}
           ctaLabel={t("signupPromptCta")}
-          href="/auth/register?callbackUrl=/plan"
+          href={`/auth/register?callbackUrl=${encodeURIComponent(planPath)}`}
         />
       </div>
     );
@@ -197,7 +208,6 @@ export default async function TradingPlanPage({
     }),
   ]);
 
-  const today = dateOnly(new Date());
   const prevDate = shiftDate(selectedDate, -1);
   const nextDate = shiftDate(selectedDate, 1);
   const isToday = selectedDate === today;
@@ -377,7 +387,7 @@ export default async function TradingPlanPage({
         )}
       </nav>
 
-      <TradingPlanForm plan={formValue} />
+      <TradingPlanForm key={selectedDate} plan={formValue} locale={locale} />
 
       {recentPlans.length > 0 ? (
         <section className="space-y-3">

@@ -74,6 +74,7 @@ export type TradingPlanFormValue = {
 
 type Props = {
   plan: TradingPlanFormValue;
+  locale: string;
 };
 
 const checklistKeys = [
@@ -223,7 +224,7 @@ function FieldSupportLink({
   );
 }
 
-export function TradingPlanForm({ plan }: Props) {
+export function TradingPlanForm({ plan, locale }: Props) {
   const t = useTranslations("tradingPlan");
   const tc = useTranslations("common");
   const pathname = usePathname();
@@ -292,6 +293,14 @@ export function TradingPlanForm({ plan }: Props) {
     .map((item) => normalizeSymbol(item.symbol))
     .filter(Boolean)
     .join(", ");
+  const normalizedSymbols = symbolPlans
+    .map((item) => normalizeSymbol(item.symbol))
+    .filter(Boolean);
+  const duplicateSymbols = normalizedSymbols.filter(
+    (symbol, index) => normalizedSymbols.indexOf(symbol) !== index,
+  );
+  const hasAnySymbol = normalizedSymbols.length > 0;
+  const canAnalyzePlan = uploadedUrls.length > 0 || hasAnySymbol;
 
   const updateSymbolPlan = useCallback(
     (id: string, patch: Partial<TradingPlanSymbolPlan>) => {
@@ -461,7 +470,7 @@ export function TradingPlanForm({ plan }: Props) {
   const onAnalyzeCharts = useCallback(async () => {
     setIsAnalyzing(true);
     setAnalysisError(null);
-    const symbols = symbolPlans.map((p) => p.symbol).filter(Boolean);
+    const symbols = symbolPlans.map((p) => normalizeSymbol(p.symbol)).filter(Boolean);
     try {
       const res = await fetch("/api/ai/plan-analysis", {
         method: "POST",
@@ -782,6 +791,7 @@ export function TradingPlanForm({ plan }: Props) {
       {uploadedUrls.map((url) => (
         <input key={url} type="hidden" name="imageUrls" value={url} />
       ))}
+      <input type="hidden" name="locale" value={locale === "en" ? "en" : "vi"} />
       <input type="hidden" name="watchedSymbols" value={watchedSymbolsValue} />
       <input type="hidden" name="symbolPlans" value={serializedSymbolPlans} />
       <input
@@ -889,6 +899,17 @@ export function TradingPlanForm({ plan }: Props) {
           </Button>
         </CardHeader>
         <CardContent className="space-y-4">
+          {!hasAnySymbol ? (
+            <p className="rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-200">
+              {t("symbolRequiredHint")}
+            </p>
+          ) : duplicateSymbols.length > 0 ? (
+            <p className="rounded-md border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-700 dark:text-amber-200">
+              {t("duplicateSymbolHint", {
+                symbols: Array.from(new Set(duplicateSymbols)).join(", "),
+              })}
+            </p>
+          ) : null}
           {symbolPlans.map((item, index) => (
             <div
               key={item.id}
@@ -1087,14 +1108,14 @@ export function TradingPlanForm({ plan }: Props) {
                 </ul>
               ) : null}
 
-              {uploadedUrls.length > 0 ? (
+              {canAnalyzePlan ? (
                 <div className="mt-3">
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
                     onClick={onAnalyzeCharts}
-                    disabled={isAnalyzing || uploading}
+                    disabled={isAnalyzing || uploading || !canAnalyzePlan}
                     className="gap-2"
                   >
                     {isAnalyzing ? (
@@ -1102,7 +1123,11 @@ export function TradingPlanForm({ plan }: Props) {
                     ) : (
                       <BrainCircuit className="size-4" aria-hidden />
                     )}
-                    {isAnalyzing ? t("aiAnalyzing") : t("aiAnalyzeChart")}
+                    {isAnalyzing
+                      ? t("aiAnalyzing")
+                      : uploadedUrls.length > 0
+                        ? t("aiAnalyzeChart")
+                        : t("aiAnalyzePlan")}
                   </Button>
                   {analysisError ? (
                     <p className="mt-2 text-sm text-destructive">{analysisError}</p>

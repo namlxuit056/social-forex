@@ -21,6 +21,7 @@ const symbolPlanSchema = z.object({
 });
 
 const planSchema = z.object({
+  locale: z.enum(["vi", "en"]).default("vi"),
   planDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   watchedSymbols: z.string().max(300).optional().nullable(),
   symbolPlans: z.string().max(20000).optional().nullable(),
@@ -41,6 +42,10 @@ const planSchema = z.object({
 function parseOptionalNumber(formData: FormData, key: string) {
   const value = formData.get(key);
   return value === null || value === "" ? null : value;
+}
+
+function parseLocale(formData: FormData) {
+  return formData.get("locale") === "en" ? "en" : "vi";
 }
 
 function parseDateOnly(value: string) {
@@ -115,10 +120,14 @@ export async function saveDailyTradingPlan(
   formData: FormData,
 ) {
   const session = await auth();
-  if (!session?.user?.id) redirect("/auth/signin");
+  const locale = parseLocale(formData);
+  if (!session?.user?.id) {
+    redirect(`/${locale}/auth/signin?callbackUrl=/${locale}/plan`);
+  }
 
   const t = await getTranslations("tradingPlan");
   const parsed = planSchema.safeParse({
+    locale,
     planDate: formData.get("planDate"),
     watchedSymbols: formData.get("watchedSymbols"),
     symbolPlans: formData.get("symbolPlans"),
@@ -211,7 +220,7 @@ export async function saveDailyTradingPlan(
     // Non-blocking
   }
 
-  revalidatePath("/plan");
-  revalidatePath("/dashboard");
+  revalidatePath(`/${parsed.data.locale}/plan`);
+  revalidatePath(`/${parsed.data.locale}/dashboard`);
   return { ok: true };
 }

@@ -158,6 +158,8 @@
     "symbolCount": "{count} cặp",
     "addSymbolPlan": "Thêm cặp",
     "removeSymbolPlan": "Xóa cặp",
+    "symbolRequiredHint": "Nhập ít nhất một cặp để AI có dữ liệu phân tích và plan lưu rõ ràng hơn.",
+    "duplicateSymbolHint": "Có cặp bị trùng: {symbols}. Khi lưu, hệ thống chỉ giữ một plan cho mỗi cặp.",
     "bias": "Xu hướng ưu tiên",
     "biasWait": "Đợi thêm dữ liệu",
     "biasBullish": "Tăng",
@@ -220,6 +222,7 @@
     "todayNav": "Hôm nay",
     "recentTitle": "Plan gần đây",
     "aiAnalyzeChart": "AI phân tích chart",
+    "aiAnalyzePlan": "AI gợi ý từ cặp",
     "aiAnalyzing": "Đang phân tích...",
     "aiAnalysisError": "AI không thể phân tích. Vui lòng thử lại."
   },
