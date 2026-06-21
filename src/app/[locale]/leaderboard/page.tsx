@@ -4,9 +4,11 @@ import { Link } from "@/i18n/navigation";
 import { EmptyState } from "@/components/layout/empty-state";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
 import { StreakBadge } from "@/components/signals/streak-badge";
+import { CopyTradeButton } from "@/components/copy-trade/copy-trade-button";
 import { prisma } from "@/lib/prisma";
 import { pageCtaItems } from "@/lib/page-cta-i18n";
 import { getLevel } from "@/lib/xp";
+import { auth } from "@/auth";
 
 export async function generateMetadata({
   params,
@@ -85,6 +87,16 @@ export default async function LeaderboardPage({
   }
 
   const userIds = [...map.keys()];
+
+  const session = await auth();
+  const copyTradeMap = new Map<string, string>();
+  if (session?.user?.id) {
+    const copyTrades = await prisma.copyTrade.findMany({
+      where: { followerId: session.user.id, providerId: { in: userIds }, isActive: true },
+      select: { providerId: true, token: true },
+    });
+    for (const ct of copyTrades) copyTradeMap.set(ct.providerId, ct.token);
+  }
 
   // Query profit factor data from TradeJournal
   const journalRows = await prisma.tradeJournal.findMany({
@@ -212,6 +224,7 @@ export default async function LeaderboardPage({
                   <th className="px-4 py-3">{t("mt5Verified")}</th>
                   <th className="px-4 py-3">Streak</th>
                   <th className="px-4 py-3">XP</th>
+                  <th className="px-4 py-3"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -256,6 +269,16 @@ export default async function LeaderboardPage({
                         <span className="font-mono text-primary">{r.xp}</span>
                         <span className="text-xs text-muted-foreground">Lv.{getLevel(r.xp)}</span>
                       </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      {session?.user?.id !== r.userId && (
+                        <CopyTradeButton
+                          providerId={r.userId}
+                          providerName={r.name}
+                          isSubscribed={copyTradeMap.has(r.userId)}
+                          existingToken={copyTradeMap.get(r.userId)}
+                        />
+                      )}
                     </td>
                   </tr>
                 ))}

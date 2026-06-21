@@ -6,7 +6,7 @@
 #property version   "1.00"
 #property strict
 
-input string ApiEndpoint = "https://toolforex.xyz/api/copy-trade/signals";
+input string ApiEndpoint = "https://www.toolforex.xyz/api/copy-trade/signals";
 input string CopyToken = "";
 input int PollSeconds = 10;
 input bool AllowAutoTrade = true;
