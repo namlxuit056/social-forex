@@ -116,6 +116,7 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
     isFollowing,
     followerRows,
     hasMt5Sync,
+    signalStats,
   ] =
     await Promise.all([
       prisma.userFollow.count({ where: { followingId: userId } }),
@@ -146,6 +147,10 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
         where: { userId, revokedAt: null },
         select: { id: true },
       }),
+      prisma.signal.aggregate({
+        where: { authorId: userId },
+        _count: { id: true },
+      }),
     ]);
 
   const isSelf = session?.user?.id === userId;
@@ -162,11 +167,11 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
     ...(hasMt5Sync ? [t("mt5ReadOnlyBadge")] : []),
   ];
   const tabs = [
-    { value: "overview", label: t("profileTabOverview"), icon: TrendingUp },
-    { value: "signals", label: t("profileTabSignals"), icon: Signal },
-    { value: "mt5", label: t("profileTabMt5"), icon: RadioTower },
-    { value: "followers", label: t("profileTabFollowers"), icon: Users },
-  ] satisfies Array<{ value: ProfileTab; label: string; icon: typeof Activity }>;
+    { value: "overview", label: t("profileTabOverview"), icon: TrendingUp, count: undefined },
+    { value: "signals", label: t("profileTabSignals"), icon: Signal, count: threadCount },
+    { value: "mt5", label: t("profileTabMt5"), icon: RadioTower, count: undefined },
+    { value: "followers", label: t("profileTabFollowers"), icon: Users, count: followerCount },
+  ] satisfies Array<{ value: ProfileTab; label: string; icon: typeof Activity; count: number | undefined }>;
 
   return (
     <div className="space-y-6">
@@ -185,6 +190,13 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
         followingLabel={t("following")}
         threadsLabel={t("threads")}
         badges={heroBadges}
+        socialProof={{
+          totalSignals: signalStats._count.id,
+          xp: user.xp,
+          level: getLevel(user.xp),
+          signalsLabel: t("profileTotalSignals"),
+          xpLabel: t("profileXpLabel"),
+        }}
         actions={
           <>
             {session?.user && !isSelf && (
@@ -217,33 +229,33 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
       />
 
       {(user.streakJournal > 0 || user.streakPlan > 0 || user.streakSignal > 0 || user.xp > 0) && (
-        <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border/60 bg-card/40 px-4 py-3">
+        <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border/60 bg-gradient-to-r from-primary/5 via-card to-primary/5 px-5 py-3.5 ring-1 ring-foreground/5">
           {user.xp > 0 && (
-            <div className="flex items-center gap-2 rounded-md bg-primary/10 px-3 py-1.5">
-              <Award className="size-4 text-primary" />
-              <span className="text-sm font-semibold text-primary">Lv.{getLevel(user.xp)}</span>
-              <div className="h-1.5 w-12 rounded-full bg-primary/20">
+            <div className="flex items-center gap-2.5 rounded-lg bg-primary/10 px-3.5 py-2 ring-1 ring-primary/20">
+              <Award className="size-4.5 text-primary" />
+              <span className="text-sm font-bold text-primary">Lv.{getLevel(user.xp)}</span>
+              <div className="h-2 w-16 rounded-full bg-primary/20">
                 <div
-                  className="h-full rounded-full bg-primary"
+                  className="h-full rounded-full bg-primary transition-all"
                   style={{ width: `${getXpProgress(user.xp)}%` }}
                 />
               </div>
-              <span className="text-xs text-muted-foreground">{user.xp} XP</span>
+              <span className="text-xs font-medium text-muted-foreground">{user.xp} {t("profileXpLabel")}</span>
             </div>
           )}
           {user.streakJournal > 0 && (
             <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
-              Nhật ký: <StreakBadge count={user.streakJournal} type="journal" />
+              {t("streakJournal")}: <StreakBadge count={user.streakJournal} type="journal" />
             </span>
           )}
           {user.streakPlan > 0 && (
             <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
-              Kế hoạch: <StreakBadge count={user.streakPlan} type="plan" />
+              {t("streakPlan")}: <StreakBadge count={user.streakPlan} type="plan" />
             </span>
           )}
           {user.streakSignal > 0 && (
             <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
-              Signal: <StreakBadge count={user.streakSignal} type="signal" />
+              {t("streakSignal")}: <StreakBadge count={user.streakSignal} type="signal" />
             </span>
           )}
         </div>
@@ -273,6 +285,11 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
               >
                 <Icon className="size-4" aria-hidden />
                 {item.label}
+                {item.count !== undefined && item.count > 0 && (
+                  <span className="ml-0.5 inline-flex size-5 items-center justify-center rounded-full bg-primary/15 text-[10px] font-semibold text-primary">
+                    {item.count > 99 ? "99+" : item.count}
+                  </span>
+                )}
               </Link>
             );
           })}

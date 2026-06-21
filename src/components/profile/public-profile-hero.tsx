@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { BadgeCheck } from "lucide-react";
+import { Award, BadgeCheck, TrendingUp } from "lucide-react";
 import { MarketDuelAnimation } from "@/components/profile/market-duel-animation";
 import { getInitialsFromLabel } from "@/lib/profile/display";
 import { cn } from "@/lib/utils";
@@ -18,6 +18,13 @@ type Props = {
   followingLabel: string;
   threadsLabel: string;
   badges?: string[];
+  socialProof?: {
+    totalSignals: number;
+    xp: number;
+    level: number;
+    signalsLabel: string;
+    xpLabel: string;
+  };
 };
 
 export function PublicProfileHero({
@@ -34,6 +41,7 @@ export function PublicProfileHero({
   followingLabel,
   threadsLabel,
   badges = [],
+  socialProof,
 }: Props) {
   const initials = getInitialsFromLabel(displayLabel);
 
@@ -42,17 +50,18 @@ export function PublicProfileHero({
       className="overflow-hidden rounded-xl border border-border/70 bg-card/60 ring-1 ring-foreground/5"
       aria-labelledby="public-profile-heading"
     >
-      <div className="relative h-20 bg-linear-to-br from-emerald-500/20 via-card to-red-500/15 sm:h-24">
+      <div className="relative h-24 bg-gradient-to-br from-emerald-600/25 via-primary/10 to-red-500/20 sm:h-28">
         <MarketDuelAnimation />
+        <div className="absolute inset-0 bg-gradient-to-t from-card/80 via-transparent to-transparent" />
       </div>
 
       <div className="px-4 pb-4 sm:px-6 sm:pb-6">
-        <div className="-mt-9 grid gap-4 sm:-mt-10 sm:grid-cols-[auto_1fr_auto] sm:items-end">
+        <div className="-mt-10 grid gap-4 sm:-mt-12 sm:grid-cols-[auto_1fr_auto] sm:items-end">
           <div className="flex items-end gap-3">
             <div
               className={cn(
-                "relative shrink-0 overflow-hidden rounded-full bg-muted ring-3 ring-card",
-                "size-18 sm:size-22",
+                "relative shrink-0 overflow-hidden rounded-full bg-muted ring-4 ring-card shadow-lg shadow-primary/10",
+                "size-20 sm:size-24",
               )}
             >
               {imageUrl ? (
@@ -60,15 +69,15 @@ export function PublicProfileHero({
                 <img
                   src={imageUrl}
                   alt=""
-                  width={88}
-                  height={88}
+                  width={96}
+                  height={96}
                   className="size-full object-cover"
                   loading="eager"
                   referrerPolicy="no-referrer"
                 />
               ) : (
                 <span
-                  className="flex size-full items-center justify-center text-base font-semibold uppercase text-muted-foreground sm:text-lg"
+                  className="flex size-full items-center justify-center text-lg font-semibold uppercase text-muted-foreground sm:text-xl"
                   aria-hidden
                 >
                   {initials}
@@ -120,6 +129,25 @@ export function PublicProfileHero({
             </p>
           ) : null}
         </div>
+
+        {socialProof && socialProof.totalSignals > 0 && (
+          <div className="mt-4 flex flex-wrap gap-3">
+            <div className="flex items-center gap-2 rounded-lg bg-muted/40 px-3 py-2">
+              <TrendingUp className="size-4 text-emerald-500" />
+              <div>
+                <p className="text-lg font-bold text-foreground">{socialProof.totalSignals}</p>
+                <p className="text-[11px] text-muted-foreground">{socialProof.signalsLabel}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 rounded-lg bg-muted/40 px-3 py-2">
+              <Award className="size-4 text-primary" />
+              <div>
+                <p className="text-lg font-bold text-foreground">Lv.{socialProof.level}</p>
+                <p className="text-[11px] text-muted-foreground">{socialProof.xp} {socialProof.xpLabel}</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         <dl className="mt-4 grid grid-cols-3 gap-2 border-t border-border/50 pt-4 sm:max-w-sm">
           <div className="rounded-lg bg-muted/20 px-3 py-2">

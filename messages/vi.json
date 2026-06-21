@@ -1040,7 +1040,13 @@
     "tradeResultWin": "Thắng",
     "tradeResultLoss": "Thua",
     "tradeResultBreakeven": "Hòa vốn",
-    "tradeResultPending": "Đang mở"
+    "tradeResultPending": "Đang mở",
+    "streakJournal": "Nhật ký",
+    "streakPlan": "Kế hoạch",
+    "streakSignal": "Signal",
+    "profileSocialProof": "Tóm tắt hiệu suất",
+    "profileTotalSignals": "Tín hiệu",
+    "profileXpLabel": "XP"
   },
   "mt5": {
     "title": "MT5 Bridge",

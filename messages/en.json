@@ -1040,7 +1040,13 @@
     "tradeResultWin": "Win",
     "tradeResultLoss": "Loss",
     "tradeResultBreakeven": "Breakeven",
-    "tradeResultPending": "Open"
+    "tradeResultPending": "Open",
+    "streakJournal": "Journal",
+    "streakPlan": "Plan",
+    "streakSignal": "Signal",
+    "profileSocialProof": "Performance snapshot",
+    "profileTotalSignals": "Signals",
+    "profileXpLabel": "XP"
   },
   "mt5": {
     "title": "MT5 Bridge",
