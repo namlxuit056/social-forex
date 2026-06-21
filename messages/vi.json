@@ -1671,5 +1671,27 @@
     "rewardHint": "Bạn được 7 ngày VIP cho mỗi bạn bè tham gia. Họ được 3 ngày miễn phí!",
     "noReferrals": "Chưa có ai được mời. Chia sẻ link để bắt đầu!",
     "referralBadge": "Giới thiệu"
+  },
+  "copyTrade": {
+    "title": "Copy Trading",
+    "copy": "Copy",
+    "manage": "Quản lý Copy",
+    "configureHint": "Cấu hình cách copy lệnh từ {name}.",
+    "modeLot": "Lot cố định",
+    "modePercent": "% tài khoản",
+    "lotSize": "Lot Size",
+    "riskPercent": "Phần trăm rủi ro",
+    "percentHint": "Tối đa 10% số dư tài khoản mỗi lệnh.",
+    "subscribe": "Bắt đầu Copy",
+    "subscribed": "Copy trading đã được kích hoạt!",
+    "setupInstructions": "Copy token này vào EA SocialForexCopyTrade trong MetaTrader 5.",
+    "yourToken": "Token Copy của bạn",
+    "step1": "Tải SocialForexCopyTrade.mq5 vào thư mục Experts của MT5.",
+    "step2": "Khởi động lại MT5 hoặc refresh Navigator.",
+    "step3": "Gắn EA vào bất kỳ chart nào và paste token ở trên.",
+    "step4": "Bật Algo Trading. EA sẽ tự động copy tín hiệu mới.",
+    "warning": "Copy trading có rủi ro. Chỉ đầu tư số tiền bạn có thể chấp nhận mất. EA sẽ tự động mở lệnh.",
+    "activeCopies": "Đang copy",
+    "noCopies": "Chưa có lệnh copy nào."
   }
 }

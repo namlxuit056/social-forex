@@ -1671,5 +1671,27 @@
     "rewardHint": "You get 7 days VIP for each friend who joins. They get 3 days free!",
     "noReferrals": "No referrals yet. Share your link to get started!",
     "referralBadge": "Referral"
+  },
+  "copyTrade": {
+    "title": "Copy Trading",
+    "copy": "Copy",
+    "manage": "Manage Copy",
+    "configureHint": "Configure how to copy trades from {name}.",
+    "modeLot": "Fixed Lot",
+    "modePercent": "% of Account",
+    "lotSize": "Lot Size",
+    "riskPercent": "Risk Percent",
+    "percentHint": "Max 10% of account balance per trade.",
+    "subscribe": "Start Copying",
+    "subscribed": "Copy trading activated!",
+    "setupInstructions": "Copy this token into the SocialForexCopyTrade EA in MetaTrader 5.",
+    "yourToken": "Your Copy Token",
+    "step1": "Download SocialForexCopyTrade.mq5 to your MT5 Experts folder.",
+    "step2": "Restart MT5 or refresh Navigator.",
+    "step3": "Attach the EA to any chart and paste the token above.",
+    "step4": "Enable Algo Trading. The EA will auto-copy new signals.",
+    "warning": "Copy trading involves risk. Only risk what you can afford to lose. The EA will open trades automatically.",
+    "activeCopies": "Active Copy Trades",
+    "noCopies": "No active copy trades."
   }
 }

@@ -14,6 +14,7 @@ import { PublicTradingOverview } from "@/components/profile/public-trading-overv
 import { ProfileTradingSummary } from "@/components/profile/profile-trading-summary";
 import { StreakBadge } from "@/components/signals/streak-badge";
 import { FollowButton } from "@/components/social/follow-button";
+import { CopyTradeButton } from "@/components/copy-trade/copy-trade-button";
 import { buttonVariants } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
 import { getLevel, getXpProgress } from "@/lib/xp";
@@ -117,6 +118,7 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
     followerRows,
     hasMt5Sync,
     signalStats,
+    existingCopyTrade,
   ] =
     await Promise.all([
       prisma.userFollow.count({ where: { followingId: userId } }),
@@ -151,6 +153,17 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
         where: { authorId: userId },
         _count: { id: true },
       }),
+      session?.user?.id && session.user.id !== userId
+        ? prisma.copyTrade.findUnique({
+            where: {
+              followerId_providerId: {
+                followerId: session.user.id,
+                providerId: userId,
+              },
+            },
+            select: { token: true, isActive: true },
+          })
+        : null,
     ]);
 
   const isSelf = session?.user?.id === userId;
@@ -202,6 +215,12 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
             {session?.user && !isSelf && (
               <>
                 <FollowButton userId={userId} isFollowing={!!isFollowing} />
+                <CopyTradeButton
+                  providerId={userId}
+                  providerName={displayLabel}
+                  isSubscribed={!!existingCopyTrade}
+                  existingToken={existingCopyTrade?.token}
+                />
                 <Link
                   href={`/messages/${userId}`}
                   className={cn(

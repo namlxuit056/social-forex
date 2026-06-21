@@ -112,6 +112,8 @@ model User {
   referralRewardsGiven ReferralEvent[] @relation("ReferralRewardReferrer")
   referralRewardsEarned ReferralEvent[] @relation("ReferralRewardReferee")
   pushSubscriptions    UserPushSubscription[]
+  copyTradesAsFollower CopyTrade[] @relation("CopyTradeFollower")
+  copyTradesAsProvider CopyTrade[] @relation("CopyTradeProvider")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -762,4 +764,30 @@ model UserPushSubscription {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+model CopyTrade {
+  id           String   @id @default(cuid())
+  followerId   String
+  providerId   String
+  token        String   @unique
+  mode         CopyTradeMode @default(LOT)
+  fixedLot     Float?
+  riskPercent  Float?
+  maxLots      Float?   @default(10)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  follower User @relation("CopyTradeFollower", fields: [followerId], references: [id], onDelete: Cascade)
+  provider User @relation("CopyTradeProvider", fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, providerId])
+  @@index([providerId, isActive])
+  @@index([token])
+}
+
+enum CopyTradeMode {
+  LOT
+  PERCENT
 }
