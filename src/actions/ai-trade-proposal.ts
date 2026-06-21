@@ -3,6 +3,69 @@
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { rateLimit } from "@/lib/rate-limit";
+import { analyzeTvChart } from "@/lib/ai/tv-chart-analyze";
+import { AiUnavailableError } from "@/lib/ai/suggest";
+import { QUOTE_BY_SYMBOL } from "@/lib/quotes/definitions";
+import { Prisma } from "@/generated/prisma/client";
+
+export async function requestAiAnalysis(
+  symbol: string,
+): Promise<{ ok: boolean; proposalId?: string; error?: string }> {
+  const session = await auth();
+  if (!session?.user?.id) return { ok: false, error: "unauthorized" };
+
+  const userId = session.user.id;
+  const { ok } = rateLimit(`ai-analysis:${userId}`, 3, 60_000);
+  if (!ok) return { ok: false, error: "rate_limited" };
+
+  const def = QUOTE_BY_SYMBOL[symbol.toUpperCase()];
+  if (!def) return { ok: false, error: "unknown_symbol" };
+
+  const connection = await prisma.mt5Connection.findFirst({
+    where: { userId, revokedAt: null },
+    orderBy: { createdAt: "desc" },
+    select: { id: true },
+  });
+  if (!connection) return { ok: false, error: "no_connection" };
+
+  let result;
+  try {
+    result = await analyzeTvChart(symbol.toUpperCase(), def.mockMid);
+  } catch (err) {
+    if (err instanceof AiUnavailableError) return { ok: false, error: "ai_unavailable" };
+    return { ok: false, error: "analysis_failed" };
+  }
+
+  const { suggestion } = result;
+
+  const proposal = await prisma.aiTradeProposal.create({
+    data: {
+      connectionId: connection.id,
+      userId,
+      symbol: symbol.toUpperCase(),
+      timeframe: "TV_MULTI",
+      direction: suggestion.direction,
+      entry: suggestion.entry,
+      stopLoss: suggestion.stopLoss ?? null,
+      takeProfit: suggestion.takeProfit ?? null,
+      confidence: suggestion.confidence ?? null,
+      qualityScore: suggestion.qualityScore ?? null,
+      reasoning: suggestion.reasoning,
+      checklist: suggestion.tradeChecklist
+        ? (JSON.parse(JSON.stringify(suggestion.tradeChecklist)) as Prisma.InputJsonValue)
+        : Prisma.JsonNull,
+      keyLevels: suggestion.keyLevels
+        ? (JSON.parse(JSON.stringify(suggestion.keyLevels)) as Prisma.InputJsonValue)
+        : Prisma.JsonNull,
+      status: "PENDING_REVIEW",
+    },
+    select: { id: true },
+  });
+
+  revalidatePath("/mt5");
+  return { ok: true, proposalId: proposal.id };
+}
 
 export async function confirmAiTradeProposal(
   proposalId: string,

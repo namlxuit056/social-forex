@@ -18,6 +18,7 @@ import { prisma } from "@/lib/prisma";
 import { getSiteUrl } from "@/lib/site-url";
 import { cn } from "@/lib/utils";
 import { AiProposalsPanel } from "@/components/mt5/ai-proposals-panel";
+import { RequestAnalysisForm } from "@/components/mt5/request-analysis-form";
 
 type AiProposal = {
   id: string;
@@ -366,7 +367,7 @@ export default async function Mt5Page({
                           </h3>
                           {positions.length > 0 ? (
                             <div className="overflow-x-auto rounded-lg border border-border/70">
-                              <table className="w-full min-w-[760px] text-left text-xs">
+                              <table className="w-full min-w-190 text-left text-xs">
                                 <thead className="bg-muted/40 text-muted-foreground">
                                   <tr>
                                     <th className="px-3 py-2 font-medium">{t("colTicket")}</th>
@@ -444,13 +445,18 @@ export default async function Mt5Page({
       </section>
 
       <section className="space-y-4">
-        <div>
-          <h2 className="font-heading text-xl font-semibold tracking-tight text-foreground">
-            AI Trade Proposals
-          </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Tín hiệu do AI đề xuất từ chart data MT5 — xác nhận để tạo signal
-          </p>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h2 className="font-heading text-xl font-semibold tracking-tight text-foreground">
+              AI Trade Proposals
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              TradingView scanner → DeepSeek-R1 phân tích → xác nhận để tạo signal
+            </p>
+          </div>
+          <RequestAnalysisForm
+            hasConnection={connections.some((c) => !c.revokedAt)}
+          />
         </div>
         <AiProposalsPanel proposals={pendingProposals as AiProposal[]} locale={locale} />
       </section>
