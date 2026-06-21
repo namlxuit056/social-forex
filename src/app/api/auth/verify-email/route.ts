@@ -5,6 +5,10 @@ import { hashEmailCode } from "@/lib/email-verification";
 import { pickErrors } from "@/lib/messages-pick";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
+import { addVipDays } from "@/lib/paypal-vip";
+
+const REFERRER_REWARD_DAYS = 7;
+const REFEREE_REWARD_DAYS = 3;
 
 const verifySchema = z.object({
   email: z.string().email(),
@@ -55,6 +59,43 @@ export async function POST(request: NextRequest) {
       }),
       prisma.verificationToken.deleteMany({ where: { identifier: email } }),
     ]);
+
+    if (user.referredById && !user.emailVerified) {
+      try {
+        const referrer = await prisma.user.findUnique({
+          where: { id: user.referredById },
+          select: { id: true, vipUntil: true },
+        });
+        if (referrer) {
+          const existingEvent = await prisma.referralEvent.findUnique({
+            where: { referrerId_refereeId: { referrerId: referrer.id, refereeId: user.id } },
+          });
+          if (!existingEvent) {
+            const newReferrerVip = addVipDays(referrer.vipUntil, REFERRER_REWARD_DAYS);
+            const newRefereeVip = addVipDays(user.vipUntil, REFEREE_REWARD_DAYS);
+            await prisma.$transaction([
+              prisma.user.update({
+                where: { id: referrer.id },
+                data: { vipUntil: newReferrerVip },
+              }),
+              prisma.user.update({
+                where: { id: user.id },
+                data: { vipUntil: newRefereeVip },
+              }),
+              prisma.referralEvent.create({
+                data: {
+                  referrerId: referrer.id,
+                  refereeId: user.id,
+                  rewardDays: REFERRER_REWARD_DAYS,
+                },
+              }),
+            ]);
+          }
+        }
+      } catch {
+        // Non-blocking: VIP reward is best-effort
+      }
+    }
 
     return NextResponse.json({ ok: true });
   } catch {

@@ -1628,5 +1628,18 @@
     "totalXp": "Tổng XP",
     "level": "Cấp độ",
     "todayXp": "XP hôm nay"
+  },
+  "referral": {
+    "title": "Chương trình giới thiệu",
+    "description": "Mời bạn bè tham gia Social Forex — cả hai đều được VIP!",
+    "linkLabel": "Link giới thiệu của bạn",
+    "copyLink": "Sao chép link",
+    "copied": "Đã sao chép!",
+    "shareVia": "Chia sẻ qua",
+    "statsInvited": "Bạn đã mời",
+    "statsVipEarned": "VIP đã nhận",
+    "rewardHint": "Bạn được 7 ngày VIP cho mỗi bạn bè tham gia. Họ được 3 ngày miễn phí!",
+    "noReferrals": "Chưa có ai được mời. Chia sẻ link để bắt đầu!",
+    "referralBadge": "Giới thiệu"
   }
 }

@@ -103,6 +103,15 @@ model User {
 
   xp                   Int       @default(0)
 
+  /// Mã referral duy nhất (8 ký tự)
+  referralCode         String?   @unique
+  /// User đã giới thiệu (referral)
+  referredById         String?
+  referredBy           User?     @relation("ReferralInvite", fields: [referredById], references: [id], onDelete: SetNull)
+  referredUsers        User[]    @relation("ReferralInvite")
+  referralRewardsGiven ReferralEvent[] @relation("ReferralRewardReferrer")
+  referralRewardsEarned ReferralEvent[] @relation("ReferralRewardReferee")
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -719,4 +728,19 @@ model Mt5SignalLink {
 
   @@unique([connectionId, mt5Ticket])
   @@index([connectionId, kind])
+}
+
+model ReferralEvent {
+  id           String   @id @default(cuid())
+  referrerId   String
+  refereeId    String
+  rewardDays   Int      @default(7)
+  createdAt    DateTime @default(now())
+
+  referrer User @relation("ReferralRewardReferrer", fields: [referrerId], references: [id], onDelete: Cascade)
+  referee  User @relation("ReferralRewardReferee", fields: [refereeId], references: [id], onDelete: Cascade)
+
+  @@unique([referrerId, refereeId])
+  @@index([referrerId])
+  @@index([refereeId])
 }

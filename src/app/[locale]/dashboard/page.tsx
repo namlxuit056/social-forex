@@ -37,6 +37,7 @@ import { Disclaimer } from "@/components/layout/disclaimer";
 import { prisma } from "@/lib/prisma";
 import { isVipActive } from "@/lib/vip";
 import { DailyActivityWidget } from "@/components/dashboard/daily-activity-widget";
+import { ReferralWidget } from "@/components/dashboard/referral-widget";
 
 type FollowFeedMode = "latest" | "active";
 
@@ -331,6 +332,8 @@ export default async function DashboardPage({
       </div>
 
       <DailyActivityWidget />
+
+      <ReferralWidget />
 
       <section aria-labelledby="dashboard-action-heading" className="space-y-4">
         <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">

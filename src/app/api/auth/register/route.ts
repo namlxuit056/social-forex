@@ -11,11 +11,13 @@ import {
 import { pickErrors } from "@/lib/messages-pick";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
+import { generateReferralCode } from "@/lib/referral";
 
 const registerSchema = z.object({
   name: z.string().min(2).max(64),
   email: z.string().email(),
   password: z.string().min(8).max(128),
+  ref: z.string().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -31,7 +33,7 @@ export async function POST(request: NextRequest) {
         { status: 400 },
       );
     }
-    const { name, email, password } = parsed.data;
+    const { name, email, password, ref } = parsed.data;
     const normalizedEmail = email.toLowerCase();
     const limited = rateLimit(`register:${normalizedEmail}`, 3, 10 * 60_000);
     if (!limited.ok) {
@@ -40,6 +42,16 @@ export async function POST(request: NextRequest) {
         { status: 429 },
       );
     }
+
+    let referredById: string | null = null;
+    if (ref) {
+      const referrer = await prisma.user.findUnique({
+        where: { referralCode: ref.toUpperCase() },
+        select: { id: true },
+      });
+      if (referrer) referredById = referrer.id;
+    }
+
     const existing = await prisma.user.findUnique({
       where: { email: normalizedEmail },
     });
@@ -50,6 +62,7 @@ export async function POST(request: NextRequest) {
     const code = generateEmailCode();
     const token = hashEmailCode(normalizedEmail, code);
     const expires = emailCodeExpiresAt();
+    const newReferralCode = generateReferralCode();
 
     await prisma.$transaction([
       existing
@@ -62,6 +75,8 @@ export async function POST(request: NextRequest) {
               name,
               email: normalizedEmail,
               passwordHash,
+              referralCode: newReferralCode,
+              referredById,
             },
           }),
       prisma.verificationToken.deleteMany({

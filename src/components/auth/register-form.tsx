@@ -22,8 +22,10 @@ import { trackInternalEvent } from "@/lib/internal-analytics";
 
 export function RegisterForm({
   callbackUrl = "/dashboard",
+  ref: referralCode,
 }: {
   callbackUrl?: string;
+  ref?: string;
 }) {
   const t = useTranslations("auth");
   const locale = useLocale();
@@ -56,7 +58,7 @@ export function RegisterForm({
     const res = await fetch("/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password }),
+      body: JSON.stringify({ name, email, password, ref: referralCode }),
     });
     const data = (await res.json()) as {
       error?: string;

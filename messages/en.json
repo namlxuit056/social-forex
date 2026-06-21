@@ -1628,5 +1628,18 @@
     "totalXp": "Total XP",
     "level": "Level",
     "todayXp": "Today's XP"
+  },
+  "referral": {
+    "title": "Referral Program",
+    "description": "Invite friends to Social Forex and both of you get VIP days!",
+    "linkLabel": "Your referral link",
+    "copyLink": "Copy link",
+    "copied": "Copied!",
+    "shareVia": "Share via",
+    "statsInvited": "Friends invited",
+    "statsVipEarned": "VIP days earned",
+    "rewardHint": "You get 7 days VIP for each friend who joins. They get 3 days free!",
+    "noReferrals": "No referrals yet. Share your link to get started!",
+    "referralBadge": "Referral"
   }
 }

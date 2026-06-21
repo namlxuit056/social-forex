@@ -20,7 +20,7 @@ export default async function RegisterPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams?: Promise<{ callbackUrl?: string | string[] }>;
+  searchParams?: Promise<{ callbackUrl?: string | string[]; ref?: string }>;
 }) {
   const { locale } = await params;
   const query = await searchParams;
@@ -30,6 +30,7 @@ export default async function RegisterPage({
     ? query?.callbackUrl[0]
     : query?.callbackUrl;
   const callbackUrl = safeLocalizedCallbackPath(rawCallbackUrl, "/challenge");
+  const ref = typeof query?.ref === "string" ? query.ref : undefined;
 
   return (
     <div className="mx-auto max-w-md space-y-8">
@@ -41,7 +42,7 @@ export default async function RegisterPage({
           {t("registerTitle")}
         </h1>
       </div>
-      <RegisterForm callbackUrl={callbackUrl} />
+      <RegisterForm callbackUrl={callbackUrl} ref={ref} />
       <p className="text-center text-sm text-muted-foreground">
         {t("hasAccount")}{" "}
         <Link
