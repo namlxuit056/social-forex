@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Copy, Loader2 } from "lucide-react";
+import { Check, Copy, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,6 +36,7 @@ export function CopyTradeButton({
   const [riskPercent, setRiskPercent] = useState("1");
   const [loading, setLoading] = useState(false);
   const [token, setToken] = useState(existingToken);
+  const [copied, setCopied] = useState(false);
 
   async function handleSubscribe() {
     setLoading(true);
@@ -52,20 +53,23 @@ export function CopyTradeButton({
       toast.error(result.error);
     } else if (result.ok && result.token) {
       setToken(result.token);
-      toast.success(t("subscribed"));
-      setOpen(false);
+      // stay open — dialog transitions to token view
     }
+  }
+
+  function handleCopyToken(value: string) {
+    void navigator.clipboard.writeText(value);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger
-        render={
-          <Button variant={isSubscribed ? "outline" : "default"} size="sm" className="gap-1.5" />
-        }
-      >
-        <Copy className="size-3.5" />
-        {isSubscribed ? t("manage") : t("copy")}
+      <DialogTrigger asChild>
+        <Button variant={isSubscribed ? "outline" : "default"} size="sm" className="gap-1.5">
+          <Copy className="size-3.5" />
+          {isSubscribed ? t("manage") : t("copy")}
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
@@ -80,7 +84,23 @@ export function CopyTradeButton({
             <p className="text-sm text-muted-foreground">{t("setupInstructions")}</p>
             <div className="rounded-lg border border-border/60 bg-muted/30 p-3">
               <Label className="text-xs">{t("yourToken")}</Label>
-              <code className="mt-1 block break-all font-mono text-sm text-foreground">{token}</code>
+              <div className="mt-1 flex items-center gap-2">
+                <code className="min-w-0 flex-1 break-all font-mono text-sm text-foreground">
+                  {token}
+                </code>
+                <button
+                  type="button"
+                  onClick={() => handleCopyToken(token)}
+                  className="shrink-0 rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                  aria-label="Copy token"
+                >
+                  {copied ? (
+                    <Check className="size-4 text-green-500" />
+                  ) : (
+                    <Copy className="size-4" />
+                  )}
+                </button>
+              </div>
             </div>
             <ol className="space-y-2 text-sm text-muted-foreground">
               <li>1. {t("step1")}</li>
