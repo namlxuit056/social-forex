@@ -27,8 +27,8 @@ export async function subscribeCopyTrade(
   const parsed = copyTradeSchema.safeParse({
     providerId: formData.get("providerId"),
     mode: formData.get("mode"),
-    fixedLot: formData.get("fixedLot"),
-    riskPercent: formData.get("riskPercent"),
+    fixedLot: formData.get("fixedLot") ?? undefined,
+    riskPercent: formData.get("riskPercent") ?? undefined,
   });
 
   if (!parsed.success) return { error: t("invalidData") };
