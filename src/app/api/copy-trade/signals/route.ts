@@ -36,6 +36,18 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: "Invalid or inactive subscription" }, { status: 404 });
   }
 
+  // Prevent infinite loop when bridge and copy trade run on the same account
+  if (copyTrade.follower.id === copyTrade.providerId) {
+    return NextResponse.json({
+      subscriptionId: copyTrade.id,
+      mode: copyTrade.mode,
+      fixedLot: copyTrade.fixedLot,
+      riskPercent: copyTrade.riskPercent,
+      maxLots: copyTrade.maxLots,
+      signals: [],
+    });
+  }
+
   const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
   const signals = await prisma.signal.findMany({
