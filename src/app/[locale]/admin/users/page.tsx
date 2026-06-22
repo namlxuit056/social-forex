@@ -66,6 +66,7 @@ export default async function AdminUsersPage({
       name: true,
       role: true,
       vipUntil: true,
+      emailVerified: true,
       createdAt: true,
     },
     orderBy: { createdAt: "desc" },
@@ -111,6 +112,7 @@ export default async function AdminUsersPage({
                   <th className="px-4 py-2.5">Email</th>
                   <th className="px-4 py-2.5">{t("role")}</th>
                   <th className="px-4 py-2.5">VIP</th>
+                  <th className="px-4 py-2.5">Email verified</th>
                   <th className="px-4 py-2.5">{t("joined")}</th>
                   <th className="px-4 py-2.5">{t("changeRole")}</th>
                 </tr>
@@ -126,6 +128,7 @@ export default async function AdminUsersPage({
                       role: u.role,
                       vipActive: isVipActive(u.vipUntil),
                       vipUntil: u.vipUntil?.toISOString() ?? null,
+                      emailVerified: !!u.emailVerified,
                       createdAt: u.createdAt.toISOString(),
                     }}
                     currentUserId={session.user.id}

@@ -15,6 +15,7 @@ interface UserRowProps {
     role: string;
     vipActive: boolean;
     vipUntil: string | null;
+    emailVerified: boolean;
     createdAt: string;
   };
   currentUserId: string;
@@ -57,6 +58,15 @@ export function UserRow({ user, currentUserId, locale }: UserRowProps) {
           </span>
         ) : (
           <span className="text-muted-foreground">—</span>
+        )}
+      </td>
+      <td className="px-4 py-2.5 text-xs">
+        {user.emailVerified ? (
+          <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+            ✓ Verified
+          </span>
+        ) : (
+          <span className="text-muted-foreground">Chưa verify</span>
         )}
       </td>
       <td className="px-4 py-2.5 text-xs text-muted-foreground">
