@@ -59,10 +59,12 @@ export async function POST(request: NextRequest) {
   }
 
   const { symbol, currentPrice } = parsed.data;
+  const acceptLang = request.headers.get("accept-language") ?? "";
+  const locale: "vi" | "en" = acceptLang.toLowerCase().includes("vi") ? "vi" : "en";
 
   let result;
   try {
-    result = await analyzeTvChart(symbol, currentPrice);
+    result = await analyzeTvChart(symbol, currentPrice, locale);
   } catch (err) {
     if (err instanceof AiUnavailableError) {
       return NextResponse.json({ error: "ai_unavailable" }, { status: 503 });

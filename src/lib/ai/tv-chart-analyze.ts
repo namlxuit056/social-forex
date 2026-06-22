@@ -27,6 +27,7 @@ function detectGroup(symbol: string): QuoteGroup {
 export async function analyzeTvChart(
   symbol: string,
   fallbackPrice: number,
+  locale: "vi" | "en" = "vi",
 ): Promise<{ suggestion: AiSuggestion; tvContext: TradingViewTechnicalContext }> {
   const resolved = resolveAiProvider();
   if (!resolved) {
@@ -66,7 +67,7 @@ export async function analyzeTvChart(
     changePct: m15Frame?.changePct ?? 0,
   };
 
-  const prompt = buildUserPrompt(quote, tvContext, newsContext, "vi");
+  const prompt = buildUserPrompt(quote, tvContext, newsContext, locale);
 
   const client = createAiClient(resolved);
 

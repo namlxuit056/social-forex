@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { BrainCircuit, Loader2 } from "lucide-react";
 import { requestAiAnalysis } from "@/actions/ai-trade-proposal";
 import { QUOTE_DEFINITIONS } from "@/lib/quotes/definitions";
@@ -22,6 +22,8 @@ const ERROR_LABELS: Record<string, string> = {
 
 export function RequestAnalysisForm({ hasConnection }: Props) {
   const router = useRouter();
+  const params = useParams();
+  const locale = (params?.locale as string) === "en" ? "en" : "vi";
   const [symbol, setSymbol] = useState("XAUUSD");
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
@@ -31,7 +33,7 @@ export function RequestAnalysisForm({ hasConnection }: Props) {
     e.preventDefault();
     setStatus("idle");
     startTransition(async () => {
-      const result = await requestAiAnalysis(symbol);
+      const result = await requestAiAnalysis(symbol, locale);
       if (result.ok) {
         setStatus("success");
         router.refresh();

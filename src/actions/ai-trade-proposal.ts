@@ -12,6 +12,7 @@ import { Prisma } from "@/generated/prisma/client";
 
 export async function requestAiAnalysis(
   symbol: string,
+  locale: "vi" | "en" = "vi",
 ): Promise<{ ok: boolean; proposalId?: string; error?: string }> {
   const session = await auth();
   if (!session?.user?.id) return { ok: false, error: "unauthorized" };
@@ -36,7 +37,7 @@ export async function requestAiAnalysis(
 
   let result;
   try {
-    result = await analyzeTvChart(symbol.toUpperCase(), def.mockMid);
+    result = await analyzeTvChart(symbol.toUpperCase(), def.mockMid, locale);
   } catch (err) {
     if (err instanceof AiUnavailableError) return { ok: false, error: "ai_unavailable" };
     return { ok: false, error: "analysis_failed" };
