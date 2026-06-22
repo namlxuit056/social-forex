@@ -1,11 +1,12 @@
 import { aiSuggestionSchema, type AiSuggestion } from "@/lib/ai/types";
-import { SYSTEM_PROMPT } from "@/lib/ai/prompt";
+import { SYSTEM_PROMPT, buildUserPrompt } from "@/lib/ai/prompt";
 import { createAiClient, resolveAiProvider } from "@/lib/ai/provider";
 import { AiUnavailableError } from "@/lib/ai/suggest";
 import {
   getTradingViewTechnicalContext,
   type TradingViewTechnicalContext,
 } from "@/lib/ai/tradingview-context";
+import { getAiNewsContext } from "@/lib/ai/news-context";
 import type { QuoteGroup } from "@/lib/quotes/types";
 
 function detectGroup(symbol: string): QuoteGroup {
@@ -20,61 +21,12 @@ function detectGroup(symbol: string): QuoteGroup {
     s.includes("USDC")
   )
     return "crypto";
-  // Default to major forex
   return "major";
-}
-
-function fmt(value: number | null, digits = 5) {
-  if (value === null) return "n/a";
-  return value.toFixed(value >= 100 ? 2 : digits);
-}
-
-function buildTvPrompt(
-  symbol: string,
-  currentPrice: number,
-  ctx: TradingViewTechnicalContext,
-): string {
-  const frameLines = ctx.frames
-    .map((f) => {
-      return [
-        `[${f.timeframe}]`,
-        `trend=${f.trend}`,
-        `rec=${fmt(f.recommendation, 2)}`,
-        `rsi=${fmt(f.rsi, 1)}(${f.rsiState})`,
-        `ema20=${fmt(f.ema20)}`,
-        `ema50=${fmt(f.ema50)}`,
-        `ema200=${fmt(f.ema200)}`,
-        `adx=${fmt(f.adx, 1)}`,
-        `macd=${fmt(f.macd)}`,
-        `sig=${fmt(f.macdSignal)}`,
-        `emaBias=${f.emaBias}`,
-        `candle=${f.candlePattern}`,
-        `O=${fmt(f.open)} H=${fmt(f.high)} L=${fmt(f.low)} C=${fmt(f.close)}`,
-      ].join(" ");
-    })
-    .join("\n");
-
-  return `Analyze this TradingView multi-timeframe technical data and provide a disciplined educational trading plan.
-
-Response language: English. Do not use Vietnamese in any field.
-
-Symbol: ${symbol}
-Current Price: ${currentPrice.toFixed(5)}
-Data source: TradingView Scanner (real-time, ${ctx.updatedAt})
-
-Multi-Timeframe Summary:
-${frameLines}
-
-Overall: ${ctx.summary}
-
-ENTRY CONSTRAINT: For LONG entry MUST be strictly below ${currentPrice.toFixed(5)}. For SHORT entry MUST be strictly above ${currentPrice.toFixed(5)}.
-
-Return one conservative setup only. JSON format, no markdown.`;
 }
 
 export async function analyzeTvChart(
   symbol: string,
-  currentPrice: number,
+  fallbackPrice: number,
 ): Promise<{ suggestion: AiSuggestion; tvContext: TradingViewTechnicalContext }> {
   const resolved = resolveAiProvider();
   if (!resolved) {
@@ -84,21 +36,39 @@ export async function analyzeTvChart(
   }
 
   const group = detectGroup(symbol);
-  const tvContext = await getTradingViewTechnicalContext({
-    symbol,
-    group,
-    bid: currentPrice,
-    ask: currentPrice,
-    name: symbol,
-    changePct: 0,
-  });
+
+  const [tvContext, newsContext] = await Promise.all([
+    getTradingViewTechnicalContext({
+      symbol,
+      group,
+      bid: fallbackPrice,
+      ask: fallbackPrice,
+      name: symbol,
+      changePct: 0,
+    }),
+    getAiNewsContext(symbol),
+  ]);
 
   if (!tvContext) {
     throw new Error(`TradingView data not available for ${symbol}`);
   }
 
+  // Use TradingView M15 close as the authoritative current price
+  const m15Frame = tvContext.frames.find((f) => f.timeframe === "M15");
+  const livePrice = m15Frame?.close ?? fallbackPrice;
+
+  const quote = {
+    symbol,
+    name: symbol,
+    group,
+    bid: livePrice,
+    ask: livePrice,
+    changePct: m15Frame?.changePct ?? 0,
+  };
+
+  const prompt = buildUserPrompt(quote, tvContext, newsContext, "vi");
+
   const client = createAiClient(resolved);
-  const prompt = buildTvPrompt(symbol, currentPrice, tvContext);
 
   const response = await client.chat.completions.create({
     model: resolved.model,

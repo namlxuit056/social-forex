@@ -14,10 +14,10 @@ type ProviderConfig = {
 const PROVIDER_CONFIG: Record<AiProvider, ProviderConfig> = {
   deepseek: {
     baseURL: "https://api.deepseek.com",
-    model: "deepseek-reasoner",
+    model: "deepseek-v4-pro",
     envKey: "DEEPSEEK_API_KEY",
     supportsTemperature: false,
-    maxTokens: 2000,
+    maxTokens: 8000,
   },
   groq: {
     baseURL: "https://api.groq.com/openai/v1",
