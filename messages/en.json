@@ -1806,5 +1806,11 @@
     "proposalConfirmed": "Proposal confirmed — signal created!",
     "proposalRejected": "Proposal rejected.",
     "viewSignal": "View signal"
+  },
+  "pwa": {
+    "installTitle": "Install Social Forex",
+    "installHint": "Add to home screen for quick access and offline support.",
+    "install": "Install",
+    "dismiss": "Not now"
   }
 }

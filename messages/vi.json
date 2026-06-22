@@ -1806,5 +1806,11 @@
     "proposalConfirmed": "Đã xác nhận — tín hiệu đã được tạo!",
     "proposalRejected": "Đã từ chối đề xuất.",
     "viewSignal": "Xem tín hiệu"
+  },
+  "pwa": {
+    "installTitle": "Cài đặt Social Forex",
+    "installHint": "Thêm vào màn hình chính để truy cập nhanh và hỗ trợ offline.",
+    "install": "Cài đặt",
+    "dismiss": "Không phải bây giờ"
   }
 }
