@@ -31,6 +31,7 @@ const marketNavKeys = [
 const communityNavKeys = [
   { href: "/leaderboard", key: "leaderboard" },
   { href: "/copy-trade", key: "copyTrade" },
+  { href: "/ai-trade-proposals", key: "aiTradeProposal" },
   { href: "/plan", key: "plan" },
   { href: "/journal", key: "journal" },
   { href: "/mt5", key: "mt5" },

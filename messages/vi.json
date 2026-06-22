@@ -49,6 +49,7 @@
     "challenge": "Thử thách 7 ngày",
     "startHere": "Bắt đầu tại đây",
     "copyTrade": "Copy Trading",
+    "aiTradeProposal": "Đề xuất AI",
     "marketTools": "Thị trường",
     "community": "Cộng đồng",
     "learning": "Học tập",
@@ -1784,5 +1785,23 @@
     "ts3A": "Token đã bị huỷ hoặc subscription không còn active. Vào profile trader → Copy → lấy token mới.",
     "ts4Q": "Lệnh bị requote liên tục",
     "ts4A": "Tăng MaxSlippage lên 50–100 points hoặc switch sang tài khoản ECN/STP có spread thấp hơn."
+  },
+  "aiTradeProposal": {
+    "title": "Đề xuất giao dịch AI",
+    "description": "Nhận phân tích và đề xuất giao dịch từ AI dựa trên chỉ báo kỹ thuật.",
+    "loginRequired": "Đăng nhập để sử dụng AI Trade Proposals",
+    "loginHint": "Tạo tài khoản để nhận ý tưởng giao dịch từ AI.",
+    "signIn": "Đăng nhập",
+    "mt5Required": "Kết nối MT5 trước",
+    "mt5RequiredHint": "Bạn cần kết nối MT5 đang hoạt động để tạo đề xuất giao dịch AI.",
+    "connectMt5": "Kết nối MT5",
+    "pendingProposals": "Đề xuất đang chờ",
+    "requestAnalysis": "Yêu cầu phân tích",
+    "analyzing": "Đang phân tích...",
+    "selectSymbol": "Chọn Symbol",
+    "noProposals": "Chưa có đề xuất. Yêu cầu phân tích để bắt đầu.",
+    "proposalConfirmed": "Đã xác nhận — tín hiệu đã được tạo!",
+    "proposalRejected": "Đã từ chối đề xuất.",
+    "viewSignal": "Xem tín hiệu"
   }
 }

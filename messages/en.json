@@ -49,6 +49,7 @@
     "challenge": "7-day challenge",
     "startHere": "Start here",
     "copyTrade": "Copy Trading",
+    "aiTradeProposal": "AI Proposals",
     "marketTools": "Market",
     "community": "Community",
     "learning": "Learning",
@@ -1784,5 +1785,23 @@
     "ts3A": "Token was revoked or subscription is no longer active. Go to the trader's profile → Copy → get a new token.",
     "ts4Q": "Trades are constantly requoted",
     "ts4A": "Increase MaxSlippage to 50–100 points, or switch to an ECN/STP account with tighter spreads."
+  },
+  "aiTradeProposal": {
+    "title": "AI Trade Proposals",
+    "description": "Get AI-powered trade analysis and proposals based on technical indicators.",
+    "loginRequired": "Sign in to access AI Trade Proposals",
+    "loginHint": "Create an account to get AI-generated trade ideas.",
+    "signIn": "Sign in",
+    "mt5Required": "Connect MT5 first",
+    "mt5RequiredHint": "You need an active MT5 connection to generate AI trade proposals.",
+    "connectMt5": "Connect MT5",
+    "pendingProposals": "Pending Proposals",
+    "requestAnalysis": "Request Analysis",
+    "analyzing": "Analyzing...",
+    "selectSymbol": "Select Symbol",
+    "noProposals": "No pending proposals. Request an analysis to get started.",
+    "proposalConfirmed": "Proposal confirmed — signal created!",
+    "proposalRejected": "Proposal rejected.",
+    "viewSignal": "View signal"
   }
 }
