@@ -79,6 +79,8 @@ export default async function AdminAnalyticsPage({
     errorGroups,
     funnelGroups,
     recentFunnelEvents,
+    topErrors,
+    recentErrors,
   ] = await Promise.all([
     prisma.userPageVisit.count({ where: { createdAt: { gte: since } } }),
     prisma.userClientError.count({ where: { createdAt: { gte: since } } }),
@@ -114,6 +116,28 @@ export default async function AdminAnalyticsPage({
         createdAt: true,
         userId: true,
         visitorId: true,
+      },
+    }),
+    prisma.userClientError.groupBy({
+      by: ["message", "path", "kind"],
+      where: { createdAt: { gte: since } },
+      _count: { _all: true },
+      orderBy: { _count: { message: "desc" } },
+      take: 15,
+    }),
+    prisma.userClientError.findMany({
+      where: { createdAt: { gte: since } },
+      orderBy: { createdAt: "desc" },
+      take: 30,
+      select: {
+        id: true,
+        path: true,
+        kind: true,
+        message: true,
+        digest: true,
+        stack: true,
+        createdAt: true,
+        user: { select: { email: true, name: true } },
       },
     }),
   ]);
@@ -529,6 +553,89 @@ export default async function AdminAnalyticsPage({
             </>
           )}
         </div>
+      </div>
+
+      {/* Global error view */}
+      <div className="grid gap-6 lg:grid-cols-[1fr_1.5fr]">
+        <Card className="border-border/60">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <AlertTriangle className="size-4 text-red-500" />
+              Top lỗi 30 ngày
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {topErrors.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Không có lỗi nào.</p>
+            ) : (
+              topErrors.map((err, i) => (
+                <div key={i} className="rounded-lg border border-border/60 px-3 py-2 space-y-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <Badge variant="destructive" className="shrink-0">{err.kind}</Badge>
+                    <Badge variant="secondary" className="shrink-0 ml-auto">{err._count._all}×</Badge>
+                  </div>
+                  <p className="font-mono text-[11px] text-muted-foreground truncate">{err.path}</p>
+                  <p className="text-xs text-foreground wrap-break-word line-clamp-2">{err.message}</p>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="border-border/60">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <AlertTriangle className="size-4 text-red-500" />
+              Lỗi gần đây (tất cả user)
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="overflow-x-auto p-0">
+            {recentErrors.length === 0 ? (
+              <p className="px-4 pb-4 text-sm text-muted-foreground">Không có lỗi nào.</p>
+            ) : (
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b text-left text-xs text-muted-foreground">
+                    <th className="px-4 py-2.5">{t("time")}</th>
+                    <th className="px-4 py-2.5">User</th>
+                    <th className="px-4 py-2.5">{t("analyticsPage")}</th>
+                    <th className="px-4 py-2.5">{t("analyticsError")}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/40">
+                  {recentErrors.map((error) => (
+                    <tr key={error.id} className="align-top">
+                      <td className="whitespace-nowrap px-4 py-3 text-xs text-muted-foreground">
+                        {formatDate(error.createdAt, locale)}
+                      </td>
+                      <td className="px-4 py-3 text-xs text-muted-foreground">
+                        {error.user.email ?? error.user.name ?? "—"}
+                      </td>
+                      <td className="px-4 py-3 font-mono text-xs">{error.path}</td>
+                      <td className="px-4 py-3">
+                        <div className="flex flex-wrap gap-1.5">
+                          <Badge variant="destructive">{error.kind}</Badge>
+                          {error.digest && <Badge variant="outline">{error.digest}</Badge>}
+                        </div>
+                        <p className="mt-1.5 max-w-sm wrap-break-word text-xs text-muted-foreground line-clamp-3">
+                          {error.message}
+                        </p>
+                        {error.stack && (
+                          <details className="mt-1">
+                            <summary className="cursor-pointer text-[11px] text-muted-foreground/60 hover:text-muted-foreground">stack trace</summary>
+                            <pre className="mt-1 max-h-32 overflow-auto rounded bg-muted/40 p-2 text-[10px] text-muted-foreground">
+                              {error.stack}
+                            </pre>
+                          </details>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
