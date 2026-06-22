@@ -24,6 +24,7 @@ const marketNavKeys = [
   { href: "/calendar", key: "calendar" },
   { href: "/chart", key: "chart" },
   { href: "/tools", key: "tools" },
+  { href: "/screener", key: "screener" },
   { href: "/heatmap", key: "heatmap" },
   { href: "/sentiment", key: "sentiment" },
 ] as const;

@@ -37,6 +37,7 @@
     "notifications": "Notifications",
     "sentiment": "Sentiment",
     "heatmap": "Heatmap",
+    "screener": "Screener",
     "backtest": "Backtest",
     "academy": "Academy",
     "articles": "AI Articles",
@@ -1812,5 +1813,23 @@
     "installHint": "Add to home screen for quick access and offline support.",
     "install": "Install",
     "dismiss": "Not now"
+  },
+  "screener": {
+    "title": "Market Screener",
+    "description": "Filter currency pairs by technical indicators — RSI, MACD, EMA crossover, and volatility.",
+    "filterAll": "All",
+    "filterBullish": "Bullish",
+    "filterBearish": "Bearish",
+    "filterVolatile": "Volatile",
+    "filterStable": "Stable",
+    "colSymbol": "Symbol",
+    "colPrice": "Price",
+    "col24h": "24h",
+    "colRsi": "RSI",
+    "colMacd": "MACD",
+    "colTrend": "Trend",
+    "colSignal": "Signal",
+    "viewChart": "Chart",
+    "noResults": "No pairs match the selected filter."
   }
 }

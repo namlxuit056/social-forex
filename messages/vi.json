@@ -37,6 +37,7 @@
     "notifications": "Thông báo",
     "sentiment": "Sentiment",
     "heatmap": "Heatmap",
+    "screener": "Screener",
     "backtest": "Backtest",
     "academy": "Academy",
     "articles": "Bài viết AI",
@@ -1812,5 +1813,23 @@
     "installHint": "Thêm vào màn hình chính để truy cập nhanh và hỗ trợ offline.",
     "install": "Cài đặt",
     "dismiss": "Không phải bây giờ"
+  },
+  "screener": {
+    "title": "Market Screener",
+    "description": "Lọc cặp tiền theo chỉ báo kỹ thuật — RSI, MACD, EMA crossover và volatility.",
+    "filterAll": "Tất cả",
+    "filterBullish": "Tăng giá",
+    "filterBearish": "Giảm giá",
+    "filterVolatile": "Biến động mạnh",
+    "filterStable": "Ổn định",
+    "colSymbol": "Symbol",
+    "colPrice": "Giá",
+    "col24h": "24h",
+    "colRsi": "RSI",
+    "colMacd": "MACD",
+    "colTrend": "Xu hướng",
+    "colSignal": "Tín hiệu",
+    "viewChart": "Biểu đồ",
+    "noResults": "Không có cặp tiền nào phù hợp với bộ lọc."
   }
 }
