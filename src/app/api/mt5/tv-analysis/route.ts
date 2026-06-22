@@ -3,6 +3,7 @@ import { z } from "zod";
 import { hashMt5BridgeToken, MT5_BRIDGE_TOKEN_PREFIX } from "@/lib/mt5-bridge";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
+import { isVipActive } from "@/lib/vip";
 import { analyzeTvChart } from "@/lib/ai/tv-chart-analyze";
 import { AiUnavailableError } from "@/lib/ai/suggest";
 import { Prisma } from "@/generated/prisma/client";
@@ -29,11 +30,15 @@ export async function POST(request: NextRequest) {
   const tokenHash = hashMt5BridgeToken(token);
   const connection = await prisma.mt5Connection.findUnique({
     where: { tokenHash },
-    select: { id: true, userId: true, revokedAt: true },
+    select: { id: true, userId: true, revokedAt: true, user: { select: { vipUntil: true } } },
   });
 
   if (!connection || connection.revokedAt) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+
+  if (!isVipActive(connection.user?.vipUntil)) {
+    return NextResponse.json({ error: "vip_required" }, { status: 403 });
   }
 
   const { ok } = rateLimit(`tv-analysis:${connection.id}`, 1, ANALYSIS_RATE_LIMIT_MS);

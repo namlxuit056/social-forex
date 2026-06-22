@@ -1789,6 +1789,9 @@
   "aiTradeProposal": {
     "title": "AI Trade Proposals",
     "description": "Get AI-powered trade analysis and proposals based on technical indicators.",
+    "vipRequired": "VIP feature only",
+    "vipRequiredHint": "Upgrade to VIP to access AI-powered trade proposals.",
+    "upgradeVip": "Upgrade to VIP",
     "loginRequired": "Sign in to access AI Trade Proposals",
     "loginHint": "Create an account to get AI-generated trade ideas.",
     "signIn": "Sign in",

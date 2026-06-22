@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
+import { isVipActive } from "@/lib/vip";
 import { analyzeTvChart } from "@/lib/ai/tv-chart-analyze";
 import { AiUnavailableError } from "@/lib/ai/suggest";
 import { QUOTE_BY_SYMBOL } from "@/lib/quotes/definitions";
@@ -16,6 +17,10 @@ export async function requestAiAnalysis(
   if (!session?.user?.id) return { ok: false, error: "unauthorized" };
 
   const userId = session.user.id;
+
+  const dbUser = await prisma.user.findUnique({ where: { id: userId }, select: { vipUntil: true } });
+  if (!isVipActive(dbUser?.vipUntil)) return { ok: false, error: "vip_required" };
+
   const { ok } = rateLimit(`ai-analysis:${userId}`, 3, 60_000);
   if (!ok) return { ok: false, error: "rate_limited" };
 
@@ -69,6 +74,7 @@ export async function requestAiAnalysis(
 
 export async function confirmAiTradeProposal(
   proposalId: string,
+  lotSize?: number,
 ): Promise<{ ok: boolean; signalId?: string; error?: string }> {
   const session = await auth();
   if (!session?.user?.id) {
@@ -97,7 +103,8 @@ export async function confirmAiTradeProposal(
     return { ok: false, error: "not_found" };
   }
 
-  const notes = `AI Trade Proposal · ${proposal.timeframe} · confidence: ${proposal.confidence ?? "?"}/5\n\n${proposal.reasoning}`;
+  const validLot = lotSize && lotSize > 0 ? Math.round(lotSize * 100) / 100 : null;
+  const notes = `AI Trade Proposal · ${proposal.timeframe} · confidence: ${proposal.confidence ?? "?"}/5${validLot ? ` · lot: ${validLot}` : ""}\n\n${proposal.reasoning}`;
 
   const signal = await prisma.signal.create({
     data: {

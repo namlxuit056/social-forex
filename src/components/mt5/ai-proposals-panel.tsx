@@ -59,10 +59,12 @@ function ProposalCard({
 }) {
   const [state, setState] = useState<ProposalState>({ type: "idle" });
   const [isPending, startTransition] = useTransition();
+  const [lotSize, setLotSize] = useState("0.01");
 
   function handleConfirm() {
+    const lot = parseFloat(lotSize);
     startTransition(async () => {
-      const result = await confirmAiTradeProposal(proposal.id);
+      const result = await confirmAiTradeProposal(proposal.id, lot > 0 ? lot : undefined);
       if (result.ok && result.signalId) {
         setState({ type: "confirmed", signalId: result.signalId });
       } else {
@@ -182,7 +184,20 @@ function ProposalCard({
           </p>
         )}
 
-        <div className="flex items-center justify-end gap-2 pt-1">
+        <div className="flex flex-wrap items-center justify-end gap-2 pt-1">
+          <div className="flex items-center gap-1.5 mr-auto">
+            <label className="text-xs text-muted-foreground whitespace-nowrap">Lot size:</label>
+            <input
+              type="number"
+              min="0.01"
+              max="100"
+              step="0.01"
+              value={lotSize}
+              onChange={(e) => setLotSize(e.target.value)}
+              disabled={isPending}
+              className="w-20 h-8 rounded-md border border-input bg-background px-2 text-sm text-foreground shadow-sm focus:outline-none focus:ring-1 focus:ring-ring disabled:opacity-50"
+            />
+          </div>
           <Button
             variant="outline"
             size="sm"

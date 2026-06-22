@@ -2,6 +2,7 @@ import { Brain, Sparkles } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { isVipActive } from "@/lib/vip";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "@/i18n/navigation";
 import { AiProposalsPanel } from "@/components/mt5/ai-proposals-panel";
@@ -57,6 +58,43 @@ export default async function AiTradeProposalsPage({
               className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
             >
               {t("signIn")}
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const dbUser = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { vipUntil: true },
+  });
+
+  if (!isVipActive(dbUser?.vipUntil)) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="font-heading text-2xl font-semibold text-foreground">
+            {t("title")}
+          </h1>
+          <p className="mt-2 text-muted-foreground">{t("description")}</p>
+        </div>
+        <Card className="border-border/60 bg-card/50">
+          <CardContent className="flex flex-col items-center gap-4 py-12 text-center">
+            <Sparkles className="size-12 text-primary/40" />
+            <div>
+              <h3 className="font-heading text-lg font-medium text-foreground">
+                {t("vipRequired")}
+              </h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {t("vipRequiredHint")}
+              </p>
+            </div>
+            <Link
+              href="/upgrade-vip"
+              className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+            >
+              {t("upgradeVip")}
             </Link>
           </CardContent>
         </Card>

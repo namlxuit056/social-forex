@@ -12,6 +12,7 @@ type Props = {
 };
 
 const ERROR_LABELS: Record<string, string> = {
+  vip_required: "Tính năng này chỉ dành cho VIP",
   no_connection: "Tạo MT5 connection trước",
   rate_limited: "Quá nhiều request, thử lại sau 1 phút",
   ai_unavailable: "Chưa cấu hình DEEPSEEK_API_KEY trong .env",

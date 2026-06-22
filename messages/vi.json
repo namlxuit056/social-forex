@@ -1789,6 +1789,9 @@
   "aiTradeProposal": {
     "title": "Đề xuất giao dịch AI",
     "description": "Nhận phân tích và đề xuất giao dịch từ AI dựa trên chỉ báo kỹ thuật.",
+    "vipRequired": "Tính năng dành riêng cho VIP",
+    "vipRequiredHint": "Nâng cấp VIP để truy cập đề xuất giao dịch từ AI.",
+    "upgradeVip": "Nâng cấp VIP",
     "loginRequired": "Đăng nhập để sử dụng AI Trade Proposals",
     "loginHint": "Tạo tài khoản để nhận ý tưởng giao dịch từ AI.",
     "signIn": "Đăng nhập",
