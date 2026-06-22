@@ -2,9 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { hashMt5BridgeToken, MT5_BRIDGE_TOKEN_PREFIX } from "@/lib/mt5-bridge";
 import { prisma } from "@/lib/prisma";
+import { rateLimit } from "@/lib/rate-limit";
 import { analyzeTvChart } from "@/lib/ai/tv-chart-analyze";
 import { AiUnavailableError } from "@/lib/ai/suggest";
 import { Prisma } from "@/generated/prisma/client";
+
+const ANALYSIS_RATE_LIMIT_MS = 15 * 60 * 1000; // 15 minutes per connection
 
 const tvAnalysisSchema = z.object({
   symbol: z.string().min(3).max(40),
@@ -31,6 +34,11 @@ export async function POST(request: NextRequest) {
 
   if (!connection || connection.revokedAt) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+
+  const { ok } = rateLimit(`tv-analysis:${connection.id}`, 1, ANALYSIS_RATE_LIMIT_MS);
+  if (!ok) {
+    return NextResponse.json({ error: "rate_limited", retryAfterMs: ANALYSIS_RATE_LIMIT_MS }, { status: 429 });
   }
 
   let body: unknown;

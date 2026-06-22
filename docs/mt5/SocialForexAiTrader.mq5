@@ -343,15 +343,42 @@ bool ExecuteAiTrade(string symbol, string direction, double entry,
       return false;
    }
 
-   ENUM_ORDER_TYPE orderType = (direction == "LONG") ? ORDER_TYPE_BUY : ORDER_TYPE_SELL;
-   bool isBuy = (orderType == ORDER_TYPE_BUY);
+   bool isBuy = (direction == "LONG");
 
-   double price   = isBuy ? SymbolInfoDouble(symbol, SYMBOL_ASK)
-                           : SymbolInfoDouble(symbol, SYMBOL_BID);
    int    digits  = (int)SymbolInfoInteger(symbol, SYMBOL_DIGITS);
    double ptSz    = SymbolInfoDouble(symbol, SYMBOL_POINT);
    long   stopsLv = SymbolInfoInteger(symbol, SYMBOL_TRADE_STOPS_LEVEL);
    double minDist = stopsLv * ptSz;
+
+   double marketPrice = isBuy ? SymbolInfoDouble(symbol, SYMBOL_ASK)
+                               : SymbolInfoDouble(symbol, SYMBOL_BID);
+
+   // Use AI entry if it's meaningfully better than market; fall back to market order
+   double limitPrice  = NormalizeDouble(entry, digits);
+   bool   useLimit    = (entry > 0) &&
+                        (isBuy  ? (limitPrice < marketPrice - minDist)
+                                : (limitPrice > marketPrice + minDist));
+
+   ENUM_ORDER_TYPE  orderType;
+   ENUM_TRADE_REQUEST_ACTIONS action;
+   double price;
+
+   if(useLimit)
+   {
+      orderType = isBuy ? ORDER_TYPE_BUY_LIMIT : ORDER_TYPE_SELL_LIMIT;
+      action    = TRADE_ACTION_PENDING;
+      price     = limitPrice;
+      Print("SocialForexAiTrader: placing limit order at AI entry=", limitPrice,
+            " (market=", marketPrice, ")");
+   }
+   else
+   {
+      orderType = isBuy ? ORDER_TYPE_BUY : ORDER_TYPE_SELL;
+      action    = TRADE_ACTION_DEAL;
+      price     = marketPrice;
+      Print("SocialForexAiTrader: AI entry=", entry,
+            " too close to market=", marketPrice, ", using market order");
+   }
 
    bool   slOk   = sl > 0 && (isBuy ? (price - sl >= minDist) : (sl - price >= minDist));
    bool   tpOk   = tp > 0 && (isBuy ? (tp - price >= minDist) : (price - tp >= minDist));
@@ -367,16 +394,19 @@ bool ExecuteAiTrade(string symbol, string direction, double entry,
    MqlTradeRequest request = {};
    MqlTradeResult  result  = {};
 
-   request.action    = TRADE_ACTION_DEAL;
-   request.symbol    = symbol;
-   request.volume    = lot;
-   request.type      = orderType;
-   request.price     = price;
-   request.sl        = safeSL;
-   request.tp        = safeTP;
-   request.deviation = MaxSlippage;
-   request.magic     = MagicNumber;
-   request.comment   = "SFAI:" + proposalId;
+   request.action      = action;
+   request.symbol      = symbol;
+   request.volume      = lot;
+   request.type        = orderType;
+   request.price       = price;
+   request.sl          = safeSL;
+   request.tp          = safeTP;
+   request.deviation   = MaxSlippage;
+   request.magic       = MagicNumber;
+   request.comment     = "SFAI:" + proposalId;
+   // Limit orders expire after 24 hours
+   if(action == TRADE_ACTION_PENDING)
+      request.expiration = TimeCurrent() + 24 * 3600;
 
    if(!OrderSend(request, result))
    {
