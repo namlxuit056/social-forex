@@ -104,7 +104,7 @@ export async function confirmAiTradeProposal(
   }
 
   const validLot = lotSize && lotSize > 0 ? Math.round(lotSize * 100) / 100 : null;
-  const notes = `AI Trade Proposal · ${proposal.timeframe} · confidence: ${proposal.confidence ?? "?"}/5${validLot ? ` · lot: ${validLot}` : ""}\n\n${proposal.reasoning}`;
+  const notes = `AI Trade Proposal · ${proposal.timeframe} · confidence: ${proposal.confidence ?? "?"}/5\n\n${proposal.reasoning}`;
 
   const signal = await prisma.signal.create({
     data: {
@@ -126,6 +126,7 @@ export async function confirmAiTradeProposal(
       status: "CONFIRMED",
       confirmedAt: new Date(),
       signalId: signal.id,
+      lotSize: validLot,
     },
   });
 

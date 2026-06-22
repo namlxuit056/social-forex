@@ -40,6 +40,7 @@ export async function GET(request: NextRequest) {
       stopLoss: true,
       takeProfit: true,
       confidence: true,
+      lotSize: true,
     },
   });
 
@@ -53,6 +54,7 @@ export async function GET(request: NextRequest) {
       stopLoss: p.stopLoss,
       takeProfit: p.takeProfit,
       confidence: p.confidence,
+      lotSize: p.lotSize,
     })),
   });
 }

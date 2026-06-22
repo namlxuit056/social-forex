@@ -755,6 +755,7 @@ model AiTradeProposal {
   reasoning    String
   checklist    Json?     // [{label, status, detail}]
   keyLevels    Json?     // {support, resistance}
+  lotSize      Float?    // lot size requested by user at confirm time
   status       String    @default("PENDING_REVIEW")
   // PENDING_REVIEW | CONFIRMED | REJECTED | EXECUTED
   createdAt    DateTime  @default(now())

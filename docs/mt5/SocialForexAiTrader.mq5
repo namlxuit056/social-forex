@@ -311,7 +311,7 @@ void PushChartAnalysis(string symbol)
 //| Execute a single trade from an AI signal                        |
 //+------------------------------------------------------------------+
 bool ExecuteAiTrade(string symbol, string direction, double entry,
-                    double sl, double tp, string proposalId)
+                    double sl, double tp, string proposalId, double requestedLot)
 {
    if(!TerminalInfoInteger(TERMINAL_TRADE_ALLOWED))
    {
@@ -387,9 +387,18 @@ bool ExecuteAiTrade(string symbol, string direction, double entry,
    if(sl > 0 && !slOk) Print("SocialForexAiTrader: SL too close for ", symbol, " - skipped");
    if(tp > 0 && !tpOk) Print("SocialForexAiTrader: TP too close for ", symbol, " - skipped");
 
-   // Use minimum lot
-   double lot = SymbolInfoDouble(symbol, SYMBOL_VOLUME_MIN);
-   if(lot <= 0) lot = 0.01;
+   // Use requested lot size; clamp to broker min/max and normalize to step
+   double lotMin  = SymbolInfoDouble(symbol, SYMBOL_VOLUME_MIN);
+   double lotMax  = SymbolInfoDouble(symbol, SYMBOL_VOLUME_MAX);
+   double lotStep = SymbolInfoDouble(symbol, SYMBOL_VOLUME_STEP);
+   if(lotMin  <= 0) lotMin  = 0.01;
+   if(lotMax  <= 0) lotMax  = 100.0;
+   if(lotStep <= 0) lotStep = 0.01;
+
+   double lot = requestedLot > 0 ? requestedLot : lotMin;
+   lot = MathMax(lotMin, MathMin(lotMax, lot));
+   lot = MathRound(lot / lotStep) * lotStep;
+   lot = NormalizeDouble(lot, 2);
 
    MqlTradeRequest request = {};
    MqlTradeResult  result  = {};
@@ -496,13 +505,15 @@ void PollAndExecuteSignals()
       string obj = StringSubstr(signalsStr, objStart, objEnd - objStart + 1);
       pos = objEnd + 1;
 
-      string proposalId = FindJsonValue(obj, "proposalId");
-      string signalId   = FindJsonValue(obj, "signalId");
-      string symbol     = FindJsonValue(obj, "symbol");
-      string direction  = FindJsonValue(obj, "direction");   // "LONG" or "SHORT"
-      double entry      = StringToDouble(FindJsonValue(obj, "entry"));
-      double sl         = StringToDouble(FindJsonValue(obj, "stopLoss"));
-      double tp         = StringToDouble(FindJsonValue(obj, "takeProfit"));
+      string proposalId  = FindJsonValue(obj, "proposalId");
+      string signalId    = FindJsonValue(obj, "signalId");
+      string symbol      = FindJsonValue(obj, "symbol");
+      string direction   = FindJsonValue(obj, "direction");   // "LONG" or "SHORT"
+      double entry       = StringToDouble(FindJsonValue(obj, "entry"));
+      double sl          = StringToDouble(FindJsonValue(obj, "stopLoss"));
+      double tp          = StringToDouble(FindJsonValue(obj, "takeProfit"));
+      string lotStr      = FindJsonValue(obj, "lotSize");
+      double requestedLot = (lotStr != "" && lotStr != "null") ? StringToDouble(lotStr) : 0;
 
       if(proposalId == "" || symbol == "") continue;
 
@@ -511,7 +522,7 @@ void PollAndExecuteSignals()
 
       if(AutoExecute)
       {
-         bool ok = ExecuteAiTrade(symbol, direction, entry, sl, tp, proposalId);
+         bool ok = ExecuteAiTrade(symbol, direction, entry, sl, tp, proposalId, requestedLot);
          if(ok)
             executed_ids += proposalId + ",";
          else

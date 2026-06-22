@@ -4,7 +4,7 @@ import { hashMt5BridgeToken, MT5_BRIDGE_TOKEN_PREFIX } from "@/lib/mt5-bridge";
 import { prisma } from "@/lib/prisma";
 
 const executedSchema = z.object({
-  mt5Ticket: z.string(),
+  mt5Ticket: z.union([z.string(), z.number()]).transform(String),
 });
 
 function bearerToken(request: NextRequest) {
