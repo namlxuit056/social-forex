@@ -42,6 +42,7 @@
     "academy": "Academy",
     "articles": "Bài viết AI",
     "webinar": "Webinar",
+    "liveRoom": "Live Room",
     "resources": "Tài liệu",
     "brokers": "Sàn",
     "partners": "Đối tác",
@@ -1831,5 +1832,18 @@
     "colSignal": "Tín hiệu",
     "viewChart": "Biểu đồ",
     "noResults": "Không có cặp tiền nào phù hợp với bộ lọc."
+  },
+  "webinar": {
+    "title": "Webinar & Live Room",
+    "description": "Tham gia buổi giao dịch trực tiếp, phân tích thị trường và thảo luận cộng đồng.",
+    "upcoming": "Webinar sắp tới",
+    "past": "Webinar đã kết thúc",
+    "noWebinars": "Chưa có webinar nào. Hãy quay lại sau!",
+    "registered": "Đã đăng ký",
+    "register": "Đăng ký",
+    "joinNow": "Tham gia ngay",
+    "host": "Host",
+    "ended": "Đã kết thúc",
+    "liveNow": "Đang trực tuyến"
   }
 }

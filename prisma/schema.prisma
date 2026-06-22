@@ -114,6 +114,8 @@ model User {
   pushSubscriptions    UserPushSubscription[]
   copyTradesAsFollower CopyTrade[] @relation("CopyTradeFollower")
   copyTradesAsProvider CopyTrade[] @relation("CopyTradeProvider")
+  hostedWebinars       Webinar[]
+  webinarRegistrations WebinarRegistration[]
   aiTradeProposals     AiTradeProposal[]
 
   createdAt DateTime @default(now())
@@ -824,4 +826,46 @@ model CopyTrade {
 enum CopyTradeMode {
   LOT
   PERCENT
+}
+
+model Webinar {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  hostId      String
+  streamUrl   String?
+  thumbnailUrl String?
+  scheduledAt DateTime
+  duration    Int      @default(60)
+  status      WebinarStatus @default(SCHEDULED)
+  maxAttendees Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  host        User @relation(fields: [hostId], references: [id], onDelete: Cascade)
+  registrations WebinarRegistration[]
+
+  @@index([status, scheduledAt])
+  @@index([hostId])
+}
+
+model WebinarRegistration {
+  id         String   @id @default(cuid())
+  webinarId  String
+  userId     String
+  createdAt  DateTime @default(now())
+
+  webinar Webinar @relation(fields: [webinarId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([webinarId, userId])
+  @@index([webinarId])
+  @@index([userId])
+}
+
+enum WebinarStatus {
+  SCHEDULED
+  LIVE
+  ENDED
+  CANCELLED
 }

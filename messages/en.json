@@ -42,6 +42,7 @@
     "academy": "Academy",
     "articles": "AI Articles",
     "webinar": "Webinar",
+    "liveRoom": "Live Room",
     "resources": "Resources",
     "brokers": "Brokers",
     "partners": "Partners",
@@ -1831,5 +1832,18 @@
     "colSignal": "Signal",
     "viewChart": "Chart",
     "noResults": "No pairs match the selected filter."
+  },
+  "webinar": {
+    "title": "Webinars & Live Rooms",
+    "description": "Join live trading sessions, market analysis, and community discussions.",
+    "upcoming": "Upcoming Webinars",
+    "past": "Past Webinars",
+    "noWebinars": "No upcoming webinars. Check back later!",
+    "registered": "Registered",
+    "register": "Register",
+    "joinNow": "Join Live",
+    "host": "Host",
+    "ended": "Ended",
+    "liveNow": "Live Now"
   }
 }
