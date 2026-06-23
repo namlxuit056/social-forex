@@ -30,6 +30,7 @@ const communityNavKeys = [
   { href: "/plan", key: "plan" },
   { href: "/journal", key: "journal" },
   { href: "/mt5", key: "mt5" },
+  { href: "/ai-trade-proposals", key: "aiTradeProposal" },
   { href: "/backtest", key: "backtest" },
   { href: "/messages", key: "messages" },
   { href: "/forum/search", key: "searchTopics" },
