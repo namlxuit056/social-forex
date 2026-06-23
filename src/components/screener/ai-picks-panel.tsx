@@ -73,6 +73,7 @@ function PickCard({ pick, t }: { pick: AiPickResult; t: ReturnType<typeof useTra
         confidence: pick.confidence,
         qualityScore: pick.qualityScore,
         reasoning: pick.reasoning,
+        checklist: pick.checklist,
         lotSize: lot > 0 ? lot : undefined,
       });
       if (result.ok && result.signalId) {

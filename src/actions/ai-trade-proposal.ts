@@ -9,6 +9,8 @@ import { analyzeTvChart } from "@/lib/ai/tv-chart-analyze";
 import { AiUnavailableError } from "@/lib/ai/suggest";
 import { QUOTE_BY_SYMBOL } from "@/lib/quotes/definitions";
 import { Prisma } from "@/generated/prisma/client";
+import { notifyTelegramNewSignal } from "@/lib/telegram";
+import { notifySignalSubscribers } from "@/lib/signals/notify-on-signal-create";
 
 export async function requestAiAnalysis(
   symbol: string,
@@ -129,6 +131,30 @@ export async function confirmAiTradeProposal(
       signalId: signal.id,
       lotSize: validLot,
     },
+  });
+
+  // In-app notifications
+  try {
+    await notifySignalSubscribers({
+      id: signal.id,
+      symbol: proposal.symbol,
+      tier: "FREE",
+      authorId: userId,
+    });
+  } catch {
+    // Non-blocking
+  }
+
+  // Telegram channel notification
+  await notifyTelegramNewSignal({
+    id: signal.id,
+    symbol: proposal.symbol,
+    direction: proposal.direction,
+    entry: proposal.entry,
+    stopLoss: proposal.stopLoss,
+    takeProfit: proposal.takeProfit,
+    tier: "FREE",
+    status: "ACTIVE",
   });
 
   revalidatePath("/mt5");

@@ -5,6 +5,15 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 import { isVipActive } from "@/lib/vip";
+import { notifyTelegramNewSignal } from "@/lib/telegram";
+import { notifySignalSubscribers } from "@/lib/signals/notify-on-signal-create";
+import { Prisma } from "@/generated/prisma/client";
+
+type ChecklistItem = {
+  label: string;
+  status: "pass" | "warn" | "fail";
+  detail: string;
+};
 
 type PickData = {
   symbol: string;
@@ -15,6 +24,7 @@ type PickData = {
   confidence: number;
   qualityScore: number;
   reasoning: string;
+  checklist: ChecklistItem[];
   lotSize?: number;
 };
 
@@ -58,10 +68,75 @@ export async function confirmScreenerPick(
       tier: "FREE",
       notes,
     },
+    select: {
+      id: true,
+      symbol: true,
+      direction: true,
+      entry: true,
+      stopLoss: true,
+      takeProfit: true,
+      tier: true,
+    },
+  });
+
+  // Create CONFIRMED AiTradeProposal so MT5 EA picks it up via /api/mt5/ai-signals
+  const connection = await prisma.mt5Connection.findFirst({
+    where: { userId, revokedAt: null },
+    orderBy: { createdAt: "desc" },
     select: { id: true },
   });
 
+  if (connection) {
+    await prisma.aiTradeProposal.create({
+      data: {
+        connectionId: connection.id,
+        userId,
+        symbol: data.symbol.toUpperCase(),
+        timeframe: "TV_MULTI",
+        direction: data.direction,
+        entry: data.entry,
+        stopLoss: data.stopLoss,
+        takeProfit: data.takeProfit,
+        confidence: data.confidence,
+        qualityScore: data.qualityScore,
+        reasoning: data.reasoning,
+        checklist: JSON.parse(
+          JSON.stringify(data.checklist),
+        ) as Prisma.InputJsonValue,
+        status: "CONFIRMED",
+        confirmedAt: new Date(),
+        signalId: signal.id,
+        lotSize: validLot,
+      },
+    });
+  }
+
+  // In-app notifications for followers / symbol watchers
+  try {
+    await notifySignalSubscribers({
+      id: signal.id,
+      symbol: signal.symbol,
+      tier: signal.tier,
+      authorId: userId,
+    });
+  } catch {
+    // Non-blocking
+  }
+
+  // Telegram channel notification
+  await notifyTelegramNewSignal({
+    id: signal.id,
+    symbol: signal.symbol,
+    direction: signal.direction,
+    entry: signal.entry,
+    stopLoss: signal.stopLoss,
+    takeProfit: signal.takeProfit,
+    tier: signal.tier,
+    status: "ACTIVE",
+  });
+
   revalidatePath("/signals");
+  revalidatePath("/mt5");
 
   return { ok: true, signalId: signal.id };
 }
