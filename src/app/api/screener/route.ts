@@ -6,19 +6,19 @@ import type { QuoteRow } from "@/lib/quotes/types";
 
 export const runtime = "nodejs";
 
-type ScreenerPair = {
+export type ScreenerPair = {
   symbol: string;
   name: string;
   group: string;
   price: number;
-  change24h: number;
-  changePercent24h: number;
-  rsi: number;
-  macd: number;
-  ema20: number;
-  ema50: number;
-  atr: number;
-  volatility: number;
+  changePercent: number;
+  rsi: number | null;
+  adx: number | null;
+  emaBias: "bullish" | "bearish" | "mixed" | "unknown";
+  recM15: number | null;
+  recH1: number | null;
+  recH4: number | null;
+  recD1: number | null;
 };
 
 const CACHE_TTL = 60_000;
@@ -32,7 +32,6 @@ export async function GET(): Promise<NextResponse> {
 
   try {
     const quotesResponse = await resolveQuotes();
-    const pairs: ScreenerPair[] = [];
 
     const quoteRows: QuoteRow[] = quotesResponse.quotes.map((q) => ({
       symbol: q.symbol,
@@ -44,47 +43,43 @@ export async function GET(): Promise<NextResponse> {
     }));
 
     const technicalResults = await Promise.allSettled(
-      quoteRows.map((q) => getTradingViewTechnicalContext(q)),
+      QUOTE_DEFINITIONS.map((def) => {
+        const quote = quoteRows.find((q) => q.symbol === def.symbol);
+        return quote
+          ? getTradingViewTechnicalContext(quote)
+          : Promise.resolve(null);
+      }),
     );
 
-    for (let i = 0; i < QUOTE_DEFINITIONS.length; i++) {
-      const def = QUOTE_DEFINITIONS[i];
+    const pairs: ScreenerPair[] = QUOTE_DEFINITIONS.map((def, i) => {
       const quote = quoteRows.find((q) => q.symbol === def.symbol);
-      if (!quote) continue;
-
-      const price = (quote.bid + quote.ask) / 2;
-      const change24h = price * (quote.changePct / 100);
-      const changePercent24h = quote.changePct;
+      const price = quote ? (quote.bid + quote.ask) / 2 : def.mockMid;
+      const changePercent = quote?.changePct ?? 0;
 
       const tvResult = technicalResults[i];
       const tvContext =
         tvResult.status === "fulfilled" ? tvResult.value : null;
 
-      // Use D1 (daily) timeframe for screener metrics
+      const m15 = tvContext?.frames.find((f) => f.timeframe === "M15");
+      const h1 = tvContext?.frames.find((f) => f.timeframe === "H1");
+      const h4 = tvContext?.frames.find((f) => f.timeframe === "H4");
       const d1 = tvContext?.frames.find((f) => f.timeframe === "D1");
 
-      const rsi = d1?.rsi ?? 50;
-      const macd = d1?.macd ?? 0;
-      const ema20 = d1?.ema20 ?? price;
-      const ema50 = d1?.ema50 ?? price;
-      const atr = d1?.atr ?? price * 0.008;
-      const volatility = price > 0 ? (atr / price) * 100 : 0;
-
-      pairs.push({
+      return {
         symbol: def.symbol,
         name: def.name,
         group: def.group,
         price,
-        change24h,
-        changePercent24h,
-        rsi,
-        macd,
-        ema20,
-        ema50,
-        atr,
-        volatility,
-      });
-    }
+        changePercent,
+        rsi: d1?.rsi ?? null,
+        adx: d1?.adx ?? null,
+        emaBias: d1?.emaBias ?? "unknown",
+        recM15: m15?.recommendation ?? null,
+        recH1: h1?.recommendation ?? null,
+        recH4: h4?.recommendation ?? null,
+        recD1: d1?.recommendation ?? null,
+      };
+    });
 
     cache = { at: now, data: pairs };
     return NextResponse.json(pairs);

@@ -1,4 +1,3 @@
-import { Filter } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { MarketScreener } from "@/components/screener/market-screener";
 
