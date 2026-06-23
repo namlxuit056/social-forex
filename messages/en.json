@@ -1868,7 +1868,16 @@
     "aiPicksIdleHint": "Multi-timeframe analysis to find the highest-probability entry opportunities.",
     "aiPicksAnalyze": "Analyze with AI",
     "aiPicksRefresh": "Refresh",
-    "aiPicksRetry": "Retry"
+    "aiPicksRetry": "Retry",
+    "aiPicksConfirmOpen": "Confirm trade entry",
+    "aiPicksLot": "Lot size",
+    "aiPicksConfirm": "Confirm",
+    "aiPicksConfirmDone": "Signal created",
+    "aiPicksViewSignal": "View signal",
+    "aiPicksErr_unauthorized": "Please sign in again.",
+    "aiPicksErr_vip_required": "VIP required.",
+    "aiPicksErr_rate_limited": "Too many requests, try again later.",
+    "aiPicksErr_error": "An error occurred, please try again."
   },
   "webinar": {
     "title": "Webinars & Live Rooms",

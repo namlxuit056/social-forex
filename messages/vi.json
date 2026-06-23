@@ -1868,7 +1868,16 @@
     "aiPicksIdleHint": "Phân tích đa khung thời gian và chọn cặp tiền có tỷ lệ vào lệnh cao nhất.",
     "aiPicksAnalyze": "Phân tích AI",
     "aiPicksRefresh": "Làm mới",
-    "aiPicksRetry": "Thử lại"
+    "aiPicksRetry": "Thử lại",
+    "aiPicksConfirmOpen": "Confirm vào lệnh",
+    "aiPicksLot": "Lot size",
+    "aiPicksConfirm": "Xác nhận",
+    "aiPicksConfirmDone": "Signal đã tạo",
+    "aiPicksViewSignal": "Xem signal",
+    "aiPicksErr_unauthorized": "Vui lòng đăng nhập lại.",
+    "aiPicksErr_vip_required": "Chỉ dành cho VIP.",
+    "aiPicksErr_rate_limited": "Quá nhiều yêu cầu, thử lại sau.",
+    "aiPicksErr_error": "Có lỗi xảy ra, vui lòng thử lại."
   },
   "webinar": {
     "title": "Webinar & Live Room",

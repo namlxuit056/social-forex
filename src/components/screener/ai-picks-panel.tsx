@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Sparkles, Loader2, Crown } from "lucide-react";
+import { Sparkles, Loader2, Crown, CheckCircle2 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
+import { confirmScreenerPick } from "@/actions/screener";
 import type { AiPickResult, AiPicksResponse, AiPicksError } from "@/app/api/screener/ai-picks/route";
 
 type Props = {
@@ -48,15 +49,48 @@ function ConfidenceStars({ value }: { value: number }) {
   );
 }
 
+type ConfirmView = "idle" | "form" | "submitting" | "done" | "error";
+
 function PickCard({ pick, t }: { pick: AiPickResult; t: ReturnType<typeof useTranslations<"screener">> }) {
   const isLong = pick.direction === "LONG";
   const dec = priceDecimals(pick.price);
+  const [view, setView] = useState<ConfirmView>("idle");
+  const [lotSize, setLotSize] = useState("0.01");
+  const [signalId, setSignalId] = useState<string | null>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+
+  function handleConfirm() {
+    const lot = parseFloat(lotSize);
+    setView("submitting");
+    startTransition(async () => {
+      const result = await confirmScreenerPick({
+        symbol: pick.symbol,
+        direction: pick.direction,
+        entry: pick.entry,
+        stopLoss: pick.stopLoss,
+        takeProfit: pick.takeProfit,
+        confidence: pick.confidence,
+        qualityScore: pick.qualityScore,
+        reasoning: pick.reasoning,
+        lotSize: lot > 0 ? lot : undefined,
+      });
+      if (result.ok && result.signalId) {
+        setSignalId(result.signalId);
+        setView("done");
+      } else {
+        setErrorMsg(result.error ?? "error");
+        setView("error");
+      }
+    });
+  }
 
   return (
     <div className={cn(
       "rounded-lg border border-border/70 bg-card flex flex-col gap-2.5 p-3.5 border-l-[3px]",
       isLong ? "border-l-emerald-500" : "border-l-red-500",
     )}>
+      {/* Header */}
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <span className="font-mono font-bold text-base text-foreground">{pick.symbol}</span>
@@ -70,6 +104,7 @@ function PickCard({ pick, t }: { pick: AiPickResult; t: ReturnType<typeof useTra
         </span>
       </div>
 
+      {/* Quality + confidence */}
       <div className="space-y-1">
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <span>{t("aiPicksQuality")}</span>
@@ -78,6 +113,7 @@ function PickCard({ pick, t }: { pick: AiPickResult; t: ReturnType<typeof useTra
         <QualityBar score={pick.qualityScore} />
       </div>
 
+      {/* Aligned timeframes */}
       <div className="flex gap-1 flex-wrap">
         {["M15", "H1", "H4", "D1"].map((tf) => {
           const aligned = pick.alignedTimeframes.includes(tf);
@@ -96,6 +132,7 @@ function PickCard({ pick, t }: { pick: AiPickResult; t: ReturnType<typeof useTra
         })}
       </div>
 
+      {/* Entry / SL / TP */}
       <div className="grid grid-cols-3 gap-1 text-xs bg-muted/30 rounded p-2">
         <div>
           <div className="text-muted-foreground">{t("aiPicksEntry")}</div>
@@ -111,6 +148,7 @@ function PickCard({ pick, t }: { pick: AiPickResult; t: ReturnType<typeof useTra
         </div>
       </div>
 
+      {/* Checklist */}
       <div className="space-y-0.5">
         {pick.checklist.slice(0, 4).map((item, i) => (
           <div key={i} className="flex items-start gap-1.5">
@@ -127,13 +165,81 @@ function PickCard({ pick, t }: { pick: AiPickResult; t: ReturnType<typeof useTra
         ))}
       </div>
 
+      {/* Reasoning */}
       <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
         {pick.reasoning}
       </p>
 
-      <Link href={`/chart?symbol=${pick.symbol}`} className="text-xs text-primary hover:underline self-start mt-auto">
-        {t("viewChart")} →
-      </Link>
+      {/* Footer actions */}
+      <div className="mt-auto space-y-2">
+        <Link href={`/chart?symbol=${pick.symbol}`} className="text-xs text-primary hover:underline">
+          {t("viewChart")} →
+        </Link>
+
+        {/* Confirm section */}
+        {view === "done" && signalId ? (
+          <div className="flex items-center gap-1.5 rounded-md bg-emerald-500/10 px-2.5 py-1.5">
+            <CheckCircle2 className="size-3.5 text-emerald-500 shrink-0" />
+            <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+              {t("aiPicksConfirmDone")}
+            </span>
+            <Link href={`/signals/${signalId}`} className="ml-auto text-xs text-primary hover:underline shrink-0">
+              {t("aiPicksViewSignal")}
+            </Link>
+          </div>
+        ) : view === "error" ? (
+          <div className="flex items-center gap-2 rounded-md bg-red-500/10 px-2.5 py-1.5">
+            <span className="text-xs text-red-500 flex-1">{t(`aiPicksErr_${errorMsg}`)}</span>
+            <button onClick={() => setView("idle")} className="text-xs text-muted-foreground hover:text-foreground">
+              {t("aiPicksRetry")}
+            </button>
+          </div>
+        ) : view === "form" || view === "submitting" ? (
+          <div className="flex items-center gap-2 rounded-md border border-border/60 bg-muted/20 px-2.5 py-2">
+            <span className="text-xs text-muted-foreground shrink-0">{t("aiPicksLot")}</span>
+            <input
+              type="number"
+              min="0.01"
+              step="0.01"
+              value={lotSize}
+              onChange={(e) => setLotSize(e.target.value)}
+              disabled={isPending}
+              className="w-20 h-7 rounded border border-input bg-background px-2 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:opacity-50"
+            />
+            <button
+              onClick={handleConfirm}
+              disabled={isPending}
+              className={cn(
+                "rounded px-2.5 py-1 text-xs font-medium transition shrink-0",
+                isLong
+                  ? "bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50"
+                  : "bg-red-600 text-white hover:bg-red-700 disabled:opacity-50",
+              )}
+            >
+              {isPending ? <Loader2 className="size-3 animate-spin" /> : t("aiPicksConfirm")}
+            </button>
+            <button
+              onClick={() => setView("idle")}
+              disabled={isPending}
+              className="text-xs text-muted-foreground hover:text-foreground disabled:opacity-50"
+            >
+              ✕
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={() => setView("form")}
+            className={cn(
+              "w-full rounded-md py-1.5 text-xs font-medium transition",
+              isLong
+                ? "border border-emerald-500/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10"
+                : "border border-red-500/40 text-red-500 hover:bg-red-500/10",
+            )}
+          >
+            {t("aiPicksConfirmOpen")} {isLong ? "▲" : "▼"}
+          </button>
+        )}
+      </div>
     </div>
   );
 }
