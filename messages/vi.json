@@ -1869,6 +1869,7 @@
     "aiPicksAnalyze": "Phân tích AI",
     "aiPicksRefresh": "Làm mới",
     "aiPicksRetry": "Thử lại",
+    "aiPicksCooldown": "còn {time}",
     "aiPicksConfirmOpen": "Confirm vào lệnh",
     "aiPicksLot": "Lot size",
     "aiPicksConfirm": "Xác nhận",

@@ -1869,6 +1869,7 @@
     "aiPicksAnalyze": "Analyze with AI",
     "aiPicksRefresh": "Refresh",
     "aiPicksRetry": "Retry",
+    "aiPicksCooldown": "{time} left",
     "aiPicksConfirmOpen": "Confirm trade entry",
     "aiPicksLot": "Lot size",
     "aiPicksConfirm": "Confirm",

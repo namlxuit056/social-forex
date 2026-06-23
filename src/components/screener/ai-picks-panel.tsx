@@ -1,12 +1,49 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Sparkles, Loader2, Crown, CheckCircle2 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { confirmScreenerPick } from "@/actions/screener";
 import type { AiPickResult, AiPicksResponse, AiPicksError } from "@/app/api/screener/ai-picks/route";
+
+const COOLDOWN_MS = 60 * 60 * 1000; // 1 hour
+
+function cacheKey(locale: string) {
+  return `screener_picks_v1_${locale}`;
+}
+
+function readLocalCache(locale: string): { data: AiPicksResponse; at: number } | null {
+  try {
+    const raw = localStorage.getItem(cacheKey(locale));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { data: AiPicksResponse; at: number };
+    if (!parsed?.at || !parsed?.data) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function writeLocalCache(locale: string, data: AiPicksResponse) {
+  try {
+    localStorage.setItem(cacheKey(locale), JSON.stringify({ at: Date.now(), data }));
+  } catch {
+    // ignore storage errors (private browsing, quota exceeded)
+  }
+}
+
+function formatRemaining(ms: number): string {
+  if (ms <= 0) return "";
+  const totalMin = Math.ceil(ms / 60_000);
+  if (totalMin >= 60) {
+    const h = Math.floor(totalMin / 60);
+    const m = totalMin % 60;
+    return m > 0 ? `${h}g ${m}p` : `${h}g`;
+  }
+  return `${totalMin}p`;
+}
 
 type Props = {
   isLoggedIn: boolean;
@@ -255,10 +292,30 @@ type FetchState =
 export function AiPicksPanel({ isLoggedIn, isVip }: Props) {
   const locale = useLocale();
   const t = useTranslations("screener");
-  const [state, setState] = useState<FetchState>({ status: "idle" });
+  // Read localStorage once at init (client only — no useEffect needed)
+  const [initialCache] = useState<{ data: AiPicksResponse; at: number } | null>(() => {
+    if (typeof window === "undefined") return null;
+    const cached = readLocalCache(locale);
+    return cached && Date.now() - cached.at < COOLDOWN_MS ? cached : null;
+  });
+
+  const [state, setState] = useState<FetchState>(() =>
+    initialCache ? { status: "done", data: initialCache.data } : { status: "idle" },
+  );
+  const [cachedAt, setCachedAt] = useState<number | null>(() => initialCache?.at ?? null);
+  const [now, setNow] = useState(() => Date.now());
+
+  // Tick every minute to keep the remaining-time label accurate
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 60_000);
+    return () => clearInterval(id);
+  }, []);
+
+  const remainingMs = cachedAt ? Math.max(0, COOLDOWN_MS - (now - cachedAt)) : 0;
+  const canRefresh = remainingMs <= 0;
 
   function handleAnalyze() {
-    if (!isVip || state.status === "loading") return;
+    if (!isVip || state.status === "loading" || !canRefresh) return;
     setState({ status: "loading" });
 
     fetch(`/api/screener/ai-picks?locale=${locale}`)
@@ -270,7 +327,11 @@ export function AiPicksPanel({ isLoggedIn, isVip }: Props) {
         if (!res.ok) throw new Error("error");
         return res.json() as Promise<AiPicksResponse>;
       })
-      .then((data) => setState({ status: "done", data }))
+      .then((data) => {
+        writeLocalCache(locale, data);
+        setCachedAt(Date.now());
+        setState({ status: "done", data });
+      })
       .catch((err) =>
         setState({ status: err.message === "unavailable" ? "unavailable" : "error" }),
       );
@@ -409,10 +470,15 @@ export function AiPicksPanel({ isLoggedIn, isVip }: Props) {
           <span className="text-xs text-muted-foreground">· {picks.length} {t("aiPicksCount")}</span>
         </div>
         <button
-          onClick={handleAnalyze}
-          className="text-xs text-muted-foreground hover:text-foreground transition"
+          onClick={canRefresh ? handleAnalyze : undefined}
+          disabled={!canRefresh}
+          className={canRefresh
+            ? "text-xs text-primary hover:underline transition"
+            : "text-xs text-muted-foreground/50 cursor-not-allowed"}
         >
-          {t("aiPicksRefresh")}
+          {canRefresh
+            ? t("aiPicksRefresh")
+            : `${t("aiPicksRefresh")} · ${t("aiPicksCooldown", { time: formatRemaining(remainingMs) })}`}
         </button>
       </div>
 
