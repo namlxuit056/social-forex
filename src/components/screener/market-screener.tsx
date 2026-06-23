@@ -144,19 +144,19 @@ export function MarketScreener({ pairs }: Props) {
                   </span>
                 </td>
                 <td className="px-3 py-2.5 text-right font-mono text-foreground">
-                  {pair.price.toFixed(priceDecimals(pair.price))}
+                  {(pair.price ?? 0).toFixed(priceDecimals(pair.price ?? 0))}
                 </td>
                 <td className="px-3 py-2.5 text-right">
                   <span
                     className={cn(
                       "font-mono text-xs",
-                      pair.changePercent >= 0
+                      (pair.changePercent ?? 0) >= 0
                         ? "text-emerald-500"
                         : "text-red-500",
                     )}
                   >
-                    {pair.changePercent >= 0 ? "+" : ""}
-                    {pair.changePercent.toFixed(2)}%
+                    {(pair.changePercent ?? 0) >= 0 ? "+" : ""}
+                    {(pair.changePercent ?? 0).toFixed(2)}%
                   </span>
                 </td>
                 <td className="px-3 py-2.5 text-center">

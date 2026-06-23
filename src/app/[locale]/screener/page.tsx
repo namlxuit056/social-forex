@@ -19,7 +19,14 @@ async function fetchScreenerData() {
       next: { revalidate: 60 },
     });
     if (!res.ok) return [];
-    return res.json();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const raw: any[] = await res.json();
+    // Normalize both old format (changePercent24h) and new format (changePercent)
+    return raw.map((p) => ({
+      ...p,
+      price: p.price ?? 0,
+      changePercent: p.changePercent ?? p.changePercent24h ?? 0,
+    }));
   } catch {
     return [];
   }
