@@ -1856,10 +1856,19 @@
     "aiPicksLoading": "AI đang phân tích thị trường, vui lòng chờ...",
     "aiPicksUnavailable": "Tính năng AI chưa được cấu hình. Thêm GROQ_API_KEY hoặc OPENAI_API_KEY vào .env để kích hoạt.",
     "aiPicksNone": "Không tìm thấy cặp tiền nào có tín hiệu đủ mạnh lúc này (cần ≥3/4 khung thời gian đồng thuận).",
+    "aiPicksError": "Có lỗi khi phân tích. Vui lòng thử lại.",
     "aiPicksCount": "cặp",
     "aiPicksQuality": "Chất lượng setup",
     "aiPicksEntry": "Vào lệnh",
-    "aiPicksDisclaimer": "AI phân tích dựa trên dữ liệu kỹ thuật TradingView. Chỉ mang tính tham khảo, không phải tư vấn đầu tư. Cập nhật mỗi 5 phút."
+    "aiPicksDisclaimer": "AI phân tích dựa trên dữ liệu kỹ thuật TradingView. Chỉ mang tính tham khảo, không phải tư vấn đầu tư. Cập nhật mỗi 5 phút.",
+    "aiPicksLoginHint": "Đăng nhập để sử dụng tính năng AI phân tích thị trường.",
+    "aiPicksLogin": "Đăng nhập",
+    "aiPicksVipHint": "Tính năng dành riêng cho thành viên VIP.",
+    "aiPicksUpgrade": "Nâng cấp VIP",
+    "aiPicksIdleHint": "Phân tích đa khung thời gian và chọn cặp tiền có tỷ lệ vào lệnh cao nhất.",
+    "aiPicksAnalyze": "Phân tích AI",
+    "aiPicksRefresh": "Làm mới",
+    "aiPicksRetry": "Thử lại"
   },
   "webinar": {
     "title": "Webinar & Live Room",

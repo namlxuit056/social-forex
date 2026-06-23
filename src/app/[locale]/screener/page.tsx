@@ -1,4 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
+import { isVipActive } from "@/lib/vip";
 import { MarketScreener } from "@/components/screener/market-screener";
 
 export async function generateMetadata({
@@ -21,7 +24,6 @@ async function fetchScreenerData() {
     if (!res.ok) return [];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const raw: any[] = await res.json();
-    // Normalize both old format (changePercent24h) and new format (changePercent)
     return raw.map((p) => ({
       ...p,
       price: p.price ?? 0,
@@ -41,7 +43,21 @@ export default async function ScreenerPage({
   setRequestLocale(locale);
   const t = await getTranslations("screener");
 
-  const pairs = await fetchScreenerData();
+  const [pairs, session] = await Promise.all([
+    fetchScreenerData(),
+    auth(),
+  ]);
+
+  const isLoggedIn = !!session?.user?.id;
+  let isVip = false;
+
+  if (isLoggedIn) {
+    const dbUser = await prisma.user.findUnique({
+      where: { id: session!.user!.id },
+      select: { vipUntil: true },
+    });
+    isVip = isVipActive(dbUser?.vipUntil);
+  }
 
   return (
     <div className="space-y-6">
@@ -52,7 +68,7 @@ export default async function ScreenerPage({
         <p className="mt-2 text-muted-foreground">{t("description")}</p>
       </div>
 
-      <MarketScreener pairs={pairs} />
+      <MarketScreener pairs={pairs} isLoggedIn={isLoggedIn} isVip={isVip} />
     </div>
   );
 }

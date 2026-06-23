@@ -1856,10 +1856,19 @@
     "aiPicksLoading": "AI is analyzing the market, please wait...",
     "aiPicksUnavailable": "AI feature not configured. Add GROQ_API_KEY or OPENAI_API_KEY to .env to enable.",
     "aiPicksNone": "No pairs with strong enough signals right now (requires ≥3/4 timeframes aligned).",
+    "aiPicksError": "Analysis failed. Please try again.",
     "aiPicksCount": "pairs",
     "aiPicksQuality": "Setup quality",
     "aiPicksEntry": "Entry",
-    "aiPicksDisclaimer": "AI analysis is based on TradingView technical data. For reference only — not investment advice. Refreshed every 5 minutes."
+    "aiPicksDisclaimer": "AI analysis is based on TradingView technical data. For reference only — not investment advice. Refreshed every 5 minutes.",
+    "aiPicksLoginHint": "Sign in to use the AI market analysis feature.",
+    "aiPicksLogin": "Sign in",
+    "aiPicksVipHint": "This feature is exclusive to VIP members.",
+    "aiPicksUpgrade": "Upgrade to VIP",
+    "aiPicksIdleHint": "Multi-timeframe analysis to find the highest-probability entry opportunities.",
+    "aiPicksAnalyze": "Analyze with AI",
+    "aiPicksRefresh": "Refresh",
+    "aiPicksRetry": "Retry"
   },
   "webinar": {
     "title": "Webinars & Live Rooms",

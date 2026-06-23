@@ -26,6 +26,8 @@ type ScreenerPair = {
 
 type Props = {
   pairs: ScreenerPair[];
+  isLoggedIn: boolean;
+  isVip: boolean;
 };
 
 type RecLabel = "STRONG BUY" | "BUY" | "NEUTRAL" | "SELL" | "STRONG SELL";
@@ -71,7 +73,7 @@ function priceDecimals(price: number): number {
   return 4;
 }
 
-export function MarketScreener({ pairs }: Props) {
+export function MarketScreener({ pairs, isLoggedIn, isVip }: Props) {
   const t = useTranslations("screener");
   const [filter, setFilter] = useState<ScreenerFilter>("all");
 
@@ -100,7 +102,7 @@ export function MarketScreener({ pairs }: Props) {
 
   return (
     <div className="space-y-4">
-      <AiPicksPanel />
+      <AiPicksPanel isLoggedIn={isLoggedIn} isVip={isVip} />
 
       <div className="flex flex-wrap gap-1.5">
         {filters.map((f) => (
