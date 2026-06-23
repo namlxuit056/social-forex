@@ -2,13 +2,14 @@ import type { QuoteRow } from "@/lib/quotes/types";
 import { toTradingViewSymbol } from "@/lib/quotes/tradingview-symbols";
 
 type ScannerMarket = "forex" | "cfd" | "crypto";
-type TimeframeCode = "15" | "60" | "240" | "1D";
+// D1 uses no suffix — TradingView scanner rejects "|1D" and returns null
+type TimeframeCode = "15" | "60" | "240" | "";
 
 const TIMEFRAMES: Array<{ code: TimeframeCode; label: "M15" | "H1" | "H4" | "D1" }> = [
   { code: "15", label: "M15" },
   { code: "60", label: "H1" },
   { code: "240", label: "H4" },
-  { code: "1D", label: "D1" },
+  { code: "", label: "D1" },
 ];
 
 const METRICS = [
@@ -173,7 +174,8 @@ function candlePattern({
 }
 
 function valueAt(values: Map<string, number | null>, metric: Metric, timeframe: TimeframeCode) {
-  return values.get(`${metric}|${timeframe}`) ?? null;
+  const key = timeframe ? `${metric}|${timeframe}` : metric;
+  return values.get(key) ?? null;
 }
 
 function buildSummary(frames: TradingViewTechnicalFrame[]) {
@@ -199,7 +201,7 @@ export async function getTradingViewTechnicalContext(
   }
 
   const columns = TIMEFRAMES.flatMap((tf) =>
-    METRICS.map((metric) => `${metric}|${tf.code}`),
+    METRICS.map((metric) => (tf.code ? `${metric}|${tf.code}` : metric)),
   );
 
   const response = await fetch(`https://scanner.tradingview.com/${market}/scan`, {
