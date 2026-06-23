@@ -38,6 +38,7 @@ import { isVipActive } from "@/lib/vip";
 import { DailyActivityWidget } from "@/components/dashboard/daily-activity-widget";
 import { ReferralWidget } from "@/components/dashboard/referral-widget";
 import { FeedSection } from "@/components/dashboard/feed-section";
+import { RealtimeSignalBanner } from "@/components/dashboard/realtime-signal-banner";
 
 export async function generateMetadata({
   params,
@@ -271,6 +272,8 @@ export default async function DashboardPage({
           </Link>
         </div>
       </div>
+
+      <RealtimeSignalBanner />
 
       <DailyActivityWidget />
 
