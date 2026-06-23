@@ -6,6 +6,7 @@ import { BrainCircuit, Loader2 } from "lucide-react";
 import { requestAiAnalysis } from "@/actions/ai-trade-proposal";
 import { QUOTE_DEFINITIONS } from "@/lib/quotes/definitions";
 import { Button } from "@/components/ui/button";
+import { Link } from "@/i18n/navigation";
 
 type Props = {
   hasConnection: boolean;
@@ -85,7 +86,17 @@ export function RequestAnalysisForm({ hasConnection }: Props) {
         </span>
       )}
       {status === "error" && (
-        <span className="text-xs text-destructive">{errorMsg}</span>
+        <span className="flex items-center gap-2 text-xs text-destructive">
+          {errorMsg}
+          {errorMsg === ERROR_LABELS.vip_required && (
+            <Link
+              href="/upgrade-vip"
+              className="font-medium text-primary underline-offset-2 hover:underline"
+            >
+              Nâng cấp VIP
+            </Link>
+          )}
+        </span>
       )}
     </form>
   );

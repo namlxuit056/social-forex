@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import { ImageIcon, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
 export function ImageLightbox({
@@ -99,12 +100,20 @@ export function SignalImageGallery({
     return (
       <div
         className={cn(
-          "flex items-center gap-2 rounded-md border border-amber-500/30 bg-amber-50 dark:bg-amber-950/20 px-3 py-2 text-sm text-amber-700 dark:text-amber-200/90",
+          "flex flex-wrap items-center justify-between gap-2 rounded-md border border-amber-500/30 bg-amber-50 dark:bg-amber-950/20 px-3 py-2 text-sm text-amber-700 dark:text-amber-200/90",
           className,
         )}
       >
-        <ImageIcon className="size-4 shrink-0" />
-        <span>{t("vipImagesLocked", { count: imageCount })}</span>
+        <span className="flex items-center gap-2">
+          <ImageIcon className="size-4 shrink-0" />
+          <span>{t("vipImagesLocked", { count: imageCount })}</span>
+        </span>
+        <Link
+          href="/upgrade-vip"
+          className="shrink-0 rounded-md bg-amber-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-amber-700 dark:bg-amber-500 dark:hover:bg-amber-400"
+        >
+          {t("upgradeVipCta")}
+        </Link>
       </div>
     );
   }

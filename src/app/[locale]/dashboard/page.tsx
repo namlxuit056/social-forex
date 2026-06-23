@@ -260,9 +260,17 @@ export default async function DashboardPage({
               {t("vipActive")}
             </Badge>
           ) : (
-            <Badge variant="outline" className="border-border text-muted-foreground">
-              {t("freeAccount")}
-            </Badge>
+            <>
+              <Badge variant="outline" className="border-border text-muted-foreground">
+                {t("freeAccount")}
+              </Badge>
+              <Link
+                href="/upgrade-vip"
+                className={cn(buttonVariants({ variant: "default", size: "sm" }))}
+              >
+                {t("upgradeVip")}
+              </Link>
+            </>
           )}
           <Link
             href="/profile"
