@@ -1851,7 +1851,15 @@
     "colAdx": "ADX D1",
     "viewChart": "Biểu đồ",
     "noResults": "Không có cặp tiền nào phù hợp với bộ lọc.",
-    "dataSource": "Nguồn: TradingView Scanner — khuyến nghị kỹ thuật tổng hợp (oscillator + MA). Cập nhật mỗi 60 giây."
+    "dataSource": "Nguồn: TradingView Scanner — khuyến nghị kỹ thuật tổng hợp (oscillator + MA). Cập nhật mỗi 60 giây.",
+    "aiPicksTitle": "Cơ hội AI chọn lọc",
+    "aiPicksLoading": "AI đang phân tích thị trường, vui lòng chờ...",
+    "aiPicksUnavailable": "Tính năng AI chưa được cấu hình. Thêm GROQ_API_KEY hoặc OPENAI_API_KEY vào .env để kích hoạt.",
+    "aiPicksNone": "Không tìm thấy cặp tiền nào có tín hiệu đủ mạnh lúc này (cần ≥3/4 khung thời gian đồng thuận).",
+    "aiPicksCount": "cặp",
+    "aiPicksQuality": "Chất lượng setup",
+    "aiPicksEntry": "Vào lệnh",
+    "aiPicksDisclaimer": "AI phân tích dựa trên dữ liệu kỹ thuật TradingView. Chỉ mang tính tham khảo, không phải tư vấn đầu tư. Cập nhật mỗi 5 phút."
   },
   "webinar": {
     "title": "Webinar & Live Room",

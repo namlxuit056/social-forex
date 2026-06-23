@@ -1851,7 +1851,15 @@
     "colAdx": "ADX D1",
     "viewChart": "Chart",
     "noResults": "No pairs match the selected filter.",
-    "dataSource": "Source: TradingView Scanner — composite technical recommendation (oscillators + MAs). Refreshed every 60 seconds."
+    "dataSource": "Source: TradingView Scanner — composite technical recommendation (oscillators + MAs). Refreshed every 60 seconds.",
+    "aiPicksTitle": "AI-Selected Opportunities",
+    "aiPicksLoading": "AI is analyzing the market, please wait...",
+    "aiPicksUnavailable": "AI feature not configured. Add GROQ_API_KEY or OPENAI_API_KEY to .env to enable.",
+    "aiPicksNone": "No pairs with strong enough signals right now (requires ≥3/4 timeframes aligned).",
+    "aiPicksCount": "pairs",
+    "aiPicksQuality": "Setup quality",
+    "aiPicksEntry": "Entry",
+    "aiPicksDisclaimer": "AI analysis is based on TradingView technical data. For reference only — not investment advice. Refreshed every 5 minutes."
   },
   "webinar": {
     "title": "Webinars & Live Rooms",

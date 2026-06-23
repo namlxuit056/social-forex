@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Filter } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
+import { AiPicksPanel } from "@/components/screener/ai-picks-panel";
 
 type ScreenerFilter = "all" | "bullish" | "bearish" | "oversold" | "overbought";
 
@@ -99,6 +100,8 @@ export function MarketScreener({ pairs }: Props) {
 
   return (
     <div className="space-y-4">
+      <AiPicksPanel />
+
       <div className="flex flex-wrap gap-1.5">
         {filters.map((f) => (
           <button
@@ -117,7 +120,7 @@ export function MarketScreener({ pairs }: Props) {
       </div>
 
       <div className="overflow-x-auto rounded-lg border border-border/70">
-        <table className="w-full min-w-[820px] text-left text-sm">
+        <table className="w-full min-w-205 text-left text-sm">
           <thead className="bg-muted/50 text-muted-foreground">
             <tr>
               <th className="px-3 py-2.5">{t("colSymbol")}</th>
