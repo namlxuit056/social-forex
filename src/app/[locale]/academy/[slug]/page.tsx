@@ -2,14 +2,17 @@ import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { SignupPrompt } from "@/components/analytics/signup-prompt";
-import { BackLink } from "@/components/layout/back-link";
 import { Disclaimer } from "@/components/layout/disclaimer";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
 import { Badge } from "@/components/ui/badge";
-import { getAcademyLesson, getAcademyLessons } from "@/lib/content/academy";
+import { getAcademyLesson, getAcademyLessons, getRelatedLessons } from "@/lib/content/academy";
+import { findRelatedArticles } from "@/lib/related-articles";
 import { pageCtaItems } from "@/lib/page-cta-i18n";
 import { absoluteUrl } from "@/lib/site-url";
 import { routing } from "@/i18n/routing";
+import { BreadcrumbJsonLd } from "@/components/seo/breadcrumb-json-ld";
+import { BreadcrumbNav } from "@/components/seo/breadcrumb-nav";
+import { RelatedLessons, RelatedArticles } from "@/components/seo/related-content";
 
 type Props = { params: Promise<{ slug: string; locale: string }> };
 
@@ -73,9 +76,51 @@ export default async function AcademyLessonPage({ params }: Props) {
     advanced: t("advanced"),
   };
 
+  const courseJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Course",
+    name: lesson.title,
+    description: lesson.summary,
+    provider: {
+      "@type": "Organization",
+      name: "Social Forex",
+      url: absoluteUrl("", locale),
+    },
+    inLanguage: locale === "vi" ? "vi" : "en",
+    educationalLevel: lesson.level,
+    keywords: lesson.keywords.join(", "),
+    url: absoluteUrl(`/academy/${slug}`, locale),
+  };
+
+  const relatedLessons = getRelatedLessons(slug, locale, 3);
+  const relatedArticles = await findRelatedArticles({
+    keywords: lesson.keywords,
+    locale,
+    limit: 3,
+  });
+
   return (
     <div className="space-y-8">
-      <BackLink href="/academy">Academy</BackLink>
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger -- JSON-LD requires inline script
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(courseJsonLd) }}
+      />
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Social Forex", path: "/" },
+          { name: "Academy", path: "/academy" },
+          { name: lesson.title, path: `/academy/${slug}` },
+        ]}
+        locale={locale}
+      />
+      <BreadcrumbNav
+        items={[
+          { label: tCommon("home"), href: "/" },
+          { label: "Academy", href: "/academy" },
+          { label: lesson.title },
+        ]}
+      />
       <article className="max-w-2xl space-y-6">
         <div>
           <Badge variant="outline" className="mb-3 text-xs">
@@ -157,6 +202,12 @@ export default async function AcademyLessonPage({ params }: Props) {
           </Link>
         </p>
       </article>
+
+      <div className="max-w-2xl space-y-8">
+        <RelatedLessons lessons={relatedLessons} label={t("relatedLessons")} />
+        <RelatedArticles articles={relatedArticles} label={t("relatedArticles")} />
+      </div>
+
       <PageCtaRow heading={tCommon("ctaDiscovery")} items={ctaRow} />
     </div>
   );

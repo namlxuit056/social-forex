@@ -2,6 +2,7 @@ import Image from "next/image";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { Disclaimer } from "@/components/layout/disclaimer";
+import { BreadcrumbNav } from "@/components/seo/breadcrumb-nav";
 import { Badge } from "@/components/ui/badge";
 import { prisma } from "@/lib/prisma";
 
@@ -31,6 +32,7 @@ export default async function ArticlesPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("articles");
+  const tCommon = await getTranslations("common");
 
   const articles = await prisma.aiGeneratedArticle.findMany({
     where: { locale, status: "PUBLISHED" },
@@ -40,6 +42,12 @@ export default async function ArticlesPage({
 
   return (
     <div className="space-y-8">
+      <BreadcrumbNav
+        items={[
+          { label: tCommon("home"), href: "/" },
+          { label: t("title") },
+        ]}
+      />
       <div>
         <h1 className="font-heading text-2xl font-semibold text-foreground">
           {t("title")}

@@ -2,6 +2,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { Disclaimer } from "@/components/layout/disclaimer";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
+import { BreadcrumbNav } from "@/components/seo/breadcrumb-nav";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { getAcademyLessons } from "@/lib/content/academy";
@@ -38,6 +39,12 @@ export default async function AcademyPage({
 
   return (
     <div className="space-y-8">
+      <BreadcrumbNav
+        items={[
+          { label: tCommon("home"), href: "/" },
+          { label: t("title") },
+        ]}
+      />
       <div>
         <h1 className="font-heading text-2xl font-semibold text-foreground">
           {t("title")}

@@ -13,6 +13,7 @@ import {
   getMt5DownloadUrl,
 } from "@/lib/start-broker-links";
 import { absoluteUrl, getSiteUrl } from "@/lib/site-url";
+import { routing } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 import { pageCtaItems } from "@/lib/page-cta-i18n";
 
@@ -29,6 +30,14 @@ export async function generateMetadata({
   return {
     title: t("metaTitle"),
     description: t("metaDescription"),
+    alternates: {
+      canonical: absoluteUrl("/start", locale),
+      languages: {
+        vi: absoluteUrl("/start", "vi"),
+        en: absoluteUrl("/start", "en"),
+        "x-default": absoluteUrl("/start", routing.defaultLocale),
+      },
+    },
   };
 }
 

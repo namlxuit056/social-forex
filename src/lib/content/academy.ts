@@ -1275,4 +1275,69 @@ export function getAcademyLesson(slug: string, locale: string): Lesson | undefin
   return getAcademyLessons(locale).find((lesson) => lesson.slug === slug);
 }
 
+/**
+ * Find academy lessons related to a given lesson by keyword overlap.
+ * Returns up to `limit` lessons, excluding the current one.
+ */
+export function getRelatedLessons(
+  currentSlug: string,
+  locale: string,
+  limit = 3,
+): Lesson[] {
+  const lessons = getAcademyLessons(locale);
+  const current = lessons.find((l) => l.slug === currentSlug);
+  if (!current) return [];
+
+  const currentKeywords = new Set(current.keywords.map((k) => k.toLowerCase()));
+
+  const scored = lessons
+    .filter((l) => l.slug !== currentSlug)
+    .map((l) => {
+      const overlap = l.keywords.filter((k) =>
+        currentKeywords.has(k.toLowerCase()),
+      ).length;
+      // Also boost by same level
+      const levelBoost = l.level === current.level ? 0.5 : 0;
+      return { lesson: l, score: overlap + levelBoost };
+    })
+    .filter((s) => s.score > 0)
+    .sort((a, b) => b.score - a.score);
+
+  return scored.slice(0, limit).map((s) => s.lesson);
+}
+
+/**
+ * Find academy lessons related to a set of keywords (e.g. from an article).
+ * Returns up to `limit` lessons sorted by keyword overlap score.
+ */
+export function getRelatedAcademyLessonsByKeywords(
+  keywords: string[],
+  locale: string,
+  limit = 3,
+): Lesson[] {
+  if (keywords.length === 0) return [];
+
+  const lessons = getAcademyLessons(locale);
+  const lowerKeywords = keywords.map((k) => k.toLowerCase());
+
+  const scored = lessons.map((l) => {
+    const overlap = l.keywords.filter((k) =>
+      lowerKeywords.includes(k.toLowerCase()),
+    ).length;
+    // Boost if lesson keyword appears in the search keywords
+    const titleBoost = lowerKeywords.some((k) =>
+      l.title.toLowerCase().includes(k),
+    )
+      ? 1
+      : 0;
+    return { lesson: l, score: overlap + titleBoost };
+  });
+
+  return scored
+    .filter((s) => s.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit)
+    .map((s) => s.lesson);
+}
+
 export const academyLessons = getAcademyLessons("vi");

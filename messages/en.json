@@ -896,14 +896,18 @@
     "backToList": "← Lesson list",
     "signupPromptTitle": "Save your learning progress",
     "signupPromptDesc": "Create an account to keep lessons, watchlist symbols, and journal notes connected as you practice.",
-    "signupPromptCta": "Save progress"
+    "signupPromptCta": "Save progress",
+    "relatedLessons": "Continue learning",
+    "relatedArticles": "Related articles"
   },
   "articles": {
     "title": "AI forex articles",
     "description": "Educational articles assisted by AI from currently watched forex keywords. Content is for learning only, not investment advice.",
     "empty": "No articles have been published yet.",
     "readMore": "Read article",
-    "backToList": "AI articles"
+    "backToList": "AI articles",
+    "relatedArticles": "Related articles",
+    "relatedLessons": "Learn more in Academy"
   },
   "resources": {
     "title": "Resource Library",

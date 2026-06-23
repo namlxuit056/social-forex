@@ -12,10 +12,14 @@ import { Link } from "@/i18n/navigation";
 import { TrackedLink } from "@/components/analytics/tracked-link";
 import { HomeTopTraders } from "@/components/home/home-top-traders";
 import { NewcomerPathSection } from "@/components/home/newcomer-path";
+import { BreadcrumbJsonLd } from "@/components/seo/breadcrumb-json-ld";
 import { FaqJsonLd } from "@/components/seo/faq-json-ld";
+import { WebsiteJsonLd } from "@/components/seo/website-json-ld";
 import { buttonVariants } from "@/components/ui/button";
 import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
 import { getExnessAffiliateUrl } from "@/lib/exness-affiliate";
+import { absoluteUrl } from "@/lib/site-url";
+import { routing } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 
 const blocks = [
@@ -94,6 +98,14 @@ export async function generateMetadata({
     title: t("metaTitle"),
     description: t("metaDescription"),
     ...(keywords.length > 0 ? { keywords } : {}),
+    alternates: {
+      canonical: absoluteUrl("/", locale),
+      languages: {
+        vi: absoluteUrl("/", "vi"),
+        en: absoluteUrl("/", "en"),
+        "x-default": absoluteUrl("/", routing.defaultLocale),
+      },
+    },
   };
 }
 
@@ -120,6 +132,11 @@ export default async function HomePage({
 
   return (
     <div className="space-y-16">
+      <WebsiteJsonLd locale={locale} />
+      <BreadcrumbJsonLd
+        items={[{ name: tHome("metaTitle"), path: "/" }]}
+        locale={locale}
+      />
       <FaqJsonLd items={faqItems} />
       <section className="text-center">
         <p className="text-sm font-medium uppercase tracking-widest text-primary">

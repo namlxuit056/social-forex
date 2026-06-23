@@ -3,7 +3,6 @@ import { notFound, redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import Image from "next/image";
 import { marked } from "marked";
-import { BackLink } from "@/components/layout/back-link";
 import { Disclaimer } from "@/components/layout/disclaimer";
 import { Badge } from "@/components/ui/badge";
 import { PageViewTracker } from "@/components/analytics/page-view-tracker";
@@ -11,6 +10,11 @@ import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
 import { routing } from "@/i18n/routing";
 import { prisma } from "@/lib/prisma";
 import { absoluteUrl } from "@/lib/site-url";
+import { BreadcrumbJsonLd } from "@/components/seo/breadcrumb-json-ld";
+import { BreadcrumbNav } from "@/components/seo/breadcrumb-nav";
+import { RelatedArticles, RelatedLessons } from "@/components/seo/related-content";
+import { findRelatedArticles } from "@/lib/related-articles";
+import { getRelatedAcademyLessonsByKeywords } from "@/lib/content/academy";
 
 function ensureHtml(body: string): string {
   const trimmed = body.trimStart();
@@ -33,11 +37,29 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   });
   if (!article || article.status !== "PUBLISHED") return {};
 
+  const canonicalUrl = absoluteUrl(`/articles/${slug}`, locale);
+
+  // Look up the alternate-locale version for hreflang
+  const alternateLocale = locale === "vi" ? "en" : "vi";
+  const alternateArticle = await prisma.aiGeneratedArticle.findUnique({
+    where: { locale_slug: { locale: alternateLocale, slug } },
+    select: { slug: true },
+  });
+
+  const languages: Record<string, string> = {
+    vi: absoluteUrl(`/articles/${slug}`, "vi"),
+    en: absoluteUrl(`/articles/${slug}`, "en"),
+    "x-default": absoluteUrl(`/articles/${slug}`, routing.defaultLocale),
+  };
+  if (!alternateArticle) {
+    delete languages[alternateLocale];
+  }
+
   return {
     title: article.title,
     description: article.metaDescription,
     keywords: article.sourceKeywords,
-    alternates: { canonical: absoluteUrl(`/articles/${slug}`, locale) },
+    alternates: { canonical: canonicalUrl, languages },
     openGraph: {
       type: "article",
       title: article.title,
@@ -69,6 +91,7 @@ export default async function ArticlePage({ params }: Props) {
   const { locale, slug } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("articles");
+  const tCommon = await getTranslations("common");
 
   const article = await prisma.aiGeneratedArticle.findUnique({
     where: { locale_slug: { locale, slug } },
@@ -113,17 +136,43 @@ export default async function ArticlePage({ params }: Props) {
     about: { "@type": "Thing", name: article.keyword },
   };
 
+  // Fetch related content for internal linking
+  const keywordsForRelated = [article.keyword, ...article.sourceKeywords];
+  const [relatedArticles, relatedLessons] = await Promise.all([
+    findRelatedArticles({
+      keywords: keywordsForRelated,
+      locale,
+      excludeSlug: slug,
+      limit: 3,
+    }),
+    getRelatedAcademyLessonsByKeywords(keywordsForRelated, locale, 3),
+  ]);
+
   return (
     <div className="space-y-8">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Social Forex", path: "/" },
+          { name: t("backToList").replace("← ", ""), path: "/articles" },
+          { name: article.title, path: `/articles/${slug}` },
+        ]}
+        locale={locale}
+      />
       <PageViewTracker
         eventName={ANALYTICS_EVENTS.articleRead}
         properties={{ keyword: article.keyword, locale, slug }}
       />
-      <BackLink href="/articles">{t("backToList")}</BackLink>
+      <BreadcrumbNav
+        items={[
+          { label: tCommon("home"), href: "/" },
+          { label: t("backToList"), href: "/articles" },
+          { label: article.title },
+        ]}
+      />
       <article className="max-w-2xl space-y-6">
         <div>
           <div className="mb-3 flex flex-wrap items-center gap-2">
@@ -159,6 +208,11 @@ export default async function ArticlePage({ params }: Props) {
 
         <Disclaimer variant="compact" />
       </article>
+
+      <div className="max-w-2xl space-y-8">
+        <RelatedArticles articles={relatedArticles} label={t("relatedArticles")} />
+        <RelatedLessons lessons={relatedLessons} label={t("relatedLessons")} />
+      </div>
     </div>
   );
 }

@@ -896,14 +896,18 @@
     "backToList": "← Danh sách bài học",
     "signupPromptTitle": "Lưu tiến độ học",
     "signupPromptDesc": "Tạo tài khoản để giữ bài học, symbol watchlist và ghi chú journal liền mạch khi luyện tập.",
-    "signupPromptCta": "Lưu tiến độ"
+    "signupPromptCta": "Lưu tiến độ",
+    "relatedLessons": "Tiếp tục học",
+    "relatedArticles": "Bài viết liên quan"
   },
   "articles": {
     "title": "Bài viết AI về forex",
     "description": "Các bài viết giáo dục được AI hỗ trợ từ keyword forex đang được quan tâm. Nội dung chỉ để học tập, không phải tư vấn đầu tư.",
     "empty": "Chưa có bài viết nào được publish.",
     "readMore": "Đọc bài",
-    "backToList": "Bài viết AI"
+    "backToList": "Bài viết AI",
+    "relatedArticles": "Bài viết liên quan",
+    "relatedLessons": "Tìm hiểu thêm tại Academy"
   },
   "resources": {
     "title": "Kho tài liệu",
