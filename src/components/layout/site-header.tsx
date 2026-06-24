@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { Bell, BookOpen, ChartCandlestick, MessageSquare, Shield, Wrench } from "lucide-react";
+import { Bell, BookOpen, MessageSquare, Shield, Wrench } from "lucide-react";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
@@ -11,45 +11,12 @@ import { SiteLogo } from "@/components/layout/site-logo";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { prisma } from "@/lib/prisma";
-
-const primaryNavKeys = [
-  { href: "/desk", key: "desk", icon: ChartCandlestick },
-  { href: "/signals", key: "signals", icon: Shield },
-  { href: "/forum", key: "forum", icon: MessageSquare },
-  { href: "/academy", key: "academy", icon: BookOpen },
-] as const;
-
-const marketNavKeys = [
-  { href: "/quotes", key: "quotes" },
-  { href: "/calendar", key: "calendar" },
-  { href: "/chart", key: "chart" },
-  { href: "/tools", key: "tools" },
-  { href: "/screener", key: "screener" },
-  { href: "/heatmap", key: "heatmap" },
-  { href: "/sentiment", key: "sentiment" },
-] as const;
-
-const communityNavKeys = [
-  { href: "/leaderboard", key: "leaderboard" },
-  { href: "/copy-trade", key: "copyTrade" },
-  { href: "/ai-trade-proposals", key: "aiTradeProposal" },
-  { href: "/plan", key: "plan" },
-  { href: "/journal", key: "journal" },
-  { href: "/mt5", key: "mt5" },
-  { href: "/backtest", key: "backtest" },
-  { href: "/messages", key: "messages" },
-  { href: "/forum/search", key: "searchTopics" },
-] as const;
-
-const learningNavKeys = [
-  { href: "/articles", key: "articles" },
-  { href: "/challenge", key: "challenge" },
-  { href: "/start", key: "startHere" },
-  { href: "/webinar", key: "webinar" },
-  { href: "/resources", key: "resources" },
-  { href: "/brokers", key: "brokers" },
-  { href: "/partners", key: "partners" },
-] as const;
+import {
+  primaryNavKeys,
+  marketNavKeys,
+  communityNavKeys,
+  learningNavKeys,
+} from "@/components/layout/nav-config";
 
 const secondaryNavGroups = [
   { icon: Wrench, items: marketNavKeys },
@@ -186,7 +153,7 @@ export async function SiteHeader() {
           aria-label={t("scrollPrimaryAria")}
           className="scrollbar-none -mx-4 flex gap-1.5 overflow-x-auto px-4 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
-          {[...primaryNavKeys, ...marketNavKeys.slice(0, 4)].map((item) => (
+          {[...primaryNavKeys, ...marketNavKeys].map((item) => (
             <SiteNavLink
               key={item.href}
               href={item.href}

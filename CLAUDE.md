@@ -9,7 +9,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Luôn chạy `npm run lint` sau khi sửa code
 - Commit message theo conventional commits
 - Nếu không chắc về business logic thì ghi TODO, không đoán
+- Khi làm xong build không lỗi thì commit và push code lên main
 
+### Navigation — bắt buộc khi thêm tính năng mới
+Khi thêm một route/tính năng mới vào `src/app/[locale]/`, phải cập nhật **duy nhất một file** là `src/components/layout/nav-config.ts`:
+- Thêm vào đúng array: `marketNavKeys`, `communityNavKeys`, hoặc `learningNavKeys`
+- `site-header.tsx` (desktop secondary nav + mobile scroll rail) và `mobile-nav.tsx` (hamburger menu) đều import từ file này — **không cần sửa hai file đó**
+- Cũng cần thêm translation key vào `messages/vi.json` và `messages/en.json` (namespace `nav`)
 ## Commands
 
 ```bash

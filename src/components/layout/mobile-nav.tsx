@@ -14,37 +14,11 @@ import {
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
-
-const marketNavKeys = [
-  { href: "/quotes", key: "quotes" },
-  { href: "/calendar", key: "calendar" },
-  { href: "/chart", key: "chart" },
-  { href: "/tools", key: "tools" },
-  { href: "/heatmap", key: "heatmap" },
-  { href: "/sentiment", key: "sentiment" },
-] as const;
-
-const communityNavKeys = [
-  { href: "/leaderboard", key: "leaderboard" },
-  { href: "/copy-trade", key: "copyTrade" },
-  { href: "/plan", key: "plan" },
-  { href: "/journal", key: "journal" },
-  { href: "/mt5", key: "mt5" },
-  { href: "/ai-trade-proposals", key: "aiTradeProposal" },
-  { href: "/backtest", key: "backtest" },
-  { href: "/messages", key: "messages" },
-  { href: "/forum/search", key: "searchTopics" },
-] as const;
-
-const learningNavKeys = [
-  { href: "/articles", key: "articles" },
-  { href: "/challenge", key: "challenge" },
-  { href: "/start", key: "startHere" },
-  { href: "/webinar", key: "webinar" },
-  { href: "/resources", key: "resources" },
-  { href: "/brokers", key: "brokers" },
-  { href: "/partners", key: "partners" },
-] as const;
+import {
+  marketNavKeys,
+  communityNavKeys,
+  learningNavKeys,
+} from "@/components/layout/nav-config";
 
 const navGroups = [
   { labelKey: "marketTools", icon: Wrench, items: marketNavKeys },
