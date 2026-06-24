@@ -42,35 +42,35 @@ export function DemoBacktest() {
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-3">
         <label className="text-sm">
-          <span className="text-zinc-400">Số lệnh mô phỏng</span>
+          <span className="text-muted-foreground">Số lệnh mô phỏng</span>
           <input
             type="number"
             min={10}
             max={2000}
-            className="mt-1 w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-2 font-mono"
+            className="mt-1 w-full rounded border border-input bg-background px-3 py-2 font-mono text-foreground"
             value={trades}
             onChange={(e) => setTrades(Number(e.target.value))}
           />
         </label>
         <label className="text-sm">
-          <span className="text-zinc-400">Tỷ lệ thắng %</span>
+          <span className="text-muted-foreground">Tỷ lệ thắng %</span>
           <input
             type="number"
             min={1}
             max={99}
-            className="mt-1 w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-2 font-mono"
+            className="mt-1 w-full rounded border border-input bg-background px-3 py-2 font-mono text-foreground"
             value={winRate}
             onChange={(e) => setWinRate(Number(e.target.value))}
           />
         </label>
         <label className="text-sm">
-          <span className="text-zinc-400">R:R khi thắng</span>
+          <span className="text-muted-foreground">R:R khi thắng</span>
           <input
             type="number"
             step="0.1"
             min={0.5}
             max={5}
-            className="mt-1 w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-2 font-mono"
+            className="mt-1 w-full rounded border border-input bg-background px-3 py-2 font-mono text-foreground"
             value={rr}
             onChange={(e) => setRr(Number(e.target.value))}
           />
@@ -83,7 +83,7 @@ export function DemoBacktest() {
           <span className="font-mono text-emerald-600 dark:text-emerald-400">{final}</span> USD · Lợi nhuận
           gần đúng: <span className="font-mono">{ret}%</span>
         </p>
-        <div className="mt-4 flex h-40 items-end gap-px overflow-hidden rounded bg-zinc-950">
+        <div className="mt-4 flex h-40 items-end gap-px overflow-hidden rounded bg-muted dark:bg-zinc-950">
           {series.filter((_, i) => i % Math.ceil(trades / 80) === 0).map((p, i) => {
             const h = Math.max(
               4,
