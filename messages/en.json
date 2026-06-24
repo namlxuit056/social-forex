@@ -1647,12 +1647,14 @@
     "riskPct": "Risk per Trade",
     "entry": "Entry Price",
     "stopLoss": "Stop Loss",
+    "takeProfit": "Take Profit",
+    "tpOptional": "(optional)",
     "dollarRisk": "Dollar Risk",
-    "pipDistance": "Pip Distance",
+    "pipDistance": "SL Pips",
     "lotSize": "Lot Size",
     "pipValue": "Pip Value",
-    "fillHint": "Fill in all fields to calculate.",
-    "approximation": "* Estimate based on $10/pip/standard lot. May differ for USD-base pairs (USDCAD, USDJPY...)."
+    "riskReward": "R:R",
+    "fillHint": "Fill in all fields to calculate."
   },
   "gamification": {
     "dailyActivity": "Daily Activity",

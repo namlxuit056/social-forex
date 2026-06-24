@@ -1,222 +1,290 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import {
-  marginRequired,
-  pivotClassic,
-  positionSizeLots,
-} from "@/lib/calculators";
+import { useState, useMemo, useCallback } from "react";
+import { Check, Copy } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { RiskCalculator } from "@/components/tools/risk-calculator";
+import { pivotClassic, contractSize, marginRequired } from "@/lib/calculators";
+import { cn } from "@/lib/utils";
 
-export function TradingCalculators() {
-  const [balance, setBalance] = useState(10000);
-  const [riskPct, setRiskPct] = useState(1);
-  const [slPips, setSlPips] = useState(40);
-  const [symbol, setSymbol] = useState("EURUSD");
-  const [price, setPrice] = useState(1.085);
-  const [quote, setQuote] = useState<"USD" | "JPY" | "other">("USD");
+// ---------------------------------------------------------------------------
+// Pivot points tab
+// ---------------------------------------------------------------------------
 
-  const pos = useMemo(
-    () =>
-      positionSizeLots({
-        balance,
-        riskPct,
-        stopLossPips: slPips,
-        symbol,
-        price: symbol.includes("JPY") ? 149.2 : price,
-        quote: symbol.includes("JPY") ? "JPY" : quote,
-      }),
-    [balance, riskPct, slPips, symbol, price, quote],
+function useCopy(resetMs = 1500) {
+  const [copied, setCopied] = useState<string | null>(null);
+  const copy = useCallback(
+    (key: string, value: string) => {
+      navigator.clipboard.writeText(value).catch(() => null);
+      setCopied(key);
+      setTimeout(() => setCopied(null), resetMs);
+    },
+    [resetMs],
   );
+  return { copied, copy };
+}
 
-  const [h, setH] = useState(1.09);
-  const [l, setL] = useState(1.08);
-  const [c, setC] = useState(1.085);
-  const pivots = useMemo(() => pivotClassic(h, l, c), [h, l, c]);
-
-  const [lots, setLots] = useState(0.5);
-  const [lev, setLev] = useState(30);
-  const margin = useMemo(
-    () =>
-      marginRequired({
-        contractSize: 100000,
-        lots,
-        price,
-        leverage: lev,
-      }),
-    [lots, price, lev],
+function CopyBtn({ id, value, copied, onCopy }: {
+  id: string;
+  value: string;
+  copied: string | null;
+  onCopy: (id: string, value: string) => void;
+}) {
+  const done = copied === id;
+  return (
+    <button
+      onClick={() => onCopy(id, value)}
+      aria-label={done ? "Đã sao chép" : "Sao chép"}
+      className="ml-1.5 rounded p-0.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-foreground"
+    >
+      {done ? <Check className="size-3 text-emerald-500" /> : <Copy className="size-3" />}
+    </button>
   );
+}
+
+function PivotRow({
+  label,
+  value,
+  color,
+  id,
+  copied,
+  onCopy,
+}: {
+  label: string;
+  value: number;
+  color?: string;
+  id: string;
+  copied: string | null;
+  onCopy: (id: string, value: string) => void;
+}) {
+  const str = value.toFixed(5);
+  return (
+    <div className={cn("group flex items-center justify-between rounded-md px-2 py-1.5 hover:bg-muted/30", color)}>
+      <span className="w-8 shrink-0 text-xs font-semibold">{label}</span>
+      <span className="font-mono text-sm">{str}</span>
+      <CopyBtn id={id} value={str} copied={copied} onCopy={onCopy} />
+    </div>
+  );
+}
+
+function PivotCalculator() {
+  const [h, setH] = useState("1.09000");
+  const [l, setL] = useState("1.08000");
+  const [c, setC] = useState("1.08500");
+
+  const pivots = useMemo(() => {
+    const hv = parseFloat(h);
+    const lv = parseFloat(l);
+    const cv = parseFloat(c);
+    if (!Number.isFinite(hv) || !Number.isFinite(lv) || !Number.isFinite(cv)) return null;
+    return pivotClassic(hv, lv, cv);
+  }, [h, l, c]);
+
+  const { copied, copy } = useCopy();
 
   return (
-    <div className="grid gap-8 lg:grid-cols-3">
-      <section className="rounded-xl border border-border bg-muted/15 p-5">
-        <h3 className="text-lg font-medium text-foreground">Position size</h3>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Lot gợi ý theo % rủi ro và khoảng cách SL (pip).
-        </p>
-        <div className="mt-4 space-y-3 text-sm">
-          <label className="block">
-            <span className="text-muted-foreground">Vốn ($)</span>
-            <input
-              type="number"
-              className="mt-1 w-full rounded border border-input bg-background px-3 py-2 font-mono"
-              value={balance}
-              onChange={(e) => setBalance(Number(e.target.value))}
-            />
-          </label>
-          <label className="block">
-            <span className="text-muted-foreground">Rủi ro %</span>
-            <input
-              type="number"
-              step="0.1"
-              className="mt-1 w-full rounded border border-input bg-background px-3 py-2 font-mono"
-              value={riskPct}
-              onChange={(e) => setRiskPct(Number(e.target.value))}
-            />
-          </label>
-          <label className="block">
-            <span className="text-muted-foreground">Stop loss (pip)</span>
-            <input
-              type="number"
-              className="mt-1 w-full rounded border border-input bg-background px-3 py-2 font-mono"
-              value={slPips}
-              onChange={(e) => setSlPips(Number(e.target.value))}
-            />
-          </label>
-          <label className="block">
-            <span className="text-muted-foreground">Symbol</span>
-            <input
-              className="mt-1 w-full rounded border border-input bg-background px-3 py-2 font-mono uppercase"
-              value={symbol}
-              onChange={(e) => setSymbol(e.target.value)}
-            />
-          </label>
-          {!symbol.includes("JPY") && (
-            <label className="block">
-              <span className="text-muted-foreground">Giá hiện tại</span>
-              <input
-                type="number"
-                step="0.00001"
-                className="mt-1 w-full rounded border border-input bg-background px-3 py-2 font-mono"
-                value={price}
-                onChange={(e) => setPrice(Number(e.target.value))}
-              />
-            </label>
-          )}
-          {!symbol.includes("JPY") && (
-            <label className="block">
-              <span className="text-muted-foreground">Quote account</span>
-              <select
-                className="mt-1 w-full rounded border border-input bg-background px-3 py-2"
-                value={quote}
-                onChange={(e) =>
-                  setQuote(e.target.value as "USD" | "JPY" | "other")
-                }
-              >
-                <option value="USD">USD</option>
-                <option value="other">Khác (xấp xỉ USD)</option>
-                <option value="JPY">JPY</option>
-              </select>
-            </label>
-          )}
+    <div className="space-y-4">
+      <p className="text-sm text-muted-foreground">H, L, Close phiên trước.</p>
+      <div className="grid grid-cols-3 gap-3">
+        <div className="space-y-1.5">
+          <Label htmlFor="pv-h" className="text-xs text-muted-foreground">High</Label>
+          <Input id="pv-h" type="number" step="0.00001" value={h} onChange={(e) => setH(e.target.value)} className="h-9 font-mono text-sm" />
         </div>
-        <dl className="mt-4 space-y-1 rounded-lg bg-muted/30 p-3 font-mono text-sm">
-          <div className="flex justify-between">
-            <dt className="text-muted-foreground">Rủi ro $</dt>
-            <dd>{pos.riskAmount}</dd>
-          </div>
-          <div className="flex justify-between">
-            <dt className="text-muted-foreground">Pip value / lot</dt>
-            <dd>{pos.pipValuePerLot}</dd>
-          </div>
-          <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
-            <dt>Lots gợi ý</dt>
-            <dd>{pos.lots}</dd>
-          </div>
-        </dl>
-      </section>
+        <div className="space-y-1.5">
+          <Label htmlFor="pv-l" className="text-xs text-muted-foreground">Low</Label>
+          <Input id="pv-l" type="number" step="0.00001" value={l} onChange={(e) => setL(e.target.value)} className="h-9 font-mono text-sm" />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="pv-c" className="text-xs text-muted-foreground">Close</Label>
+          <Input id="pv-c" type="number" step="0.00001" value={c} onChange={(e) => setC(e.target.value)} className="h-9 font-mono text-sm" />
+        </div>
+      </div>
 
-      <section className="rounded-xl border border-border bg-muted/15 p-5">
-        <h3 className="text-lg font-medium text-foreground">Pivot (classic)</h3>
-        <p className="mt-1 text-sm text-muted-foreground">H, L, Close phiên trước.</p>
-        <div className="mt-4 grid grid-cols-3 gap-2 text-sm">
-          <label className="col-span-1">
-            <span className="text-muted-foreground">High</span>
-            <input
-              type="number"
-              step="0.00001"
-              className="mt-1 w-full rounded border border-input bg-background px-2 py-1 font-mono"
-              value={h}
-              onChange={(e) => setH(Number(e.target.value))}
-            />
-          </label>
-          <label className="col-span-1">
-            <span className="text-muted-foreground">Low</span>
-            <input
-              type="number"
-              step="0.00001"
-              className="mt-1 w-full rounded border border-input bg-background px-2 py-1 font-mono"
-              value={l}
-              onChange={(e) => setL(Number(e.target.value))}
-            />
-          </label>
-          <label className="col-span-1">
-            <span className="text-muted-foreground">Close</span>
-            <input
-              type="number"
-              step="0.00001"
-              className="mt-1 w-full rounded border border-input bg-background px-2 py-1 font-mono"
-              value={c}
-              onChange={(e) => setC(Number(e.target.value))}
-            />
-          </label>
+      {pivots ? (
+        <div className="rounded-lg border border-border/60 bg-muted/10 p-2">
+          <PivotRow label="R3" value={pivots.r3} color="text-sky-600 dark:text-sky-400" id="r3" copied={copied} onCopy={copy} />
+          <PivotRow label="R2" value={pivots.r2} color="text-sky-600 dark:text-sky-400" id="r2" copied={copied} onCopy={copy} />
+          <PivotRow label="R1" value={pivots.r1} color="text-sky-600 dark:text-sky-400" id="r1" copied={copied} onCopy={copy} />
+          <div className="my-1 border-t border-border/40" />
+          <PivotRow label="P" value={pivots.pivot} color="text-foreground font-bold" id="p" copied={copied} onCopy={copy} />
+          <div className="my-1 border-t border-border/40" />
+          <PivotRow label="S1" value={pivots.s1} color="text-amber-600 dark:text-amber-400" id="s1" copied={copied} onCopy={copy} />
+          <PivotRow label="S2" value={pivots.s2} color="text-amber-600 dark:text-amber-400" id="s2" copied={copied} onCopy={copy} />
+          <PivotRow label="S3" value={pivots.s3} color="text-amber-600 dark:text-amber-400" id="s3" copied={copied} onCopy={copy} />
         </div>
-        <ul className="mt-4 space-y-1 font-mono text-sm text-foreground/80">
-          <li>P: {pivots.pivot}</li>
-          <li className="text-sky-600 dark:text-sky-400">R1 {pivots.r1} · R2 {pivots.r2} · R3 {pivots.r3}</li>
-          <li className="text-amber-600 dark:text-amber-400/90">S1 {pivots.s1} · S2 {pivots.s2} · S3 {pivots.s3}</li>
-        </ul>
-      </section>
-
-      <section className="rounded-xl border border-border bg-muted/15 p-5">
-        <h3 className="text-lg font-medium text-foreground">Ký quỹ (ước lượng)</h3>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Notional / đòn bẩy — minh họa; từng sàn có công thức riêng.
-        </p>
-        <div className="mt-4 space-y-3 text-sm">
-          <label className="block">
-            <span className="text-muted-foreground">Lots</span>
-            <input
-              type="number"
-              step="0.01"
-              className="mt-1 w-full rounded border border-input bg-background px-3 py-2 font-mono"
-              value={lots}
-              onChange={(e) => setLots(Number(e.target.value))}
-            />
-          </label>
-          <label className="block">
-            <span className="text-muted-foreground">Giá</span>
-            <input
-              type="number"
-              step="0.00001"
-              className="mt-1 w-full rounded border border-input bg-background px-3 py-2 font-mono"
-              value={price}
-              onChange={(e) => setPrice(Number(e.target.value))}
-            />
-          </label>
-          <label className="block">
-            <span className="text-muted-foreground">Đòn bẩy</span>
-            <input
-              type="number"
-              className="mt-1 w-full rounded border border-input bg-background px-3 py-2 font-mono"
-              value={lev}
-              onChange={(e) => setLev(Number(e.target.value))}
-            />
-          </label>
+      ) : (
+        <div className="rounded-lg border border-dashed border-border/60 bg-muted/10 px-4 py-3 text-center text-xs text-muted-foreground">
+          Nhập H, L, C để tính pivot.
         </div>
-        <p className="mt-4 rounded-lg bg-muted/30 p-3 font-mono text-emerald-600 dark:text-emerald-400">
-          Margin ≈ ${margin}
-        </p>
-      </section>
+      )}
     </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Margin calculator tab
+// ---------------------------------------------------------------------------
+
+const MARGIN_PRESETS = ["EURUSD", "USDJPY", "XAUUSD", "BTCUSD"];
+
+function MarginCalculator() {
+  const [symbol, setSymbol] = useState("EURUSD");
+  const [lots, setLots] = useState("0.10");
+  const [price, setPrice] = useState("1.08500");
+  const [leverage, setLeverage] = useState("100");
+
+  const result = useMemo(() => {
+    const lotsV = parseFloat(lots);
+    const priceV = parseFloat(price);
+    const levV = parseFloat(leverage);
+    if (!Number.isFinite(lotsV) || !Number.isFinite(priceV) || !Number.isFinite(levV)) return null;
+    if (lotsV <= 0 || priceV <= 0 || levV <= 0) return null;
+    const cs = contractSize(symbol);
+    const notional = cs * lotsV * priceV;
+    const margin = marginRequired({ contractSize: cs, lots: lotsV, price: priceV, leverage: levV });
+    return { cs, notional, margin };
+  }, [symbol, lots, price, leverage]);
+
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-muted-foreground">Ước tính notional / đòn bẩy. Từng sàn có thể tính khác.</p>
+
+      <div className="flex flex-wrap gap-1.5">
+        {MARGIN_PRESETS.map((s) => (
+          <button
+            key={s}
+            onClick={() => setSymbol(s)}
+            className={cn(
+              "rounded-md border px-2.5 py-0.5 font-mono text-xs transition-colors",
+              symbol.toUpperCase() === s
+                ? "border-primary bg-primary/10 text-primary"
+                : "border-border/60 text-muted-foreground hover:border-primary/50 hover:text-foreground",
+            )}
+          >
+            {s}
+          </button>
+        ))}
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="space-y-1.5">
+          <Label htmlFor="mg-symbol" className="text-xs text-muted-foreground">Symbol</Label>
+          <Input
+            id="mg-symbol"
+            placeholder="EURUSD"
+            value={symbol}
+            onChange={(e) => setSymbol(e.target.value.toUpperCase())}
+            className="h-9 font-mono text-sm uppercase"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="mg-lots" className="text-xs text-muted-foreground">Lots</Label>
+          <Input
+            id="mg-lots"
+            type="number"
+            step="0.01"
+            placeholder="0.10"
+            value={lots}
+            onChange={(e) => setLots(e.target.value)}
+            className="h-9 font-mono text-sm"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="mg-price" className="text-xs text-muted-foreground">Giá hiện tại</Label>
+          <Input
+            id="mg-price"
+            type="number"
+            step="0.00001"
+            placeholder="1.08500"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            className="h-9 font-mono text-sm"
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="mg-lev" className="text-xs text-muted-foreground">Đòn bẩy</Label>
+          <div className="relative">
+            <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
+              1:
+            </span>
+            <Input
+              id="mg-lev"
+              type="number"
+              placeholder="100"
+              value={leverage}
+              onChange={(e) => setLeverage(e.target.value)}
+              className="h-9 pl-7 font-mono text-sm"
+            />
+          </div>
+        </div>
+      </div>
+
+      {result ? (
+        <div className="grid grid-cols-3 gap-3 rounded-lg border border-border/60 bg-muted/20 p-3">
+          <div>
+            <p className="text-[11px] text-muted-foreground">Contract size</p>
+            <p className="mt-0.5 font-mono text-sm font-semibold text-foreground">
+              {result.cs.toLocaleString()}
+            </p>
+          </div>
+          <div>
+            <p className="text-[11px] text-muted-foreground">Notional</p>
+            <p className="mt-0.5 font-mono text-sm font-semibold text-foreground">
+              ${result.notional.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+            </p>
+          </div>
+          <div>
+            <p className="text-[11px] text-muted-foreground">Margin cần</p>
+            <p className="mt-0.5 font-mono text-base font-bold text-primary">
+              ${result.margin.toLocaleString(undefined, { maximumFractionDigits: 2 })}
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="rounded-lg border border-dashed border-border/60 bg-muted/10 px-4 py-3 text-center text-xs text-muted-foreground">
+          Nhập đầy đủ thông tin để tính margin.
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Main export
+// ---------------------------------------------------------------------------
+
+export function TradingCalculators() {
+  return (
+    <Tabs defaultValue="position" className="space-y-4">
+      <TabsList className="h-9">
+        <TabsTrigger value="position" className="text-sm">Position Size</TabsTrigger>
+        <TabsTrigger value="pivot" className="text-sm">Pivot Points</TabsTrigger>
+        <TabsTrigger value="margin" className="text-sm">Ký quỹ</TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="position">
+        <RiskCalculator />
+      </TabsContent>
+
+      <TabsContent value="pivot">
+        <div className="rounded-xl border border-border bg-muted/15 p-5">
+          <h3 className="text-base font-medium text-foreground">Pivot Points (Classic)</h3>
+          <div className="mt-3">
+            <PivotCalculator />
+          </div>
+        </div>
+      </TabsContent>
+
+      <TabsContent value="margin">
+        <div className="rounded-xl border border-border bg-muted/15 p-5">
+          <h3 className="text-base font-medium text-foreground">Ký quỹ (Margin)</h3>
+          <div className="mt-3">
+            <MarginCalculator />
+          </div>
+        </div>
+      </TabsContent>
+    </Tabs>
   );
 }

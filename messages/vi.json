@@ -1647,12 +1647,14 @@
     "riskPct": "Rủi ro mỗi lệnh",
     "entry": "Giá vào lệnh",
     "stopLoss": "Stop Loss",
+    "takeProfit": "Take Profit",
+    "tpOptional": "(tuỳ chọn)",
     "dollarRisk": "Rủi ro ($)",
-    "pipDistance": "Khoảng cách pip",
+    "pipDistance": "Pip cách SL",
     "lotSize": "Lot size",
-    "pipValue": "Giá trị pip",
-    "fillHint": "Nhập đầy đủ thông tin để tính toán.",
-    "approximation": "* Ước tính dựa trên $10/pip/lot chuẩn. Kết quả có thể sai lệch với các cặp tiền có USD ở vị trí base (USDCAD, USDJPY...)."
+    "pipValue": "Pip value",
+    "riskReward": "R:R",
+    "fillHint": "Nhập đầy đủ thông tin để tính toán."
   },
   "gamification": {
     "dailyActivity": "Hoạt động hôm nay",
