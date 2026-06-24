@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { Calculator } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { pipSize, contractSize } from "@/lib/calculators";
+import { useLocalStorage } from "@/hooks/use-local-storage";
 import { cn } from "@/lib/utils";
 
 const SYMBOL_PRESETS = ["EURUSD", "GBPUSD", "USDJPY", "XAUUSD", "BTCUSD"];
@@ -17,6 +18,8 @@ interface Props {
   defaultStopLoss?: number | null;
   defaultTakeProfit?: number | null;
   defaultSymbol?: string;
+  /** When provided, form state is persisted to localStorage under this key prefix */
+  storageKey?: string;
 }
 
 function pipValuePerLot(symbol: string, price: number): number {
@@ -63,15 +66,27 @@ export function RiskCalculator({
   defaultStopLoss,
   defaultTakeProfit,
   defaultSymbol = "",
+  storageKey,
 }: Props) {
   const t = useTranslations("riskCalc");
 
-  const [symbol, setSymbol] = useState(defaultSymbol);
-  const [balance, setBalance] = useState(defaultBalance ? String(defaultBalance) : "");
-  const [riskPct, setRiskPct] = useState("1");
-  const [entry, setEntry] = useState(defaultEntry ? String(defaultEntry) : "");
-  const [stopLoss, setStopLoss] = useState(defaultStopLoss ? String(defaultStopLoss) : "");
-  const [takeProfit, setTakeProfit] = useState(
+  const sk = storageKey ?? "";
+  const [symbol, setSymbol] = useLocalStorage(sk ? `${sk}:symbol` : "", defaultSymbol);
+  const [balance, setBalance] = useLocalStorage(
+    sk ? `${sk}:balance` : "",
+    defaultBalance ? String(defaultBalance) : "",
+  );
+  const [riskPct, setRiskPct] = useLocalStorage(sk ? `${sk}:riskPct` : "", "1");
+  const [entry, setEntry] = useLocalStorage(
+    sk ? `${sk}:entry` : "",
+    defaultEntry ? String(defaultEntry) : "",
+  );
+  const [stopLoss, setStopLoss] = useLocalStorage(
+    sk ? `${sk}:sl` : "",
+    defaultStopLoss ? String(defaultStopLoss) : "",
+  );
+  const [takeProfit, setTakeProfit] = useLocalStorage(
+    sk ? `${sk}:tp` : "",
     defaultTakeProfit ? String(defaultTakeProfit) : "",
   );
 

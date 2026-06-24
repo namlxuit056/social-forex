@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RiskCalculator } from "@/components/tools/risk-calculator";
 import { pivotClassic, contractSize, marginRequired } from "@/lib/calculators";
+import { useLocalStorage } from "@/hooks/use-local-storage";
 import { cn } from "@/lib/utils";
 
 // ---------------------------------------------------------------------------
@@ -70,9 +71,9 @@ function PivotRow({
 }
 
 function PivotCalculator() {
-  const [h, setH] = useState("1.09000");
-  const [l, setL] = useState("1.08000");
-  const [c, setC] = useState("1.08500");
+  const [h, setH] = useLocalStorage("tools:pivot:h", "1.09000");
+  const [l, setL] = useLocalStorage("tools:pivot:l", "1.08000");
+  const [c, setC] = useLocalStorage("tools:pivot:c", "1.08500");
 
   const pivots = useMemo(() => {
     const hv = parseFloat(h);
@@ -130,10 +131,10 @@ function PivotCalculator() {
 const MARGIN_PRESETS = ["EURUSD", "USDJPY", "XAUUSD", "BTCUSD"];
 
 function MarginCalculator() {
-  const [symbol, setSymbol] = useState("EURUSD");
-  const [lots, setLots] = useState("0.10");
-  const [price, setPrice] = useState("1.08500");
-  const [leverage, setLeverage] = useState("100");
+  const [symbol, setSymbol] = useLocalStorage("tools:margin:symbol", "EURUSD");
+  const [lots, setLots] = useLocalStorage("tools:margin:lots", "0.10");
+  const [price, setPrice] = useLocalStorage("tools:margin:price", "1.08500");
+  const [leverage, setLeverage] = useLocalStorage("tools:margin:leverage", "100");
 
   const result = useMemo(() => {
     const lotsV = parseFloat(lots);
@@ -256,8 +257,10 @@ function MarginCalculator() {
 // ---------------------------------------------------------------------------
 
 export function TradingCalculators() {
+  const [tab, setTab] = useLocalStorage("tools:tab", "position");
+
   return (
-    <Tabs defaultValue="position" className="space-y-4">
+    <Tabs value={tab} onValueChange={setTab} className="space-y-4">
       <TabsList className="h-9">
         <TabsTrigger value="position" className="text-sm">Position Size</TabsTrigger>
         <TabsTrigger value="pivot" className="text-sm">Pivot Points</TabsTrigger>
@@ -265,7 +268,7 @@ export function TradingCalculators() {
       </TabsList>
 
       <TabsContent value="position">
-        <RiskCalculator />
+        <RiskCalculator storageKey="tools:risk" />
       </TabsContent>
 
       <TabsContent value="pivot">
