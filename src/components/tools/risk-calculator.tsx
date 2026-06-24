@@ -6,6 +6,7 @@ import { Calculator } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { pipSize, contractSize } from "@/lib/calculators";
 
 interface Props {
   defaultBalance?: number | null;
@@ -14,12 +15,16 @@ interface Props {
   defaultSymbol?: string;
 }
 
-function getPipSize(symbol: string): number {
-  return symbol.toUpperCase().includes("JPY") ? 0.01 : 0.0001;
+function pipValuePerLot(symbol: string, price: number): number {
+  const s = symbol.toUpperCase();
+  const contract = contractSize(symbol);
+  const pip = pipSize(symbol);
+  // JPY-quoted pairs (e.g. USDJPY, EURJPY): divide by price to convert to USD
+  if (s.endsWith("JPY") && !s.startsWith("XAU") && !s.startsWith("BTC")) {
+    return (contract * pip) / price;
+  }
+  return contract * pip;
 }
-
-// Standard approximation: $10 per pip per standard lot (USD account, USD-quoted pair)
-const PIP_VALUE_PER_LOT = 10;
 
 function calcResults(
   balance: number,
@@ -31,16 +36,16 @@ function calcResults(
   if (balance <= 0 || riskPct <= 0 || entry <= 0 || stopLoss <= 0 || entry === stopLoss) {
     return null;
   }
-  const pipSize = getPipSize(symbol);
-  const pipDistance = Math.abs(entry - stopLoss) / pipSize;
+  const pip = pipSize(symbol);
+  const pipDistance = Math.abs(entry - stopLoss) / pip;
   const dollarRisk = (balance * riskPct) / 100;
-  const lotSize = dollarRisk / (pipDistance * PIP_VALUE_PER_LOT);
-  const pipValue = lotSize * PIP_VALUE_PER_LOT;
+  const pipVal = pipValuePerLot(symbol, entry);
+  const lotSize = dollarRisk / (pipDistance * pipVal);
   return {
     dollarRisk,
     pipDistance,
     lotSize: Math.max(0.01, Math.round(lotSize * 100) / 100),
-    pipValue,
+    pipValue: lotSize * pipVal,
   };
 }
 
