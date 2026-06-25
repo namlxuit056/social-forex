@@ -6,7 +6,7 @@
     },
     {
       "path": "/api/scalping/auto-run",
-      "schedule": "*/5 * * * *"
+      "schedule": "0 0 * * *"
     }
   ]
 }
