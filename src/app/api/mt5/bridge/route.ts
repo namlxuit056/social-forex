@@ -22,6 +22,8 @@ const accountSchema = z.object({
   leverage: z.coerce.number().int().positive().optional().nullable(),
 });
 
+const zPrice = z.coerce.number().optional().nullable().transform((v) => (v == null || v === 0) ? null : v);
+
 const positionSchema = z.object({
   ticket: z.union([z.string(), z.number()]).transform(String),
   identifier: z.union([z.string(), z.number()]).optional().transform((v) => v == null ? undefined : String(v)),
@@ -30,8 +32,8 @@ const positionSchema = z.object({
   volume: z.coerce.number(),
   priceOpen: z.coerce.number(),
   priceCurrent: z.coerce.number().optional().nullable(),
-  stopLoss: z.coerce.number().optional().nullable(),
-  takeProfit: z.coerce.number().optional().nullable(),
+  stopLoss: zPrice,
+  takeProfit: zPrice,
   profit: z.coerce.number().optional().nullable(),
   swap: z.coerce.number().optional().nullable(),
   openedAt: z.string().optional().nullable(),
@@ -43,8 +45,8 @@ const pendingOrderSchema = z.object({
   type: z.string().min(1).max(30),
   volume: z.coerce.number(),
   priceOpen: z.coerce.number(),
-  stopLoss: z.coerce.number().optional().nullable(),
-  takeProfit: z.coerce.number().optional().nullable(),
+  stopLoss: zPrice,
+  takeProfit: zPrice,
   openedAt: z.string().optional().nullable(),
 });
 
