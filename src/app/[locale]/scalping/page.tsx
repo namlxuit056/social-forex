@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { isVipActive } from "@/lib/vip";
 import { ScalpingPanel } from "@/components/scalping/scalping-panel";
+import { AutoScalpSettings } from "@/components/scalping/auto-scalp-settings";
 
 export async function generateMetadata({
   params,
@@ -27,13 +28,24 @@ export default async function ScalpingPage({
   const session = await auth();
   const isLoggedIn = !!session?.user?.id;
   let isVip = false;
+  let autoConfig = null;
 
   if (isLoggedIn) {
-    const dbUser = await prisma.user.findUnique({
-      where: { id: session!.user!.id },
-      select: { vipUntil: true },
-    });
+    const [dbUser, cfg] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id: session!.user!.id },
+        select: { vipUntil: true },
+      }),
+      prisma.autoScalpConfig.findUnique({
+        where: { userId: session!.user!.id },
+        select: {
+          enabled: true, symbol: true, lotSize: true,
+          minScore: true, minConfidence: true, maxPerDay: true, lastTradeAt: true,
+        },
+      }),
+    ]);
     isVip = isVipActive(dbUser?.vipUntil);
+    autoConfig = cfg;
   }
 
   return (
@@ -44,6 +56,13 @@ export default async function ScalpingPage({
       </div>
 
       <ScalpingPanel isLoggedIn={isLoggedIn} isVip={isVip} />
+
+      {isVip && (
+        <div className="space-y-2">
+          <h2 className="text-sm font-semibold text-foreground">{t("autoSection")}</h2>
+          <AutoScalpSettings initial={autoConfig} />
+        </div>
+      )}
     </div>
   );
 }

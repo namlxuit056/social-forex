@@ -3,6 +3,10 @@
     {
       "path": "/api/ai/articles/run",
       "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/scalping/auto-run",
+      "schedule": "*/5 * * * *"
     }
   ]
 }

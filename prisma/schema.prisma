@@ -118,6 +118,7 @@ model User {
   webinarRegistrations WebinarRegistration[]
   aiTradeProposals     AiTradeProposal[]
   academyProgress      AcademyProgress[]
+  autoScalpConfig      AutoScalpConfig?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -884,4 +885,22 @@ model AcademyProgress {
 
   @@unique([userId, lessonSlug])
   @@index([userId])
+}
+
+model AutoScalpConfig {
+  id            String    @id @default(cuid())
+  userId        String    @unique
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  enabled       Boolean   @default(false)
+  symbol        String    @default("XAUUSD")
+  lotSize       Float     @default(0.01)
+  minScore      Int       @default(72)
+  minConfidence Int       @default(3)
+  maxPerDay     Int       @default(5)
+  /// Thời điểm giao dịch auto-scalp cuối cùng (dùng để check cooldown 30 phút)
+  lastTradeAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([enabled])
 }

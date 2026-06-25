@@ -1909,7 +1909,22 @@
     "err_vip_required": "VIP required.",
     "err_rate_limited": "Too many requests, try again later.",
     "err_error": "An error occurred, please try again.",
-    "disclaimer": "AI analysis based on TradingView M1/M5/M15/H1 data. For reference only — not investment advice."
+    "disclaimer": "AI analysis based on TradingView M1/M5/M15/H1 data. For reference only — not investment advice.",
+    "autoSection": "Automated trading (Auto-Scalp)",
+    "autoTitle": "AI Auto-Scalp",
+    "autoDesc": "Automatically analyzes and places trades when a signal meets your threshold — runs every 5 minutes.",
+    "autoSymbol": "Symbol",
+    "autoLot": "Lot size",
+    "autoMinScore": "Min quality score",
+    "autoMinConf": "Min confidence",
+    "autoMaxDay": "Max trades / day",
+    "autoSave": "Save settings",
+    "autoSaved": "Saved",
+    "autoCooldown": "{min} min cooldown remaining",
+    "autoReady": "Ready to trade",
+    "autoLastTrade": "Last trade",
+    "autoWarning": "Auto-Scalp will place trades automatically when AI meets the threshold. Test with small lot sizes on a demo account before going live.",
+    "err_invalid_data": "Invalid data, please check your settings."
   },
   "webinar": {
     "title": "Webinars & Live Rooms",
