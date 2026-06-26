@@ -39,9 +39,9 @@ export function AutoScalpSettings({ initial }: Props) {
         enabled,
         symbol,
         lotSize: parseFloat(lotSize) || 0.01,
-        minScore: parseInt(minScore) || 72,
-        minConfidence: parseInt(minConfidence) || 3,
-        maxPerDay: parseInt(maxPerDay) || 5,
+        minScore: parseInt(minScore, 10) || 72,
+        minConfidence: parseInt(minConfidence, 10) || 3,
+        maxPerDay: parseInt(maxPerDay, 10) || 5,
       });
       if (result.ok) {
         setSaved(true);
@@ -205,7 +205,11 @@ export function AutoScalpSettings({ initial }: Props) {
           <span className="text-xs text-emerald-600 dark:text-emerald-400">{t("autoSaved")}</span>
         )}
         {errorMsg && (
-          <span className="text-xs text-red-500">{t(`err_${errorMsg as "unauthorized" | "vip_required" | "invalid_data" | "error"}`)}</span>
+          <span className="text-xs text-red-500">
+            {errorMsg.startsWith("invalid_data:")
+              ? errorMsg
+              : t(`err_${errorMsg as "unauthorized" | "vip_required" | "invalid_data" | "error"}`)}
+          </span>
         )}
       </div>
 

@@ -8,11 +8,11 @@ import { z } from "zod";
 
 const configSchema = z.object({
   enabled: z.boolean(),
-  symbol: z.string().min(3).max(10).toUpperCase(),
-  lotSize: z.number().min(0.01).max(100),
-  minScore: z.number().int().min(50).max(95),
-  minConfidence: z.number().int().min(1).max(5),
-  maxPerDay: z.number().int().min(1).max(20),
+  symbol: z.string().min(3).max(10),
+  lotSize: z.coerce.number().min(0.01).max(100),
+  minScore: z.coerce.number().int().min(50).max(95),
+  minConfidence: z.coerce.number().int().min(1).max(5),
+  maxPerDay: z.coerce.number().int().min(1).max(20),
 });
 
 export type AutoScalpConfigData = z.infer<typeof configSchema>;
@@ -52,7 +52,11 @@ export async function saveAutoScalpConfig(
   if (!isVipActive(dbUser?.vipUntil)) return { ok: false, error: "vip_required" };
 
   const parsed = configSchema.safeParse(data);
-  if (!parsed.success) return { ok: false, error: "invalid_data" };
+  if (!parsed.success) {
+    const detail = parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join(", ");
+    console.error("[auto-scalp] validation failed:", detail, "| raw data:", JSON.stringify(data));
+    return { ok: false, error: `invalid_data: ${detail}` };
+  }
 
   await prisma.autoScalpConfig.upsert({
     where: { userId },
