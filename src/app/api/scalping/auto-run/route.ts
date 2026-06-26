@@ -39,6 +39,7 @@ type RunResult = {
 };
 
 async function runAutoScalp(userId: string, config: {
+  symbolId: string;
   symbol: string;
   lotSize: number;
   minScore: number;
@@ -163,9 +164,9 @@ async function runAutoScalp(userId: string, config: {
     });
   }
 
-  // Update lastTradeAt
-  await prisma.autoScalpConfig.update({
-    where: { userId },
+  // Update lastTradeAt per symbol
+  await prisma.autoScalpSymbol.update({
+    where: { id: config.symbolId },
     data: { lastTradeAt: new Date() },
   });
 
@@ -222,23 +223,40 @@ export async function GET(req: NextRequest) {
     where: { enabled: true },
     include: {
       user: { select: { vipUntil: true } },
+      symbols: { where: { enabled: true } },
     },
   });
 
-  if (configs.length === 0) {
+  // Flatten to (config, symbol) pairs
+  const tasks = configs.flatMap((cfg) =>
+    cfg.symbols.map((sym) => ({
+      userId: cfg.userId,
+      symbolId: sym.id,
+      symbol: sym.symbol,
+      lotSize: sym.lotSize,
+      minScore: cfg.minScore,
+      minConfidence: cfg.minConfidence,
+      maxPerDay: cfg.maxPerDay,
+      lastTradeAt: sym.lastTradeAt,
+      vipUntil: cfg.user.vipUntil,
+    })),
+  );
+
+  if (tasks.length === 0) {
     return Response.json({ ok: true, ran: 0, results: [] });
   }
 
   const results = await Promise.allSettled(
-    configs.map((cfg) =>
-      runAutoScalp(cfg.userId, {
-        symbol: cfg.symbol,
-        lotSize: cfg.lotSize,
-        minScore: cfg.minScore,
-        minConfidence: cfg.minConfidence,
-        maxPerDay: cfg.maxPerDay,
-        lastTradeAt: cfg.lastTradeAt,
-        vipUntil: cfg.user.vipUntil,
+    tasks.map((task) =>
+      runAutoScalp(task.userId, {
+        symbolId: task.symbolId,
+        symbol: task.symbol,
+        lotSize: task.lotSize,
+        minScore: task.minScore,
+        minConfidence: task.minConfidence,
+        maxPerDay: task.maxPerDay,
+        lastTradeAt: task.lastTradeAt,
+        vipUntil: task.vipUntil,
       }),
     ),
   );
@@ -249,7 +267,7 @@ export async function GET(req: NextRequest) {
 
   const traded = output.filter((r) => r.status === "traded").length;
 
-  return Response.json({ ok: true, ran: configs.length, traded, results: output });
+  return Response.json({ ok: true, ran: tasks.length, traded, results: output });
 }
 
 export async function POST(req: NextRequest) {

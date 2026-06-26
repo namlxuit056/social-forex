@@ -38,14 +38,25 @@ export default async function ScalpingPage({
       }),
       prisma.autoScalpConfig.findUnique({
         where: { userId: session!.user!.id },
-        select: {
-          enabled: true, symbol: true, lotSize: true,
-          minScore: true, minConfidence: true, maxPerDay: true, lastTradeAt: true,
-        },
+        include: { symbols: { orderBy: { createdAt: "asc" } } },
       }),
     ]);
     isVip = isVipActive(dbUser?.vipUntil);
-    autoConfig = cfg;
+    autoConfig = cfg
+      ? {
+          enabled: cfg.enabled,
+          minScore: cfg.minScore,
+          minConfidence: cfg.minConfidence,
+          maxPerDay: cfg.maxPerDay,
+          symbols: cfg.symbols.map((s) => ({
+            id: s.id,
+            symbol: s.symbol,
+            enabled: s.enabled,
+            lotSize: s.lotSize,
+            lastTradeAt: s.lastTradeAt,
+          })),
+        }
+      : null;
   }
 
   return (
@@ -60,7 +71,7 @@ export default async function ScalpingPage({
       {isVip && (
         <div className="space-y-2">
           <h2 className="text-sm font-semibold text-foreground">{t("autoSection")}</h2>
-          <AutoScalpSettings initial={autoConfig} />
+          <AutoScalpSettings initial={autoConfig} isVip={isVip} />
         </div>
       )}
     </div>

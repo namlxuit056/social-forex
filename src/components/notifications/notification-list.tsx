@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 export type NotificationRow = {
   id: string;
-  kind: "SIGNAL_NEW" | "USER_FOLLOWED" | "STREAK_REMINDER";
+  kind: "SIGNAL_NEW" | "USER_FOLLOWED" | "STREAK_REMINDER" | "PRICE_ALERT" | "JOURNAL_REVIEW";
   createdAt: string;
   readAt: string | null;
   signal: { id: string; symbol: string; direction: string } | null;
@@ -42,9 +42,13 @@ export function NotificationList({
             ? `/u/${n.actor.id}`
             : n.kind === "STREAK_REMINDER"
               ? "/journal"
-              : n.signal
-                ? `/signals/${n.signal.id}`
-                : "/notifications";
+              : n.kind === "PRICE_ALERT"
+                ? "/alerts"
+                : n.kind === "JOURNAL_REVIEW"
+                  ? "/journal?tab=weekly"
+                  : n.signal
+                    ? `/signals/${n.signal.id}`
+                    : "/notifications";
         const title =
           n.kind === "USER_FOLLOWED" && n.actor
             ? t("followYou", {
@@ -55,12 +59,16 @@ export function NotificationList({
               })
             : n.kind === "STREAK_REMINDER"
               ? "Đừng quên ghi nhật ký / lập kế hoạch hôm nay!"
-              : n.signal
-                ? t("signalNew", {
-                    symbol: n.signal.symbol,
-                    direction: n.signal.direction,
-                  })
-                : t("empty");
+              : n.kind === "PRICE_ALERT"
+                ? "Cảnh báo giá đã kích hoạt"
+                : n.kind === "JOURNAL_REVIEW"
+                  ? "Báo cáo giao dịch tuần đã sẵn sàng"
+                  : n.signal
+                    ? t("signalNew", {
+                        symbol: n.signal.symbol,
+                        direction: n.signal.direction,
+                      })
+                    : t("empty");
 
         return (
           <li key={n.id}>

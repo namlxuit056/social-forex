@@ -1,0 +1,20 @@
+name: Price Alert Check
+
+on:
+  schedule:
+    # Mỗi phút — GitHub Actions thay Vercel cron (Hobby plan giới hạn daily)
+    - cron: "* * * * *"
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    environment: Production
+    timeout-minutes: 1
+    steps:
+      - name: Check price alerts
+        run: |
+          curl -sf -X GET \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.SITE_URL }}/api/price-alerts/check" \
+            || echo "Request failed (no active alerts or endpoint error)"

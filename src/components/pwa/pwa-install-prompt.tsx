@@ -21,8 +21,9 @@ export function PwaInstallPrompt() {
     if (dismissedAt) {
       const daysSinceDismiss = (Date.now() - Number(dismissedAt)) / (1000 * 60 * 60 * 24);
       if (daysSinceDismiss < 7) {
-        setDismissed(true);
-        return;
+        // Use setTimeout to avoid calling setState synchronously in an effect
+        const id = setTimeout(() => setDismissed(true), 0);
+        return () => clearTimeout(id);
       }
     }
 

@@ -119,6 +119,8 @@ model User {
   aiTradeProposals     AiTradeProposal[]
   academyProgress      AcademyProgress[]
   autoScalpConfig      AutoScalpConfig?
+  priceAlerts          PriceAlert[]
+  weeklyReviews        AiWeeklyJournalReview[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -257,6 +259,8 @@ enum NotificationKind {
   SIGNAL_NEW
   USER_FOLLOWED
   STREAK_REMINDER
+  PRICE_ALERT
+  JOURNAL_REVIEW
 }
 
 model Notification {
@@ -892,15 +896,66 @@ model AutoScalpConfig {
   userId        String    @unique
   user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   enabled       Boolean   @default(false)
-  symbol        String    @default("XAUUSD")
-  lotSize       Float     @default(0.01)
   minScore      Int       @default(72)
   minConfidence Int       @default(3)
   maxPerDay     Int       @default(5)
-  /// Thời điểm giao dịch auto-scalp cuối cùng (dùng để check cooldown 30 phút)
-  lastTradeAt   DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  symbols AutoScalpSymbol[]
+
   @@index([enabled])
+}
+
+model AutoScalpSymbol {
+  id          String    @id @default(cuid())
+  configId    String
+  symbol      String
+  enabled     Boolean   @default(true)
+  lotSize     Float     @default(0.01)
+  /// Thời điểm giao dịch auto-scalp cuối cùng của symbol này (cooldown 30 phút)
+  lastTradeAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  config AutoScalpConfig @relation(fields: [configId], references: [id], onDelete: Cascade)
+
+  @@unique([configId, symbol])
+  @@index([configId, enabled])
+}
+
+model PriceAlert {
+  id          String    @id @default(cuid())
+  userId      String
+  symbol      String
+  targetPrice Float
+  /// "ABOVE" | "BELOW"
+  direction   String
+  isActive    Boolean   @default(true)
+  triggeredAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([isActive, symbol])
+  @@index([userId])
+}
+
+model AiWeeklyJournalReview {
+  id         String   @id @default(cuid())
+  userId     String
+  /// Thứ Hai 00:00 UTC của tuần
+  weekStart  DateTime
+  /// Chủ Nhật 23:59:59 UTC của tuần
+  weekEnd    DateTime
+  tradeCount Int
+  /// AiJournalAnalysis JSON
+  analysis   Json
+  locale     String   @default("vi")
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, weekStart])
+  @@index([userId, weekStart])
 }

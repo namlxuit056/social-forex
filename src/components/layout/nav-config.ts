@@ -14,6 +14,7 @@ export const marketNavKeys = [
   { href: "/tools", key: "tools" },
   { href: "/screener", key: "screener" },
   { href: "/scalping", key: "scalping" },
+  { href: "/alerts", key: "alerts" },
   { href: "/heatmap", key: "heatmap" },
   { href: "/sentiment", key: "sentiment" },
 ] as const;

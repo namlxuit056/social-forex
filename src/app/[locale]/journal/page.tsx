@@ -1,4 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { SignupPrompt } from "@/components/analytics/signup-prompt";
@@ -10,7 +11,9 @@ import { JournalLivePanel, type LivePosition } from "./journal-live-panel";
 import { JournalMt5Prompt } from "./journal-mt5-prompt";
 import { JournalPerformanceChart } from "./journal-performance-chart";
 import { JournalAiPanel } from "./journal-ai-panel";
+import { JournalWeeklyReview } from "./journal-weekly-review";
 import { RiskCalculator } from "@/components/tools/risk-calculator";
+import type { AiJournalAnalysis } from "@/lib/ai/types";
 
 export async function generateMetadata({
   params,
@@ -37,6 +40,7 @@ export default async function JournalPage({
     stopLoss?: string;
     takeProfit?: string;
     from?: string;
+    tab?: string;
   }>;
 }) {
   const { locale } = await params;
@@ -70,7 +74,9 @@ export default async function JournalPage({
     );
   }
 
-  const [trades, mt5Connection] = await Promise.all([
+  const activeTab = query?.tab === "weekly" ? "weekly" : "trades";
+
+  const [trades, mt5Connection, weeklyReviewsRaw] = await Promise.all([
     prisma.tradeJournal.findMany({
       where: { userId: session.user.id },
       orderBy: { openedAt: "desc" },
@@ -80,7 +86,22 @@ export default async function JournalPage({
       where: { userId: session.user.id, revokedAt: null },
       orderBy: { lastSeenAt: "desc" },
     }),
+    activeTab === "weekly"
+      ? prisma.aiWeeklyJournalReview.findMany({
+          where: { userId: session.user.id },
+          orderBy: { weekStart: "desc" },
+          take: 10,
+        })
+      : Promise.resolve([]),
   ]);
+
+  const weeklyReviews = weeklyReviewsRaw.map((r) => ({
+    id: r.id,
+    weekStart: r.weekStart.toISOString(),
+    weekEnd: r.weekEnd.toISOString(),
+    tradeCount: r.tradeCount,
+    analysis: r.analysis as AiJournalAnalysis,
+  }));
 
   const closed = trades.filter((t) => t.result !== "PENDING");
   const wins = closed.filter((t) => t.result === "WIN").length;
@@ -171,26 +192,56 @@ export default async function JournalPage({
         avgPnl={avgPnl}
       />
 
-      <RiskCalculator defaultBalance={mt5Account?.balance ?? null} />
+      {/* Tab navigation */}
+      <nav className="flex gap-1 border-b">
+        <Link
+          href="/journal"
+          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+            activeTab === "trades"
+              ? "border-primary text-foreground"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          {t("tabTrades")}
+        </Link>
+        <Link
+          href="/journal?tab=weekly"
+          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+            activeTab === "weekly"
+              ? "border-primary text-foreground"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          {t("tabWeekly")}
+        </Link>
+      </nav>
 
-      <JournalAiPanel tradeCount={trades.length} />
-
-      <JournalPerformanceChart
-        trades={serialized}
-        locale={locale}
-        accountBalance={mt5Connection?.balance ?? mt5Connection?.equity ?? null}
-      />
-
-      <JournalLivePanel
-        account={mt5Account}
-        positions={livePositions}
-        locale={locale}
-      />
-
-      {trades.length === 0 ? (
-        <JournalMt5Prompt />
+      {activeTab === "weekly" ? (
+        <JournalWeeklyReview reviews={weeklyReviews} />
       ) : (
-        <JournalTable trades={serialized} locale={locale} />
+        <>
+          <RiskCalculator defaultBalance={mt5Account?.balance ?? null} />
+
+          <JournalAiPanel tradeCount={trades.length} />
+
+          <JournalPerformanceChart
+            trades={serialized}
+            locale={locale}
+            accountBalance={mt5Connection?.balance ?? mt5Connection?.equity ?? null}
+          />
+
+          <JournalLivePanel
+            account={mt5Account}
+            positions={livePositions}
+            locale={locale}
+          />
+
+          {trades.length === 0 ? (
+            <JournalMt5Prompt />
+          ) : (
+            <JournalTable trades={serialized} locale={locale} />
+          )}
+        </>
       )}
     </div>
   );
