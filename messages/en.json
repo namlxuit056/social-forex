@@ -1921,7 +1921,19 @@
     "aiPicksErr_unauthorized": "Please sign in again.",
     "aiPicksErr_vip_required": "VIP required.",
     "aiPicksErr_rate_limited": "Too many requests, try again later.",
-    "aiPicksErr_error": "An error occurred, please try again."
+    "aiPicksErr_error": "An error occurred, please try again.",
+    "customFilter": "Custom Filters",
+    "rsiRange": "RSI",
+    "adxThreshold": "ADX",
+    "emaBias": "EMA Bias",
+    "recommendation": "Recommendation",
+    "changeRange": "Change %",
+    "group": "Group",
+    "applyFilters": "Apply",
+    "clearFilters": "Clear",
+    "savePreset": "Save preset",
+    "presetNamePlaceholder": "Preset name...",
+    "filterMatchCount": "{matched} of {total} pairs"
   },
   "scalping": {
     "title": "AI Scalping",

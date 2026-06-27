@@ -1921,7 +1921,19 @@
     "aiPicksErr_unauthorized": "Vui lòng đăng nhập lại.",
     "aiPicksErr_vip_required": "Chỉ dành cho VIP.",
     "aiPicksErr_rate_limited": "Quá nhiều yêu cầu, thử lại sau.",
-    "aiPicksErr_error": "Có lỗi xảy ra, vui lòng thử lại."
+    "aiPicksErr_error": "Có lỗi xảy ra, vui lòng thử lại.",
+    "customFilter": "Bộ lọc tùy chỉnh",
+    "rsiRange": "RSI",
+    "adxThreshold": "ADX",
+    "emaBias": "EMA Bias",
+    "recommendation": "Khuyến nghị",
+    "changeRange": "Thay đổi %",
+    "group": "Nhóm",
+    "applyFilters": "Áp dụng",
+    "clearFilters": "Xóa bộ lọc",
+    "savePreset": "Lưu mẫu",
+    "presetNamePlaceholder": "Tên mẫu...",
+    "filterMatchCount": "{matched} trên {total} cặp"
   },
   "scalping": {
     "title": "AI Scalping",

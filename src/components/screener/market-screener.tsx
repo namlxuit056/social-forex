@@ -6,6 +6,8 @@ import { Filter, ChevronUp, ChevronDown, ChevronsUpDown, Star } from "lucide-rea
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { AiPicksPanel } from "@/components/screener/ai-picks-panel";
+import { ScreenerFilterBuilder } from "@/components/screener/screener-filter-builder";
+import type { CustomFilters } from "@/components/screener/screener-filter-builder";
 
 type ScreenerFilter = "all" | "bullish" | "bearish" | "oversold" | "overbought" | "favorites";
 
@@ -104,6 +106,7 @@ function cmpStr(a: string, b: string, dir: number): number {
 export function MarketScreener({ pairs, isLoggedIn, isVip, initialFavorites = [] }: Props) {
   const t = useTranslations("screener");
   const [filter, setFilter] = useState<ScreenerFilter>("all");
+  const [customFilters, setCustomFilters] = useState<CustomFilters>({});
   const [favorites, setFavorites] = useState<Set<string>>(new Set(initialFavorites));
 
   // For guests: load favorites from localStorage on mount
@@ -215,7 +218,7 @@ export function MarketScreener({ pairs, isLoggedIn, isVip, initialFavorites = []
   const filtered = useMemo(() => {
     let list = [...pairs];
 
-    // Apply filter
+    // Apply preset filter
     switch (filter) {
       case "favorites":
         list = list.filter((p) => favorites.has(p.symbol));
@@ -232,6 +235,55 @@ export function MarketScreener({ pairs, isLoggedIn, isVip, initialFavorites = []
       case "overbought":
         list = list.filter((p) => p.rsi !== null && p.rsi > 65);
         break;
+    }
+
+    // Apply custom filters
+    const cf = customFilters;
+    if (cf.rsi) {
+      list = list.filter((p) => {
+        if (p.rsi === null) return false;
+        if (cf.rsi!.operator === "gt") return p.rsi > cf.rsi!.value;
+        if (cf.rsi!.operator === "lt") return p.rsi < cf.rsi!.value;
+        return p.rsi >= cf.rsi!.value && p.rsi <= (cf.rsi!.max ?? cf.rsi!.value + 20);
+      });
+    }
+    if (cf.adx) {
+      list = list.filter((p) => {
+        if (p.adx === null) return false;
+        if (cf.adx!.operator === "gt") return p.adx > cf.adx!.value;
+        if (cf.adx!.operator === "lt") return p.adx < cf.adx!.value;
+        return p.adx >= cf.adx!.value && p.adx <= (cf.adx!.max ?? cf.adx!.value + 20);
+      });
+    }
+    if (cf.changePercent) {
+      list = list.filter((p) => {
+        if (cf.changePercent!.operator === "gt") return p.changePercent > cf.changePercent!.value;
+        if (cf.changePercent!.operator === "lt") return p.changePercent < cf.changePercent!.value;
+        return (
+          p.changePercent >= cf.changePercent!.value &&
+          p.changePercent <= (cf.changePercent!.max ?? cf.changePercent!.value + 5)
+        );
+      });
+    }
+    if (cf.emaBias && cf.emaBias.selected.length > 0) {
+      list = list.filter((p) => cf.emaBias!.selected.includes(p.emaBias));
+    }
+    if (cf.group && cf.group.selected.length > 0) {
+      list = list.filter((p) => cf.group!.selected.includes(p.group));
+    }
+    const recFields = ["recM15", "recH1", "recH4", "recD1"] as const;
+    for (const tf of recFields) {
+      const cond = cf[tf];
+      if (cond && cond.selected.length > 0) {
+        list = list.filter((p) => {
+          const val = p[tf];
+          if (val === null) return false;
+          return cond.selected.some((threshold) => {
+            const t = Number(threshold);
+            return t >= 0 ? val >= t : val <= t;
+          });
+        });
+      }
     }
 
     // Apply sort
@@ -264,7 +316,7 @@ export function MarketScreener({ pairs, isLoggedIn, isVip, initialFavorites = []
     }
 
     return list;
-  }, [pairs, filter, sortBy, sortDir, favorites]);
+  }, [pairs, filter, sortBy, sortDir, favorites, customFilters]);
 
   const filters: { key: ScreenerFilter; label: string; count?: number }[] = [
     { key: "all", label: t("filterAll") },
@@ -291,6 +343,13 @@ export function MarketScreener({ pairs, isLoggedIn, isVip, initialFavorites = []
   return (
     <div className="space-y-4">
       <AiPicksPanel isLoggedIn={isLoggedIn} isVip={isVip} />
+
+      <ScreenerFilterBuilder
+        totalPairs={pairs.length}
+        matchedPairs={filtered.length}
+        onApply={setCustomFilters}
+        activeFilters={customFilters}
+      />
 
       <div className="flex flex-wrap gap-1.5">
         {filters.map((f) => (

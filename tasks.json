@@ -9,7 +9,7 @@
       "title": "Column Sorting cho Screener Table",
       "priority": "high",
       "effort": "small",
-      "status": "pending",
+      "status": "completed",
       "description": "Cho phép sort bảng screener theo bất kỳ column nào (symbol, price, change%, RSI, ADX, EMA bias, rec M15/H1/H4/D1). Click header để toggle asc/desc. Hiển thị mũi tên sort indicator.",
       "details": [
         "Thêm state sortBy + sortDir vào market-screener.tsx",
@@ -34,7 +34,7 @@
       "title": "Watchlist / Favorite Pairs",
       "priority": "high",
       "effort": "medium",
-      "status": "in_progress",
+      "status": "completed",
       "description": "Cho phép user đánh dấu pairs yêu thích (star icon). Filter tab 'Favorites' để xem nhanh danh sách đã lưu. Persist watchlist vào localStorage (guest) + Prisma (logged-in user).",
       "details": [
         "Tạo Prisma model ScreenerWatchlist { id, userId, symbol, createdAt }",
@@ -66,7 +66,7 @@
       "title": "Custom Filter Builder",
       "priority": "high",
       "effort": "large",
-      "status": "pending",
+      "status": "in_progress",
       "description": "Cho phép user tạo bộ lọc tùy chỉnh với điều kiện kỹ thuật: RSI range, ADX threshold, EMA bias, multi-TF recommendation. Lưu filter presets để tái sử dụng.",
       "details": [
         "Tạo component ScreenerFilterBuilder với UI điều kiện:",
@@ -218,7 +218,15 @@
       ]
     }
   ],
-  "sprintOrder": ["T001", "T002", "T005", "T003", "T004", "T006", "T007"],
+  "sprintOrder": [
+    "T001",
+    "T002",
+    "T005",
+    "T003",
+    "T004",
+    "T006",
+    "T007"
+  ],
   "notes": [
     "T001 (Sorting) là quick win, nên làm đầu tiên",
     "T002 (Watchlist) là feature user-facing giá trị cao",
