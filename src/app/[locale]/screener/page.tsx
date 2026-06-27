@@ -50,13 +50,22 @@ export default async function ScreenerPage({
 
   const isLoggedIn = !!session?.user?.id;
   let isVip = false;
+  let initialFavorites: string[] = [];
 
   if (isLoggedIn) {
-    const dbUser = await prisma.user.findUnique({
-      where: { id: session!.user!.id },
-      select: { vipUntil: true },
-    });
+    const [dbUser, favs] = await Promise.all([
+      prisma.user.findUnique({
+        where: { id: session!.user!.id },
+        select: { vipUntil: true },
+      }),
+      prisma.userFavoriteSymbol.findMany({
+        where: { userId: session!.user!.id },
+        select: { symbol: true },
+        orderBy: { sortOrder: "asc" },
+      }),
+    ]);
     isVip = isVipActive(dbUser?.vipUntil);
+    initialFavorites = favs.map((f) => f.symbol);
   }
 
   return (
@@ -68,7 +77,12 @@ export default async function ScreenerPage({
         <p className="mt-2 text-muted-foreground">{t("description")}</p>
       </div>
 
-      <MarketScreener pairs={pairs} isLoggedIn={isLoggedIn} isVip={isVip} />
+      <MarketScreener
+        pairs={pairs}
+        isLoggedIn={isLoggedIn}
+        isVip={isVip}
+        initialFavorites={initialFavorites}
+      />
     </div>
   );
 }

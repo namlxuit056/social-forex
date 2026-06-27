@@ -34,7 +34,7 @@
       "title": "Watchlist / Favorite Pairs",
       "priority": "high",
       "effort": "medium",
-      "status": "pending",
+      "status": "in_progress",
       "description": "Cho phép user đánh dấu pairs yêu thích (star icon). Filter tab 'Favorites' để xem nhanh danh sách đã lưu. Persist watchlist vào localStorage (guest) + Prisma (logged-in user).",
       "details": [
         "Tạo Prisma model ScreenerWatchlist { id, userId, symbol, createdAt }",

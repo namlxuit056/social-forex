@@ -2,12 +2,12 @@
 
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { Filter, ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
+import { Filter, ChevronUp, ChevronDown, ChevronsUpDown, Star } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { AiPicksPanel } from "@/components/screener/ai-picks-panel";
 
-type ScreenerFilter = "all" | "bullish" | "bearish" | "oversold" | "overbought";
+type ScreenerFilter = "all" | "bullish" | "bearish" | "oversold" | "overbought" | "favorites";
 
 type SortColumn =
   | "symbol"
@@ -41,7 +41,10 @@ type Props = {
   pairs: ScreenerPair[];
   isLoggedIn: boolean;
   isVip: boolean;
+  initialFavorites?: string[];
 };
+
+const LS_FAVORITES_KEY = "screener_favorites";
 
 type RecLabel = "STRONG BUY" | "BUY" | "NEUTRAL" | "SELL" | "STRONG SELL";
 
@@ -98,9 +101,25 @@ function cmpStr(a: string, b: string, dir: number): number {
   return a.localeCompare(b) * dir;
 }
 
-export function MarketScreener({ pairs, isLoggedIn, isVip }: Props) {
+export function MarketScreener({ pairs, isLoggedIn, isVip, initialFavorites = [] }: Props) {
   const t = useTranslations("screener");
   const [filter, setFilter] = useState<ScreenerFilter>("all");
+  const [favorites, setFavorites] = useState<Set<string>>(new Set(initialFavorites));
+
+  // For guests: load favorites from localStorage on mount
+  useEffect(() => {
+    if (!isLoggedIn) {
+      try {
+        const stored = localStorage.getItem(LS_FAVORITES_KEY);
+        if (stored) {
+          const parsed: string[] = JSON.parse(stored);
+          setFavorites(new Set(parsed));
+        }
+      } catch {
+        // ignore
+      }
+    }
+  }, [isLoggedIn]);
 
   // ── Sorting state, initialised from URL search params ──
   const [sortBy, setSortBy] = useState<SortColumn | null>(null);
@@ -150,11 +169,57 @@ export function MarketScreener({ pairs, isLoggedIn, isVip }: Props) {
     [sortBy, sortDir],
   );
 
+  const toggleFavorite = useCallback(
+    async (symbol: string) => {
+      setFavorites((prev) => {
+        const next = new Set(prev);
+        const isFav = next.has(symbol);
+
+        if (isFav) {
+          next.delete(symbol);
+        } else {
+          next.add(symbol);
+        }
+
+        if (isLoggedIn) {
+          // Sync to server
+          const method = isFav ? "DELETE" : "POST";
+          fetch("/api/favorites", {
+            method,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ symbol }),
+          }).catch(() => {
+            // Revert on error — reload from server
+            setFavorites((curr) => {
+              const revert = new Set(curr);
+              if (isFav) revert.add(symbol);
+              else revert.delete(symbol);
+              return revert;
+            });
+          });
+        } else {
+          // Persist to localStorage for guests
+          try {
+            localStorage.setItem(LS_FAVORITES_KEY, JSON.stringify([...next]));
+          } catch {
+            // ignore
+          }
+        }
+
+        return next;
+      });
+    },
+    [isLoggedIn],
+  );
+
   const filtered = useMemo(() => {
     let list = [...pairs];
 
     // Apply filter
     switch (filter) {
+      case "favorites":
+        list = list.filter((p) => favorites.has(p.symbol));
+        break;
       case "bullish":
         list = list.filter((p) => p.recD1 !== null && p.recD1 >= 0.1);
         break;
@@ -199,10 +264,11 @@ export function MarketScreener({ pairs, isLoggedIn, isVip }: Props) {
     }
 
     return list;
-  }, [pairs, filter, sortBy, sortDir]);
+  }, [pairs, filter, sortBy, sortDir, favorites]);
 
-  const filters: { key: ScreenerFilter; label: string }[] = [
+  const filters: { key: ScreenerFilter; label: string; count?: number }[] = [
     { key: "all", label: t("filterAll") },
+    { key: "favorites", label: t("filterFavorites"), count: favorites.size },
     { key: "bullish", label: t("filterBullish") },
     { key: "bearish", label: t("filterBearish") },
     { key: "oversold", label: t("filterOversold") },
@@ -239,6 +305,11 @@ export function MarketScreener({ pairs, isLoggedIn, isVip }: Props) {
             )}
           >
             {f.label}
+            {f.count !== undefined && f.count > 0 && (
+              <span className="ml-1 inline-flex items-center justify-center rounded-full bg-primary/20 px-1.5 py-0.5 text-[10px] font-semibold leading-none text-primary">
+                {f.count}
+              </span>
+            )}
           </button>
         ))}
       </div>
@@ -247,6 +318,9 @@ export function MarketScreener({ pairs, isLoggedIn, isVip }: Props) {
         <table className="w-full min-w-205 text-left text-sm">
           <thead className="bg-muted/50 text-muted-foreground">
             <tr>
+              <th className="w-10 px-2 py-2.5 text-center">
+                <Star className="inline size-3.5 text-amber-500" fill="currentColor" />
+              </th>
               <th
                 className="group cursor-pointer select-none px-3 py-2.5"
                 onClick={() => handleSort("symbol")}
@@ -310,8 +384,26 @@ export function MarketScreener({ pairs, isLoggedIn, isVip }: Props) {
             </tr>
           </thead>
           <tbody className="divide-y divide-border/50">
-            {filtered.map((pair) => (
+            {filtered.map((pair) => {
+              const isFav = favorites.has(pair.symbol);
+              return (
               <tr key={pair.symbol} className="hover:bg-muted/20 transition">
+                <td className="w-10 px-2 py-2.5 text-center">
+                  <button
+                    onClick={() => toggleFavorite(pair.symbol)}
+                    className="group/star inline-flex items-center justify-center transition-transform hover:scale-110"
+                    aria-label={isFav ? t("removeFromFavorites") : t("addToFavorites")}
+                  >
+                    <Star
+                      className={cn(
+                        "size-4 transition-colors",
+                        isFav
+                          ? "fill-amber-400 text-amber-500"
+                          : "text-muted-foreground/30 group-hover/star:text-amber-400",
+                      )}
+                    />
+                  </button>
+                </td>
                 <td className="px-3 py-2.5">
                   <span className="font-mono font-semibold text-foreground">
                     {pair.symbol}
@@ -391,7 +483,8 @@ export function MarketScreener({ pairs, isLoggedIn, isVip }: Props) {
                   </Link>
                 </td>
               </tr>
-            ))}
+            );
+            })}
           </tbody>
         </table>
       </div>
