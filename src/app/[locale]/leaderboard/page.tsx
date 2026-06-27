@@ -49,7 +49,7 @@ export default async function LeaderboardPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams?: Promise<{ timeframe?: string }>;
+  searchParams?: Promise<{ timeframe?: string; sortBy?: string }>;
 }) {
   const { locale } = await params;
   const resolvedSearchParams = await searchParams;
@@ -62,6 +62,8 @@ export default async function LeaderboardPage({
   const tf = ["30d", "90d"].includes(resolvedSearchParams?.timeframe ?? "")
     ? resolvedSearchParams!.timeframe
     : "all";
+
+  const sortBy = resolvedSearchParams?.sortBy === "xp" ? "xp" : "pf";
 
   const since = getSince(tf ?? "all");
 
@@ -167,6 +169,13 @@ export default async function LeaderboardPage({
     .filter((r) => r.total >= 3);
 
   rows.sort((a, b) => {
+    if (sortBy === "xp") {
+      if (b.xp !== a.xp) return b.xp - a.xp;
+      const aPF = a.profitFactor ?? -Infinity;
+      const bPF = b.profitFactor ?? -Infinity;
+      if (bPF !== aPF) return bPF - aPF;
+      return (b.winRate ?? 0) - (a.winRate ?? 0);
+    }
     const aPF = a.profitFactor ?? -Infinity;
     const bPF = b.profitFactor ?? -Infinity;
     if (bPF !== aPF) return bPF - aPF;
@@ -189,23 +198,47 @@ export default async function LeaderboardPage({
         <p className="mt-2 text-muted-foreground">{t("description")}</p>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {filters.map((f) => {
-          const isActive = tf === f.key;
-          return (
-            <Link
-              key={f.key}
-              href={`/leaderboard?timeframe=${f.key}`}
-              className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors ${
-                isActive
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
-              }`}
-            >
-              {f.label}
-            </Link>
-          );
-        })}
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap gap-2">
+          {filters.map((f) => {
+            const isActive = tf === f.key;
+            return (
+              <Link
+                key={f.key}
+                href={`/leaderboard?timeframe=${f.key}${sortBy !== "pf" ? `&sortBy=${sortBy}` : ""}`}
+                className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors ${
+                  isActive
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
+                }`}
+              >
+                {f.label}
+              </Link>
+            );
+          })}
+        </div>
+        <span className="text-muted-foreground">·</span>
+        <div className="flex flex-wrap gap-2">
+          {([
+            { key: "pf", label: t("sortByPf") },
+            { key: "xp", label: t("sortByXp") },
+          ] as const).map((s) => {
+            const isActive = sortBy === s.key;
+            return (
+              <Link
+                key={s.key}
+                href={`/leaderboard?timeframe=${tf}${s.key !== "pf" ? `&sortBy=${s.key}` : ""}`}
+                className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors ${
+                  isActive
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
+                }`}
+              >
+                {s.label}
+              </Link>
+            );
+          })}
+        </div>
       </div>
 
       {rows.length === 0 ? (

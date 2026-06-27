@@ -878,7 +878,9 @@
     "filterAll": "Tất cả",
     "profitFactor": "Profit Factor",
     "mt5Verified": "MT5",
-    "minTradesHint": "Chỉ hiển thị trader có ≥ 3 lệnh đóng"
+    "minTradesHint": "Chỉ hiển thị trader có ≥ 3 lệnh đóng",
+    "sortByPf": "Profit Factor",
+    "sortByXp": "XP"
   },
   "sentiment": {
     "title": "Tâm lý thị trường",
@@ -946,11 +948,17 @@
     "note": "Ghi chú"
   },
   "webinar": {
-    "title": "Webinar & Livestream",
-    "description": "Phiên giao dịch trực tiếp, phân tích kỹ thuật và Q&A cộng đồng.",
-    "empty": "Chưa có webinar nào được lên lịch",
-    "emptyHint": "Chúng tôi đang chuẩn bị nội dung webinar đầu tiên. Theo dõi trang này để cập nhật lịch phát sóng.",
-    "inMeantime": "Trong lúc chờ đợi"
+    "title": "Webinar & Live Room",
+    "description": "Tham gia buổi giao dịch trực tiếp, phân tích thị trường và thảo luận cộng đồng.",
+    "upcoming": "Webinar sắp tới",
+    "past": "Webinar đã kết thúc",
+    "noWebinars": "Chưa có webinar nào. Hãy quay lại sau!",
+    "registered": "Đã đăng ký",
+    "register": "Đăng ký",
+    "joinNow": "Tham gia ngay",
+    "host": "Host",
+    "ended": "Đã kết thúc",
+    "liveNow": "Đang trực tuyến"
   },
   "backtest": {
     "title": "Backtest — mô phỏng equity",
@@ -1757,10 +1765,10 @@
     "step4Detail1": "Tải SocialForexCopyTrade.mq5 từ trang này",
     "step4Detail2": "Copy vào thư mục MQL5/Experts/ trong MT5",
     "step4Detail3": "Khởi động lại MT5 hoặc refresh Navigator",
-    "step5Title": "Bắt đầu Copy",
-    "step5Desc": "Gắn EA và bắt đầu copy lệnh tự động.",
-    "step5Detail1": "Kéo EA vào chart bất kỳ, paste token vào settings",
-    "step5Detail2": "Bật Algo Trading — EA sẽ tự động copy tín hiệu mới",
+    "step5Title": "Cấu hình và gắn EA vào Chart",
+    "step5Desc": "Kéo EA từ Navigator vào bất kỳ chart nào, paste token và điều chỉnh thông số.",
+    "step5Detail1": "Navigator → Expert Advisors → SocialForexCopyTrade → kéo vào chart",
+    "step5Detail2": "Paste token vào trường CopyToken",
     "warningTitle": "Cảnh báo rủi ro",
     "warningText": "Copy trading có rủi ro đáng kể. Hiệu quả trong quá khứ không đảm bảo kết quả tương lai. Chỉ đầu tư vốn bạn có thể chấp nhận mất. Bạn chịu trách nhiệm cho tất cả lệnh thực thi bởi EA.",
     "findTraders": "Tìm Trader để Copy",
@@ -1785,10 +1793,6 @@
     "step4PathHint": "Đường dẫn thư mục: File → Open Data Folder → MQL5 → Experts",
     "step4AllowUrl": "Thêm URL vào whitelist: Tools → Options → Expert Advisors → Allow WebRequest for listed URL",
     "step4AllowUrlValue": "https://www.toolforex.xyz",
-    "step5Title": "Cấu hình và gắn EA vào Chart",
-    "step5Desc": "Kéo EA từ Navigator vào bất kỳ chart nào, paste token và điều chỉnh thông số.",
-    "step5Detail1": "Navigator → Expert Advisors → SocialForexCopyTrade → kéo vào chart",
-    "step5Detail2": "Paste token vào trường CopyToken",
     "step5Detail3": "Chọn AllowAutoTrade = true để EA đặt lệnh thật",
     "step5Detail4": "Bấm OK để khởi động EA",
     "step6Title": "Bật Algo Trading và Theo dõi",
@@ -1983,18 +1987,5 @@
     "limitReached": "Bạn đã đạt {limit} cảnh báo tối đa. Xóa bớt để thêm mới.",
     "errorInvalidData": "Dữ liệu không hợp lệ.",
     "errorLimitReached": "Đã đạt giới hạn {limit} cảnh báo."
-  },
-  "webinar": {
-    "title": "Webinar & Live Room",
-    "description": "Tham gia buổi giao dịch trực tiếp, phân tích thị trường và thảo luận cộng đồng.",
-    "upcoming": "Webinar sắp tới",
-    "past": "Webinar đã kết thúc",
-    "noWebinars": "Chưa có webinar nào. Hãy quay lại sau!",
-    "registered": "Đã đăng ký",
-    "register": "Đăng ký",
-    "joinNow": "Tham gia ngay",
-    "host": "Host",
-    "ended": "Đã kết thúc",
-    "liveNow": "Đang trực tuyến"
   }
 }

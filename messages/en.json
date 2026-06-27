@@ -848,7 +848,7 @@
     "feedLv": "Lv.",
     "feedSignals": "{count} signals",
     "feedWinRate": "Win {rate}%",
-    "feedEmpty":"No activity yet. Follow traders to see their signals, journal entries, and forum posts here.",
+    "feedEmpty": "No activity yet. Follow traders to see their signals, journal entries, and forum posts here.",
     "feedDiscoverTraders": "Discover traders",
     "feedLoadMore": "Load more",
     "feedJournalBody": "closed a trade",
@@ -878,7 +878,9 @@
     "filterAll": "All time",
     "profitFactor": "Profit Factor",
     "mt5Verified": "MT5",
-    "minTradesHint": "Only traders with ≥ 3 closed signals"
+    "minTradesHint": "Only traders with ≥ 3 closed signals",
+    "sortByPf": "Profit Factor",
+    "sortByXp": "XP"
   },
   "sentiment": {
     "title": "Market Sentiment",
@@ -946,11 +948,17 @@
     "note": "Notes"
   },
   "webinar": {
-    "title": "Webinar & Livestream",
-    "description": "Live trading sessions, technical analysis and community Q&A.",
-    "empty": "No webinars scheduled",
-    "emptyHint": "We're preparing our first webinar. Follow this page for broadcast schedule updates.",
-    "inMeantime": "In the meantime"
+    "title": "Webinars & Live Rooms",
+    "description": "Join live trading sessions, market analysis, and community discussions.",
+    "upcoming": "Upcoming Webinars",
+    "past": "Past Webinars",
+    "noWebinars": "No upcoming webinars. Check back later!",
+    "registered": "Registered",
+    "register": "Register",
+    "joinNow": "Join Live",
+    "host": "Host",
+    "ended": "Ended",
+    "liveNow": "Live Now"
   },
   "backtest": {
     "title": "Backtest — equity simulation",
@@ -1757,10 +1765,10 @@
     "step4Detail1": "Download SocialForexCopyTrade.mq5 from this page",
     "step4Detail2": "Copy it to MQL5/Experts/ folder in your MT5 data directory",
     "step4Detail3": "Restart MT5 or refresh Navigator panel",
-    "step5Title": "Start Copying",
-    "step5Desc": "Attach the EA and start auto-copying trades.",
-    "step5Detail1": "Drag EA to any chart, paste your token in settings",
-    "step5Detail2": "Enable Algo Trading — EA will auto-copy new signals",
+    "step5Title": "Configure and Attach the EA to a Chart",
+    "step5Desc": "Drag the EA from Navigator onto any chart, paste your token and adjust parameters.",
+    "step5Detail1": "Navigator → Expert Advisors → SocialForexCopyTrade → drag onto chart",
+    "step5Detail2": "Paste your token into the CopyToken field",
     "warningTitle": "Risk Warning",
     "warningText": "Copy trading involves significant risk. Past performance does not guarantee future results. Only risk capital you can afford to lose. You are responsible for all trades executed by the EA.",
     "findTraders": "Find Traders to Copy",
@@ -1785,10 +1793,6 @@
     "step4PathHint": "Folder path: File → Open Data Folder → MQL5 → Experts",
     "step4AllowUrl": "Add URL to whitelist: Tools → Options → Expert Advisors → Allow WebRequest for listed URL",
     "step4AllowUrlValue": "https://www.toolforex.xyz",
-    "step5Title": "Configure and Attach the EA to a Chart",
-    "step5Desc": "Drag the EA from Navigator onto any chart, paste your token and adjust parameters.",
-    "step5Detail1": "Navigator → Expert Advisors → SocialForexCopyTrade → drag onto chart",
-    "step5Detail2": "Paste your token into the CopyToken field",
     "step5Detail3": "Set AllowAutoTrade = true so the EA places real trades",
     "step5Detail4": "Click OK to start the EA",
     "step6Title": "Enable Algo Trading and Monitor",
@@ -1983,18 +1987,5 @@
     "limitReached": "You have reached the {limit} alert limit. Delete one to add more.",
     "errorInvalidData": "Invalid data.",
     "errorLimitReached": "Alert limit of {limit} reached."
-  },
-  "webinar": {
-    "title": "Webinars & Live Rooms",
-    "description": "Join live trading sessions, market analysis, and community discussions.",
-    "upcoming": "Upcoming Webinars",
-    "past": "Past Webinars",
-    "noWebinars": "No upcoming webinars. Check back later!",
-    "registered": "Registered",
-    "register": "Register",
-    "joinNow": "Join Live",
-    "host": "Host",
-    "ended": "Ended",
-    "liveNow": "Live Now"
   }
 }
