@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { Bell, BookOpen, MessageSquare, Shield, Wrench } from "lucide-react";
+import { Bell, Shield } from "lucide-react";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
@@ -20,9 +20,9 @@ import {
 } from "@/components/layout/nav-config";
 
 const megaMenuGroups = [
-  { labelKey: "marketTools", icon: Wrench, items: marketNavKeys },
-  { labelKey: "community", icon: MessageSquare, items: communityNavKeys },
-  { labelKey: "learning", icon: BookOpen, items: learningNavKeys },
+  { labelKey: "marketTools", items: marketNavKeys },
+  { labelKey: "community", items: communityNavKeys },
+  { labelKey: "learning", items: learningNavKeys },
 ] as const;
 
 export async function SiteHeader() {
@@ -79,7 +79,6 @@ export async function SiteHeader() {
             <NavMegaMenu
               key={group.labelKey}
               labelKey={group.labelKey}
-              icon={group.icon}
               items={group.items}
             />
           ))}

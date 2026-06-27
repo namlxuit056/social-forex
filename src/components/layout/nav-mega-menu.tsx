@@ -1,20 +1,25 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { ChevronDown, type LucideIcon } from "lucide-react";
+import { BookOpen, ChevronDown, MessageSquare, Wrench } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SiteNavLink } from "@/components/layout/site-nav-link";
 import { usePathname } from "@/i18n/navigation";
 
+const iconMap = {
+  marketTools: Wrench,
+  community: MessageSquare,
+  learning: BookOpen,
+} as const;
+
 export function NavMegaMenu({
   labelKey,
-  icon: Icon,
   items,
 }: {
-  labelKey: string;
-  icon: LucideIcon;
+  labelKey: keyof typeof iconMap;
   items: readonly { href: string; key: string }[];
 }) {
+  const Icon = iconMap[labelKey];
   const t = useTranslations("nav");
   const pathname = usePathname();
 
