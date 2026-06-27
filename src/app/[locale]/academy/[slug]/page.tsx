@@ -17,6 +17,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { AcademyCompleteButton } from "@/components/academy/academy-complete-button";
 import { AcademyQuiz } from "@/components/academy/academy-quiz";
+import { diagramRegistry } from "@/components/academy/diagrams";
 import { getQuizQuestion } from "@/lib/content/academy-quiz";
 
 type Props = { params: Promise<{ slug: string; locale: string }> };
@@ -155,6 +156,16 @@ export default async function AcademyLessonPage({ params }: Props) {
 
         <div className="prose prose-invert max-w-none text-sm leading-relaxed text-foreground/90">
           {lesson.body.split("\n").map((line, i) => {
+            if (line.startsWith("[diagram:") && line.endsWith("]")) {
+              const name = line.slice(9, -1);
+              const DiagramComponent = diagramRegistry[name];
+              if (!DiagramComponent) return null;
+              return (
+                <div key={i} className="my-6 rounded-lg border border-border bg-card/50 p-4">
+                  <DiagramComponent />
+                </div>
+              );
+            }
             if (line.startsWith("## ")) {
               return (
                 <h2

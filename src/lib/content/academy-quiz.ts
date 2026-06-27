@@ -265,6 +265,58 @@ export const academyQuiz: Record<string, QuizQuestion> = {
     ],
     correctIndex: 1,
   },
+  "price-action-pin-bar": {
+    question: {
+      vi: "Pin bar tăng có xác suất cao nhất khi xuất hiện ở đâu?",
+      en: "Where does a bullish pin bar have the highest probability setup?",
+    },
+    options: [
+      { vi: "Giữa vùng đi ngang, không có bối cảnh rõ ràng", en: "In the middle of a range with no clear context" },
+      { vi: "Tại vùng hỗ trợ rõ ràng sau xu hướng giảm hoặc pullback", en: "At a clear support zone after a downtrend or pullback" },
+      { vi: "Ngay sau một tin tức quan trọng", en: "Right after a major news release" },
+      { vi: "Trên bất kỳ khung thời gian nào, bất kỳ vị trí nào", en: "On any timeframe, at any location" },
+    ],
+    correctIndex: 1,
+  },
+  "price-action-engulfing": {
+    question: {
+      vi: "Điều nào làm tín hiệu bullish engulfing mạnh hơn?",
+      en: "Which factor makes a bullish engulfing signal stronger?",
+    },
+    options: [
+      { vi: "Nến xanh chỉ nhỉnh hơn nến đỏ một chút", en: "The green candle is only slightly larger than the red one" },
+      { vi: "Mô hình xuất hiện giữa vùng đi ngang", en: "The pattern appears in the middle of a range" },
+      { vi: "Nến xanh lớn hơn đáng kể và xuất hiện tại vùng hỗ trợ rõ ràng", en: "The green candle is significantly larger and appears at a clear support zone" },
+      { vi: "Nến đỏ trước đó có bóng dài", en: "The preceding red candle has long wicks" },
+    ],
+    correctIndex: 2,
+  },
+  "price-action-inside-bar": {
+    question: {
+      vi: "Inside bar thường báo hiệu điều gì trong price action?",
+      en: "What does an inside bar typically signal in price action?",
+    },
+    options: [
+      { vi: "Xu hướng tăng mạnh sắp xảy ra", en: "A strong uptrend is about to begin" },
+      { vi: "Sự nén giá và tích lũy năng lượng cho breakout", en: "Price compression and energy building for a breakout" },
+      { vi: "Đảo chiều xu hướng chắc chắn", en: "A guaranteed trend reversal" },
+      { vi: "Thị trường đang rất biến động", en: "The market is highly volatile" },
+    ],
+    correctIndex: 1,
+  },
+  "price-action-bos-choch-fvg": {
+    question: {
+      vi: "Sự khác biệt chính giữa BOS và CHoCH là gì?",
+      en: "What is the key difference between BOS and CHoCH?",
+    },
+    options: [
+      { vi: "BOS xảy ra trên Daily, CHoCH xảy ra trên H1", en: "BOS occurs on Daily, CHoCH occurs on H1" },
+      { vi: "BOS xác nhận xu hướng tiếp diễn, CHoCH cảnh báo xu hướng có thể đảo chiều", en: "BOS confirms trend continuation, CHoCH warns the trend may be reversing" },
+      { vi: "BOS là tín hiệu giảm, CHoCH là tín hiệu tăng", en: "BOS is a bearish signal, CHoCH is a bullish signal" },
+      { vi: "Cả hai đều có ý nghĩa như nhau", en: "Both have the same meaning" },
+    ],
+    correctIndex: 1,
+  },
 };
 
 export function getQuizQuestion(slug: string): QuizQuestion | undefined {

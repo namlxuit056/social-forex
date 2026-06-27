@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { Filter, ChevronUp, ChevronDown, ChevronsUpDown, Star } from "lucide-react";
+import { Filter, ChevronUp, ChevronDown, ChevronsUpDown, Star, Columns3 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { AiPicksPanel } from "@/components/screener/ai-picks-panel";
@@ -18,12 +18,23 @@ type SortColumn =
   | "changePercent"
   | "rsi"
   | "adx"
+  | "macd"
+  | "stochK"
+  | "atr"
   | "recM15"
   | "recH1"
   | "recH4"
   | "recD1";
 
 type SortDir = "asc" | "desc";
+
+function SortIcon({ col, sortBy, sortDir }: { col: SortColumn; sortBy: SortColumn | null; sortDir: SortDir }) {
+  if (sortBy !== col)
+    return <ChevronsUpDown className="ml-1 inline size-3 opacity-30 group-hover:opacity-60" />;
+  return sortDir === "asc"
+    ? <ChevronUp className="ml-1 inline size-3 text-primary" />
+    : <ChevronDown className="ml-1 inline size-3 text-primary" />;
+}
 
 type ScreenerPair = {
   symbol: string;
@@ -38,6 +49,16 @@ type ScreenerPair = {
   recH1: number | null;
   recH4: number | null;
   recD1: number | null;
+  macd: number | null;
+  macdSignal: number | null;
+  bbUpper: number | null;
+  bbMiddle: number | null;
+  bbLower: number | null;
+  bbPosition: "above" | "below" | "within" | "unknown";
+  stochK: number | null;
+  stochD: number | null;
+  stochState: "overbought" | "oversold" | "neutral";
+  atr: number | null;
 };
 
 type Props = {
@@ -104,43 +125,89 @@ function cmpStr(a: string, b: string, dir: number): number {
   return a.localeCompare(b) * dir;
 }
 
+function BBPositionBadge({ position }: { position: "above" | "below" | "within" | "unknown" }) {
+  if (position === "unknown")
+    return <span className="text-xs text-muted-foreground/40">—</span>;
+  const cfg = {
+    above: { label: "Above", cls: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" },
+    below: { label: "Below", cls: "bg-red-500/15 text-red-500" },
+    within: { label: "Within", cls: "bg-muted/50 text-muted-foreground" },
+  } as const;
+  const { label, cls } = cfg[position];
+  return (
+    <span className={cn("inline-block rounded px-1.5 py-0.5 text-[10px] font-semibold leading-tight whitespace-nowrap", cls)}>
+      {label}
+    </span>
+  );
+}
+
+function StochBadge({ value, state }: { value: number | null; state: "overbought" | "oversold" | "neutral" }) {
+  if (value === null)
+    return <span className="text-xs text-muted-foreground/40">—</span>;
+  const cls =
+    state === "overbought"
+      ? "bg-red-500/15 text-red-500"
+      : state === "oversold"
+        ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+        : "bg-muted/50 text-muted-foreground";
+  return (
+    <span className={cn("inline-block rounded px-1.5 py-0.5 text-[10px] font-semibold leading-tight whitespace-nowrap tabular-nums", cls)}>
+      {value.toFixed(1)}
+    </span>
+  );
+}
+
+function MACDCell({ value, signal }: { value: number | null; signal: number | null }) {
+  if (value === null)
+    return <span className="text-xs text-muted-foreground/40">—</span>;
+  const bullish = signal !== null ? value > signal : value > 0;
+  return (
+    <span className={cn("text-xs tabular-nums font-medium", bullish ? "text-emerald-600 dark:text-emerald-400" : "text-red-500")}>
+      {value.toFixed(4)}
+    </span>
+  );
+}
+
 export function MarketScreener({ pairs, isLoggedIn, isVip, initialFavorites = [] }: Props) {
   const t = useTranslations("screener");
   const [filter, setFilter] = useState<ScreenerFilter>("all");
   const [customFilters, setCustomFilters] = useState<CustomFilters>({});
-  const [favorites, setFavorites] = useState<Set<string>>(new Set(initialFavorites));
-
-  // For guests: load favorites from localStorage on mount
-  useEffect(() => {
-    if (!isLoggedIn) {
+  const [favorites, setFavorites] = useState<Set<string>>(() => {
+    if (!isLoggedIn && typeof window !== "undefined") {
       try {
         const stored = localStorage.getItem(LS_FAVORITES_KEY);
-        if (stored) {
-          const parsed: string[] = JSON.parse(stored);
-          setFavorites(new Set(parsed));
-        }
+        if (stored) return new Set<string>(JSON.parse(stored));
       } catch {
         // ignore
       }
     }
-  }, [isLoggedIn]);
+    return new Set(initialFavorites);
+  });
 
   // ── Sorting state, initialised from URL search params ──
-  const [sortBy, setSortBy] = useState<SortColumn | null>(null);
-  const [sortDir, setSortDir] = useState<SortDir>("asc");
-
-  // Read initial sort from URL on mount
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const s = params.get("sort") as SortColumn | null;
-    const d = params.get("dir");
-    if (s && ["symbol", "price", "changePercent", "rsi", "adx", "recM15", "recH1", "recH4", "recD1"].includes(s)) {
-      setSortBy(s);
-    }
-    if (d === "desc" || d === "asc") {
-      setSortDir(d);
-    }
+  // ── Column visibility ──
+  type ExtraCol = "macd" | "bb" | "stoch" | "atr";
+  const [visibleCols, setVisibleCols] = useState<Set<ExtraCol>>(new Set());
+  const [showColMenu, setShowColMenu] = useState(false);
+  const toggleCol = useCallback((col: ExtraCol) => {
+    setVisibleCols((prev) => {
+      const next = new Set(prev);
+      if (next.has(col)) next.delete(col);
+      else next.add(col);
+      return next;
+    });
   }, []);
+
+  const [sortBy, setSortBy] = useState<SortColumn | null>(() => {
+    if (typeof window === "undefined") return null;
+    const s = new URLSearchParams(window.location.search).get("sort") as SortColumn | null;
+    return s && ["symbol", "price", "changePercent", "rsi", "adx", "macd", "stochK", "atr", "recM15", "recH1", "recH4", "recD1"].includes(s) ? s : null;
+  });
+  const [sortDir, setSortDir] = useState<SortDir>(() => {
+    if (typeof window === "undefined") return "asc";
+    const d = new URLSearchParams(window.location.search).get("dir");
+    return d === "desc" || d === "asc" ? d : "asc";
+  });
 
   // Persist sort to URL
   useEffect(() => {
@@ -302,6 +369,12 @@ export function MarketScreener({ pairs, isLoggedIn, isVip, initialFavorites = []
             return cmpNum(a.rsi, b.rsi, dir);
           case "adx":
             return cmpNum(a.adx, b.adx, dir);
+          case "macd":
+            return cmpNum(a.macd, b.macd, dir);
+          case "stochK":
+            return cmpNum(a.stochK, b.stochK, dir);
+          case "atr":
+            return cmpNum(a.atr, b.atr, dir);
           case "recM15":
             return cmpNum(a.recM15, b.recM15, dir);
           case "recH1":
@@ -327,19 +400,6 @@ export function MarketScreener({ pairs, isLoggedIn, isVip, initialFavorites = []
     { key: "oversold", label: t("filterOversold") },
     { key: "overbought", label: t("filterOverbought") },
   ];
-
-  /** Render sort icon for a column */
-  function SortIcon({ col }: { col: SortColumn }) {
-    if (sortBy !== col)
-      return (
-        <ChevronsUpDown className="ml-1 inline size-3 opacity-30 group-hover:opacity-60" />
-      );
-    return sortDir === "asc" ? (
-      <ChevronUp className="ml-1 inline size-3 text-primary" />
-    ) : (
-      <ChevronDown className="ml-1 inline size-3 text-primary" />
-    );
-  }
 
   return (
     <div className="space-y-4">
@@ -374,6 +434,46 @@ export function MarketScreener({ pairs, isLoggedIn, isVip, initialFavorites = []
             )}
           </button>
         ))}
+
+        {/* Column visibility toggle */}
+        <div className="relative ml-auto">
+          <button
+            onClick={() => setShowColMenu((v) => !v)}
+            className={cn(
+              "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition",
+              showColMenu ? "bg-primary/15 text-primary" : "bg-muted/30 text-muted-foreground hover:text-foreground",
+            )}
+          >
+            <Columns3 className="size-3.5" />
+            {t("columns")}
+          </button>
+          {showColMenu && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setShowColMenu(false)} />
+              <div className="absolute right-0 top-full z-50 mt-1 w-48 rounded-lg border border-border/70 bg-popover p-1.5 shadow-lg">
+              {([
+                { key: "macd" as const, label: "MACD" },
+                { key: "bb" as const, label: t("colBB") },
+                { key: "stoch" as const, label: t("colStoch") },
+                { key: "atr" as const, label: "ATR" },
+              ]).map((col) => (
+                <label
+                  key={col.key}
+                  className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-xs hover:bg-muted/50"
+                >
+                  <input
+                    type="checkbox"
+                    checked={visibleCols.has(col.key)}
+                    onChange={() => toggleCol(col.key)}
+                    className="size-3.5 rounded border-border accent-primary"
+                  />
+                  {col.label}
+                </label>
+              ))}
+            </div>
+            </>
+          )}
+        </div>
       </div>
 
       <div className="overflow-x-auto rounded-lg border border-border/70">
@@ -388,59 +488,88 @@ export function MarketScreener({ pairs, isLoggedIn, isVip, initialFavorites = []
                 onClick={() => handleSort("symbol")}
               >
                 {t("colSymbol")}
-                <SortIcon col="symbol" />
+                <SortIcon col="symbol" sortBy={sortBy} sortDir={sortDir} />
               </th>
               <th
                 className="group cursor-pointer select-none px-3 py-2.5 text-right"
                 onClick={() => handleSort("price")}
               >
                 {t("colPrice")}
-                <SortIcon col="price" />
+                <SortIcon col="price" sortBy={sortBy} sortDir={sortDir} />
               </th>
               <th
                 className="group cursor-pointer select-none px-3 py-2.5 text-right"
                 onClick={() => handleSort("changePercent")}
               >
                 {t("col24h")}
-                <SortIcon col="changePercent" />
+                <SortIcon col="changePercent" sortBy={sortBy} sortDir={sortDir} />
               </th>
               <th
                 className="group cursor-pointer select-none px-3 py-2.5 text-center"
                 onClick={() => handleSort("rsi")}
               >
                 {t("colRsi")}
-                <SortIcon col="rsi" />
+                <SortIcon col="rsi" sortBy={sortBy} sortDir={sortDir} />
               </th>
               <th
                 className="group cursor-pointer select-none px-3 py-2.5 text-center"
                 onClick={() => handleSort("adx")}
               >
                 {t("colAdx")}
-                <SortIcon col="adx" />
+                <SortIcon col="adx" sortBy={sortBy} sortDir={sortDir} />
               </th>
+              {visibleCols.has("macd") && (
+                <th
+                  className="group cursor-pointer select-none px-3 py-2.5 text-center text-xs"
+                  onClick={() => handleSort("macd")}
+                >
+                  MACD <SortIcon col="macd" sortBy={sortBy} sortDir={sortDir} />
+                </th>
+              )}
+              {visibleCols.has("bb") && (
+                <th className="px-3 py-2.5 text-center text-xs">
+                  {t("colBB")}
+                </th>
+              )}
+              {visibleCols.has("stoch") && (
+                <th
+                  className="group cursor-pointer select-none px-3 py-2.5 text-center text-xs"
+                  onClick={() => handleSort("stochK")}
+                >
+                  {t("colStoch")} <SortIcon col="stochK" sortBy={sortBy} sortDir={sortDir} />
+                </th>
+              )}
+              {visibleCols.has("atr") && (
+                <th
+                  className="group cursor-pointer select-none px-3 py-2.5 text-center text-xs"
+                  onClick={() => handleSort("atr")}
+                >
+                  ATR <SortIcon col="atr" sortBy={sortBy} sortDir={sortDir} />
+                </th>
+              )}
               <th
                 className="group cursor-pointer select-none px-3 py-2.5 text-center text-xs"
                 onClick={() => handleSort("recM15")}
               >
-                M15 <SortIcon col="recM15" />
+                M15 <SortIcon col="recM15" sortBy={sortBy} sortDir={sortDir} />
               </th>
               <th
                 className="group cursor-pointer select-none px-3 py-2.5 text-center text-xs"
                 onClick={() => handleSort("recH1")}
               >
-                H1 <SortIcon col="recH1" />
+                H1 <SortIcon col="recH1" sortBy={sortBy} sortDir={sortDir} />
               </th>
               <th
                 className="group cursor-pointer select-none px-3 py-2.5 text-center text-xs"
                 onClick={() => handleSort("recH4")}
               >
-                H4 <SortIcon col="recH4" />
+                H4 <SortIcon col="recH4" sortBy={sortBy} sortDir={sortDir} />
               </th>
               <th
                 className="group cursor-pointer select-none px-3 py-2.5 text-center text-xs"
                 onClick={() => handleSort("recD1")}
               >
-                D1 <SortIcon col="recD1" />
+                D1 <SortIcon col="recD1" sortBy={sortBy} sortDir={sortDir} />
               </th>
               <th className="px-3 py-2.5"></th>
             </tr>
@@ -524,6 +653,32 @@ export function MarketScreener({ pairs, isLoggedIn, isVip, initialFavorites = []
                     <span className="text-xs text-muted-foreground/40">—</span>
                   )}
                 </td>
+                {visibleCols.has("macd") && (
+                  <td className="px-3 py-2.5 text-center">
+                    <MACDCell value={pair.macd} signal={pair.macdSignal} />
+                  </td>
+                )}
+                {visibleCols.has("bb") && (
+                  <td className="px-3 py-2.5 text-center">
+                    <BBPositionBadge position={pair.bbPosition} />
+                  </td>
+                )}
+                {visibleCols.has("stoch") && (
+                  <td className="px-3 py-2.5 text-center">
+                    <StochBadge value={pair.stochK} state={pair.stochState} />
+                  </td>
+                )}
+                {visibleCols.has("atr") && (
+                  <td className="px-3 py-2.5 text-center">
+                    {pair.atr !== null ? (
+                      <span className="text-xs tabular-nums font-mono text-muted-foreground">
+                        {pair.atr.toFixed(4)}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-muted-foreground/40">—</span>
+                    )}
+                  </td>
+                )}
                 <td className="px-3 py-2.5 text-center">
                   <RecBadge value={pair.recM15} />
                 </td>

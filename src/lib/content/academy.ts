@@ -1256,6 +1256,384 @@ Rủi ro 1% không có nghĩa là dùng 1% margin. Nó nghĩa là khoản lỗ d
 Quy tắc đơn giản, nhưng làm đúng khi có cảm xúc mới là kỹ năng thật.`,
     },
   ),
+  lesson(
+    "price-action-pin-bar",
+    "intermediate",
+    {
+      title: "Price action: how to trade pin bars",
+      summary:
+        "Identify bullish and bearish pin bars, understand what the long wick tells you, and learn how to set entry, stop loss, and target.",
+      keywords: ["pin bar forex", "price action pin bar", "hammer candlestick forex", "shooting star forex"],
+      body: `## What is a pin bar?
+
+A pin bar (short for Pinocchio bar) is a single candle with a very long wick and a small body. The long wick shows that price moved strongly in one direction but was rejected — buyers or sellers pushed back hard enough to close price near the open.
+
+## Bullish pin bar at support
+
+A bullish pin bar forms when price dips into a support zone, is rejected, and closes back near the top of the candle. The long lower wick is the rejection signal.
+
+[diagram:pin-bar-bullish]
+
+What to look for: small body sitting near the top of the candle, long lower wick penetrating a support zone, and a downtrend or pullback leading into it. The longer the wick relative to nearby candles, the stronger the signal.
+
+## Bearish pin bar at resistance
+
+A bearish pin bar forms when price spikes into a resistance zone and gets rejected. The long upper wick shows sellers took control.
+
+[diagram:pin-bar-bearish]
+
+What to look for: small body near the bottom of the candle, long upper wick spiking into a resistance zone, and an uptrend or rally leading into it.
+
+## How to trade a pin bar
+
+1. Identify a key support or resistance zone on H4 or Daily timeframe.
+2. Wait for price to approach the zone and form a pin bar with a clear long wick.
+3. Enter on the open of the next candle after the pin bar closes.
+4. Stop loss goes just beyond the tip of the wick — outside the zone.
+5. Target the next structural level for take profit.
+
+## What makes a pin bar stronger
+
+- Forms at a clearly defined support or resistance zone
+- H4 or Daily timeframe (longer timeframes produce more reliable signals)
+- Long wick is at least twice the body length
+- The body closes inside the previous candle range
+- Aligns with the higher timeframe trend direction
+
+## Common mistakes
+
+Trading every pin bar you find is the fastest way to lose money. A pin bar in the middle of a range, against the higher timeframe trend, or with a short wick relative to nearby candles carries much lower probability. Always ask: where did the pin bar form, not just what it looks like.`,
+    },
+    {
+      title: "Price action: cách giao dịch pin bar",
+      summary:
+        "Nhận diện pin bar tăng và giảm, hiểu bóng nến dài nói gì, và học cách đặt entry, stop loss, target.",
+      keywords: ["pin bar forex", "price action pin bar", "nến hammer forex", "shooting star forex"],
+      body: `## Pin bar là gì?
+
+Pin bar (viết tắt của Pinocchio bar) là một cây nến đơn có bóng rất dài và thân nhỏ. Bóng nến dài cho thấy giá đã di chuyển mạnh theo một hướng nhưng bị từ chối — bên mua hoặc bên bán đã phản ứng đủ mạnh để đẩy giá quay về gần điểm mở cửa.
+
+## Pin bar tăng tại vùng hỗ trợ
+
+Pin bar tăng hình thành khi giá lao vào vùng hỗ trợ, bị từ chối, và đóng cửa gần đỉnh cây nến. Bóng dưới dài là tín hiệu từ chối.
+
+[diagram:pin-bar-bullish]
+
+Cần tìm: thân nhỏ nằm gần đỉnh cây nến, bóng dưới dài đâm vào vùng hỗ trợ, và bối cảnh giảm giá hoặc pullback trước đó. Bóng càng dài so với các nến gần đó, tín hiệu càng mạnh.
+
+## Pin bar giảm tại vùng kháng cự
+
+Pin bar giảm hình thành khi giá đâm lên vùng kháng cự rồi bị đẩy xuống. Bóng trên dài cho thấy bên bán đang kiểm soát.
+
+[diagram:pin-bar-bearish]
+
+Cần tìm: thân nhỏ gần đáy cây nến, bóng trên dài đâm vào vùng kháng cự, và xu hướng tăng hoặc đà tăng trước đó.
+
+## Cách giao dịch pin bar
+
+1. Xác định vùng hỗ trợ hoặc kháng cự rõ ràng trên khung H4 hoặc Daily.
+2. Chờ giá tiếp cận vùng đó và hình thành pin bar với bóng nến dài rõ ràng.
+3. Vào lệnh tại open của nến tiếp theo sau khi pin bar đóng cửa.
+4. Stop loss đặt ngay sau đầu bóng nến — ngoài vùng.
+5. Take profit tại mức cấu trúc tiếp theo.
+
+## Điều gì làm pin bar mạnh hơn
+
+- Xuất hiện tại vùng hỗ trợ kháng cự được xác định rõ
+- Khung H4 hoặc Daily (khung lớn cho tín hiệu đáng tin hơn)
+- Bóng nến dài ít nhất gấp đôi thân nến
+- Thân nến đóng trong phạm vi nến trước
+- Cùng chiều xu hướng khung lớn
+
+## Lỗi phổ biến
+
+Giao dịch mọi pin bar là cách nhanh nhất để thua lỗ. Pin bar giữa vùng đi ngang, ngược chiều xu hướng khung lớn, hoặc bóng ngắn so với các nến gần đó đều có xác suất thấp. Luôn hỏi: pin bar xuất hiện ở đâu, không chỉ trông như thế nào.`,
+    },
+  ),
+  lesson(
+    "price-action-engulfing",
+    "intermediate",
+    {
+      title: "Price action: engulfing candle setups",
+      summary:
+        "How to read bullish and bearish engulfing patterns, what makes an engulfing signal strong, and how to trade them at key levels.",
+      keywords: ["engulfing candle forex", "bullish engulfing", "bearish engulfing", "price action reversal"],
+      body: `## What is an engulfing candle?
+
+An engulfing pattern is two candles where the second candle's body completely covers the first candle's body. It signals a shift in momentum — the second candle shows that the opposing side took over completely.
+
+## Bullish engulfing
+
+A bullish engulfing forms when a small bearish candle is followed by a larger bullish candle that opens below the first close and closes above the first open.
+
+[diagram:engulfing-bullish]
+
+Context matters: a bullish engulfing at a support zone after a downtrend or pullback is far more meaningful than one appearing randomly. The green candle should visibly dominate the red one.
+
+## Bearish engulfing
+
+A bearish engulfing forms when a small bullish candle is followed by a larger bearish candle that opens above the first close and closes below the first open.
+
+[diagram:engulfing-bearish]
+
+Look for bearish engulfing at resistance zones after an uptrend or rally. The red candle should be clearly larger than the green one it covers.
+
+## What makes an engulfing pattern stronger
+
+- The second candle is significantly larger than the first — not just marginally bigger
+- Forms at a key support or resistance zone, not in empty space
+- The second candle closes well beyond the first candle's body (not just touching)
+- Higher timeframe context supports the direction (H4 or Daily)
+- Previous candles show exhaustion — small bodies, long wicks, or slowing momentum
+
+## How to trade engulfing setups
+
+1. Mark key support and resistance on H4 or Daily.
+2. Wait for a clear engulfing candle to form at one of those levels.
+3. Enter on the next candle open after the engulfing closes.
+4. Stop loss goes below the low of the engulfing pattern (for bullish) or above the high (for bearish).
+5. Target the next structural level.
+
+## Common mistakes
+
+The most common mistake is trading engulfing patterns away from key levels. Two candles where the second is slightly bigger than the first, appearing mid-range, is not a reliable signal. Size and location both matter.`,
+    },
+    {
+      title: "Price action: setup nến engulfing",
+      summary:
+        "Cách đọc mô hình engulfing tăng và giảm, điều gì làm tín hiệu engulfing mạnh, và cách giao dịch tại vùng giá quan trọng.",
+      keywords: ["nến engulfing forex", "bullish engulfing", "bearish engulfing", "price action đảo chiều"],
+      body: `## Nến engulfing là gì?
+
+Mô hình engulfing gồm hai nến trong đó thân nến thứ hai bao phủ hoàn toàn thân nến thứ nhất. Nó báo hiệu sự thay đổi động lực — nến thứ hai cho thấy bên đối lập đã kiểm soát hoàn toàn.
+
+## Bullish engulfing (tăng)
+
+Bullish engulfing hình thành khi một cây nến đỏ nhỏ được tiếp nối bởi cây nến xanh lớn hơn, mở dưới điểm đóng của nến đỏ và đóng trên điểm mở của nến đỏ.
+
+[diagram:engulfing-bullish]
+
+Bối cảnh quan trọng: bullish engulfing tại vùng hỗ trợ sau xu hướng giảm hoặc pullback có ý nghĩa hơn nhiều so với khi xuất hiện ngẫu nhiên. Cây nến xanh cần áp đảo cây nến đỏ một cách rõ ràng.
+
+## Bearish engulfing (giảm)
+
+Bearish engulfing hình thành khi một cây nến xanh nhỏ được tiếp nối bởi cây nến đỏ lớn hơn, mở trên điểm đóng của nến xanh và đóng dưới điểm mở của nến xanh.
+
+[diagram:engulfing-bearish]
+
+Tìm bearish engulfing tại vùng kháng cự sau xu hướng tăng. Cây nến đỏ cần rõ ràng lớn hơn cây nến xanh mà nó bao phủ.
+
+## Điều gì làm engulfing mạnh hơn
+
+- Nến thứ hai lớn hơn đáng kể so với nến thứ nhất — không chỉ nhỉnh hơn một chút
+- Xuất hiện tại vùng hỗ trợ kháng cự quan trọng, không phải giữa vùng trống
+- Nến thứ hai đóng cửa vượt xa thân nến đầu tiên
+- Bối cảnh khung cao hơn (H4 hoặc Daily) ủng hộ chiều hướng
+- Các nến trước cho thấy đà yếu dần — thân nhỏ, bóng dài, hoặc đà chậm lại
+
+## Cách giao dịch setup engulfing
+
+1. Đánh dấu hỗ trợ kháng cự quan trọng trên H4 hoặc Daily.
+2. Chờ nến engulfing rõ ràng hình thành tại một trong các vùng đó.
+3. Vào lệnh tại open nến tiếp theo sau khi engulfing đóng cửa.
+4. Stop loss dưới đáy mô hình engulfing (tăng) hoặc trên đỉnh (giảm).
+5. Take profit tại mức cấu trúc tiếp theo.
+
+## Lỗi phổ biến
+
+Lỗi phổ biến nhất là giao dịch engulfing xa vùng giá quan trọng. Hai nến mà nến sau chỉ nhỉnh hơn nến trước một chút, xuất hiện giữa vùng đi ngang, không phải tín hiệu đáng tin. Kích thước và vị trí đều quan trọng.`,
+    },
+  ),
+  lesson(
+    "price-action-inside-bar",
+    "intermediate",
+    {
+      title: "Price action: inside bar and breakout",
+      summary:
+        "What an inside bar signals about market compression, how to identify the mother bar, and how to trade breakouts with defined risk.",
+      keywords: ["inside bar forex", "inside bar breakout", "price action inside bar", "mother bar trading"],
+      body: `## What is an inside bar?
+
+An inside bar is a candle whose entire range — from wick high to wick low — sits completely inside the previous candle (called the mother bar). The inside bar shows compression: neither buyers nor sellers could push beyond the previous candle's range.
+
+[diagram:inside-bar-setup]
+
+The mother bar sets the range. The inside bar is contained within it. When price is compressed inside a range, energy builds for a breakout.
+
+## Why inside bars form
+
+Inside bars typically appear after a strong directional move (the mother bar), during pauses in trend, or near major support and resistance levels. The market is waiting — participants are deciding whether to continue or reverse.
+
+## Trading the breakout
+
+The inside bar setup is based on the breakout of the mother bar's range.
+
+[diagram:inside-bar-breakout]
+
+Entry: place a buy stop just above the mother bar high (for bullish breakout) or a sell stop below the mother bar low (for bearish breakout). When price breaks out, your order triggers automatically.
+
+Stop loss: place it on the opposite side of the mother bar. If you buy the breakout above the high, your stop goes below the mother bar low. This keeps risk defined by the full setup range.
+
+Target: measure the mother bar's height and project it from the breakout point. Alternatively, use the next structural level.
+
+## What makes an inside bar setup stronger
+
+- The mother bar is large and decisive — a strong directional move
+- The inside bar is small, showing clear compression
+- Forms at or near a key support, resistance, or trend continuation point
+- Higher timeframe trend aligns with the intended breakout direction
+
+## Failed breakouts
+
+Not every inside bar breakout follows through. Price can break above the mother bar high and reverse quickly — this is called a failed breakout or fakeout. To reduce this risk:
+
+- Wait for the breakout candle to close beyond the mother bar high or low
+- Avoid inside bars forming against strong higher timeframe resistance
+- Do not chase price if the breakout candle is very large`,
+    },
+    {
+      title: "Price action: inside bar và breakout",
+      summary:
+        "Inside bar báo hiệu gì về sự nén giá, cách nhận diện mother bar, và cách giao dịch breakout với rủi ro xác định.",
+      keywords: ["inside bar forex", "inside bar breakout", "price action inside bar", "mother bar giao dịch"],
+      body: `## Inside bar là gì?
+
+Inside bar là cây nến có toàn bộ biên độ — từ đỉnh bóng đến đáy bóng — nằm hoàn toàn bên trong cây nến trước (gọi là mother bar). Inside bar thể hiện sự nén giá: cả bên mua lẫn bên bán đều không thể đẩy giá ra ngoài biên độ của nến trước.
+
+[diagram:inside-bar-setup]
+
+Mother bar xác lập biên độ. Inside bar nằm bên trong. Khi giá bị nén trong một vùng, năng lượng tích tụ cho một cú breakout.
+
+## Vì sao inside bar xuất hiện
+
+Inside bar thường xuất hiện sau một nhịp đi có hướng mạnh (mother bar), trong lúc tạm dừng xu hướng, hoặc gần vùng hỗ trợ kháng cự quan trọng. Thị trường đang chờ — các bên đang quyết định tiếp tục hay đảo chiều.
+
+## Giao dịch breakout
+
+Setup inside bar dựa trên việc giá phá ra khỏi biên độ của mother bar.
+
+[diagram:inside-bar-breakout]
+
+Entry: đặt buy stop ngay trên đỉnh mother bar (breakout tăng) hoặc sell stop dưới đáy mother bar (breakout giảm). Khi giá phá ra, lệnh của bạn sẽ tự động kích hoạt.
+
+Stop loss: đặt ở phía đối diện của mother bar. Nếu mua breakout trên đỉnh, stop đặt dưới đáy mother bar. Điều này giữ rủi ro được xác định bởi biên độ toàn bộ setup.
+
+Take profit: đo chiều cao mother bar và chiếu từ điểm breakout. Hoặc dùng mức cấu trúc tiếp theo.
+
+## Điều gì làm setup inside bar mạnh hơn
+
+- Mother bar lớn và dứt khoát — một nhịp đi có hướng mạnh
+- Inside bar nhỏ, thể hiện sự nén rõ ràng
+- Xuất hiện tại hoặc gần vùng hỗ trợ, kháng cự quan trọng hoặc điểm tiếp diễn xu hướng
+- Xu hướng khung cao hơn phù hợp với chiều breakout dự định
+
+## Breakout thất bại
+
+Không phải mọi breakout inside bar đều tiếp diễn. Giá có thể phá trên đỉnh mother bar rồi đảo chiều nhanh — đây gọi là failed breakout hay fakeout. Để giảm rủi ro này:
+
+- Chờ nến breakout đóng cửa ngoài đỉnh hoặc đáy mother bar
+- Tránh inside bar xuất hiện ngược chiều kháng cự khung lớn mạnh
+- Đừng đuổi giá nếu nến breakout quá lớn`,
+    },
+  ),
+  lesson(
+    "price-action-bos-choch-fvg",
+    "advanced",
+    {
+      title: "Market structure: BOS, CHoCH and Fair Value Gaps",
+      summary:
+        "How to read market structure using Break of Structure, Change of Character, and Fair Value Gaps to identify trend continuation and reversal setups.",
+      keywords: ["BOS forex", "CHoCH forex", "fair value gap", "market structure SMC", "smart money concepts"],
+      body: `## Reading market structure
+
+Price does not move randomly. In an uptrend, price creates Higher Highs (HH) and Higher Lows (HL). In a downtrend, it creates Lower Highs (LH) and Lower Lows (LL). Understanding this structure is the foundation of price action and Smart Money Concepts (SMC).
+
+## Break of Structure (BOS)
+
+A BOS happens when price breaks beyond the previous swing high or low in the direction of the current trend. It confirms the trend is continuing.
+
+[diagram:bos-uptrend]
+
+In an uptrend: price makes HL1, then rallies. When it breaks above the previous HH, that is a BOS. This confirms buyers are still in control and the uptrend continues. BOS entries look for pullbacks after the BOS to trade continuation.
+
+## Change of Character (CHoCH)
+
+A CHoCH happens when price breaks the structure in the opposite direction — suggesting the trend may be reversing.
+
+[diagram:choch-bearish]
+
+In an uptrend: after making HH2, price pulls back to HL2. If the next move breaks below HL2 (makes a new lower low), the market structure has shifted. This is a CHoCH — a warning that sellers may be taking over. It does not guarantee reversal, but it changes the bias from bullish to neutral or bearish.
+
+**BOS vs CHoCH in one sentence:** BOS = trend continues, CHoCH = trend may be ending.
+
+## Fair Value Gap (FVG)
+
+A Fair Value Gap is an imbalance in price created by a strong impulse move. It appears as a three-candle sequence where the middle candle moves so aggressively that it leaves a gap between candle one's high and candle three's low.
+
+[diagram:fvg-bullish]
+
+The shaded zone between C1 high and C3 low is the FVG. Price often returns to fill this gap because market participants who missed the original move look to enter at those prices.
+
+## How to use these concepts together
+
+A common SMC-style approach:
+1. Identify the trend using HH/HL or LH/LL structure.
+2. Wait for a CHoCH to signal a possible shift.
+3. Look for an FVG left by the impulse that caused the CHoCH.
+4. Enter when price returns to fill the FVG, with stop beyond the swing that created it.
+
+## Important cautions
+
+These concepts improve context but do not guarantee outcomes. Not every CHoCH leads to a reversal. Not every FVG gets filled. Use them as one layer of analysis alongside support and resistance, risk management, and session timing.`,
+    },
+    {
+      title: "Cấu trúc thị trường: BOS, CHoCH và Fair Value Gap",
+      summary:
+        "Cách đọc cấu trúc thị trường bằng Break of Structure, Change of Character và Fair Value Gap để xác định setup tiếp diễn và đảo chiều.",
+      keywords: ["BOS forex", "CHoCH forex", "fair value gap", "cấu trúc thị trường SMC", "smart money concepts"],
+      body: `## Đọc cấu trúc thị trường
+
+Giá không di chuyển ngẫu nhiên. Trong xu hướng tăng, giá tạo ra Đỉnh Cao Hơn (HH) và Đáy Cao Hơn (HL). Trong xu hướng giảm, giá tạo ra Đỉnh Thấp Hơn (LH) và Đáy Thấp Hơn (LL). Hiểu cấu trúc này là nền tảng của price action và Smart Money Concepts (SMC).
+
+## Break of Structure (BOS)
+
+BOS xảy ra khi giá phá vỡ swing high hoặc swing low trước đó theo chiều xu hướng hiện tại. Nó xác nhận xu hướng đang tiếp diễn.
+
+[diagram:bos-uptrend]
+
+Trong xu hướng tăng: giá tạo HL1, sau đó tăng. Khi giá phá trên HH trước, đó là BOS. Điều này xác nhận bên mua vẫn kiểm soát và xu hướng tăng tiếp tục. Entry BOS thường tìm pullback sau BOS để giao dịch tiếp diễn.
+
+## Change of Character (CHoCH)
+
+CHoCH xảy ra khi giá phá vỡ cấu trúc theo chiều ngược lại — gợi ý xu hướng có thể đang đảo chiều.
+
+[diagram:choch-bearish]
+
+Trong xu hướng tăng: sau khi tạo HH2, giá pullback xuống HL2. Nếu nhịp tiếp theo phá dưới HL2 (tạo đáy thấp hơn mới), cấu trúc thị trường đã dịch chuyển. Đây là CHoCH — cảnh báo rằng bên bán có thể đang kiểm soát. Nó không đảm bảo đảo chiều, nhưng thay đổi thiên hướng từ tăng sang trung lập hoặc giảm.
+
+**BOS vs CHoCH trong một câu:** BOS = xu hướng tiếp diễn, CHoCH = xu hướng có thể kết thúc.
+
+## Fair Value Gap (FVG)
+
+Fair Value Gap là sự mất cân bằng giá được tạo ra bởi một nhịp impulse mạnh. Nó xuất hiện như một chuỗi ba nến trong đó nến giữa di chuyển mạnh đến mức để lại khoảng trống giữa đỉnh của nến thứ nhất và đáy của nến thứ ba.
+
+[diagram:fvg-bullish]
+
+Vùng tô màu giữa đỉnh C1 và đáy C3 là FVG. Giá thường quay lại để lấp đầy khoảng trống này vì các tham gia thị trường đã bỏ lỡ nhịp gốc muốn vào lệnh ở các mức đó.
+
+## Cách kết hợp các khái niệm này
+
+Một cách tiếp cận theo phong cách SMC phổ biến:
+1. Xác định xu hướng bằng cấu trúc HH/HL hoặc LH/LL.
+2. Chờ CHoCH báo hiệu sự dịch chuyển có thể.
+3. Tìm FVG được tạo ra bởi nhịp impulse gây ra CHoCH.
+4. Vào lệnh khi giá quay lại lấp FVG, stop ngoài swing đã tạo ra nó.
+
+## Lưu ý quan trọng
+
+Các khái niệm này cải thiện bối cảnh nhưng không đảm bảo kết quả. Không phải mọi CHoCH đều dẫn đến đảo chiều. Không phải mọi FVG đều được lấp đầy. Dùng chúng như một lớp phân tích cùng với hỗ trợ kháng cự, quản lý rủi ro và thời gian giao dịch theo phiên.`,
+    },
+  ),
 ];
 
 function normalizeLocale(locale: string): AcademyLocale {
