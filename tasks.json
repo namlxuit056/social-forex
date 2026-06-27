@@ -1,99 +1,231 @@
 {
-  "story": "Cho phép user pin signal lên profile",
+  "project": "social-forex",
+  "feature": "Market Screener Enhancement",
+  "created": "2026-06-27",
+  "totalTasks": 7,
   "tasks": [
     {
       "id": "T001",
-      "title": "Thêm model UserPinnedSignal vào Prisma schema",
-      "description": "Thêm model `UserPinnedSignal` vào `prisma/schema.prisma` với các field: id (cuid), userId, signalId, sortOrder (default 0), createdAt. Thêm relation `pinnedSignals UserPinnedSignal[]` vào model `User` và `pinnedBy UserPinnedSignal[]` vào model `Signal`. Đặt `onDelete: Cascade` trên cả hai FK. Thêm `@@unique([userId, signalId])` và `@@index([userId, sortOrder])`.",
-      "files": ["prisma/schema.prisma"],
-      "estimate_hours": 0.5,
-      "depends_on": []
+      "title": "Column Sorting cho Screener Table",
+      "priority": "high",
+      "effort": "small",
+      "status": "pending",
+      "description": "Cho phép sort bảng screener theo bất kỳ column nào (symbol, price, change%, RSI, ADX, EMA bias, rec M15/H1/H4/D1). Click header để toggle asc/desc. Hiển thị mũi tên sort indicator.",
+      "details": [
+        "Thêm state sortBy + sortDir vào market-screener.tsx",
+        "Click column header → toggle asc/desc/null (unsorted)",
+        "Sort logic: number columns (price, change%, RSI, ADX, recs) sort numerically; string columns (symbol, name, group) sort alphabetically; emaBias sort: bullish > mixed > bearish > unknown",
+        "Persist sort state vào URL search params (?sort=rsi&dir=asc)",
+        "Sort indicator arrow (↑/↓) bên cạnh column header",
+        "Default sort: symbol asc"
+      ],
+      "files": [
+        "src/components/screener/market-screener.tsx"
+      ],
+      "acceptance": [
+        "Click column header sort đúng thứ tự asc/desc",
+        "Sort indicator hiển thị đúng",
+        "Sort state persist trong URL",
+        "UI responsive, không lag với 19 pairs"
+      ]
     },
     {
       "id": "T002",
-      "title": "Tạo migration SQL cho bảng UserPinnedSignal",
-      "description": "Tạo file migration tại `prisma/migrations/20260516120000_user_pinned_signals/migration.sql` với SQL CREATE TABLE, CREATE UNIQUE INDEX, CREATE INDEX, và 2 ALTER TABLE ADD CONSTRAINT (FK tới User và Signal với ON DELETE CASCADE). Chạy `npm run db:migrate` để apply migration lên DB local.",
-      "files": [
-        "prisma/migrations/20260516120000_user_pinned_signals/migration.sql"
+      "title": "Watchlist / Favorite Pairs",
+      "priority": "high",
+      "effort": "medium",
+      "status": "pending",
+      "description": "Cho phép user đánh dấu pairs yêu thích (star icon). Filter tab 'Favorites' để xem nhanh danh sách đã lưu. Persist watchlist vào localStorage (guest) + Prisma (logged-in user).",
+      "details": [
+        "Tạo Prisma model ScreenerWatchlist { id, userId, symbol, createdAt }",
+        "Run prisma migrate dev để add model mới",
+        "Tạo server action: toggleWatchlist(symbol), getWatchlist()",
+        "Star icon (☆/★) ở đầu mỗi row trong bảng screener",
+        "Click star → toggle favorite, animate fill/empty",
+        "Thêm filter tab '⭐ Favorites' bên cạnh all/bullish/bearish/oversold/overbought",
+        "Guest users: lưu vào localStorage key 'screener_watchlist'",
+        "Logged-in users: sync lên Prisma, fallback localStorage",
+        "Hiển thị số lượng favorites trên tab badge"
       ],
-      "estimate_hours": 0.5,
-      "depends_on": ["T001"]
+      "files": [
+        "prisma/schema.prisma",
+        "src/actions/screener.ts",
+        "src/components/screener/market-screener.tsx",
+        "src/app/api/screener/watchlist/route.ts"
+      ],
+      "acceptance": [
+        "Star icon toggle hoạt động mượt",
+        "Favorites persist sau khi reload trang",
+        "Logged-in user sync favorites lên DB",
+        "Filter tab 'Favorites' chỉ hiện starred pairs",
+        "Guest user lưu được bằng localStorage"
+      ]
     },
     {
       "id": "T003",
-      "title": "Regenerate Prisma client sau migration",
-      "description": "Chạy `npm run db:generate` để regenerate Prisma client tại `src/generated/prisma/` bao gồm type `UserPinnedSignal` và các method `prisma.userPinnedSignal.*`. Verify TypeScript không còn báo lỗi với model mới.",
-      "files": ["src/generated/prisma/"],
-      "estimate_hours": 0.25,
-      "depends_on": ["T002"]
+      "title": "Custom Filter Builder",
+      "priority": "high",
+      "effort": "large",
+      "status": "pending",
+      "description": "Cho phép user tạo bộ lọc tùy chỉnh với điều kiện kỹ thuật: RSI range, ADX threshold, EMA bias, multi-TF recommendation. Lưu filter presets để tái sử dụng.",
+      "details": [
+        "Tạo component ScreenerFilterBuilder với UI điều kiện:",
+        "  - RSI: range slider (0-100) hoặc operator (>, <, between)",
+        "  - ADX: threshold (>, <, between 0-100)",
+        "  - EMA Bias: multi-select (bullish, bearish, mixed)",
+        "  - Recommendation: multi-select cho từng TF (M15, H1, H4, D1) với giá trị Strong Buy/Buy/Neutral/Sell/Strong Sell",
+        "  - Change%: range filter",
+        "  - Group: multi-select (Forex, Crypto, Commodities, Indices)",
+        "Lưu custom filters vào localStorage key 'screener_custom_filters'",
+        "Cho phép đặt tên filter preset (e.g., 'Oversold Forex', 'Strong Trend')",
+        "Dropdown chọn preset đã lưu",
+        "Nút 'Apply' → filter bảng real-time (client-side)",
+        "Nút 'Clear' → reset tất cả filters",
+        "Hiển thị số pairs match / tổng (e.g., '5/19 pairs')"
+      ],
+      "files": [
+        "src/components/screener/screener-filter-builder.tsx",
+        "src/components/screener/market-screener.tsx"
+      ],
+      "acceptance": [
+        "RSI range filter hoạt động đúng",
+        "ADX threshold filter hoạt động đúng",
+        "Multi-select cho EMA bias và recommendation",
+        "Lưu/tải preset hoạt động",
+        "Filter count hiển thị đúng (X/Y pairs)",
+        "Custom filter kết hợp được với preset filters (bullish/bearish/...)"
+      ]
     },
     {
       "id": "T004",
-      "title": "Tạo utility pin-signal-limit và unit test",
-      "description": "Tạo `src/lib/signals/pin-signal-limit.ts` export `MAX_PINS = 6` và `isAtPinLimit(count: number): boolean`. Tạo `src/lib/signals/pin-signal-limit.test.ts` với 3 test cases: dưới limit trả false, đúng bằng limit trả true, vượt limit trả true. Chạy `npx vitest run src/lib/signals/pin-signal-limit.test.ts` để xác nhận pass.",
-      "files": [
-        "src/lib/signals/pin-signal-limit.ts",
-        "src/lib/signals/pin-signal-limit.test.ts"
+      "title": "Screener Alerts (Thông báo điều kiện)",
+      "priority": "medium",
+      "effort": "large",
+      "status": "pending",
+      "description": "Cho phép user tạo alert rules: khi một pair match điều kiện kỹ thuật đã định, gửi thông báo in-app + optional Telegram. Quản lý alert rules trong UI riêng.",
+      "details": [
+        "Tạo Prisma model ScreenerAlert { id, userId, name, conditions (JSON), isActive, lastTriggeredAt, createdAt }",
+        "Tạo Prisma model ScreenerAlertLog { id, alertId, symbol, triggeredAt, data (JSON) }",
+        "Run prisma migrate dev",
+        "Tạo API /api/screener/alerts để CRUD alert rules",
+        "Background check logic: mỗi lần screener fetch (cache TTL 60s), so sánh kết quả với active alerts",
+        "Khi match: tạo in-app notification (Notification model đã có) + gửi Telegram nếu user linked",
+        "Alert conditions reuse filter builder format từ T003",
+        "UI quản lý alerts: list active/paused alerts, toggle active, edit, delete",
+        "Trang /[locale]/screener/alerts hoặc tab trong screener page",
+        "Cooldown: mỗi alert chỉ trigger 1 lần / giờ cho cùng 1 symbol"
       ],
-      "estimate_hours": 0.5,
-      "depends_on": ["T003"]
+      "files": [
+        "prisma/schema.prisma",
+        "src/app/api/screener/alerts/route.ts",
+        "src/app/api/screener/route.ts",
+        "src/components/screener/screener-alerts.tsx",
+        "src/actions/screener.ts"
+      ],
+      "acceptance": [
+        "Tạo/edit/delete alert rule hoạt động",
+        "Alert trigger đúng khi pair match điều kiện",
+        "In-app notification gửi đúng",
+        "Telegram notification gửi nếu user linked",
+        "Cooldown 1 giờ / symbol hoạt động",
+        "Alert logs hiển thị lịch sử trigger"
+      ]
     },
     {
       "id": "T005",
-      "title": "Thêm i18n keys cho tính năng pin signal",
-      "description": "Thêm vào `messages/en.json` và `messages/vi.json`: key `errors.pinLimitReached` (en: 'You can pin up to 6 signals.' / vi: 'Bạn chỉ có thể ghim tối đa 6 tín hiệu.'), và 6 key dưới namespace `profile`: `pinnedSignals`, `pinnedSignalsEmpty`, `pinSignal`, `unpinSignal`, `pinLimitReachedHint` (có param `{max}`), `pinSignalAria`, `unpinSignalAria` (có param `{symbol}`). Hai file phải sync nhau.",
-      "files": ["messages/en.json", "messages/vi.json"],
-      "estimate_hours": 0.5,
-      "depends_on": ["T003"]
+      "title": "Additional Technical Indicators (MACD, BB, Stochastic, ATR)",
+      "priority": "medium",
+      "effort": "medium",
+      "status": "pending",
+      "description": "Bổ sung thêm indicators vào screener: MACD (signal/histogram), Bollinger Bands (position), Stochastic (%K/%D), ATR (volatility). Hiển thị dưới dạng columns có thể toggle.",
+      "details": [
+        "Mở rộng API /api/screener/route.ts: parse thêm MACD, BB, Stochastic, ATR từ TradingView context",
+        "Thêm fields vào ScreenerPair type: macdValue, macdSignal, macdHist, bbPosition (above/below/within), stochK, stochD, atrValue",
+        "Hiển thị columns mới trong bảng (ẩn mặc định, toggle hiện)",
+        "Column visibility toggle dropdown/menu: user chọn columns muốn hiện",
+        "Persist column visibility vào localStorage",
+        "MACD: hiển thị histogram với color coding (xanh = bullish, đỏ = bearish)",
+        "BB: hiển thị 'Above' / 'Below' / 'Within' bands",
+        "Stochastic: hiển thị %K value + color coding (oversold/overbought)",
+        "ATR: hiển thị value + volatility label (Low/Med/High)"
+      ],
+      "files": [
+        "src/app/api/screener/route.ts",
+        "src/components/screener/market-screener.tsx",
+        "src/types/screener.ts"
+      ],
+      "acceptance": [
+        "MACD, BB, Stochastic, ATR data fetch được từ TradingView",
+        "Columns mới hiển thị đúng data",
+        "Column toggle hoạt động, persist localStorage",
+        "Color coding đúng cho từng indicator",
+        "Không ảnh hưởng performance (vẫn dùng cache 60s)"
+      ]
     },
     {
       "id": "T006",
-      "title": "Thêm server action togglePinSignal",
-      "description": "Thêm function `togglePinSignal` vào `src/actions/signal-social.ts`. Flow: auth() → redirect nếu chưa login; rateLimit('sig-pin:{userId}', 20, 60000); zod validate signalId; kiểm tra signal tồn tại; findUnique existing pin → nếu có thì delete + return {ok:true, pinned:false}; nếu không: count pins, nếu >= MAX_PINS return error 'pinLimitReached'; create với sortOrder=count (try/catch P2002); revalidatePath('/u/{userId}'). Import MAX_PINS từ pin-signal-limit.ts.",
-      "files": [
-        "src/actions/signal-social.ts",
-        "src/lib/signals/pin-signal-limit.ts"
+      "title": "i18n Keys cho tất cả Screener Enhancements",
+      "priority": "high",
+      "effort": "small",
+      "status": "pending",
+      "description": "Thêm tất cả i18n keys mới cho features T001-T005 vào messages/vi.json và messages/en.json.",
+      "details": [
+        "Sorting: sort_by, sort_asc, sort_desc, sort_reset",
+        "Watchlist: favorites, add_to_favorites, remove_from_favorites, no_favorites",
+        "Filter Builder: custom_filter, filter_conditions, save_preset, load_preset, clear_filters, pairs_match, rsi_range, adx_threshold, ema_bias, recommendation, change_range, group",
+        "Alerts: screener_alerts, create_alert, edit_alert, delete_alert, alert_conditions, alert_active, alert_paused, alert_history, alert_triggered, no_alerts",
+        "Indicators: macd, bollinger_bands, stochastic, atr, column_visibility, show_columns, hide_columns, above_band, below_band, within_band, low_volatility, medium_volatility, high_volatility",
+        "Đảm bảo cả vi và en có đủ keys"
       ],
-      "estimate_hours": 1.5,
-      "depends_on": ["T004", "T005"]
+      "files": [
+        "messages/vi.json",
+        "messages/en.json"
+      ],
+      "acceptance": [
+        "Tất cả keys mới có trong cả vi.json và en.json",
+        "Không duplicate keys",
+        "Không miss key nào so với usage trong code"
+      ]
     },
     {
       "id": "T007",
-      "title": "Tạo client component PinSignalButton",
-      "description": "Tạo `src/components/signals/pin-signal-button.tsx` (\"use client\"). Props: signalId, signalSymbol, isPinned, loggedIn, atLimit. Render null nếu !loggedIn. Dùng native <form action={togglePinSignal}>, hidden input signalId, Button variant='outline' size='sm' với icon Pin/PinOff (lucide-react). Disabled khi !isPinned && atLimit. Class amber khi isPinned. aria-label và title từ i18n keys profile.*.",
-      "files": ["src/components/signals/pin-signal-button.tsx"],
-      "estimate_hours": 1,
-      "depends_on": ["T005", "T006"]
-    },
-    {
-      "id": "T008",
-      "title": "Tạo server component PinnedSignalsSection",
-      "description": "Tạo `src/components/profile/pinned-signals-section.tsx` (async server component). Props: profileUserId, viewerVipUntil, viewerUserId. Query `prisma.userPinnedSignal.findMany` với orderBy sortOrder asc, take 6, select signal fields (id, symbol, direction, tier, status, entry). Return null nếu pins.length === 0. Render <section> với heading 'pinnedSignals'. Mỗi item là Link tới /signals/{id}, hiện symbol, direction badge, tier badge. Ẩn entry nếu VIP signal và viewer không phải VIP và không phải chủ profile.",
-      "files": ["src/components/profile/pinned-signals-section.tsx"],
-      "estimate_hours": 1.5,
-      "depends_on": ["T003", "T005"]
-    },
-    {
-      "id": "T009",
-      "title": "Tích hợp PinSignalButton vào signal detail page",
-      "description": "Trong `src/app/[locale]/signals/[signalId]/page.tsx`: sau khi đã fetch signal, thêm Promise.all query `prisma.userPinnedSignal.findUnique({where:{userId_signalId:{userId,signalId}}})` và `prisma.userPinnedSignal.count({where:{userId}})` — chỉ khi userId tồn tại. Tính `atPinLimit = pinCount >= MAX_PINS`. Render `<PinSignalButton>` trong card actions, bên cạnh reactions, với các props isPinned, loggedIn, atLimit.",
-      "files": [
-        "src/app/[locale]/signals/[signalId]/page.tsx",
-        "src/components/signals/pin-signal-button.tsx"
+      "title": "Unit Tests cho Screener Enhancements",
+      "priority": "high",
+      "effort": "medium",
+      "status": "pending",
+      "description": "Viết unit tests cho tất cả logic mới: sorting, watchlist, custom filter matching, alert condition evaluation, indicator parsing.",
+      "details": [
+        "Test sorting utility: sortPairs(pairs, sortBy, sortDir) cho tất cả column types",
+        "Test watchlist: addToWatchlist, removeFromWatchlist, isFavorite, getWatchlist",
+        "Test custom filter: matchConditions(pair, conditions) với various condition combos",
+        "Test alert: evaluateAlert(pair, alertConditions) → boolean",
+        "Test indicator parsing: parseMacd, parseBollingerBands, parseStochastic, parseAtr từ TradingView raw data",
+        "Edge cases: null values, empty arrays, invalid conditions",
+        "Đảm bảo tất cả tests pass: npx vitest run",
+        "Target: >= 15 new tests"
       ],
-      "estimate_hours": 1,
-      "depends_on": ["T006", "T007"]
-    },
-    {
-      "id": "T010",
-      "title": "Tích hợp PinnedSignalsSection vào public profile page",
-      "description": "Trong `src/app/[locale]/u/[userId]/page.tsx`: thêm query viewer's VIP (`prisma.user.findUnique({where:{id:session.user.id}, select:{vipUntil:true}})`) — chỉ khi session tồn tại. Render `<PinnedSignalsSection profileUserId={userId} viewerVipUntil={viewerDbUser?.vipUntil} viewerUserId={session?.user?.id}/>` ngay sau TraderPerformanceCard, trước phần follower grid.",
       "files": [
-        "src/app/[locale]/u/[userId]/page.tsx",
-        "src/components/profile/pinned-signals-section.tsx"
+        "src/components/screener/market-screener.test.ts",
+        "src/lib/screener/filters.test.ts",
+        "src/lib/screener/indicators.test.ts",
+        "src/actions/screener.test.ts"
       ],
-      "estimate_hours": 1,
-      "depends_on": ["T006", "T008"]
+      "acceptance": [
+        "Tất cả tests pass",
+        ">= 15 new test cases",
+        "Cover edge cases (null, empty, invalid)",
+        "npx vitest run exit code 0"
+      ]
     }
+  ],
+  "sprintOrder": ["T001", "T002", "T005", "T003", "T004", "T006", "T007"],
+  "notes": [
+    "T001 (Sorting) là quick win, nên làm đầu tiên",
+    "T002 (Watchlist) là feature user-facing giá trị cao",
+    "T005 (Indicators) nên làm trước T003 vì filter builder cần data từ indicators",
+    "T003 (Custom Filter) depend trên T005 (cần MACD/BB/Stochastic conditions)",
+    "T004 (Alerts) depend trên T003 (reuse filter condition format)",
+    "T006 (i18n) nên làm sau khi có tất cả UI components",
+    "T007 (Tests) luôn cuối cùng để cover tất cả logic"
   ]
 }

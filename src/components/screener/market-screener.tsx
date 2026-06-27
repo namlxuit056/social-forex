@@ -1,13 +1,26 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { Filter } from "lucide-react";
+import { Filter, ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { AiPicksPanel } from "@/components/screener/ai-picks-panel";
 
 type ScreenerFilter = "all" | "bullish" | "bearish" | "oversold" | "overbought";
+
+type SortColumn =
+  | "symbol"
+  | "price"
+  | "changePercent"
+  | "rsi"
+  | "adx"
+  | "recM15"
+  | "recH1"
+  | "recH4"
+  | "recD1";
+
+type SortDir = "asc" | "desc";
 
 type ScreenerPair = {
   symbol: string;
@@ -73,24 +86,120 @@ function priceDecimals(price: number): number {
   return 4;
 }
 
+/** Compare two nullable numbers: null always sorts last. */
+function cmpNum(a: number | null, b: number | null, dir: number): number {
+  if (a === null && b === null) return 0;
+  if (a === null) return 1; // null last
+  if (b === null) return -1;
+  return (a - b) * dir;
+}
+
+function cmpStr(a: string, b: string, dir: number): number {
+  return a.localeCompare(b) * dir;
+}
+
 export function MarketScreener({ pairs, isLoggedIn, isVip }: Props) {
   const t = useTranslations("screener");
   const [filter, setFilter] = useState<ScreenerFilter>("all");
 
+  // ── Sorting state, initialised from URL search params ──
+  const [sortBy, setSortBy] = useState<SortColumn | null>(null);
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+
+  // Read initial sort from URL on mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const s = params.get("sort") as SortColumn | null;
+    const d = params.get("dir");
+    if (s && ["symbol", "price", "changePercent", "rsi", "adx", "recM15", "recH1", "recH4", "recD1"].includes(s)) {
+      setSortBy(s);
+    }
+    if (d === "desc" || d === "asc") {
+      setSortDir(d);
+    }
+  }, []);
+
+  // Persist sort to URL
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (sortBy) {
+      url.searchParams.set("sort", sortBy);
+      url.searchParams.set("dir", sortDir);
+    } else {
+      url.searchParams.delete("sort");
+      url.searchParams.delete("dir");
+    }
+    window.history.replaceState(null, "", url.toString());
+  }, [sortBy, sortDir]);
+
+  const handleSort = useCallback(
+    (col: SortColumn) => {
+      if (sortBy === col) {
+        // Toggle: asc → desc → none → asc
+        if (sortDir === "asc") {
+          setSortDir("desc");
+        } else {
+          setSortBy(null);
+          setSortDir("asc");
+        }
+      } else {
+        setSortBy(col);
+        setSortDir("asc");
+      }
+    },
+    [sortBy, sortDir],
+  );
+
   const filtered = useMemo(() => {
+    let list = [...pairs];
+
+    // Apply filter
     switch (filter) {
       case "bullish":
-        return pairs.filter((p) => p.recD1 !== null && p.recD1 >= 0.1);
+        list = list.filter((p) => p.recD1 !== null && p.recD1 >= 0.1);
+        break;
       case "bearish":
-        return pairs.filter((p) => p.recD1 !== null && p.recD1 <= -0.1);
+        list = list.filter((p) => p.recD1 !== null && p.recD1 <= -0.1);
+        break;
       case "oversold":
-        return pairs.filter((p) => p.rsi !== null && p.rsi < 35);
+        list = list.filter((p) => p.rsi !== null && p.rsi < 35);
+        break;
       case "overbought":
-        return pairs.filter((p) => p.rsi !== null && p.rsi > 65);
-      default:
-        return pairs;
+        list = list.filter((p) => p.rsi !== null && p.rsi > 65);
+        break;
     }
-  }, [pairs, filter]);
+
+    // Apply sort
+    if (sortBy) {
+      const dir = sortDir === "asc" ? 1 : -1;
+      list.sort((a, b) => {
+        switch (sortBy) {
+          case "symbol":
+            return cmpStr(a.symbol, b.symbol, dir);
+          case "price":
+            return cmpNum(a.price, b.price, dir);
+          case "changePercent":
+            return cmpNum(a.changePercent, b.changePercent, dir);
+          case "rsi":
+            return cmpNum(a.rsi, b.rsi, dir);
+          case "adx":
+            return cmpNum(a.adx, b.adx, dir);
+          case "recM15":
+            return cmpNum(a.recM15, b.recM15, dir);
+          case "recH1":
+            return cmpNum(a.recH1, b.recH1, dir);
+          case "recH4":
+            return cmpNum(a.recH4, b.recH4, dir);
+          case "recD1":
+            return cmpNum(a.recD1, b.recD1, dir);
+          default:
+            return 0;
+        }
+      });
+    }
+
+    return list;
+  }, [pairs, filter, sortBy, sortDir]);
 
   const filters: { key: ScreenerFilter; label: string }[] = [
     { key: "all", label: t("filterAll") },
@@ -99,6 +208,19 @@ export function MarketScreener({ pairs, isLoggedIn, isVip }: Props) {
     { key: "oversold", label: t("filterOversold") },
     { key: "overbought", label: t("filterOverbought") },
   ];
+
+  /** Render sort icon for a column */
+  function SortIcon({ col }: { col: SortColumn }) {
+    if (sortBy !== col)
+      return (
+        <ChevronsUpDown className="ml-1 inline size-3 opacity-30 group-hover:opacity-60" />
+      );
+    return sortDir === "asc" ? (
+      <ChevronUp className="ml-1 inline size-3 text-primary" />
+    ) : (
+      <ChevronDown className="ml-1 inline size-3 text-primary" />
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -125,15 +247,65 @@ export function MarketScreener({ pairs, isLoggedIn, isVip }: Props) {
         <table className="w-full min-w-205 text-left text-sm">
           <thead className="bg-muted/50 text-muted-foreground">
             <tr>
-              <th className="px-3 py-2.5">{t("colSymbol")}</th>
-              <th className="px-3 py-2.5 text-right">{t("colPrice")}</th>
-              <th className="px-3 py-2.5 text-right">{t("col24h")}</th>
-              <th className="px-3 py-2.5 text-center">{t("colRsi")}</th>
-              <th className="px-3 py-2.5 text-center">{t("colAdx")}</th>
-              <th className="px-3 py-2.5 text-center text-xs">M15</th>
-              <th className="px-3 py-2.5 text-center text-xs">H1</th>
-              <th className="px-3 py-2.5 text-center text-xs">H4</th>
-              <th className="px-3 py-2.5 text-center text-xs">D1</th>
+              <th
+                className="group cursor-pointer select-none px-3 py-2.5"
+                onClick={() => handleSort("symbol")}
+              >
+                {t("colSymbol")}
+                <SortIcon col="symbol" />
+              </th>
+              <th
+                className="group cursor-pointer select-none px-3 py-2.5 text-right"
+                onClick={() => handleSort("price")}
+              >
+                {t("colPrice")}
+                <SortIcon col="price" />
+              </th>
+              <th
+                className="group cursor-pointer select-none px-3 py-2.5 text-right"
+                onClick={() => handleSort("changePercent")}
+              >
+                {t("col24h")}
+                <SortIcon col="changePercent" />
+              </th>
+              <th
+                className="group cursor-pointer select-none px-3 py-2.5 text-center"
+                onClick={() => handleSort("rsi")}
+              >
+                {t("colRsi")}
+                <SortIcon col="rsi" />
+              </th>
+              <th
+                className="group cursor-pointer select-none px-3 py-2.5 text-center"
+                onClick={() => handleSort("adx")}
+              >
+                {t("colAdx")}
+                <SortIcon col="adx" />
+              </th>
+              <th
+                className="group cursor-pointer select-none px-3 py-2.5 text-center text-xs"
+                onClick={() => handleSort("recM15")}
+              >
+                M15 <SortIcon col="recM15" />
+              </th>
+              <th
+                className="group cursor-pointer select-none px-3 py-2.5 text-center text-xs"
+                onClick={() => handleSort("recH1")}
+              >
+                H1 <SortIcon col="recH1" />
+              </th>
+              <th
+                className="group cursor-pointer select-none px-3 py-2.5 text-center text-xs"
+                onClick={() => handleSort("recH4")}
+              >
+                H4 <SortIcon col="recH4" />
+              </th>
+              <th
+                className="group cursor-pointer select-none px-3 py-2.5 text-center text-xs"
+                onClick={() => handleSort("recD1")}
+              >
+                D1 <SortIcon col="recD1" />
+              </th>
               <th className="px-3 py-2.5"></th>
             </tr>
           </thead>
