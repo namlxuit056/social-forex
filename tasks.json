@@ -66,7 +66,7 @@
       "title": "Custom Filter Builder",
       "priority": "high",
       "effort": "large",
-      "status": "in_progress",
+      "status": "completed",
       "description": "Cho phép user tạo bộ lọc tùy chỉnh với điều kiện kỹ thuật: RSI range, ADX threshold, EMA bias, multi-TF recommendation. Lưu filter presets để tái sử dụng.",
       "details": [
         "Tạo component ScreenerFilterBuilder với UI điều kiện:",
@@ -101,7 +101,7 @@
       "title": "Screener Alerts (Thông báo điều kiện)",
       "priority": "medium",
       "effort": "large",
-      "status": "pending",
+      "status": "in_progress",
       "description": "Cho phép user tạo alert rules: khi một pair match điều kiện kỹ thuật đã định, gửi thông báo in-app + optional Telegram. Quản lý alert rules trong UI riêng.",
       "details": [
         "Tạo Prisma model ScreenerAlert { id, userId, name, conditions (JSON), isActive, lastTriggeredAt, createdAt }",

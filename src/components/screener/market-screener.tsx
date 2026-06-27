@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { AiPicksPanel } from "@/components/screener/ai-picks-panel";
 import { ScreenerFilterBuilder } from "@/components/screener/screener-filter-builder";
 import type { CustomFilters } from "@/components/screener/screener-filter-builder";
+import { ScreenerAlerts } from "@/components/screener/screener-alerts";
 
 type ScreenerFilter = "all" | "bullish" | "bearish" | "oversold" | "overbought" | "favorites";
 
@@ -343,6 +344,8 @@ export function MarketScreener({ pairs, isLoggedIn, isVip, initialFavorites = []
   return (
     <div className="space-y-4">
       <AiPicksPanel isLoggedIn={isLoggedIn} isVip={isVip} />
+
+      {isLoggedIn && <ScreenerAlerts />}
 
       <ScreenerFilterBuilder
         totalPairs={pairs.length}

@@ -1180,7 +1180,8 @@
     "pushDisabledHint": "Enable to get alerts for new signals from traders you follow.",
     "pushSubscribe": "Enable",
     "pushUnsubscribe": "Disable",
-    "pushFailed": "Could not update push notification settings."
+    "pushFailed": "Could not update push notification settings.",
+    "screenerAlert": "Screener alert triggered"
   },
   "auth": {
     "signInTitle": "Sign in",
@@ -1933,7 +1934,31 @@
     "clearFilters": "Clear",
     "savePreset": "Save preset",
     "presetNamePlaceholder": "Preset name...",
-    "filterMatchCount": "{matched} of {total} pairs"
+    "filterMatchCount": "{matched} of {total} pairs",
+    "alerts": {
+      "title": "Screener Alerts",
+      "newAlert": "New Alert",
+      "createAlert": "Create Alert",
+      "alertNamePlaceholder": "Alert name (e.g. Oversold RSI)",
+      "noConditions": "No conditions set",
+      "pause": "Pause",
+      "resume": "Resume",
+      "delete": "Delete",
+      "lastTriggered": "Last triggered",
+      "triggerHistory": "Trigger History",
+      "noTriggers": "No triggers yet",
+      "noAlerts": "No alerts yet",
+      "noAlertsHint": "Create an alert to get notified when conditions match",
+      "maxAlertsReached": "Maximum 20 active alerts reached",
+      "fetchError": "Failed to load alerts",
+      "createError": "Failed to create alert",
+      "updateError": "Failed to update alert",
+      "deleteError": "Failed to delete alert",
+      "cancel": "Cancel",
+      "create": "Create",
+      "min": "Min",
+      "group": "Group"
+    }
   },
   "scalping": {
     "title": "AI Scalping",

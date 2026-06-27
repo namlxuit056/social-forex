@@ -1180,7 +1180,8 @@
     "pushDisabledHint": "Bật để nhận cảnh báo khi có tín hiệu mới từ traders bạn follow.",
     "pushSubscribe": "Bật",
     "pushUnsubscribe": "Tắt",
-    "pushFailed": "Không thể cập nhật cài đặt thông báo."
+    "pushFailed": "Không thể cập nhật cài đặt thông báo.",
+    "screenerAlert": "Cảnh báo screener đã kích hoạt"
   },
   "auth": {
     "signInTitle": "Đăng nhập",
@@ -1933,7 +1934,31 @@
     "clearFilters": "Xóa bộ lọc",
     "savePreset": "Lưu mẫu",
     "presetNamePlaceholder": "Tên mẫu...",
-    "filterMatchCount": "{matched} trên {total} cặp"
+    "filterMatchCount": "{matched} trên {total} cặp",
+    "alerts": {
+      "title": "Cảnh báo Screener",
+      "newAlert": "Tạo cảnh báo",
+      "createAlert": "Tạo cảnh báo mới",
+      "alertNamePlaceholder": "Tên cảnh báo (VD: RSI quá bán)",
+      "noConditions": "Chưa đặt điều kiện",
+      "pause": "Tạm dừng",
+      "resume": "Tiếp tục",
+      "delete": "Xóa",
+      "lastTriggered": "Kích hoạt lần cuối",
+      "triggerHistory": "Lịch sử kích hoạt",
+      "noTriggers": "Chưa có lần kích hoạt nào",
+      "noAlerts": "Chưa có cảnh báo nào",
+      "noAlertsHint": "Tạo cảnh báo để được thông báo khi điều kiện khớp",
+      "maxAlertsReached": "Đã đạt giới hạn 20 cảnh báo đang hoạt động",
+      "fetchError": "Không thể tải danh sách cảnh báo",
+      "createError": "Không thể tạo cảnh báo",
+      "updateError": "Không thể cập nhật cảnh báo",
+      "deleteError": "Không thể xóa cảnh báo",
+      "cancel": "Hủy",
+      "create": "Tạo",
+      "min": "Tối thiểu",
+      "group": "Nhóm"
+    }
   },
   "scalping": {
     "title": "AI Scalping",

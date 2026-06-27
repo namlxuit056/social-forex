@@ -15,7 +15,8 @@ export type NotificationRow = {
     | "USER_FOLLOWED"
     | "STREAK_REMINDER"
     | "PRICE_ALERT"
-    | "JOURNAL_REVIEW";
+    | "JOURNAL_REVIEW"
+    | "SCREENER_ALERT";
   createdAt: string;
   readAt: string | null;
   signal: { id: string; symbol: string; direction: string } | null;
@@ -53,9 +54,11 @@ export function NotificationList({
                 ? "/alerts"
                 : n.kind === "JOURNAL_REVIEW"
                   ? "/journal?tab=weekly"
-                  : n.signal
-                    ? `/signals/${n.signal.id}`
-                    : "/notifications";
+                  : n.kind === "SCREENER_ALERT"
+                    ? "/screener"
+                    : n.signal
+                      ? `/signals/${n.signal.id}`
+                      : "/notifications";
 
         const title =
           n.kind === "USER_FOLLOWED" && n.actor
@@ -81,8 +84,10 @@ export function NotificationList({
                     ? "Cảnh báo giá đã kích hoạt"
                     : n.kind === "JOURNAL_REVIEW"
                       ? "Báo cáo giao dịch tuần đã sẵn sàng"
-                      : n.signal
-                        ? t("signalNew", {
+                      : n.kind === "SCREENER_ALERT"
+                        ? t("screenerAlert")
+                        : n.signal
+                          ? t("signalNew", {
                             symbol: n.signal.symbol,
                             direction: n.signal.direction,
                           })
