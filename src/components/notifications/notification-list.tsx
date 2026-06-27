@@ -1,14 +1,21 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Bell } from "lucide-react";
+import { Bell, TrendingUp, TrendingDown } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { markNotificationRead } from "@/actions/notifications";
 import { cn } from "@/lib/utils";
 
 export type NotificationRow = {
   id: string;
-  kind: "SIGNAL_NEW" | "USER_FOLLOWED" | "STREAK_REMINDER" | "PRICE_ALERT" | "JOURNAL_REVIEW";
+  kind:
+    | "SIGNAL_NEW"
+    | "SIGNAL_WIN"
+    | "SIGNAL_LOSS"
+    | "USER_FOLLOWED"
+    | "STREAK_REMINDER"
+    | "PRICE_ALERT"
+    | "JOURNAL_REVIEW";
   createdAt: string;
   readAt: string | null;
   signal: { id: string; symbol: string; direction: string } | null;
@@ -49,6 +56,7 @@ export function NotificationList({
                   : n.signal
                     ? `/signals/${n.signal.id}`
                     : "/notifications";
+
         const title =
           n.kind === "USER_FOLLOWED" && n.actor
             ? t("followYou", {
@@ -57,18 +65,35 @@ export function NotificationList({
                   n.actor.email?.split("@")[0] ??
                   t("followUnknownName"),
               })
-            : n.kind === "STREAK_REMINDER"
-              ? "Đừng quên ghi nhật ký / lập kế hoạch hôm nay!"
-              : n.kind === "PRICE_ALERT"
-                ? "Cảnh báo giá đã kích hoạt"
-                : n.kind === "JOURNAL_REVIEW"
-                  ? "Báo cáo giao dịch tuần đã sẵn sàng"
-                  : n.signal
-                    ? t("signalNew", {
-                        symbol: n.signal.symbol,
-                        direction: n.signal.direction,
-                      })
-                    : t("empty");
+            : n.kind === "SIGNAL_WIN" && n.signal
+              ? t("signalWin", {
+                  symbol: n.signal.symbol,
+                  direction: n.signal.direction,
+                })
+              : n.kind === "SIGNAL_LOSS" && n.signal
+                ? t("signalLoss", {
+                    symbol: n.signal.symbol,
+                    direction: n.signal.direction,
+                  })
+                : n.kind === "STREAK_REMINDER"
+                  ? "Đừng quên ghi nhật ký / lập kế hoạch hôm nay!"
+                  : n.kind === "PRICE_ALERT"
+                    ? "Cảnh báo giá đã kích hoạt"
+                    : n.kind === "JOURNAL_REVIEW"
+                      ? "Báo cáo giao dịch tuần đã sẵn sàng"
+                      : n.signal
+                        ? t("signalNew", {
+                            symbol: n.signal.symbol,
+                            direction: n.signal.direction,
+                          })
+                        : t("empty");
+
+        const accentClass =
+          n.kind === "SIGNAL_WIN"
+            ? "text-green-400"
+            : n.kind === "SIGNAL_LOSS"
+              ? "text-red-400"
+              : "";
 
         return (
           <li key={n.id}>
@@ -82,11 +107,21 @@ export function NotificationList({
                 unread && "bg-primary/5",
               )}
             >
-              <div className="min-w-0">
-                <p className="text-sm font-medium text-foreground">{title}</p>
-                <p className="text-xs text-muted-foreground">
-                  {new Date(n.createdAt).toLocaleString(locale)}
-                </p>
+              <div className="flex min-w-0 items-center gap-2">
+                {n.kind === "SIGNAL_WIN" && (
+                  <TrendingUp className="size-3.5 shrink-0 text-green-400" />
+                )}
+                {n.kind === "SIGNAL_LOSS" && (
+                  <TrendingDown className="size-3.5 shrink-0 text-red-400" />
+                )}
+                <div className="min-w-0">
+                  <p className={cn("text-sm font-medium text-foreground", accentClass)}>
+                    {title}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(n.createdAt).toLocaleString(locale)}
+                  </p>
+                </div>
               </div>
               <span
                 className={cn(

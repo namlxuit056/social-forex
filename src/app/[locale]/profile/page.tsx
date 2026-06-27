@@ -12,6 +12,7 @@ import { pageCtaItems } from "@/lib/page-cta-i18n";
 import { updateNotificationSettings } from "@/actions/notifications";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { getLevel, getXpProgress } from "@/lib/xp";
 
 export async function generateMetadata({
   params,
@@ -58,12 +59,16 @@ export default async function ProfilePage({
     where: { id: session.user.id },
     select: {
       vipUntil: true,
+      xp: true,
       notifySignalFollow: true,
       notifySignalFavoriteSym: true,
       notifySignalVipBroadcast: true,
     },
   });
   const vip = isVipActive(dbUser?.vipUntil);
+  const userXp = dbUser?.xp ?? 0;
+  const userLevel = getLevel(userXp);
+  const xpProgress = getXpProgress(userXp);
 
   return (
     <div className="space-y-8">
@@ -121,6 +126,23 @@ export default async function ProfilePage({
                 ? t("vipActive", { date: dbUser?.vipUntil?.toLocaleDateString(locale) ?? "" })
                 : t("vipInactive")}
             </dd>
+          </div>
+          <div className="flex flex-col gap-1.5 pt-1">
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-muted-foreground">XP</span>
+              <span className="font-semibold text-primary">Lv.{userLevel}</span>
+              <span className="text-muted-foreground">·</span>
+              <span className="font-mono text-foreground">{userXp} XP</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="h-1.5 w-40 overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full bg-primary transition-all"
+                  style={{ width: `${xpProgress}%` }}
+                />
+              </div>
+              <span className="text-xs text-muted-foreground">{xpProgress}/100</span>
+            </div>
           </div>
         </dl>
         {!vip && (

@@ -257,6 +257,8 @@ model SignalEditLog {
 
 enum NotificationKind {
   SIGNAL_NEW
+  SIGNAL_WIN
+  SIGNAL_LOSS
   USER_FOLLOWED
   STREAK_REMINDER
   PRICE_ALERT

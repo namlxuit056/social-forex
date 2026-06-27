@@ -13,6 +13,11 @@ import { routing } from "@/i18n/routing";
 import { BreadcrumbJsonLd } from "@/components/seo/breadcrumb-json-ld";
 import { BreadcrumbNav } from "@/components/seo/breadcrumb-nav";
 import { RelatedLessons, RelatedArticles } from "@/components/seo/related-content";
+import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
+import { AcademyCompleteButton } from "@/components/academy/academy-complete-button";
+import { AcademyQuiz } from "@/components/academy/academy-quiz";
+import { getQuizQuestion } from "@/lib/content/academy-quiz";
 
 type Props = { params: Promise<{ slug: string; locale: string }> };
 
@@ -69,6 +74,22 @@ export default async function AcademyLessonPage({ params }: Props) {
 
   const lesson = getAcademyLesson(slug, locale);
   if (!lesson) notFound();
+
+  const session = await auth();
+  let initialCompleted = false;
+  let initialQuizScore: number | null = null;
+  if (session?.user?.id) {
+    const progress = await prisma.academyProgress.findUnique({
+      where: {
+        userId_lessonSlug: { userId: session.user.id, lessonSlug: slug },
+      },
+      select: { completed: true, quizScore: true },
+    });
+    initialCompleted = progress?.completed ?? false;
+    initialQuizScore = progress?.quizScore ?? null;
+  }
+
+  const quizQuestion = getQuizQuestion(slug);
 
   const levelLabel: Record<string, string> = {
     beginner: t("beginner"),
@@ -188,19 +209,47 @@ export default async function AcademyLessonPage({ params }: Props) {
 
         <Disclaimer variant="compact" />
 
-        <SignupPrompt
-          surface="academy_progress"
-          title={t("signupPromptTitle")}
-          description={t("signupPromptDesc")}
-          ctaLabel={t("signupPromptCta")}
-          className="not-prose"
-        />
+        {session?.user && quizQuestion && (
+          <AcademyQuiz
+            lessonSlug={slug}
+            question={locale === "vi" ? quizQuestion.question.vi : quizQuestion.question.en}
+            options={quizQuestion.options.map((o) => ({
+              label: locale === "vi" ? o.vi : o.en,
+            }))}
+            correctIndex={quizQuestion.correctIndex}
+            initialScore={initialQuizScore}
+          />
+        )}
 
-        <p className="text-sm text-muted-foreground">
-          <Link href="/academy" className="font-medium text-primary hover:underline">
-            {t("backToList")}
-          </Link>
-        </p>
+        {session?.user ? (
+          <div className="not-prose flex items-center gap-3">
+            <AcademyCompleteButton
+              lessonSlug={slug}
+              initialCompleted={initialCompleted}
+            />
+            <Link
+              href="/academy"
+              className="text-sm text-muted-foreground hover:text-foreground hover:underline"
+            >
+              {t("backToList")}
+            </Link>
+          </div>
+        ) : (
+          <>
+            <SignupPrompt
+              surface="academy_progress"
+              title={t("signupPromptTitle")}
+              description={t("signupPromptDesc")}
+              ctaLabel={t("signupPromptCta")}
+              className="not-prose"
+            />
+            <p className="text-sm text-muted-foreground">
+              <Link href="/academy" className="font-medium text-primary hover:underline">
+                {t("backToList")}
+              </Link>
+            </p>
+          </>
+        )}
       </article>
 
       <div className="max-w-2xl space-y-8">

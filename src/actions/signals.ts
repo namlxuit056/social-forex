@@ -10,6 +10,7 @@ import { isVipActive } from "@/lib/vip";
 import { rateLimit } from "@/lib/rate-limit";
 import { parseAndValidateImageUrls } from "@/lib/signal-images";
 import { notifySignalSubscribers } from "@/lib/signals/notify-on-signal-create";
+import { notifyFollowersSignalClosed } from "@/lib/signals/notify-on-signal-close";
 import { updateStreak } from "@/lib/streak";
 import { addXp } from "@/lib/add-xp";
 import {
@@ -213,6 +214,18 @@ export async function closeSignal(
     direction: signal.direction,
     status,
   });
+
+  if (status === "CLOSED_WIN" || status === "CLOSED_LOSS") {
+    try {
+      await notifyFollowersSignalClosed({
+        signalId: signal.id,
+        authorId: signal.authorId,
+        status,
+      });
+    } catch {
+      // Non-blocking
+    }
+  }
 
   revalidatePath("/signals");
   revalidatePath(`/signals/${signalId}`);

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { addXp } from "@/lib/add-xp";
 
 export const runtime = "nodejs";
 
@@ -23,26 +24,27 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: "Invalid data" }, { status: 400 });
   }
 
-  await prisma.academyProgress.upsert({
-    where: {
-      userId_lessonSlug: {
-        userId: session.user.id,
-        lessonSlug: parsed.data.lessonSlug,
-      },
-    },
-    create: {
-      userId: session.user.id,
-      lessonSlug: parsed.data.lessonSlug,
-      completed: parsed.data.completed,
-      quizScore: parsed.data.quizScore,
-    },
-    update: {
-      completed: parsed.data.completed,
-      quizScore: parsed.data.quizScore,
-    },
+  const userId = session.user.id;
+  const { lessonSlug, completed, quizScore } = parsed.data;
+
+  const existing = await prisma.academyProgress.findUnique({
+    where: { userId_lessonSlug: { userId, lessonSlug } },
+    select: { completed: true },
   });
 
-  return NextResponse.json({ ok: true });
+  await prisma.academyProgress.upsert({
+    where: { userId_lessonSlug: { userId, lessonSlug } },
+    create: { userId, lessonSlug, completed, quizScore },
+    update: { completed, ...(quizScore !== undefined ? { quizScore } : {}) },
+  });
+
+  let xpEarned = 0;
+  if (completed && !existing?.completed) {
+    const result = await addXp(userId, "academyComplete");
+    xpEarned = result.xpEarned;
+  }
+
+  return NextResponse.json({ ok: true, xpEarned });
 }
 
 export async function GET(): Promise<NextResponse> {

@@ -5,6 +5,7 @@ import { EmptyState } from "@/components/layout/empty-state";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
 import { StreakBadge } from "@/components/signals/streak-badge";
 import { CopyTradeButton } from "@/components/copy-trade/copy-trade-button";
+import { FollowButton } from "@/components/social/follow-button";
 import { prisma } from "@/lib/prisma";
 import { pageCtaItems } from "@/lib/page-cta-i18n";
 import { getLevel } from "@/lib/xp";
@@ -90,12 +91,20 @@ export default async function LeaderboardPage({
 
   const session = await auth();
   const copyTradeMap = new Map<string, string>();
+  const followingSet = new Set<string>();
   if (session?.user?.id) {
-    const copyTrades = await prisma.copyTrade.findMany({
-      where: { followerId: session.user.id, providerId: { in: userIds }, isActive: true },
-      select: { providerId: true, token: true },
-    });
+    const [copyTrades, follows] = await Promise.all([
+      prisma.copyTrade.findMany({
+        where: { followerId: session.user.id, providerId: { in: userIds }, isActive: true },
+        select: { providerId: true, token: true },
+      }),
+      prisma.userFollow.findMany({
+        where: { followerId: session.user.id, followingId: { in: userIds } },
+        select: { followingId: true },
+      }),
+    ]);
     for (const ct of copyTrades) copyTradeMap.set(ct.providerId, ct.token);
+    for (const f of follows) followingSet.add(f.followingId);
   }
 
   // Query profit factor data from TradeJournal
@@ -272,12 +281,18 @@ export default async function LeaderboardPage({
                     </td>
                     <td className="px-4 py-3">
                       {session?.user?.id !== r.userId && (
-                        <CopyTradeButton
-                          providerId={r.userId}
-                          providerName={r.name}
-                          isSubscribed={copyTradeMap.has(r.userId)}
-                          existingToken={copyTradeMap.get(r.userId)}
-                        />
+                        <div className="flex items-center gap-2">
+                          <FollowButton
+                            userId={r.userId}
+                            isFollowing={followingSet.has(r.userId)}
+                          />
+                          <CopyTradeButton
+                            providerId={r.userId}
+                            providerName={r.name}
+                            isSubscribed={copyTradeMap.has(r.userId)}
+                            existingToken={copyTradeMap.get(r.userId)}
+                          />
+                        </div>
                       )}
                     </td>
                   </tr>

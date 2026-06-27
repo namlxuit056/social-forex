@@ -10,11 +10,14 @@ import {
   Radio,
   TrendingUp,
   TrendingDown,
+  UserPlus,
+  Check,
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import type { SuggestedTrader } from "@/app/api/traders/suggested/route";
 
 type FeedAuthor = {
   id: string;
@@ -62,6 +65,8 @@ export function FeedSection() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(false);
+  const [suggested, setSuggested] = useState<SuggestedTrader[]>([]);
+  const [followingIds, setFollowingIds] = useState<Set<string>>(new Set());
 
   const fetchFeed = useCallback(
     async (reset = false) => {
@@ -102,6 +107,27 @@ export function FeedSection() {
     const interval = setInterval(() => void fetchFeed(true), 30_000);
     return () => clearInterval(interval);
   }, [fetchFeed]);
+
+  useEffect(() => {
+    fetch("/api/traders/suggested")
+      .then((r) => r.json())
+      .then((data: { traders: SuggestedTrader[] }) => setSuggested(data.traders ?? []))
+      .catch(() => {});
+  }, []);
+
+  async function handleFollow(traderId: string) {
+    const formData = new FormData();
+    formData.set("targetUserId", traderId);
+    const { toggleFollowUser } = await import("@/actions/social");
+    await toggleFollowUser(formData);
+    setFollowingIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(traderId)) next.delete(traderId);
+      else next.add(traderId);
+      return next;
+    });
+    void fetchFeed(true);
+  }
 
   const filters: { key: FeedFilter; label: string }[] = [
     { key: "all", label: t("feedFilterAll") },
@@ -144,15 +170,72 @@ export function FeedSection() {
           <Loader2 className="size-5 animate-spin text-muted-foreground" />
         </div>
       ) : items.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-border/80 bg-muted/15 px-4 py-8 text-center">
-          <p className="text-sm text-muted-foreground">{t("feedEmpty")}</p>
-          <Link
-            href="/leaderboard"
-            className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
-          >
-            {t("feedDiscoverTraders")}
-            <ArrowRight className="size-3.5" />
-          </Link>
+        <div className="space-y-5">
+          <div className="rounded-lg border border-dashed border-border/80 bg-muted/15 px-4 py-6 text-center">
+            <p className="text-sm text-muted-foreground">{t("feedEmpty")}</p>
+            <Link
+              href="/leaderboard"
+              className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+            >
+              {t("feedDiscoverTraders")}
+              <ArrowRight className="size-3.5" />
+            </Link>
+          </div>
+          {suggested.length > 0 && (
+            <div className="space-y-3">
+              <p className="text-sm font-medium text-foreground">
+                {t("feedSuggestedTitle")}
+              </p>
+              <ul className="grid gap-2 sm:grid-cols-2">
+                {suggested.map((trader) => {
+                  const displayName = trader.name ?? trader.email ?? "—";
+                  const isFollowing = followingIds.has(trader.id);
+                  return (
+                    <li
+                      key={trader.id}
+                      className="flex items-center justify-between gap-3 rounded-lg border border-border/70 bg-card/50 px-3 py-2.5"
+                    >
+                      <div className="min-w-0">
+                        <Link
+                          href={`/u/${trader.id}`}
+                          className="block truncate text-sm font-medium text-foreground hover:text-primary"
+                        >
+                          {displayName}
+                        </Link>
+                        <div className="mt-0.5 flex flex-wrap gap-2 text-xs text-muted-foreground">
+                          <span>{t("feedLv")}{trader.level}</span>
+                          {trader.signalCount > 0 && (
+                            <span>{t("feedSignals", { count: trader.signalCount })}</span>
+                          )}
+                          {trader.winRate !== null && (
+                            <span className="text-green-500">
+                              {t("feedWinRate", { rate: trader.winRate })}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => void handleFollow(trader.id)}
+                        className={cn(
+                          "flex shrink-0 items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
+                          isFollowing
+                            ? "bg-primary/15 text-primary"
+                            : "bg-muted/50 text-muted-foreground hover:bg-primary/10 hover:text-primary",
+                        )}
+                      >
+                        {isFollowing ? (
+                          <Check className="size-3" />
+                        ) : (
+                          <UserPlus className="size-3" />
+                        )}
+                        {isFollowing ? t("feedFollowingBtn") : t("feedFollowBtn")}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
         </div>
       ) : (
         <div className="divide-y divide-border/60 overflow-hidden rounded-lg border border-border/70 bg-card/45">
