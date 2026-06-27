@@ -8,6 +8,7 @@ import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { SiteNavLink } from "@/components/layout/site-nav-link";
 import { SiteLogo } from "@/components/layout/site-logo";
+import { NavMegaMenu } from "@/components/layout/nav-mega-menu";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { prisma } from "@/lib/prisma";
@@ -18,10 +19,10 @@ import {
   learningNavKeys,
 } from "@/components/layout/nav-config";
 
-const secondaryNavGroups = [
-  { icon: Wrench, items: marketNavKeys },
-  { icon: MessageSquare, items: communityNavKeys },
-  { icon: BookOpen, items: learningNavKeys },
+const megaMenuGroups = [
+  { labelKey: "marketTools", icon: Wrench, items: marketNavKeys },
+  { labelKey: "community", icon: MessageSquare, items: communityNavKeys },
+  { labelKey: "learning", icon: BookOpen, items: learningNavKeys },
 ] as const;
 
 export async function SiteHeader() {
@@ -70,6 +71,17 @@ export async function SiteHeader() {
               <item.icon className="size-3.5" aria-hidden />
               {t(item.key)}
             </SiteNavLink>
+          ))}
+
+          <div className="mx-1 h-4 w-px bg-border/60" />
+
+          {megaMenuGroups.map((group) => (
+            <NavMegaMenu
+              key={group.labelKey}
+              labelKey={group.labelKey}
+              icon={group.icon}
+              items={group.items}
+            />
           ))}
         </nav>
 
@@ -166,29 +178,6 @@ export async function SiteHeader() {
         </nav>
       </div>
 
-      {/* Desktop secondary nav */}
-      <div className="hidden border-t border-border/40 bg-muted/30 lg:block">
-        <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-1">
-          {secondaryNavGroups.map((group, groupIndex) => (
-            <div
-              key={groupIndex}
-              className="flex min-w-0 items-center gap-0.5 border-r border-border/50 pr-4 last:border-r-0 last:pr-0"
-            >
-              <group.icon className="mr-1 size-3.5 shrink-0 text-muted-foreground/60" aria-hidden />
-              {group.items.map((item) => (
-                <SiteNavLink
-                  key={item.href}
-                  href={item.href}
-                  className="rounded px-2 py-1 text-xs text-muted-foreground/80 transition-colors hover:bg-muted hover:text-foreground"
-                  activeClassName="bg-primary/10 text-primary"
-                >
-                  {t(item.key)}
-                </SiteNavLink>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
     </header>
   );
 }
