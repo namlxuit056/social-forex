@@ -591,6 +591,7 @@
     "searchNoResultsDesc": "Try another keyword or browse each category.",
     "searchBackForum": "Back to forum",
     "searchGoSignals": "Signals",
+    "searchResultsCount": "{count} results",
     "newThreadPageTitle": "New thread",
     "newThreadSubtitle": "A clear title helps others find and join the discussion.",
     "createThreadSubmit": "Create thread",

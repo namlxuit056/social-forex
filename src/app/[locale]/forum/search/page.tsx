@@ -25,6 +25,44 @@ type Props = {
   searchParams: Promise<{ q?: string }>;
 };
 
+type SearchRow = {
+  id: string;
+  title: string;
+  slug: string;
+  categorySlug: string;
+  categoryName: string;
+  authorName: string | null;
+  authorEmail: string | null;
+};
+
+async function ftsSearch(query: string): Promise<SearchRow[]> {
+  return prisma.$queryRaw<SearchRow[]>`
+    SELECT
+      t.id,
+      t.title,
+      t.slug,
+      c.slug AS "categorySlug",
+      c.name AS "categoryName",
+      u.name AS "authorName",
+      u.email AS "authorEmail"
+    FROM "ForumThread" t
+    JOIN "ForumCategory" c ON c.id = t."categoryId"
+    LEFT JOIN "User" u ON u.id = t."authorId"
+    WHERE t.hidden = false
+      AND (
+        to_tsvector('simple', t.title) @@ plainto_tsquery('simple', ${query})
+        OR EXISTS (
+          SELECT 1 FROM "ForumPost" p
+          WHERE p."threadId" = t.id
+            AND p.hidden = false
+            AND to_tsvector('simple', p.body) @@ plainto_tsquery('simple', ${query})
+        )
+      )
+    ORDER BY t."updatedAt" DESC
+    LIMIT 40
+  `;
+}
+
 export default async function ForumSearchPage({ params, searchParams }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -33,20 +71,7 @@ export default async function ForumSearchPage({ params, searchParams }: Props) {
   const { q } = await searchParams;
   const query = q?.trim() ?? "";
 
-  const results =
-    query.length >= 2
-      ? await prisma.forumThread.findMany({
-          where: {
-            title: { contains: query, mode: "insensitive" },
-          },
-          take: 40,
-          orderBy: { updatedAt: "desc" },
-          include: {
-            category: { select: { slug: true, name: true } },
-            author: { select: { name: true, email: true } },
-          },
-        })
-      : [];
+  const results = query.length >= 2 ? await ftsSearch(query) : [];
 
   return (
     <div className="space-y-6">
@@ -59,7 +84,7 @@ export default async function ForumSearchPage({ params, searchParams }: Props) {
           name="q"
           defaultValue={query}
           placeholder={t("searchKeywordPlaceholder")}
-          className="min-w-[240px] flex-1"
+          className="min-w-60 flex-1"
         />
         <Button type="submit" size="sm">
           {t("searchAction")}
@@ -81,21 +106,26 @@ export default async function ForumSearchPage({ params, searchParams }: Props) {
       )}
 
       {query.length >= 2 && results.length > 0 && (
-        <ul className="divide-y divide-border rounded-xl border border-border">
-          {results.map((row) => (
-            <li key={row.id}>
-              <Link
-                href={`/forum/${row.category.slug}/thread/${row.slug}`}
-                className="block p-4 hover:bg-muted/40"
-              >
-                <span className="font-medium text-foreground">{row.title}</span>
-                <div className="mt-1 text-xs text-muted-foreground">
-                  {row.category.name} · {row.author?.name ?? row.author?.email}
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <>
+          <p className="text-sm text-muted-foreground">
+            {t("searchResultsCount", { count: results.length })}
+          </p>
+          <ul className="divide-y divide-border rounded-xl border border-border">
+            {results.map((row) => (
+              <li key={row.id}>
+                <Link
+                  href={`/forum/${row.categorySlug}/thread/${row.slug}`}
+                  className="block p-4 hover:bg-muted/40"
+                >
+                  <span className="font-medium text-foreground">{row.title}</span>
+                  <div className="mt-1 text-xs text-muted-foreground">
+                    {row.categoryName} · {row.authorName ?? row.authorEmail}
+                  </div>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </>
       )}
     </div>
   );

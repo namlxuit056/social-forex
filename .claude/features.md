@@ -8,19 +8,15 @@ Mỗi dòng là một feature/improvement độc lập.
 
 ## High Priority
 
-- [ ] **Signal detail page: Add comment reaction (like/dislike) với emoji reactions** — SignalReaction model đã có, cần UI trên trang /signals/[id]
-- [ ] **Forum: Full-text search** — route /forum/search đã có nhưng chưa query DB; thêm Postgres full-text search trên ForumThread.title + ForumPost.body
-- [ ] **Desk page: Trading dashboard widget** — /desk route là stub; build trang tổng hợp realtime quotes + alerts + open signals + journal summary
 - [ ] **Profile /u/[userId]: Tab "Academy" hiện bài học đã hoàn thành** — AcademyProgress model có sẵn, thêm tab mới trên public profile
-- [ ] **Streak reminder notification: hardcode text → dùng i18n** — src/components/notifications/notification-list.tsx line 64 có hardcoded Vietnamese string
+- [ ] **Streak reminder notification: hardcode text → dùng i18n** — src/components/notifications/notification-list.tsx line 79 có hardcoded Vietnamese string
 
 ## Medium Priority
 
-- [ ] **Screener AI picks: cache kết quả 15 phút** — /api/screener/ai-picks hiện không cache, gọi AI mỗi request; thêm in-memory cache tương tự ai/suggest.ts
 - [ ] **Journal: export CSV** — trader muốn export lịch sử giao dịch ra Excel; thêm nút "Export CSV" trên trang /journal
 - [ ] **Leaderboard: add pagination** — hiện load tất cả rows, cần limit 20 + "Load more"
 - [ ] **Academy: progress badge trên /u/[userId] public profile** — hiện chỉ có XP, thêm "X/20 bài học" badge
-- [ ] **Notifications: mark single as read khi click (optimistic UI)** — hiện chỉ có markAllRead form action; thêm optimistic update trong NotificationList
+- [ ] **Notifications: mark single as read khi click (optimistic UI)** — markNotificationRead đã fire on click nhưng chưa có optimistic state update; cần local state để UI update ngay lập tức
 
 ## Low Priority / Nice-to-have
 
@@ -33,6 +29,10 @@ Mỗi dòng là một feature/improvement độc lập.
 
 ## Completed
 
+- [x] Signal detail page: Add comment reaction (like/dislike) — SignalReactions component đầy đủ tại src/app/[locale]/signals/[signalId]/signal-reactions.tsx
+- [x] Desk page: Trading dashboard widget — /desk có realtime quotes, calendar, chart, pre-trade desk tại src/app/[locale]/desk/page.tsx
+- [x] Screener AI picks: cache kết quả — /api/screener/ai-picks có in-memory cache 5 phút (src/app/api/screener/ai-picks/route.ts)
+- [x] Forum: Full-text search — upgrade từ LIKE → Postgres FTS (to_tsvector/plainto_tsquery) trên ForumThread.title + ForumPost.body với GIN index
 - [x] Academy Progress UI: progress bar + checkmarks + Mark Complete button + Quiz
 - [x] Academy: +25 XP khi hoàn thành bài học (via /api/academy/progress)
 - [x] Trader Discovery: Suggested Traders trên dashboard feed empty state

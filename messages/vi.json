@@ -591,6 +591,7 @@
     "searchNoResultsDesc": "Thử từ khóa khác hoặc tìm trong từng danh mục.",
     "searchBackForum": "Về diễn đàn",
     "searchGoSignals": "Tín hiệu",
+    "searchResultsCount": "{count} kết quả",
     "newThreadPageTitle": "Chủ đề mới",
     "newThreadSubtitle": "Tiêu đề rõ ràng giúp người khác tìm và tham gia thảo luận.",
     "createThreadSubmit": "Đăng chủ đề",
