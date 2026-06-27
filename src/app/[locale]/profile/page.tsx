@@ -13,6 +13,7 @@ import { updateNotificationSettings } from "@/actions/notifications";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { getLevel, getXpProgress } from "@/lib/xp";
+import { ProfileReferralSection } from "@/components/profile/referral-section";
 
 export async function generateMetadata({
   params,
@@ -60,6 +61,7 @@ export default async function ProfilePage({
     select: {
       vipUntil: true,
       xp: true,
+      referralCode: true,
       notifySignalFollow: true,
       notifySignalFavoriteSym: true,
       notifySignalVipBroadcast: true,
@@ -69,6 +71,22 @@ export default async function ProfilePage({
   const userXp = dbUser?.xp ?? 0;
   const userLevel = getLevel(userXp);
   const xpProgress = getXpProgress(userXp);
+
+  // Referral stats
+  let referralStats = { totalReferred: 0, totalVipDays: 0 };
+  if (dbUser?.referralCode) {
+    const [totalReferred, referralEvents] = await Promise.all([
+      prisma.user.count({ where: { referredById: session.user.id } }),
+      prisma.referralEvent.findMany({
+        where: { referrerId: session.user.id },
+        select: { rewardDays: true },
+      }),
+    ]);
+    referralStats = {
+      totalReferred,
+      totalVipDays: referralEvents.reduce((sum, e) => sum + e.rewardDays, 0),
+    };
+  }
 
   return (
     <div className="space-y-8">
@@ -220,6 +238,14 @@ export default async function ProfilePage({
           </Button>
         </form>
       </div>
+
+      {dbUser?.referralCode && (
+        <ProfileReferralSection
+          referralCode={dbUser.referralCode}
+          totalReferred={referralStats.totalReferred}
+          totalVipDays={referralStats.totalVipDays}
+        />
+      )}
 
       <PageCtaRow heading={tc("ctaDiscovery")} items={ctaRow} />
     </div>
