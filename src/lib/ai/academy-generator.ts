@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { createAiClient, resolveAiProvider } from "@/lib/ai/provider";
-import { fetchArticleImage } from "@/lib/ai/article-images";
 import { pollinationsImageUrl } from "@/lib/ai/pollinations-image";
 
 export type LessonLevel = "beginner" | "intermediate" | "advanced";
@@ -219,8 +218,7 @@ export async function generateAcademyLesson(
   const data = validated.data;
   const slug = data.slug || slugify(topic);
 
-  const imageResult = await fetchArticleImage(`${topic} candlestick forex chart`);
-  const imageUrl = imageResult?.url ?? pollinationsImageUrl(topic, slug);
+  const imageUrl = pollinationsImageUrl(topic, slug);
 
   return {
     slug,
