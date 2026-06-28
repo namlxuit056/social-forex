@@ -199,24 +199,34 @@ export async function generateAcademyLesson(
   }
 
   const client = createAiClient(resolved);
+  const messages = [
+    {
+      role: "system" as const,
+      content:
+        "You are a bilingual (Vietnamese/English) forex education expert. Always respond with valid JSON only, no markdown code blocks.",
+    },
+    { role: "user" as const, content: buildPrompt(topic, level) },
+  ];
 
-  const response = await client.chat.completions.create({
-    model: resolved.model,
-    max_tokens: 4000,
-    ...(resolved.supportsTemperature ? { temperature: 0.4 } : {}),
-    response_format: { type: "json_object" },
-    messages: [
-      {
-        role: "system",
-        content:
-          "You are a bilingual (Vietnamese/English) forex education expert. Always respond with valid JSON only, no markdown code blocks.",
-      },
-      { role: "user", content: buildPrompt(topic, level) },
-    ],
-  });
+  // Retry up to 2 times on empty response (provider rate-limit transient error)
+  const MAX_RETRIES = 2;
+  let raw: string | null | undefined;
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    if (attempt > 0) {
+      await new Promise((r) => setTimeout(r, 5000 * attempt)); // 5s, then 10s
+    }
+    const response = await client.chat.completions.create({
+      model: resolved.model,
+      max_tokens: 4000,
+      ...(resolved.supportsTemperature ? { temperature: 0.4 } : {}),
+      response_format: { type: "json_object" },
+      messages,
+    });
+    raw = response.choices[0]?.message?.content;
+    if (raw) break;
+  }
 
-  const raw = response.choices[0]?.message?.content;
-  if (!raw) throw new Error("AI returned empty response");
+  if (!raw) throw new Error("AI returned empty response after retries");
 
   let parsed: unknown;
   try {

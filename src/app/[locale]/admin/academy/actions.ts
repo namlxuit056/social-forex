@@ -110,8 +110,8 @@ export async function bulkGenerateAcademyLessonsAction(
 
   for (let i = 0; i < topics.length; i++) {
     if (i > 0) {
-      // 2-second gap between API calls to avoid provider rate-limiting
-      await new Promise((r) => setTimeout(r, 2000));
+      // 5-second gap between lessons to avoid provider rate-limiting
+      await new Promise((r) => setTimeout(r, 5000));
     }
     try {
       await saveLesson(topics[i].topic, topics[i].level);
