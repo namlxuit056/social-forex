@@ -77,55 +77,18 @@ async function saveLesson(topic: string, level: LessonLevel) {
   });
 }
 
-export type BulkGenerateState = {
-  created: number;
-  failed: number;
-  errors: string[];
-} | null;
-
-export async function bulkGenerateAcademyLessonsAction(
-  _prevState: BulkGenerateState,
-  formData: FormData,
-): Promise<BulkGenerateState> {
+export async function getTopicIdeasForBulkAction(
+  count: number,
+): Promise<Array<{ topic: string; level: string }>> {
   await requireAdmin();
 
-  const parsed = bulkSchema.safeParse({ count: formData.get("count") });
-  if (!parsed.success) return { created: 0, failed: 0, errors: ["Số bài không hợp lệ (1–10)."] };
-
-  const { count } = parsed.data;
+  const parsed = bulkSchema.safeParse({ count });
+  if (!parsed.success) throw new Error("Số bài không hợp lệ (1–10).");
 
   const existing = await prisma.academyLesson.findMany({ select: { titleEn: true } });
   const existingTitles = existing.map((l) => l.titleEn);
 
-  let topics;
-  try {
-    topics = await generateTopicIdeas(count, existingTitles);
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : "Lỗi tạo ý tưởng chủ đề";
-    return { created: 0, failed: count, errors: [msg] };
-  }
-
-  let created = 0;
-  const errors: string[] = [];
-
-  for (let i = 0; i < topics.length; i++) {
-    if (i > 0) {
-      // 5-second gap between lessons to avoid provider rate-limiting
-      await new Promise((r) => setTimeout(r, 5000));
-    }
-    try {
-      await saveLesson(topics[i].topic, topics[i].level);
-      created++;
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : "Unknown error";
-      errors.push(`"${topics[i].topic}": ${msg.slice(0, 120)}`);
-    }
-  }
-
-  revalidatePath("/admin/academy");
-  revalidatePath("/academy");
-
-  return { created, failed: topics.length - created, errors };
+  return generateTopicIdeas(parsed.data.count, existingTitles);
 }
 
 export async function publishAcademyLesson(formData: FormData) {
