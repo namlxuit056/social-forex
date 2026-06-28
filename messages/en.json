@@ -921,7 +921,8 @@
     "quizScore": "Score: {score}/100",
     "quizCorrect": "Correct! +{xp} XP",
     "quizWrong": "Not quite, try again",
-    "quizOption": "Choose an answer"
+    "quizOption": "Choose an answer",
+    "aiQuizNext": "Next →"
   },
   "articles": {
     "title": "AI forex articles",
@@ -1267,6 +1268,7 @@
     "manageSignals": "Manage signals",
     "manageAnalytics": "User tracking",
     "manageAiArticles": "AI articles",
+    "manageAcademy": "Academy AI Lessons",
     "aiArticles": "AI articles",
     "aiArticlesDesc": "Fetch trending forex keywords, generate educational AI articles, and save them as drafts or publish them.",
     "aiArticlesSettings": "Automation settings",

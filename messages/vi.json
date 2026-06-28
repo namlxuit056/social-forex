@@ -921,7 +921,8 @@
     "quizScore": "Điểm: {score}/100",
     "quizCorrect": "Chính xác! +{xp} XP",
     "quizWrong": "Chưa đúng, hãy thử lại",
-    "quizOption": "Chọn đáp án"
+    "quizOption": "Chọn đáp án",
+    "aiQuizNext": "Câu tiếp →"
   },
   "articles": {
     "title": "Bài viết AI về forex",
@@ -1267,6 +1268,7 @@
     "manageSignals": "Quản lý tín hiệu",
     "manageAnalytics": "Tracking người dùng",
     "manageAiArticles": "Bài viết AI",
+    "manageAcademy": "Bài học Academy AI",
     "aiArticles": "Bài viết AI",
     "aiArticlesDesc": "Tự động lấy keyword forex đang được quan tâm, dùng AI tạo bài giáo dục và lưu thành draft hoặc publish.",
     "aiArticlesSettings": "Cấu hình automation",

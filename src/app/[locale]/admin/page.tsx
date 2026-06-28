@@ -9,6 +9,7 @@ import {
   Activity,
   ArrowRight,
   Bot,
+  BookOpen,
 } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
@@ -109,6 +110,7 @@ export default async function AdminDashboardPage({
     { href: "/admin/signals", label: t("manageSignals"), icon: TrendingUp },
     { href: "/admin/analytics", label: t("manageAnalytics"), icon: Activity },
     { href: "/admin/articles", label: t("manageAiArticles"), icon: Bot },
+    { href: "/admin/academy", label: "Bài học Academy AI", icon: BookOpen },
   ];
 
   return (
