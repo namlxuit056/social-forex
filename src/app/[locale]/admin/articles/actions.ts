@@ -106,6 +106,8 @@ export async function deleteAiArticle(formData: FormData) {
   revalidatePath("/articles");
 }
 
+
+
 const generateKeywordSchema = z.object({
   keyword: z.string().min(2).max(100).trim(),
   locale: z.enum(["vi", "en"]),
