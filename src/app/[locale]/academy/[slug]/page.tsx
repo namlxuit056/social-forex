@@ -21,6 +21,7 @@ import { diagramRegistry } from "@/components/academy/diagrams";
 import { getQuizQuestion } from "@/lib/content/academy-quiz";
 import { getDbLesson, getDbLessonQuizzes } from "@/lib/content/academy-db";
 import { AcademyAiQuiz } from "@/components/academy/academy-ai-quiz";
+import { PatternDiagram } from "@/components/academy/pattern-diagram";
 
 type Props = { params: Promise<{ slug: string; locale: string }> };
 
@@ -159,13 +160,19 @@ export default async function AcademyLessonPage({ params }: Props) {
             {lesson.title}
           </h1>
           <p className="mt-2 text-muted-foreground">{lesson.summary}</p>
-          {"imageUrl" in lesson && (lesson as { imageUrl?: string | null }).imageUrl && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={(lesson as { imageUrl: string }).imageUrl}
-              alt={lesson.title}
-              className="w-full rounded-xl object-cover max-h-60"
-            />
+          {"imageUrl" in lesson && (
+            (lesson as { imageUrl?: string | null }).imageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={(lesson as { imageUrl: string }).imageUrl}
+                alt={lesson.title}
+                className="mt-4 w-full rounded-xl object-cover max-h-60"
+              />
+            ) : (
+              <div className="mt-4 w-full rounded-xl border border-border/60 bg-card/50 p-4">
+                <PatternDiagram slug={slug} />
+              </div>
+            )
           )}
         </div>
 
