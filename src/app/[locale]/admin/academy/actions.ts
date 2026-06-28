@@ -23,20 +23,34 @@ const generateSchema = z.object({
   level: z.enum(["beginner", "intermediate", "advanced"]),
 });
 
-export async function generateAcademyLessonAction(
-  formData: FormData,
+/** Used by the single-lesson <form action={}> — must return void */
+export async function generateAcademyLessonAction(formData: FormData) {
+  await requireAdmin();
+
+  const parsed = generateSchema.safeParse({
+    topic: formData.get("topic"),
+    level: formData.get("level") || "intermediate",
+  });
+  if (!parsed.success) return;
+
+  const { topic, level } = parsed.data;
+  await saveLesson(topic, level as LessonLevel);
+
+  revalidatePath("/admin/academy");
+}
+
+/** Used by BulkGenerateForm — returns { error } so the real message reaches the client */
+export async function generateAcademyLessonForBulkAction(
+  topic: string,
+  level: string,
 ): Promise<{ error?: string }> {
   try {
     await requireAdmin();
 
-    const parsed = generateSchema.safeParse({
-      topic: formData.get("topic"),
-      level: formData.get("level") || "intermediate",
-    });
+    const parsed = generateSchema.safeParse({ topic, level: level || "intermediate" });
     if (!parsed.success) return { error: "Chủ đề không hợp lệ." };
 
-    const { topic, level } = parsed.data;
-    await saveLesson(topic, level as LessonLevel);
+    await saveLesson(parsed.data.topic, parsed.data.level as LessonLevel);
 
     revalidatePath("/admin/academy");
     return {};

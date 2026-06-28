@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { getTopicIdeasForBulkAction, generateAcademyLessonAction } from "./actions";
+import { getTopicIdeasForBulkAction, generateAcademyLessonForBulkAction } from "./actions";
 
 type RowStatus =
   | { state: "waiting" }
@@ -47,11 +47,7 @@ export function BulkGenerateForm() {
         prev.map((r, idx) => (idx === i ? { ...r, status: { state: "generating" } } : r)),
       );
 
-      const fd = new FormData();
-      fd.set("topic", topics[i].topic);
-      fd.set("level", topics[i].level);
-
-      const result = await generateAcademyLessonAction(fd);
+      const result = await generateAcademyLessonForBulkAction(topics[i].topic, topics[i].level);
       if (result?.error) {
         setRows((prev) =>
           prev.map((r, idx) =>
