@@ -22,6 +22,7 @@ import { getQuizQuestion } from "@/lib/content/academy-quiz";
 import { getDbLesson, getDbLessonQuizzes } from "@/lib/content/academy-db";
 import { AcademyAiQuiz } from "@/components/academy/academy-ai-quiz";
 import { PatternDiagram } from "@/components/academy/pattern-diagram";
+import { LessonImage } from "@/components/academy/lesson-image";
 
 type Props = { params: Promise<{ slug: string; locale: string }> };
 
@@ -162,11 +163,10 @@ export default async function AcademyLessonPage({ params }: Props) {
           <p className="mt-2 text-muted-foreground">{lesson.summary}</p>
           {"imageUrl" in lesson && (
             (lesson as { imageUrl?: string | null }).imageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <LessonImage
                 src={(lesson as { imageUrl: string }).imageUrl}
                 alt={lesson.title}
-                className="mt-4 w-full rounded-xl object-cover max-h-60"
+                slug={slug}
               />
             ) : (
               <div className="mt-4 w-full rounded-xl border border-border/60 bg-card/50 p-4">

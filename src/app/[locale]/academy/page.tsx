@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { getAcademyLessons } from "@/lib/content/academy";
 import { getDbLessons } from "@/lib/content/academy-db";
 import { PatternDiagram } from "@/components/academy/pattern-diagram";
+import { LessonImage } from "@/components/academy/lesson-image";
 import { pageCtaItems } from "@/lib/page-cta-i18n";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
@@ -131,11 +132,11 @@ export default async function AcademyPage({
               </p>
               {"imageUrl" in lesson && (
                 (lesson as { imageUrl?: string | null }).imageUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                  <LessonImage
                     src={(lesson as { imageUrl: string }).imageUrl}
                     alt={lesson.title}
-                    className="mt-3 h-32 w-full rounded-lg object-cover opacity-80"
+                    slug={lesson.slug}
+                    imgClassName="mt-3 h-32 w-full rounded-lg object-cover opacity-80"
                   />
                 ) : (
                   <div className="mt-3 h-32 w-full overflow-hidden rounded-lg border border-border/50 bg-card/40 p-2">
