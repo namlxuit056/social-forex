@@ -167,15 +167,17 @@ export async function unpublishAcademyLesson(formData: FormData) {
 
 export async function regenerateImageAction(formData: FormData) {
   await requireAdmin();
-  const id = formData.get("id");
   const slug = formData.get("slug");
   const topic = formData.get("topic");
-  if (typeof id !== "string" || typeof slug !== "string" || typeof topic !== "string") return;
+  if (typeof slug !== "string" || typeof topic !== "string") return;
   const imageUrl =
     (await generateLessonImage(topic, slug)) ?? pollinationsImageUrl(topic, slug);
-  await prisma.academyLesson.update({ where: { id }, data: { imageUrl } });
+  // Update all locale variants for this slug
+  await prisma.academyLesson.updateMany({ where: { slug }, data: { imageUrl } });
   revalidatePath("/admin/academy");
   revalidatePath("/academy");
+  revalidatePath(`/vi/academy/${slug}`);
+  revalidatePath(`/en/academy/${slug}`);
 }
 
 export async function deleteAcademyLesson(formData: FormData) {

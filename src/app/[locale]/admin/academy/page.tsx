@@ -170,7 +170,6 @@ export default async function AdminAcademyPage() {
                         </form>
                       )}
                       <form action={regenerateImageAction}>
-                        <input type="hidden" name="id" value={lesson.id} />
                         <input type="hidden" name="slug" value={lesson.slug} />
                         <input type="hidden" name="topic" value={lesson.title} />
                         <SubmitButton size="sm" variant="outline" pendingLabel="Đang tạo ảnh...">
