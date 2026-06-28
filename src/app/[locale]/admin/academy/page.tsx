@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { Bot, BookOpen, Plus, Wand2 } from "lucide-react";
+import { Bot, BookOpen, Plus } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
@@ -8,12 +8,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   generateAcademyLessonAction,
-  bulkGenerateAcademyLessonsAction,
   publishAcademyLesson,
   unpublishAcademyLesson,
   deleteAcademyLesson,
 } from "./actions";
 import { SubmitButton } from "./submit-button";
+import { BulkGenerateForm } from "./bulk-form";
 
 export const dynamic = "force-dynamic";
 
@@ -109,41 +109,7 @@ export default async function AdminAcademyPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-border/70">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Wand2 className="size-4 text-primary" aria-hidden />
-                AI tự lên ý tưởng &amp; tạo hàng loạt
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form action={bulkGenerateAcademyLessonsAction} className="space-y-4">
-                <div>
-                  <Label htmlFor="count">Số bài cần tạo</Label>
-                  <Input
-                    id="count"
-                    name="count"
-                    type="number"
-                    min={1}
-                    max={10}
-                    defaultValue={3}
-                    className="mt-1.5"
-                    required
-                  />
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    AI sẽ tự chọn chủ đề đa dạng (1–10 bài), tránh trùng với bài đã có.
-                  </p>
-                </div>
-                <SubmitButton
-                  className="w-full"
-                  pendingLabel="AI đang tạo hàng loạt (có thể mất vài phút)..."
-                >
-                  <Wand2 className="mr-2 size-4" aria-hidden />
-                  Tạo hàng loạt
-                </SubmitButton>
-              </form>
-            </CardContent>
-          </Card>
+          <BulkGenerateForm />
         </div>
 
         <Card className="border-border/70">

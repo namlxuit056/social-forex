@@ -148,17 +148,18 @@ export async function generateTopicIdeas(
       ? `\nChủ đề đã có (KHÔNG lặp lại):\n${existingTitles.map((t) => `- ${t}`).join("\n")}`
       : "";
 
-  const prompt = `Bạn là chuyên gia forex. Hãy đề xuất ${count} chủ đề bài học đa dạng cho Academy forex trading về price action và mô hình nến (candlestick patterns).${existingList}
+  const prompt = `Bạn là chuyên gia forex. Hãy đề xuất ĐÚNG ${count} chủ đề bài học cho Academy forex trading về price action và mô hình nến (candlestick patterns).${existingList}
 
-Yêu cầu:
-- Chủ đề phải cụ thể, thực dụng (VD: "Hammer Candle", "Bearish Engulfing", "Morning Star", "Order Block", "Liquidity Grab", "Fair Value Gap", "Bullish Marubozu")
+Yêu cầu QUAN TRỌNG:
+- Phải trả về ĐÚNG ${count} phần tử trong mảng topics, không ít hơn, không nhiều hơn
+- Chủ đề cụ thể, thực dụng (VD: "Hammer Candle", "Bearish Engulfing", "Morning Star", "Order Block", "Fair Value Gap", "Bullish Marubozu", "Tweezer Bottom", "Three White Soldiers")
 - Phân bổ cấp độ đa dạng: beginner, intermediate, advanced
-- KHÔNG lặp lại chủ đề đã có
-- Trả về JSON: { "topics": [{ "topic": "Tên chủ đề (tiếng Anh)", "level": "beginner|intermediate|advanced" }] }`;
+- KHÔNG lặp lại chủ đề đã có trong danh sách trên
+- Trả về JSON: { "topics": [{ "topic": "Topic name in English", "level": "beginner|intermediate|advanced" }] }`;
 
   const response = await client.chat.completions.create({
     model: resolved.model,
-    max_tokens: 800,
+    max_tokens: 1500,
     ...(resolved.supportsTemperature ? { temperature: 0.75 } : {}),
     response_format: { type: "json_object" },
     messages: [

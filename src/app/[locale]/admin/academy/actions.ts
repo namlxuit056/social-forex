@@ -77,29 +77,55 @@ async function saveLesson(topic: string, level: LessonLevel) {
   });
 }
 
-export async function bulkGenerateAcademyLessonsAction(formData: FormData) {
+export type BulkGenerateState = {
+  created: number;
+  failed: number;
+  errors: string[];
+} | null;
+
+export async function bulkGenerateAcademyLessonsAction(
+  _prevState: BulkGenerateState,
+  formData: FormData,
+): Promise<BulkGenerateState> {
   await requireAdmin();
 
   const parsed = bulkSchema.safeParse({ count: formData.get("count") });
-  if (!parsed.success) return;
+  if (!parsed.success) return { created: 0, failed: 0, errors: ["Số bài không hợp lệ (1–10)."] };
 
   const { count } = parsed.data;
 
   const existing = await prisma.academyLesson.findMany({ select: { titleEn: true } });
   const existingTitles = existing.map((l) => l.titleEn);
 
-  const topics = await generateTopicIdeas(count, existingTitles);
+  let topics;
+  try {
+    topics = await generateTopicIdeas(count, existingTitles);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Lỗi tạo ý tưởng chủ đề";
+    return { created: 0, failed: count, errors: [msg] };
+  }
 
-  for (const { topic, level } of topics) {
+  let created = 0;
+  const errors: string[] = [];
+
+  for (let i = 0; i < topics.length; i++) {
+    if (i > 0) {
+      // 2-second gap between API calls to avoid provider rate-limiting
+      await new Promise((r) => setTimeout(r, 2000));
+    }
     try {
-      await saveLesson(topic, level);
-    } catch {
-      // Continue with remaining topics if one fails
+      await saveLesson(topics[i].topic, topics[i].level);
+      created++;
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Unknown error";
+      errors.push(`"${topics[i].topic}": ${msg.slice(0, 120)}`);
     }
   }
 
   revalidatePath("/admin/academy");
   revalidatePath("/academy");
+
+  return { created, failed: topics.length - created, errors };
 }
 
 export async function publishAcademyLesson(formData: FormData) {
