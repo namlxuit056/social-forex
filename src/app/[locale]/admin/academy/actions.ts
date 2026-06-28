@@ -119,19 +119,24 @@ async function saveLesson(topic: string, level: LessonLevel) {
 
 export async function getTopicIdeasForBulkAction(
   count: number,
-): Promise<Array<{ topic: string; level: string }>> {
-  await requireAdmin();
+): Promise<{ topics?: Array<{ topic: string; level: string }>; error?: string }> {
+  try {
+    await requireAdmin();
 
-  const parsed = bulkSchema.safeParse({ count });
-  if (!parsed.success) throw new Error("Số bài không hợp lệ (1–10).");
+    const parsed = bulkSchema.safeParse({ count });
+    if (!parsed.success) return { error: "Số bài không hợp lệ (1–10)." };
 
-  const existing = await prisma.academyLesson.findMany({
-    where: { locale: "en" },
-    select: { title: true },
-  });
-  const existingTitles = existing.map((l) => l.title);
+    const existing = await prisma.academyLesson.findMany({
+      where: { locale: "en" },
+      select: { title: true },
+    });
+    const existingTitles = existing.map((l) => l.title);
 
-  return generateTopicIdeas(parsed.data.count, existingTitles);
+    const topics = await generateTopicIdeas(parsed.data.count, existingTitles);
+    return { topics };
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Lỗi không xác định" };
+  }
 }
 
 export async function publishAcademyLesson(formData: FormData) {

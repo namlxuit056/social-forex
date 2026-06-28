@@ -29,15 +29,13 @@ export function BulkGenerateForm() {
     setPhase("getting-topics");
     setRows([]);
 
-    let topics: Array<{ topic: string; level: string }>;
-    try {
-      topics = await getTopicIdeasForBulkAction(count);
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
-      setRows([{ topic: "Lấy ý tưởng thất bại", level: "", status: { state: "failed", error: msg } }]);
+    const ideaResult = await getTopicIdeasForBulkAction(count);
+    if (ideaResult.error || !ideaResult.topics) {
+      setRows([{ topic: "Lấy ý tưởng thất bại", level: "", status: { state: "failed", error: ideaResult.error ?? "Không có chủ đề" } }]);
       setPhase("done");
       return;
     }
+    const topics = ideaResult.topics;
 
     setRows(topics.map((t) => ({ ...t, status: { state: "waiting" } })));
     setPhase("generating");
