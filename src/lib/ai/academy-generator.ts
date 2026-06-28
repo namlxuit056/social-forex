@@ -208,46 +208,50 @@ export async function generateAcademyLesson(
     { role: "user" as const, content: buildPrompt(topic, level) },
   ];
 
-  // Retry up to 3 times — catches both empty responses AND HTTP 429 rate-limit errors
+  // Retry up to 3 times — catches API errors, empty responses, and invalid JSON
   const MAX_RETRIES = 3;
-  let raw: string | null | undefined;
+  let parsed: unknown;
   let lastError: Error | null = null;
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     if (attempt > 0) {
-      // Exponential backoff: 10s, 20s, 30s — Groq free-tier needs time to recover
       await new Promise((r) => setTimeout(r, 10000 * attempt));
     }
+    let raw: string | null | undefined;
     try {
       const response = await client.chat.completions.create({
         model: resolved.model,
-        max_tokens: 8000,
+        max_tokens: resolved.maxTokens,
         ...(resolved.supportsTemperature ? { temperature: 0.4 } : {}),
         response_format: { type: "json_object" },
         messages,
       });
       raw = response.choices[0]?.message?.content;
-      if (raw) break;
     } catch (e) {
       lastError = e instanceof Error ? e : new Error(String(e));
-      // API error (e.g. HTTP 429 rate-limit) — retry after backoff
+      continue;
+    }
+
+    if (!raw) continue;
+
+    // Strip <think>...</think> blocks (DeepSeek-R1 reasoning output)
+    const stripped = raw.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
+
+    // Strip markdown code fences if model ignored response_format
+    const jsonStr = stripped.includes("```")
+      ? (stripped.match(/```(?:json)?\s*([\s\S]*?)```/)?.[1] ?? stripped).trim()
+      : stripped;
+
+    try {
+      parsed = JSON.parse(jsonStr);
+      lastError = null;
+      break;
+    } catch {
+      lastError = new Error(`AI returned invalid JSON: ${raw.slice(0, 300)}`);
     }
   }
 
-  if (!raw) {
-    if (lastError) throw lastError;
-    throw new Error("AI returned empty response after retries");
-  }
-
-  // Strip markdown code fences if model ignored response_format
-  const jsonStr = raw.includes("```")
-    ? (raw.match(/```(?:json)?\s*([\s\S]*?)```/)?.[1] ?? raw).trim()
-    : raw.trim();
-
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(jsonStr);
-  } catch {
-    throw new Error(`AI returned invalid JSON: ${raw.slice(0, 300)}`);
+  if (!parsed) {
+    throw lastError ?? new Error("AI returned empty response after retries");
   }
 
   const validated = lessonSchema.safeParse(parsed);

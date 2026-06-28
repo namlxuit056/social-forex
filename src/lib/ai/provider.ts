@@ -14,9 +14,9 @@ type ProviderConfig = {
 const PROVIDER_CONFIG: Record<AiProvider, ProviderConfig> = {
   deepseek: {
     baseURL: "https://api.deepseek.com",
-    model: "deepseek-v4-pro",
+    model: "deepseek-chat",
     envKey: "DEEPSEEK_API_KEY",
-    supportsTemperature: false,
+    supportsTemperature: true,
     maxTokens: 8000,
   },
   groq: {
