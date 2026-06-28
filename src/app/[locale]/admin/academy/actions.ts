@@ -70,6 +70,8 @@ async function saveLesson(topic: string, level: LessonLevel) {
   const conflict = await prisma.academyLesson.findFirst({ where: { slug } });
   if (conflict) slug = `${slug}-${Date.now().toString(36)}`;
 
+  const publishedAt = new Date();
+
   // Create Vietnamese lesson
   await prisma.academyLesson.create({
     data: {
@@ -81,7 +83,8 @@ async function saveLesson(topic: string, level: LessonLevel) {
       body: generated.bodyVi,
       keywords: generated.keywordsVi,
       imageUrl: generated.imageUrl,
-      status: "DRAFT",
+      status: "PUBLISHED",
+      publishedAt,
       quizQuestions: generated.quizzes.map((q, i) => ({
         question: q.questionVi,
         options: q.optionsVi,
@@ -102,7 +105,8 @@ async function saveLesson(topic: string, level: LessonLevel) {
       body: generated.bodyEn,
       keywords: generated.keywordsEn,
       imageUrl: generated.imageUrl,
-      status: "DRAFT",
+      status: "PUBLISHED",
+      publishedAt,
       quizQuestions: generated.quizzes.map((q, i) => ({
         question: q.questionEn,
         options: q.optionsEn,
