@@ -103,6 +103,72 @@ function slugify(text: string): string {
     .slice(0, 80);
 }
 
+const topicIdeaSchema = z.object({
+  topic: z.string().min(3).max(100),
+  level: z.enum(["beginner", "intermediate", "advanced"]),
+});
+
+const topicIdeasSchema = z.object({
+  topics: z.array(topicIdeaSchema).min(1).max(20),
+});
+
+export type TopicIdea = {
+  topic: string;
+  level: LessonLevel;
+};
+
+export async function generateTopicIdeas(
+  count: number,
+  existingTitles: string[] = [],
+): Promise<TopicIdea[]> {
+  const resolved = resolveAiProvider();
+  if (!resolved) throw new Error("No AI API key configured.");
+
+  const client = createAiClient(resolved);
+
+  const existingList =
+    existingTitles.length > 0
+      ? `\nChủ đề đã có (KHÔNG lặp lại):\n${existingTitles.map((t) => `- ${t}`).join("\n")}`
+      : "";
+
+  const prompt = `Bạn là chuyên gia forex. Hãy đề xuất ${count} chủ đề bài học đa dạng cho Academy forex trading về price action và mô hình nến (candlestick patterns).${existingList}
+
+Yêu cầu:
+- Chủ đề phải cụ thể, thực dụng (VD: "Hammer Candle", "Bearish Engulfing", "Morning Star", "Order Block", "Liquidity Grab", "Fair Value Gap", "Bullish Marubozu")
+- Phân bổ cấp độ đa dạng: beginner, intermediate, advanced
+- KHÔNG lặp lại chủ đề đã có
+- Trả về JSON: { "topics": [{ "topic": "Tên chủ đề (tiếng Anh)", "level": "beginner|intermediate|advanced" }] }`;
+
+  const response = await client.chat.completions.create({
+    model: resolved.model,
+    max_tokens: 800,
+    ...(resolved.supportsTemperature ? { temperature: 0.75 } : {}),
+    response_format: { type: "json_object" },
+    messages: [
+      {
+        role: "system",
+        content: "You are a forex education expert. Respond with valid JSON only.",
+      },
+      { role: "user", content: prompt },
+    ],
+  });
+
+  const raw = response.choices[0]?.message?.content;
+  if (!raw) throw new Error("AI returned empty response");
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    throw new Error(`AI returned invalid JSON: ${raw.slice(0, 200)}`);
+  }
+
+  const validated = topicIdeasSchema.safeParse(parsed);
+  if (!validated.success) throw new Error("Topic ideas validation failed");
+
+  return validated.data.topics.slice(0, count) as TopicIdea[];
+}
+
 export async function generateAcademyLesson(
   topic: string,
   level: LessonLevel,

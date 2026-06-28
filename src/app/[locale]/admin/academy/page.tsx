@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { Bot, BookOpen, Plus } from "lucide-react";
+import { Bot, BookOpen, Plus, Wand2 } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   generateAcademyLessonAction,
+  bulkGenerateAcademyLessonsAction,
   publishAcademyLesson,
   unpublishAcademyLesson,
   deleteAcademyLesson,
@@ -64,48 +65,86 @@ export default async function AdminAcademyPage() {
       </div>
 
       <div className="grid gap-5 lg:grid-cols-[0.42fr_0.58fr]">
-        <Card className="border-border/70">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Plus className="size-4 text-primary" aria-hidden />
-              Tạo bài học mới
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form action={generateAcademyLessonAction} className="space-y-4">
-              <div>
-                <Label htmlFor="topic">Chủ đề / Mô hình nến</Label>
-                <Input
-                  id="topic"
-                  name="topic"
-                  placeholder="VD: Hammer Candle, Doji, Three White Soldiers..."
-                  className="mt-1.5"
-                  required
-                />
-                <p className="mt-1 text-xs text-muted-foreground">
-                  Nhập tên tiếng Anh hoặc tiếng Việt. AI sẽ tạo nội dung song ngữ.
-                </p>
-              </div>
-              <div>
-                <Label htmlFor="level">Cấp độ</Label>
-                <select
-                  id="level"
-                  name="level"
-                  defaultValue="intermediate"
-                  className="mt-1.5 flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+        <div className="flex flex-col gap-5">
+          <Card className="border-border/70">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Plus className="size-4 text-primary" aria-hidden />
+                Tạo bài học theo chủ đề
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form action={generateAcademyLessonAction} className="space-y-4">
+                <div>
+                  <Label htmlFor="topic">Chủ đề / Mô hình nến</Label>
+                  <Input
+                    id="topic"
+                    name="topic"
+                    placeholder="VD: Hammer Candle, Doji, Three White Soldiers..."
+                    className="mt-1.5"
+                    required
+                  />
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Nhập tên tiếng Anh hoặc tiếng Việt. AI sẽ tạo nội dung song ngữ.
+                  </p>
+                </div>
+                <div>
+                  <Label htmlFor="level">Cấp độ</Label>
+                  <select
+                    id="level"
+                    name="level"
+                    defaultValue="intermediate"
+                    className="mt-1.5 flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+                  >
+                    <option value="beginner">Cơ bản (Beginner)</option>
+                    <option value="intermediate">Trung cấp (Intermediate)</option>
+                    <option value="advanced">Nâng cao (Advanced)</option>
+                  </select>
+                </div>
+                <SubmitButton className="w-full" pendingLabel="AI đang viết bài (~15-30 giây)...">
+                  <Bot className="mr-2 size-4" aria-hidden />
+                  Generate bài học
+                </SubmitButton>
+              </form>
+            </CardContent>
+          </Card>
+
+          <Card className="border-border/70">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Wand2 className="size-4 text-primary" aria-hidden />
+                AI tự lên ý tưởng &amp; tạo hàng loạt
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form action={bulkGenerateAcademyLessonsAction} className="space-y-4">
+                <div>
+                  <Label htmlFor="count">Số bài cần tạo</Label>
+                  <Input
+                    id="count"
+                    name="count"
+                    type="number"
+                    min={1}
+                    max={10}
+                    defaultValue={3}
+                    className="mt-1.5"
+                    required
+                  />
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    AI sẽ tự chọn chủ đề đa dạng (1–10 bài), tránh trùng với bài đã có.
+                  </p>
+                </div>
+                <SubmitButton
+                  className="w-full"
+                  pendingLabel="AI đang tạo hàng loạt (có thể mất vài phút)..."
                 >
-                  <option value="beginner">Cơ bản (Beginner)</option>
-                  <option value="intermediate">Trung cấp (Intermediate)</option>
-                  <option value="advanced">Nâng cao (Advanced)</option>
-                </select>
-              </div>
-              <SubmitButton className="w-full" pendingLabel="AI đang viết bài (~15-30 giây)...">
-                <Bot className="mr-2 size-4" aria-hidden />
-                Generate bài học
-              </SubmitButton>
-            </form>
-          </CardContent>
-        </Card>
+                  <Wand2 className="mr-2 size-4" aria-hidden />
+                  Tạo hàng loạt
+                </SubmitButton>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
 
         <Card className="border-border/70">
           <CardHeader>

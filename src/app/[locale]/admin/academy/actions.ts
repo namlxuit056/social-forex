@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { generateAcademyLesson } from "@/lib/ai/academy-generator";
+import { generateAcademyLesson, generateTopicIdeas } from "@/lib/ai/academy-generator";
 import type { LessonLevel } from "@/lib/ai/academy-generator";
 
 async function requireAdmin() {
@@ -33,11 +33,21 @@ export async function generateAcademyLessonAction(formData: FormData) {
   if (!parsed.success) return;
 
   const { topic, level } = parsed.data;
-  const generated = await generateAcademyLesson(topic, level as LessonLevel);
+  await saveLesson(topic, level as LessonLevel);
+
+  revalidatePath("/admin/academy");
+}
+
+const bulkSchema = z.object({
+  count: z.coerce.number().int().min(1).max(10),
+});
+
+async function saveLesson(topic: string, level: LessonLevel) {
+  const generated = await generateAcademyLesson(topic, level);
 
   let slug = generated.slug;
-  const existing = await prisma.academyLesson.findUnique({ where: { slug } });
-  if (existing) slug = `${slug}-${Date.now().toString(36)}`;
+  const conflict = await prisma.academyLesson.findUnique({ where: { slug } });
+  if (conflict) slug = `${slug}-${Date.now().toString(36)}`;
 
   await prisma.academyLesson.create({
     data: {
@@ -65,8 +75,31 @@ export async function generateAcademyLessonAction(formData: FormData) {
       },
     },
   });
+}
+
+export async function bulkGenerateAcademyLessonsAction(formData: FormData) {
+  await requireAdmin();
+
+  const parsed = bulkSchema.safeParse({ count: formData.get("count") });
+  if (!parsed.success) return;
+
+  const { count } = parsed.data;
+
+  const existing = await prisma.academyLesson.findMany({ select: { titleEn: true } });
+  const existingTitles = existing.map((l) => l.titleEn);
+
+  const topics = await generateTopicIdeas(count, existingTitles);
+
+  for (const { topic, level } of topics) {
+    try {
+      await saveLesson(topic, level);
+    } catch {
+      // Continue with remaining topics if one fails
+    }
+  }
 
   revalidatePath("/admin/academy");
+  revalidatePath("/academy");
 }
 
 export async function publishAcademyLesson(formData: FormData) {
