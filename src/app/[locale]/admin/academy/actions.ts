@@ -7,6 +7,8 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { generateAcademyLesson, generateTopicIdeas } from "@/lib/ai/academy-generator";
 import type { LessonLevel } from "@/lib/ai/academy-generator";
+import { generateLessonImage } from "@/lib/ai/gemini-image";
+import { pollinationsImageUrl } from "@/lib/ai/pollinations-image";
 
 async function requireAdmin() {
   const session = await auth();
@@ -159,6 +161,19 @@ export async function unpublishAcademyLesson(formData: FormData) {
     where: { id },
     data: { status: "DRAFT", publishedAt: null },
   });
+  revalidatePath("/admin/academy");
+  revalidatePath("/academy");
+}
+
+export async function regenerateImageAction(formData: FormData) {
+  await requireAdmin();
+  const id = formData.get("id");
+  const slug = formData.get("slug");
+  const topic = formData.get("topic");
+  if (typeof id !== "string" || typeof slug !== "string" || typeof topic !== "string") return;
+  const imageUrl =
+    (await generateLessonImage(topic, slug)) ?? pollinationsImageUrl(topic, slug);
+  await prisma.academyLesson.update({ where: { id }, data: { imageUrl } });
   revalidatePath("/admin/academy");
   revalidatePath("/academy");
 }

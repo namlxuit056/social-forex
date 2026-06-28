@@ -11,6 +11,7 @@ import {
   publishAcademyLesson,
   unpublishAcademyLesson,
   deleteAcademyLesson,
+  regenerateImageAction,
 } from "./actions";
 import { SubmitButton } from "./submit-button";
 import { BulkGenerateForm } from "./bulk-form";
@@ -144,8 +145,10 @@ export default async function AdminAcademyPage() {
                       {quizCount > 0 && (
                         <span className="text-xs text-muted-foreground">{quizCount} câu quiz</span>
                       )}
-                      {lesson.imageUrl && (
+                      {lesson.imageUrl ? (
                         <span className="text-xs text-green-500">✓ Ảnh</span>
+                      ) : (
+                        <span className="text-xs text-amber-500">✗ Chưa có ảnh</span>
                       )}
                     </div>
                     <p className="text-sm font-semibold text-foreground">{lesson.title}</p>
@@ -166,6 +169,14 @@ export default async function AdminAcademyPage() {
                           </SubmitButton>
                         </form>
                       )}
+                      <form action={regenerateImageAction}>
+                        <input type="hidden" name="id" value={lesson.id} />
+                        <input type="hidden" name="slug" value={lesson.slug} />
+                        <input type="hidden" name="topic" value={lesson.title} />
+                        <SubmitButton size="sm" variant="outline" pendingLabel="Đang tạo ảnh...">
+                          🖼 Tạo lại ảnh
+                        </SubmitButton>
+                      </form>
                       <form action={deleteAcademyLesson}>
                         <input type="hidden" name="id" value={lesson.id} />
                         <SubmitButton size="sm" variant="ghost" pendingLabel="Deleting...">
