@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { createAiClient, resolveAiProvider } from "@/lib/ai/provider";
 import { pollinationsImageUrl } from "@/lib/ai/pollinations-image";
+import { generateLessonImage } from "@/lib/ai/gemini-image";
 
 export type LessonLevel = "beginner" | "intermediate" | "advanced";
 
@@ -265,7 +266,8 @@ export async function generateAcademyLesson(
   const data = validated.data;
   const slug = data.slug || slugify(topic);
 
-  const imageUrl = pollinationsImageUrl(topic, slug);
+  const imageUrl =
+    (await generateLessonImage(topic, slug)) ?? pollinationsImageUrl(topic, slug);
 
   return {
     slug,
