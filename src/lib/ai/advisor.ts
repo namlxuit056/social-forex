@@ -91,7 +91,7 @@ export async function getAiAdvisorReply({
 
   const response = await client.chat.completions.create({
     model: resolved.model,
-    temperature: 0.35,
+    ...(resolved.supportsTemperature ? { temperature: 0.35 } : {}),
     max_tokens: 700,
     messages: [
       { role: "system", content: buildSystemPrompt(locale, quotes) },

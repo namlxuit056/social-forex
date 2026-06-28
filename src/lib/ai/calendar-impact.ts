@@ -146,7 +146,7 @@ export async function getAiCalendarImpact(
   const client = createAiClient(resolved);
   const response = await client.chat.completions.create({
     model: resolved.model,
-    temperature: 0.2,
+    ...(resolved.supportsTemperature ? { temperature: 0.2 } : {}),
     max_tokens: 950,
     response_format: { type: "json_object" },
     messages: [

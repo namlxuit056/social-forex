@@ -162,8 +162,8 @@ export async function getAiJournalAnalysis({
 
   const response = await client.chat.completions.create({
     model: resolved.model,
-    temperature: 0.25,
-    max_tokens: 1200,
+    ...(resolved.supportsTemperature ? { temperature: 0.25 } : {}),
+    max_tokens: 2000,
     response_format: { type: "json_object" },
     messages: [
       { role: "system", content: buildSystemPrompt(locale) },

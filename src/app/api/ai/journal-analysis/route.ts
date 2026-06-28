@@ -25,7 +25,8 @@ export async function POST(req: NextRequest) {
 
   const hasAiKey =
     !!process.env.GROQ_API_KEY?.trim() ||
-    !!process.env.OPENAI_API_KEY?.trim();
+    !!process.env.OPENAI_API_KEY?.trim() ||
+    !!process.env.DEEPSEEK_API_KEY?.trim();
   if (!hasAiKey) {
     return errorJson(ai.apiNotConfigured, 503);
   }

@@ -350,7 +350,7 @@ export async function generateAiForexArticle({
   const client = createAiClient(config);
   const completion = await client.chat.completions.create({
     model: config.model,
-    temperature: 0.6,
+    ...(config.supportsTemperature ? { temperature: 0.6 } : {}),
     response_format: { type: "json_object" },
     messages: [
       {
