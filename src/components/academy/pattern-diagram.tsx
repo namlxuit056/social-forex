@@ -15,6 +15,13 @@ function patternKeyForSlug(slug: string): string {
   if (s.includes("shooting") && s.includes("star")) return "shooting-star";
   if (s.includes("hanging") && s.includes("man")) return "hanging-man";
 
+  // Harami
+  if (s.includes("harami") && (s.includes("cross") || s.includes("doji")))
+    return "harami-cross";
+  if (s.includes("harami") && (s.includes("bear") || s.includes("bearish")))
+    return "harami-cross";
+  if (s.includes("harami")) return "harami-bullish";
+
   // Engulfing
   if (s.includes("engulfing") && (s.includes("bull") || s.includes("bullish")))
     return "engulfing-bullish";

@@ -724,6 +724,62 @@ export function BearishMarubozu() {
   );
 }
 
+export function HaramiCross() {
+  return (
+    <svg {...BOX} role="img" aria-label="Harami Cross — bearish reversal: doji inside previous bearish candle">
+      {/* Context candles */}
+      <Candle cx={30} wickTop={48} bodyTop={58} bodyBottom={95} wickBottom={105} green={true} />
+      <Candle cx={68} wickTop={35} bodyTop={45} bodyBottom={82} wickBottom={92} green={true} />
+      {/* Candle 1: large bullish candle */}
+      <Candle cx={120} wickTop={28} bodyTop={38} bodyBottom={140} wickBottom={150} green={true} />
+      {/* Candle 2: doji — open ≈ close, body sits inside candle 1's body */}
+      <Candle cx={165} wickTop={60} bodyTop={85} bodyBottom={89} wickBottom={115} green={false} />
+      {/* Dashed box showing containment */}
+      <rect x="110" y="80" width="66" height="14" fill="none" stroke="#f59e0b" strokeWidth="1" strokeDasharray="4 2" rx="2" />
+      {/* Labels */}
+      <line x1="222" y1="38" x2="140" y2={42} stroke="#9ca3af" strokeWidth="0.8" />
+      <text x="224" y="41" fill="#22c55e" fontSize="9" fontWeight="bold" {...FONT}>Large</text>
+      <text x="224" y="51" fill="#22c55e" fontSize="9" {...FONT}>bullish candle</text>
+      <line x1="222" y1="87" x2="185" y2={87} stroke="#9ca3af" strokeWidth="0.8" />
+      <text x="224" y="84" fill="#f59e0b" fontSize="9" fontWeight="bold" {...FONT}>Doji inside</text>
+      <text x="224" y="94" fill="#f59e0b" fontSize="9" {...FONT}>Open ≈ Close</text>
+      <line x1="222" y1="148" x2="140" y2={144} stroke="#9ca3af" strokeWidth="0.8" />
+      <text x="224" y="148" fill="#d1d5db" fontSize="9" {...FONT}>Candle 1 body</text>
+      {/* Arrow pointing down */}
+      <line x1="165" y1="122" x2="165" y2={142} stroke="#ef4444" strokeWidth="2" />
+      <polygon points="165,149 159,139 171,139" fill="#ef4444" />
+      <text x="6" y="185" fill="#9ca3af" fontSize="9" {...FONT}>Harami Cross: doji contained within prior candle → strong reversal signal</text>
+    </svg>
+  );
+}
+
+export function HaramiBullish() {
+  return (
+    <svg {...BOX} role="img" aria-label="Bullish Harami — small green candle inside prior large bearish candle">
+      {/* Context candles */}
+      <Candle cx={30} wickTop={95} bodyTop={105} bodyBottom={148} wickBottom={158} green={false} />
+      <Candle cx={68} wickTop={82} bodyTop={92} bodyBottom={138} wickBottom={148} green={false} />
+      {/* Candle 1: large bearish candle */}
+      <Candle cx={120} wickTop={22} bodyTop={32} bodyBottom={155} wickBottom={165} green={false} />
+      {/* Candle 2: small bullish inside candle 1 */}
+      <Candle cx={165} wickTop={72} bodyTop={82} bodyBottom={110} wickBottom={120} green={true} />
+      {/* Containment box */}
+      <rect x="110" y="75" width="66" height="40" fill="none" stroke="#22c55e" strokeWidth="1" strokeDasharray="4 2" rx="2" />
+      {/* Labels */}
+      <line x1="222" y1="32" x2="140" y2={36} stroke="#9ca3af" strokeWidth="0.8" />
+      <text x="224" y="35" fill="#ef4444" fontSize="9" fontWeight="bold" {...FONT}>Large</text>
+      <text x="224" y="45" fill="#ef4444" fontSize="9" {...FONT}>bearish candle</text>
+      <line x1="222" y1="96" x2="185" y2={96} stroke="#9ca3af" strokeWidth="0.8" />
+      <text x="224" y="93" fill="#22c55e" fontSize="9" fontWeight="bold" {...FONT}>Small bullish</text>
+      <text x="224" y="103" fill="#22c55e" fontSize="9" {...FONT}>body inside</text>
+      {/* Arrow pointing up */}
+      <line x1="165" y1="126" x2="165" y2={146} stroke="#22c55e" strokeWidth="2" />
+      <polygon points="165,119 159,129 171,129" fill="#22c55e" />
+      <text x="6" y="185" fill="#9ca3af" fontSize="9" {...FONT}>Bullish Harami: small candle inside prior large bearish → potential reversal up</text>
+    </svg>
+  );
+}
+
 export function GenericCandleChart() {
   return (
     <svg {...BOX} role="img" aria-label="Candlestick price action chart">
@@ -771,5 +827,7 @@ export const diagramRegistry: Record<string, React.ComponentType> = {
   "long-legged-doji": LongLeggedDoji,
   "marubozu-bullish": BullishMarubozu,
   "marubozu-bearish": BearishMarubozu,
+  "harami-cross": HaramiCross,
+  "harami-bullish": HaramiBullish,
   "generic-chart": GenericCandleChart,
 };

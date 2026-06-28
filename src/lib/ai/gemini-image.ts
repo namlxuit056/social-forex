@@ -24,13 +24,13 @@ export async function generateLessonImage(
 
   try {
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          instances: [{ prompt }],
-          parameters: { sampleCount: 1, aspectRatio: "16:9" },
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { responseModalities: ["IMAGE"] },
         }),
         signal: AbortSignal.timeout(30_000),
       },
@@ -43,9 +43,13 @@ export async function generateLessonImage(
     }
 
     const data = (await res.json()) as {
-      predictions?: Array<{ bytesBase64Encoded?: string; mimeType?: string }>;
+      candidates?: Array<{
+        content?: { parts?: Array<{ inlineData?: { data?: string; mimeType?: string } }> };
+      }>;
     };
-    const b64 = data.predictions?.[0]?.bytesBase64Encoded;
+    const b64 = data.candidates?.[0]?.content?.parts?.find(
+      (p) => p.inlineData?.mimeType?.startsWith("image/"),
+    )?.inlineData?.data;
     if (!b64) return null;
 
     const buffer = Buffer.from(b64, "base64");
