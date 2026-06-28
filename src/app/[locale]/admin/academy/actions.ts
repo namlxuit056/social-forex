@@ -67,33 +67,48 @@ async function saveLesson(topic: string, level: LessonLevel) {
   const generated = await generateAcademyLesson(topic, level);
 
   let slug = generated.slug;
-  const conflict = await prisma.academyLesson.findUnique({ where: { slug } });
+  const conflict = await prisma.academyLesson.findFirst({ where: { slug } });
   if (conflict) slug = `${slug}-${Date.now().toString(36)}`;
 
+  // Create Vietnamese lesson
   await prisma.academyLesson.create({
     data: {
       slug,
+      locale: "vi",
       level: generated.level,
-      titleVi: generated.titleVi,
-      titleEn: generated.titleEn,
-      summaryVi: generated.summaryVi,
-      summaryEn: generated.summaryEn,
-      bodyVi: generated.bodyVi,
-      bodyEn: generated.bodyEn,
-      keywordsVi: generated.keywordsVi,
-      keywordsEn: generated.keywordsEn,
+      title: generated.titleVi,
+      summary: generated.summaryVi,
+      body: generated.bodyVi,
+      keywords: generated.keywordsVi,
       imageUrl: generated.imageUrl,
-      published: false,
-      quizzes: {
-        create: generated.quizzes.map((q) => ({
-          questionVi: q.questionVi,
-          questionEn: q.questionEn,
-          optionsVi: q.optionsVi,
-          optionsEn: q.optionsEn,
-          correctIndex: q.correctIndex,
-          order: q.order,
-        })),
-      },
+      status: "DRAFT",
+      quizQuestions: generated.quizzes.map((q, i) => ({
+        question: q.questionVi,
+        options: q.optionsVi,
+        correctIndex: q.correctIndex,
+        order: i,
+      })),
+    },
+  });
+
+  // Create English lesson
+  await prisma.academyLesson.create({
+    data: {
+      slug,
+      locale: "en",
+      level: generated.level,
+      title: generated.titleEn,
+      summary: generated.summaryEn,
+      body: generated.bodyEn,
+      keywords: generated.keywordsEn,
+      imageUrl: generated.imageUrl,
+      status: "DRAFT",
+      quizQuestions: generated.quizzes.map((q, i) => ({
+        question: q.questionEn,
+        options: q.optionsEn,
+        correctIndex: q.correctIndex,
+        order: i,
+      })),
     },
   });
 }
@@ -106,8 +121,11 @@ export async function getTopicIdeasForBulkAction(
   const parsed = bulkSchema.safeParse({ count });
   if (!parsed.success) throw new Error("Số bài không hợp lệ (1–10).");
 
-  const existing = await prisma.academyLesson.findMany({ select: { titleEn: true } });
-  const existingTitles = existing.map((l) => l.titleEn);
+  const existing = await prisma.academyLesson.findMany({
+    where: { locale: "en" },
+    select: { title: true },
+  });
+  const existingTitles = existing.map((l) => l.title);
 
   return generateTopicIdeas(parsed.data.count, existingTitles);
 }
@@ -116,7 +134,10 @@ export async function publishAcademyLesson(formData: FormData) {
   await requireAdmin();
   const id = formData.get("id");
   if (typeof id !== "string") return;
-  await prisma.academyLesson.update({ where: { id }, data: { published: true } });
+  await prisma.academyLesson.update({
+    where: { id },
+    data: { status: "PUBLISHED", publishedAt: new Date() },
+  });
   revalidatePath("/admin/academy");
   revalidatePath("/academy");
 }
@@ -125,7 +146,10 @@ export async function unpublishAcademyLesson(formData: FormData) {
   await requireAdmin();
   const id = formData.get("id");
   if (typeof id !== "string") return;
-  await prisma.academyLesson.update({ where: { id }, data: { published: false } });
+  await prisma.academyLesson.update({
+    where: { id },
+    data: { status: "DRAFT", publishedAt: null },
+  });
   revalidatePath("/admin/academy");
   revalidatePath("/academy");
 }

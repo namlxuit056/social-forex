@@ -44,11 +44,12 @@ export default async function AdminAcademyPage() {
       id: true,
       slug: true,
       level: true,
-      titleVi: true,
-      published: true,
+      locale: true,
+      title: true,
+      status: true,
       imageUrl: true,
+      quizQuestions: true,
       createdAt: true,
-      _count: { select: { quizzes: true } },
     },
   });
 
@@ -125,50 +126,56 @@ export default async function AdminAcademyPage() {
                 Chưa có bài học nào. Nhập chủ đề và bấm Generate.
               </p>
             ) : (
-              lessons.map((lesson) => (
-                <div
-                  key={lesson.id}
-                  className="rounded-lg border border-border/60 bg-card/45 p-4 space-y-2"
-                >
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Badge variant={lesson.published ? "default" : "outline"}>
-                      {lesson.published ? "Published" : "Draft"}
-                    </Badge>
-                    <Badge variant="secondary">{lesson.level}</Badge>
-                    <span className="text-xs text-muted-foreground">
-                      {lesson._count.quizzes} câu quiz
-                    </span>
-                    {lesson.imageUrl && (
-                      <span className="text-xs text-green-500">✓ Ảnh</span>
-                    )}
-                  </div>
-                  <p className="text-sm font-semibold text-foreground">{lesson.titleVi}</p>
-                  <p className="font-mono text-xs text-muted-foreground">/academy/{lesson.slug}</p>
-                  <div className="flex flex-wrap gap-2 pt-1">
-                    {!lesson.published ? (
-                      <form action={publishAcademyLesson}>
+              lessons.map((lesson) => {
+                const quizCount = Array.isArray(lesson.quizQuestions)
+                  ? (lesson.quizQuestions as unknown[]).length
+                  : 0;
+                return (
+                  <div
+                    key={lesson.id}
+                    className="rounded-lg border border-border/60 bg-card/45 p-4 space-y-2"
+                  >
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge variant={lesson.status === "PUBLISHED" ? "default" : "outline"}>
+                        {lesson.status === "PUBLISHED" ? "Published" : lesson.status === "ARCHIVED" ? "Archived" : "Draft"}
+                      </Badge>
+                      <Badge variant="secondary">{lesson.locale.toUpperCase()}</Badge>
+                      <Badge variant="secondary">{lesson.level}</Badge>
+                      {quizCount > 0 && (
+                        <span className="text-xs text-muted-foreground">{quizCount} câu quiz</span>
+                      )}
+                      {lesson.imageUrl && (
+                        <span className="text-xs text-green-500">✓ Ảnh</span>
+                      )}
+                    </div>
+                    <p className="text-sm font-semibold text-foreground">{lesson.title}</p>
+                    <p className="font-mono text-xs text-muted-foreground">/academy/{lesson.slug}</p>
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      {lesson.status !== "PUBLISHED" ? (
+                        <form action={publishAcademyLesson}>
+                          <input type="hidden" name="id" value={lesson.id} />
+                          <SubmitButton size="sm" pendingLabel="Publishing...">
+                            Publish
+                          </SubmitButton>
+                        </form>
+                      ) : (
+                        <form action={unpublishAcademyLesson}>
+                          <input type="hidden" name="id" value={lesson.id} />
+                          <SubmitButton size="sm" variant="outline" pendingLabel="Unpublishing...">
+                            Unpublish
+                          </SubmitButton>
+                        </form>
+                      )}
+                      <form action={deleteAcademyLesson}>
                         <input type="hidden" name="id" value={lesson.id} />
-                        <SubmitButton size="sm" pendingLabel="Publishing...">
-                          Publish
+                        <SubmitButton size="sm" variant="ghost" pendingLabel="Deleting...">
+                          Xóa
                         </SubmitButton>
                       </form>
-                    ) : (
-                      <form action={unpublishAcademyLesson}>
-                        <input type="hidden" name="id" value={lesson.id} />
-                        <SubmitButton size="sm" variant="outline" pendingLabel="Unpublishing...">
-                          Unpublish
-                        </SubmitButton>
-                      </form>
-                    )}
-                    <form action={deleteAcademyLesson}>
-                      <input type="hidden" name="id" value={lesson.id} />
-                      <SubmitButton size="sm" variant="ghost" pendingLabel="Deleting...">
-                        Xóa
-                      </SubmitButton>
-                    </form>
+                    </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </CardContent>
         </Card>

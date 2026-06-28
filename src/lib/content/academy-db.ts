@@ -7,31 +7,23 @@ export type DbLesson = Lesson & {
 };
 
 export type DbQuiz = {
-  id: string;
-  questionVi: string;
-  questionEn: string;
-  optionsVi: string[];
-  optionsEn: string[];
+  question: string;
+  options: string[];
   correctIndex: number;
   order: number;
 };
 
 export async function getDbLessons(locale: string): Promise<DbLesson[]> {
-  const isVi = locale === "vi";
   const rows = await prisma.academyLesson.findMany({
-    where: { published: true },
+    where: { locale, status: "PUBLISHED" },
     orderBy: { createdAt: "desc" },
     select: {
       slug: true,
       level: true,
-      titleVi: true,
-      titleEn: true,
-      summaryVi: true,
-      summaryEn: true,
-      bodyVi: true,
-      bodyEn: true,
-      keywordsVi: true,
-      keywordsEn: true,
+      title: true,
+      summary: true,
+      body: true,
+      keywords: true,
       imageUrl: true,
     },
   });
@@ -39,10 +31,10 @@ export async function getDbLessons(locale: string): Promise<DbLesson[]> {
   return rows.map((r) => ({
     slug: r.slug,
     level: r.level as Lesson["level"],
-    title: isVi ? r.titleVi : r.titleEn,
-    summary: isVi ? r.summaryVi : r.summaryEn,
-    body: isVi ? r.bodyVi : r.bodyEn,
-    keywords: isVi ? r.keywordsVi : r.keywordsEn,
+    title: r.title,
+    summary: r.summary,
+    body: r.body,
+    keywords: r.keywords,
     imageUrl: r.imageUrl,
     fromDb: true as const,
   }));
@@ -52,20 +44,15 @@ export async function getDbLesson(
   slug: string,
   locale: string,
 ): Promise<DbLesson | null> {
-  const isVi = locale === "vi";
-  const row = await prisma.academyLesson.findUnique({
-    where: { slug, published: true },
+  const row = await prisma.academyLesson.findFirst({
+    where: { slug, locale, status: "PUBLISHED" },
     select: {
       slug: true,
       level: true,
-      titleVi: true,
-      titleEn: true,
-      summaryVi: true,
-      summaryEn: true,
-      bodyVi: true,
-      bodyEn: true,
-      keywordsVi: true,
-      keywordsEn: true,
+      title: true,
+      summary: true,
+      body: true,
+      keywords: true,
       imageUrl: true,
     },
   });
@@ -75,33 +62,27 @@ export async function getDbLesson(
   return {
     slug: row.slug,
     level: row.level as Lesson["level"],
-    title: isVi ? row.titleVi : row.titleEn,
-    summary: isVi ? row.summaryVi : row.summaryEn,
-    body: isVi ? row.bodyVi : row.bodyEn,
-    keywords: isVi ? row.keywordsVi : row.keywordsEn,
+    title: row.title,
+    summary: row.summary,
+    body: row.body,
+    keywords: row.keywords,
     imageUrl: row.imageUrl,
     fromDb: true as const,
   };
 }
 
-export async function getDbLessonQuizzes(slug: string): Promise<DbQuiz[]> {
-  const lesson = await prisma.academyLesson.findUnique({
-    where: { slug, published: true },
-    select: {
-      quizzes: {
-        orderBy: { order: "asc" },
-        select: {
-          id: true,
-          questionVi: true,
-          questionEn: true,
-          optionsVi: true,
-          optionsEn: true,
-          correctIndex: true,
-          order: true,
-        },
-      },
-    },
+export async function getDbLessonQuizzes(slug: string, locale: string): Promise<DbQuiz[]> {
+  const lesson = await prisma.academyLesson.findFirst({
+    where: { slug, locale, status: "PUBLISHED" },
+    select: { quizQuestions: true },
   });
 
-  return lesson?.quizzes ?? [];
+  if (!lesson?.quizQuestions) return [];
+
+  const raw = lesson.quizQuestions;
+  if (!Array.isArray(raw)) return [];
+
+  return (raw as DbQuiz[]).filter(
+    (q) => q && typeof q.question === "string" && Array.isArray(q.options),
+  );
 }

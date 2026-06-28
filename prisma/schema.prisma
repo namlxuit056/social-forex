@@ -995,35 +995,20 @@ model ScreenerAlertLog {
 }
 
 model AcademyLesson {
-  id          String   @id @default(cuid())
-  slug        String   @unique
-  level       String   // "beginner" | "intermediate" | "advanced"
-  titleVi     String
-  titleEn     String
-  summaryVi   String
-  summaryEn   String
-  bodyVi      String   @db.Text
-  bodyEn      String   @db.Text
-  keywordsVi  String[]
-  keywordsEn  String[]
-  imageUrl    String?
-  published   Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String    @id @default(cuid())
+  slug          String
+  locale        String    // "vi" | "en"
+  level         String    // "beginner" | "intermediate" | "advanced"
+  title         String
+  summary       String
+  body          String    @db.Text
+  keywords      String[]
+  imageUrl      String?
+  quizQuestions Json?
+  status        String    @default("DRAFT") // "DRAFT" | "PUBLISHED" | "ARCHIVED"
+  publishedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
-  quizzes AcademyLessonQuiz[]
-}
-
-model AcademyLessonQuiz {
-  id           String        @id @default(cuid())
-  lessonId     String
-  lesson       AcademyLesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-  questionVi   String
-  questionEn   String
-  optionsVi    String[]
-  optionsEn    String[]
-  correctIndex Int
-  order        Int           @default(0)
-
-  @@index([lessonId, order])
+  @@unique([slug, locale])
 }

@@ -83,7 +83,7 @@ export default async function AcademyLessonPage({ params }: Props) {
   if (!lesson) notFound();
 
   const isDbLesson = dbLesson !== null;
-  const dbQuizzes = isDbLesson ? await getDbLessonQuizzes(slug) : [];
+  const dbQuizzes = isDbLesson ? await getDbLessonQuizzes(slug, locale) : [];
 
   const session = await auth();
   let initialCompleted = false;

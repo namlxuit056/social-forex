@@ -14,9 +14,8 @@ interface Props {
   initialScore?: number | null;
 }
 
-export function AcademyAiQuiz({ lessonSlug, quizzes, locale, initialScore }: Props) {
+export function AcademyAiQuiz({ lessonSlug, quizzes, initialScore }: Props) {
   const t = useTranslations("academy");
-  const isVi = locale === "vi";
 
   const [currentIdx, setCurrentIdx] = useState(0);
   const [selections, setSelections] = useState<Record<number, number>>({});
@@ -28,8 +27,6 @@ export function AcademyAiQuiz({ lessonSlug, quizzes, locale, initialScore }: Pro
   const quiz = quizzes[currentIdx];
   if (!quiz) return null;
 
-  const question = isVi ? quiz.questionVi : quiz.questionEn;
-  const options = isVi ? quiz.optionsVi : quiz.optionsEn;
   const selectedForCurrent = selections[currentIdx] ?? null;
   const isLastQuestion = currentIdx === quizzes.length - 1;
   const allAnswered = quizzes.every((_, i) => selections[i] !== undefined);
@@ -99,17 +96,15 @@ export function AcademyAiQuiz({ lessonSlug, quizzes, locale, initialScore }: Pro
         {quizzes.map((q, i) => {
           const userAnswer = selections[i];
           const isCorrect = userAnswer === q.correctIndex;
-          const qText = isVi ? q.questionVi : q.questionEn;
-          const opts = isVi ? q.optionsVi : q.optionsEn;
           return (
             <div
-              key={q.id}
+              key={i}
               className="space-y-1 rounded-lg border border-border/50 bg-muted/20 p-3"
             >
               <p className="text-xs font-medium text-foreground/80">
-                {i + 1}. {qText}
+                {i + 1}. {q.question}
               </p>
-              {opts.map((opt, oi) => (
+              {q.options.map((opt, oi) => (
                 <div
                   key={oi}
                   className={cn(
@@ -149,10 +144,10 @@ export function AcademyAiQuiz({ lessonSlug, quizzes, locale, initialScore }: Pro
         </span>
       </div>
 
-      <p className="text-sm text-foreground/90">{question}</p>
+      <p className="text-sm text-foreground/90">{quiz.question}</p>
 
       <ul className="space-y-2">
-        {options.map((opt, i) => (
+        {quiz.options.map((opt, i) => (
           <li key={i}>
             <button
               disabled={isPending}
