@@ -220,7 +220,7 @@ export async function generateAcademyLesson(
     try {
       const response = await client.chat.completions.create({
         model: resolved.model,
-        max_tokens: 4000,
+        max_tokens: 8000,
         ...(resolved.supportsTemperature ? { temperature: 0.4 } : {}),
         response_format: { type: "json_object" },
         messages,
@@ -238,11 +238,16 @@ export async function generateAcademyLesson(
     throw new Error("AI returned empty response after retries");
   }
 
+  // Strip markdown code fences if model ignored response_format
+  const jsonStr = raw.includes("```")
+    ? (raw.match(/```(?:json)?\s*([\s\S]*?)```/)?.[1] ?? raw).trim()
+    : raw.trim();
+
   let parsed: unknown;
   try {
-    parsed = JSON.parse(raw);
+    parsed = JSON.parse(jsonStr);
   } catch {
-    throw new Error(`AI returned invalid JSON: ${raw.slice(0, 200)}`);
+    throw new Error(`AI returned invalid JSON: ${raw.slice(0, 300)}`);
   }
 
   const validated = lessonSchema.safeParse(parsed);
