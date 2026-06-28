@@ -19,6 +19,8 @@ import { AcademyCompleteButton } from "@/components/academy/academy-complete-but
 import { AcademyQuiz } from "@/components/academy/academy-quiz";
 import { diagramRegistry } from "@/components/academy/diagrams";
 import { getQuizQuestion } from "@/lib/content/academy-quiz";
+import { getDbLesson, getDbLessonQuizzes } from "@/lib/content/academy-db";
+import { AcademyAiQuiz } from "@/components/academy/academy-ai-quiz";
 
 type Props = { params: Promise<{ slug: string; locale: string }> };
 
@@ -34,7 +36,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props) {
   const { slug, locale } = await params;
   setRequestLocale(locale);
-  const lesson = getAcademyLesson(slug, locale);
+  const lesson = getAcademyLesson(slug, locale) ?? await getDbLesson(slug, locale);
   if (!lesson) return {};
 
   return {
@@ -73,8 +75,13 @@ export default async function AcademyLessonPage({ params }: Props) {
   const tCommon = await getTranslations("common");
   const ctaRow = await pageCtaItems("learn", "trading");
 
-  const lesson = getAcademyLesson(slug, locale);
+  const hardcodedLesson = getAcademyLesson(slug, locale);
+  const dbLesson = hardcodedLesson ? null : await getDbLesson(slug, locale);
+  const lesson = hardcodedLesson ?? dbLesson;
   if (!lesson) notFound();
+
+  const isDbLesson = dbLesson !== null;
+  const dbQuizzes = isDbLesson ? await getDbLessonQuizzes(slug) : [];
 
   const session = await auth();
   let initialCompleted = false;
@@ -152,6 +159,14 @@ export default async function AcademyLessonPage({ params }: Props) {
             {lesson.title}
           </h1>
           <p className="mt-2 text-muted-foreground">{lesson.summary}</p>
+          {"imageUrl" in lesson && (lesson as { imageUrl?: string | null }).imageUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={(lesson as { imageUrl: string }).imageUrl}
+              alt={lesson.title}
+              className="w-full rounded-xl object-cover max-h-60"
+            />
+          )}
         </div>
 
         <div className="prose prose-invert max-w-none text-sm leading-relaxed text-foreground/90">
@@ -220,7 +235,15 @@ export default async function AcademyLessonPage({ params }: Props) {
 
         <Disclaimer variant="compact" />
 
-        {session?.user && quizQuestion && (
+        {session?.user && isDbLesson && dbQuizzes.length > 0 && (
+          <AcademyAiQuiz
+            lessonSlug={slug}
+            quizzes={dbQuizzes}
+            locale={locale}
+            initialScore={initialQuizScore}
+          />
+        )}
+        {session?.user && !isDbLesson && quizQuestion && (
           <AcademyQuiz
             lessonSlug={slug}
             question={locale === "vi" ? quizQuestion.question.vi : quizQuestion.question.en}

@@ -7,9 +7,12 @@ import { BreadcrumbNav } from "@/components/seo/breadcrumb-nav";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { getAcademyLessons } from "@/lib/content/academy";
+import { getDbLessons } from "@/lib/content/academy-db";
 import { pageCtaItems } from "@/lib/page-cta-i18n";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
@@ -32,7 +35,13 @@ export default async function AcademyPage({
   const t = await getTranslations("academy");
   const tCommon = await getTranslations("common");
   const ctaRow = await pageCtaItems("learn", "explore");
-  const academyLessons = getAcademyLessons(locale);
+  const [dbLessons, hardcodedLessons] = await Promise.all([
+    getDbLessons(locale),
+    Promise.resolve(getAcademyLessons(locale)),
+  ]);
+  const dbSlugs = new Set(dbLessons.map((l) => l.slug));
+  const uniqueHardcoded = hardcodedLessons.filter((l) => !dbSlugs.has(l.slug));
+  const academyLessons = [...dbLessons, ...uniqueHardcoded];
 
   const session = await auth();
   const completedSlugs = new Set<string>();
@@ -119,6 +128,14 @@ export default async function AcademyPage({
               <p className="mt-2 text-sm text-muted-foreground">
                 {lesson.summary}
               </p>
+              {"imageUrl" in lesson && (lesson as { imageUrl?: string | null }).imageUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={(lesson as { imageUrl: string }).imageUrl}
+                  alt={lesson.title}
+                  className="mt-3 h-32 w-full rounded-lg object-cover opacity-80"
+                />
+              )}
               <Link
                 href={`/academy/${lesson.slug}`}
                 className={cn(
