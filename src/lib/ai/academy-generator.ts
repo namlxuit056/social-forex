@@ -208,25 +208,35 @@ export async function generateAcademyLesson(
     { role: "user" as const, content: buildPrompt(topic, level) },
   ];
 
-  // Retry up to 2 times on empty response (provider rate-limit transient error)
-  const MAX_RETRIES = 2;
+  // Retry up to 3 times — catches both empty responses AND HTTP 429 rate-limit errors
+  const MAX_RETRIES = 3;
   let raw: string | null | undefined;
+  let lastError: Error | null = null;
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     if (attempt > 0) {
-      await new Promise((r) => setTimeout(r, 5000 * attempt)); // 5s, then 10s
+      // Exponential backoff: 10s, 20s, 30s — Groq free-tier needs time to recover
+      await new Promise((r) => setTimeout(r, 10000 * attempt));
     }
-    const response = await client.chat.completions.create({
-      model: resolved.model,
-      max_tokens: 4000,
-      ...(resolved.supportsTemperature ? { temperature: 0.4 } : {}),
-      response_format: { type: "json_object" },
-      messages,
-    });
-    raw = response.choices[0]?.message?.content;
-    if (raw) break;
+    try {
+      const response = await client.chat.completions.create({
+        model: resolved.model,
+        max_tokens: 4000,
+        ...(resolved.supportsTemperature ? { temperature: 0.4 } : {}),
+        response_format: { type: "json_object" },
+        messages,
+      });
+      raw = response.choices[0]?.message?.content;
+      if (raw) break;
+    } catch (e) {
+      lastError = e instanceof Error ? e : new Error(String(e));
+      // API error (e.g. HTTP 429 rate-limit) — retry after backoff
+    }
   }
 
-  if (!raw) throw new Error("AI returned empty response after retries");
+  if (!raw) {
+    if (lastError) throw lastError;
+    throw new Error("AI returned empty response after retries");
+  }
 
   let parsed: unknown;
   try {

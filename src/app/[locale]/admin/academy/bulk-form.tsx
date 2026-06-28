@@ -51,22 +51,24 @@ export function BulkGenerateForm() {
       fd.set("topic", topics[i].topic);
       fd.set("level", topics[i].level);
 
-      try {
-        await generateAcademyLessonAction(fd);
-        setRows((prev) =>
-          prev.map((r, idx) => (idx === i ? { ...r, status: { state: "done" } } : r)),
-        );
-      } catch (e) {
-        const msg = (e instanceof Error ? e.message : String(e)).slice(0, 180);
+      const result = await generateAcademyLessonAction(fd);
+      if (result?.error) {
         setRows((prev) =>
           prev.map((r, idx) =>
-            idx === i ? { ...r, status: { state: "failed", error: msg } } : r,
+            idx === i
+              ? { ...r, status: { state: "failed", error: result.error!.slice(0, 200) } }
+              : r,
           ),
+        );
+      } else {
+        setRows((prev) =>
+          prev.map((r, idx) => (idx === i ? { ...r, status: { state: "done" } } : r)),
         );
       }
 
       if (i < topics.length - 1) {
-        await new Promise((r) => setTimeout(r, 2000));
+        // 10s gap between lessons — gives Groq free-tier time to recover rate-limit
+        await new Promise((r) => setTimeout(r, 10000));
       }
     }
 

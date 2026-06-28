@@ -23,19 +23,26 @@ const generateSchema = z.object({
   level: z.enum(["beginner", "intermediate", "advanced"]),
 });
 
-export async function generateAcademyLessonAction(formData: FormData) {
-  await requireAdmin();
+export async function generateAcademyLessonAction(
+  formData: FormData,
+): Promise<{ error?: string }> {
+  try {
+    await requireAdmin();
 
-  const parsed = generateSchema.safeParse({
-    topic: formData.get("topic"),
-    level: formData.get("level") || "intermediate",
-  });
-  if (!parsed.success) return;
+    const parsed = generateSchema.safeParse({
+      topic: formData.get("topic"),
+      level: formData.get("level") || "intermediate",
+    });
+    if (!parsed.success) return { error: "Chủ đề không hợp lệ." };
 
-  const { topic, level } = parsed.data;
-  await saveLesson(topic, level as LessonLevel);
+    const { topic, level } = parsed.data;
+    await saveLesson(topic, level as LessonLevel);
 
-  revalidatePath("/admin/academy");
+    revalidatePath("/admin/academy");
+    return {};
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Lỗi không xác định" };
+  }
 }
 
 const bulkSchema = z.object({
