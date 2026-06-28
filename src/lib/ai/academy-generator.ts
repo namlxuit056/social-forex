@@ -70,8 +70,8 @@ Trả về JSON hợp lệ với cấu trúc sau (KHÔNG thêm markdown, chỉ J
   "titleEn": "English title (concise, 8-70 chars)",
   "summaryVi": "Tóm tắt tiếng Việt, 1-2 câu mô tả bài học (50-200 ký tự)",
   "summaryEn": "English summary, 1-2 sentences (50-200 chars)",
-  "bodyVi": "Nội dung bài học tiếng Việt. Dùng ## cho heading, - cho bullet, **text** cho bold. Tối thiểu 500 ký tự. Bao gồm: định nghĩa, cách nhận diện, cách giao dịch, ví dụ thực tế, lỗi phổ biến.",
-  "bodyEn": "English lesson body. Use ## for headings, - for bullets, **text** for bold. Minimum 500 chars. Include: definition, how to identify, how to trade, real examples, common mistakes.",
+  "bodyVi": "Nội dung bài học tiếng Việt. Dùng ## cho heading, - cho bullet, **text** cho bold. Tối thiểu 500 ký tự. Bao gồm: định nghĩa, cách nhận diện, cách giao dịch, ví dụ thực tế, lỗi phổ biến. Chèn sơ đồ minh hoạ bằng cú pháp [diagram:key] trên một dòng riêng NGAY SAU đoạn giải thích hình dạng nến (xem danh sách key bên dưới). Chèn 1-3 sơ đồ phù hợp nhất với chủ đề.",
+  "bodyEn": "English lesson body. Use ## for headings, - for bullets, **text** for bold. Minimum 500 chars. Include: definition, how to identify, how to trade, real examples, common mistakes. Insert diagram illustrations using [diagram:key] syntax on its own line IMMEDIATELY AFTER explaining the candle shape (see key list below). Insert 1-3 most relevant diagrams.",
   "keywordsVi": ["từ khóa 1", "từ khóa 2", "từ khóa 3"],
   "keywordsEn": ["keyword 1", "keyword 2", "keyword 3"],
   "quizzes": [
@@ -84,6 +84,23 @@ Trả về JSON hợp lệ với cấu trúc sau (KHÔNG thêm markdown, chỉ J
     }
   ]
 }
+
+Danh sách diagram key hợp lệ (dùng trong [diagram:key]):
+hammer | inverted-hammer | shooting-star | hanging-man
+doji-standard | long-legged-doji | gravestone-resistance | dragonfly-support
+engulfing-bullish | engulfing-bearish
+morning-star | evening-star
+three-white-soldiers | three-black-crows
+pin-bar-bullish | pin-bar-bearish
+marubozu-bullish | marubozu-bearish
+tweezer-bottom | tweezer-top
+inside-bar-setup | inside-bar-breakout
+fvg-bullish | fvg-bearish
+bos-uptrend | choch-bullish | choch-bearish
+generic-chart (dùng khi không có key nào phù hợp)
+
+Ví dụ cách chèn trong bodyVi:
+## Hình dạng nến Hammer\\n\\nThân nến nhỏ nằm ở phía trên...\\n[diagram:hammer]\\n\\n## Cách giao dịch...
 
 Yêu cầu quiz:
 - Viết đúng 4 câu hỏi (quizzes array có 4 phần tử)
