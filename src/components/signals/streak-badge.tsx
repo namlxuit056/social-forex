@@ -26,7 +26,7 @@ export function StreakBadge({
         typeColors[type],
         className,
       )}
-      title={`${count} ngày liên tiếp`}
+      title={`${count}-day streak`}
     >
       <Flame className="size-3.5" aria-hidden />
       {count}

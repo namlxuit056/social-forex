@@ -79,11 +79,11 @@ export function NotificationList({
                     direction: n.signal.direction,
                   })
                 : n.kind === "STREAK_REMINDER"
-                  ? "Đừng quên ghi nhật ký / lập kế hoạch hôm nay!"
+                  ? "Don't forget to write your journal / plan for today!"
                   : n.kind === "PRICE_ALERT"
-                    ? "Cảnh báo giá đã kích hoạt"
+                    ? "Price alert triggered"
                     : n.kind === "JOURNAL_REVIEW"
-                      ? "Báo cáo giao dịch tuần đã sẵn sàng"
+                      ? "Weekly trading report is ready"
                       : n.kind === "SCREENER_ALERT"
                         ? t("screenerAlert")
                         : n.signal

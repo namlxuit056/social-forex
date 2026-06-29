@@ -89,7 +89,7 @@ export function AcademyAiQuiz({ lessonSlug, quizzes, initialScore }: Props) {
         >
           {passed ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
           <span>
-            {correct}/{quizzes.length} câu đúng — {score}/100 điểm
+            {correct}/{quizzes.length} correct — {score}/100 pts
             {xpEarned > 0 && ` · +${xpEarned} XP`}
           </span>
         </div>
@@ -176,7 +176,7 @@ export function AcademyAiQuiz({ lessonSlug, quizzes, initialScore }: Props) {
             onClick={handleNext}
             disabled={selectedForCurrent === null || isPending}
           >
-            Câu tiếp →
+            Next →
           </Button>
         )}
         {allAnswered && (

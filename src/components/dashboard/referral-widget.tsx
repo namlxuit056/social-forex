@@ -97,7 +97,7 @@ export function ReferralWidget() {
             size="sm"
             className="flex-1"
             onClick={() => {
-              const text = encodeURIComponent(`Tham gia Social Forex qua link của tôi để nhận 3 ngày VIP miễn phí! ${referralLink}`);
+              const text = encodeURIComponent(`Join Social Forex via my link and get 3 free VIP days! ${referralLink}`);
               window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(referralLink)}&quote=${text}`, "_blank");
             }}
           >
@@ -109,7 +109,7 @@ export function ReferralWidget() {
             size="sm"
             className="flex-1"
             onClick={() => {
-              const text = encodeURIComponent(`Tham gia Social Forex qua link của tôi để nhận 3 ngày VIP miễn phí! ${referralLink}`);
+              const text = encodeURIComponent(`Join Social Forex via my link and get 3 free VIP days! ${referralLink}`);
               window.open(`https://twitter.com/intent/tweet?text=${text}`, "_blank");
             }}
           >

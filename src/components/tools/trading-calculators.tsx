@@ -37,7 +37,7 @@ function CopyBtn({ id, value, copied, onCopy }: {
   return (
     <button
       onClick={() => onCopy(id, value)}
-      aria-label={done ? "Đã sao chép" : "Sao chép"}
+      aria-label={done ? "Copied" : "Copy"}
       className="ml-1.5 rounded p-0.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-foreground"
     >
       {done ? <Check className="size-3 text-emerald-500" /> : <Copy className="size-3" />}
@@ -87,7 +87,7 @@ function PivotCalculator() {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">H, L, Close phiên trước.</p>
+      <p className="text-sm text-muted-foreground">H, L, Close from the previous session.</p>
       <div className="grid grid-cols-3 gap-3">
         <div className="space-y-1.5">
           <Label htmlFor="pv-h" className="text-xs text-muted-foreground">High</Label>
@@ -117,7 +117,7 @@ function PivotCalculator() {
         </div>
       ) : (
         <div className="rounded-lg border border-dashed border-border/60 bg-muted/10 px-4 py-3 text-center text-xs text-muted-foreground">
-          Nhập H, L, C để tính pivot.
+          Enter H, L, C to calculate pivot.
         </div>
       )}
     </div>
@@ -150,7 +150,7 @@ function MarginCalculator() {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">Ước tính notional / đòn bẩy. Từng sàn có thể tính khác.</p>
+      <p className="text-sm text-muted-foreground">Estimated notional / leverage. Actual values may vary by broker.</p>
 
       <div className="flex flex-wrap gap-1.5">
         {MARGIN_PRESETS.map((s) => (
@@ -193,7 +193,7 @@ function MarginCalculator() {
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="mg-price" className="text-xs text-muted-foreground">Giá hiện tại</Label>
+          <Label htmlFor="mg-price" className="text-xs text-muted-foreground">Current price</Label>
           <Input
             id="mg-price"
             type="number"
@@ -205,7 +205,7 @@ function MarginCalculator() {
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="mg-lev" className="text-xs text-muted-foreground">Đòn bẩy</Label>
+          <Label htmlFor="mg-lev" className="text-xs text-muted-foreground">Leverage</Label>
           <div className="relative">
             <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
               1:
@@ -237,7 +237,7 @@ function MarginCalculator() {
             </p>
           </div>
           <div>
-            <p className="text-[11px] text-muted-foreground">Margin cần</p>
+            <p className="text-[11px] text-muted-foreground">Margin required</p>
             <p className="mt-0.5 font-mono text-base font-bold text-primary">
               ${result.margin.toLocaleString(undefined, { maximumFractionDigits: 2 })}
             </p>
@@ -245,7 +245,7 @@ function MarginCalculator() {
         </div>
       ) : (
         <div className="rounded-lg border border-dashed border-border/60 bg-muted/10 px-4 py-3 text-center text-xs text-muted-foreground">
-          Nhập đầy đủ thông tin để tính margin.
+          Enter all fields to calculate margin.
         </div>
       )}
     </div>
@@ -264,7 +264,7 @@ export function TradingCalculators() {
       <TabsList className="h-9">
         <TabsTrigger value="position" className="text-sm">Position Size</TabsTrigger>
         <TabsTrigger value="pivot" className="text-sm">Pivot Points</TabsTrigger>
-        <TabsTrigger value="margin" className="text-sm">Ký quỹ</TabsTrigger>
+        <TabsTrigger value="margin" className="text-sm">Margin</TabsTrigger>
       </TabsList>
 
       <TabsContent value="position">
@@ -282,7 +282,7 @@ export function TradingCalculators() {
 
       <TabsContent value="margin">
         <div className="rounded-xl border border-border bg-muted/15 p-5">
-          <h3 className="text-base font-medium text-foreground">Ký quỹ (Margin)</h3>
+          <h3 className="text-base font-medium text-foreground">Margin</h3>
           <div className="mt-3">
             <MarginCalculator />
           </div>

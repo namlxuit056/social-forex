@@ -278,7 +278,7 @@ export function RiskCalculator({
                 >
                   1 : {rrRatio.toFixed(2)}
                   {rrRatio >= 2 && " ✓"}
-                  {rrRatio < 1 && " — R:R thấp"}
+                  {rrRatio < 1 && " — R:R low"}
                 </p>
               </div>
             )}

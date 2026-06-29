@@ -42,7 +42,7 @@ export function DemoBacktest() {
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-3">
         <label className="text-sm">
-          <span className="text-muted-foreground">Số lệnh mô phỏng</span>
+          <span className="text-muted-foreground">Simulated trades</span>
           <input
             type="number"
             min={10}
@@ -53,7 +53,7 @@ export function DemoBacktest() {
           />
         </label>
         <label className="text-sm">
-          <span className="text-muted-foreground">Tỷ lệ thắng %</span>
+          <span className="text-muted-foreground">Win rate %</span>
           <input
             type="number"
             min={1}
@@ -64,7 +64,7 @@ export function DemoBacktest() {
           />
         </label>
         <label className="text-sm">
-          <span className="text-muted-foreground">R:R khi thắng</span>
+          <span className="text-muted-foreground">R:R on win</span>
           <input
             type="number"
             step="0.1"
@@ -79,9 +79,9 @@ export function DemoBacktest() {
 
       <div className="rounded-xl border border-border bg-muted/15 p-4">
         <p className="text-sm text-muted-foreground">
-          Equity cuối (mô phỏng):{" "}
-          <span className="font-mono text-emerald-600 dark:text-emerald-400">{final}</span> USD · Lợi nhuận
-          gần đúng: <span className="font-mono">{ret}%</span>
+          Final equity (simulated):{" "}
+          <span className="font-mono text-emerald-600 dark:text-emerald-400">{final}</span> USD · Approx. return:{" "}
+          <span className="font-mono">{ret}%</span>
         </p>
         <div className="mt-4 flex h-40 items-end gap-px overflow-hidden rounded bg-muted dark:bg-zinc-950">
           {series.filter((_, i) => i % Math.ceil(trades / 80) === 0).map((p, i) => {

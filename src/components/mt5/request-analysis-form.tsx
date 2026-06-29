@@ -13,12 +13,12 @@ type Props = {
 };
 
 const ERROR_LABELS: Record<string, string> = {
-  vip_required: "Tính năng này chỉ dành cho VIP",
-  no_connection: "Tạo MT5 connection trước",
-  rate_limited: "Quá nhiều request, thử lại sau 1 phút",
-  ai_unavailable: "Chưa cấu hình DEEPSEEK_API_KEY trong .env",
-  analysis_failed: "Phân tích thất bại — thử lại",
-  unknown_symbol: "Symbol không hợp lệ",
+  vip_required: "This feature is VIP only",
+  no_connection: "Create an MT5 connection first",
+  rate_limited: "Too many requests, try again in 1 minute",
+  ai_unavailable: "DEEPSEEK_API_KEY not configured in .env",
+  analysis_failed: "Analysis failed — try again",
+  unknown_symbol: "Invalid symbol",
 };
 
 export function RequestAnalysisForm({ hasConnection }: Props) {
@@ -41,7 +41,7 @@ export function RequestAnalysisForm({ hasConnection }: Props) {
         setTimeout(() => setStatus("idle"), 4000);
       } else {
         setStatus("error");
-        setErrorMsg(ERROR_LABELS[result.error ?? ""] ?? result.error ?? "Lỗi không xác định");
+        setErrorMsg(ERROR_LABELS[result.error ?? ""] ?? result.error ?? "Unknown error");
       }
     });
   }
@@ -65,24 +65,24 @@ export function RequestAnalysisForm({ hasConnection }: Props) {
         {isPending ? (
           <>
             <Loader2 className="mr-1.5 size-3.5 animate-spin" />
-            Đang phân tích…
+            Analysing…
           </>
         ) : (
           <>
             <BrainCircuit className="mr-1.5 size-3.5" />
-            Phân tích AI
+            AI Analysis
           </>
         )}
       </Button>
 
       {!hasConnection && (
         <span className="text-xs text-muted-foreground">
-          Tạo MT5 connection ở trên trước
+          Create an MT5 connection above first
         </span>
       )}
       {status === "success" && (
         <span className="text-xs text-green-500 font-medium">
-          ✓ Đang phân tích, kết quả xuất hiện bên dưới
+          ✓ Analysing — results will appear below
         </span>
       )}
       {status === "error" && (
@@ -93,7 +93,7 @@ export function RequestAnalysisForm({ hasConnection }: Props) {
               href="/upgrade-vip"
               className="font-medium text-primary underline-offset-2 hover:underline"
             >
-              Nâng cấp VIP
+              Upgrade VIP
             </Link>
           )}
         </span>

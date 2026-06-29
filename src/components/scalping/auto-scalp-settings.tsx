@@ -54,14 +54,14 @@ function SymbolCard({
         <button
           onClick={() => onToggle(sym.id, !sym.enabled)}
           className="p-1 rounded text-muted-foreground hover:text-foreground transition-colors"
-          title={sym.enabled ? "Tắt" : "Bật"}
+          title={sym.enabled ? "Disable" : "Enable"}
         >
           {sym.enabled ? <ToggleRight className="size-4 text-primary" /> : <ToggleLeft className="size-4" />}
         </button>
         <button
           onClick={() => onRemove(sym.id)}
           className="p-1 rounded text-muted-foreground hover:text-destructive transition-colors"
-          title="Xóa"
+          title="Remove"
         >
           <Trash2 className="size-3.5" />
         </button>
