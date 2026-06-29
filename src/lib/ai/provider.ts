@@ -9,6 +9,8 @@ type ProviderConfig = {
   /** DeepSeek-R1 rejects temperature param — must be omitted */
   supportsTemperature: boolean;
   maxTokens: number;
+  /** Some models (deepseek-v4-pro) return empty content when response_format is set */
+  supportsJsonResponseFormat: boolean;
 };
 
 const PROVIDER_CONFIG: Record<AiProvider, ProviderConfig> = {
@@ -17,6 +19,7 @@ const PROVIDER_CONFIG: Record<AiProvider, ProviderConfig> = {
     model: "deepseek-v4-pro",
     envKey: "DEEPSEEK_API_KEY",
     supportsTemperature: true,
+    supportsJsonResponseFormat: false,
     maxTokens: 8000,
   },
   groq: {
@@ -24,6 +27,7 @@ const PROVIDER_CONFIG: Record<AiProvider, ProviderConfig> = {
     model: "llama-3.3-70b-versatile",
     envKey: "GROQ_API_KEY",
     supportsTemperature: true,
+    supportsJsonResponseFormat: true,
     maxTokens: 900,
   },
   openai: {
@@ -31,6 +35,7 @@ const PROVIDER_CONFIG: Record<AiProvider, ProviderConfig> = {
     model: "gpt-4o-mini",
     envKey: "OPENAI_API_KEY",
     supportsTemperature: true,
+    supportsJsonResponseFormat: true,
     maxTokens: 900,
   },
 };
@@ -41,6 +46,7 @@ export type ResolvedAiProvider = {
   model: string;
   baseURL: string;
   supportsTemperature: boolean;
+  supportsJsonResponseFormat: boolean;
   maxTokens: number;
 };
 

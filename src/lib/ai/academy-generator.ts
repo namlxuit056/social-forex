@@ -162,7 +162,7 @@ Yêu cầu QUAN TRỌNG:
     model: resolved.model,
     max_tokens: 1500,
     ...(resolved.supportsTemperature ? { temperature: 0.75 } : {}),
-    response_format: { type: "json_object" },
+    ...(resolved.supportsJsonResponseFormat ? { response_format: { type: "json_object" } } : {}),
     messages: [
       {
         role: "system",
@@ -223,7 +223,7 @@ export async function generateAcademyLesson(
         model: resolved.model,
         max_tokens: resolved.maxTokens,
         ...(resolved.supportsTemperature ? { temperature: 0.4 } : {}),
-        response_format: { type: "json_object" },
+        ...(resolved.supportsJsonResponseFormat ? { response_format: { type: "json_object" } } : {}),
         messages,
       });
       raw = response.choices[0]?.message?.content;

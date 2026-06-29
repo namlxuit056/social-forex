@@ -42,7 +42,7 @@ export async function getAiSuggestion(
     model: resolved.model,
     ...(resolved.supportsTemperature ? { temperature: 0.3 } : {}),
     max_tokens: resolved.maxTokens,
-    response_format: { type: "json_object" },
+    ...(resolved.supportsJsonResponseFormat ? { response_format: { type: "json_object" } } : {}),
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
       { role: "user", content: buildUserPrompt(quote, tradingViewContext, newsContext, locale) },
@@ -54,9 +54,15 @@ export async function getAiSuggestion(
     throw new Error("AI returned an empty response");
   }
 
+  // Strip <think>...</think> blocks (DeepSeek reasoning output)
+  const stripped = raw.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
+  const jsonStr = stripped.includes("```")
+    ? (stripped.match(/```(?:json)?\s*([\s\S]*?)```/)?.[1] ?? stripped).trim()
+    : stripped;
+
   let parsed: unknown;
   try {
-    parsed = JSON.parse(raw);
+    parsed = JSON.parse(jsonStr);
   } catch {
     throw new Error("AI response is not valid JSON");
   }
