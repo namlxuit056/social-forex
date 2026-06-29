@@ -111,7 +111,7 @@ function parsePrefillRisk(value: string | string[] | undefined) {
   return Number.isFinite(n) && n > 0 && n <= 100 ? n : null;
 }
 
-function parsePrefillBias(value: string | string[] | undefined) {
+function parsePrefillBias(value: string | string[] | undefined): TradingPlanSymbolPlan["bias"] | null {
   const raw = Array.isArray(value) ? value[0] : value;
   if (raw === "BULLISH" || raw === "BEARISH" || raw === "RANGE" || raw === "WAIT") return raw;
   return null;
