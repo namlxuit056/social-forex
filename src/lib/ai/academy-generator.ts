@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createAiClient, resolveAiProvider } from "@/lib/ai/provider";
+import { createAiClient, resolveAiProvider, resolveMaxTokens } from "@/lib/ai/provider";
 import { pollinationsImageUrl } from "@/lib/ai/pollinations-image";
 import { generateLessonImage } from "@/lib/ai/gemini-image";
 
@@ -160,7 +160,7 @@ Yêu cầu QUAN TRỌNG:
 
   const response = await client.chat.completions.create({
     model: resolved.model,
-    max_tokens: 1500,
+    max_tokens: resolveMaxTokens(resolved, 1500),
     ...(resolved.supportsTemperature ? { temperature: 0.75 } : {}),
     ...(resolved.supportsJsonResponseFormat ? { response_format: { type: "json_object" } } : {}),
     messages: [
