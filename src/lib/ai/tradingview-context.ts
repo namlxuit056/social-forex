@@ -25,6 +25,11 @@ const METRICS = [
   "ADX",
   "MACD.macd",
   "MACD.signal",
+  "BB.upper",
+  "BB.lower",
+  "BB.basis",
+  "Stoch.K",
+  "Stoch.D",
   "open",
   "high",
   "low",
@@ -50,6 +55,13 @@ export type TradingViewTechnicalFrame = {
   adx: number | null;
   macd: number | null;
   macdSignal: number | null;
+  bbUpper: number | null;
+  bbMiddle: number | null;
+  bbLower: number | null;
+  bbPosition: "above" | "below" | "within" | "unknown";
+  stochK: number | null;
+  stochD: number | null;
+  stochState: "overbought" | "oversold" | "neutral";
   open: number | null;
   high: number | null;
   low: number | null;
@@ -125,6 +137,24 @@ function emaBias(
   if (close > ema20 && ema20 > ema50 && ema50 > ema200) return "bullish";
   if (close < ema20 && ema20 < ema50 && ema50 < ema200) return "bearish";
   return "mixed";
+}
+
+function bbPosition(
+  close: number | null,
+  bbUpper: number | null,
+  bbLower: number | null,
+): TradingViewTechnicalFrame["bbPosition"] {
+  if (close === null || bbUpper === null || bbLower === null) return "unknown";
+  if (close > bbUpper) return "above";
+  if (close < bbLower) return "below";
+  return "within";
+}
+
+function stochState(stochK: number | null): TradingViewTechnicalFrame["stochState"] {
+  if (stochK === null) return "neutral";
+  if (stochK >= 80) return "overbought";
+  if (stochK <= 20) return "oversold";
+  return "neutral";
 }
 
 function candlePattern({
@@ -241,6 +271,10 @@ export async function getTradingViewTechnicalContext(
     const ema200 = valueAt(values, "EMA200", code);
     const recommendation = valueAt(values, "Recommend.All", code);
     const rsi = valueAt(values, "RSI", code);
+    const bbUp = valueAt(values, "BB.upper", code);
+    const bbMid = valueAt(values, "BB.basis", code);
+    const bbLow = valueAt(values, "BB.lower", code);
+    const stochK = valueAt(values, "Stoch.K", code);
 
     return {
       timeframe: label,
@@ -255,6 +289,13 @@ export async function getTradingViewTechnicalContext(
       adx: valueAt(values, "ADX", code),
       macd: valueAt(values, "MACD.macd", code),
       macdSignal: valueAt(values, "MACD.signal", code),
+      bbUpper: bbUp,
+      bbMiddle: bbMid,
+      bbLower: bbLow,
+      bbPosition: bbPosition(close, bbUp, bbLow),
+      stochK,
+      stochD: valueAt(values, "Stoch.D", code),
+      stochState: stochState(stochK),
       open,
       high,
       low,

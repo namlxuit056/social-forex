@@ -16,6 +16,16 @@ export type ScreenerPair = {
   recH1: number | null;
   recH4: number | null;
   recD1: number | null;
+  macd: number | null;
+  macdSignal: number | null;
+  bbUpper: number | null;
+  bbMiddle: number | null;
+  bbLower: number | null;
+  bbPosition: "above" | "below" | "within" | "unknown";
+  stochK: number | null;
+  stochD: number | null;
+  stochState: "overbought" | "oversold" | "neutral";
+  atr: number | null;
 };
 
 const CACHE_TTL = 60_000;
@@ -74,6 +84,16 @@ export async function fetchScreenerPairs(): Promise<ScreenerPair[]> {
       recH1: h1?.recommendation ?? null,
       recH4: h4?.recommendation ?? null,
       recD1: d1?.recommendation ?? null,
+      macd: d1?.macd ?? null,
+      macdSignal: d1?.macdSignal ?? null,
+      bbUpper: d1?.bbUpper ?? null,
+      bbMiddle: d1?.bbMiddle ?? null,
+      bbLower: d1?.bbLower ?? null,
+      bbPosition: d1?.bbPosition ?? "unknown",
+      stochK: d1?.stochK ?? null,
+      stochD: d1?.stochD ?? null,
+      stochState: d1?.stochState ?? "neutral",
+      atr: d1?.atr ?? null,
     };
   });
 
