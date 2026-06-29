@@ -111,6 +111,12 @@ function parsePrefillRisk(value: string | string[] | undefined) {
   return Number.isFinite(n) && n > 0 && n <= 100 ? n : null;
 }
 
+function parsePrefillBias(value: string | string[] | undefined) {
+  const raw = Array.isArray(value) ? value[0] : value;
+  if (raw === "BULLISH" || raw === "BEARISH" || raw === "RANGE" || raw === "WAIT") return raw;
+  return null;
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -132,6 +138,9 @@ export default async function TradingPlanPage({
     symbol?: string | string[];
     riskPct?: string | string[];
     news?: string | string[];
+    bias?: string | string[];
+    notes?: string | string[];
+    keyLevels?: string | string[];
   }>;
 }) {
   const { locale } = await params;
@@ -228,6 +237,9 @@ export default async function TradingPlanPage({
   const prefillSymbol = parsePrefillSymbol(sp?.symbol);
   const prefillRiskPct = parsePrefillRisk(sp?.riskPct);
   const prefillNews = parsePrefillText(sp?.news, 1200);
+  const prefillBias = parsePrefillBias(sp?.bias);
+  const prefillNotes = parsePrefillText(sp?.notes, 1200);
+  const prefillKeyLevels = parsePrefillText(sp?.keyLevels, 500);
   const savedSymbolPlans = parseSymbolPlans(plan?.symbolPlans);
   const symbolPlans =
     savedSymbolPlans.length > 0
@@ -237,10 +249,10 @@ export default async function TradingPlanPage({
             {
               id: prefillSymbol,
               symbol: prefillSymbol,
-              bias: "WAIT" as const,
-              keyLevels: null,
+              bias: prefillBias ?? "WAIT",
+              keyLevels: prefillKeyLevels,
               newsToAvoid: prefillNews,
-              notes: null,
+              notes: prefillNotes,
             },
           ]
         : [];

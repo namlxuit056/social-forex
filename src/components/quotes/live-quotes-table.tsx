@@ -8,6 +8,7 @@ import { Link } from "@/i18n/navigation";
 import {
   AlertCircle,
   Calendar,
+  ClipboardList,
   LineChart,
   Loader2,
   Lock,
@@ -253,6 +254,21 @@ export function LiveQuotesTable({
           <p className="text-[11px] leading-relaxed text-muted-foreground/80">
             {t("aiTrendInvalidation")} {state.payload.invalidation}
           </p>
+          <Link
+            href={{
+              pathname: "/plan",
+              query: {
+                symbol,
+                bias: isUp ? "BULLISH" : "BEARISH",
+                notes: state.payload.summary,
+                keyLevels: state.payload.invalidation,
+              },
+            }}
+            className={cn(buttonVariants({ variant: "outline", size: "xs" }), "mt-1 gap-1.5")}
+          >
+            <ClipboardList className="size-3.5" aria-hidden />
+            {t("aiTrendAddToPlan")}
+          </Link>
         </div>
       );
     }

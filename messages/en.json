@@ -365,6 +365,7 @@
     "aiTrendDown": "Likely down",
     "aiTrendInvalidation": "Invalidation:",
     "aiTrendError": "AI trend unavailable",
+    "aiTrendAddToPlan": "Add to Today's Plan",
     "colActions": "Links",
     "watchlistPinnedHint": "★ Watchlist pairs are pinned to the top of each group (sign in to save).",
     "rowOpenChart": "Open chart for {symbol}",

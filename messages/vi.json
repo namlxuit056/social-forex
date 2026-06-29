@@ -365,6 +365,7 @@
     "aiTrendDown": "Nghiêng giảm",
     "aiTrendInvalidation": "Vô hiệu nếu:",
     "aiTrendError": "Chưa lấy được nhận định AI",
+    "aiTrendAddToPlan": "Thêm vào Plan hôm nay",
     "colActions": "Lối tắt",
     "watchlistPinnedHint": "★ Cặp trong watchlist được ghim lên đầu mỗi nhóm (đăng nhập để lưu).",
     "rowOpenChart": "Mở biểu đồ {symbol}",
