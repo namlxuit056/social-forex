@@ -23,7 +23,7 @@ const PROVIDER_CONFIG: Record<AiProvider, ProviderConfig> = {
     supportsTemperature: true,
     supportsJsonResponseFormat: false,
     maxTokens: 10000,
-    reasoningOverhead: 2500,
+    reasoningOverhead: 10000,
   },
   groq: {
     baseURL: "https://api.groq.com/openai/v1",
