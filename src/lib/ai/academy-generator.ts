@@ -135,6 +135,11 @@ export type TopicIdea = {
   level: LessonLevel;
 };
 
+// For academy generation, use the faster/cheaper flash variant on deepseek
+function academyModel(resolved: NonNullable<ReturnType<typeof resolveAiProvider>>) {
+  return resolved.provider === "deepseek" ? "deepseek-v4-flash" : resolved.model;
+}
+
 export async function generateTopicIdeas(
   count: number,
   existingTitles: string[] = [],
@@ -159,7 +164,7 @@ Yêu cầu QUAN TRỌNG:
 - Trả về JSON: { "topics": [{ "topic": "Topic name in English", "level": "beginner|intermediate|advanced" }] }`;
 
   const response = await client.chat.completions.create({
-    model: resolved.model,
+    model: academyModel(resolved),
     max_tokens: resolveMaxTokens(resolved, 1500),
     ...(resolved.supportsTemperature ? { temperature: 0.75 } : {}),
     ...(resolved.supportsJsonResponseFormat ? { response_format: { type: "json_object" } } : {}),
@@ -220,7 +225,7 @@ export async function generateAcademyLesson(
     let raw: string | null | undefined;
     try {
       const response = await client.chat.completions.create({
-        model: resolved.model,
+        model: academyModel(resolved),
         max_tokens: resolved.maxTokens,
         ...(resolved.supportsTemperature ? { temperature: 0.4 } : {}),
         ...(resolved.supportsJsonResponseFormat ? { response_format: { type: "json_object" } } : {}),
