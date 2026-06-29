@@ -22,7 +22,7 @@ const PROVIDER_CONFIG: Record<AiProvider, ProviderConfig> = {
     envKey: "DEEPSEEK_API_KEY",
     supportsTemperature: true,
     supportsJsonResponseFormat: false,
-    maxTokens: 8000,
+    maxTokens: 10000,
     reasoningOverhead: 2500,
   },
   groq: {
