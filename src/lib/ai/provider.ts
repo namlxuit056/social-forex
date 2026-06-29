@@ -8,9 +8,11 @@ type ProviderConfig = {
   envKey: string;
   /** DeepSeek-R1 rejects temperature param — must be omitted */
   supportsTemperature: boolean;
-  maxTokens: number;
   /** Some models (deepseek-v4-pro) return empty content when response_format is set */
   supportsJsonResponseFormat: boolean;
+  maxTokens: number;
+  /** Extra token budget for internal chain-of-thought in reasoning models (0 for non-reasoning) */
+  reasoningOverhead: number;
 };
 
 const PROVIDER_CONFIG: Record<AiProvider, ProviderConfig> = {
@@ -21,6 +23,7 @@ const PROVIDER_CONFIG: Record<AiProvider, ProviderConfig> = {
     supportsTemperature: true,
     supportsJsonResponseFormat: false,
     maxTokens: 8000,
+    reasoningOverhead: 2500,
   },
   groq: {
     baseURL: "https://api.groq.com/openai/v1",
@@ -29,6 +32,7 @@ const PROVIDER_CONFIG: Record<AiProvider, ProviderConfig> = {
     supportsTemperature: true,
     supportsJsonResponseFormat: true,
     maxTokens: 900,
+    reasoningOverhead: 0,
   },
   openai: {
     baseURL: "https://api.openai.com/v1",
@@ -37,6 +41,7 @@ const PROVIDER_CONFIG: Record<AiProvider, ProviderConfig> = {
     supportsTemperature: true,
     supportsJsonResponseFormat: true,
     maxTokens: 900,
+    reasoningOverhead: 0,
   },
 };
 
@@ -48,7 +53,13 @@ export type ResolvedAiProvider = {
   supportsTemperature: boolean;
   supportsJsonResponseFormat: boolean;
   maxTokens: number;
+  reasoningOverhead: number;
 };
+
+/** Returns the token budget needed: base output tokens + reasoning overhead for CoT models */
+export function resolveMaxTokens(resolved: ResolvedAiProvider, base: number): number {
+  return base + resolved.reasoningOverhead;
+}
 
 export function resolveAiProvider(): ResolvedAiProvider | null {
   const explicit = process.env.AI_PROVIDER?.toLowerCase() as AiProvider;

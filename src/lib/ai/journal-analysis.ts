@@ -1,5 +1,5 @@
 import type { AppLocale } from "@/lib/api-locale";
-import { createAiClient, resolveAiProvider } from "@/lib/ai/provider";
+import { createAiClient, resolveAiProvider, resolveMaxTokens } from "@/lib/ai/provider";
 import {
   aiJournalAnalysisSchema,
   type AiJournalAnalysis,
@@ -163,8 +163,8 @@ export async function getAiJournalAnalysis({
   const response = await client.chat.completions.create({
     model: resolved.model,
     ...(resolved.supportsTemperature ? { temperature: 0.25 } : {}),
-    max_tokens: 2000,
-    response_format: { type: "json_object" },
+    max_tokens: resolveMaxTokens(resolved, 2000),
+    ...(resolved.supportsJsonResponseFormat ? { response_format: { type: "json_object" } } : {}),
     messages: [
       { role: "system", content: buildSystemPrompt(locale) },
       {

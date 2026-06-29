@@ -1,7 +1,7 @@
 import { z } from "zod";
 import type { AppLocale } from "@/lib/api-locale";
 import type { TradingViewTechnicalContext } from "@/lib/ai/tradingview-context";
-import { createAiClient, resolveAiProvider } from "@/lib/ai/provider";
+import { createAiClient, resolveAiProvider, resolveMaxTokens } from "@/lib/ai/provider";
 import type { QuoteRow } from "@/lib/quotes/types";
 
 export const AI_DAILY_TREND_CACHE_TTL_MS = 60 * 60 * 1000;
@@ -113,8 +113,8 @@ export async function getAiDailyTrend(
   const response = await client.chat.completions.create({
     model: resolved.model,
     ...(resolved.supportsTemperature ? { temperature: 0.2 } : {}),
-    max_tokens: 260,
-    response_format: { type: "json_object" },
+    max_tokens: resolveMaxTokens(resolved, 260),
+    ...(resolved.supportsJsonResponseFormat ? { response_format: { type: "json_object" } } : {}),
     messages: [
       {
         role: "system",

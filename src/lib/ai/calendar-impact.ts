@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { AppLocale } from "@/lib/api-locale";
-import { createAiClient, resolveAiProvider } from "@/lib/ai/provider";
+import { createAiClient, resolveAiProvider, resolveMaxTokens } from "@/lib/ai/provider";
 import type { CalendarEvent } from "@/lib/calendar/types";
 import { QUOTE_DEFINITIONS } from "@/lib/quotes/definitions";
 
@@ -147,8 +147,8 @@ export async function getAiCalendarImpact(
   const response = await client.chat.completions.create({
     model: resolved.model,
     ...(resolved.supportsTemperature ? { temperature: 0.2 } : {}),
-    max_tokens: 950,
-    response_format: { type: "json_object" },
+    max_tokens: resolveMaxTokens(resolved, 950),
+    ...(resolved.supportsJsonResponseFormat ? { response_format: { type: "json_object" } } : {}),
     messages: [
       {
         role: "system",
