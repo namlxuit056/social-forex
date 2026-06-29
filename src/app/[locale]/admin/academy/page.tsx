@@ -1,11 +1,14 @@
 import { redirect } from "next/navigation";
-import { Bot, BookOpen, Plus } from "lucide-react";
+import { Bot, BookOpen, Pencil, Plus } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Link } from "@/i18n/navigation";
+import { cn } from "@/lib/utils";
 import {
   generateAcademyLessonAction,
   publishAcademyLesson,
@@ -155,6 +158,13 @@ export default async function AdminAcademyPage() {
                     <p className="text-sm font-semibold text-foreground">{lesson.title}</p>
                     <p className="font-mono text-xs text-muted-foreground">/academy/{lesson.slug}</p>
                     <div className="flex flex-wrap gap-2 pt-1">
+                      <Link
+                        href={`/admin/academy/${lesson.slug}`}
+                        className={cn(buttonVariants({ variant: "outline", size: "sm" }), "gap-1.5")}
+                      >
+                        <Pencil className="size-3.5" aria-hidden />
+                        Sửa nội dung
+                      </Link>
                       {lesson.status !== "PUBLISHED" ? (
                         <form action={publishAcademyLesson}>
                           <input type="hidden" name="id" value={lesson.id} />

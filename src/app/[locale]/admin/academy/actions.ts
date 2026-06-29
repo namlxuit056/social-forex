@@ -180,6 +180,40 @@ export async function regenerateImageAction(formData: FormData) {
   revalidatePath(`/en/academy/${slug}`);
 }
 
+export async function updateLessonAction(
+  _prev: { ok?: boolean; error?: string } | null,
+  formData: FormData,
+): Promise<{ ok?: boolean; error?: string }> {
+  try {
+    await requireAdmin();
+    const id = formData.get("id");
+    if (typeof id !== "string") return { error: "Missing id" };
+
+    const title = formData.get("title");
+    const summary = formData.get("summary");
+    const body = formData.get("body");
+    const slug = formData.get("slug");
+
+    if (typeof title !== "string" || !title.trim()) return { error: "Tiêu đề không được để trống" };
+    if (typeof summary !== "string" || !summary.trim()) return { error: "Tóm tắt không được để trống" };
+    if (typeof body !== "string" || !body.trim()) return { error: "Nội dung không được để trống" };
+    if (typeof slug !== "string") return { error: "Missing slug" };
+
+    await prisma.academyLesson.update({
+      where: { id },
+      data: { title: title.trim(), summary: summary.trim(), body: body.trim() },
+    });
+
+    revalidatePath("/admin/academy");
+    revalidatePath("/academy");
+    revalidatePath(`/vi/academy/${slug}`);
+    revalidatePath(`/en/academy/${slug}`);
+    return { ok: true };
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Lỗi không xác định" };
+  }
+}
+
 export async function updateImageUrlAction(formData: FormData) {
   await requireAdmin();
   const slug = formData.get("slug");
