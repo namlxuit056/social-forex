@@ -1,13 +1,13 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { Loader2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ArticleEditor } from "@/components/articles/article-editor";
+import { ArticleEditorCK, type ArticleEditorCKHandle } from "@/components/articles/article-editor-ck";
 import { updateLessonAction } from "../actions";
 
 type Props = {
@@ -21,6 +21,8 @@ type Props = {
 
 export function LessonEditForm({ id, slug, locale, defaultTitle, defaultSummary, defaultBody }: Props) {
   const [state, formAction, pending] = useActionState(updateLessonAction, null);
+  const editorRef = useRef<ArticleEditorCKHandle>(null);
+  const [body, setBody] = useState(defaultBody);
 
   useEffect(() => {
     if (!state) return;
@@ -67,7 +69,8 @@ export function LessonEditForm({ id, slug, locale, defaultTitle, defaultSummary,
 
       <div>
         <Label className="mb-1.5 block">Nội dung ({locale.toUpperCase()})</Label>
-        <ArticleEditor name="body" defaultValue={defaultBody} required />
+        <input type="hidden" name="body" value={body} onChange={() => {}} />
+        <ArticleEditorCK ref={editorRef} defaultValue={defaultBody} onValueChange={setBody} />
       </div>
 
       <Button type="submit" disabled={pending} className="gap-2">
