@@ -4,6 +4,7 @@ import { QUOTE_DEFINITIONS } from "@/lib/quotes/definitions";
 import { getScalpingTechnicalContext } from "@/lib/ai/scalping-tradingview-context";
 import { getScalpingAiSuggestion } from "@/lib/ai/scalping-suggest";
 import { AiUnavailableError } from "@/lib/ai/suggest";
+import { getAiNewsContext } from "@/lib/ai/news-context";
 import type { AppLocale } from "@/lib/api-locale";
 
 export const runtime = "nodejs";
@@ -25,6 +26,7 @@ export type ScalpingAnalysisResult = {
   reasoning: string;
   checklist: Array<{ label: string; status: "pass" | "warn" | "fail"; detail: string }>;
   alignedTimeframes: string[];
+  keyLevels?: { support: number; resistance: number };
   generatedAt: string;
 };
 
@@ -75,13 +77,15 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       ? { symbol: liveQuote.symbol, name: liveQuote.name, group: liveQuote.group, bid: liveQuote.bid, ask: liveQuote.ask, changePct: liveQuote.changePct }
       : { symbol: def.symbol, name: def.name, group: def.group, bid: def.mockMid, ask: def.mockMid, changePct: 0 };
 
-    const [scalpingContext] = await Promise.allSettled([
+    const [scalpingContext, newsResult] = await Promise.allSettled([
       getScalpingTechnicalContext(quote),
+      getAiNewsContext(quote.symbol),
     ]);
 
     const tvContext = scalpingContext.status === "fulfilled" ? scalpingContext.value : null;
+    const newsContext = newsResult.status === "fulfilled" ? newsResult.value : null;
 
-    const ai = await getScalpingAiSuggestion(quote, tvContext, null, locale);
+    const ai = await getScalpingAiSuggestion(quote, tvContext, newsContext, locale);
 
     const result: ScalpingAnalysisResult = {
       symbol: quote.symbol,
@@ -102,6 +106,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       alignedTimeframes: tvContext
         ? getAlignedTimeframes(tvContext.frames, ai.direction)
         : [],
+      keyLevels: ai.keyLevels,
       generatedAt: new Date().toISOString(),
     };
 

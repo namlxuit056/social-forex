@@ -185,6 +185,24 @@ function AnalysisCard({
         </div>
       </div>
 
+      {/* Key levels */}
+      {result.keyLevels && (
+        <div className="grid grid-cols-2 gap-1 text-xs bg-muted/20 rounded p-2">
+          <div>
+            <div className="text-muted-foreground">{t("support")}</div>
+            <div className="font-mono font-semibold text-emerald-600 dark:text-emerald-400">
+              {result.keyLevels.support.toFixed(dec)}
+            </div>
+          </div>
+          <div>
+            <div className="text-muted-foreground">{t("resistance")}</div>
+            <div className="font-mono font-semibold text-red-500">
+              {result.keyLevels.resistance.toFixed(dec)}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Checklist */}
       <div className="space-y-0.5">
         {result.checklist.map((item, i) => (
@@ -211,6 +229,11 @@ function AnalysisCard({
 
       {/* Reasoning */}
       <p className="text-xs text-muted-foreground leading-relaxed">{result.reasoning}</p>
+
+      {/* Timestamp */}
+      <p className="text-[10px] text-muted-foreground/40">
+        {new Date(result.generatedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+      </p>
 
       {/* Chart link + confirm */}
       <div className="mt-auto space-y-2">

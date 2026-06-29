@@ -1970,6 +1970,8 @@
     "analyzing": "Đang phân tích...",
     "quality": "Chất lượng setup",
     "entry": "Vào lệnh",
+    "support": "Hỗ trợ",
+    "resistance": "Kháng cự",
     "spread": "Spread",
     "viewChart": "Xem chart",
     "cooldown": "Còn {time}",

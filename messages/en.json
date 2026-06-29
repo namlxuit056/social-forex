@@ -1970,6 +1970,8 @@
     "analyzing": "Analyzing...",
     "quality": "Setup quality",
     "entry": "Entry",
+    "support": "Support",
+    "resistance": "Resistance",
     "spread": "Spread",
     "viewChart": "View chart",
     "cooldown": "{time} left",
