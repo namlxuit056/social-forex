@@ -176,69 +176,76 @@ export default async function AcademyLessonPage({ params }: Props) {
           )}
         </div>
 
-        <div className="prose prose-invert max-w-none text-sm leading-relaxed text-foreground/90">
-          {lesson.body.split("\n").map((line, i) => {
-            if (line.startsWith("[diagram:") && line.endsWith("]")) {
-              const name = line.slice(9, -1);
-              const DiagramComponent = diagramRegistry[name];
-              if (!DiagramComponent) return null;
+        {lesson.body.trimStart().startsWith("<") ? (
+          <div
+            className="prose prose-invert max-w-none text-sm leading-relaxed text-foreground/90"
+            dangerouslySetInnerHTML={{ __html: lesson.body }}
+          />
+        ) : (
+          <div className="prose prose-invert max-w-none text-sm leading-relaxed text-foreground/90">
+            {lesson.body.split("\n").map((line, i) => {
+              if (line.startsWith("[diagram:") && line.endsWith("]")) {
+                const name = line.slice(9, -1);
+                const DiagramComponent = diagramRegistry[name];
+                if (!DiagramComponent) return null;
+                return (
+                  <div key={i} className="my-6 rounded-lg border border-border bg-card/50 p-4">
+                    <DiagramComponent />
+                  </div>
+                );
+              }
+              if (line.startsWith("## ")) {
+                return (
+                  <h2
+                    key={i}
+                    className="mb-3 mt-8 font-heading text-lg font-semibold text-foreground"
+                  >
+                    {line.replace("## ", "")}
+                  </h2>
+                );
+              }
+              if (line.startsWith("### ")) {
+                return (
+                  <h3
+                    key={i}
+                    className="mb-2 mt-6 font-heading text-base font-medium text-foreground"
+                  >
+                    {line.replace("### ", "")}
+                  </h3>
+                );
+              }
+              if (line.startsWith("| ")) {
+                return (
+                  <p key={i} className="font-mono text-xs text-muted-foreground">
+                    {line}
+                  </p>
+                );
+              }
+              if (line.startsWith("- ")) {
+                return (
+                  <li key={i} className="ml-4 list-disc text-foreground/80">
+                    {renderInlineMarkdown(line.replace(/^- /, ""))}
+                  </li>
+                );
+              }
+              if (/^\d+\. /.test(line)) {
+                return (
+                  <li key={i} className="ml-4 list-decimal text-foreground/80">
+                    {renderInlineMarkdown(line.replace(/^\d+\. /, ""))}
+                  </li>
+                );
+              }
+              if (line.trim() === "") {
+                return <div key={i} className="h-2" />;
+              }
               return (
-                <div key={i} className="my-6 rounded-lg border border-border bg-card/50 p-4">
-                  <DiagramComponent />
-                </div>
-              );
-            }
-            if (line.startsWith("## ")) {
-              return (
-                <h2
-                  key={i}
-                  className="mb-3 mt-8 font-heading text-lg font-semibold text-foreground"
-                >
-                  {line.replace("## ", "")}
-                </h2>
-              );
-            }
-            if (line.startsWith("### ")) {
-              return (
-                <h3
-                  key={i}
-                  className="mb-2 mt-6 font-heading text-base font-medium text-foreground"
-                >
-                  {line.replace("### ", "")}
-                </h3>
-              );
-            }
-            if (line.startsWith("| ")) {
-              return (
-                <p key={i} className="font-mono text-xs text-muted-foreground">
-                  {line}
+                <p key={i} className="text-foreground/80">
+                  {renderInlineMarkdown(line)}
                 </p>
               );
-            }
-            if (line.startsWith("- ")) {
-              return (
-                <li key={i} className="ml-4 list-disc text-foreground/80">
-                  {renderInlineMarkdown(line.replace(/^- /, ""))}
-                </li>
-              );
-            }
-            if (/^\d+\. /.test(line)) {
-              return (
-                <li key={i} className="ml-4 list-decimal text-foreground/80">
-                  {renderInlineMarkdown(line.replace(/^\d+\. /, ""))}
-                </li>
-              );
-            }
-            if (line.trim() === "") {
-              return <div key={i} className="h-2" />;
-            }
-            return (
-              <p key={i} className="text-foreground/80">
-                {renderInlineMarkdown(line)}
-              </p>
-            );
-          })}
-        </div>
+            })}
+          </div>
+        )}
 
         <Disclaimer variant="compact" />
 
