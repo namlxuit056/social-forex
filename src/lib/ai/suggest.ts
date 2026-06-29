@@ -51,7 +51,9 @@ export async function getAiSuggestion(
 
   const raw = response.choices[0]?.message?.content;
   if (!raw) {
-    throw new Error("AI returned an empty response");
+    const reason = response.choices[0]?.finish_reason ?? "no choices";
+    console.error("[suggest] empty content from", resolved.provider, resolved.model, "finish_reason:", reason);
+    throw new Error(`AI returned an empty response (provider=${resolved.provider} model=${resolved.model} finish_reason=${reason})`);
   }
 
   // Strip <think>...</think> blocks (DeepSeek reasoning output)
