@@ -15,6 +15,7 @@ import {
 } from "./actions";
 import { SubmitButton } from "./submit-button";
 import { BulkGenerateForm } from "./bulk-form";
+import { EditImageForm } from "./edit-image-form";
 
 export const dynamic = "force-dynamic";
 
@@ -183,6 +184,7 @@ export default async function AdminAcademyPage() {
                         </SubmitButton>
                       </form>
                     </div>
+                    <EditImageForm slug={lesson.slug} currentImageUrl={lesson.imageUrl} />
                   </div>
                 );
               })

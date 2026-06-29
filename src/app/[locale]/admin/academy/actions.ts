@@ -180,6 +180,22 @@ export async function regenerateImageAction(formData: FormData) {
   revalidatePath(`/en/academy/${slug}`);
 }
 
+export async function updateImageUrlAction(formData: FormData) {
+  await requireAdmin();
+  const slug = formData.get("slug");
+  const imageUrl = formData.get("imageUrl");
+  if (typeof slug !== "string") return;
+  const url = typeof imageUrl === "string" ? imageUrl.trim() : "";
+  await prisma.academyLesson.updateMany({
+    where: { slug },
+    data: { imageUrl: url || null },
+  });
+  revalidatePath("/admin/academy");
+  revalidatePath("/academy");
+  revalidatePath(`/vi/academy/${slug}`);
+  revalidatePath(`/en/academy/${slug}`);
+}
+
 export async function deleteAcademyLesson(formData: FormData) {
   await requireAdmin();
   const id = formData.get("id");
