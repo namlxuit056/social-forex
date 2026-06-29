@@ -20,7 +20,11 @@
     "profile": "Profile",
     "dashboard": "Dashboard",
     "copyright": "© {year} Social Forex. All rights reserved.",
-    "notificationsBellAria": "Notifications"
+    "notificationsBellAria": "Notifications",
+    "copy": "Copy",
+    "copied": "Copied",
+    "dayStreak": "{count}-day streak",
+    "joinTelegram": "Join Telegram"
   },
   "nav": {
     "desk": "Live desk",
@@ -541,7 +545,15 @@
   },
   "tools": {
     "title": "Trading Calculators",
-    "description": "Position size, margin, pivot point and pip value calculators for forex traders."
+    "description": "Position size, margin, pivot point and pip value calculators for forex traders.",
+    "pivotHint": "H, L, Close from the previous session.",
+    "pivotEmptyHint": "Enter H, L, C to calculate pivot.",
+    "marginHint": "Estimated notional / leverage. Actual values may vary by broker.",
+    "marginCurrentPrice": "Current price",
+    "marginLeverage": "Leverage",
+    "marginRequired": "Margin required",
+    "marginEmptyHint": "Enter all fields to calculate margin.",
+    "marginTab": "Margin"
   },
   "chart": {
     "title": "TradingView Chart",
@@ -923,7 +935,8 @@
     "quizCorrect": "Correct! +{xp} XP",
     "quizWrong": "Not quite, try again",
     "quizOption": "Choose an answer",
-    "aiQuizNext": "Next →"
+    "aiQuizNext": "Next →",
+    "quizResult": "{correct}/{total} correct — {score}/100 pts"
   },
   "articles": {
     "title": "AI forex articles",
@@ -964,7 +977,12 @@
   },
   "backtest": {
     "title": "Backtest — equity simulation",
-    "description": "Monte Carlo simulation helps you understand the impact of win rate and risk/reward on the equity curve. Enter parameters and observe results across multiple scenarios."
+    "description": "Monte Carlo simulation helps you understand the impact of win rate and risk/reward on the equity curve. Enter parameters and observe results across multiple scenarios.",
+    "simTrades": "Simulated trades",
+    "winRate": "Win rate %",
+    "rrOnWin": "R:R on win",
+    "finalEquity": "Final equity (simulated):",
+    "approxReturn": "Approx. return:"
   },
   "partners": {
     "title": "Partners & Revenue",
@@ -1162,7 +1180,19 @@
     "colCurrent": "Current",
     "colSl": "SL",
     "colTp": "TP",
-    "colProfit": "P/L"
+    "colProfit": "P/L",
+    "analysisVipRequired": "This feature is VIP only",
+    "analysisNoConnection": "Create an MT5 connection first",
+    "analysisRateLimited": "Too many requests, try again in 1 minute",
+    "analysisAiUnavailable": "DEEPSEEK_API_KEY not configured in .env",
+    "analysisFailed": "Analysis failed — try again",
+    "analysisUnknownSymbol": "Invalid symbol",
+    "analysisError": "Unknown error",
+    "analysisBtn": "AI Analysis",
+    "analysingBtn": "Analysing…",
+    "analysisNoConnectionHint": "Create an MT5 connection above first",
+    "analysisSuccess": "✓ Analysing — results will appear below",
+    "analysisUpgradeVip": "Upgrade VIP"
   },
   "notifications": {
     "title": "Notifications",
@@ -1183,7 +1213,10 @@
     "pushSubscribe": "Enable",
     "pushUnsubscribe": "Disable",
     "pushFailed": "Could not update push notification settings.",
-    "screenerAlert": "Screener alert triggered"
+    "screenerAlert": "Screener alert triggered",
+    "streakReminder": "Don't forget to write your journal / plan for today!",
+    "priceAlert": "Price alert triggered",
+    "journalReview": "Weekly trading report is ready"
   },
   "auth": {
     "signInTitle": "Sign in",
@@ -1700,7 +1733,8 @@
     "lotSize": "Lot Size",
     "pipValue": "Pip Value",
     "riskReward": "R:R",
-    "fillHint": "Fill in all fields to calculate."
+    "fillHint": "Fill in all fields to calculate.",
+    "rrLow": " — R:R low"
   },
   "gamification": {
     "dailyActivity": "Daily Activity",
@@ -1727,7 +1761,8 @@
     "statsVipEarned": "VIP days earned",
     "rewardHint": "You get 7 days VIP for each friend who joins. They get 3 days free!",
     "noReferrals": "No referrals yet. Share your link to get started!",
-    "referralBadge": "Referral"
+    "referralBadge": "Referral",
+    "shareText": "Join Social Forex via my link and get 3 free VIP days!"
   },
   "copyTrade": {
     "title": "Copy Trading",
@@ -2013,7 +2048,10 @@
     "autoSymbols": "Active symbols",
     "autoNoSymbols": "No symbols added. Add one below to start.",
     "autoAddSymbol": "Add",
-    "autoLimitReached": "You have reached the {limit} symbol limit."
+    "autoLimitReached": "You have reached the {limit} symbol limit.",
+    "enable": "Enable",
+    "disable": "Disable",
+    "remove": "Remove"
   },
   "alerts": {
     "title": "Price Alerts",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { Check, Copy } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
@@ -33,11 +34,12 @@ function CopyBtn({ id, value, copied, onCopy }: {
   copied: string | null;
   onCopy: (id: string, value: string) => void;
 }) {
+  const tc = useTranslations("common");
   const done = copied === id;
   return (
     <button
       onClick={() => onCopy(id, value)}
-      aria-label={done ? "Copied" : "Copy"}
+      aria-label={done ? tc("copied") : tc("copy")}
       className="ml-1.5 rounded p-0.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-foreground"
     >
       {done ? <Check className="size-3 text-emerald-500" /> : <Copy className="size-3" />}
@@ -71,6 +73,7 @@ function PivotRow({
 }
 
 function PivotCalculator() {
+  const t = useTranslations("tools");
   const [h, setH] = useLocalStorage("tools:pivot:h", "1.09000");
   const [l, setL] = useLocalStorage("tools:pivot:l", "1.08000");
   const [c, setC] = useLocalStorage("tools:pivot:c", "1.08500");
@@ -87,7 +90,7 @@ function PivotCalculator() {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">H, L, Close from the previous session.</p>
+      <p className="text-sm text-muted-foreground">{t("pivotHint")}</p>
       <div className="grid grid-cols-3 gap-3">
         <div className="space-y-1.5">
           <Label htmlFor="pv-h" className="text-xs text-muted-foreground">High</Label>
@@ -117,7 +120,7 @@ function PivotCalculator() {
         </div>
       ) : (
         <div className="rounded-lg border border-dashed border-border/60 bg-muted/10 px-4 py-3 text-center text-xs text-muted-foreground">
-          Enter H, L, C to calculate pivot.
+          {t("pivotEmptyHint")}
         </div>
       )}
     </div>
@@ -131,6 +134,7 @@ function PivotCalculator() {
 const MARGIN_PRESETS = ["EURUSD", "USDJPY", "XAUUSD", "BTCUSD"];
 
 function MarginCalculator() {
+  const t = useTranslations("tools");
   const [symbol, setSymbol] = useLocalStorage("tools:margin:symbol", "EURUSD");
   const [lots, setLots] = useLocalStorage("tools:margin:lots", "0.10");
   const [price, setPrice] = useLocalStorage("tools:margin:price", "1.08500");
@@ -150,7 +154,7 @@ function MarginCalculator() {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">Estimated notional / leverage. Actual values may vary by broker.</p>
+      <p className="text-sm text-muted-foreground">{t("marginHint")}</p>
 
       <div className="flex flex-wrap gap-1.5">
         {MARGIN_PRESETS.map((s) => (
@@ -193,7 +197,7 @@ function MarginCalculator() {
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="mg-price" className="text-xs text-muted-foreground">Current price</Label>
+          <Label htmlFor="mg-price" className="text-xs text-muted-foreground">{t("marginCurrentPrice")}</Label>
           <Input
             id="mg-price"
             type="number"
@@ -205,7 +209,7 @@ function MarginCalculator() {
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="mg-lev" className="text-xs text-muted-foreground">Leverage</Label>
+          <Label htmlFor="mg-lev" className="text-xs text-muted-foreground">{t("marginLeverage")}</Label>
           <div className="relative">
             <span className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">
               1:
@@ -237,7 +241,7 @@ function MarginCalculator() {
             </p>
           </div>
           <div>
-            <p className="text-[11px] text-muted-foreground">Margin required</p>
+            <p className="text-[11px] text-muted-foreground">{t("marginRequired")}</p>
             <p className="mt-0.5 font-mono text-base font-bold text-primary">
               ${result.margin.toLocaleString(undefined, { maximumFractionDigits: 2 })}
             </p>
@@ -245,7 +249,7 @@ function MarginCalculator() {
         </div>
       ) : (
         <div className="rounded-lg border border-dashed border-border/60 bg-muted/10 px-4 py-3 text-center text-xs text-muted-foreground">
-          Enter all fields to calculate margin.
+          {t("marginEmptyHint")}
         </div>
       )}
     </div>
@@ -257,6 +261,7 @@ function MarginCalculator() {
 // ---------------------------------------------------------------------------
 
 export function TradingCalculators() {
+  const t = useTranslations("tools");
   const [tab, setTab] = useLocalStorage("tools:tab", "position");
 
   return (
@@ -264,7 +269,7 @@ export function TradingCalculators() {
       <TabsList className="h-9">
         <TabsTrigger value="position" className="text-sm">Position Size</TabsTrigger>
         <TabsTrigger value="pivot" className="text-sm">Pivot Points</TabsTrigger>
-        <TabsTrigger value="margin" className="text-sm">Margin</TabsTrigger>
+        <TabsTrigger value="margin" className="text-sm">{t("marginTab")}</TabsTrigger>
       </TabsList>
 
       <TabsContent value="position">
@@ -282,7 +287,7 @@ export function TradingCalculators() {
 
       <TabsContent value="margin">
         <div className="rounded-xl border border-border bg-muted/15 p-5">
-          <h3 className="text-base font-medium text-foreground">Margin</h3>
+          <h3 className="text-base font-medium text-foreground">{t("marginTab")}</h3>
           <div className="mt-3">
             <MarginCalculator />
           </div>

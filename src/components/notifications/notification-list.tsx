@@ -79,11 +79,11 @@ export function NotificationList({
                     direction: n.signal.direction,
                   })
                 : n.kind === "STREAK_REMINDER"
-                  ? "Don't forget to write your journal / plan for today!"
+                  ? t("streakReminder")
                   : n.kind === "PRICE_ALERT"
-                    ? "Price alert triggered"
+                    ? t("priceAlert")
                     : n.kind === "JOURNAL_REVIEW"
-                      ? "Weekly trading report is ready"
+                      ? t("journalReview")
                       : n.kind === "SCREENER_ALERT"
                         ? t("screenerAlert")
                         : n.signal

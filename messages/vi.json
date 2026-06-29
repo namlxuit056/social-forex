@@ -20,7 +20,11 @@
     "profile": "Hồ sơ",
     "dashboard": "Dashboard",
     "copyright": "© {year} Social Forex. Mọi quyền được bảo lưu.",
-    "notificationsBellAria": "Thông báo"
+    "notificationsBellAria": "Thông báo",
+    "copy": "Sao chép",
+    "copied": "Đã sao chép",
+    "dayStreak": "{count} ngày liên tiếp",
+    "joinTelegram": "Tham gia Telegram"
   },
   "nav": {
     "desk": "Bàn live",
@@ -541,7 +545,15 @@
   },
   "tools": {
     "title": "Công cụ tính toán",
-    "description": "Máy tính position size, margin, pivot point và pip value cho trader forex."
+    "description": "Máy tính position size, margin, pivot point và pip value cho trader forex.",
+    "pivotHint": "H, L, Close phiên trước.",
+    "pivotEmptyHint": "Nhập H, L, C để tính pivot.",
+    "marginHint": "Ước tính notional / đòn bẩy. Từng sàn có thể tính khác.",
+    "marginCurrentPrice": "Giá hiện tại",
+    "marginLeverage": "Đòn bẩy",
+    "marginRequired": "Margin cần",
+    "marginEmptyHint": "Nhập đầy đủ thông tin để tính margin.",
+    "marginTab": "Ký quỹ"
   },
   "chart": {
     "title": "Biểu đồ TradingView",
@@ -923,7 +935,8 @@
     "quizCorrect": "Chính xác! +{xp} XP",
     "quizWrong": "Chưa đúng, hãy thử lại",
     "quizOption": "Chọn đáp án",
-    "aiQuizNext": "Câu tiếp →"
+    "aiQuizNext": "Câu tiếp →",
+    "quizResult": "{correct}/{total} câu đúng — {score}/100 điểm"
   },
   "articles": {
     "title": "Bài viết AI về forex",
@@ -964,7 +977,12 @@
   },
   "backtest": {
     "title": "Backtest — mô phỏng equity",
-    "description": "Mô phỏng Monte Carlo giúp bạn hiểu tác động của win rate và risk/reward lên đường equity. Nhập thông số và quan sát kết quả qua nhiều kịch bản."
+    "description": "Mô phỏng Monte Carlo giúp bạn hiểu tác động của win rate và risk/reward lên đường equity. Nhập thông số và quan sát kết quả qua nhiều kịch bản.",
+    "simTrades": "Số lệnh mô phỏng",
+    "winRate": "Tỷ lệ thắng %",
+    "rrOnWin": "R:R khi thắng",
+    "finalEquity": "Equity cuối (mô phỏng):",
+    "approxReturn": "Lợi nhuận gần đúng:"
   },
   "partners": {
     "title": "Đối tác & thu nhập",
@@ -1162,7 +1180,19 @@
     "colCurrent": "Giá hiện tại",
     "colSl": "SL",
     "colTp": "TP",
-    "colProfit": "P/L"
+    "colProfit": "P/L",
+    "analysisVipRequired": "Tính năng này chỉ dành cho VIP",
+    "analysisNoConnection": "Tạo MT5 connection trước",
+    "analysisRateLimited": "Quá nhiều request, thử lại sau 1 phút",
+    "analysisAiUnavailable": "Chưa cấu hình DEEPSEEK_API_KEY trong .env",
+    "analysisFailed": "Phân tích thất bại — thử lại",
+    "analysisUnknownSymbol": "Symbol không hợp lệ",
+    "analysisError": "Lỗi không xác định",
+    "analysisBtn": "Phân tích AI",
+    "analysingBtn": "Đang phân tích…",
+    "analysisNoConnectionHint": "Tạo MT5 connection ở trên trước",
+    "analysisSuccess": "✓ Đang phân tích, kết quả xuất hiện bên dưới",
+    "analysisUpgradeVip": "Nâng cấp VIP"
   },
   "notifications": {
     "title": "Thông báo",
@@ -1183,7 +1213,10 @@
     "pushSubscribe": "Bật",
     "pushUnsubscribe": "Tắt",
     "pushFailed": "Không thể cập nhật cài đặt thông báo.",
-    "screenerAlert": "Cảnh báo screener đã kích hoạt"
+    "screenerAlert": "Cảnh báo screener đã kích hoạt",
+    "streakReminder": "Đừng quên ghi nhật ký / lập kế hoạch hôm nay!",
+    "priceAlert": "Cảnh báo giá đã kích hoạt",
+    "journalReview": "Báo cáo giao dịch tuần đã sẵn sàng"
   },
   "auth": {
     "signInTitle": "Đăng nhập",
@@ -1700,7 +1733,8 @@
     "lotSize": "Lot size",
     "pipValue": "Pip value",
     "riskReward": "R:R",
-    "fillHint": "Nhập đầy đủ thông tin để tính toán."
+    "fillHint": "Nhập đầy đủ thông tin để tính toán.",
+    "rrLow": " — R:R thấp"
   },
   "gamification": {
     "dailyActivity": "Hoạt động hôm nay",
@@ -1727,7 +1761,8 @@
     "statsVipEarned": "VIP đã nhận",
     "rewardHint": "Bạn được 7 ngày VIP cho mỗi bạn bè tham gia. Họ được 3 ngày miễn phí!",
     "noReferrals": "Chưa có ai được mời. Chia sẻ link để bắt đầu!",
-    "referralBadge": "Giới thiệu"
+    "referralBadge": "Giới thiệu",
+    "shareText": "Tham gia Social Forex qua link của tôi để nhận 3 ngày VIP miễn phí!"
   },
   "copyTrade": {
     "title": "Copy Trading",
@@ -2013,7 +2048,10 @@
     "autoSymbols": "Symbols đang chạy",
     "autoNoSymbols": "Chưa có symbol. Thêm bên dưới để bắt đầu.",
     "autoAddSymbol": "Thêm",
-    "autoLimitReached": "Đã đạt {limit} symbols tối đa."
+    "autoLimitReached": "Đã đạt {limit} symbols tối đa.",
+    "enable": "Bật",
+    "disable": "Tắt",
+    "remove": "Xóa"
   },
   "alerts": {
     "title": "Cảnh báo giá",

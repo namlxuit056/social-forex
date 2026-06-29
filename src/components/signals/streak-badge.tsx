@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { Flame } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +21,7 @@ export function StreakBadge({
   type: StreakType;
   className?: string;
 }) {
+  const tc = useTranslations("common");
   if (count <= 0) return null;
   return (
     <span
@@ -26,7 +30,7 @@ export function StreakBadge({
         typeColors[type],
         className,
       )}
-      title={`${count}-day streak`}
+      title={tc("dayStreak", { count })}
     >
       <Flame className="size-3.5" aria-hidden />
       {count}

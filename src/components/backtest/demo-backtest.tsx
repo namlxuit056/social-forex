@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 
 /** PRNG xác định theo tham số — tránh Math.random trong render (React Compiler). */
 function mulberry32(seed: number) {
@@ -14,6 +15,7 @@ function mulberry32(seed: number) {
 
 /** Mô phỏng đơn giản — không phải backtest thật; không dùng dữ liệu lịch sử. */
 export function DemoBacktest() {
+  const t = useTranslations("backtest");
   const [trades, setTrades] = useState(200);
   const [winRate, setWinRate] = useState(48);
   const [rr, setRr] = useState(1.5);
@@ -42,7 +44,7 @@ export function DemoBacktest() {
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-3">
         <label className="text-sm">
-          <span className="text-muted-foreground">Simulated trades</span>
+          <span className="text-muted-foreground">{t("simTrades")}</span>
           <input
             type="number"
             min={10}
@@ -53,7 +55,7 @@ export function DemoBacktest() {
           />
         </label>
         <label className="text-sm">
-          <span className="text-muted-foreground">Win rate %</span>
+          <span className="text-muted-foreground">{t("winRate")}</span>
           <input
             type="number"
             min={1}
@@ -64,7 +66,7 @@ export function DemoBacktest() {
           />
         </label>
         <label className="text-sm">
-          <span className="text-muted-foreground">R:R on win</span>
+          <span className="text-muted-foreground">{t("rrOnWin")}</span>
           <input
             type="number"
             step="0.1"
@@ -79,8 +81,8 @@ export function DemoBacktest() {
 
       <div className="rounded-xl border border-border bg-muted/15 p-4">
         <p className="text-sm text-muted-foreground">
-          Final equity (simulated):{" "}
-          <span className="font-mono text-emerald-600 dark:text-emerald-400">{final}</span> USD · Approx. return:{" "}
+          {t("finalEquity")}{" "}
+          <span className="font-mono text-emerald-600 dark:text-emerald-400">{final}</span> USD · {t("approxReturn")}{" "}
           <span className="font-mono">{ret}%</span>
         </p>
         <div className="mt-4 flex h-40 items-end gap-px overflow-hidden rounded bg-muted dark:bg-zinc-950">
