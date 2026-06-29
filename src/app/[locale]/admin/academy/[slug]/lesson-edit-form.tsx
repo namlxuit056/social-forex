@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState } from "react";
+import { marked } from "marked";
 import { Loader2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ArticleEditorCK, type ArticleEditorCKHandle } from "@/components/articles/article-editor-ck";
 import { updateLessonAction } from "../actions";
+
+function markdownToHtml(content: string): string {
+  // Already HTML (saved by CKEditor previously)
+  if (content.trimStart().startsWith("<")) return content;
+  return String(marked.parse(content));
+}
 
 type Props = {
   id: string;
@@ -22,7 +29,7 @@ type Props = {
 export function LessonEditForm({ id, slug, locale, defaultTitle, defaultSummary, defaultBody }: Props) {
   const [state, formAction, pending] = useActionState(updateLessonAction, null);
   const editorRef = useRef<ArticleEditorCKHandle>(null);
-  const [body, setBody] = useState(defaultBody);
+  const [body, setBody] = useState(() => markdownToHtml(defaultBody));
 
   useEffect(() => {
     if (!state) return;
@@ -70,7 +77,7 @@ export function LessonEditForm({ id, slug, locale, defaultTitle, defaultSummary,
       <div>
         <Label className="mb-1.5 block">Nội dung ({locale.toUpperCase()})</Label>
         <input type="hidden" name="body" value={body} onChange={() => {}} />
-        <ArticleEditorCK ref={editorRef} defaultValue={defaultBody} onValueChange={setBody} />
+        <ArticleEditorCK ref={editorRef} defaultValue={markdownToHtml(defaultBody)} onValueChange={setBody} />
       </div>
 
       <Button type="submit" disabled={pending} className="gap-2">
