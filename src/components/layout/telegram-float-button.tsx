@@ -10,7 +10,7 @@ export function TelegramFloatButton() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label={tc("joinTelegram")}
-      className="group fixed bottom-20 right-4 z-50 flex items-center gap-2 sm:right-5"
+      className="group fixed bottom-20 right-4 z-50 hidden items-center gap-2 sm:right-5 md:flex"
     >
       {/* Tooltip label */}
       <span className="pointer-events-none max-w-0 overflow-hidden whitespace-nowrap rounded-full bg-[#229ED9] px-0 py-1.5 text-sm font-medium text-white opacity-0 shadow-lg transition-all duration-300 group-hover:max-w-40 group-hover:px-4 group-hover:opacity-100">

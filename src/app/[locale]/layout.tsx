@@ -6,8 +6,10 @@ import { routing } from "@/i18n/routing";
 import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { TelegramFloatButton } from "@/components/layout/telegram-float-button";
+import { BottomAppNav } from "@/components/layout/bottom-app-nav";
 import { AppProviders } from "@/components/providers/app-providers";
 import { getSiteUrl } from "@/lib/site-url";
+import { auth } from "@/auth";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -64,16 +66,18 @@ export default async function LocaleLayout({
 
   setRequestLocale(locale);
   const messages = await getMessages();
+  const session = await auth();
 
   return (
     <NextIntlClientProvider messages={messages}>
       <AppProviders>
         <SiteHeader />
-        <main className="mx-auto min-h-[60vh] max-w-7xl px-4 py-10">
+        <main className="mx-auto min-h-[60vh] max-w-7xl px-4 pb-28 pt-10 lg:pb-10">
           {children}
         </main>
         <SiteFooter />
         <TelegramFloatButton />
+        {session?.user?.id ? <BottomAppNav userId={session.user.id} /> : null}
       </AppProviders>
     </NextIntlClientProvider>
   );
