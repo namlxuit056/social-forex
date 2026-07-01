@@ -78,19 +78,18 @@ export function NewOrderDialog() {
         <div className="grid gap-4 py-2">
           <div className="grid gap-1.5">
             <Label htmlFor="order-symbol">Symbol</Label>
-            <Input
-              id="order-symbol"
-              list="order-symbol-list"
-              value={symbol}
-              onChange={(e) => setSymbol(e.target.value.toUpperCase())}
-              placeholder="XAUUSD"
-              className="font-mono uppercase"
-            />
-            <datalist id="order-symbol-list">
-              {QUOTE_DEFINITIONS.map((d) => (
-                <option key={d.symbol} value={d.symbol} />
-              ))}
-            </datalist>
+            <Select value={symbol} onValueChange={setSymbol}>
+              <SelectTrigger id="order-symbol" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {QUOTE_DEFINITIONS.map((d) => (
+                  <SelectItem key={d.symbol} value={d.symbol}>
+                    {d.symbol}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="grid gap-1.5">
