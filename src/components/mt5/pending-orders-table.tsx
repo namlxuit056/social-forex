@@ -5,7 +5,7 @@ import { ArrowDownRight, ArrowUpRight, Ban, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { closePosition } from "@/actions/mt5-commands";
+import { cancelOrder } from "@/actions/mt5-commands";
 import { ModifyDialog } from "./modify-dialog";
 import type { LivePendingOrder } from "@/app/api/mt5/account/route";
 
@@ -62,7 +62,7 @@ export function PendingOrdersTable({ orders }: Props) {
   function handleCancel(ticket: string) {
     setCancelling((prev) => new Set(prev).add(ticket));
     startTransition(async () => {
-      await closePosition(ticket);
+      await cancelOrder(ticket);
     });
   }
 
@@ -193,6 +193,7 @@ export function PendingOrdersTable({ orders }: Props) {
           symbol={modifyTarget.symbol}
           currentSl={modifyTarget.stopLoss}
           currentTp={modifyTarget.takeProfit}
+          kind="order"
         />
       )}
     </div>

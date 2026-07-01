@@ -50,6 +50,8 @@ whatever you queue from the `/positions` dashboard:
 
 - `CLOSE_POSITION` — closes a single open position by ticket
 - `MODIFY_POSITION` — updates SL/TP on a single open position by ticket
+- `CANCEL_ORDER` — cancels a single pending order by ticket
+- `MODIFY_ORDER` — updates SL/TP on a single pending order by ticket (entry price unchanged)
 - `CLOSE_ALL` — closes every open position and cancels every pending order
 
 Each command is acknowledged back to `/api/mt5/commands/{id}/ack` with

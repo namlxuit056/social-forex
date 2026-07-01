@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { modifyPosition } from "@/actions/mt5-commands";
+import { modifyOrder, modifyPosition } from "@/actions/mt5-commands";
 
 type Props = {
   open: boolean;
@@ -20,10 +20,11 @@ type Props = {
   symbol: string;
   currentSl: number | null;
   currentTp: number | null;
+  kind?: "position" | "order";
   onQueued?: () => void;
 };
 
-export function ModifyDialog({ open, onOpenChange, ticket, symbol, currentSl, currentTp, onQueued }: Props) {
+export function ModifyDialog({ open, onOpenChange, ticket, symbol, currentSl, currentTp, kind = "position", onQueued }: Props) {
   const [sl, setSl] = useState(currentSl?.toString() ?? "");
   const [tp, setTp] = useState(currentTp?.toString() ?? "");
   const [isPending, startTransition] = useTransition();
@@ -34,7 +35,9 @@ export function ModifyDialog({ open, onOpenChange, ticket, symbol, currentSl, cu
     startTransition(async () => {
       const slVal = sl === "" ? null : Number(sl);
       const tpVal = tp === "" ? null : Number(tp);
-      const result = await modifyPosition(ticket, slVal, tpVal);
+      const result = kind === "order"
+        ? await modifyOrder(ticket, slVal, tpVal)
+        : await modifyPosition(ticket, slVal, tpVal);
       if (result.error) {
         setError(result.error);
         return;

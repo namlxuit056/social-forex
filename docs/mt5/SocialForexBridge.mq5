@@ -414,6 +414,42 @@ bool ModifyPositionByTicket(ulong ticket, double sl, double tp, string &errMsg)
    return true;
 }
 
+bool ModifyOrderByTicket(ulong ticket, double sl, double tp, string &errMsg)
+{
+   if(!OrderSelect(ticket))
+   {
+      errMsg = "order not found";
+      return false;
+   }
+   string symbol       = OrderGetString(ORDER_SYMBOL);
+   double price        = OrderGetDouble(ORDER_PRICE_OPEN);
+   long   typeTime      = OrderGetInteger(ORDER_TYPE_TIME);
+   datetime expiration = (datetime)OrderGetInteger(ORDER_TIME_EXPIRATION);
+   int digits          = (int)SymbolInfoInteger(symbol, SYMBOL_DIGITS);
+   double safeSL       = sl > 0 ? NormalizeDouble(sl, digits) : 0;
+   double safeTP       = tp > 0 ? NormalizeDouble(tp, digits) : 0;
+
+   MqlTradeRequest req = {};
+   MqlTradeResult  res = {};
+   req.action     = TRADE_ACTION_MODIFY;
+   req.order      = ticket;
+   req.symbol     = symbol;
+   req.price      = price;
+   req.sl         = safeSL;
+   req.tp         = safeTP;
+   req.type_time  = (ENUM_ORDER_TYPE_TIME)typeTime;
+   req.expiration = expiration;
+
+   if(!OrderSend(req, res) || res.retcode != TRADE_RETCODE_DONE)
+   {
+      errMsg = "err=" + IntegerToString(GetLastError()) + " rc=" + IntegerToString(res.retcode);
+      Print("SocialForexBridge: ModifyOrder failed ticket=", ticket, " ", errMsg);
+      return false;
+   }
+   Print("SocialForexBridge: Modified order ticket=", ticket, " SL=", safeSL, " TP=", safeTP);
+   return true;
+}
+
 bool CancelOrderByTicket(ulong ticket, string &errMsg)
 {
    MqlTradeRequest req = {};
@@ -549,6 +585,20 @@ void FetchAndExecuteCommands()
             errorMsg = "invalid ticket";
          else
             success = ModifyPositionByTicket(ticket, sl, tp, errorMsg);
+      }
+      else if(type == "CANCEL_ORDER")
+      {
+         if(ticket == 0)
+            errorMsg = "invalid ticket";
+         else
+            success = CancelOrderByTicket(ticket, errorMsg);
+      }
+      else if(type == "MODIFY_ORDER")
+      {
+         if(ticket == 0)
+            errorMsg = "invalid ticket";
+         else
+            success = ModifyOrderByTicket(ticket, sl, tp, errorMsg);
       }
       else if(type == "CLOSE_ALL")
       {

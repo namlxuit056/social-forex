@@ -37,6 +37,24 @@ export async function closePosition(ticket: string): Promise<{ error?: string }>
   return {};
 }
 
+export async function cancelOrder(ticket: string): Promise<{ error?: string }> {
+  const session = await auth();
+  if (!session?.user?.id) redirect("/auth/signin");
+
+  const connection = await getActiveConnection(session.user.id);
+  if (!connection) return { error: "no_connection" };
+
+  await prisma.mt5Command.create({
+    data: {
+      connectionId: connection.id,
+      type: "CANCEL_ORDER",
+      ticket,
+    },
+  });
+
+  return {};
+}
+
 export async function modifyPosition(
   ticket: string,
   stopLoss: number | null,
@@ -55,6 +73,33 @@ export async function modifyPosition(
     data: {
       connectionId: connection.id,
       type: "MODIFY_POSITION",
+      ticket: parsed.data.ticket,
+      stopLoss: parsed.data.stopLoss ?? null,
+      takeProfit: parsed.data.takeProfit ?? null,
+    },
+  });
+
+  return {};
+}
+
+export async function modifyOrder(
+  ticket: string,
+  stopLoss: number | null,
+  takeProfit: number | null,
+): Promise<{ error?: string }> {
+  const session = await auth();
+  if (!session?.user?.id) redirect("/auth/signin");
+
+  const parsed = modifySchema.safeParse({ ticket, stopLoss, takeProfit });
+  if (!parsed.success) return { error: "invalid_params" };
+
+  const connection = await getActiveConnection(session.user.id);
+  if (!connection) return { error: "no_connection" };
+
+  await prisma.mt5Command.create({
+    data: {
+      connectionId: connection.id,
+      type: "MODIFY_ORDER",
       ticket: parsed.data.ticket,
       stopLoss: parsed.data.stopLoss ?? null,
       takeProfit: parsed.data.takeProfit ?? null,
