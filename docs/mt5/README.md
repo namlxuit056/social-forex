@@ -2,12 +2,13 @@
 
 This is a MetaTrader 5 Expert Advisor bridge. It sends account info and open
 positions to Social Forex through `/api/mt5/bridge`, and polls
-`/api/mt5/commands` to execute Close / Modify / Close All actions that you
-queue from the `/positions` dashboard.
+`/api/mt5/commands` to execute Close / Modify / Cancel / Close All / New
+Order actions that you queue from the `/positions` dashboard.
 
-It never opens new positions or places trades on its own — it only acts on
-commands you explicitly trigger from the dashboard. It does not need your
-MT5 password.
+It never opens new positions or trades on its own initiative — every trade
+action, including new Buy/Sell/Buy Limit/Sell Limit/Buy Stop/Sell Stop
+orders, only happens because you explicitly triggered it from the
+dashboard. It does not need your MT5 password.
 
 ## Setup
 
@@ -53,6 +54,8 @@ whatever you queue from the `/positions` dashboard:
 - `CANCEL_ORDER` — cancels a single pending order by ticket
 - `MODIFY_ORDER` — updates SL/TP on a single pending order by ticket (entry price unchanged)
 - `CLOSE_ALL` — closes every open position and cancels every pending order
+- `PLACE_BUY` / `PLACE_SELL` — opens a market order on the given symbol/volume
+- `PLACE_BUY_LIMIT` / `PLACE_SELL_LIMIT` / `PLACE_BUY_STOP` / `PLACE_SELL_STOP` — places a pending order at the given price
 
 Each command is acknowledged back to `/api/mt5/commands/{id}/ack` with
 success/failure so the dashboard reflects the real outcome.
@@ -62,4 +65,4 @@ success/failure so the dashboard reflects the real outcome.
 - Never paste your MT5 password into Social Forex.
 - Keep the bridge token private.
 - Revoke a token from `/mt5` if it is exposed.
-- The EA only ever acts on commands you explicitly queue from the dashboard (Close / Modify / Close All). It never opens new positions or trades autonomously.
+- The EA only ever acts on commands you explicitly queue from the dashboard (Close / Modify / Cancel / Close All / New Order). It never opens new positions or trades autonomously.

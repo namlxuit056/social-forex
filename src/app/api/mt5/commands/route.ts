@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     where: { connectionId: connection.id, status: "PENDING" },
     orderBy: { createdAt: "asc" },
     take: 20,
-    select: { id: true, type: true, ticket: true, stopLoss: true, takeProfit: true },
+    select: { id: true, type: true, ticket: true, symbol: true, volume: true, price: true, stopLoss: true, takeProfit: true },
   });
 
   if (pending.length > 0) {

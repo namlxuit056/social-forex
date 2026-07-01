@@ -757,8 +757,11 @@ model Mt5SignalLink {
 model Mt5Command {
   id           String    @id @default(cuid())
   connectionId String
-  type         String    // CLOSE_POSITION | MODIFY_POSITION | CANCEL_ORDER | MODIFY_ORDER | CLOSE_ALL
-  ticket       String?   // null for CLOSE_ALL
+  type         String    // CLOSE_POSITION | MODIFY_POSITION | CANCEL_ORDER | MODIFY_ORDER | CLOSE_ALL | PLACE_BUY | PLACE_SELL | PLACE_BUY_LIMIT | PLACE_SELL_LIMIT | PLACE_BUY_STOP | PLACE_SELL_STOP
+  ticket       String?   // null for CLOSE_ALL and PLACE_*
+  symbol       String?   // PLACE_* only
+  volume       Float?    // PLACE_* only
+  price        Float?    // PLACE_*_LIMIT / PLACE_*_STOP only
   stopLoss     Float?
   takeProfit   Float?
   status       String    @default("PENDING")

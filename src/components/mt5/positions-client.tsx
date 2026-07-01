@@ -30,6 +30,7 @@ import { cn } from "@/lib/utils";
 import { closeAllPositions } from "@/actions/mt5-commands";
 import { PositionsTable } from "./positions-table";
 import { PendingOrdersTable } from "./pending-orders-table";
+import { NewOrderDialog } from "./new-order-dialog";
 import type { LivePosition, Mt5AccountInfo } from "@/app/[locale]/journal/journal-live-panel";
 import type { LivePendingOrder, Mt5AccountResponse } from "@/app/api/mt5/account/route";
 
@@ -148,6 +149,7 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
             >
               <RefreshCw className={cn("size-4", spinning && "animate-spin")} />
             </Button>
+            <NewOrderDialog />
             <AlertDialog>
               <AlertDialogTrigger
                 render={
