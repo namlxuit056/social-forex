@@ -3,9 +3,21 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import type { LivePosition, Mt5AccountInfo } from "@/app/[locale]/journal/journal-live-panel";
 
+export type LivePendingOrder = {
+  ticket: string;
+  symbol: string;
+  type: string;
+  volume: number | null;
+  priceOpen: number | null;
+  stopLoss: number | null;
+  takeProfit: number | null;
+  openedAt: string | null;
+};
+
 export type Mt5AccountResponse = {
   account: Mt5AccountInfo;
   positions: LivePosition[];
+  orders: LivePendingOrder[];
 };
 
 export async function GET() {
@@ -26,6 +38,7 @@ export async function GET() {
       openPositions: true,
       lastSeenAt: true,
       lastPositions: true,
+      lastOrders: true,
     },
   });
 
@@ -58,6 +71,30 @@ export async function GET() {
     }
   }
 
+  const orders: LivePendingOrder[] = [];
+  if (Array.isArray(connection.lastOrders)) {
+    for (const o of connection.lastOrders as Record<string, unknown>[]) {
+      const ticket = o.ticket != null ? String(o.ticket) : null;
+      const symbol = typeof o.symbol === "string" ? o.symbol : null;
+      const type = typeof o.type === "string" ? o.type : null;
+      if (!ticket || !symbol || !type) continue;
+      const num = (v: unknown) => {
+        const n = Number(v);
+        return Number.isFinite(n) ? n : null;
+      };
+      orders.push({
+        ticket,
+        symbol,
+        type,
+        volume: num(o.volume),
+        priceOpen: num(o.priceOpen),
+        stopLoss: num(o.stopLoss),
+        takeProfit: num(o.takeProfit),
+        openedAt: typeof o.openedAt === "string" ? o.openedAt : null,
+      });
+    }
+  }
+
   const body: Mt5AccountResponse = {
     account: {
       balance: connection.balance,
@@ -69,6 +106,7 @@ export async function GET() {
       lastSeenAt: connection.lastSeenAt?.toISOString() ?? null,
     },
     positions,
+    orders,
   };
 
   return NextResponse.json(body);
