@@ -68,7 +68,7 @@ export function PendingOrdersTable({ orders }: Props) {
 
   return (
     <div className="rounded-2xl border border-border bg-card shadow-sm">
-      <div className="flex items-center justify-between px-4 py-4 sm:px-6">
+      <div className="flex items-center justify-between px-3 py-4 sm:px-6">
         <h2 className="text-base font-semibold">Pending Orders</h2>
         <span className="text-xs text-muted-foreground">{orders.length} waiting</span>
       </div>
@@ -137,11 +137,11 @@ export function PendingOrdersTable({ orders }: Props) {
           </div>
 
           {/* Mobile cards */}
-          <div className="flex flex-col gap-3 p-3 md:hidden">
+          <div className="flex flex-col gap-2 p-2 md:hidden">
             {orders.map((o) => {
               const isCancelling = cancelling.has(o.ticket);
               return (
-                <div key={o.ticket} className={cn("rounded-xl border border-border bg-background p-4 transition-opacity", isCancelling && "opacity-40")}>
+                <div key={o.ticket} className={cn("rounded-xl border border-border bg-background p-3 transition-opacity", isCancelling && "opacity-40")}>
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
                       <span className="text-base font-semibold">{o.symbol}</span>
