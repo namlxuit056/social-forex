@@ -704,6 +704,7 @@ model Mt5Connection {
   openPositions   Int       @default(0)
   pendingOrders   Int       @default(0)
   lastPositions   Json      @default("[]")
+  lastOrders      Json      @default("[]")
   lastTradeHash   String?
   lastSnapshotAt  DateTime?
   lastError       String?
@@ -714,6 +715,7 @@ model Mt5Connection {
   snapshots Mt5Snapshot[]
   signalLinks Mt5SignalLink[]
   aiTradeProposals AiTradeProposal[]
+  commands Mt5Command[]
 
   @@index([userId, revokedAt])
   @@index([lastSeenAt])
@@ -750,6 +752,25 @@ model Mt5SignalLink {
 
   @@unique([connectionId, mt5Ticket])
   @@index([connectionId, kind])
+}
+
+model Mt5Command {
+  id           String    @id @default(cuid())
+  connectionId String
+  type         String    // CLOSE_POSITION | MODIFY_POSITION | CLOSE_ALL
+  ticket       String?   // null for CLOSE_ALL
+  stopLoss     Float?
+  takeProfit   Float?
+  status       String    @default("PENDING")
+  // PENDING | SENT | DONE | ERROR
+  errorMsg     String?
+  createdAt    DateTime  @default(now())
+  sentAt       DateTime?
+  doneAt       DateTime?
+
+  connection Mt5Connection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+
+  @@index([connectionId, status, createdAt])
 }
 
 model AiTradeProposal {
