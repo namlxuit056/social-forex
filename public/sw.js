@@ -1,5 +1,5 @@
-const CACHE_NAME = "social-forex-v2";
-const STATIC_ASSETS = ["/", "/manifest.json"];
+const CACHE_NAME = "social-forex-v3";
+const STATIC_ASSETS = ["/manifest.json"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -24,11 +24,17 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
   if (request.url.includes("/api/")) return;
 
+  // Safari rejects redirect responses served from SW for navigation requests.
+  // The i18n middleware redirects "/" → "/vi/" so we must let navigation requests
+  // go directly to the network without SW interference.
+  if (request.mode === "navigate") return;
+
   event.respondWith(
     caches.match(request).then((cached) => {
       const fetchPromise = fetch(request)
         .then((response) => {
-          if (response.ok) {
+          // Don't cache redirects — they cause the same Safari error
+          if (response.ok && response.status < 300) {
             const clone = response.clone();
             caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
           }
