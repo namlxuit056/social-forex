@@ -197,6 +197,7 @@ export async function POST(request: NextRequest) {
         openPositions: positions.length,
         pendingOrders: orders.length,
         lastPositions: positions as never,
+        lastOrders: orders as never,
         lastTradeHash: nextTradeHash,
         lastSnapshotAt: shouldCreateSnapshot ? now : undefined,
       },
