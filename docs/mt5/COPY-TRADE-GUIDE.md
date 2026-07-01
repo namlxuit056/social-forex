@@ -134,4 +134,4 @@ Other causes:
 | File | Location | Description |
 |------|----------|-------------|
 | `SocialForexCopyTrade.mq5` | `docs/mt5/` | Copy Trading EA source |
-| `SocialForexBridge.mq5` | `docs/mt5/` | Read-only bridge EA (separate) |
+| `SocialForexBridge.mq5` | `docs/mt5/` | Bridge EA — syncs positions + executes dashboard Close/Modify/Close All commands (separate) |

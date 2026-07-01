@@ -1,9 +1,13 @@
 # Social Forex MT5 Bridge
 
-This is a read-only MetaTrader 5 Expert Advisor bridge. It sends account info
-and open positions to Social Forex through `/api/mt5/bridge`.
+This is a MetaTrader 5 Expert Advisor bridge. It sends account info and open
+positions to Social Forex through `/api/mt5/bridge`, and polls
+`/api/mt5/commands` to execute Close / Modify / Close All actions that you
+queue from the `/positions` dashboard.
 
-It does not place trades and does not need your MT5 password.
+It never opens new positions or places trades on its own — it only acts on
+commands you explicitly trigger from the dashboard. It does not need your
+MT5 password.
 
 ## Setup
 
@@ -19,9 +23,11 @@ It does not place trades and does not need your MT5 password.
 8. Attach `SocialForexBridge` to any chart.
 9. Set:
    - `BridgeEndpoint` to `https://your-domain.com/api/mt5/bridge`
+   - `CommandsEndpoint` to `https://your-domain.com/api/mt5/commands`
    - `BridgeToken` to the token from `/mt5`
-   - `HeartbeatSeconds` to `30` or higher
-10. Enable Algo Trading.
+   - `HeartbeatSeconds` to `30` or higher (account/position snapshot cadence)
+   - `CommandPollSeconds` to `3`-`5` (how often it checks for queued Close/Modify/Close All commands)
+10. Enable Algo Trading (required for the EA to execute Close/Modify/Close All commands, not just for the heartbeat).
 
 The `/mt5` page should show `Connected` after the first successful heartbeat.
 
@@ -37,9 +43,21 @@ The EA sends:
 Social Forex creates/updates a FREE signal for each MT5 pending order or open
 position. Pending orders use `PENDING`; open positions use `ACTIVE`.
 
+## Commands
+
+The EA also polls `CommandsEndpoint` every `CommandPollSeconds` and executes
+whatever you queue from the `/positions` dashboard:
+
+- `CLOSE_POSITION` — closes a single open position by ticket
+- `MODIFY_POSITION` — updates SL/TP on a single open position by ticket
+- `CLOSE_ALL` — closes every open position and cancels every pending order
+
+Each command is acknowledged back to `/api/mt5/commands/{id}/ack` with
+success/failure so the dashboard reflects the real outcome.
+
 ## Safety
 
 - Never paste your MT5 password into Social Forex.
 - Keep the bridge token private.
 - Revoke a token from `/mt5` if it is exposed.
-- This MVP is read-only. Do not add automated trading until legal, risk, and user-consent flows are ready.
+- The EA only ever acts on commands you explicitly queue from the dashboard (Close / Modify / Close All). It never opens new positions or trades autonomously.
