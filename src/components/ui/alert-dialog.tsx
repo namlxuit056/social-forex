@@ -90,14 +90,18 @@ function AlertDialogAction({
   ...props
 }: React.ComponentProps<typeof Button> & { onClick?: () => void }) {
   return (
-    <Button
+    <DialogClose
       data-slot="alert-dialog-action"
-      className={cn(className)}
-      onClick={onClick}
-      {...props}
+      render={
+        <Button
+          className={cn(className)}
+          onClick={onClick}
+          {...props}
+        />
+      }
     >
       {children}
-    </Button>
+    </DialogClose>
   )
 }
 

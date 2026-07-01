@@ -78,7 +78,7 @@ export function NewOrderDialog() {
         <div className="grid gap-4 py-2">
           <div className="grid gap-1.5">
             <Label htmlFor="order-symbol">Symbol</Label>
-            <Select value={symbol} onValueChange={setSymbol}>
+            <Select value={symbol} onValueChange={(value) => value && setSymbol(value)}>
               <SelectTrigger id="order-symbol" className="w-full">
                 <SelectValue />
               </SelectTrigger>
