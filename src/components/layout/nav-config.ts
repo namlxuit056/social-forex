@@ -26,6 +26,7 @@ export const communityNavKeys = [
   { href: "/plan", key: "plan" },
   { href: "/journal", key: "journal" },
   { href: "/mt5", key: "mt5" },
+  { href: "/positions", key: "positions" },
   { href: "/backtest", key: "backtest" },
   { href: "/messages", key: "messages" },
   { href: "/forum/search", key: "searchTopics" },
