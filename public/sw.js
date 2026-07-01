@@ -1,21 +1,14 @@
-/// <reference lib="webworker" />
-const sw = self as unknown as ServiceWorkerGlobalScope;
+const CACHE_NAME = "social-forex-v2";
+const STATIC_ASSETS = ["/", "/manifest.json"];
 
-const CACHE_NAME = "social-forex-v1";
-const STATIC_ASSETS = [
-  "/",
-  "/icon.png",
-  "/manifest.json",
-];
-
-sw.addEventListener("install", (event) => {
+self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS)),
   );
-  sw.skipWaiting();
+  self.skipWaiting();
 });
 
-sw.addEventListener("activate", (event) => {
+self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(
@@ -23,13 +16,12 @@ sw.addEventListener("activate", (event) => {
       ),
     ),
   );
-  sw.clients.claim();
+  self.clients.claim();
 });
 
-sw.addEventListener("fetch", (event) => {
+self.addEventListener("fetch", (event) => {
   const { request } = event;
   if (request.method !== "GET") return;
-
   if (request.url.includes("/api/")) return;
 
   event.respondWith(
@@ -49,35 +41,35 @@ sw.addEventListener("fetch", (event) => {
   );
 });
 
-sw.addEventListener("push", (event) => {
-  const data = event.data?.json() as { title: string; body: string; url?: string } | undefined;
+self.addEventListener("push", (event) => {
+  const data = event.data?.json();
   if (!data) return;
 
   event.waitUntil(
-    sw.registration.showNotification(data.title, {
+    self.registration.showNotification(data.title, {
       body: data.body,
-      icon: "/icon.png",
-      badge: "/icon.png",
+      icon: "/icon-192.png",
+      badge: "/icon-192.png",
       data: { url: data.url ?? "/dashboard" },
       tag: "social-forex-notification",
     }),
   );
 });
 
-sw.addEventListener("notificationclick", (event) => {
+self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const url = (event.notification.data as { url?: string })?.url ?? "/dashboard";
+  const url = event.notification.data?.url ?? "/dashboard";
 
   event.waitUntil(
-    sw.clients.matchAll({ type: "window" }).then((clients) => {
+    self.clients.matchAll({ type: "window" }).then((clients) => {
       for (const client of clients) {
-        if (client.url.includes(sw.location.origin) && "focus" in client) {
+        if (client.url.includes(self.location.origin) && "focus" in client) {
           client.focus();
           client.navigate(url);
           return;
         }
       }
-      sw.clients.openWindow(url);
+      self.clients.openWindow(url);
     }),
   );
 });
