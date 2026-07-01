@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { closePosition } from "@/actions/mt5-commands";
 import { ModifyDialog } from "./modify-dialog";
-import type { LivePosition } from "@/app/api/mt5/account/route";
+import type { LivePosition } from "@/app/[locale]/journal/journal-live-panel";
 
 function fmt(v: number | null, d = 5) {
   return v == null ? "—" : v.toFixed(d);

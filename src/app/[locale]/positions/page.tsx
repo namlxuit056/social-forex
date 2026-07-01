@@ -1,7 +1,8 @@
 import { Activity } from "lucide-react";
 import { setRequestLocale } from "next-intl/server";
 import { auth } from "@/auth";
-import { redirect, Link } from "@/i18n/navigation";
+import { redirect } from "next/navigation";
+import { Link } from "@/i18n/navigation";
 import { prisma } from "@/lib/prisma";
 import { PositionsClient } from "@/components/mt5/positions-client";
 import type { LivePosition, Mt5AccountInfo } from "@/app/[locale]/journal/journal-live-panel";

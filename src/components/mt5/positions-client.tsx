@@ -106,16 +106,18 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
             <RefreshCw className={cn("h-4 w-4", spinning && "animate-spin")} />
           </Button>
           <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                size="sm"
-                variant="destructive"
-                disabled={closeAllPending || (positions.length === 0 && orders.length === 0)}
-                className="gap-1.5"
-              >
-                <TrendingDown className="h-4 w-4" />
-                Close All
-              </Button>
+            <AlertDialogTrigger
+              render={
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  disabled={closeAllPending || (positions.length === 0 && orders.length === 0)}
+                  className="gap-1.5"
+                />
+              }
+            >
+              <TrendingDown className="h-4 w-4" />
+              Close All
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
