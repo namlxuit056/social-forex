@@ -1,11 +1,20 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
-import { RefreshCw, TrendingDown, AlertTriangle } from "lucide-react";
+import {
+  AlertTriangle,
+  Clock,
+  Gauge,
+  LineChart,
+  ListChecks,
+  RefreshCw,
+  TrendingDown,
+  TrendingUp,
+  Wallet,
+  type LucideIcon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,6 +34,42 @@ import type { LivePosition, Mt5AccountInfo } from "@/app/[locale]/journal/journa
 import type { LivePendingOrder, Mt5AccountResponse } from "@/app/api/mt5/account/route";
 
 const REFRESH_MS = 5_000;
+
+function fmtMoney(v: number | null, currency: string) {
+  if (v == null) return "—";
+  const sign = v > 0 ? "+" : "";
+  return `${sign}${v.toFixed(2)} ${currency}`.trim();
+}
+
+function Metric({
+  label,
+  value,
+  icon: Icon,
+  tone = "default",
+}: {
+  label: string;
+  value: string;
+  icon: LucideIcon;
+  tone?: "default" | "profit" | "loss";
+}) {
+  return (
+    <div className="flex flex-col gap-1">
+      <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+        <Icon className="size-3.5" />
+        {label}
+      </span>
+      <span
+        className={cn(
+          "text-lg font-semibold tabular-nums tracking-tight sm:text-xl",
+          tone === "profit" && "text-emerald-500",
+          tone === "loss" && "text-red-500",
+        )}
+      >
+        {value}
+      </span>
+    </div>
+  );
+}
 
 type Props = {
   initialAccount: Mt5AccountInfo | null;
@@ -73,112 +118,95 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
 
   const totalPL = positions.reduce((sum, p) => sum + (p.profit ?? 0), 0);
   const currency = account?.currency ?? "";
+  const plTone = totalPL > 0 ? "profit" : totalPL < 0 ? "loss" : "default";
+  const hasQueueable = positions.length > 0 || orders.length > 0;
 
   return (
     <div className="space-y-6">
-      {/* Account summary strip */}
-      <div className="flex flex-wrap items-center gap-4 rounded-lg border border-border/60 bg-card px-4 py-3">
-        <div className="flex flex-col">
-          <span className="text-xs text-muted-foreground">Balance</span>
-          <span className="font-semibold">{account?.balance?.toFixed(2) ?? "—"} {currency}</span>
-        </div>
-        <div className="flex flex-col">
-          <span className="text-xs text-muted-foreground">Equity</span>
-          <span className="font-semibold">{account?.equity?.toFixed(2) ?? "—"} {currency}</span>
-        </div>
-        <div className="flex flex-col">
-          <span className="text-xs text-muted-foreground">Free Margin</span>
-          <span className="font-semibold">{account?.freeMargin?.toFixed(2) ?? "—"} {currency}</span>
-        </div>
-        <div className="flex flex-col">
-          <span className="text-xs text-muted-foreground">Open P/L</span>
-          <span className={cn("font-semibold", totalPL >= 0 ? "text-emerald-500" : "text-red-500")}>
-            {totalPL >= 0 ? "+" : ""}{totalPL.toFixed(2)} {currency}
-          </span>
-        </div>
-        <div className="ml-auto flex items-center gap-2">
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => void fetchData()}
-            className="h-8 w-8 p-0"
-          >
-            <RefreshCw className={cn("h-4 w-4", spinning && "animate-spin")} />
-          </Button>
-          <AlertDialog>
-            <AlertDialogTrigger
-              render={
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  disabled={closeAllPending || (positions.length === 0 && orders.length === 0)}
-                  className="gap-1.5"
-                />
-              }
+      {/* Account summary */}
+      <div className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-6">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 sm:gap-8 lg:flex-1">
+            <Metric label="Balance" icon={Wallet} value={fmtMoney(account?.balance ?? null, currency)} />
+            <Metric label="Equity" icon={LineChart} value={fmtMoney(account?.equity ?? null, currency)} />
+            <Metric label="Free Margin" icon={Gauge} value={fmtMoney(account?.freeMargin ?? null, currency)} />
+            <Metric
+              label="Open P/L"
+              icon={plTone === "loss" ? TrendingDown : TrendingUp}
+              value={fmtMoney(totalPL, currency)}
+              tone={plTone}
+            />
+          </div>
+
+          <div className="flex items-center gap-2 border-t border-border pt-4 lg:border-t-0 lg:pt-0">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => void fetchData()}
+              aria-label="Refresh account data"
+              className="shrink-0"
             >
-              <TrendingDown className="h-4 w-4" />
-              Close All
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle className="flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5 text-destructive" />
-                  Close all positions?
-                </AlertDialogTitle>
-                <AlertDialogDescription>
-                  This queues a CLOSE_ALL command. Your MT5 EA will close {positions.length} position{positions.length !== 1 ? "s" : ""} and cancel {orders.length} pending order{orders.length !== 1 ? "s" : ""} on the next heartbeat. This cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleCloseAll} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                  {closeAllPending ? "Queuing…" : "Yes, close all"}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+              <RefreshCw className={cn("size-4", spinning && "animate-spin")} />
+            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger
+                render={
+                  <Button
+                    variant="destructive"
+                    disabled={closeAllPending || !hasQueueable}
+                    className="flex-1 gap-1.5 lg:flex-none"
+                  />
+                }
+              >
+                <TrendingDown className="size-4" />
+                Close All
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5 text-destructive" />
+                    Close all positions?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This queues a CLOSE_ALL command. Your MT5 EA will close {positions.length} position{positions.length !== 1 ? "s" : ""} and cancel {orders.length} pending order{orders.length !== 1 ? "s" : ""} on the next heartbeat. This cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleCloseAll} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                    {closeAllPending ? "Queuing…" : "Yes, close all"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         </div>
       </div>
 
       {/* Tabs: positions / pending orders */}
-      <Tabs defaultValue="positions">
-        <TabsList>
-          <TabsTrigger value="positions">
+      <Tabs defaultValue="positions" className="gap-4">
+        <TabsList className="h-auto rounded-full bg-muted p-1">
+          <TabsTrigger value="positions" className="gap-2 rounded-full px-4 py-1.5">
+            <ListChecks className="size-4" />
             Positions
-            {positions.length > 0 && (
-              <Badge variant="secondary" className="ml-1.5 h-5 px-1.5 text-xs">
-                {positions.length}
-              </Badge>
-            )}
+            <span className="flex min-w-5 items-center justify-center rounded-full bg-background px-1.5 text-xs font-semibold text-foreground">
+              {positions.length}
+            </span>
           </TabsTrigger>
-          <TabsTrigger value="orders">
+          <TabsTrigger value="orders" className="gap-2 rounded-full px-4 py-1.5">
+            <Clock className="size-4" />
             Pending Orders
-            {orders.length > 0 && (
-              <Badge variant="secondary" className="ml-1.5 h-5 px-1.5 text-xs">
-                {orders.length}
-              </Badge>
-            )}
+            <span className="flex min-w-5 items-center justify-center rounded-full bg-background px-1.5 text-xs font-semibold text-foreground">
+              {orders.length}
+            </span>
           </TabsTrigger>
         </TabsList>
+
         <TabsContent value="positions">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base">Open Positions</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <PositionsTable positions={positions} currency={currency} />
-            </CardContent>
-          </Card>
+          <PositionsTable positions={positions} currency={currency} />
         </TabsContent>
         <TabsContent value="orders">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base">Pending Orders</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <PendingOrdersTable orders={orders} />
-            </CardContent>
-          </Card>
+          <PendingOrdersTable orders={orders} />
         </TabsContent>
       </Tabs>
 

@@ -94,11 +94,13 @@ export default async function PositionsPage({
   const orders = parseOrders(connection?.lastOrders);
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 px-4 py-6">
-      <div className="flex items-center gap-3">
-        <Activity className="h-6 w-6 text-primary" />
+    <div className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-6">
+      <div className="flex items-start gap-3">
+        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          <Activity className="size-6" />
+        </div>
         <div>
-          <h1 className="text-xl font-bold">Positions</h1>
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Positions</h1>
           <p className="text-sm text-muted-foreground">Live MT5 positions &amp; pending orders</p>
         </div>
       </div>
