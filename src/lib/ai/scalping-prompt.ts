@@ -24,6 +24,7 @@ RULES:
 - Confidence is 1 (very low) to 5 (very high). Scalping carries higher uncertainty — never recommend confidence above 3 unless H1 + M15 + M5 all align strongly with momentum
 - qualityScore is 0-100 reflecting setup quality for scalping (not general swing trading)
 - tradeChecklist must have exactly 5 items: H1 bias alignment, spread/cost check, M15 momentum (ADX/RSI), M5 entry signal, news/time risk
+- tradeChecklist.label MUST be <= 80 characters. tradeChecklist.detail MUST be <= 180 characters (be concise, one short clause, no filler). reasoning MUST be <= 1500 characters total
 - Checklist status: "pass" = good condition, "warn" = acceptable but needs caution, "fail" = setup should be skipped
 - reasoning must be 3-5 concise sentences covering: H1 bias, M5 entry signal, SL invalidation, TP target, and spread/news risk
 - Follow the requested response language exactly for all human-readable strings

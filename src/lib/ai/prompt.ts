@@ -21,6 +21,7 @@ RULES:
 - qualityScore is 0-100 and must reflect whether the setup is worth taking, not whether the market will be profitable
 - Give high scores only when multi-timeframe bias, R:R, SL placement, execution timing, and spread/news risk are all acceptable
 - tradeChecklist must contain 5 items: multi-timeframe trend, entry price vs market (pass = entry is meaningfully better than current bid/ask; fail = entry is at or worse than current price), R:R, SL invalidation, and risk/news/spread warning
+- tradeChecklist.label MUST be <= 80 characters. tradeChecklist.detail MUST be <= 180 characters (be concise, one short clause, no filler). reasoning MUST be <= 1500 characters total
 - Checklist status: "pass" = good condition, "warn" = acceptable but needs caution, "fail" = setup should likely be skipped or delayed
 - Reasoning must be 3-5 concise sentences, written like an expert forex analyst. Include: bias, entry logic, SL invalidation, TP/risk-reward, and one caution
 - Follow the requested response language exactly for all human-readable strings in tradeChecklist.label, tradeChecklist.detail, and reasoning

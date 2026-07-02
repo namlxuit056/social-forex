@@ -1,4 +1,4 @@
-import { aiSuggestionSchema, type AiSuggestion } from "@/lib/ai/types";
+import { aiSuggestionSchema, sanitizeAiSuggestionPayload, type AiSuggestion } from "@/lib/ai/types";
 import { SYSTEM_PROMPT } from "@/lib/ai/prompt";
 import { createAiClient, resolveAiProvider } from "@/lib/ai/provider";
 import { AiUnavailableError } from "@/lib/ai/suggest";
@@ -125,7 +125,7 @@ export async function analyzeMt5Chart(
     throw new Error("AI response is not valid JSON");
   }
 
-  const result = aiSuggestionSchema.safeParse(parsed);
+  const result = aiSuggestionSchema.safeParse(sanitizeAiSuggestionPayload(parsed));
   if (!result.success) {
     throw new Error(
       `Invalid AI response format: ${result.error.issues.map((i) => i.message).join(", ")}`,

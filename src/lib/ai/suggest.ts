@@ -1,5 +1,5 @@
 import type { QuoteRow } from "@/lib/quotes/types";
-import { aiSuggestionSchema, type AiSuggestion } from "@/lib/ai/types";
+import { aiSuggestionSchema, sanitizeAiSuggestionPayload, type AiSuggestion } from "@/lib/ai/types";
 import { SYSTEM_PROMPT, buildUserPrompt } from "@/lib/ai/prompt";
 import type { TradingViewTechnicalContext } from "@/lib/ai/tradingview-context";
 import type { AiNewsContext } from "@/lib/ai/news-context";
@@ -69,7 +69,7 @@ export async function getAiSuggestion(
     throw new Error("AI response is not valid JSON");
   }
 
-  const result = aiSuggestionSchema.safeParse(parsed);
+  const result = aiSuggestionSchema.safeParse(sanitizeAiSuggestionPayload(parsed));
   if (!result.success) {
     throw new Error(
       `Invalid AI response format: ${result.error.issues.map((i) => i.message).join(", ")}`,

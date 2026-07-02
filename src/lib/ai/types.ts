@@ -30,6 +30,42 @@ export const aiSuggestionSchema = z.object({
 
 export type AiSuggestion = z.infer<typeof aiSuggestionSchema>;
 
+function truncate(value: unknown, max: number): unknown {
+  if (typeof value === "string" && value.length > max) {
+    return value.slice(0, max - 1).trimEnd() + "…";
+  }
+  return value;
+}
+
+/**
+ * LLMs occasionally overflow the checklist/reasoning length limits despite
+ * prompt instructions. Truncate before Zod validation so a slightly long
+ * response doesn't hard-fail the whole analysis.
+ */
+export function sanitizeAiSuggestionPayload(data: unknown): unknown {
+  if (!data || typeof data !== "object") return data;
+  const obj = data as Record<string, unknown>;
+  const sanitized: Record<string, unknown> = { ...obj };
+
+  if (Array.isArray(obj.tradeChecklist)) {
+    sanitized.tradeChecklist = obj.tradeChecklist.map((item) => {
+      if (!item || typeof item !== "object") return item;
+      const checklistItem = item as Record<string, unknown>;
+      return {
+        ...checklistItem,
+        label: truncate(checklistItem.label, 80),
+        detail: truncate(checklistItem.detail, 180),
+      };
+    });
+  }
+
+  if (typeof obj.reasoning === "string") {
+    sanitized.reasoning = truncate(obj.reasoning, 1500);
+  }
+
+  return sanitized;
+}
+
 export type AiSuggestResponse = {
   symbol: string;
   suggestion: AiSuggestion;
