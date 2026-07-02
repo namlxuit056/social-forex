@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Activity, ArrowDownRight, ArrowUpRight, SlidersHorizontal, X } from "lucide-react";
+import { Activity, ArrowDownRight, ArrowUpRight, Lock, SlidersHorizontal, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { closePosition } from "@/actions/mt5-commands";
+import { closePosition, modifyPosition } from "@/actions/mt5-commands";
 import { ModifyDialog } from "./modify-dialog";
 import type { LivePosition } from "@/app/[locale]/journal/journal-live-panel";
 
@@ -67,15 +67,28 @@ type Props = {
   currency: string | null;
 };
 
+function isAtBreakeven(p: LivePosition) {
+  return p.priceOpen != null && p.stopLoss != null && Math.abs(p.stopLoss - p.priceOpen) < 1e-8;
+}
+
 export function PositionsTable({ positions, currency }: Props) {
   const [modifyTarget, setModifyTarget] = useState<LivePosition | null>(null);
   const [closing, setClosing] = useState<Set<string>>(new Set());
+  const [movingBE, setMovingBE] = useState<Set<string>>(new Set());
   const [, startTransition] = useTransition();
 
   function handleClose(ticket: string) {
     setClosing((prev) => new Set(prev).add(ticket));
     startTransition(async () => {
       await closePosition(ticket);
+    });
+  }
+
+  function handleBreakeven(p: LivePosition) {
+    if (p.priceOpen == null) return;
+    setMovingBE((prev) => new Set(prev).add(p.ticket));
+    startTransition(async () => {
+      await modifyPosition(p.ticket, p.priceOpen, p.takeProfit);
     });
   }
 
@@ -92,7 +105,7 @@ export function PositionsTable({ positions, currency }: Props) {
         <>
           {/* Desktop / tablet table */}
           <div className="hidden overflow-x-auto md:block">
-            <table className="w-full min-w-205 border-collapse text-sm">
+            <table className="w-full min-w-235 border-collapse text-sm">
               <thead>
                 <tr className="border-t border-border text-xs text-muted-foreground">
                   <th className="px-6 py-3 text-left font-medium">Ticket</th>
@@ -110,6 +123,8 @@ export function PositionsTable({ positions, currency }: Props) {
               <tbody>
                 {positions.map((p) => {
                   const isClosing = closing.has(p.ticket);
+                  const isMovingBE = movingBE.has(p.ticket);
+                  const atBreakeven = isAtBreakeven(p);
                   return (
                     <tr key={p.ticket} className={cn("border-t border-border transition-colors hover:bg-muted/40", isClosing && "opacity-40")}>
                       <td className="px-6 py-4 font-mono text-xs text-muted-foreground">{p.ticket}</td>
@@ -127,6 +142,17 @@ export function PositionsTable({ positions, currency }: Props) {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex justify-end gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleBreakeven(p)}
+                            disabled={isClosing || isMovingBE || atBreakeven || p.priceOpen == null}
+                            className="gap-1.5"
+                            title="Move stop loss to entry price"
+                          >
+                            <Lock className="size-3.5" />
+                            {isMovingBE ? "Queued" : atBreakeven ? "At BE" : "BE"}
+                          </Button>
                           <Button
                             size="sm"
                             variant="outline"
@@ -160,6 +186,8 @@ export function PositionsTable({ positions, currency }: Props) {
           <div className="flex flex-col gap-3 p-3 md:hidden">
             {positions.map((p) => {
               const isClosing = closing.has(p.ticket);
+              const isMovingBE = movingBE.has(p.ticket);
+              const atBreakeven = isAtBreakeven(p);
               return (
                 <div key={p.ticket} className={cn("rounded-xl border border-border bg-background p-4 transition-opacity", isClosing && "opacity-40")}>
                   <div className="flex items-start justify-between gap-3">
@@ -183,6 +211,16 @@ export function PositionsTable({ positions, currency }: Props) {
                   </div>
 
                   <div className="mt-4 flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleBreakeven(p)}
+                      disabled={isClosing || isMovingBE || atBreakeven || p.priceOpen == null}
+                      className="flex-1 gap-1.5"
+                    >
+                      <Lock className="size-3.5" />
+                      {isMovingBE ? "Queued" : atBreakeven ? "At BE" : "BE"}
+                    </Button>
                     <Button
                       size="sm"
                       variant="outline"
