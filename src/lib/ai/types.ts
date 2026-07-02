@@ -126,3 +126,58 @@ export type AiJournalAnalysisResponse = {
   closedTradeCount: number;
   disclaimer: string;
 };
+
+export const aiPortfolioReviewSchema = z.object({
+  overallRiskLevel: z.enum(["low", "medium", "high"]),
+  totalExposurePct: z.number().min(0).max(500),
+  summary: z.string().min(20).max(600),
+  correlationWarnings: z.array(z.string().min(5).max(220)).max(5),
+  positionAdvice: z
+    .array(
+      z.object({
+        ticket: z.string().min(1).max(40),
+        symbol: z.string().min(1).max(20),
+        action: z.enum(["hold", "trim", "close"]),
+        reason: z.string().min(5).max(220),
+      }),
+    )
+    .max(30),
+});
+
+export type AiPortfolioReview = z.infer<typeof aiPortfolioReviewSchema>;
+
+export type AiPortfolioReviewResponse = {
+  review: AiPortfolioReview;
+  generatedAt: string;
+  positionCount: number;
+  disclaimer: string;
+};
+
+/**
+ * LLMs occasionally overflow the string length limits despite prompt
+ * instructions. Truncate before Zod validation so a slightly long
+ * response doesn't hard-fail the whole review.
+ */
+export function sanitizeAiPortfolioReviewPayload(data: unknown): unknown {
+  if (!data || typeof data !== "object") return data;
+  const obj = data as Record<string, unknown>;
+  const sanitized: Record<string, unknown> = { ...obj };
+
+  if (typeof obj.summary === "string") {
+    sanitized.summary = truncate(obj.summary, 600);
+  }
+
+  if (Array.isArray(obj.correlationWarnings)) {
+    sanitized.correlationWarnings = obj.correlationWarnings.map((item) => truncate(item, 220));
+  }
+
+  if (Array.isArray(obj.positionAdvice)) {
+    sanitized.positionAdvice = obj.positionAdvice.map((item) => {
+      if (!item || typeof item !== "object") return item;
+      const advice = item as Record<string, unknown>;
+      return { ...advice, reason: truncate(advice.reason, 220) };
+    });
+  }
+
+  return sanitized;
+}

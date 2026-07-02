@@ -31,6 +31,7 @@ import { closeAllPositions } from "@/actions/mt5-commands";
 import { PositionsTable } from "./positions-table";
 import { PendingOrdersTable } from "./pending-orders-table";
 import { NewOrderDialog } from "./new-order-dialog";
+import { PortfolioReviewPanel } from "./portfolio-review-panel";
 import type { LivePosition, Mt5AccountInfo } from "@/app/[locale]/journal/journal-live-panel";
 import type { LivePendingOrder, Mt5AccountResponse } from "@/app/api/mt5/account/route";
 
@@ -184,6 +185,8 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
           </div>
         </div>
       </div>
+
+      <PortfolioReviewPanel positionCount={positions.length} />
 
       {/* Tabs: positions / pending orders */}
       <Tabs defaultValue="positions" className="gap-4">
