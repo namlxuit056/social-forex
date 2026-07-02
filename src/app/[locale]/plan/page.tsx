@@ -241,30 +241,34 @@ export default async function TradingPlanPage({
   const prefillNotes = parsePrefillText(sp?.notes, 1200);
   const prefillKeyLevels = parsePrefillText(sp?.keyLevels, 500);
   const savedSymbolPlans = parseSymbolPlans(plan?.symbolPlans);
-  const symbolPlans =
-    savedSymbolPlans.length > 0
-      ? savedSymbolPlans
-      : prefillSymbol
-        ? [
-            {
-              id: prefillSymbol,
-              symbol: prefillSymbol,
-              bias: prefillBias ?? "WAIT",
-              keyLevels: prefillKeyLevels,
-              newsToAvoid: prefillNews,
-              notes: prefillNotes,
-            },
-          ]
-        : [];
+  const symbolPlans = prefillSymbol
+    ? (() => {
+        const existingIndex = savedSymbolPlans.findIndex((p) => p.symbol === prefillSymbol);
+        const existing = existingIndex >= 0 ? savedSymbolPlans[existingIndex] : null;
+        const merged: TradingPlanSymbolPlan = {
+          id: existing?.id ?? prefillSymbol,
+          symbol: prefillSymbol,
+          bias: prefillBias ?? existing?.bias ?? "WAIT",
+          keyLevels: prefillKeyLevels ?? existing?.keyLevels ?? null,
+          newsToAvoid: existing?.newsToAvoid ?? null,
+          notes: prefillNotes ?? existing?.notes ?? null,
+        };
+        if (existingIndex >= 0) {
+          return savedSymbolPlans.map((p, i) => (i === existingIndex ? merged : p));
+        }
+        return [...savedSymbolPlans, merged];
+      })()
+    : savedSymbolPlans;
+
+  const savedWatchedSymbols = plan?.watchedSymbols ?? [];
+  const watchedSymbols =
+    prefillSymbol && !savedWatchedSymbols.includes(prefillSymbol)
+      ? [...savedWatchedSymbols, prefillSymbol]
+      : savedWatchedSymbols;
 
   const formValue: TradingPlanFormValue = {
     planDate: selectedDate,
-    watchedSymbols:
-      plan?.watchedSymbols && plan.watchedSymbols.length > 0
-        ? plan.watchedSymbols
-        : prefillSymbol
-          ? [prefillSymbol]
-          : [],
+    watchedSymbols,
     symbolPlans,
     bias: plan?.bias ?? "WAIT",
     chartImageUrls: plan?.chartImageUrls ?? [],
