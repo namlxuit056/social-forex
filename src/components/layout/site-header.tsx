@@ -138,7 +138,7 @@ export async function SiteHeader() {
             <>
               <Link
                 href="/auth/signin"
-                className="inline-flex shrink-0 whitespace-nowrap rounded-md px-2 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground sm:px-2.5 sm:text-sm"
+                className="hidden shrink-0 whitespace-nowrap rounded-md px-2 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground sm:inline-flex sm:px-2.5 sm:text-sm"
               >
                 {tc("signIn")}
               </Link>
@@ -146,7 +146,7 @@ export async function SiteHeader() {
                 href="/auth/register"
                 className={cn(
                   buttonVariants({ size: "sm" }),
-                  "shrink-0 text-xs",
+                  "hidden shrink-0 text-xs sm:inline-flex",
                 )}
               >
                 {tc("signUp")}
