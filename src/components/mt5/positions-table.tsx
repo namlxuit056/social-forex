@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { formatDistanceToNowStrict } from "date-fns";
 import { Activity, ArrowDownRight, ArrowUpRight, Lock, SlidersHorizontal, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { closePosition, modifyPosition } from "@/actions/mt5-commands";
+import { getPipSize } from "@/lib/mt5/pip-size";
 import { ModifyDialog } from "./modify-dialog";
 import type { LivePosition } from "@/app/[locale]/journal/journal-live-panel";
 
@@ -41,6 +43,43 @@ function PL({ value, className }: { value: number | null; className?: string }) 
   );
 }
 
+function estimateRisk(p: LivePosition, equity: number | null) {
+  if (p.priceOpen == null || p.priceCurrent == null || p.stopLoss == null || p.profit == null || equity == null || equity <= 0) {
+    return null;
+  }
+  const isBuy = p.type.toUpperCase().startsWith("BUY");
+  const dir = isBuy ? 1 : -1;
+  const priceDiff = (p.priceCurrent - p.priceOpen) * dir;
+  const pipSize = getPipSize(p.symbol);
+  if (Math.abs(priceDiff) < pipSize * 0.5) return null;
+  const valuePerUnit = p.profit / priceDiff;
+  const slDistancePrice = Math.abs(p.priceOpen - p.stopLoss);
+  const riskAmount = Math.abs(valuePerUnit) * slDistancePrice;
+  const riskPct = (riskAmount / equity) * 100;
+  const slDistancePips = slDistancePrice / pipSize;
+  return { riskAmount, riskPct, slDistancePips };
+}
+
+function RiskCell({ p, equity, currency }: { p: LivePosition; equity: number | null; currency: string | null }) {
+  const risk = estimateRisk(p, equity);
+  if (!risk) {
+    return <span className="font-mono text-xs tabular-nums text-muted-foreground">—</span>;
+  }
+  const tone = risk.riskPct > 5 ? "text-red-500" : risk.riskPct > 2 ? "text-amber-500" : "text-muted-foreground";
+  return (
+    <span className={cn("font-mono text-xs font-semibold tabular-nums", tone)}>
+      -{risk.riskAmount.toFixed(2)} {currency ?? ""} ({risk.riskPct.toFixed(1)}%)
+    </span>
+  );
+}
+
+function openedAgo(openedAt: string | null) {
+  if (!openedAt) return "—";
+  const d = new Date(openedAt);
+  if (!Number.isFinite(d.getTime())) return "—";
+  return `${formatDistanceToNowStrict(d)} ago`;
+}
+
 function Row({ label, value, muted }: { label: string; value: string; muted?: boolean }) {
   return (
     <div className="flex items-center justify-between gap-2">
@@ -65,13 +104,14 @@ function EmptyState() {
 type Props = {
   positions: LivePosition[];
   currency: string | null;
+  equity: number | null;
 };
 
 function isAtBreakeven(p: LivePosition) {
   return p.priceOpen != null && p.stopLoss != null && Math.abs(p.stopLoss - p.priceOpen) < 1e-8;
 }
 
-export function PositionsTable({ positions, currency }: Props) {
+export function PositionsTable({ positions, currency, equity }: Props) {
   const [modifyTarget, setModifyTarget] = useState<LivePosition | null>(null);
   const [closing, setClosing] = useState<Set<string>>(new Set());
   const [movingBE, setMovingBE] = useState<Set<string>>(new Set());
@@ -117,6 +157,8 @@ export function PositionsTable({ positions, currency }: Props) {
                   <th className="px-3 py-3 text-right font-medium">SL</th>
                   <th className="px-3 py-3 text-right font-medium">TP</th>
                   <th className="px-3 py-3 text-right font-medium">P/L {currency ?? ""}</th>
+                  <th className="px-3 py-3 text-right font-medium">Risk</th>
+                  <th className="px-3 py-3 text-right font-medium">Opened</th>
                   <th className="px-6 py-3 text-right font-medium">Actions</th>
                 </tr>
               </thead>
@@ -139,6 +181,12 @@ export function PositionsTable({ positions, currency }: Props) {
                       <td className="px-3 py-4 text-right font-mono tabular-nums text-muted-foreground">{fmt(p.takeProfit)}</td>
                       <td className="px-3 py-4 text-right">
                         <PL value={p.profit} />
+                      </td>
+                      <td className="px-3 py-4 text-right">
+                        <RiskCell p={p} equity={equity} currency={currency} />
+                      </td>
+                      <td className="px-3 py-4 text-right font-mono text-xs tabular-nums text-muted-foreground whitespace-nowrap">
+                        {openedAgo(p.openedAt)}
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex justify-end gap-2">
@@ -188,6 +236,7 @@ export function PositionsTable({ positions, currency }: Props) {
               const isClosing = closing.has(p.ticket);
               const isMovingBE = movingBE.has(p.ticket);
               const atBreakeven = isAtBreakeven(p);
+              const risk = estimateRisk(p, equity);
               return (
                 <div key={p.ticket} className={cn("rounded-xl border border-border bg-background p-4 transition-opacity", isClosing && "opacity-40")}>
                   <div className="flex items-start justify-between gap-3">
@@ -208,6 +257,8 @@ export function PositionsTable({ positions, currency }: Props) {
                     <Row label="Current" value={fmt(p.priceCurrent)} />
                     <Row label="SL" value={fmt(p.stopLoss)} muted />
                     <Row label="TP" value={fmt(p.takeProfit)} muted />
+                    <Row label="Opened" value={openedAgo(p.openedAt)} muted />
+                    <Row label="Risk" value={risk ? `-${risk.riskAmount.toFixed(2)} (${risk.riskPct.toFixed(1)}%)` : "—"} muted />
                   </div>
 
                   <div className="mt-4 flex gap-2">

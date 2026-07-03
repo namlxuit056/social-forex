@@ -10,6 +10,13 @@ import type { LivePendingOrder } from "@/app/api/mt5/account/route";
 
 export const dynamic = "force-dynamic";
 
+function parseMql5Time(v: unknown): string | null {
+  if (typeof v !== "string" || !v) return null;
+  const iso = v.replace(/^(\d{4})\.(\d{2})\.(\d{2})/, "$1-$2-$3").replace(" ", "T");
+  const d = new Date(iso);
+  return Number.isFinite(d.getTime()) ? d.toISOString() : null;
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -68,6 +75,7 @@ export default async function PositionsPage({
         ticket, symbol, type,
         volume: num(r.volume), priceOpen: num(r.priceOpen), priceCurrent: num(r.priceCurrent),
         stopLoss: num(r.stopLoss), takeProfit: num(r.takeProfit), profit: num(r.profit),
+        swap: num(r.swap), openedAt: parseMql5Time(r.openedAt),
       }];
     });
   }

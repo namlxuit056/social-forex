@@ -28,6 +28,13 @@ export async function generateMetadata({
 
 export const dynamic = "force-dynamic";
 
+function parseMql5Time(v: unknown): string | null {
+  if (typeof v !== "string" || !v) return null;
+  const iso = v.replace(/^(\d{4})\.(\d{2})\.(\d{2})/, "$1-$2-$3").replace(" ", "T");
+  const d = new Date(iso);
+  return Number.isFinite(d.getTime()) ? d.toISOString() : null;
+}
+
 export default async function JournalPage({
   params,
   searchParams,
@@ -135,6 +142,8 @@ export default async function JournalPage({
         stopLoss: num(p.stopLoss),
         takeProfit: num(p.takeProfit),
         profit: num(p.profit),
+        swap: num(p.swap),
+        openedAt: parseMql5Time(p.openedAt),
       });
     }
   }

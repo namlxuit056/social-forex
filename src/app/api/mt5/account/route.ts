@@ -3,6 +3,13 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import type { LivePosition, Mt5AccountInfo } from "@/app/[locale]/journal/journal-live-panel";
 
+function parseMql5Time(v: unknown): string | null {
+  if (typeof v !== "string" || !v) return null;
+  const iso = v.replace(/^(\d{4})\.(\d{2})\.(\d{2})/, "$1-$2-$3").replace(" ", "T");
+  const d = new Date(iso);
+  return Number.isFinite(d.getTime()) ? d.toISOString() : null;
+}
+
 export type LivePendingOrder = {
   ticket: string;
   symbol: string;
@@ -67,6 +74,8 @@ export async function GET() {
         stopLoss: num(p.stopLoss),
         takeProfit: num(p.takeProfit),
         profit: num(p.profit),
+        swap: num(p.swap),
+        openedAt: parseMql5Time(p.openedAt),
       });
     }
   }
