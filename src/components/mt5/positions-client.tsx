@@ -27,7 +27,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
-import { closeAllPositions } from "@/actions/mt5-commands";
+import { closeAllPositions, placeOrder } from "@/actions/mt5-commands";
 import { PositionsTable } from "./positions-table";
 import { PendingOrdersTable } from "./pending-orders-table";
 import { NewOrderDialog } from "./new-order-dialog";
@@ -83,6 +83,8 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
   const [orders, setOrders] = useState<LivePendingOrder[]>(initialOrders);
   const [spinning, setSpinning] = useState(false);
   const [closeAllPending, startCloseAll] = useTransition();
+  const [quickOrderPending, startQuickOrder] = useTransition();
+  const [quickOrderSide, setQuickOrderSide] = useState<"BUY" | "SELL" | null>(null);
 
   const applySnapshot = useCallback((data: Mt5AccountResponse) => {
     setAccount(data.account);
@@ -153,6 +155,21 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
     });
   }
 
+  function handleQuickGoldOrder(orderType: "BUY" | "SELL") {
+    setQuickOrderSide(orderType);
+    startQuickOrder(async () => {
+      await placeOrder({
+        symbol: "XAUUSD",
+        orderType,
+        volume: 0.02,
+        price: null,
+        stopLoss: null,
+        takeProfit: null,
+      });
+      setQuickOrderSide(null);
+    });
+  }
+
   const totalPL = positions.reduce((sum, p) => sum + (p.profit ?? 0), 0);
   const currency = account?.currency ?? "";
   const plTone = totalPL > 0 ? "profit" : totalPL < 0 ? "loss" : "default";
@@ -185,6 +202,24 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
             >
               <RefreshCw className={cn("size-4", spinning && "animate-spin")} />
             </Button> */}
+            <Button
+              variant="outline"
+              disabled={quickOrderPending}
+              onClick={() => handleQuickGoldOrder("BUY")}
+              className="gap-1.5 border-emerald-500/50 text-emerald-600 hover:bg-emerald-500/10 hover:text-emerald-600 dark:text-emerald-400"
+            >
+              <TrendingUp className="size-4" />
+              {quickOrderPending && quickOrderSide === "BUY" ? "Queuing…" : "Buy 0.02 XAU"}
+            </Button>
+            <Button
+              variant="outline"
+              disabled={quickOrderPending}
+              onClick={() => handleQuickGoldOrder("SELL")}
+              className="gap-1.5 border-red-500/50 text-red-600 hover:bg-red-500/10 hover:text-red-600 dark:text-red-400"
+            >
+              <TrendingDown className="size-4" />
+              {quickOrderPending && quickOrderSide === "SELL" ? "Queuing…" : "Sell 0.02 XAU"}
+            </Button>
             <NewOrderDialog />
             <AlertDialog>
               <AlertDialogTrigger
