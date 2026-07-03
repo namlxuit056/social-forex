@@ -192,7 +192,7 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
             />
           </div>
 
-          <div className="flex items-center gap-2 border-t border-border pt-4 lg:border-t-0 lg:pt-0">
+          <div className="grid grid-cols-2 gap-2 border-t border-border pt-4 sm:flex sm:flex-wrap sm:items-center lg:flex-nowrap lg:border-t-0 lg:pt-0">
             {/* <Button
               variant="outline"
               size="icon"
