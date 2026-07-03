@@ -6,13 +6,14 @@
 //| It never opens new positions on its own.                          |
 //+------------------------------------------------------------------+
 #property copyright "Social Forex"
-#property version   "1.31"
+#property version   "1.32"
 #property strict
 
 input string BridgeEndpoint   = "https://www.toolforex.xyz/api/mt5/bridge";
 input string CommandsEndpoint = "https://www.toolforex.xyz/api/mt5/commands";
 input string BridgeToken      = "";
-input int    HeartbeatSeconds = 30;
+input int    HeartbeatSeconds = 5;     // fallback snapshot push when no ticks arrive
+input int    MinSnapshotIntervalMs = 3000; // fastest we'll re-push account/positions even on rapid ticks
 input int    CommandPollSeconds = 1;   // fallback poll when no ticks arrive (weekends, quiet symbol)
 input int    MinCommandCheckIntervalMs = 500; // fastest we'll re-check commands even on rapid ticks
 input int    SlippagePoints   = 30;
@@ -21,6 +22,7 @@ input int    RetryAttempts    = 3;    // attempts per command before giving up
 input int    RetryDelayMs     = 300;  // delay between attempts, price/state is re-read each retry
 
 ulong last_command_check_ms = 0;
+ulong last_snapshot_check_ms = 0;
 
 // Lets both OnTick and the OnTimer fallback share one debounce so a price tick
 // (the moments latency matters most) can trigger a check well before the
@@ -31,6 +33,20 @@ bool ShouldCheckCommands()
    if(now - last_command_check_ms < (ulong)MathMax(0, MinCommandCheckIntervalMs))
       return false;
    last_command_check_ms = now;
+   return true;
+}
+
+// Same idea for the account/positions push: the server only does the heavy
+// signal/journal sync when trades actually changed (see tradeHash in
+// src/app/api/mt5/bridge/route.ts), so pushing more often than the fixed
+// HeartbeatSeconds costs little and lets the dashboard reflect price/profit
+// moves without waiting up to 30s.
+bool ShouldPushSnapshot()
+{
+   ulong now = GetTickCount64();
+   if(now - last_snapshot_check_ms < (ulong)MathMax(0, MinSnapshotIntervalMs))
+      return false;
+   last_snapshot_check_ms = now;
    return true;
 }
 
@@ -862,10 +878,11 @@ void OnDeinit(const int reason)
 void OnTimer()
 {
    datetime now = TimeCurrent();
-   if(now - last_send_at >= MathMax(5, HeartbeatSeconds))
+   if(now - last_send_at >= MathMax(1, HeartbeatSeconds))
    {
       last_send_at = now;
-      SendSnapshot();
+      if(ShouldPushSnapshot())
+         SendSnapshot();
    }
    if(now - last_poll_at >= MathMax(1, CommandPollSeconds))
    {
@@ -879,7 +896,10 @@ void OnTick()
 {
    // Reacts to price movement on the chart's own symbol immediately instead of
    // waiting for the next timer tick - this is exactly when a queued close/modify
-   // is most at risk of executing against a stale price.
+   // is most at risk of executing against a stale price, and when the dashboard's
+   // displayed price/profit is most likely to be visibly out of date.
    if(ShouldCheckCommands())
       FetchAndExecuteCommands();
+   if(ShouldPushSnapshot())
+      SendSnapshot();
 }
