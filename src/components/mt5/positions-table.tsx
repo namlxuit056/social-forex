@@ -312,7 +312,9 @@ export function PositionsTable({ positions, currency, equity }: Props) {
             <>
               <Select value={symbolFilter} onValueChange={(v) => v && setSymbolFilter(v)}>
                 <SelectTrigger size="sm">
-                  <SelectValue placeholder="All symbols" />
+                  <SelectValue placeholder="All symbols">
+                    {(v: string) => (v === "all" ? "All symbols" : v)}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All symbols</SelectItem>
@@ -325,7 +327,9 @@ export function PositionsTable({ positions, currency, equity }: Props) {
               </Select>
               <Select value={sideFilter} onValueChange={(v) => v && setSideFilter(v as "all" | "buy" | "sell")}>
                 <SelectTrigger size="sm">
-                  <SelectValue placeholder="All" />
+                  <SelectValue placeholder="All">
+                    {(v: string) => (v === "buy" ? "Buy" : v === "sell" ? "Sell" : "All")}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All</SelectItem>

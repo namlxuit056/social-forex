@@ -68,7 +68,7 @@ export function LockProfitMenu({ position: p, disabled, queued, onLock, classNam
         <ChevronDown className="size-3.5" />
       </Button>
       {open && (
-        <div className="absolute right-0 z-20 mt-1 w-48 rounded-lg border border-border bg-popover p-1 text-sm shadow-md">
+        <div className="absolute left-0 z-20 mt-1 w-44 rounded-lg border border-border bg-popover p-1 text-sm shadow-md md:left-auto md:right-0 md:w-48">
           <button
             type="button"
             onClick={moveToBreakeven}
