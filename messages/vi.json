@@ -1218,7 +1218,8 @@
     "screenerAlert": "Cảnh báo screener đã kích hoạt",
     "streakReminder": "Đừng quên ghi nhật ký / lập kế hoạch hôm nay!",
     "priceAlert": "Cảnh báo giá đã kích hoạt",
-    "journalReview": "Báo cáo giao dịch tuần đã sẵn sàng"
+    "journalReview": "Báo cáo giao dịch tuần đã sẵn sàng",
+    "mt5AutoClose": "Đã tự động đóng tất cả lệnh trước giờ thị trường đóng cửa"
   },
   "auth": {
     "signInTitle": "Đăng nhập",

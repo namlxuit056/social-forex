@@ -1,5 +1,6 @@
 import { auth } from "@/auth";
 import { getMt5AccountSnapshot } from "@/lib/mt5/account-snapshot";
+import { maybeTriggerWeekendAutoClose } from "@/lib/mt5/auto-close";
 
 export const runtime = "nodejs";
 
@@ -24,13 +25,21 @@ export async function GET(): Promise<Response> {
       async function push() {
         try {
           const snapshot = await getMt5AccountSnapshot(userId);
-          if (!snapshot) return;
-          const payload = JSON.stringify(snapshot);
-          if (payload === lastPayload) return;
-          lastPayload = payload;
-          controller.enqueue(encoder.encode(`data: ${payload}\n\n`));
+          if (snapshot) {
+            const payload = JSON.stringify(snapshot);
+            if (payload !== lastPayload) {
+              lastPayload = payload;
+              controller.enqueue(encoder.encode(`data: ${payload}\n\n`));
+            }
+          }
         } catch {
           // keep the stream alive even if a single poll fails
+        }
+
+        try {
+          await maybeTriggerWeekendAutoClose(userId);
+        } catch {
+          // never let the auto-close check break the stream
         }
       }
 

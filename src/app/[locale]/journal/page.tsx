@@ -158,6 +158,7 @@ export default async function JournalPage({
         currency: mt5Connection.accountCurrency,
         openPositions: mt5Connection.openPositions,
         lastSeenAt: mt5Connection.lastSeenAt?.toISOString() ?? null,
+        autoCloseBeforeWeekend: mt5Connection.autoCloseBeforeWeekend,
       }
     : null;
 

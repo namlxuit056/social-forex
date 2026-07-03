@@ -1218,7 +1218,8 @@
     "screenerAlert": "Screener alert triggered",
     "streakReminder": "Don't forget to write your journal / plan for today!",
     "priceAlert": "Price alert triggered",
-    "journalReview": "Weekly trading report is ready"
+    "journalReview": "Weekly trading report is ready",
+    "mt5AutoClose": "All positions were auto-closed before the market close"
   },
   "auth": {
     "signInTitle": "Sign in",

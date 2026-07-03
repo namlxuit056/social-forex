@@ -47,6 +47,7 @@ export default async function PositionsPage({
       lastSeenAt: true,
       lastPositions: true,
       lastOrders: true,
+      autoCloseBeforeWeekend: true,
     },
   });
 
@@ -59,6 +60,7 @@ export default async function PositionsPage({
         currency: connection.accountCurrency,
         openPositions: connection.openPositions,
         lastSeenAt: connection.lastSeenAt?.toISOString() ?? null,
+        autoCloseBeforeWeekend: connection.autoCloseBeforeWeekend,
       }
     : null;
 

@@ -27,7 +27,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
-import { closeAllPositions, placeOrder } from "@/actions/mt5-commands";
+import { closeAllPositions, placeOrder, setMt5AutoCloseBeforeWeekend } from "@/actions/mt5-commands";
 import { PositionsTable } from "./positions-table";
 import { PendingOrdersTable } from "./pending-orders-table";
 import { NewOrderDialog } from "./new-order-dialog";
@@ -85,6 +85,7 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
   const [closeAllPending, startCloseAll] = useTransition();
   const [quickOrderPending, startQuickOrder] = useTransition();
   const [quickOrderSide, setQuickOrderSide] = useState<"BUY" | "SELL" | null>(null);
+  const [autoClosePending, startAutoClose] = useTransition();
 
   const applySnapshot = useCallback((data: Mt5AccountResponse) => {
     setAccount(data.account);
@@ -152,6 +153,14 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
   function handleCloseAll() {
     startCloseAll(async () => {
       await closeAllPositions();
+    });
+  }
+
+  function handleToggleAutoClose() {
+    const next = !account?.autoCloseBeforeWeekend;
+    setAccount((prev) => (prev ? { ...prev, autoCloseBeforeWeekend: next } : prev));
+    startAutoClose(async () => {
+      await setMt5AutoCloseBeforeWeekend(next);
     });
   }
 
@@ -253,6 +262,34 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
               </AlertDialogContent>
             </AlertDialog>
           </div>
+        </div>
+
+        <div className="mt-4 flex items-center justify-between gap-3 border-t border-border pt-4">
+          <div>
+            <p className="text-sm font-medium text-foreground">Auto-close before weekend</p>
+            <p className="text-xs text-muted-foreground">
+              Automatically close all positions 1 hour before the forex market closes on Friday.
+              Only works while this page is open at that time.
+            </p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={account?.autoCloseBeforeWeekend ?? false}
+            disabled={autoClosePending || !account}
+            onClick={handleToggleAutoClose}
+            className={cn(
+              "relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors focus:outline-none disabled:opacity-50",
+              account?.autoCloseBeforeWeekend ? "bg-primary" : "bg-muted",
+            )}
+          >
+            <span
+              className={cn(
+                "pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-md transition-transform",
+                account?.autoCloseBeforeWeekend ? "translate-x-5" : "translate-x-0",
+              )}
+            />
+          </button>
         </div>
       </div>
 

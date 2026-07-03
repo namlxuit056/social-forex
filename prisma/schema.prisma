@@ -265,6 +265,7 @@ enum NotificationKind {
   PRICE_ALERT
   JOURNAL_REVIEW
   SCREENER_ALERT
+  MT5_AUTO_CLOSE
 }
 
 model Notification {
@@ -708,6 +709,8 @@ model Mt5Connection {
   lastTradeHash   String?
   lastSnapshotAt  DateTime?
   lastError       String?
+  autoCloseBeforeWeekend    Boolean   @default(false)
+  lastAutoCloseTriggeredAt  DateTime?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { commandExpiresAt } from "@/lib/mt5/command-ttl";
+import { queueCloseAll } from "@/lib/mt5/commands";
 
 async function getActiveConnection(userId: string) {
   return prisma.mt5Connection.findFirst({
@@ -200,12 +201,26 @@ export async function closeAllPositions(): Promise<{ error?: string }> {
   const connection = await getActiveConnection(session.user.id);
   if (!connection) return { error: "no_connection" };
 
-  await prisma.mt5Command.create({
-    data: {
-      connectionId: connection.id,
-      type: "CLOSE_ALL",
-      expiresAt: commandExpiresAt("CLOSE_ALL"),
-    },
+  await queueCloseAll(connection.id);
+
+  return {};
+}
+
+const autoCloseSchema = z.object({ enabled: z.boolean() });
+
+export async function setMt5AutoCloseBeforeWeekend(enabled: boolean): Promise<{ error?: string }> {
+  const session = await auth();
+  if (!session?.user?.id) redirect("/auth/signin");
+
+  const parsed = autoCloseSchema.safeParse({ enabled });
+  if (!parsed.success) return { error: "invalid_params" };
+
+  const connection = await getActiveConnection(session.user.id);
+  if (!connection) return { error: "no_connection" };
+
+  await prisma.mt5Connection.update({
+    where: { id: connection.id },
+    data: { autoCloseBeforeWeekend: parsed.data.enabled },
   });
 
   return {};
