@@ -756,21 +756,23 @@ model Mt5SignalLink {
 }
 
 model Mt5Command {
-  id           String    @id @default(cuid())
-  connectionId String
-  type         String    // CLOSE_POSITION | PARTIAL_CLOSE | MODIFY_POSITION | CANCEL_ORDER | MODIFY_ORDER | CLOSE_ALL | PLACE_BUY | PLACE_SELL | PLACE_BUY_LIMIT | PLACE_SELL_LIMIT | PLACE_BUY_STOP | PLACE_SELL_STOP
-  ticket       String?   // null for CLOSE_ALL and PLACE_*
-  symbol       String?   // PLACE_* only
-  volume       Float?    // PLACE_* and PARTIAL_CLOSE only
-  price        Float?    // PLACE_*_LIMIT / PLACE_*_STOP only
-  stopLoss     Float?
-  takeProfit   Float?
-  status       String    @default("PENDING")
-  // PENDING | SENT | DONE | ERROR
-  errorMsg     String?
-  createdAt    DateTime  @default(now())
-  sentAt       DateTime?
-  doneAt       DateTime?
+  id                String    @id @default(cuid())
+  connectionId      String
+  type              String    // CLOSE_POSITION | PARTIAL_CLOSE | MODIFY_POSITION | TRAIL_UPDATE | CANCEL_ORDER | MODIFY_ORDER | CLOSE_ALL | PLACE_BUY | PLACE_SELL | PLACE_BUY_LIMIT | PLACE_SELL_LIMIT | PLACE_BUY_STOP | PLACE_SELL_STOP
+  ticket            String?   // null for CLOSE_ALL and PLACE_*
+  symbol            String?   // PLACE_* only
+  volume            Float?    // PLACE_* and PARTIAL_CLOSE only
+  price             Float?    // PLACE_*_LIMIT / PLACE_*_STOP only
+  stopLoss          Float?
+  takeProfit        Float?
+  trailDistancePips Float?    // TRAIL_UPDATE only - EA recomputes SL from live price using this distance
+  status            String    @default("PENDING")
+  // PENDING | SENT | DONE | ERROR | EXPIRED
+  errorMsg          String?
+  createdAt         DateTime  @default(now())
+  sentAt            DateTime?
+  doneAt            DateTime?
+  expiresAt         DateTime? // price-sensitive commands are marked EXPIRED instead of dispatched once stale
 
   connection Mt5Connection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
 

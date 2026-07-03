@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { commandExpiresAt } from "@/lib/mt5/command-ttl";
 
 async function getActiveConnection(userId: string) {
   return prisma.mt5Connection.findFirst({
@@ -43,6 +44,7 @@ export async function closePosition(ticket: string): Promise<{ error?: string }>
       connectionId: connection.id,
       type: "CLOSE_POSITION",
       ticket,
+      expiresAt: commandExpiresAt("CLOSE_POSITION"),
     },
   });
 
@@ -70,6 +72,7 @@ export async function partialClosePosition(ticket: string, volume: number): Prom
       type: "PARTIAL_CLOSE",
       ticket: parsed.data.ticket,
       volume: parsed.data.volume,
+      expiresAt: commandExpiresAt("PARTIAL_CLOSE"),
     },
   });
 
@@ -88,6 +91,7 @@ export async function cancelOrder(ticket: string): Promise<{ error?: string }> {
       connectionId: connection.id,
       type: "CANCEL_ORDER",
       ticket,
+      expiresAt: commandExpiresAt("CANCEL_ORDER"),
     },
   });
 
@@ -115,6 +119,7 @@ export async function modifyPosition(
       ticket: parsed.data.ticket,
       stopLoss: parsed.data.stopLoss ?? null,
       takeProfit: parsed.data.takeProfit ?? null,
+      expiresAt: commandExpiresAt("MODIFY_POSITION"),
     },
   });
 
@@ -142,6 +147,7 @@ export async function modifyOrder(
       ticket: parsed.data.ticket,
       stopLoss: parsed.data.stopLoss ?? null,
       takeProfit: parsed.data.takeProfit ?? null,
+      expiresAt: commandExpiresAt("MODIFY_ORDER"),
     },
   });
 
@@ -170,15 +176,17 @@ export async function placeOrder(input: {
   const connection = await getActiveConnection(session.user.id);
   if (!connection) return { error: "no_connection" };
 
+  const placeType = `PLACE_${parsed.data.orderType}`;
   await prisma.mt5Command.create({
     data: {
       connectionId: connection.id,
-      type: `PLACE_${parsed.data.orderType}`,
+      type: placeType,
       symbol: parsed.data.symbol,
       volume: parsed.data.volume,
       price: isPending ? parsed.data.price : null,
       stopLoss: parsed.data.stopLoss ?? null,
       takeProfit: parsed.data.takeProfit ?? null,
+      expiresAt: commandExpiresAt(placeType),
     },
   });
 
@@ -196,6 +204,7 @@ export async function closeAllPositions(): Promise<{ error?: string }> {
     data: {
       connectionId: connection.id,
       type: "CLOSE_ALL",
+      expiresAt: commandExpiresAt("CLOSE_ALL"),
     },
   });
 

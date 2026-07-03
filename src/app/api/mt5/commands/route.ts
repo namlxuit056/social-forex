@@ -24,12 +24,30 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
+  const now = new Date();
+
+  // Stale price-sensitive commands must not be dispatched with an outdated target price/SL.
+  await prisma.mt5Command.updateMany({
+    where: { connectionId: connection.id, status: "PENDING", expiresAt: { lt: now } },
+    data: { status: "EXPIRED", errorMsg: "expired before dispatch (stale price)", doneAt: now },
+  });
+
   // Fetch PENDING commands, mark them SENT atomically
   const pending = await prisma.mt5Command.findMany({
     where: { connectionId: connection.id, status: "PENDING" },
     orderBy: { createdAt: "asc" },
     take: 20,
-    select: { id: true, type: true, ticket: true, symbol: true, volume: true, price: true, stopLoss: true, takeProfit: true },
+    select: {
+      id: true,
+      type: true,
+      ticket: true,
+      symbol: true,
+      volume: true,
+      price: true,
+      stopLoss: true,
+      takeProfit: true,
+      trailDistancePips: true,
+    },
   });
 
   if (pending.length > 0) {

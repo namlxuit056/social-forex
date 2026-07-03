@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getPipSize } from "@/lib/mt5/pip-size";
+import { commandExpiresAt } from "@/lib/mt5/command-ttl";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -71,13 +72,30 @@ export async function GET(req: NextRequest) {
 
       if (!shouldUpdate) continue;
 
+      // Avoid stacking duplicate trail updates for the same ticket while the EA
+      // is still catching up on a previous one (common during fast-moving markets).
+      const alreadyQueued = await prisma.mt5Command.findFirst({
+        where: {
+          connectionId: config.connectionId,
+          ticket: config.ticket,
+          type: "TRAIL_UPDATE",
+          status: { in: ["PENDING", "SENT"] },
+        },
+        select: { id: true },
+      });
+      if (alreadyQueued) continue;
+
+      // The final SL is recomputed by the EA from the live price at execution time
+      // (see ModifyTrailingStopByTicket in SocialForexBridge.mq5) rather than the
+      // stale snapshot price used here, which only decides whether a trail is due.
       await prisma.mt5Command.create({
         data: {
           connectionId: config.connectionId,
-          type: "MODIFY_POSITION",
+          type: "TRAIL_UPDATE",
           ticket: config.ticket,
-          stopLoss: candidateSl,
+          trailDistancePips: config.distancePips,
           takeProfit,
+          expiresAt: commandExpiresAt("TRAIL_UPDATE"),
         },
       });
       updated += 1;

@@ -6,7 +6,7 @@
 //| It never opens new positions on its own.                          |
 //+------------------------------------------------------------------+
 #property copyright "Social Forex"
-#property version   "1.20"
+#property version   "1.30"
 #property strict
 
 input string BridgeEndpoint   = "https://www.toolforex.xyz/api/mt5/bridge";
@@ -16,6 +16,39 @@ input int    HeartbeatSeconds = 30;
 input int    CommandPollSeconds = 3;
 input int    SlippagePoints   = 30;
 input int    MagicNumber      = 990001;
+input int    RetryAttempts    = 3;    // attempts per command before giving up
+input int    RetryDelayMs     = 300;  // delay between attempts, price/state is re-read each retry
+
+bool IsRetryableRetcode(uint rc)
+{
+   return rc == TRADE_RETCODE_REQUOTE
+       || rc == TRADE_RETCODE_PRICE_CHANGED
+       || rc == TRADE_RETCODE_PRICE_OFF
+       || rc == TRADE_RETCODE_TIMEOUT
+       || rc == TRADE_RETCODE_CONNECTION
+       || rc == TRADE_RETCODE_TOO_MANY_REQUESTS;
+}
+
+// Mirrors src/lib/mt5/pip-size.ts so trail distances match what the dashboard shows.
+double GetPipSize(string symbol)
+{
+   string s = symbol;
+   StringToUpper(s);
+   if(StringFind(s, "JPY") >= 0)
+      return 0.01;
+   if(StringFind(s, "XAU") == 0)
+      return 0.1;
+   if(StringFind(s, "XAG") == 0)
+      return 0.01;
+   if(StringFind(s, "US30") == 0 || StringFind(s, "NAS100") == 0 || StringFind(s, "SPX500") == 0 ||
+      StringFind(s, "GER40") == 0 || StringFind(s, "UK100") == 0 || StringFind(s, "JP225") == 0 ||
+      StringFind(s, "US500") == 0 || StringFind(s, "GER30") == 0 || StringFind(s, "AUS200") == 0 ||
+      StringFind(s, "FRA40") == 0)
+      return 1.0;
+   if(StringFind(s, "BTC") >= 0 || StringFind(s, "ETH") >= 0 || StringFind(s, "XRP") >= 0 || StringFind(s, "LTC") >= 0)
+      return 1.0;
+   return 0.0001;
+}
 
 datetime last_send_at = 0;
 datetime last_poll_at = 0;
@@ -351,121 +384,188 @@ string ExtractCommandsArray(string body)
 //+------------------------------------------------------------------+
 bool ClosePositionByTicket(ulong ticket, string &errMsg, double closeVolume = 0)
 {
-   if(!PositionSelectByTicket(ticket))
+   for(int attempt = 1; attempt <= RetryAttempts; attempt++)
    {
-      errMsg = "position not found";
-      return false;
-   }
-   string symbol    = PositionGetString(POSITION_SYMBOL);
-   double volume    = PositionGetDouble(POSITION_VOLUME);
-   double reqVolume = (closeVolume > 0 && closeVolume < volume) ? closeVolume : volume;
-   long   posType   = PositionGetInteger(POSITION_TYPE);
-   bool   isBuy     = (posType == POSITION_TYPE_BUY);
-   double price     = isBuy ? SymbolInfoDouble(symbol, SYMBOL_BID) : SymbolInfoDouble(symbol, SYMBOL_ASK);
+      if(!PositionSelectByTicket(ticket))
+      {
+         errMsg = "position not found";
+         return false;
+      }
+      string symbol    = PositionGetString(POSITION_SYMBOL);
+      double volume    = PositionGetDouble(POSITION_VOLUME);
+      double reqVolume = (closeVolume > 0 && closeVolume < volume) ? closeVolume : volume;
+      long   posType   = PositionGetInteger(POSITION_TYPE);
+      bool   isBuy     = (posType == POSITION_TYPE_BUY);
+      double price     = isBuy ? SymbolInfoDouble(symbol, SYMBOL_BID) : SymbolInfoDouble(symbol, SYMBOL_ASK);
 
-   MqlTradeRequest req = {};
-   MqlTradeResult  res = {};
-   req.action    = TRADE_ACTION_DEAL;
-   req.position  = ticket;
-   req.symbol    = symbol;
-   req.volume    = reqVolume;
-   req.type      = isBuy ? ORDER_TYPE_SELL : ORDER_TYPE_BUY;
-   req.price     = price;
-   req.deviation = SlippagePoints;
-   req.magic     = MagicNumber;
-   req.comment   = reqVolume < volume ? "SF:CmdPartialClose" : "SF:CmdClose";
+      MqlTradeRequest req = {};
+      MqlTradeResult  res = {};
+      req.action    = TRADE_ACTION_DEAL;
+      req.position  = ticket;
+      req.symbol    = symbol;
+      req.volume    = reqVolume;
+      req.type      = isBuy ? ORDER_TYPE_SELL : ORDER_TYPE_BUY;
+      req.price     = price;
+      req.deviation = SlippagePoints;
+      req.magic     = MagicNumber;
+      req.comment   = reqVolume < volume ? "SF:CmdPartialClose" : "SF:CmdClose";
 
-   if(!OrderSend(req, res) || (res.retcode != TRADE_RETCODE_DONE && res.retcode != TRADE_RETCODE_DONE_PARTIAL))
-   {
+      if(OrderSend(req, res) && (res.retcode == TRADE_RETCODE_DONE || res.retcode == TRADE_RETCODE_DONE_PARTIAL))
+      {
+         Print("SocialForexBridge: Closed ticket=", ticket, " volume=", reqVolume, " attempt=", attempt);
+         return true;
+      }
+
       errMsg = "err=" + IntegerToString(GetLastError()) + " rc=" + IntegerToString(res.retcode);
-      Print("SocialForexBridge: ClosePosition failed ticket=", ticket, " ", errMsg);
-      return false;
+      Print("SocialForexBridge: ClosePosition failed ticket=", ticket, " ", errMsg, " attempt=", attempt);
+
+      if(attempt < RetryAttempts && IsRetryableRetcode(res.retcode))
+         Sleep(RetryDelayMs);
+      else
+         return false;
    }
-   Print("SocialForexBridge: Closed ticket=", ticket, " volume=", reqVolume);
-   return true;
+   return false;
 }
 
 bool ModifyPositionByTicket(ulong ticket, double sl, double tp, string &errMsg)
 {
+   for(int attempt = 1; attempt <= RetryAttempts; attempt++)
+   {
+      if(!PositionSelectByTicket(ticket))
+      {
+         errMsg = "position not found";
+         return false;
+      }
+      string symbol = PositionGetString(POSITION_SYMBOL);
+      int digits    = (int)SymbolInfoInteger(symbol, SYMBOL_DIGITS);
+      double safeSL = sl > 0 ? NormalizeDouble(sl, digits) : 0;
+      double safeTP = tp > 0 ? NormalizeDouble(tp, digits) : 0;
+
+      MqlTradeRequest req = {};
+      MqlTradeResult  res = {};
+      req.action   = TRADE_ACTION_SLTP;
+      req.position = ticket;
+      req.symbol   = symbol;
+      req.sl       = safeSL;
+      req.tp       = safeTP;
+
+      if(OrderSend(req, res) && (res.retcode == TRADE_RETCODE_DONE || res.retcode == TRADE_RETCODE_DONE_PARTIAL))
+      {
+         Print("SocialForexBridge: Modified ticket=", ticket, " SL=", safeSL, " TP=", safeTP, " attempt=", attempt);
+         return true;
+      }
+
+      errMsg = "err=" + IntegerToString(GetLastError()) + " rc=" + IntegerToString(res.retcode);
+      Print("SocialForexBridge: ModifyPosition failed ticket=", ticket, " ", errMsg, " attempt=", attempt);
+
+      if(attempt < RetryAttempts && IsRetryableRetcode(res.retcode))
+         Sleep(RetryDelayMs);
+      else
+         return false;
+   }
+   return false;
+}
+
+bool ModifyTrailingStopByTicket(ulong ticket, double distancePips, string &errMsg)
+{
    if(!PositionSelectByTicket(ticket))
    {
       errMsg = "position not found";
       return false;
    }
-   string symbol = PositionGetString(POSITION_SYMBOL);
-   int digits    = (int)SymbolInfoInteger(symbol, SYMBOL_DIGITS);
-   double safeSL = sl > 0 ? NormalizeDouble(sl, digits) : 0;
-   double safeTP = tp > 0 ? NormalizeDouble(tp, digits) : 0;
+   string symbol       = PositionGetString(POSITION_SYMBOL);
+   long   posType      = PositionGetInteger(POSITION_TYPE);
+   bool   isBuy        = (posType == POSITION_TYPE_BUY);
+   double currentSL     = PositionGetDouble(POSITION_SL);
+   double currentTP     = PositionGetDouble(POSITION_TP);
+   double pipSize       = GetPipSize(symbol);
+   double distance      = distancePips * pipSize;
+   double price         = isBuy ? SymbolInfoDouble(symbol, SYMBOL_BID) : SymbolInfoDouble(symbol, SYMBOL_ASK);
+   double candidateSL    = isBuy ? price - distance : price + distance;
 
-   MqlTradeRequest req = {};
-   MqlTradeResult  res = {};
-   req.action   = TRADE_ACTION_SLTP;
-   req.position = ticket;
-   req.symbol   = symbol;
-   req.sl       = safeSL;
-   req.tp       = safeTP;
+   bool shouldUpdate = isBuy
+      ? (currentSL <= 0 || candidateSL > currentSL + pipSize * 0.5)
+      : (currentSL <= 0 || candidateSL < currentSL - pipSize * 0.5);
 
-   if(!OrderSend(req, res) || (res.retcode != TRADE_RETCODE_DONE && res.retcode != TRADE_RETCODE_DONE_PARTIAL))
+   if(!shouldUpdate)
    {
-      errMsg = "err=" + IntegerToString(GetLastError()) + " rc=" + IntegerToString(res.retcode);
-      Print("SocialForexBridge: ModifyPosition failed ticket=", ticket, " ", errMsg);
-      return false;
+      // Price has already retraced since the trail was queued; leaving the SL
+      // untouched is safer than applying a stale/worse value.
+      return true;
    }
-   Print("SocialForexBridge: Modified ticket=", ticket, " SL=", safeSL, " TP=", safeTP);
-   return true;
+
+   return ModifyPositionByTicket(ticket, candidateSL, currentTP, errMsg);
 }
 
 bool ModifyOrderByTicket(ulong ticket, double sl, double tp, string &errMsg)
 {
-   if(!OrderSelect(ticket))
+   for(int attempt = 1; attempt <= RetryAttempts; attempt++)
    {
-      errMsg = "order not found";
-      return false;
-   }
-   string symbol       = OrderGetString(ORDER_SYMBOL);
-   double price        = OrderGetDouble(ORDER_PRICE_OPEN);
-   long   typeTime      = OrderGetInteger(ORDER_TYPE_TIME);
-   datetime expiration = (datetime)OrderGetInteger(ORDER_TIME_EXPIRATION);
-   int digits          = (int)SymbolInfoInteger(symbol, SYMBOL_DIGITS);
-   double safeSL       = sl > 0 ? NormalizeDouble(sl, digits) : 0;
-   double safeTP       = tp > 0 ? NormalizeDouble(tp, digits) : 0;
+      if(!OrderSelect(ticket))
+      {
+         errMsg = "order not found";
+         return false;
+      }
+      string symbol       = OrderGetString(ORDER_SYMBOL);
+      double price        = OrderGetDouble(ORDER_PRICE_OPEN);
+      long   typeTime      = OrderGetInteger(ORDER_TYPE_TIME);
+      datetime expiration = (datetime)OrderGetInteger(ORDER_TIME_EXPIRATION);
+      int digits          = (int)SymbolInfoInteger(symbol, SYMBOL_DIGITS);
+      double safeSL       = sl > 0 ? NormalizeDouble(sl, digits) : 0;
+      double safeTP       = tp > 0 ? NormalizeDouble(tp, digits) : 0;
 
-   MqlTradeRequest req = {};
-   MqlTradeResult  res = {};
-   req.action     = TRADE_ACTION_MODIFY;
-   req.order      = ticket;
-   req.symbol     = symbol;
-   req.price      = price;
-   req.sl         = safeSL;
-   req.tp         = safeTP;
-   req.type_time  = (ENUM_ORDER_TYPE_TIME)typeTime;
-   req.expiration = expiration;
+      MqlTradeRequest req = {};
+      MqlTradeResult  res = {};
+      req.action     = TRADE_ACTION_MODIFY;
+      req.order      = ticket;
+      req.symbol     = symbol;
+      req.price      = price;
+      req.sl         = safeSL;
+      req.tp         = safeTP;
+      req.type_time  = (ENUM_ORDER_TYPE_TIME)typeTime;
+      req.expiration = expiration;
 
-   if(!OrderSend(req, res) || res.retcode != TRADE_RETCODE_DONE)
-   {
+      if(OrderSend(req, res) && res.retcode == TRADE_RETCODE_DONE)
+      {
+         Print("SocialForexBridge: Modified order ticket=", ticket, " SL=", safeSL, " TP=", safeTP, " attempt=", attempt);
+         return true;
+      }
+
       errMsg = "err=" + IntegerToString(GetLastError()) + " rc=" + IntegerToString(res.retcode);
-      Print("SocialForexBridge: ModifyOrder failed ticket=", ticket, " ", errMsg);
-      return false;
+      Print("SocialForexBridge: ModifyOrder failed ticket=", ticket, " ", errMsg, " attempt=", attempt);
+
+      if(attempt < RetryAttempts && IsRetryableRetcode(res.retcode))
+         Sleep(RetryDelayMs);
+      else
+         return false;
    }
-   Print("SocialForexBridge: Modified order ticket=", ticket, " SL=", safeSL, " TP=", safeTP);
-   return true;
+   return false;
 }
 
 bool CancelOrderByTicket(ulong ticket, string &errMsg)
 {
-   MqlTradeRequest req = {};
-   MqlTradeResult  res = {};
-   req.action = TRADE_ACTION_REMOVE;
-   req.order  = ticket;
-
-   if(!OrderSend(req, res) || res.retcode != TRADE_RETCODE_DONE)
+   for(int attempt = 1; attempt <= RetryAttempts; attempt++)
    {
+      MqlTradeRequest req = {};
+      MqlTradeResult  res = {};
+      req.action = TRADE_ACTION_REMOVE;
+      req.order  = ticket;
+
+      if(OrderSend(req, res) && res.retcode == TRADE_RETCODE_DONE)
+      {
+         Print("SocialForexBridge: Cancelled order ticket=", ticket, " attempt=", attempt);
+         return true;
+      }
+
       errMsg = "err=" + IntegerToString(GetLastError()) + " rc=" + IntegerToString(res.retcode);
-      Print("SocialForexBridge: CancelOrder failed ticket=", ticket, " ", errMsg);
-      return false;
+      Print("SocialForexBridge: CancelOrder failed ticket=", ticket, " ", errMsg, " attempt=", attempt);
+
+      if(attempt < RetryAttempts && IsRetryableRetcode(res.retcode))
+         Sleep(RetryDelayMs);
+      else
+         return false;
    }
-   Print("SocialForexBridge: Cancelled order ticket=", ticket);
-   return true;
+   return false;
 }
 
 bool PlaceOrderCmd(string symbol, string orderTypeStr, double volume, double price, double sl, double tp, string &errMsg)
@@ -484,62 +584,74 @@ bool PlaceOrderCmd(string symbol, string orderTypeStr, double volume, double pri
    int digits    = (int)SymbolInfoInteger(symbol, SYMBOL_DIGITS);
    double safeSL = sl > 0 ? NormalizeDouble(sl, digits) : 0;
    double safeTP = tp > 0 ? NormalizeDouble(tp, digits) : 0;
+   bool isMarket = (orderTypeStr == "BUY" || orderTypeStr == "SELL");
 
-   MqlTradeRequest req = {};
-   MqlTradeResult  res = {};
-   req.symbol    = symbol;
-   req.volume    = volume;
-   req.sl        = safeSL;
-   req.tp        = safeTP;
-   req.deviation = SlippagePoints;
-   req.magic     = MagicNumber;
-   req.comment   = "SF:CmdOpen";
-
-   if(orderTypeStr == "BUY")
-   {
-      req.action = TRADE_ACTION_DEAL;
-      req.type   = ORDER_TYPE_BUY;
-      req.price  = SymbolInfoDouble(symbol, SYMBOL_ASK);
-   }
-   else if(orderTypeStr == "SELL")
-   {
-      req.action = TRADE_ACTION_DEAL;
-      req.type   = ORDER_TYPE_SELL;
-      req.price  = SymbolInfoDouble(symbol, SYMBOL_BID);
-   }
-   else if(orderTypeStr == "BUY_LIMIT" || orderTypeStr == "SELL_LIMIT" || orderTypeStr == "BUY_STOP" || orderTypeStr == "SELL_STOP")
-   {
-      if(price <= 0)
-      {
-         errMsg = "price required";
-         return false;
-      }
-      req.action    = TRADE_ACTION_PENDING;
-      req.price     = NormalizeDouble(price, digits);
-      req.type_time = ORDER_TIME_GTC;
-      if(orderTypeStr == "BUY_LIMIT")
-         req.type = ORDER_TYPE_BUY_LIMIT;
-      else if(orderTypeStr == "SELL_LIMIT")
-         req.type = ORDER_TYPE_SELL_LIMIT;
-      else if(orderTypeStr == "BUY_STOP")
-         req.type = ORDER_TYPE_BUY_STOP;
-      else
-         req.type = ORDER_TYPE_SELL_STOP;
-   }
-   else
+   if(!isMarket && orderTypeStr != "BUY_LIMIT" && orderTypeStr != "SELL_LIMIT" &&
+      orderTypeStr != "BUY_STOP" && orderTypeStr != "SELL_STOP")
    {
       errMsg = "unknown order type: " + orderTypeStr;
       return false;
    }
-
-   if(!OrderSend(req, res) || (res.retcode != TRADE_RETCODE_DONE && res.retcode != TRADE_RETCODE_PLACED && res.retcode != TRADE_RETCODE_DONE_PARTIAL))
+   if(!isMarket && price <= 0)
    {
-      errMsg = "err=" + IntegerToString(GetLastError()) + " rc=" + IntegerToString(res.retcode);
-      Print("SocialForexBridge: PlaceOrder failed symbol=", symbol, " type=", orderTypeStr, " ", errMsg);
+      errMsg = "price required";
       return false;
    }
-   Print("SocialForexBridge: Placed ", orderTypeStr, " ", symbol, " vol=", volume, " ticket=", res.order);
-   return true;
+
+   for(int attempt = 1; attempt <= RetryAttempts; attempt++)
+   {
+      MqlTradeRequest req = {};
+      MqlTradeResult  res = {};
+      req.symbol    = symbol;
+      req.volume    = volume;
+      req.sl        = safeSL;
+      req.tp        = safeTP;
+      req.deviation = SlippagePoints;
+      req.magic     = MagicNumber;
+      req.comment   = "SF:CmdOpen";
+
+      if(orderTypeStr == "BUY")
+      {
+         req.action = TRADE_ACTION_DEAL;
+         req.type   = ORDER_TYPE_BUY;
+         req.price  = SymbolInfoDouble(symbol, SYMBOL_ASK);
+      }
+      else if(orderTypeStr == "SELL")
+      {
+         req.action = TRADE_ACTION_DEAL;
+         req.type   = ORDER_TYPE_SELL;
+         req.price  = SymbolInfoDouble(symbol, SYMBOL_BID);
+      }
+      else
+      {
+         req.action    = TRADE_ACTION_PENDING;
+         req.price     = NormalizeDouble(price, digits);
+         req.type_time = ORDER_TIME_GTC;
+         if(orderTypeStr == "BUY_LIMIT")
+            req.type = ORDER_TYPE_BUY_LIMIT;
+         else if(orderTypeStr == "SELL_LIMIT")
+            req.type = ORDER_TYPE_SELL_LIMIT;
+         else if(orderTypeStr == "BUY_STOP")
+            req.type = ORDER_TYPE_BUY_STOP;
+         else
+            req.type = ORDER_TYPE_SELL_STOP;
+      }
+
+      if(OrderSend(req, res) && (res.retcode == TRADE_RETCODE_DONE || res.retcode == TRADE_RETCODE_PLACED || res.retcode == TRADE_RETCODE_DONE_PARTIAL))
+      {
+         Print("SocialForexBridge: Placed ", orderTypeStr, " ", symbol, " vol=", volume, " ticket=", res.order, " attempt=", attempt);
+         return true;
+      }
+
+      errMsg = "err=" + IntegerToString(GetLastError()) + " rc=" + IntegerToString(res.retcode);
+      Print("SocialForexBridge: PlaceOrder failed symbol=", symbol, " type=", orderTypeStr, " ", errMsg, " attempt=", attempt);
+
+      if(attempt < RetryAttempts && IsRetryableRetcode(res.retcode))
+         Sleep(RetryDelayMs);
+      else
+         return false;
+   }
+   return false;
 }
 
 bool CloseAllPositionsAndOrders(string &errMsg)
@@ -637,16 +749,18 @@ void FetchAndExecuteCommands()
          continue;
       string type = JsonExtractString(obj, "type", tmpNull);
       string ticketStr = JsonExtractString(obj, "ticket", tmpNull);
-      bool slNull, tpNull, volNull, priceNull;
+      bool slNull, tpNull, volNull, priceNull, trailNull;
       double sl = JsonExtractNumber(obj, "stopLoss", slNull);
       double tp = JsonExtractNumber(obj, "takeProfit", tpNull);
       string orderSymbol = JsonExtractString(obj, "symbol", tmpNull);
       double orderVolume = JsonExtractNumber(obj, "volume", volNull);
       double orderPrice = JsonExtractNumber(obj, "price", priceNull);
+      double trailDistancePips = JsonExtractNumber(obj, "trailDistancePips", trailNull);
       if(slNull) sl = 0.0;
       if(tpNull) tp = 0.0;
       if(volNull) orderVolume = 0.0;
       if(priceNull) orderPrice = 0.0;
+      if(trailNull) trailDistancePips = 0.0;
 
       bool success = false;
       string errorMsg = "";
@@ -674,6 +788,15 @@ void FetchAndExecuteCommands()
             errorMsg = "invalid ticket";
          else
             success = ModifyPositionByTicket(ticket, sl, tp, errorMsg);
+      }
+      else if(type == "TRAIL_UPDATE")
+      {
+         if(ticket == 0)
+            errorMsg = "invalid ticket";
+         else if(trailDistancePips <= 0)
+            errorMsg = "invalid trail distance";
+         else
+            success = ModifyTrailingStopByTicket(ticket, trailDistancePips, errorMsg);
       }
       else if(type == "CANCEL_ORDER")
       {
