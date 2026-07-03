@@ -523,20 +523,20 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                     <Row label="Risk" value={risk ? `-${risk.riskAmount.toFixed(2)} (${risk.riskPct.toFixed(1)}%)` : "—"} muted />
                   </div>
 
-                  <div className="mt-4 flex gap-2">
+                  <div className="mt-4 grid grid-cols-2 gap-2">
                     <LockProfitMenu
                       position={p}
                       disabled={isClosing}
                       queued={isMovingBE}
                       onLock={handleLockProfit}
-                      className="flex-1"
+                      className="w-full"
                     />
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() => setPartialCloseTarget(p)}
                       disabled={isClosing || p.volume == null || p.volume <= 0}
-                      className="flex-1 gap-1.5"
+                      className="w-full gap-1.5"
                     >
                       <Scissors className="size-3.5" />
                       Partial
@@ -546,7 +546,7 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                       variant="outline"
                       onClick={() => setModifyTarget(p)}
                       disabled={isClosing}
-                      className="flex-1 gap-1.5"
+                      className="w-full gap-1.5"
                     >
                       <SlidersHorizontal className="size-3.5" />
                       Modify
@@ -556,7 +556,7 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                       variant={p.trailingPips != null ? "secondary" : "outline"}
                       onClick={() => setTrailingTarget(p)}
                       disabled={isClosing}
-                      className="flex-1 gap-1.5"
+                      className="w-full gap-1.5"
                     >
                       <Crosshair className="size-3.5" />
                       {p.trailingPips != null ? `Trail ${p.trailingPips}p` : "Trail"}
@@ -566,7 +566,7 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                       variant="destructive"
                       onClick={() => handleClose(p.ticket)}
                       disabled={isClosing}
-                      className="flex-1 gap-1.5"
+                      className="col-span-2 w-full gap-1.5"
                     >
                       <X className="size-3.5" />
                       {isClosing ? "Queued" : "Close"}
