@@ -1586,7 +1586,7 @@
     "noMt5Hint": "Connect MT5 to see live capital info and open positions.",
     "connectMt5": "Connect MT5",
     "lastSync": "Last synced",
-    "autoRefresh": "Auto-refreshing every 5s",
+    "autoRefresh": "Live updates",
     "colCurrent": "Current price",
     "colProfit": "Profit",
     "colTicket": "Ticket",

@@ -1586,7 +1586,7 @@
     "noMt5Hint": "Kết nối MT5 để xem thông tin vốn và lệnh realtime.",
     "connectMt5": "Kết nối MT5",
     "lastSync": "Đồng bộ lần cuối",
-    "autoRefresh": "Tự động cập nhật mỗi 5s",
+    "autoRefresh": "Cập nhật realtime",
     "colCurrent": "Giá hiện tại",
     "colProfit": "Profit",
     "colTicket": "Ticket",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useState, useTransition } from "react";
 import {
   AlertTriangle,
   Clock,
@@ -34,8 +34,6 @@ import { NewOrderDialog } from "./new-order-dialog";
 import { PortfolioReviewPanel } from "./portfolio-review-panel";
 import type { LivePosition, Mt5AccountInfo } from "@/app/[locale]/journal/journal-live-panel";
 import type { LivePendingOrder, Mt5AccountResponse } from "@/app/api/mt5/account/route";
-
-const REFRESH_MS = 5_000;
 
 function fmtMoney(v: number | null, currency: string) {
   if (v == null) return "—";
@@ -85,32 +83,69 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
   const [orders, setOrders] = useState<LivePendingOrder[]>(initialOrders);
   const [spinning, setSpinning] = useState(false);
   const [closeAllPending, startCloseAll] = useTransition();
-  const timerRef = useRef<number | null>(null);
 
+  const applySnapshot = useCallback((data: Mt5AccountResponse) => {
+    setAccount(data.account);
+    setPositions(data.positions);
+    setOrders(data.orders ?? []);
+  }, []);
+
+  // Manual refresh button - the automatic updates below come from the SSE stream.
   const fetchData = useCallback(async () => {
-    if (document.visibilityState !== "visible") return;
     setSpinning(true);
     try {
       const res = await fetch("/api/mt5/account", { credentials: "include" });
       if (!res.ok) return;
       const data = (await res.json()) as Mt5AccountResponse;
-      setAccount(data.account);
-      setPositions(data.positions);
-      setOrders(data.orders ?? []);
+      applySnapshot(data);
     } catch {
       // silent — keep showing last known data
     } finally {
       window.setTimeout(() => setSpinning(false), 400);
     }
-  }, []);
+  }, [applySnapshot]);
 
   useEffect(() => {
     if (!initialAccount) return;
-    timerRef.current = window.setInterval(() => void fetchData(), REFRESH_MS);
+
+    let source: EventSource | null = null;
+    let spinTimeout: number | null = null;
+
+    function handleMessage(event: MessageEvent<string>) {
+      try {
+        const data = JSON.parse(event.data) as Mt5AccountResponse;
+        applySnapshot(data);
+        setSpinning(true);
+        if (spinTimeout) window.clearTimeout(spinTimeout);
+        spinTimeout = window.setTimeout(() => setSpinning(false), 400);
+      } catch {
+        // ignore malformed payloads
+      }
+    }
+
+    function connect() {
+      source = new EventSource("/api/mt5/account/stream");
+      source.onmessage = handleMessage;
+    }
+
+    function handleVisibility() {
+      if (document.visibilityState === "visible") {
+        if (!source) connect();
+      } else {
+        source?.close();
+        source = null;
+      }
+    }
+
+    if (document.visibilityState === "visible") connect();
+    document.addEventListener("visibilitychange", handleVisibility);
+
     return () => {
-      if (timerRef.current) window.clearInterval(timerRef.current);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      if (spinTimeout) window.clearTimeout(spinTimeout);
+      source?.close();
     };
-  }, [initialAccount, fetchData]);
+  }, [initialAccount, applySnapshot]);
 
   function handleCloseAll() {
     startCloseAll(async () => {
@@ -216,7 +251,7 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
       </Tabs>
 
       <p className="text-center text-xs text-muted-foreground">
-        Auto-refreshes every 5s · Commands execute on next EA heartbeat
+        Live updates via realtime feed · Commands execute on next EA heartbeat
       </p>
     </div>
   );
