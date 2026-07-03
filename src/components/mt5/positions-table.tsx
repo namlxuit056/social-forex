@@ -9,6 +9,7 @@ import {
   ArrowUpRight,
   ChevronDown,
   ChevronUp,
+  Scissors,
   SlidersHorizontal,
   X,
 } from "lucide-react";
@@ -30,6 +31,7 @@ import { cn } from "@/lib/utils";
 import { closePosition, modifyPosition } from "@/actions/mt5-commands";
 import { getPipSize } from "@/lib/mt5/pip-size";
 import { ModifyDialog } from "./modify-dialog";
+import { PartialCloseDialog } from "./partial-close-dialog";
 import { LockProfitMenu } from "./lock-profit-menu";
 import type { LivePosition } from "@/app/[locale]/journal/journal-live-panel";
 
@@ -173,6 +175,7 @@ type Props = {
 
 export function PositionsTable({ positions, currency, equity }: Props) {
   const [modifyTarget, setModifyTarget] = useState<LivePosition | null>(null);
+  const [partialCloseTarget, setPartialCloseTarget] = useState<LivePosition | null>(null);
   const [closing, setClosing] = useState<Set<string>>(new Set());
   const [movingBE, setMovingBE] = useState<Set<string>>(new Set());
   const [selectedRaw, setSelected] = useState<Set<string>>(new Set());
@@ -434,6 +437,16 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                           <Button
                             size="sm"
                             variant="outline"
+                            onClick={() => setPartialCloseTarget(p)}
+                            disabled={isClosing || p.volume == null || p.volume <= 0}
+                            className="gap-1.5"
+                          >
+                            <Scissors className="size-3.5" />
+                            Partial
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
                             onClick={() => setModifyTarget(p)}
                             disabled={isClosing}
                             className="gap-1.5"
@@ -508,6 +521,16 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                     <Button
                       size="sm"
                       variant="outline"
+                      onClick={() => setPartialCloseTarget(p)}
+                      disabled={isClosing || p.volume == null || p.volume <= 0}
+                      className="flex-1 gap-1.5"
+                    >
+                      <Scissors className="size-3.5" />
+                      Partial
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
                       onClick={() => setModifyTarget(p)}
                       disabled={isClosing}
                       className="flex-1 gap-1.5"
@@ -541,6 +564,16 @@ export function PositionsTable({ positions, currency, equity }: Props) {
           symbol={modifyTarget.symbol}
           currentSl={modifyTarget.stopLoss}
           currentTp={modifyTarget.takeProfit}
+        />
+      )}
+
+      {partialCloseTarget && (
+        <PartialCloseDialog
+          open
+          onOpenChange={(v) => { if (!v) setPartialCloseTarget(null); }}
+          ticket={partialCloseTarget.ticket}
+          symbol={partialCloseTarget.symbol}
+          maxVolume={partialCloseTarget.volume ?? 0}
         />
       )}
     </div>

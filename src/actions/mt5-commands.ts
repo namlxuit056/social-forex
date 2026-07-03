@@ -49,6 +49,33 @@ export async function closePosition(ticket: string): Promise<{ error?: string }>
   return {};
 }
 
+const partialCloseSchema = z.object({
+  ticket: z.string().min(1),
+  volume: z.coerce.number().positive(),
+});
+
+export async function partialClosePosition(ticket: string, volume: number): Promise<{ error?: string }> {
+  const session = await auth();
+  if (!session?.user?.id) redirect("/auth/signin");
+
+  const parsed = partialCloseSchema.safeParse({ ticket, volume });
+  if (!parsed.success) return { error: "invalid_params" };
+
+  const connection = await getActiveConnection(session.user.id);
+  if (!connection) return { error: "no_connection" };
+
+  await prisma.mt5Command.create({
+    data: {
+      connectionId: connection.id,
+      type: "PARTIAL_CLOSE",
+      ticket: parsed.data.ticket,
+      volume: parsed.data.volume,
+    },
+  });
+
+  return {};
+}
+
 export async function cancelOrder(ticket: string): Promise<{ error?: string }> {
   const session = await auth();
   if (!session?.user?.id) redirect("/auth/signin");

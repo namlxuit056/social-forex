@@ -349,30 +349,31 @@ string ExtractCommandsArray(string body)
 //+------------------------------------------------------------------+
 //| Command execution                                                 |
 //+------------------------------------------------------------------+
-bool ClosePositionByTicket(ulong ticket, string &errMsg)
+bool ClosePositionByTicket(ulong ticket, string &errMsg, double closeVolume = 0)
 {
    if(!PositionSelectByTicket(ticket))
    {
       errMsg = "position not found";
       return false;
    }
-   string symbol  = PositionGetString(POSITION_SYMBOL);
-   double volume  = PositionGetDouble(POSITION_VOLUME);
-   long   posType = PositionGetInteger(POSITION_TYPE);
-   bool   isBuy   = (posType == POSITION_TYPE_BUY);
-   double price   = isBuy ? SymbolInfoDouble(symbol, SYMBOL_BID) : SymbolInfoDouble(symbol, SYMBOL_ASK);
+   string symbol    = PositionGetString(POSITION_SYMBOL);
+   double volume    = PositionGetDouble(POSITION_VOLUME);
+   double reqVolume = (closeVolume > 0 && closeVolume < volume) ? closeVolume : volume;
+   long   posType   = PositionGetInteger(POSITION_TYPE);
+   bool   isBuy     = (posType == POSITION_TYPE_BUY);
+   double price     = isBuy ? SymbolInfoDouble(symbol, SYMBOL_BID) : SymbolInfoDouble(symbol, SYMBOL_ASK);
 
    MqlTradeRequest req = {};
    MqlTradeResult  res = {};
    req.action    = TRADE_ACTION_DEAL;
    req.position  = ticket;
    req.symbol    = symbol;
-   req.volume    = volume;
+   req.volume    = reqVolume;
    req.type      = isBuy ? ORDER_TYPE_SELL : ORDER_TYPE_BUY;
    req.price     = price;
    req.deviation = SlippagePoints;
    req.magic     = MagicNumber;
-   req.comment   = "SF:CmdClose";
+   req.comment   = reqVolume < volume ? "SF:CmdPartialClose" : "SF:CmdClose";
 
    if(!OrderSend(req, res) || (res.retcode != TRADE_RETCODE_DONE && res.retcode != TRADE_RETCODE_DONE_PARTIAL))
    {
@@ -380,7 +381,7 @@ bool ClosePositionByTicket(ulong ticket, string &errMsg)
       Print("SocialForexBridge: ClosePosition failed ticket=", ticket, " ", errMsg);
       return false;
    }
-   Print("SocialForexBridge: Closed ticket=", ticket);
+   Print("SocialForexBridge: Closed ticket=", ticket, " volume=", reqVolume);
    return true;
 }
 
@@ -657,6 +658,15 @@ void FetchAndExecuteCommands()
             errorMsg = "invalid ticket";
          else
             success = ClosePositionByTicket(ticket, errorMsg);
+      }
+      else if(type == "PARTIAL_CLOSE")
+      {
+         if(ticket == 0)
+            errorMsg = "invalid ticket";
+         else if(orderVolume <= 0)
+            errorMsg = "invalid volume";
+         else
+            success = ClosePositionByTicket(ticket, errorMsg, orderVolume);
       }
       else if(type == "MODIFY_POSITION")
       {
