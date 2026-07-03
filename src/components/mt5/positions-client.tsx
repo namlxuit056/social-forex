@@ -5,6 +5,7 @@ import {
   AlertTriangle,
   Clock,
   Gauge,
+  Globe,
   LineChart,
   ListChecks,
   RefreshCw,
@@ -13,6 +14,7 @@ import {
   Wallet,
   type LucideIcon,
 } from "lucide-react";
+import { getActiveTradingSessions } from "@/lib/mt5/trading-sessions";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -86,6 +88,14 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
   const [quickOrderPending, startQuickOrder] = useTransition();
   const [quickOrderSide, setQuickOrderSide] = useState<"BUY" | "SELL" | null>(null);
   const [autoClosePending, startAutoClose] = useTransition();
+  const [activeSessions, setActiveSessions] = useState(() => getActiveTradingSessions());
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setActiveSessions(getActiveTradingSessions());
+    }, 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   const applySnapshot = useCallback((data: Mt5AccountResponse) => {
     setAccount(data.account);
@@ -188,6 +198,17 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
     <div className="space-y-6">
       {/* Account summary */}
       <div className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-6">
+        <div className="mb-4 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+          <Globe className="size-3.5" />
+          {activeSessions.length > 0 ? (
+            <span>
+              Active session{activeSessions.length > 1 ? "s" : ""}:{" "}
+              <span className="text-foreground">{activeSessions.map((s) => s.label).join(" + ")}</span>
+            </span>
+          ) : (
+            <span>Market closed (weekend)</span>
+          )}
+        </div>
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 sm:gap-8 lg:flex-1">
             <Metric label="Balance" icon={Wallet} value={fmtMoney(account?.balance ?? null, currency)} />
