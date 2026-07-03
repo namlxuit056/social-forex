@@ -82,17 +82,25 @@ function estimateRisk(p: LivePosition, equity: number | null) {
   const pipSize = getPipSize(p.symbol);
   if (Math.abs(priceDiff) < pipSize * 0.5) return null;
   const valuePerUnit = p.profit / priceDiff;
-  const slDistancePrice = Math.abs(p.priceOpen - p.stopLoss);
+  // Only count the stop as "risk" if it sits on the adverse side of entry — once it's
+  // been moved to breakeven or beyond (e.g. locked profit), there's no more downside.
+  const slDistancePrice = isBuy ? p.priceOpen - p.stopLoss : p.stopLoss - p.priceOpen;
+  if (slDistancePrice <= 0) {
+    return { riskAmount: 0, riskPct: 0, slDistancePips: 0, protected: true };
+  }
   const riskAmount = Math.abs(valuePerUnit) * slDistancePrice;
   const riskPct = (riskAmount / equity) * 100;
   const slDistancePips = slDistancePrice / pipSize;
-  return { riskAmount, riskPct, slDistancePips };
+  return { riskAmount, riskPct, slDistancePips, protected: false };
 }
 
 function RiskCell({ p, equity, currency }: { p: LivePosition; equity: number | null; currency: string | null }) {
   const risk = estimateRisk(p, equity);
   if (!risk) {
     return <span className="font-mono text-xs tabular-nums text-muted-foreground">—</span>;
+  }
+  if (risk.protected) {
+    return <span className="font-mono text-xs font-semibold tabular-nums text-emerald-500">Protected</span>;
   }
   const tone = risk.riskPct > 5 ? "text-red-500" : risk.riskPct > 2 ? "text-amber-500" : "text-muted-foreground";
   return (
@@ -524,7 +532,17 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                     <Row label="SL" value={fmt(p.stopLoss)} muted />
                     <Row label="TP" value={fmt(p.takeProfit)} muted />
                     <Row label="Opened" value={openedAgo(p.openedAt)} muted />
-                    <Row label="Risk" value={risk ? `-${risk.riskAmount.toFixed(2)} (${risk.riskPct.toFixed(1)}%)` : "—"} muted />
+                    <Row
+                      label="Risk"
+                      value={
+                        !risk
+                          ? "—"
+                          : risk.protected
+                            ? "Protected"
+                            : `-${risk.riskAmount.toFixed(2)} (${risk.riskPct.toFixed(1)}%)`
+                      }
+                      muted
+                    />
                   </div>
 
                   <div className="mt-4 grid grid-cols-2 gap-2">
