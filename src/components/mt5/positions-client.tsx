@@ -176,7 +176,7 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
           </div>
 
           <div className="flex items-center gap-2 border-t border-border pt-4 lg:border-t-0 lg:pt-0">
-            <Button
+            {/* <Button
               variant="outline"
               size="icon"
               onClick={() => void fetchData()}
@@ -184,7 +184,7 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
               className="shrink-0"
             >
               <RefreshCw className={cn("size-4", spinning && "animate-spin")} />
-            </Button>
+            </Button> */}
             <NewOrderDialog />
             <AlertDialog>
               <AlertDialogTrigger
