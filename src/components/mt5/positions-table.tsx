@@ -1,15 +1,40 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { formatDistanceToNowStrict } from "date-fns";
-import { Activity, ArrowDownRight, ArrowUpRight, Lock, SlidersHorizontal, X } from "lucide-react";
+import {
+  Activity,
+  AlertTriangle,
+  ArrowDownRight,
+  ArrowUpRight,
+  ChevronDown,
+  ChevronUp,
+  SlidersHorizontal,
+  X,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { closePosition, modifyPosition } from "@/actions/mt5-commands";
 import { getPipSize } from "@/lib/mt5/pip-size";
 import { ModifyDialog } from "./modify-dialog";
+import { LockProfitMenu } from "./lock-profit-menu";
 import type { LivePosition } from "@/app/[locale]/journal/journal-live-panel";
+
+type SortKey = "symbol" | "profit" | "openedAt" | null;
+type SortDir = "asc" | "desc";
 
 function fmt(v: number | null, d = 5) {
   return v == null ? "—" : v.toFixed(d);
@@ -101,21 +126,119 @@ function EmptyState() {
   );
 }
 
+function FilterEmptyState() {
+  return (
+    <div className="flex flex-col items-center justify-center gap-2 py-14 text-center">
+      <div className="flex size-11 items-center justify-center rounded-full bg-muted">
+        <Activity className="size-5 text-muted-foreground" />
+      </div>
+      <p className="text-sm font-medium text-foreground">No positions match the filter</p>
+    </div>
+  );
+}
+
+function SortHeader({
+  label,
+  active,
+  dir,
+  onClick,
+  align = "left",
+}: {
+  label: string;
+  active: boolean;
+  dir: SortDir;
+  onClick: () => void;
+  align?: "left" | "right";
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "inline-flex cursor-pointer select-none items-center gap-1 font-medium text-inherit",
+        align === "right" && "flex-row-reverse",
+      )}
+    >
+      {label}
+      {active && (dir === "asc" ? <ChevronUp className="size-3.5" /> : <ChevronDown className="size-3.5" />)}
+    </button>
+  );
+}
+
 type Props = {
   positions: LivePosition[];
   currency: string | null;
   equity: number | null;
 };
 
-function isAtBreakeven(p: LivePosition) {
-  return p.priceOpen != null && p.stopLoss != null && Math.abs(p.stopLoss - p.priceOpen) < 1e-8;
-}
-
 export function PositionsTable({ positions, currency, equity }: Props) {
   const [modifyTarget, setModifyTarget] = useState<LivePosition | null>(null);
   const [closing, setClosing] = useState<Set<string>>(new Set());
   const [movingBE, setMovingBE] = useState<Set<string>>(new Set());
+  const [selectedRaw, setSelected] = useState<Set<string>>(new Set());
+  const [sortKey, setSortKey] = useState<SortKey>(null);
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+  const [symbolFilter, setSymbolFilter] = useState("all");
+  const [sideFilter, setSideFilter] = useState<"all" | "buy" | "sell">("all");
   const [, startTransition] = useTransition();
+
+  const selected = useMemo(() => {
+    const tickets = new Set(positions.map((p) => p.ticket));
+    return new Set([...selectedRaw].filter((t) => tickets.has(t)));
+  }, [selectedRaw, positions]);
+
+  const symbols = useMemo(() => Array.from(new Set(positions.map((p) => p.symbol))).sort(), [positions]);
+
+  const filteredPositions = useMemo(() => {
+    return positions.filter((p) => {
+      if (symbolFilter !== "all" && p.symbol !== symbolFilter) return false;
+      if (sideFilter !== "all") {
+        const isBuy = p.type.toUpperCase().startsWith("BUY");
+        if (sideFilter === "buy" && !isBuy) return false;
+        if (sideFilter === "sell" && isBuy) return false;
+      }
+      return true;
+    });
+  }, [positions, symbolFilter, sideFilter]);
+
+  const sortedPositions = useMemo(() => {
+    if (!sortKey) return filteredPositions;
+    const dirMul = sortDir === "asc" ? 1 : -1;
+    return [...filteredPositions].sort((a, b) => {
+      if (sortKey === "symbol") return a.symbol.localeCompare(b.symbol) * dirMul;
+      if (sortKey === "profit") return ((a.profit ?? 0) - (b.profit ?? 0)) * dirMul;
+      const aTime = a.openedAt ? new Date(a.openedAt).getTime() : null;
+      const bTime = b.openedAt ? new Date(b.openedAt).getTime() : null;
+      if (aTime == null && bTime == null) return 0;
+      if (aTime == null) return 1;
+      if (bTime == null) return -1;
+      return (aTime - bTime) * dirMul;
+    });
+  }, [filteredPositions, sortKey, sortDir]);
+
+  function toggleSort(key: Exclude<SortKey, null>) {
+    if (sortKey !== key) {
+      setSortKey(key);
+      setSortDir("asc");
+    } else {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    }
+  }
+
+  function toggleSelected(ticket: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(ticket)) next.delete(ticket);
+      else next.add(ticket);
+      return next;
+    });
+  }
+
+  function toggleSelectAll() {
+    setSelected((prev) =>
+      prev.size === sortedPositions.length ? new Set() : new Set(sortedPositions.map((p) => p.ticket)),
+    );
+  }
 
   function handleClose(ticket: string) {
     setClosing((prev) => new Set(prev).add(ticket));
@@ -124,23 +247,95 @@ export function PositionsTable({ positions, currency, equity }: Props) {
     });
   }
 
-  function handleBreakeven(p: LivePosition) {
-    if (p.priceOpen == null) return;
-    setMovingBE((prev) => new Set(prev).add(p.ticket));
+  function handleCloseSelected() {
+    const tickets = Array.from(selected);
+    setClosing((prev) => new Set([...prev, ...tickets]));
     startTransition(async () => {
-      await modifyPosition(p.ticket, p.priceOpen, p.takeProfit);
+      await Promise.all(tickets.map((ticket) => closePosition(ticket)));
+      setSelected(new Set());
     });
   }
 
+  function handleLockProfit(ticket: string, newSl: number) {
+    const p = positions.find((pos) => pos.ticket === ticket);
+    if (!p) return;
+    setMovingBE((prev) => new Set(prev).add(ticket));
+    startTransition(async () => {
+      await modifyPosition(ticket, newSl, p.takeProfit);
+    });
+  }
+
+  const allSelected = sortedPositions.length > 0 && selected.size === sortedPositions.length;
+
   return (
     <div className="rounded-2xl border border-border bg-card shadow-sm">
-      <div className="flex items-center justify-between px-4 py-4 sm:px-6">
-        <h2 className="text-base font-semibold">Open Positions</h2>
-        <span className="text-xs text-muted-foreground">{positions.length} active</span>
+      <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6">
+        <div className="flex items-center gap-3">
+          <h2 className="text-base font-semibold">Open Positions</h2>
+          <span className="text-xs text-muted-foreground">{positions.length} active</span>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {selected.size > 0 && (
+            <AlertDialog>
+              <AlertDialogTrigger
+                render={<Button size="sm" variant="destructive" className="gap-1.5" />}
+              >
+                <X className="size-3.5" />
+                Close Selected ({selected.size})
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="flex items-center gap-2">
+                    <AlertTriangle className="h-5 w-5 text-destructive" />
+                    Close {selected.size} position{selected.size !== 1 ? "s" : ""}?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This queues a CLOSE_POSITION command for each selected ticket. Your MT5 EA will close them on the next heartbeat. This cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleCloseSelected} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                    Yes, close selected
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+          {positions.length > 0 && (
+            <>
+              <Select value={symbolFilter} onValueChange={(v) => v && setSymbolFilter(v)}>
+                <SelectTrigger size="sm">
+                  <SelectValue placeholder="All symbols" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All symbols</SelectItem>
+                  {symbols.map((s) => (
+                    <SelectItem key={s} value={s}>
+                      {s}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={sideFilter} onValueChange={(v) => v && setSideFilter(v as "all" | "buy" | "sell")}>
+                <SelectTrigger size="sm">
+                  <SelectValue placeholder="All" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="buy">Buy</SelectItem>
+                  <SelectItem value="sell">Sell</SelectItem>
+                </SelectContent>
+              </Select>
+            </>
+          )}
+        </div>
       </div>
 
       {positions.length === 0 ? (
         <EmptyState />
+      ) : sortedPositions.length === 0 ? (
+        <FilterEmptyState />
       ) : (
         <>
           {/* Desktop / tablet table */}
@@ -148,28 +343,68 @@ export function PositionsTable({ positions, currency, equity }: Props) {
             <table className="w-full min-w-235 border-collapse text-sm">
               <thead>
                 <tr className="border-t border-border text-xs text-muted-foreground">
-                  <th className="px-6 py-3 text-left font-medium">Ticket</th>
-                  <th className="px-3 py-3 text-left font-medium">Symbol</th>
+                  <th className="px-4 py-3 text-left font-medium">
+                    <input
+                      type="checkbox"
+                      className="size-4 rounded border-border accent-primary"
+                      checked={allSelected}
+                      onChange={toggleSelectAll}
+                      aria-label="Select all"
+                    />
+                  </th>
+                  <th className="px-3 py-3 text-left font-medium">Ticket</th>
+                  <th className="px-3 py-3 text-left font-medium">
+                    <SortHeader
+                      label="Symbol"
+                      active={sortKey === "symbol"}
+                      dir={sortDir}
+                      onClick={() => toggleSort("symbol")}
+                    />
+                  </th>
                   <th className="px-3 py-3 text-left font-medium">Type</th>
                   <th className="px-3 py-3 text-right font-medium">Lot</th>
                   <th className="px-3 py-3 text-right font-medium">Entry</th>
                   <th className="px-3 py-3 text-right font-medium">Current</th>
                   <th className="px-3 py-3 text-right font-medium">SL</th>
                   <th className="px-3 py-3 text-right font-medium">TP</th>
-                  <th className="px-3 py-3 text-right font-medium">P/L {currency ?? ""}</th>
+                  <th className="px-3 py-3 text-right font-medium">
+                    <SortHeader
+                      label={`P/L ${currency ?? ""}`}
+                      active={sortKey === "profit"}
+                      dir={sortDir}
+                      onClick={() => toggleSort("profit")}
+                      align="right"
+                    />
+                  </th>
                   <th className="px-3 py-3 text-right font-medium">Risk</th>
-                  <th className="px-3 py-3 text-right font-medium">Opened</th>
+                  <th className="px-3 py-3 text-right font-medium">
+                    <SortHeader
+                      label="Opened"
+                      active={sortKey === "openedAt"}
+                      dir={sortDir}
+                      onClick={() => toggleSort("openedAt")}
+                      align="right"
+                    />
+                  </th>
                   <th className="px-6 py-3 text-right font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {positions.map((p) => {
+                {sortedPositions.map((p) => {
                   const isClosing = closing.has(p.ticket);
                   const isMovingBE = movingBE.has(p.ticket);
-                  const atBreakeven = isAtBreakeven(p);
                   return (
                     <tr key={p.ticket} className={cn("border-t border-border transition-colors hover:bg-muted/40", isClosing && "opacity-40")}>
-                      <td className="px-6 py-4 font-mono text-xs text-muted-foreground">{p.ticket}</td>
+                      <td className="px-4 py-4">
+                        <input
+                          type="checkbox"
+                          className="size-4 rounded border-border accent-primary"
+                          checked={selected.has(p.ticket)}
+                          onChange={() => toggleSelected(p.ticket)}
+                          aria-label={`Select position ${p.ticket}`}
+                        />
+                      </td>
+                      <td className="px-3 py-4 font-mono text-xs text-muted-foreground">{p.ticket}</td>
                       <td className="px-3 py-4 font-semibold">{p.symbol}</td>
                       <td className="px-3 py-4">
                         <SideBadge type={p.type} />
@@ -190,17 +425,12 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex justify-end gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleBreakeven(p)}
-                            disabled={isClosing || isMovingBE || atBreakeven || p.priceOpen == null}
-                            className="gap-1.5"
-                            title="Move stop loss to entry price"
-                          >
-                            <Lock className="size-3.5" />
-                            {isMovingBE ? "Queued" : atBreakeven ? "At BE" : "BE"}
-                          </Button>
+                          <LockProfitMenu
+                            position={p}
+                            disabled={isClosing}
+                            queued={isMovingBE}
+                            onLock={handleLockProfit}
+                          />
                           <Button
                             size="sm"
                             variant="outline"
@@ -232,14 +462,20 @@ export function PositionsTable({ positions, currency, equity }: Props) {
 
           {/* Mobile cards */}
           <div className="flex flex-col gap-3 p-3 md:hidden">
-            {positions.map((p) => {
+            {sortedPositions.map((p) => {
               const isClosing = closing.has(p.ticket);
               const isMovingBE = movingBE.has(p.ticket);
-              const atBreakeven = isAtBreakeven(p);
               const risk = estimateRisk(p, equity);
               return (
-                <div key={p.ticket} className={cn("rounded-xl border border-border bg-background p-4 transition-opacity", isClosing && "opacity-40")}>
-                  <div className="flex items-start justify-between gap-3">
+                <div key={p.ticket} className={cn("relative rounded-xl border border-border bg-background p-4 transition-opacity", isClosing && "opacity-40")}>
+                  <input
+                    type="checkbox"
+                    className="absolute left-3 top-3 size-4 rounded border-border accent-primary"
+                    checked={selected.has(p.ticket)}
+                    onChange={() => toggleSelected(p.ticket)}
+                    aria-label={`Select position ${p.ticket}`}
+                  />
+                  <div className="flex items-start justify-between gap-3 pl-6">
                     <div className="flex items-center gap-2">
                       <span className="text-base font-semibold">{p.symbol}</span>
                       <SideBadge type={p.type} />
@@ -262,16 +498,13 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                   </div>
 
                   <div className="mt-4 flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleBreakeven(p)}
-                      disabled={isClosing || isMovingBE || atBreakeven || p.priceOpen == null}
-                      className="flex-1 gap-1.5"
-                    >
-                      <Lock className="size-3.5" />
-                      {isMovingBE ? "Queued" : atBreakeven ? "At BE" : "BE"}
-                    </Button>
+                    <LockProfitMenu
+                      position={p}
+                      disabled={isClosing}
+                      queued={isMovingBE}
+                      onLock={handleLockProfit}
+                      className="flex-1"
+                    />
                     <Button
                       size="sm"
                       variant="outline"
