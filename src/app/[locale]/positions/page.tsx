@@ -75,7 +75,7 @@ export default async function PositionsPage({
         ticket, symbol, type,
         volume: num(r.volume), priceOpen: num(r.priceOpen), priceCurrent: num(r.priceCurrent),
         stopLoss: num(r.stopLoss), takeProfit: num(r.takeProfit), profit: num(r.profit),
-        swap: num(r.swap), openedAt: parseMql5Time(r.openedAt),
+        swap: num(r.swap), openedAt: parseMql5Time(r.openedAt), trailingPips: null,
       }];
     });
   }

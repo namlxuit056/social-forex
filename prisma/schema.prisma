@@ -716,6 +716,7 @@ model Mt5Connection {
   signalLinks Mt5SignalLink[]
   aiTradeProposals AiTradeProposal[]
   commands Mt5Command[]
+  trailingStops TrailingStopConfig[]
 
   @@index([userId, revokedAt])
   @@index([lastSeenAt])
@@ -774,6 +775,19 @@ model Mt5Command {
   connection Mt5Connection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
 
   @@index([connectionId, status, createdAt])
+}
+
+model TrailingStopConfig {
+  id           String   @id @default(cuid())
+  connectionId String
+  ticket       String
+  distancePips Float
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  connection Mt5Connection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+
+  @@unique([connectionId, ticket])
 }
 
 model AiTradeProposal {

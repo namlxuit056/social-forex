@@ -144,6 +144,7 @@ export default async function JournalPage({
         profit: num(p.profit),
         swap: num(p.swap),
         openedAt: parseMql5Time(p.openedAt),
+        trailingPips: null,
       });
     }
   }

@@ -1,0 +1,20 @@
+name: Trailing Stop Run
+
+on:
+  schedule:
+    # Mỗi phút — trailing stop cần phản hồi nhanh với biến động giá
+    - cron: "* * * * *"
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    environment: Production
+    timeout-minutes: 1
+    steps:
+      - name: Run trailing stop
+        run: |
+          curl -sf -X GET \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.SITE_URL }}/api/mt5/trailing-stop/run" \
+            || echo "Request failed (no active trailing stops or endpoint error)"

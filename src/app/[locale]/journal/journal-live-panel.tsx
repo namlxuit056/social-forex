@@ -21,6 +21,7 @@ export type LivePosition = {
   profit: number | null;
   swap: number | null;
   openedAt: string | null;
+  trailingPips: number | null;
 };
 
 export type Mt5AccountInfo = {

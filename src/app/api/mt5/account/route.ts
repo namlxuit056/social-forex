@@ -37,6 +37,7 @@ export async function GET() {
     where: { userId: session.user.id, revokedAt: null },
     orderBy: { lastSeenAt: "desc" },
     select: {
+      id: true,
       balance: true,
       equity: true,
       margin: true,
@@ -52,6 +53,12 @@ export async function GET() {
   if (!connection) {
     return NextResponse.json({ error: "no_connection" }, { status: 404 });
   }
+
+  const trailingConfigs = await prisma.trailingStopConfig.findMany({
+    where: { connectionId: connection.id },
+    select: { ticket: true, distancePips: true },
+  });
+  const trailingMap = new Map(trailingConfigs.map((c) => [c.ticket, c.distancePips]));
 
   const positions: LivePosition[] = [];
   if (Array.isArray(connection.lastPositions)) {
@@ -76,6 +83,7 @@ export async function GET() {
         profit: num(p.profit),
         swap: num(p.swap),
         openedAt: parseMql5Time(p.openedAt),
+        trailingPips: trailingMap.get(ticket) ?? null,
       });
     }
   }

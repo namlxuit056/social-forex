@@ -9,6 +9,7 @@ import {
   ArrowUpRight,
   ChevronDown,
   ChevronUp,
+  Crosshair,
   Scissors,
   SlidersHorizontal,
   X,
@@ -32,6 +33,7 @@ import { closePosition, modifyPosition } from "@/actions/mt5-commands";
 import { getPipSize } from "@/lib/mt5/pip-size";
 import { ModifyDialog } from "./modify-dialog";
 import { PartialCloseDialog } from "./partial-close-dialog";
+import { TrailingStopDialog } from "./trailing-stop-dialog";
 import { LockProfitMenu } from "./lock-profit-menu";
 import type { LivePosition } from "@/app/[locale]/journal/journal-live-panel";
 
@@ -176,6 +178,7 @@ type Props = {
 export function PositionsTable({ positions, currency, equity }: Props) {
   const [modifyTarget, setModifyTarget] = useState<LivePosition | null>(null);
   const [partialCloseTarget, setPartialCloseTarget] = useState<LivePosition | null>(null);
+  const [trailingTarget, setTrailingTarget] = useState<LivePosition | null>(null);
   const [closing, setClosing] = useState<Set<string>>(new Set());
   const [movingBE, setMovingBE] = useState<Set<string>>(new Set());
   const [selectedRaw, setSelected] = useState<Set<string>>(new Set());
@@ -456,6 +459,16 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                           </Button>
                           <Button
                             size="sm"
+                            variant={p.trailingPips != null ? "secondary" : "outline"}
+                            onClick={() => setTrailingTarget(p)}
+                            disabled={isClosing}
+                            className="gap-1.5"
+                          >
+                            <Crosshair className="size-3.5" />
+                            {p.trailingPips != null ? `Trail ${p.trailingPips}p` : "Trail"}
+                          </Button>
+                          <Button
+                            size="sm"
                             variant="destructive"
                             onClick={() => handleClose(p.ticket)}
                             disabled={isClosing}
@@ -540,6 +553,16 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                     </Button>
                     <Button
                       size="sm"
+                      variant={p.trailingPips != null ? "secondary" : "outline"}
+                      onClick={() => setTrailingTarget(p)}
+                      disabled={isClosing}
+                      className="flex-1 gap-1.5"
+                    >
+                      <Crosshair className="size-3.5" />
+                      {p.trailingPips != null ? `Trail ${p.trailingPips}p` : "Trail"}
+                    </Button>
+                    <Button
+                      size="sm"
                       variant="destructive"
                       onClick={() => handleClose(p.ticket)}
                       disabled={isClosing}
@@ -574,6 +597,16 @@ export function PositionsTable({ positions, currency, equity }: Props) {
           ticket={partialCloseTarget.ticket}
           symbol={partialCloseTarget.symbol}
           maxVolume={partialCloseTarget.volume ?? 0}
+        />
+      )}
+
+      {trailingTarget && (
+        <TrailingStopDialog
+          open
+          onOpenChange={(v) => { if (!v) setTrailingTarget(null); }}
+          ticket={trailingTarget.ticket}
+          symbol={trailingTarget.symbol}
+          currentDistancePips={trailingTarget.trailingPips}
         />
       )}
     </div>
