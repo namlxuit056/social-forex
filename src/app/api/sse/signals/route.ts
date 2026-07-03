@@ -12,6 +12,7 @@ export async function GET(): Promise<Response> {
   }
 
   const userId = session.user.id;
+  let cleanup: (() => void) | null = null;
 
   const stream = new ReadableStream({
     start(controller) {
@@ -70,19 +71,20 @@ export async function GET(): Promise<Response> {
         }
       }, 15_000);
 
-      const cleanup = () => {
+      // `start()` runs synchronously during `new ReadableStream(...)`, before the
+      // `stream` binding itself is assigned - referencing `stream` in here throws
+      // a TDZ ReferenceError. Use a variable from the enclosing scope instead,
+      // shared with cancel() via closure.
+      cleanup = () => {
         clearInterval(heartbeat);
         clearInterval(checkNewSignals);
         clients.delete(userId);
       };
 
       controller.enqueue(new TextEncoder().encode(": connected\n\n"));
-
-      (stream as unknown as { cleanup?: () => void }).cleanup = cleanup;
     },
     cancel() {
-      const cleanup = (stream as unknown as { cleanup?: () => void }).cleanup;
-      if (cleanup) cleanup();
+      cleanup?.();
     },
   });
 

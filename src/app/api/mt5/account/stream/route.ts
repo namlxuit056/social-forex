@@ -14,18 +14,12 @@ export async function GET(): Promise<Response> {
 
   const userId = session.user.id;
   let lastPayload = "";
+  let cleanup: (() => void) | null = null;
 
   const stream = new ReadableStream({
     start(controller) {
       const encoder = new TextEncoder();
       let closed = false;
-
-      function cleanup() {
-        if (closed) return;
-        closed = true;
-        clearInterval(heartbeat);
-        clearInterval(poll);
-      }
 
       async function push() {
         try {
@@ -44,20 +38,28 @@ export async function GET(): Promise<Response> {
         try {
           controller.enqueue(encoder.encode(": heartbeat\n\n"));
         } catch {
-          cleanup();
+          cleanup?.();
         }
       }, HEARTBEAT_MS);
 
       const poll = setInterval(() => void push(), POLL_MS);
 
+      // `start()` runs synchronously during `new ReadableStream(...)`, before the
+      // `stream` binding itself is assigned - referencing `stream` in here (even
+      // just to stash `cleanup` on it) throws a TDZ ReferenceError. Use a variable
+      // from the enclosing scope instead, shared with cancel() via closure.
+      cleanup = () => {
+        if (closed) return;
+        closed = true;
+        clearInterval(heartbeat);
+        clearInterval(poll);
+      };
+
       controller.enqueue(encoder.encode(": connected\n\n"));
       void push();
-
-      (stream as unknown as { cleanup?: () => void }).cleanup = cleanup;
     },
     cancel() {
-      const cleanup = (stream as unknown as { cleanup?: () => void }).cleanup;
-      if (cleanup) cleanup();
+      cleanup?.();
     },
   });
 
