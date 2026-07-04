@@ -412,7 +412,9 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                       align="right"
                     />
                   </th>
-                  <th className="px-6 py-3 text-right font-medium">Actions</th>
+                  <th className="sticky right-0 z-10 border-l border-border bg-card px-6 py-3 text-right font-medium shadow-[-4px_0_6px_-4px_rgba(0,0,0,0.15)]">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -420,7 +422,7 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                   const isClosing = closing.has(p.ticket);
                   const isMovingBE = movingBE.has(p.ticket);
                   return (
-                    <tr key={p.ticket} className={cn("border-t border-border transition-colors hover:bg-muted/40", isClosing && "opacity-40")}>
+                    <tr key={p.ticket} className={cn("group border-t border-border transition-colors hover:bg-muted/40", isClosing && "opacity-40")}>
                       <td className="px-4 py-4">
                         <input
                           type="checkbox"
@@ -453,7 +455,7 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                       <td className="px-3 py-4 text-right font-mono text-xs tabular-nums text-muted-foreground whitespace-nowrap">
                         {openedAgo(p.openedAt)}
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="sticky right-0 z-10 border-l border-border bg-card px-6 py-4 shadow-[-4px_0_6px_-4px_rgba(0,0,0,0.15)] transition-colors group-hover:bg-muted/40">
                         <div className="flex justify-end gap-2">
                           <LockProfitMenu
                             position={p}
