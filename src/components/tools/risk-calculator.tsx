@@ -6,7 +6,7 @@ import { Calculator } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { pipSize, contractSize } from "@/lib/calculators";
+import { pipSize, pipValuePerLot } from "@/lib/calculators";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { cn } from "@/lib/utils";
 
@@ -20,17 +20,6 @@ interface Props {
   defaultSymbol?: string;
   /** When provided, form state is persisted to localStorage under this key prefix */
   storageKey?: string;
-}
-
-function pipValuePerLot(symbol: string, price: number): number {
-  const s = symbol.toUpperCase();
-  const contract = contractSize(symbol);
-  const pip = pipSize(symbol);
-  // JPY-quoted pairs (e.g. USDJPY, EURJPY): divide by price to convert to USD
-  if (s.endsWith("JPY") && !s.startsWith("XAU") && !s.startsWith("BTC")) {
-    return (contract * pip) / price;
-  }
-  return contract * pip;
 }
 
 function calcResults(

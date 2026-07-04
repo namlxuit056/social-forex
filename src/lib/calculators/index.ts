@@ -28,6 +28,56 @@ export function contractSize(symbol: string): number {
   return 100000;
 }
 
+export function pipValuePerLot(symbol: string, price: number): number {
+  const s = symbol.toUpperCase();
+  const contract = contractSize(symbol);
+  const pip = pipSize(symbol);
+  // JPY-quoted pairs (e.g. USDJPY, EURJPY) settle in JPY — convert back to account currency (assumed USD).
+  if (s.endsWith("JPY") && !s.startsWith("XAU") && !s.startsWith("BTC")) {
+    return (contract * pip) / price;
+  }
+  return contract * pip;
+}
+
+export type OrderRiskEstimate = {
+  slAmount: number | null;
+  tpAmount: number | null;
+  riskReward: number | null;
+};
+
+/** Dollar loss/gain if SL/TP is hit, plus risk:reward, for a not-yet-filled order. */
+export function estimateOrderRisk(params: {
+  symbol: string;
+  isBuy: boolean;
+  entryPrice: number | null;
+  volume: number | null;
+  stopLoss: number | null;
+  takeProfit: number | null;
+}): OrderRiskEstimate {
+  const { symbol, isBuy, entryPrice, volume, stopLoss, takeProfit } = params;
+  if (!entryPrice || entryPrice <= 0 || !volume || volume <= 0) {
+    return { slAmount: null, tpAmount: null, riskReward: null };
+  }
+
+  const pip = pipSize(symbol);
+  const valuePerPip = pipValuePerLot(symbol, entryPrice) * volume;
+
+  const slAmount =
+    stopLoss != null && stopLoss > 0
+      ? (((isBuy ? entryPrice - stopLoss : stopLoss - entryPrice) / pip) * valuePerPip)
+      : null;
+
+  const tpAmount =
+    takeProfit != null && takeProfit > 0
+      ? (((isBuy ? takeProfit - entryPrice : entryPrice - takeProfit) / pip) * valuePerPip)
+      : null;
+
+  const riskReward =
+    slAmount != null && slAmount > 0 && tpAmount != null && tpAmount > 0 ? tpAmount / slAmount : null;
+
+  return { slAmount, tpAmount, riskReward };
+}
+
 export function stopLossPips(params: {
   symbol: string;
   entry: number;

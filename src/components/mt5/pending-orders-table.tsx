@@ -193,6 +193,9 @@ export function PendingOrdersTable({ orders }: Props) {
           symbol={modifyTarget.symbol}
           currentSl={modifyTarget.stopLoss}
           currentTp={modifyTarget.takeProfit}
+          entryPrice={modifyTarget.priceOpen}
+          volume={modifyTarget.volume}
+          isBuy={modifyTarget.type.toUpperCase().startsWith("BUY")}
           kind="order"
         />
       )}

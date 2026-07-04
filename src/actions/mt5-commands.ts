@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { commandExpiresAt } from "@/lib/mt5/command-ttl";
 import { queueCloseAll } from "@/lib/mt5/commands";
 import { resolveQuotes } from "@/lib/quotes/resolve-quotes";
-import { pipSize, contractSize } from "@/lib/calculators";
+import { pipSize, pipValuePerLot } from "@/lib/calculators";
 
 // Orders placed with no explicit SL get one sized to risk 10% of account
 // equity, so a position is never left fully unprotected. Same pip-value
@@ -18,17 +18,6 @@ const DEFAULT_STOP_LOSS_RISK_PCT = 10;
 function roundToSymbolPrecision(price: number, symbol: string): number {
   const decimals = Math.max(0, Math.round(-Math.log10(pipSize(symbol))) + 1);
   return Number(price.toFixed(decimals));
-}
-
-function pipValuePerLot(symbol: string, price: number): number {
-  const s = symbol.toUpperCase();
-  const contract = contractSize(symbol);
-  const pip = pipSize(symbol);
-  // JPY-quoted pairs (e.g. USDJPY, EURJPY) settle in JPY — convert back to account currency (assumed USD).
-  if (s.endsWith("JPY") && !s.startsWith("XAU") && !s.startsWith("BTC")) {
-    return (contract * pip) / price;
-  }
-  return contract * pip;
 }
 
 async function estimateDefaultStopLoss(params: {

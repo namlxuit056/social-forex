@@ -80,16 +80,27 @@ function PL({ value, className }: { value: number | null; className?: string }) 
   );
 }
 
-function estimateRisk(p: LivePosition, equity: number | null) {
-  if (p.priceOpen == null || p.priceCurrent == null || p.stopLoss == null || p.profit == null || equity == null || equity <= 0) {
-    return null;
-  }
+// Reverse-engineers $ profit per 1.0 price move from the position's own live `profit` —
+// this already accounts for lot/contract size and currency conversion via the real broker
+// figure, so it's more reliable than a generic contract-size table for an OPEN position.
+function deriveValuePerUnit(p: LivePosition): number | null {
+  if (p.priceOpen == null || p.priceCurrent == null || p.profit == null) return null;
   const isBuy = p.type.toUpperCase().startsWith("BUY");
   const dir = isBuy ? 1 : -1;
   const priceDiff = (p.priceCurrent - p.priceOpen) * dir;
   const pipSize = getPipSize(p.symbol);
   if (Math.abs(priceDiff) < pipSize * 0.5) return null;
-  const valuePerUnit = p.profit / priceDiff;
+  return p.profit / priceDiff;
+}
+
+function estimateRisk(p: LivePosition, equity: number | null) {
+  if (p.priceOpen == null || p.stopLoss == null || p.stopLoss === 0 || equity == null || equity <= 0) {
+    return null;
+  }
+  const valuePerUnit = deriveValuePerUnit(p);
+  if (valuePerUnit == null) return null;
+  const isBuy = p.type.toUpperCase().startsWith("BUY");
+  const pipSize = getPipSize(p.symbol);
   // Only count the stop as "risk" if it sits on the adverse side of entry — once it's
   // been moved to breakeven or beyond (e.g. locked profit), there's no more downside.
   const slDistancePrice = isBuy ? p.priceOpen - p.stopLoss : p.stopLoss - p.priceOpen;
@@ -102,8 +113,39 @@ function estimateRisk(p: LivePosition, equity: number | null) {
   return { riskAmount, riskPct, slDistancePips, protected: false };
 }
 
+// $ gained if TP is hit — same reverse-engineered value-per-unit as estimateRisk, projected
+// forward from entry to the TP price instead of the SL price.
+function estimateTakeProfitAmount(p: LivePosition): number | null {
+  if (p.priceOpen == null || p.takeProfit == null || p.takeProfit === 0) return null;
+  const valuePerUnit = deriveValuePerUnit(p);
+  if (valuePerUnit == null) return null;
+  const isBuy = p.type.toUpperCase().startsWith("BUY");
+  const tpDistancePrice = isBuy ? p.takeProfit - p.priceOpen : p.priceOpen - p.takeProfit;
+  return Math.abs(valuePerUnit) * tpDistancePrice;
+}
+
+function estimateRiskReward(p: LivePosition, equity: number | null): number | null {
+  const risk = estimateRisk(p, equity);
+  const tpAmount = estimateTakeProfitAmount(p);
+  if (!risk || risk.protected || risk.riskAmount <= 0 || tpAmount == null || tpAmount <= 0) return null;
+  return tpAmount / risk.riskAmount;
+}
+
+function SlAmount({ p, equity }: { p: LivePosition; equity: number | null }) {
+  const risk = estimateRisk(p, equity);
+  if (!risk || risk.protected || risk.riskAmount <= 0) return null;
+  return <span className="block font-mono text-[11px] text-red-500">-{risk.riskAmount.toFixed(2)}</span>;
+}
+
+function TpAmount({ p }: { p: LivePosition }) {
+  const amount = estimateTakeProfitAmount(p);
+  if (amount == null || amount <= 0) return null;
+  return <span className="block font-mono text-[11px] text-emerald-500">+{amount.toFixed(2)}</span>;
+}
+
 function RiskCell({ p, equity, currency }: { p: LivePosition; equity: number | null; currency: string | null }) {
   const risk = estimateRisk(p, equity);
+  const riskReward = estimateRiskReward(p, equity);
   if (!risk) {
     return <span className="font-mono text-xs tabular-nums text-muted-foreground">—</span>;
   }
@@ -112,8 +154,24 @@ function RiskCell({ p, equity, currency }: { p: LivePosition; equity: number | n
   }
   const tone = risk.riskPct > 5 ? "text-red-500" : risk.riskPct > 2 ? "text-amber-500" : "text-muted-foreground";
   return (
-    <span className={cn("font-mono text-xs font-semibold tabular-nums", tone)}>
-      -{risk.riskAmount.toFixed(2)} {currency ?? ""} ({risk.riskPct.toFixed(1)}%)
+    <span className="inline-flex flex-col items-end">
+      <span className={cn("font-mono text-xs font-semibold tabular-nums", tone)}>
+        -{risk.riskAmount.toFixed(2)} {currency ?? ""} ({risk.riskPct.toFixed(1)}%)
+      </span>
+      {riskReward != null && (
+        <span
+          className={cn(
+            "font-mono text-[11px] font-semibold tabular-nums",
+            riskReward >= 2
+              ? "text-emerald-600 dark:text-emerald-400"
+              : riskReward >= 1
+                ? "text-amber-600 dark:text-amber-400"
+                : "text-destructive",
+          )}
+        >
+          R:R 1:{riskReward.toFixed(2)}
+        </span>
+      )}
     </span>
   );
 }
@@ -442,9 +500,11 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                       <td className="px-3 py-4 text-right font-mono tabular-nums">{fmt(p.priceCurrent)}</td>
                       <td className="px-3 py-4 text-right font-mono tabular-nums text-muted-foreground">
                         <LevelValue value={p.stopLoss} />
+                        <SlAmount p={p} equity={equity} />
                       </td>
                       <td className="px-3 py-4 text-right font-mono tabular-nums text-muted-foreground">
                         <LevelValue value={p.takeProfit} />
+                        <TpAmount p={p} />
                       </td>
                       <td className="px-3 py-4 text-right">
                         <PL value={p.profit} />
@@ -518,6 +578,7 @@ export function PositionsTable({ positions, currency, equity }: Props) {
               const isClosing = closing.has(p.ticket);
               const isMovingBE = movingBE.has(p.ticket);
               const risk = estimateRisk(p, equity);
+              const riskReward = estimateRiskReward(p, equity);
               return (
                 <div key={p.ticket} className={cn("relative rounded-xl border border-border bg-background p-4 transition-opacity", isClosing && "opacity-40")}>
                   <input
@@ -543,17 +604,53 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                     <Row label="Ticket" value={p.ticket} muted />
                     <Row label="Entry" value={fmt(p.priceOpen)} />
                     <Row label="Current" value={fmt(p.priceCurrent)} />
-                    <Row label="SL" value={<LevelValue value={p.stopLoss} />} muted />
-                    <Row label="TP" value={<LevelValue value={p.takeProfit} />} muted />
+                    <Row
+                      label="SL"
+                      value={
+                        <span className="flex flex-col items-end">
+                          <LevelValue value={p.stopLoss} />
+                          <SlAmount p={p} equity={equity} />
+                        </span>
+                      }
+                      muted
+                    />
+                    <Row
+                      label="TP"
+                      value={
+                        <span className="flex flex-col items-end">
+                          <LevelValue value={p.takeProfit} />
+                          <TpAmount p={p} />
+                        </span>
+                      }
+                      muted
+                    />
                     <Row label="Opened" value={openedAgo(p.openedAt)} muted />
                     <Row
                       label="Risk"
                       value={
-                        !risk
-                          ? "—"
-                          : risk.protected
-                            ? "Protected"
-                            : `-${risk.riskAmount.toFixed(2)} (${risk.riskPct.toFixed(1)}%)`
+                        <span className="flex flex-col items-end">
+                          <span>
+                            {!risk
+                              ? "—"
+                              : risk.protected
+                                ? "Protected"
+                                : `-${risk.riskAmount.toFixed(2)} (${risk.riskPct.toFixed(1)}%)`}
+                          </span>
+                          {riskReward != null && (
+                            <span
+                              className={cn(
+                                "font-mono text-[11px] font-semibold",
+                                riskReward >= 2
+                                  ? "text-emerald-600 dark:text-emerald-400"
+                                  : riskReward >= 1
+                                    ? "text-amber-600 dark:text-amber-400"
+                                    : "text-destructive",
+                              )}
+                            >
+                              R:R 1:{riskReward.toFixed(2)}
+                            </span>
+                          )}
+                        </span>
                       }
                       muted
                     />
@@ -623,6 +720,9 @@ export function PositionsTable({ positions, currency, equity }: Props) {
           symbol={modifyTarget.symbol}
           currentSl={modifyTarget.stopLoss}
           currentTp={modifyTarget.takeProfit}
+          entryPrice={modifyTarget.priceOpen}
+          volume={modifyTarget.volume}
+          isBuy={modifyTarget.type.toUpperCase().startsWith("BUY")}
         />
       )}
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { Plus } from "lucide-react";
 import {
   Dialog,
@@ -15,7 +15,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { QUOTE_DEFINITIONS } from "@/lib/quotes/definitions";
+import type { QuotesApiResponse } from "@/lib/quotes/types";
 import { placeOrder, type PlaceOrderType } from "@/actions/mt5-commands";
+import { estimateOrderRisk } from "@/lib/calculators";
+import { SlAmountHint, TpAmountHint, RiskRewardPreview } from "./risk-reward-preview";
 
 const ORDER_TYPE_OPTIONS: { value: PlaceOrderType; label: string }[] = [
   { value: "BUY", label: "Buy (Market)" },
@@ -36,8 +39,46 @@ export function NewOrderDialog() {
   const [tp, setTp] = useState("");
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [marketPrice, setMarketPrice] = useState<{ bid: number; ask: number } | null>(null);
 
   const isPendingType = orderType !== "BUY" && orderType !== "SELL";
+  const isBuy = orderType.startsWith("BUY");
+
+  // Market orders have no entry price field — fetch the live quote just to preview $ SL/TP/R:R.
+  useEffect(() => {
+    if (!open || isPendingType) return;
+    let cancelled = false;
+    fetch("/api/quotes")
+      .then((res) => res.json() as Promise<QuotesApiResponse>)
+      .then((data) => {
+        if (cancelled) return;
+        const quote = data.quotes.find((q) => q.symbol === symbol);
+        setMarketPrice(quote ? { bid: quote.bid, ask: quote.ask } : null);
+      })
+      .catch(() => {
+        if (!cancelled) setMarketPrice(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [open, isPendingType, symbol]);
+
+  const referencePrice = isPendingType
+    ? (Number(price) || null)
+    : (marketPrice ? (isBuy ? marketPrice.ask : marketPrice.bid) : null);
+
+  const risk = useMemo(
+    () =>
+      estimateOrderRisk({
+        symbol,
+        isBuy,
+        entryPrice: referencePrice,
+        volume: Number(volume) || null,
+        stopLoss: sl === "" ? null : Number(sl),
+        takeProfit: tp === "" ? null : Number(tp),
+      }),
+    [symbol, isBuy, referencePrice, volume, sl, tp],
+  );
 
   function handleSubmit() {
     setError(null);
@@ -142,10 +183,11 @@ export function NewOrderDialog() {
                 id="order-sl"
                 type="number"
                 step="any"
-                placeholder="Optional"
+                placeholder="Optional — auto 10% risk if blank"
                 value={sl}
                 onChange={(e) => setSl(e.target.value)}
               />
+              <SlAmountHint amount={risk.slAmount} />
             </div>
             <div className="grid gap-1.5">
               <Label htmlFor="order-tp">Take Profit</Label>
@@ -157,8 +199,11 @@ export function NewOrderDialog() {
                 value={tp}
                 onChange={(e) => setTp(e.target.value)}
               />
+              <TpAmountHint amount={risk.tpAmount} />
             </div>
           </div>
+
+          <RiskRewardPreview riskReward={risk.riskReward} />
 
           {error && <p className="text-sm text-destructive">{error}</p>}
           <p className="text-xs text-muted-foreground">
