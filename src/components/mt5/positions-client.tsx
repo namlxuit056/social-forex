@@ -28,6 +28,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { closeAllPositions, placeOrder, setMt5AutoCloseBeforeWeekend } from "@/actions/mt5-commands";
 import { PositionsTable } from "./positions-table";
@@ -193,6 +194,7 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
   const currency = account?.currency ?? "";
   const plTone = totalPL > 0 ? "profit" : totalPL < 0 ? "loss" : "default";
   const hasQueueable = positions.length > 0 || orders.length > 0;
+  const marketClosed = activeSessions.length === 0;
 
   return (
     <div className="space-y-6">
@@ -232,24 +234,42 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
             >
               <RefreshCw className={cn("size-4", spinning && "animate-spin")} />
             </Button> */}
-            <Button
-              variant="outline"
-              disabled={quickOrderPending}
-              onClick={() => handleQuickGoldOrder("BUY")}
-              className="gap-1.5 border-emerald-500/50 text-emerald-600 hover:bg-emerald-500/10 hover:text-emerald-600 dark:text-emerald-400"
-            >
-              <TrendingUp className="size-4" />
-              {quickOrderPending && quickOrderSide === "BUY" ? "Queuing…" : "Buy 0.02 XAU"}
-            </Button>
-            <Button
-              variant="outline"
-              disabled={quickOrderPending}
-              onClick={() => handleQuickGoldOrder("SELL")}
-              className="gap-1.5 border-red-500/50 text-red-600 hover:bg-red-500/10 hover:text-red-600 dark:text-red-400"
-            >
-              <TrendingDown className="size-4" />
-              {quickOrderPending && quickOrderSide === "SELL" ? "Queuing…" : "Sell 0.02 XAU"}
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger render={<span className="inline-flex" />}>
+                  <Button
+                    variant="outline"
+                    disabled={quickOrderPending || marketClosed}
+                    onClick={() => handleQuickGoldOrder("BUY")}
+                    className={cn(
+                      "gap-1.5 border-emerald-500/50 text-emerald-600 hover:bg-emerald-500/10 hover:text-emerald-600 dark:text-emerald-400",
+                      marketClosed && "cursor-not-allowed",
+                    )}
+                  >
+                    <TrendingUp className="size-4" />
+                    {quickOrderPending && quickOrderSide === "BUY" ? "Queuing…" : "Buy 0.02 XAU"}
+                  </Button>
+                </TooltipTrigger>
+                {marketClosed && <TooltipContent>Market is closed on weekends — orders cannot be filled</TooltipContent>}
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger render={<span className="inline-flex" />}>
+                  <Button
+                    variant="outline"
+                    disabled={quickOrderPending || marketClosed}
+                    onClick={() => handleQuickGoldOrder("SELL")}
+                    className={cn(
+                      "gap-1.5 border-red-500/50 text-red-600 hover:bg-red-500/10 hover:text-red-600 dark:text-red-400",
+                      marketClosed && "cursor-not-allowed",
+                    )}
+                  >
+                    <TrendingDown className="size-4" />
+                    {quickOrderPending && quickOrderSide === "SELL" ? "Queuing…" : "Sell 0.02 XAU"}
+                  </Button>
+                </TooltipTrigger>
+                {marketClosed && <TooltipContent>Market is closed on weekends — orders cannot be filled</TooltipContent>}
+              </Tooltip>
+            </TooltipProvider>
             <NewOrderDialog />
             <AlertDialog>
               <AlertDialogTrigger

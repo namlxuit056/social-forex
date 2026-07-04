@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useTransition, type ReactNode } from "react";
 import { formatDistanceToNowStrict } from "date-fns";
 import {
   Activity,
@@ -48,6 +48,14 @@ function fmtProfit(v: number | null) {
   if (v == null) return "—";
   const sign = v >= 0 ? "+" : "";
   return `${sign}${v.toFixed(2)}`;
+}
+
+// MT5 reports 0 (not null) for an unset SL/TP — surface it as "Not set" rather than a fake price.
+function LevelValue({ value }: { value: number | null }) {
+  if (value == null || value === 0) {
+    return <span className="italic text-muted-foreground/70">Not set</span>;
+  }
+  return <>{fmt(value)}</>;
 }
 
 function SideBadge({ type }: { type: string }) {
@@ -117,7 +125,7 @@ function openedAgo(openedAt: string | null) {
   return `${formatDistanceToNowStrict(d)} ago`;
 }
 
-function Row({ label, value, muted }: { label: string; value: string; muted?: boolean }) {
+function Row({ label, value, muted }: { label: string; value: ReactNode; muted?: boolean }) {
   return (
     <div className="flex items-center justify-between gap-2">
       <span className="text-xs text-muted-foreground">{label}</span>
@@ -430,8 +438,12 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                       <td className="px-3 py-4 text-right font-mono tabular-nums">{fmt(p.volume, 2)}</td>
                       <td className="px-3 py-4 text-right font-mono tabular-nums">{fmt(p.priceOpen)}</td>
                       <td className="px-3 py-4 text-right font-mono tabular-nums">{fmt(p.priceCurrent)}</td>
-                      <td className="px-3 py-4 text-right font-mono tabular-nums text-muted-foreground">{fmt(p.stopLoss)}</td>
-                      <td className="px-3 py-4 text-right font-mono tabular-nums text-muted-foreground">{fmt(p.takeProfit)}</td>
+                      <td className="px-3 py-4 text-right font-mono tabular-nums text-muted-foreground">
+                        <LevelValue value={p.stopLoss} />
+                      </td>
+                      <td className="px-3 py-4 text-right font-mono tabular-nums text-muted-foreground">
+                        <LevelValue value={p.takeProfit} />
+                      </td>
                       <td className="px-3 py-4 text-right">
                         <PL value={p.profit} />
                       </td>
@@ -529,8 +541,8 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                     <Row label="Ticket" value={p.ticket} muted />
                     <Row label="Entry" value={fmt(p.priceOpen)} />
                     <Row label="Current" value={fmt(p.priceCurrent)} />
-                    <Row label="SL" value={fmt(p.stopLoss)} muted />
-                    <Row label="TP" value={fmt(p.takeProfit)} muted />
+                    <Row label="SL" value={<LevelValue value={p.stopLoss} />} muted />
+                    <Row label="TP" value={<LevelValue value={p.takeProfit} />} muted />
                     <Row label="Opened" value={openedAgo(p.openedAt)} muted />
                     <Row
                       label="Risk"
