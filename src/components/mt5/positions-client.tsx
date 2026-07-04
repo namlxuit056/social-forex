@@ -21,6 +21,7 @@ import {
   saveQuickOrderConfig,
   type QuickOrderConfig,
 } from "@/lib/mt5/quick-order-config";
+import { QUOTE_BY_SYMBOL } from "@/lib/quotes/definitions";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -211,7 +212,9 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
   const currency = account?.currency ?? "";
   const plTone = totalPL > 0 ? "profit" : totalPL < 0 ? "loss" : "default";
   const hasQueueable = positions.length > 0 || orders.length > 0;
-  const marketClosed = activeSessions.length === 0;
+  // Crypto trades 24/7 — only forex/metals/energy follow the weekday session calendar.
+  const isCryptoQuickOrder = QUOTE_BY_SYMBOL[quickOrderConfig.symbol]?.group === "crypto";
+  const marketClosed = !isCryptoQuickOrder && activeSessions.length === 0;
 
   return (
     <div className="space-y-6">
