@@ -15,6 +15,12 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { getActiveTradingSessions } from "@/lib/mt5/trading-sessions";
+import {
+  DEFAULT_QUICK_ORDER_CONFIG,
+  loadQuickOrderConfig,
+  saveQuickOrderConfig,
+  type QuickOrderConfig,
+} from "@/lib/mt5/quick-order-config";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -34,6 +40,7 @@ import { closeAllPositions, placeOrder, setMt5AutoCloseBeforeWeekend } from "@/a
 import { PositionsTable } from "./positions-table";
 import { PendingOrdersTable } from "./pending-orders-table";
 import { NewOrderDialog } from "./new-order-dialog";
+import { QuickOrderSettingsDialog } from "./quick-order-settings-dialog";
 import { PortfolioReviewPanel } from "./portfolio-review-panel";
 import type { LivePosition, Mt5AccountInfo } from "@/app/[locale]/journal/journal-live-panel";
 import type { LivePendingOrder, Mt5AccountResponse } from "@/app/api/mt5/account/route";
@@ -90,6 +97,11 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
   const [quickOrderSide, setQuickOrderSide] = useState<"BUY" | "SELL" | null>(null);
   const [autoClosePending, startAutoClose] = useTransition();
   const [activeSessions, setActiveSessions] = useState(() => getActiveTradingSessions());
+  const [quickOrderConfig, setQuickOrderConfig] = useState<QuickOrderConfig>(DEFAULT_QUICK_ORDER_CONFIG);
+
+  useEffect(() => {
+    setQuickOrderConfig(loadQuickOrderConfig());
+  }, []);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -175,19 +187,24 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
     });
   }
 
-  function handleQuickGoldOrder(orderType: "BUY" | "SELL") {
+  function handleQuickOrder(orderType: "BUY" | "SELL") {
     setQuickOrderSide(orderType);
     startQuickOrder(async () => {
       await placeOrder({
-        symbol: "XAUUSD",
+        symbol: quickOrderConfig.symbol,
         orderType,
-        volume: 0.02,
+        volume: quickOrderConfig.volume,
         price: null,
         stopLoss: null,
         takeProfit: null,
       });
       setQuickOrderSide(null);
     });
+  }
+
+  function handleSaveQuickOrderConfig(next: QuickOrderConfig) {
+    setQuickOrderConfig(next);
+    saveQuickOrderConfig(next);
   }
 
   const totalPL = positions.reduce((sum, p) => sum + (p.profit ?? 0), 0);
@@ -240,14 +257,16 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
                   <Button
                     variant="outline"
                     disabled={quickOrderPending || marketClosed}
-                    onClick={() => handleQuickGoldOrder("BUY")}
+                    onClick={() => handleQuickOrder("BUY")}
                     className={cn(
                       "gap-1.5 border-emerald-500/50 text-emerald-600 hover:bg-emerald-500/10 hover:text-emerald-600 dark:text-emerald-400",
                       marketClosed && "cursor-not-allowed",
                     )}
                   >
                     <TrendingUp className="size-4" />
-                    {quickOrderPending && quickOrderSide === "BUY" ? "Queuing…" : "Buy 0.02 XAU"}
+                    {quickOrderPending && quickOrderSide === "BUY"
+                      ? "Queuing…"
+                      : `Buy ${quickOrderConfig.volume} ${quickOrderConfig.symbol}`}
                   </Button>
                 </TooltipTrigger>
                 {marketClosed && <TooltipContent>Market is closed on weekends — orders cannot be filled</TooltipContent>}
@@ -257,19 +276,22 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
                   <Button
                     variant="outline"
                     disabled={quickOrderPending || marketClosed}
-                    onClick={() => handleQuickGoldOrder("SELL")}
+                    onClick={() => handleQuickOrder("SELL")}
                     className={cn(
                       "gap-1.5 border-red-500/50 text-red-600 hover:bg-red-500/10 hover:text-red-600 dark:text-red-400",
                       marketClosed && "cursor-not-allowed",
                     )}
                   >
                     <TrendingDown className="size-4" />
-                    {quickOrderPending && quickOrderSide === "SELL" ? "Queuing…" : "Sell 0.02 XAU"}
+                    {quickOrderPending && quickOrderSide === "SELL"
+                      ? "Queuing…"
+                      : `Sell ${quickOrderConfig.volume} ${quickOrderConfig.symbol}`}
                   </Button>
                 </TooltipTrigger>
                 {marketClosed && <TooltipContent>Market is closed on weekends — orders cannot be filled</TooltipContent>}
               </Tooltip>
             </TooltipProvider>
+            <QuickOrderSettingsDialog config={quickOrderConfig} onSave={handleSaveQuickOrderConfig} />
             <NewOrderDialog />
             <AlertDialog>
               <AlertDialogTrigger
