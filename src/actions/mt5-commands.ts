@@ -6,6 +6,32 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { commandExpiresAt } from "@/lib/mt5/command-ttl";
 import { queueCloseAll } from "@/lib/mt5/commands";
+import { getPipSize } from "@/lib/mt5/pip-size";
+import { resolveQuotes } from "@/lib/quotes/resolve-quotes";
+
+// Orders placed with no explicit SL get one 10% away from entry, so a position
+// is never left fully unprotected. User can still override it in the form.
+const DEFAULT_STOP_LOSS_DISTANCE_PCT = 0.1;
+
+function roundToSymbolPrecision(price: number, symbol: string): number {
+  const pipSize = getPipSize(symbol);
+  const decimals = Math.max(0, Math.round(-Math.log10(pipSize)) + 1);
+  return Number(price.toFixed(decimals));
+}
+
+async function estimateDefaultStopLoss(symbol: string, isBuy: boolean, entryPrice: number | null): Promise<number | null> {
+  let referencePrice = entryPrice;
+  if (referencePrice == null) {
+    const { quotes } = await resolveQuotes();
+    const quote = quotes.find((q) => q.symbol === symbol);
+    referencePrice = quote ? (isBuy ? quote.ask : quote.bid) : null;
+  }
+  if (referencePrice == null) return null;
+
+  const distance = referencePrice * DEFAULT_STOP_LOSS_DISTANCE_PCT;
+  const stopLoss = isBuy ? referencePrice - distance : referencePrice + distance;
+  return roundToSymbolPrecision(stopLoss, symbol);
+}
 
 async function getActiveConnection(userId: string) {
   return prisma.mt5Connection.findFirst({
@@ -177,6 +203,11 @@ export async function placeOrder(input: {
   const connection = await getActiveConnection(session.user.id);
   if (!connection) return { error: "no_connection" };
 
+  const isBuy = parsed.data.orderType.startsWith("BUY");
+  const stopLoss =
+    parsed.data.stopLoss ??
+    (await estimateDefaultStopLoss(parsed.data.symbol, isBuy, isPending ? (parsed.data.price ?? null) : null));
+
   const placeType = `PLACE_${parsed.data.orderType}`;
   await prisma.mt5Command.create({
     data: {
@@ -185,7 +216,7 @@ export async function placeOrder(input: {
       symbol: parsed.data.symbol,
       volume: parsed.data.volume,
       price: isPending ? parsed.data.price : null,
-      stopLoss: parsed.data.stopLoss ?? null,
+      stopLoss,
       takeProfit: parsed.data.takeProfit ?? null,
       expiresAt: commandExpiresAt(placeType),
     },
