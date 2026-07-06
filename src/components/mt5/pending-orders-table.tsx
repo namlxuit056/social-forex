@@ -1,16 +1,60 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, type ReactNode } from "react";
 import { ArrowDownRight, ArrowUpRight, Ban, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { cancelOrder } from "@/actions/mt5-commands";
+import { estimateOrderRisk } from "@/lib/calculators";
 import { ModifyDialog } from "./modify-dialog";
 import type { LivePendingOrder } from "@/app/api/mt5/account/route";
 
 function fmt(v: number | null, d = 5) {
   return v == null ? "—" : v.toFixed(d);
+}
+
+// MT5 reports 0 (not null) for an unset SL/TP — treat it the same as "not set".
+function orderRisk(o: LivePendingOrder) {
+  return estimateOrderRisk({
+    symbol: o.symbol,
+    isBuy: o.type.toUpperCase().startsWith("BUY"),
+    entryPrice: o.priceOpen,
+    volume: o.volume,
+    stopLoss: o.stopLoss,
+    takeProfit: o.takeProfit,
+  });
+}
+
+function SlAmount({ o }: { o: LivePendingOrder }) {
+  const { slAmount } = orderRisk(o);
+  if (slAmount == null || slAmount <= 0) return null;
+  return <span className="block font-mono text-[11px] text-red-500">-{slAmount.toFixed(2)}</span>;
+}
+
+function TpAmount({ o }: { o: LivePendingOrder }) {
+  const { tpAmount } = orderRisk(o);
+  if (tpAmount == null || tpAmount <= 0) return null;
+  return <span className="block font-mono text-[11px] text-emerald-500">+{tpAmount.toFixed(2)}</span>;
+}
+
+function RiskRewardCell({ o }: { o: LivePendingOrder }) {
+  const { riskReward } = orderRisk(o);
+  if (riskReward == null) return <span className="font-mono text-xs tabular-nums text-muted-foreground">—</span>;
+  return (
+    <span
+      className={cn(
+        "font-mono text-xs font-semibold tabular-nums",
+        riskReward >= 2
+          ? "text-emerald-600 dark:text-emerald-400"
+          : riskReward >= 1
+            ? "text-amber-600 dark:text-amber-400"
+            : "text-destructive",
+      )}
+    >
+      1:{riskReward.toFixed(2)}
+    </span>
+  );
 }
 
 function TypeBadge({ type }: { type: string }) {
@@ -29,7 +73,7 @@ function TypeBadge({ type }: { type: string }) {
   );
 }
 
-function Row({ label, value, muted }: { label: string; value: string; muted?: boolean }) {
+function Row({ label, value, muted }: { label: string; value: ReactNode; muted?: boolean }) {
   return (
     <div className="flex items-center justify-between gap-2">
       <span className="text-xs text-muted-foreground">{label}</span>
@@ -89,6 +133,7 @@ export function PendingOrdersTable({ orders }: Props) {
                   <th className="px-3 py-3 text-right font-medium">Price</th>
                   <th className="px-3 py-3 text-right font-medium">SL</th>
                   <th className="px-3 py-3 text-right font-medium">TP</th>
+                  <th className="px-3 py-3 text-right font-medium">R:R</th>
                   <th className="px-6 py-3 text-right font-medium">Actions</th>
                 </tr>
               </thead>
@@ -104,8 +149,17 @@ export function PendingOrdersTable({ orders }: Props) {
                       </td>
                       <td className="px-3 py-4 text-right font-mono tabular-nums">{fmt(o.volume, 2)}</td>
                       <td className="px-3 py-4 text-right font-mono tabular-nums">{fmt(o.priceOpen)}</td>
-                      <td className="px-3 py-4 text-right font-mono tabular-nums text-muted-foreground">{fmt(o.stopLoss)}</td>
-                      <td className="px-3 py-4 text-right font-mono tabular-nums text-muted-foreground">{fmt(o.takeProfit)}</td>
+                      <td className="px-3 py-4 text-right font-mono tabular-nums text-muted-foreground">
+                        {fmt(o.stopLoss)}
+                        <SlAmount o={o} />
+                      </td>
+                      <td className="px-3 py-4 text-right font-mono tabular-nums text-muted-foreground">
+                        {fmt(o.takeProfit)}
+                        <TpAmount o={o} />
+                      </td>
+                      <td className="px-3 py-4 text-right">
+                        <RiskRewardCell o={o} />
+                      </td>
                       <td className="px-6 py-4">
                         <div className="flex justify-end gap-2">
                           <Button
@@ -153,8 +207,27 @@ export function PendingOrdersTable({ orders }: Props) {
                   <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2">
                     <Row label="Lot" value={fmt(o.volume, 2)} />
                     <Row label="Price" value={fmt(o.priceOpen)} />
-                    <Row label="SL" value={fmt(o.stopLoss)} muted />
-                    <Row label="TP" value={fmt(o.takeProfit)} muted />
+                    <Row
+                      label="SL"
+                      value={
+                        <span className="flex flex-col items-end">
+                          {fmt(o.stopLoss)}
+                          <SlAmount o={o} />
+                        </span>
+                      }
+                      muted
+                    />
+                    <Row
+                      label="TP"
+                      value={
+                        <span className="flex flex-col items-end">
+                          {fmt(o.takeProfit)}
+                          <TpAmount o={o} />
+                        </span>
+                      }
+                      muted
+                    />
+                    <Row label="R:R" value={<RiskRewardCell o={o} />} muted />
                   </div>
 
                   <div className="mt-4 flex gap-2">
