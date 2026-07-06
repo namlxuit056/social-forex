@@ -39,6 +39,27 @@ export function pipValuePerLot(symbol: string, price: number): number {
   return contract * pip;
 }
 
+// Price distance (in the symbol's own units) that corresponds to `pct` of equity
+// moving through the position, given its lot size — shared by the SL/TP quick-set helpers.
+function priceDistanceForEquityPct(params: {
+  symbol: string;
+  entryPrice: number;
+  volume: number;
+  equity: number;
+  pct: number;
+}): number | null {
+  const { symbol, entryPrice, volume, equity, pct } = params;
+  if (!Number.isFinite(entryPrice) || entryPrice <= 0) return null;
+  if (!Number.isFinite(equity) || equity <= 0) return null;
+  if (!Number.isFinite(volume) || volume <= 0) return null;
+
+  const amount = (equity * pct) / 100;
+  const pipValue = pipValuePerLot(symbol, entryPrice) * volume;
+  if (!Number.isFinite(pipValue) || pipValue <= 0) return null;
+
+  return (amount / pipValue) * pipSize(symbol);
+}
+
 /** SL price that risks exactly `riskPct` of equity, given entry price and lot size. */
 export function estimateStopLossForRisk(params: {
   symbol: string;
@@ -49,17 +70,26 @@ export function estimateStopLossForRisk(params: {
   riskPct?: number;
 }): number | null {
   const { symbol, isBuy, entryPrice, volume, equity, riskPct = 10 } = params;
-  if (!Number.isFinite(entryPrice) || entryPrice <= 0) return null;
-  if (!Number.isFinite(equity) || equity <= 0) return null;
-  if (!Number.isFinite(volume) || volume <= 0) return null;
-
-  const riskAmount = (equity * riskPct) / 100;
-  const pipValue = pipValuePerLot(symbol, entryPrice) * volume;
-  if (!Number.isFinite(pipValue) || pipValue <= 0) return null;
-
-  const priceDistance = (riskAmount / pipValue) * pipSize(symbol);
-  const stopLoss = isBuy ? entryPrice - priceDistance : entryPrice + priceDistance;
+  const distance = priceDistanceForEquityPct({ symbol, entryPrice, volume, equity, pct: riskPct });
+  if (distance == null) return null;
+  const stopLoss = isBuy ? entryPrice - distance : entryPrice + distance;
   return stopLoss > 0 ? stopLoss : null;
+}
+
+/** TP price that gains exactly `rewardPct` of equity, given entry price and lot size. */
+export function estimateTakeProfitForReward(params: {
+  symbol: string;
+  isBuy: boolean;
+  entryPrice: number;
+  volume: number;
+  equity: number;
+  rewardPct?: number;
+}): number | null {
+  const { symbol, isBuy, entryPrice, volume, equity, rewardPct = 20 } = params;
+  const distance = priceDistanceForEquityPct({ symbol, entryPrice, volume, equity, pct: rewardPct });
+  if (distance == null) return null;
+  const takeProfit = isBuy ? entryPrice + distance : entryPrice - distance;
+  return takeProfit > 0 ? takeProfit : null;
 }
 
 export function roundToSymbolPrecision(price: number, symbol: string): number {

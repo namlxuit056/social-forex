@@ -13,6 +13,7 @@ import {
   Percent,
   Scissors,
   SlidersHorizontal,
+  Target,
   X,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -31,7 +32,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { closePosition, modifyPosition } from "@/actions/mt5-commands";
-import { estimateStopLossForRisk, roundToSymbolPrecision } from "@/lib/calculators";
+import { estimateStopLossForRisk, estimateTakeProfitForReward, roundToSymbolPrecision } from "@/lib/calculators";
 import { getPipSize } from "@/lib/mt5/pip-size";
 import { ModifyDialog } from "./modify-dialog";
 import { PartialCloseDialog } from "./partial-close-dialog";
@@ -258,6 +259,7 @@ export function PositionsTable({ positions, currency, equity }: Props) {
   const [closing, setClosing] = useState<Set<string>>(new Set());
   const [movingBE, setMovingBE] = useState<Set<string>>(new Set());
   const [quickSlPending, setQuickSlPending] = useState<Set<string>>(new Set());
+  const [quickTpPending, setQuickTpPending] = useState<Set<string>>(new Set());
   const [selectedRaw, setSelected] = useState<Set<string>>(new Set());
   const [sortKey, setSortKey] = useState<SortKey>(null);
   const [sortDir, setSortDir] = useState<SortDir>("asc");
@@ -363,6 +365,24 @@ export function PositionsTable({ positions, currency, equity }: Props) {
     setQuickSlPending((prev) => new Set(prev).add(p.ticket));
     startTransition(async () => {
       await modifyPosition(p.ticket, rounded, p.takeProfit);
+    });
+  }
+
+  function handleQuickTakeProfit(p: LivePosition) {
+    if (p.priceOpen == null || p.volume == null || equity == null) return;
+    const isBuy = p.type.toUpperCase().startsWith("BUY");
+    const takeProfit = estimateTakeProfitForReward({
+      symbol: p.symbol,
+      isBuy,
+      entryPrice: p.priceOpen,
+      volume: p.volume,
+      equity,
+    });
+    if (takeProfit == null) return;
+    const rounded = roundToSymbolPrecision(takeProfit, p.symbol);
+    setQuickTpPending((prev) => new Set(prev).add(p.ticket));
+    startTransition(async () => {
+      await modifyPosition(p.ticket, p.stopLoss, rounded);
     });
   }
 
@@ -501,6 +521,7 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                   const isClosing = closing.has(p.ticket);
                   const isMovingBE = movingBE.has(p.ticket);
                   const isQuickSl = quickSlPending.has(p.ticket);
+                  const isQuickTp = quickTpPending.has(p.ticket);
                   return (
                     <tr key={p.ticket} className={cn("group border-t border-border transition-colors hover:bg-muted/40", isClosing && "opacity-40")}>
                       <td className="px-4 py-4">
@@ -559,6 +580,17 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                           <Button
                             size="sm"
                             variant="outline"
+                            onClick={() => handleQuickTakeProfit(p)}
+                            disabled={isClosing || isQuickTp || p.priceOpen == null || equity == null}
+                            className="gap-1.5"
+                            title="Set take profit to 20% equity reward"
+                          >
+                            <Target className="size-3.5" />
+                            {isQuickTp ? "Queued" : "TP 20%"}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
                             onClick={() => setPartialCloseTarget(p)}
                             disabled={isClosing || p.volume == null || p.volume <= 0}
                             className="gap-1.5"
@@ -611,6 +643,7 @@ export function PositionsTable({ positions, currency, equity }: Props) {
               const isClosing = closing.has(p.ticket);
               const isMovingBE = movingBE.has(p.ticket);
               const isQuickSl = quickSlPending.has(p.ticket);
+              const isQuickTp = quickTpPending.has(p.ticket);
               const risk = estimateRisk(p, equity);
               const riskReward = estimateRiskReward(p, equity);
               return (
@@ -708,6 +741,17 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                     >
                       <Percent className="size-3.5" />
                       {isQuickSl ? "Queued" : "SL 10%"}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleQuickTakeProfit(p)}
+                      disabled={isClosing || isQuickTp || p.priceOpen == null || equity == null}
+                      className="w-full gap-1.5"
+                      title="Set take profit to 20% equity reward"
+                    >
+                      <Target className="size-3.5" />
+                      {isQuickTp ? "Queued" : "TP 20%"}
                     </Button>
                     <Button
                       size="sm"
