@@ -1,17 +1,54 @@
 "use client";
 
-import { useState, useTransition, type ReactNode } from "react";
+import { useEffect, useState, useTransition, type ReactNode } from "react";
 import { ArrowDownRight, ArrowUpRight, Ban, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { cancelOrder } from "@/actions/mt5-commands";
 import { estimateOrderRisk } from "@/lib/calculators";
+import type { QuotesApiResponse } from "@/lib/quotes/types";
 import { ModifyDialog } from "./modify-dialog";
 import type { LivePendingOrder } from "@/app/api/mt5/account/route";
 
 function fmt(v: number | null, d = 5) {
   return v == null ? "—" : v.toFixed(d);
+}
+
+// A pending order "lights up" once the market price is within this % of its trigger
+// price — % rather than fixed pips so it scales across XAUUSD, BTCUSD, EURJPY, etc.
+const NEAR_TRIGGER_PCT = 0.15;
+
+type QuoteMap = Record<string, { bid: number; ask: number }>;
+
+function distanceToTriggerPct(o: LivePendingOrder, quotes: QuoteMap): number | null {
+  if (o.priceOpen == null || o.priceOpen <= 0) return null;
+  const quote = quotes[o.symbol];
+  if (!quote) return null;
+  const isBuy = o.type.toUpperCase().startsWith("BUY");
+  const current = isBuy ? quote.ask : quote.bid;
+  if (!Number.isFinite(current) || current <= 0) return null;
+  return (Math.abs(current - o.priceOpen) / current) * 100;
+}
+
+function isNearTrigger(o: LivePendingOrder, quotes: QuoteMap): boolean {
+  const distance = distanceToTriggerPct(o, quotes);
+  return distance != null && distance <= NEAR_TRIGGER_PCT;
+}
+
+function NearTriggerBadge() {
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger render={<span className="relative inline-flex size-2.5" />}>
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-400 opacity-75" />
+          <span className="relative inline-flex size-2.5 rounded-full bg-amber-500" />
+        </TooltipTrigger>
+        <TooltipContent>Price is close to the trigger — order may fill soon</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
 }
 
 // MT5 reports 0 (not null) for an unset SL/TP — treat it the same as "not set".
@@ -101,7 +138,30 @@ type Props = {
 export function PendingOrdersTable({ orders }: Props) {
   const [modifyTarget, setModifyTarget] = useState<LivePendingOrder | null>(null);
   const [cancelling, setCancelling] = useState<Set<string>>(new Set());
+  const [quotes, setQuotes] = useState<QuoteMap>({});
   const [, startTransition] = useTransition();
+
+  useEffect(() => {
+    let cancelled = false;
+    const poll = async () => {
+      try {
+        const res = await fetch("/api/quotes");
+        const data = (await res.json()) as QuotesApiResponse;
+        if (cancelled || !Array.isArray(data.quotes)) return;
+        const next: QuoteMap = {};
+        for (const q of data.quotes) next[q.symbol] = { bid: q.bid, ask: q.ask };
+        setQuotes(next);
+      } catch {
+        // keep last known quotes
+      }
+    };
+    void poll();
+    const id = setInterval(poll, 15_000);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, []);
 
   function handleCancel(ticket: string) {
     setCancelling((prev) => new Set(prev).add(ticket));
@@ -140,15 +200,28 @@ export function PendingOrdersTable({ orders }: Props) {
               <tbody>
                 {orders.map((o) => {
                   const isCancelling = cancelling.has(o.ticket);
+                  const isNear = isNearTrigger(o, quotes);
                   return (
-                    <tr key={o.ticket} className={cn("border-t border-border transition-colors hover:bg-muted/40", isCancelling && "opacity-40")}>
+                    <tr
+                      key={o.ticket}
+                      className={cn(
+                        "border-t border-border transition-colors hover:bg-muted/40",
+                        isCancelling && "opacity-40",
+                        isNear && "bg-amber-400/10 hover:bg-amber-400/15 dark:bg-amber-400/5",
+                      )}
+                    >
                       <td className="px-6 py-4 font-mono text-xs text-muted-foreground">{o.ticket}</td>
                       <td className="px-3 py-4 font-semibold">{o.symbol}</td>
                       <td className="px-3 py-4">
                         <TypeBadge type={o.type} />
                       </td>
                       <td className="px-3 py-4 text-right font-mono tabular-nums">{fmt(o.volume, 2)}</td>
-                      <td className="px-3 py-4 text-right font-mono tabular-nums">{fmt(o.priceOpen)}</td>
+                      <td className="px-3 py-4 text-right font-mono tabular-nums">
+                        <span className="inline-flex items-center justify-end gap-1.5">
+                          {isNear && <NearTriggerBadge />}
+                          {fmt(o.priceOpen)}
+                        </span>
+                      </td>
                       <td className="px-3 py-4 text-right font-mono tabular-nums text-muted-foreground">
                         {fmt(o.stopLoss)}
                         <SlAmount o={o} />
@@ -194,12 +267,21 @@ export function PendingOrdersTable({ orders }: Props) {
           <div className="flex flex-col gap-2 p-2 md:hidden">
             {orders.map((o) => {
               const isCancelling = cancelling.has(o.ticket);
+              const isNear = isNearTrigger(o, quotes);
               return (
-                <div key={o.ticket} className={cn("rounded-xl border border-border bg-background p-3 transition-opacity", isCancelling && "opacity-40")}>
+                <div
+                  key={o.ticket}
+                  className={cn(
+                    "rounded-xl border border-border bg-background p-3 transition-opacity",
+                    isCancelling && "opacity-40",
+                    isNear && "border-amber-400/50 bg-amber-400/10 dark:bg-amber-400/5",
+                  )}
+                >
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
                       <span className="text-base font-semibold">{o.symbol}</span>
                       <TypeBadge type={o.type} />
+                      {isNear && <NearTriggerBadge />}
                     </div>
                     <span className="font-mono text-[11px] text-muted-foreground">#{o.ticket}</span>
                   </div>
