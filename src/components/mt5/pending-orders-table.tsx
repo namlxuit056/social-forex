@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState, useTransition, type ReactNode } from "react";
-import { ArrowDownRight, ArrowUpRight, Ban, Clock } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, Ban, Clock, Percent } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { cancelOrder } from "@/actions/mt5-commands";
-import { estimateOrderRisk } from "@/lib/calculators";
+import { cancelOrder, modifyOrder } from "@/actions/mt5-commands";
+import { estimateOrderRisk, estimateStopLossForRisk, roundToSymbolPrecision } from "@/lib/calculators";
 import type { QuotesApiResponse } from "@/lib/quotes/types";
 import { ModifyDialog } from "./modify-dialog";
 import type { LivePendingOrder } from "@/app/api/mt5/account/route";
@@ -133,11 +133,13 @@ function EmptyState() {
 
 type Props = {
   orders: LivePendingOrder[];
+  equity: number | null;
 };
 
-export function PendingOrdersTable({ orders }: Props) {
+export function PendingOrdersTable({ orders, equity }: Props) {
   const [modifyTarget, setModifyTarget] = useState<LivePendingOrder | null>(null);
   const [cancelling, setCancelling] = useState<Set<string>>(new Set());
+  const [quickSlPending, setQuickSlPending] = useState<Set<string>>(new Set());
   const [quotes, setQuotes] = useState<QuoteMap>({});
   const [, startTransition] = useTransition();
 
@@ -167,6 +169,24 @@ export function PendingOrdersTable({ orders }: Props) {
     setCancelling((prev) => new Set(prev).add(ticket));
     startTransition(async () => {
       await cancelOrder(ticket);
+    });
+  }
+
+  function handleQuickStopLoss(o: LivePendingOrder) {
+    if (o.priceOpen == null || o.volume == null || equity == null) return;
+    const isBuy = o.type.toUpperCase().startsWith("BUY");
+    const stopLoss = estimateStopLossForRisk({
+      symbol: o.symbol,
+      isBuy,
+      entryPrice: o.priceOpen,
+      volume: o.volume,
+      equity,
+    });
+    if (stopLoss == null) return;
+    const rounded = roundToSymbolPrecision(stopLoss, o.symbol);
+    setQuickSlPending((prev) => new Set(prev).add(o.ticket));
+    startTransition(async () => {
+      await modifyOrder(o.ticket, rounded, o.takeProfit);
     });
   }
 
@@ -200,6 +220,7 @@ export function PendingOrdersTable({ orders }: Props) {
               <tbody>
                 {orders.map((o) => {
                   const isCancelling = cancelling.has(o.ticket);
+                  const isQuickSl = quickSlPending.has(o.ticket);
                   const isNear = isNearTrigger(o, quotes);
                   return (
                     <tr
@@ -238,6 +259,17 @@ export function PendingOrdersTable({ orders }: Props) {
                           <Button
                             size="sm"
                             variant="outline"
+                            onClick={() => handleQuickStopLoss(o)}
+                            disabled={isCancelling || isQuickSl || o.priceOpen == null || equity == null}
+                            className="gap-1.5"
+                            title="Set stop loss to 10% equity risk"
+                          >
+                            <Percent className="size-3.5" />
+                            {isQuickSl ? "Queued" : "SL 10%"}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
                             onClick={() => setModifyTarget(o)}
                             disabled={isCancelling}
                             className="gap-1.5"
@@ -267,6 +299,7 @@ export function PendingOrdersTable({ orders }: Props) {
           <div className="flex flex-col gap-2 p-2 md:hidden">
             {orders.map((o) => {
               const isCancelling = cancelling.has(o.ticket);
+              const isQuickSl = quickSlPending.has(o.ticket);
               const isNear = isNearTrigger(o, quotes);
               return (
                 <div
@@ -312,13 +345,24 @@ export function PendingOrdersTable({ orders }: Props) {
                     <Row label="R:R" value={<RiskRewardCell o={o} />} muted />
                   </div>
 
-                  <div className="mt-4 flex gap-2">
+                  <div className="mt-4 grid grid-cols-2 gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleQuickStopLoss(o)}
+                      disabled={isCancelling || isQuickSl || o.priceOpen == null || equity == null}
+                      className="w-full gap-1.5"
+                      title="Set stop loss to 10% equity risk"
+                    >
+                      <Percent className="size-3.5" />
+                      {isQuickSl ? "Queued" : "SL 10%"}
+                    </Button>
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() => setModifyTarget(o)}
                       disabled={isCancelling}
-                      className="flex-1 gap-1.5"
+                      className="w-full gap-1.5"
                     >
                       Modify
                     </Button>
@@ -327,7 +371,7 @@ export function PendingOrdersTable({ orders }: Props) {
                       variant="destructive"
                       onClick={() => handleCancel(o.ticket)}
                       disabled={isCancelling}
-                      className="flex-1 gap-1.5"
+                      className="col-span-2 w-full gap-1.5"
                     >
                       <Ban className="size-3.5" />
                       {isCancelling ? "Queued" : "Cancel"}

@@ -384,7 +384,7 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
           <PositionsTable positions={positions} currency={currency} equity={account?.equity ?? null} />
         </TabsContent>
         <TabsContent value="orders">
-          <PendingOrdersTable orders={orders} />
+          <PendingOrdersTable orders={orders} equity={account?.equity ?? null} />
         </TabsContent>
       </Tabs>
 

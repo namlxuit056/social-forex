@@ -7,18 +7,13 @@ import { prisma } from "@/lib/prisma";
 import { commandExpiresAt } from "@/lib/mt5/command-ttl";
 import { queueCloseAll } from "@/lib/mt5/commands";
 import { resolveQuotes } from "@/lib/quotes/resolve-quotes";
-import { pipSize, pipValuePerLot } from "@/lib/calculators";
+import { estimateStopLossForRisk, roundToSymbolPrecision } from "@/lib/calculators";
 
 // Orders placed with no explicit SL get one sized to risk 10% of account
 // equity, so a position is never left fully unprotected. Same pip-value
 // formula as the Risk Calculator tool (src/lib/calculators). User can still
 // override it in the form.
 const DEFAULT_STOP_LOSS_RISK_PCT = 10;
-
-function roundToSymbolPrecision(price: number, symbol: string): number {
-  const decimals = Math.max(0, Math.round(-Math.log10(pipSize(symbol))) + 1);
-  return Number(price.toFixed(decimals));
-}
 
 async function estimateDefaultStopLoss(params: {
   symbol: string;
@@ -35,17 +30,17 @@ async function estimateDefaultStopLoss(params: {
     const quote = quotes.find((q) => q.symbol === symbol);
     referencePrice = quote ? (isBuy ? quote.ask : quote.bid) : null;
   }
-  if (referencePrice == null || equity == null || equity <= 0) return null;
+  if (referencePrice == null || equity == null) return null;
 
-  const riskAmount = (equity * DEFAULT_STOP_LOSS_RISK_PCT) / 100;
-  const pipValue = pipValuePerLot(symbol, referencePrice) * volume;
-  if (!Number.isFinite(pipValue) || pipValue <= 0) return null;
-
-  const priceDistance = (riskAmount / pipValue) * pipSize(symbol);
-  const stopLoss = isBuy ? referencePrice - priceDistance : referencePrice + priceDistance;
-  if (stopLoss <= 0) return null;
-
-  return roundToSymbolPrecision(stopLoss, symbol);
+  const stopLoss = estimateStopLossForRisk({
+    symbol,
+    isBuy,
+    entryPrice: referencePrice,
+    volume,
+    equity,
+    riskPct: DEFAULT_STOP_LOSS_RISK_PCT,
+  });
+  return stopLoss == null ? null : roundToSymbolPrecision(stopLoss, symbol);
 }
 
 async function getActiveConnection(userId: string) {

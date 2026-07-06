@@ -39,6 +39,34 @@ export function pipValuePerLot(symbol: string, price: number): number {
   return contract * pip;
 }
 
+/** SL price that risks exactly `riskPct` of equity, given entry price and lot size. */
+export function estimateStopLossForRisk(params: {
+  symbol: string;
+  isBuy: boolean;
+  entryPrice: number;
+  volume: number;
+  equity: number;
+  riskPct?: number;
+}): number | null {
+  const { symbol, isBuy, entryPrice, volume, equity, riskPct = 10 } = params;
+  if (!Number.isFinite(entryPrice) || entryPrice <= 0) return null;
+  if (!Number.isFinite(equity) || equity <= 0) return null;
+  if (!Number.isFinite(volume) || volume <= 0) return null;
+
+  const riskAmount = (equity * riskPct) / 100;
+  const pipValue = pipValuePerLot(symbol, entryPrice) * volume;
+  if (!Number.isFinite(pipValue) || pipValue <= 0) return null;
+
+  const priceDistance = (riskAmount / pipValue) * pipSize(symbol);
+  const stopLoss = isBuy ? entryPrice - priceDistance : entryPrice + priceDistance;
+  return stopLoss > 0 ? stopLoss : null;
+}
+
+export function roundToSymbolPrecision(price: number, symbol: string): number {
+  const decimals = Math.max(0, Math.round(-Math.log10(pipSize(symbol))) + 1);
+  return Number(price.toFixed(decimals));
+}
+
 export type OrderRiskEstimate = {
   slAmount: number | null;
   tpAmount: number | null;

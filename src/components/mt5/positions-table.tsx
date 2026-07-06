@@ -10,6 +10,7 @@ import {
   ChevronDown,
   ChevronUp,
   Crosshair,
+  Percent,
   Scissors,
   SlidersHorizontal,
   X,
@@ -30,6 +31,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { closePosition, modifyPosition } from "@/actions/mt5-commands";
+import { estimateStopLossForRisk, roundToSymbolPrecision } from "@/lib/calculators";
 import { getPipSize } from "@/lib/mt5/pip-size";
 import { ModifyDialog } from "./modify-dialog";
 import { PartialCloseDialog } from "./partial-close-dialog";
@@ -255,6 +257,7 @@ export function PositionsTable({ positions, currency, equity }: Props) {
   const [trailingTarget, setTrailingTarget] = useState<LivePosition | null>(null);
   const [closing, setClosing] = useState<Set<string>>(new Set());
   const [movingBE, setMovingBE] = useState<Set<string>>(new Set());
+  const [quickSlPending, setQuickSlPending] = useState<Set<string>>(new Set());
   const [selectedRaw, setSelected] = useState<Set<string>>(new Set());
   const [sortKey, setSortKey] = useState<SortKey>(null);
   const [sortDir, setSortDir] = useState<SortDir>("asc");
@@ -342,6 +345,24 @@ export function PositionsTable({ positions, currency, equity }: Props) {
     setMovingBE((prev) => new Set(prev).add(ticket));
     startTransition(async () => {
       await modifyPosition(ticket, newSl, p.takeProfit);
+    });
+  }
+
+  function handleQuickStopLoss(p: LivePosition) {
+    if (p.priceOpen == null || p.volume == null || equity == null) return;
+    const isBuy = p.type.toUpperCase().startsWith("BUY");
+    const stopLoss = estimateStopLossForRisk({
+      symbol: p.symbol,
+      isBuy,
+      entryPrice: p.priceOpen,
+      volume: p.volume,
+      equity,
+    });
+    if (stopLoss == null) return;
+    const rounded = roundToSymbolPrecision(stopLoss, p.symbol);
+    setQuickSlPending((prev) => new Set(prev).add(p.ticket));
+    startTransition(async () => {
+      await modifyPosition(p.ticket, rounded, p.takeProfit);
     });
   }
 
@@ -479,6 +500,7 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                 {sortedPositions.map((p) => {
                   const isClosing = closing.has(p.ticket);
                   const isMovingBE = movingBE.has(p.ticket);
+                  const isQuickSl = quickSlPending.has(p.ticket);
                   return (
                     <tr key={p.ticket} className={cn("group border-t border-border transition-colors hover:bg-muted/40", isClosing && "opacity-40")}>
                       <td className="px-4 py-4">
@@ -523,6 +545,17 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                             queued={isMovingBE}
                             onLock={handleLockProfit}
                           />
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleQuickStopLoss(p)}
+                            disabled={isClosing || isQuickSl || p.priceOpen == null || equity == null}
+                            className="gap-1.5"
+                            title="Set stop loss to 10% equity risk"
+                          >
+                            <Percent className="size-3.5" />
+                            {isQuickSl ? "Queued" : "SL 10%"}
+                          </Button>
                           <Button
                             size="sm"
                             variant="outline"
@@ -577,6 +610,7 @@ export function PositionsTable({ positions, currency, equity }: Props) {
             {sortedPositions.map((p) => {
               const isClosing = closing.has(p.ticket);
               const isMovingBE = movingBE.has(p.ticket);
+              const isQuickSl = quickSlPending.has(p.ticket);
               const risk = estimateRisk(p, equity);
               const riskReward = estimateRiskReward(p, equity);
               return (
@@ -664,6 +698,17 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                       onLock={handleLockProfit}
                       className="w-full"
                     />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleQuickStopLoss(p)}
+                      disabled={isClosing || isQuickSl || p.priceOpen == null || equity == null}
+                      className="w-full gap-1.5"
+                      title="Set stop loss to 10% equity risk"
+                    >
+                      <Percent className="size-3.5" />
+                      {isQuickSl ? "Queued" : "SL 10%"}
+                    </Button>
                     <Button
                       size="sm"
                       variant="outline"
