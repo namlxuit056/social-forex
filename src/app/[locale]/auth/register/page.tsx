@@ -42,7 +42,7 @@ export default async function RegisterPage({
           {t("registerTitle")}
         </h1>
       </div>
-      <RegisterForm callbackUrl={callbackUrl} ref={ref} />
+      <RegisterForm callbackUrl={callbackUrl} referralCode={ref} />
       <p className="text-center text-sm text-muted-foreground">
         {t("hasAccount")}{" "}
         <Link

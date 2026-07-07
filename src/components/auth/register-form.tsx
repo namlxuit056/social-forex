@@ -22,10 +22,10 @@ import { trackInternalEvent } from "@/lib/internal-analytics";
 
 export function RegisterForm({
   callbackUrl = "/dashboard",
-  ref: referralCode,
+  referralCode,
 }: {
   callbackUrl?: string;
-  ref?: string;
+  referralCode?: string;
 }) {
   const t = useTranslations("auth");
   const locale = useLocale();
