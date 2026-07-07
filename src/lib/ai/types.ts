@@ -153,6 +153,40 @@ export type AiPortfolioReviewResponse = {
   disclaimer: string;
 };
 
+export const aiPositionReviewSchema = z.object({
+  action: z.enum(["hold", "trim", "close"]),
+  trendAlignment: z.enum(["bullish", "bearish", "neutral"]),
+  confidence: z.number().min(1).max(5),
+  summary: z.string().min(20).max(400),
+  reasoning: z.string().min(20).max(1200),
+  invalidationLevel: z.number().positive().optional(),
+});
+
+export type AiPositionReview = z.infer<typeof aiPositionReviewSchema>;
+
+export type AiPositionReviewResponse = {
+  review: AiPositionReview;
+  technicalContext?: TradingViewTechnicalContext;
+  generatedAt: string;
+  disclaimer: string;
+};
+
+/**
+ * LLMs occasionally overflow the string length limits despite prompt
+ * instructions. Truncate before Zod validation so a slightly long
+ * response doesn't hard-fail the whole review.
+ */
+export function sanitizeAiPositionReviewPayload(data: unknown): unknown {
+  if (!data || typeof data !== "object") return data;
+  const obj = data as Record<string, unknown>;
+  const sanitized: Record<string, unknown> = { ...obj };
+
+  if (typeof obj.summary === "string") sanitized.summary = truncate(obj.summary, 400);
+  if (typeof obj.reasoning === "string") sanitized.reasoning = truncate(obj.reasoning, 1200);
+
+  return sanitized;
+}
+
 /**
  * LLMs occasionally overflow the string length limits despite prompt
  * instructions. Truncate before Zod validation so a slightly long

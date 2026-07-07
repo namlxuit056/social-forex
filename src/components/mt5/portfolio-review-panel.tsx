@@ -1,34 +1,17 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import {
-  AlertTriangle,
-  Loader2,
-  Minus,
-  ShieldAlert,
-  Sparkles,
-  TrendingDown,
-  TrendingUp,
-} from "lucide-react";
+import { AlertTriangle, Loader2, ShieldAlert, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { tradeActionBadge } from "./trade-action-badge";
 import type { AiPortfolioReviewResponse, AiSuggestError } from "@/lib/ai/types";
 
 function riskLevelTone(level: "low" | "medium" | "high") {
   if (level === "high") return "border-destructive/30 bg-destructive/8 text-destructive";
   if (level === "medium") return "border-amber-500/30 bg-amber-500/8 text-amber-600 dark:text-amber-500";
   return "border-emerald-500/30 bg-emerald-500/8 text-emerald-600 dark:text-emerald-500";
-}
-
-function actionBadge(action: "hold" | "trim" | "close") {
-  if (action === "close") {
-    return { icon: TrendingDown, className: "border-destructive/30 bg-destructive/8 text-destructive" };
-  }
-  if (action === "trim") {
-    return { icon: Minus, className: "border-amber-500/30 bg-amber-500/8 text-amber-600 dark:text-amber-500" };
-  }
-  return { icon: TrendingUp, className: "border-emerald-500/30 bg-emerald-500/8 text-emerald-600 dark:text-emerald-500" };
 }
 
 export function PortfolioReviewPanel({ positionCount }: { positionCount: number }) {
@@ -170,7 +153,7 @@ export function PortfolioReviewPanel({ positionCount }: { positionCount: number 
             <h3 className="text-sm font-semibold text-foreground">Per-Position Advice</h3>
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
               {data.review.positionAdvice.map((item) => {
-                const { icon: Icon, className } = actionBadge(item.action);
+                const { icon: Icon, className } = tradeActionBadge(item.action);
                 return (
                   <div
                     key={item.ticket}

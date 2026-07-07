@@ -7,6 +7,7 @@ import {
   AlertTriangle,
   ArrowDownRight,
   ArrowUpRight,
+  BrainCircuit,
   ChevronDown,
   ChevronUp,
   Crosshair,
@@ -37,6 +38,7 @@ import { getPipSize } from "@/lib/mt5/pip-size";
 import { ModifyDialog } from "./modify-dialog";
 import { PartialCloseDialog } from "./partial-close-dialog";
 import { TrailingStopDialog } from "./trailing-stop-dialog";
+import { PositionReviewDialog } from "./position-review-dialog";
 import { LockProfitMenu } from "./lock-profit-menu";
 import type { LivePosition } from "@/app/[locale]/journal/journal-live-panel";
 
@@ -256,6 +258,7 @@ export function PositionsTable({ positions, currency, equity }: Props) {
   const [modifyTarget, setModifyTarget] = useState<LivePosition | null>(null);
   const [partialCloseTarget, setPartialCloseTarget] = useState<LivePosition | null>(null);
   const [trailingTarget, setTrailingTarget] = useState<LivePosition | null>(null);
+  const [aiReviewTarget, setAiReviewTarget] = useState<LivePosition | null>(null);
   const [closing, setClosing] = useState<Set<string>>(new Set());
   const [movingBE, setMovingBE] = useState<Set<string>>(new Set());
   const [quickSlPending, setQuickSlPending] = useState<Set<string>>(new Set());
@@ -619,6 +622,15 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                             {p.trailingPips != null ? `Trail ${p.trailingPips}p` : "Trail"}
                           </Button>
                           <Button
+                            size="icon"
+                            variant="outline"
+                            onClick={() => setAiReviewTarget(p)}
+                            disabled={isClosing}
+                            title="AI: check if the trend still supports holding this position"
+                          >
+                            <BrainCircuit className="size-3.5" />
+                          </Button>
+                          <Button
                             size="sm"
                             variant="destructive"
                             onClick={() => handleClose(p.ticket)}
@@ -785,6 +797,16 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                     </Button>
                     <Button
                       size="sm"
+                      variant="outline"
+                      onClick={() => setAiReviewTarget(p)}
+                      disabled={isClosing}
+                      className="w-full gap-1.5"
+                    >
+                      <BrainCircuit className="size-3.5" />
+                      AI Check
+                    </Button>
+                    <Button
+                      size="sm"
                       variant="destructive"
                       onClick={() => handleClose(p.ticket)}
                       disabled={isClosing}
@@ -832,6 +854,15 @@ export function PositionsTable({ positions, currency, equity }: Props) {
           ticket={trailingTarget.ticket}
           symbol={trailingTarget.symbol}
           currentDistancePips={trailingTarget.trailingPips}
+        />
+      )}
+
+      {aiReviewTarget && (
+        <PositionReviewDialog
+          open
+          onOpenChange={(v) => { if (!v) setAiReviewTarget(null); }}
+          ticket={aiReviewTarget.ticket}
+          symbol={aiReviewTarget.symbol}
         />
       )}
     </div>

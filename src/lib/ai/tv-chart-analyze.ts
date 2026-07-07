@@ -9,7 +9,7 @@ import {
 import { getAiNewsContext } from "@/lib/ai/news-context";
 import type { QuoteGroup } from "@/lib/quotes/types";
 
-function detectGroup(symbol: string): QuoteGroup {
+export function detectGroup(symbol: string): QuoteGroup {
   const s = symbol.toUpperCase();
   if (s.includes("XAU") || s.includes("XAG")) return "metal";
   if (s.includes("OIL") || s.includes("GAS") || s === "USOIL" || s === "UKOIL") return "energy";

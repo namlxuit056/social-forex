@@ -50,7 +50,7 @@ RESPONSE JSON SCHEMA:
 
 Respond ONLY with the JSON object, no markdown, no extra text.`;
 
-function responseLanguage(locale: AppLocale) {
+export function responseLanguage(locale: AppLocale) {
   return locale === "en"
     ? "English. Do not use Vietnamese words or Vietnamese sentence structure in any user-facing field."
     : "Vietnamese.";
@@ -61,7 +61,7 @@ function formatNumber(value: number | null, digits = 5) {
   return value.toFixed(value >= 100 ? 2 : digits);
 }
 
-function formatTradingViewContext(context?: TradingViewTechnicalContext | null) {
+export function formatTradingViewContext(context?: TradingViewTechnicalContext | null) {
   if (!context) {
     return "TradingView technical context: unavailable. Use lower confidence and state that the plan is based mainly on the live quote snapshot.";
   }
@@ -88,7 +88,7 @@ Summary: ${context.summary}
 ${frames}`;
 }
 
-function formatNewsContext(context?: AiNewsContext | null) {
+export function formatNewsContext(context?: AiNewsContext | null) {
   if (!context) {
     return "Economic calendar news context: unavailable. Do not assume there is no news risk.";
   }
