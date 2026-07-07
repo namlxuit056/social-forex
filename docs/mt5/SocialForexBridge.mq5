@@ -6,7 +6,7 @@
 //| It never opens new positions on its own.                          |
 //+------------------------------------------------------------------+
 #property copyright "Social Forex"
-#property version   "1.32"
+#property version   "1.33"
 #property strict
 
 input string BridgeEndpoint   = "https://www.toolforex.xyz/api/mt5/bridge";
@@ -225,6 +225,59 @@ string OrdersJson()
    return json;
 }
 
+// Reports realized exit deals from trade history so the server can record a closed
+// position's real close price/profit instead of reconstructing it from the last-seen
+// floating profit, which can be a few seconds (and a few pips) stale by the time the
+// EA notices the position is no longer in PositionsJson(). Looks back a few days so a
+// dashboard that was briefly unreachable still gets the real numbers on the next sync.
+string ClosedDealsJson()
+{
+   string json = "[";
+   bool first = true;
+   datetime from = TimeCurrent() - 3 * 24 * 60 * 60;
+
+   if(!HistorySelect(from, TimeCurrent()))
+      return "[]";
+
+   int total = HistoryDealsTotal();
+   for(int i = 0; i < total; i++)
+   {
+      ulong dealTicket = HistoryDealGetTicket(i);
+      if(dealTicket == 0)
+         continue;
+
+      long entry = HistoryDealGetInteger(dealTicket, DEAL_ENTRY);
+      if(entry != DEAL_ENTRY_OUT && entry != DEAL_ENTRY_OUT_BY)
+         continue; // only closing legs, not the opening deal
+
+      long dealType = HistoryDealGetInteger(dealTicket, DEAL_TYPE);
+      if(dealType != DEAL_TYPE_BUY && dealType != DEAL_TYPE_SELL)
+         continue; // skip balance/credit/correction entries
+
+      long positionId = HistoryDealGetInteger(dealTicket, DEAL_POSITION_ID);
+      if(positionId == 0)
+         continue;
+
+      if(!first)
+         json += ",";
+      first = false;
+
+      datetime closed_at = (datetime)HistoryDealGetInteger(dealTicket, DEAL_TIME);
+
+      json += "{";
+      json += "\"positionId\":" + JsonString(IntegerToString(positionId)) + ",";
+      json += "\"price\":" + DoubleToString(HistoryDealGetDouble(dealTicket, DEAL_PRICE), 5) + ",";
+      json += "\"profit\":" + DoubleToString(HistoryDealGetDouble(dealTicket, DEAL_PROFIT), 2) + ",";
+      json += "\"swap\":" + DoubleToString(HistoryDealGetDouble(dealTicket, DEAL_SWAP), 2) + ",";
+      json += "\"commission\":" + DoubleToString(HistoryDealGetDouble(dealTicket, DEAL_COMMISSION), 2) + ",";
+      json += "\"closedAt\":" + JsonString(TimeToString(closed_at, TIME_DATE | TIME_SECONDS));
+      json += "}";
+   }
+
+   json += "]";
+   return json;
+}
+
 string BuildPayload()
 {
    string json = "{";
@@ -232,6 +285,7 @@ string BuildPayload()
    json += "\"account\":" + AccountJson() + ",";
    json += "\"positions\":" + PositionsJson() + ",";
    json += "\"orders\":" + OrdersJson() + ",";
+   json += "\"closedDeals\":" + ClosedDealsJson() + ",";
    json += "\"terminal\":{";
    json += "\"name\":" + JsonString(TerminalInfoString(TERMINAL_NAME)) + ",";
    json += "\"build\":" + IntegerToString((int)TerminalInfoInteger(TERMINAL_BUILD));

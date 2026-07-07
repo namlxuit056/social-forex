@@ -50,11 +50,25 @@ const pendingOrderSchema = z.object({
   openedAt: z.string().optional().nullable(),
 });
 
+// Realized exit deal from MT5 trade history (HistoryDealGetX) — reported in addition to
+// `positions` so a closed position's final price/profit doesn't have to be reconstructed
+// from the last-seen floating profit, which can be several seconds stale by the time the
+// EA notices the position is gone.
+const closedDealSchema = z.object({
+  positionId: z.union([z.string(), z.number()]).transform(String),
+  price: z.coerce.number(),
+  profit: z.coerce.number(),
+  swap: z.coerce.number().optional().default(0),
+  commission: z.coerce.number().optional().default(0),
+  closedAt: z.string(),
+});
+
 const payloadSchema = z.object({
   token: z.string().optional(),
   account: accountSchema,
   positions: z.array(positionSchema).max(200).default([]),
   orders: z.array(pendingOrderSchema).max(200).default([]),
+  closedDeals: z.array(closedDealSchema).max(1000).default([]),
   terminal: z
     .object({
       build: z.union([z.string(), z.number()]).optional(),
@@ -62,6 +76,32 @@ const payloadSchema = z.object({
     })
     .optional(),
 });
+
+type ClosedDealInfo = { price: number; profit: number; closedAt: Date };
+
+// A position can be closed via multiple exit deals (partial closes finishing with a final
+// close) — sum the realized profit across all of them and keep the latest deal's price/time
+// as the position's effective close price/time.
+function aggregateClosedDeals(deals: z.infer<typeof closedDealSchema>[]): Map<string, ClosedDealInfo> {
+  const byPosition = new Map<string, ClosedDealInfo & { latestMs: number }>();
+  for (const deal of deals) {
+    const closedAt = new Date(deal.closedAt);
+    if (!Number.isFinite(closedAt.getTime())) continue;
+    const dealProfit = deal.profit + deal.swap + deal.commission;
+    const existing = byPosition.get(deal.positionId);
+    if (!existing) {
+      byPosition.set(deal.positionId, { price: deal.price, profit: dealProfit, closedAt, latestMs: closedAt.getTime() });
+      continue;
+    }
+    existing.profit += dealProfit;
+    if (closedAt.getTime() >= existing.latestMs) {
+      existing.price = deal.price;
+      existing.closedAt = closedAt;
+      existing.latestMs = closedAt.getTime();
+    }
+  }
+  return byPosition;
+}
 
 function bearerToken(request: NextRequest) {
   const authorization = request.headers.get("authorization");
@@ -162,8 +202,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
-  const { account, positions, orders } = parsed.data;
+  const { account, positions, orders, closedDeals } = parsed.data;
   const now = new Date();
+  const closedDealsByPosition = aggregateClosedDeals(closedDeals);
   const nextTradeHash = tradeHash(positions, orders);
   const tradeChanged = connection.lastTradeHash !== nextTradeHash;
   const snapshotExpired =
@@ -453,13 +494,19 @@ export async function POST(request: NextRequest) {
       }
 
       if (link.kind === "OPEN_POSITION" && link.signal.status === "ACTIVE" && !activeMt5Tickets.has(link.mt5Ticket)) {
-        const status = typeof link.lastProfit === "number" && link.lastProfit < 0 ? "CLOSED_LOSS" : "CLOSED_WIN";
+        // Prefer the realized deal from trade history over the last-seen floating profit —
+        // the position can move for several seconds between the last heartbeat and the actual
+        // close, so `lastProfit` alone can be noticeably off from the real fill.
+        const closedDeal = closedDealsByPosition.get(link.mt5Ticket);
+        const profit = closedDeal?.profit ?? link.lastProfit;
+        const closedAt = closedDeal?.closedAt ?? now;
+        const status = typeof profit === "number" && profit < 0 ? "CLOSED_LOSS" : "CLOSED_WIN";
         const signal = await tx.signal.update({
           where: { id: link.signalId },
           data: {
             status,
-            closedAt: now,
-            notes: closeNoteForMt5("closed", link.mt5Ticket, link.lastProfit),
+            closedAt,
+            notes: closeNoteForMt5("closed", link.mt5Ticket, profit),
           },
           select: { id: true },
         });
@@ -468,11 +515,10 @@ export async function POST(request: NextRequest) {
           symbol: link.signal.symbol,
           direction: link.signal.direction,
           status,
-          profit: link.lastProfit,
+          profit,
         });
 
         if (link.journalId) {
-          const profit = link.lastProfit;
           const result =
             typeof profit === "number"
               ? profit > 0
@@ -483,7 +529,7 @@ export async function POST(request: NextRequest) {
               : "PENDING";
           await tx.tradeJournal.update({
             where: { id: link.journalId },
-            data: { result, pnl: profit, closedAt: now },
+            data: { result, pnl: profit, closedAt, exitPrice: closedDeal?.price ?? null },
           });
         }
 
