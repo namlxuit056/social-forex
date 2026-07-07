@@ -75,6 +75,7 @@ export type TradingPlanFormValue = {
 type Props = {
   plan: TradingPlanFormValue;
   locale: string;
+  hasPrefill?: boolean;
 };
 
 const checklistKeys = [
@@ -224,14 +225,14 @@ function FieldSupportLink({
   );
 }
 
-export function TradingPlanForm({ plan, locale }: Props) {
+export function TradingPlanForm({ plan, locale, hasPrefill = false }: Props) {
   const t = useTranslations("tradingPlan");
   const tc = useTranslations("common");
   const pathname = usePathname();
   const [state, formAction, isPending] = useActionState(saveDailyTradingPlan, null);
   const [readPlan, setReadPlan] = useState(plan);
   const [pendingReadPlan, setPendingReadPlan] = useState<TradingPlanFormValue | null>(null);
-  const [isEditing, setIsEditing] = useState(() => !hasPlanContent(plan));
+  const [isEditing, setIsEditing] = useState(() => hasPrefill || !hasPlanContent(plan));
   const [uploadedUrls, setUploadedUrls] = useState<string[]>(plan.chartImageUrls);
   const [pendingSlots, setPendingSlots] = useState<PendingSlot[]>([]);
   const [symbolPlans, setSymbolPlans] = useState(() => symbolPlansFromPlan(plan));
@@ -244,7 +245,7 @@ export function TradingPlanForm({ plan, locale }: Props) {
   );
   const [notes, setNotes] = useState(readPlan.notes ?? "");
   const [sessionFocus, setSessionFocus] = useState(readPlan.sessionFocus ?? "");
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(hasPrefill);
 
   useEffect(() => {
     if (!hasUnsavedChanges) return;

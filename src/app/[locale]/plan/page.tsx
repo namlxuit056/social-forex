@@ -403,7 +403,12 @@ export default async function TradingPlanPage({
         )}
       </nav>
 
-      <TradingPlanForm key={selectedDate} plan={formValue} locale={locale} />
+      <TradingPlanForm
+        key={selectedDate}
+        plan={formValue}
+        locale={locale}
+        hasPrefill={Boolean(prefillSymbol)}
+      />
 
       {recentPlans.length > 0 ? (
         <section className="space-y-3">
