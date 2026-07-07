@@ -11,11 +11,13 @@ import {
   ChevronDown,
   ChevronUp,
   Crosshair,
+  MoreHorizontal,
   Percent,
   Scissors,
   SlidersHorizontal,
   Target,
   X,
+  type LucideIcon,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -31,6 +33,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { closePosition, modifyPosition } from "@/actions/mt5-commands";
 import { estimateStopLossForRisk, estimateTakeProfitForReward, roundToSymbolPrecision } from "@/lib/calculators";
@@ -248,6 +252,101 @@ function SortHeader({
   );
 }
 
+function IconAction({
+  label,
+  icon: Icon,
+  onClick,
+  disabled,
+  variant = "outline",
+}: {
+  label: string;
+  icon: LucideIcon;
+  onClick: () => void;
+  disabled?: boolean;
+  variant?: "outline" | "destructive" | "secondary";
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <Button size="icon" variant={variant} onClick={onClick} disabled={disabled} aria-label={label} />
+        }
+      >
+        <Icon className="size-3.5" />
+      </TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
+  );
+}
+
+// Groups the less-frequent per-position actions behind a menu so the desktop table's sticky
+// actions column stays narrow enough that the data columns don't require horizontal scrolling.
+function RowActionsMenu({
+  disabled,
+  quickSlDisabled,
+  quickSlPending,
+  onQuickSl,
+  quickTpDisabled,
+  quickTpPending,
+  onQuickTp,
+  partialDisabled,
+  onPartial,
+  onModify,
+  trailingPips,
+  onTrail,
+  onAiReview,
+}: {
+  disabled: boolean;
+  quickSlDisabled: boolean;
+  quickSlPending: boolean;
+  onQuickSl: () => void;
+  quickTpDisabled: boolean;
+  quickTpPending: boolean;
+  onQuickTp: () => void;
+  partialDisabled: boolean;
+  onPartial: () => void;
+  onModify: () => void;
+  trailingPips: number | null;
+  onTrail: () => void;
+  onAiReview: () => void;
+}) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={<Button size="icon" variant="outline" disabled={disabled} aria-label="More actions" />}
+      >
+        <MoreHorizontal className="size-3.5" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-52">
+        <DropdownMenuItem onClick={onQuickSl} disabled={quickSlDisabled}>
+          <Percent className="size-3.5" />
+          {quickSlPending ? "SL 10% — queued" : "Set SL to 10% risk"}
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={onQuickTp} disabled={quickTpDisabled}>
+          <Target className="size-3.5" />
+          {quickTpPending ? "TP 20% — queued" : "Set TP to 20% reward"}
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={onPartial} disabled={partialDisabled}>
+          <Scissors className="size-3.5" />
+          Partial close
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={onModify}>
+          <SlidersHorizontal className="size-3.5" />
+          Modify SL/TP
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={onTrail}>
+          <Crosshair className="size-3.5" />
+          {trailingPips != null ? `Trailing stop — ${trailingPips}p` : "Trailing stop"}
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={onAiReview}>
+          <BrainCircuit className="size-3.5" />
+          AI trend check
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 type Props = {
   positions: LivePosition[];
   currency: string | null;
@@ -392,6 +491,7 @@ export function PositionsTable({ positions, currency, equity }: Props) {
   const allSelected = sortedPositions.length > 0 && selected.size === sortedPositions.length;
 
   return (
+    <TooltipProvider>
     <div className="rounded-2xl border border-border bg-card shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6">
         <div className="flex items-center gap-3">
@@ -468,10 +568,10 @@ export function PositionsTable({ positions, currency, equity }: Props) {
         <>
           {/* Desktop / tablet table */}
           <div className="hidden overflow-x-auto md:block">
-            <table className="w-full min-w-235 border-collapse text-sm">
+            <table className="w-full border-collapse text-sm">
               <thead>
                 <tr className="border-t border-border text-xs text-muted-foreground">
-                  <th className="px-4 py-3 text-left font-medium">
+                  <th className="px-3 py-3 text-left font-medium">
                     <input
                       type="checkbox"
                       className="size-4 rounded border-border accent-primary"
@@ -480,8 +580,8 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                       aria-label="Select all"
                     />
                   </th>
-                  <th className="px-3 py-3 text-left font-medium">Ticket</th>
-                  <th className="px-3 py-3 text-left font-medium">
+                  <th className="px-2 py-3 text-left font-medium">Ticket</th>
+                  <th className="px-2 py-3 text-left font-medium">
                     <SortHeader
                       label="Symbol"
                       active={sortKey === "symbol"}
@@ -489,13 +589,11 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                       onClick={() => toggleSort("symbol")}
                     />
                   </th>
-                  <th className="px-3 py-3 text-left font-medium">Type</th>
-                  <th className="px-3 py-3 text-right font-medium">Lot</th>
-                  <th className="px-3 py-3 text-right font-medium">Entry</th>
-                  <th className="px-3 py-3 text-right font-medium">Current</th>
-                  <th className="px-3 py-3 text-right font-medium">SL</th>
-                  <th className="px-3 py-3 text-right font-medium">TP</th>
-                  <th className="px-3 py-3 text-right font-medium">
+                  <th className="px-2 py-3 text-left font-medium">Type</th>
+                  <th className="px-2 py-3 text-right font-medium">Lot</th>
+                  <th className="px-2 py-3 text-right font-medium">Entry / Current</th>
+                  <th className="px-2 py-3 text-right font-medium">SL / TP</th>
+                  <th className="px-2 py-3 text-right font-medium">
                     <SortHeader
                       label={`P/L ${currency ?? ""}`}
                       active={sortKey === "profit"}
@@ -504,8 +602,8 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                       align="right"
                     />
                   </th>
-                  <th className="px-3 py-3 text-right font-medium">Risk</th>
-                  <th className="px-3 py-3 text-right font-medium">
+                  <th className="px-2 py-3 text-right font-medium">Risk</th>
+                  <th className="px-2 py-3 text-right font-medium">
                     <SortHeader
                       label="Opened"
                       active={sortKey === "openedAt"}
@@ -514,7 +612,7 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                       align="right"
                     />
                   </th>
-                  <th className="sticky right-0 z-10 border-l border-border bg-card px-6 py-3 text-right font-medium shadow-[-4px_0_6px_-4px_rgba(0,0,0,0.15)]">
+                  <th className="sticky right-0 z-10 border-l border-border bg-card px-3 py-3 text-right font-medium shadow-[-4px_0_6px_-4px_rgba(0,0,0,0.15)]">
                     Actions
                   </th>
                 </tr>
@@ -527,7 +625,7 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                   const isQuickTp = quickTpPending.has(p.ticket);
                   return (
                     <tr key={p.ticket} className={cn("group border-t border-border transition-colors hover:bg-muted/40", isClosing && "opacity-40")}>
-                      <td className="px-4 py-4">
+                      <td className="px-3 py-3">
                         <input
                           type="checkbox"
                           className="size-4 rounded border-border accent-primary"
@@ -536,110 +634,65 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                           aria-label={`Select position ${p.ticket}`}
                         />
                       </td>
-                      <td className="px-3 py-4 font-mono text-xs text-muted-foreground">{p.ticket}</td>
-                      <td className="px-3 py-4 font-semibold">{p.symbol}</td>
-                      <td className="px-3 py-4">
+                      <td className="px-2 py-3 font-mono text-xs text-muted-foreground">{p.ticket}</td>
+                      <td className="px-2 py-3 font-semibold whitespace-nowrap">{p.symbol}</td>
+                      <td className="px-2 py-3">
                         <SideBadge type={p.type} />
                       </td>
-                      <td className="px-3 py-4 text-right font-mono tabular-nums">{fmt(p.volume, 2)}</td>
-                      <td className="px-3 py-4 text-right font-mono tabular-nums">{fmt(p.priceOpen)}</td>
-                      <td className="px-3 py-4 text-right font-mono tabular-nums">{fmt(p.priceCurrent)}</td>
-                      <td className="px-3 py-4 text-right font-mono tabular-nums text-muted-foreground">
-                        <LevelValue value={p.stopLoss} />
-                        <SlAmount p={p} equity={equity} />
+                      <td className="px-2 py-3 text-right font-mono tabular-nums">{fmt(p.volume, 2)}</td>
+                      <td className="px-2 py-3 text-right font-mono text-xs tabular-nums whitespace-nowrap">
+                        <span className="block text-muted-foreground">{fmt(p.priceOpen)}</span>
+                        <span className="block font-semibold">{fmt(p.priceCurrent)}</span>
                       </td>
-                      <td className="px-3 py-4 text-right font-mono tabular-nums text-muted-foreground">
-                        <LevelValue value={p.takeProfit} />
-                        <TpAmount p={p} />
+                      <td className="px-2 py-3 text-right font-mono text-xs tabular-nums text-muted-foreground whitespace-nowrap">
+                        <div>
+                          <LevelValue value={p.stopLoss} />
+                          <SlAmount p={p} equity={equity} />
+                        </div>
+                        <div className="mt-1">
+                          <LevelValue value={p.takeProfit} />
+                          <TpAmount p={p} />
+                        </div>
                       </td>
-                      <td className="px-3 py-4 text-right">
+                      <td className="px-2 py-3 text-right whitespace-nowrap">
                         <PL value={p.profit} />
                       </td>
-                      <td className="px-3 py-4 text-right">
+                      <td className="px-2 py-3 text-right whitespace-nowrap">
                         <RiskCell p={p} equity={equity} currency={currency} />
                       </td>
-                      <td className="px-3 py-4 text-right font-mono text-xs tabular-nums text-muted-foreground whitespace-nowrap">
+                      <td className="px-2 py-3 text-right font-mono text-xs tabular-nums text-muted-foreground whitespace-nowrap">
                         {openedAgo(p.openedAt)}
                       </td>
-                      <td className="sticky right-0 z-10 border-l border-border bg-card px-6 py-4 shadow-[-4px_0_6px_-4px_rgba(0,0,0,0.15)] transition-colors group-hover:bg-muted/40">
-                        <div className="flex justify-end gap-2">
+                      <td className="sticky right-0 z-10 border-l border-border bg-card px-3 py-3 shadow-[-4px_0_6px_-4px_rgba(0,0,0,0.15)] transition-colors group-hover:bg-muted/40">
+                        <div className="flex justify-end gap-1.5">
                           <LockProfitMenu
                             position={p}
                             disabled={isClosing}
                             queued={isMovingBE}
                             onLock={handleLockProfit}
                           />
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleQuickStopLoss(p)}
-                            disabled={isClosing || isQuickSl || p.priceOpen == null || equity == null}
-                            className="gap-1.5"
-                            title="Set stop loss to 10% equity risk"
-                          >
-                            <Percent className="size-3.5" />
-                            {isQuickSl ? "Queued" : "SL 10%"}
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleQuickTakeProfit(p)}
-                            disabled={isClosing || isQuickTp || p.priceOpen == null || equity == null}
-                            className="gap-1.5"
-                            title="Set take profit to 20% equity reward"
-                          >
-                            <Target className="size-3.5" />
-                            {isQuickTp ? "Queued" : "TP 20%"}
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => setPartialCloseTarget(p)}
-                            disabled={isClosing || p.volume == null || p.volume <= 0}
-                            className="gap-1.5"
-                          >
-                            <Scissors className="size-3.5" />
-                            Partial
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => setModifyTarget(p)}
+                          <RowActionsMenu
                             disabled={isClosing}
-                            className="gap-1.5"
-                          >
-                            <SlidersHorizontal className="size-3.5" />
-                            Modify
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant={p.trailingPips != null ? "secondary" : "outline"}
-                            onClick={() => setTrailingTarget(p)}
-                            disabled={isClosing}
-                            className="gap-1.5"
-                          >
-                            <Crosshair className="size-3.5" />
-                            {p.trailingPips != null ? `Trail ${p.trailingPips}p` : "Trail"}
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            onClick={() => setAiReviewTarget(p)}
-                            disabled={isClosing}
-                            title="AI: check if the trend still supports holding this position"
-                          >
-                            <BrainCircuit className="size-3.5" />
-                          </Button>
-                          <Button
-                            size="sm"
+                            quickSlDisabled={isClosing || isQuickSl || p.priceOpen == null || equity == null}
+                            quickSlPending={isQuickSl}
+                            onQuickSl={() => handleQuickStopLoss(p)}
+                            quickTpDisabled={isClosing || isQuickTp || p.priceOpen == null || equity == null}
+                            quickTpPending={isQuickTp}
+                            onQuickTp={() => handleQuickTakeProfit(p)}
+                            partialDisabled={isClosing || p.volume == null || p.volume <= 0}
+                            onPartial={() => setPartialCloseTarget(p)}
+                            onModify={() => setModifyTarget(p)}
+                            trailingPips={p.trailingPips}
+                            onTrail={() => setTrailingTarget(p)}
+                            onAiReview={() => setAiReviewTarget(p)}
+                          />
+                          <IconAction
+                            label={isClosing ? "Close — queued" : "Close position"}
+                            icon={X}
                             variant="destructive"
                             onClick={() => handleClose(p.ticket)}
                             disabled={isClosing}
-                            className="gap-1.5"
-                          >
-                            <X className="size-3.5" />
-                            {isClosing ? "Queued" : "Close"}
-                          </Button>
+                          />
                         </div>
                       </td>
                     </tr>
@@ -866,5 +919,6 @@ export function PositionsTable({ positions, currency, equity }: Props) {
         />
       )}
     </div>
+    </TooltipProvider>
   );
 }
