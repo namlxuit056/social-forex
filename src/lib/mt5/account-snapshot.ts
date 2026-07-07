@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import type { LivePosition, Mt5AccountInfo } from "@/app/[locale]/journal/journal-live-panel";
+import type { ClosedTrade } from "@/components/mt5/history-table";
 
 export type LivePendingOrder = {
   ticket: string;
@@ -16,7 +17,10 @@ export type Mt5AccountResponse = {
   account: Mt5AccountInfo;
   positions: LivePosition[];
   orders: LivePendingOrder[];
+  history: ClosedTrade[];
 };
+
+const HISTORY_LIMIT = 100;
 
 function parseMql5Time(v: unknown): string | null {
   if (typeof v !== "string" || !v) return null;
@@ -45,6 +49,45 @@ export async function getMt5AccountSnapshot(userId: string): Promise<Mt5AccountR
   });
 
   if (!connection) return null;
+
+  const closedJournalEntries = await prisma.tradeJournal.findMany({
+    where: {
+      userId,
+      closedAt: { not: null },
+      mt5Link: { connectionId: connection.id },
+    },
+    orderBy: { closedAt: "desc" },
+    take: HISTORY_LIMIT,
+    select: {
+      id: true,
+      symbol: true,
+      direction: true,
+      entry: true,
+      stopLoss: true,
+      takeProfit: true,
+      exitPrice: true,
+      lotSize: true,
+      result: true,
+      pnl: true,
+      openedAt: true,
+      closedAt: true,
+    },
+  });
+
+  const history: ClosedTrade[] = closedJournalEntries.map((j) => ({
+    id: j.id,
+    symbol: j.symbol,
+    direction: j.direction,
+    entry: j.entry,
+    stopLoss: j.stopLoss,
+    takeProfit: j.takeProfit,
+    exitPrice: j.exitPrice,
+    lotSize: j.lotSize,
+    result: j.result,
+    pnl: j.pnl,
+    openedAt: j.openedAt.toISOString(),
+    closedAt: j.closedAt!.toISOString(),
+  }));
 
   const trailingConfigs = await prisma.trailingStopConfig.findMany({
     where: { connectionId: connection.id },
@@ -117,5 +160,6 @@ export async function getMt5AccountSnapshot(userId: string): Promise<Mt5AccountR
     },
     positions,
     orders,
+    history,
   };
 }

@@ -88,13 +88,14 @@ type Props = {
   initialAccount: Mt5AccountInfo | null;
   initialPositions: LivePosition[];
   initialOrders: LivePendingOrder[];
-  history: ClosedTrade[];
+  initialHistory: ClosedTrade[];
 };
 
-export function PositionsClient({ initialAccount, initialPositions, initialOrders, history }: Props) {
+export function PositionsClient({ initialAccount, initialPositions, initialOrders, initialHistory }: Props) {
   const [account, setAccount] = useState<Mt5AccountInfo | null>(initialAccount);
   const [positions, setPositions] = useState<LivePosition[]>(initialPositions);
   const [orders, setOrders] = useState<LivePendingOrder[]>(initialOrders);
+  const [history, setHistory] = useState<ClosedTrade[]>(initialHistory);
   const [spinning, setSpinning] = useState(false);
   const [closeAllPending, startCloseAll] = useTransition();
   const [quickOrderPending, startQuickOrder] = useTransition();
@@ -118,6 +119,7 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
     setAccount(data.account);
     setPositions(data.positions);
     setOrders(data.orders ?? []);
+    setHistory(data.history ?? []);
   }, []);
 
   // Manual refresh button - the automatic updates below come from the SSE stream.

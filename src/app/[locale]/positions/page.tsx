@@ -3,20 +3,10 @@ import { setRequestLocale } from "next-intl/server";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { Link } from "@/i18n/navigation";
-import { prisma } from "@/lib/prisma";
+import { getMt5AccountSnapshot } from "@/lib/mt5/account-snapshot";
 import { PositionsClient } from "@/components/mt5/positions-client";
-import type { ClosedTrade } from "@/components/mt5/history-table";
-import type { LivePosition, Mt5AccountInfo } from "@/app/[locale]/journal/journal-live-panel";
-import type { LivePendingOrder } from "@/app/api/mt5/account/route";
 
 export const dynamic = "force-dynamic";
-
-function parseMql5Time(v: unknown): string | null {
-  if (typeof v !== "string" || !v) return null;
-  const iso = v.replace(/^(\d{4})\.(\d{2})\.(\d{2})/, "$1-$2-$3").replace(" ", "T");
-  const d = new Date(iso);
-  return Number.isFinite(d.getTime()) ? d.toISOString() : null;
-}
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -35,116 +25,7 @@ export default async function PositionsPage({
   const session = await auth();
   if (!session?.user?.id) redirect("/auth/signin");
 
-  const connection = await prisma.mt5Connection.findFirst({
-    where: { userId: session.user.id, revokedAt: null },
-    orderBy: { lastSeenAt: "desc" },
-    select: {
-      id: true,
-      balance: true,
-      equity: true,
-      margin: true,
-      freeMargin: true,
-      accountCurrency: true,
-      openPositions: true,
-      lastSeenAt: true,
-      lastPositions: true,
-      lastOrders: true,
-      autoCloseBeforeWeekend: true,
-    },
-  });
-
-  const closedJournalEntries = connection
-    ? await prisma.tradeJournal.findMany({
-        where: {
-          userId: session.user.id,
-          closedAt: { not: null },
-          mt5Link: { connectionId: connection.id },
-        },
-        orderBy: { closedAt: "desc" },
-        take: 100,
-        select: {
-          id: true,
-          symbol: true,
-          direction: true,
-          entry: true,
-          stopLoss: true,
-          takeProfit: true,
-          exitPrice: true,
-          lotSize: true,
-          result: true,
-          pnl: true,
-          openedAt: true,
-          closedAt: true,
-        },
-      })
-    : [];
-
-  const history: ClosedTrade[] = closedJournalEntries.map((j) => ({
-    id: j.id,
-    symbol: j.symbol,
-    direction: j.direction,
-    entry: j.entry,
-    stopLoss: j.stopLoss,
-    takeProfit: j.takeProfit,
-    exitPrice: j.exitPrice,
-    lotSize: j.lotSize,
-    result: j.result,
-    pnl: j.pnl,
-    openedAt: j.openedAt.toISOString(),
-    closedAt: j.closedAt!.toISOString(),
-  }));
-
-  const account: Mt5AccountInfo | null = connection
-    ? {
-        balance: connection.balance,
-        equity: connection.equity,
-        margin: connection.margin,
-        freeMargin: connection.freeMargin,
-        currency: connection.accountCurrency,
-        openPositions: connection.openPositions,
-        lastSeenAt: connection.lastSeenAt?.toISOString() ?? null,
-        autoCloseBeforeWeekend: connection.autoCloseBeforeWeekend,
-      }
-    : null;
-
-  function parsePositions(raw: unknown): LivePosition[] {
-    if (!Array.isArray(raw)) return [];
-    return raw.flatMap((p) => {
-      const r = p as Record<string, unknown>;
-      const ticket = r.ticket != null ? String(r.ticket) : null;
-      const symbol = typeof r.symbol === "string" ? r.symbol : null;
-      const type = typeof r.type === "string" ? r.type : null;
-      if (!ticket || !symbol || !type) return [];
-      const num = (v: unknown) => { const n = Number(v); return Number.isFinite(n) ? n : null; };
-      return [{
-        ticket, symbol, type,
-        volume: num(r.volume), priceOpen: num(r.priceOpen), priceCurrent: num(r.priceCurrent),
-        stopLoss: num(r.stopLoss), takeProfit: num(r.takeProfit), profit: num(r.profit),
-        swap: num(r.swap), openedAt: parseMql5Time(r.openedAt), trailingPips: null,
-      }];
-    });
-  }
-
-  function parseOrders(raw: unknown): LivePendingOrder[] {
-    if (!Array.isArray(raw)) return [];
-    return raw.flatMap((o) => {
-      const r = o as Record<string, unknown>;
-      const ticket = r.ticket != null ? String(r.ticket) : null;
-      const symbol = typeof r.symbol === "string" ? r.symbol : null;
-      const type = typeof r.type === "string" ? r.type : null;
-      if (!ticket || !symbol || !type) return [];
-      const num = (v: unknown) => { const n = Number(v); return Number.isFinite(n) ? n : null; };
-      return [{
-        ticket, symbol, type,
-        volume: num(r.volume), priceOpen: num(r.priceOpen),
-        stopLoss: num(r.stopLoss), takeProfit: num(r.takeProfit),
-        openedAt: typeof r.openedAt === "string" ? r.openedAt : null,
-      }];
-    });
-  }
-
-  const positions = parsePositions(connection?.lastPositions);
-  const orders = parseOrders(connection?.lastOrders);
+  const snapshot = await getMt5AccountSnapshot(session.user.id);
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6">
@@ -158,7 +39,7 @@ export default async function PositionsPage({
         </div>
       </div>
 
-      {!account ? (
+      {!snapshot ? (
         <div className="rounded-lg border border-dashed border-border/60 py-16 text-center">
           <p className="text-muted-foreground">No MT5 connection found.</p>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -168,10 +49,10 @@ export default async function PositionsPage({
         </div>
       ) : (
         <PositionsClient
-          initialAccount={account}
-          initialPositions={positions}
-          initialOrders={orders}
-          history={history}
+          initialAccount={snapshot.account}
+          initialPositions={snapshot.positions}
+          initialOrders={snapshot.orders}
+          initialHistory={snapshot.history}
         />
       )}
     </div>
