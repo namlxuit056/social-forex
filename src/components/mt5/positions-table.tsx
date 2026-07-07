@@ -761,7 +761,12 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                       label="Risk"
                       value={
                         <span className="flex flex-col items-end">
-                          <span>
+                          <span
+                            className={cn(
+                              "font-mono tabular-nums",
+                              risk?.protected && "font-semibold text-emerald-500",
+                            )}
+                          >
                             {!risk
                               ? "—"
                               : risk.protected
