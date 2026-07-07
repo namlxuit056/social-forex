@@ -6,6 +6,7 @@ import {
   Clock,
   Gauge,
   Globe,
+  History,
   LineChart,
   ListChecks,
   RefreshCw,
@@ -40,6 +41,7 @@ import { cn } from "@/lib/utils";
 import { closeAllPositions, placeOrder, setMt5AutoCloseBeforeWeekend } from "@/actions/mt5-commands";
 import { PositionsTable } from "./positions-table";
 import { PendingOrdersTable } from "./pending-orders-table";
+import { HistoryTable, type ClosedTrade } from "./history-table";
 import { NewOrderDialog } from "./new-order-dialog";
 import { QuickOrderSettingsDialog } from "./quick-order-settings-dialog";
 import { PortfolioReviewPanel } from "./portfolio-review-panel";
@@ -86,9 +88,10 @@ type Props = {
   initialAccount: Mt5AccountInfo | null;
   initialPositions: LivePosition[];
   initialOrders: LivePendingOrder[];
+  history: ClosedTrade[];
 };
 
-export function PositionsClient({ initialAccount, initialPositions, initialOrders }: Props) {
+export function PositionsClient({ initialAccount, initialPositions, initialOrders, history }: Props) {
   const [account, setAccount] = useState<Mt5AccountInfo | null>(initialAccount);
   const [positions, setPositions] = useState<LivePosition[]>(initialPositions);
   const [orders, setOrders] = useState<LivePendingOrder[]>(initialOrders);
@@ -378,6 +381,13 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
               {orders.length}
             </span>
           </TabsTrigger>
+          <TabsTrigger value="history" className="gap-2 rounded-full px-4 py-1.5">
+            <History className="size-4" />
+            History
+            <span className="flex min-w-5 items-center justify-center rounded-full bg-background px-1.5 text-xs font-semibold text-foreground">
+              {history.length}
+            </span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="positions">
@@ -385,6 +395,9 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
         </TabsContent>
         <TabsContent value="orders">
           <PendingOrdersTable orders={orders} equity={account?.equity ?? null} />
+        </TabsContent>
+        <TabsContent value="history">
+          <HistoryTable trades={history} currency={currency} />
         </TabsContent>
       </Tabs>
 

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { prisma } from "@/lib/prisma";
 import { PositionsClient } from "@/components/mt5/positions-client";
+import type { ClosedTrade } from "@/components/mt5/history-table";
 import type { LivePosition, Mt5AccountInfo } from "@/app/[locale]/journal/journal-live-panel";
 import type { LivePendingOrder } from "@/app/api/mt5/account/route";
 
@@ -38,6 +39,7 @@ export default async function PositionsPage({
     where: { userId: session.user.id, revokedAt: null },
     orderBy: { lastSeenAt: "desc" },
     select: {
+      id: true,
       balance: true,
       equity: true,
       margin: true,
@@ -50,6 +52,47 @@ export default async function PositionsPage({
       autoCloseBeforeWeekend: true,
     },
   });
+
+  const closedJournalEntries = connection
+    ? await prisma.tradeJournal.findMany({
+        where: {
+          userId: session.user.id,
+          closedAt: { not: null },
+          mt5Link: { connectionId: connection.id },
+        },
+        orderBy: { closedAt: "desc" },
+        take: 100,
+        select: {
+          id: true,
+          symbol: true,
+          direction: true,
+          entry: true,
+          stopLoss: true,
+          takeProfit: true,
+          exitPrice: true,
+          lotSize: true,
+          result: true,
+          pnl: true,
+          openedAt: true,
+          closedAt: true,
+        },
+      })
+    : [];
+
+  const history: ClosedTrade[] = closedJournalEntries.map((j) => ({
+    id: j.id,
+    symbol: j.symbol,
+    direction: j.direction,
+    entry: j.entry,
+    stopLoss: j.stopLoss,
+    takeProfit: j.takeProfit,
+    exitPrice: j.exitPrice,
+    lotSize: j.lotSize,
+    result: j.result,
+    pnl: j.pnl,
+    openedAt: j.openedAt.toISOString(),
+    closedAt: j.closedAt!.toISOString(),
+  }));
 
   const account: Mt5AccountInfo | null = connection
     ? {
@@ -128,6 +171,7 @@ export default async function PositionsPage({
           initialAccount={account}
           initialPositions={positions}
           initialOrders={orders}
+          history={history}
         />
       )}
     </div>
