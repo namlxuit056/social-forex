@@ -368,29 +368,31 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
 
       {/* Tabs: positions / pending orders */}
       <Tabs defaultValue="positions" className="gap-4">
-        <TabsList className="h-auto rounded-full bg-muted p-1">
-          <TabsTrigger value="positions" className="gap-2 rounded-full px-4 py-1.5">
-            <ListChecks className="size-4" />
-            Positions
-            <span className="flex min-w-5 items-center justify-center rounded-full bg-background px-1.5 text-xs font-semibold text-foreground">
-              {positions.length}
-            </span>
-          </TabsTrigger>
-          <TabsTrigger value="orders" className="gap-2 rounded-full px-4 py-1.5">
-            <Clock className="size-4" />
-            Pending Orders
-            <span className="flex min-w-5 items-center justify-center rounded-full bg-background px-1.5 text-xs font-semibold text-foreground">
-              {orders.length}
-            </span>
-          </TabsTrigger>
-          <TabsTrigger value="history" className="gap-2 rounded-full px-4 py-1.5">
-            <History className="size-4" />
-            History
-            <span className="flex min-w-5 items-center justify-center rounded-full bg-background px-1.5 text-xs font-semibold text-foreground">
-              {history.length}
-            </span>
-          </TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <TabsList className="h-auto w-max rounded-full bg-muted p-1">
+            <TabsTrigger value="positions" className="shrink-0 gap-2 rounded-full px-4 py-1.5">
+              <ListChecks className="size-4" />
+              Positions
+              <span className="flex min-w-5 items-center justify-center rounded-full bg-background px-1.5 text-xs font-semibold text-foreground">
+                {positions.length}
+              </span>
+            </TabsTrigger>
+            <TabsTrigger value="orders" className="shrink-0 gap-2 rounded-full px-4 py-1.5">
+              <Clock className="size-4" />
+              Pending Orders
+              <span className="flex min-w-5 items-center justify-center rounded-full bg-background px-1.5 text-xs font-semibold text-foreground">
+                {orders.length}
+              </span>
+            </TabsTrigger>
+            <TabsTrigger value="history" className="shrink-0 gap-2 rounded-full px-4 py-1.5">
+              <History className="size-4" />
+              History
+              <span className="flex min-w-5 items-center justify-center rounded-full bg-background px-1.5 text-xs font-semibold text-foreground">
+                {history.length}
+              </span>
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="positions">
           <PositionsTable positions={positions} currency={currency} equity={account?.equity ?? null} />
