@@ -14,6 +14,8 @@ const copyTradeSchema = z.object({
   mode: z.enum(["LOT", "PERCENT"]),
   fixedLot: z.coerce.number().positive().optional(),
   riskPercent: z.coerce.number().min(0.1).max(10).optional(),
+  xauusdLot: z.coerce.number().positive().optional(),
+  btcusdLot: z.coerce.number().positive().optional(),
 });
 
 export async function subscribeCopyTrade(
@@ -29,11 +31,15 @@ export async function subscribeCopyTrade(
     mode: formData.get("mode"),
     fixedLot: formData.get("fixedLot") ?? undefined,
     riskPercent: formData.get("riskPercent") ?? undefined,
+    // Empty string means "clear the override", not "keep the current value" — map it
+    // to undefined so a blank field results in null (fall back to fixedLot).
+    xauusdLot: formData.get("xauusdLot") || undefined,
+    btcusdLot: formData.get("btcusdLot") || undefined,
   });
 
   if (!parsed.success) return { error: t("invalidData") };
 
-  const { providerId, mode, fixedLot, riskPercent } = parsed.data;
+  const { providerId, mode, fixedLot, riskPercent, xauusdLot, btcusdLot } = parsed.data;
   const followerId = session.user.id;
 
   if (providerId === followerId) {
@@ -63,7 +69,14 @@ export async function subscribeCopyTrade(
   if (existing) {
     await prisma.copyTrade.update({
       where: { id: existing.id },
-      data: { mode, fixedLot, riskPercent, isActive: true },
+      data: {
+        mode,
+        fixedLot,
+        riskPercent,
+        xauusdLot: xauusdLot ?? null,
+        btcusdLot: btcusdLot ?? null,
+        isActive: true,
+      },
     });
     revalidatePath(`/u/${providerId}`);
     return { ok: true, token: existing.token };
@@ -79,6 +92,8 @@ export async function subscribeCopyTrade(
       mode,
       fixedLot,
       riskPercent,
+      xauusdLot,
+      btcusdLot,
     },
   });
 

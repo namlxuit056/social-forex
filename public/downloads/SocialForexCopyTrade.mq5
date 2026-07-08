@@ -161,6 +161,17 @@ double CalcLotSize(string symbol, double balance, double riskPercent, double ent
    return NormalizeDouble(lot, 2);
 }
 
+// Gold/crypto move in far bigger price increments per lot than FX pairs, so a single
+// fixedLot picked for EURUSD is rarely a safe size for XAUUSD/BTCUSD. Falls back to
+// fixedLot when no override is set for the symbol (matches broker suffixes like
+// "XAUUSDm"/"BTCUSD.a" via prefix match).
+double ResolveFixedLot(string symbol, double fixedLot, double xauusdLot, double btcusdLot)
+{
+   if(xauusdLot > 0 && StringFind(symbol, "XAUUSD") == 0) return xauusdLot;
+   if(btcusdLot > 0 && StringFind(symbol, "BTCUSD") == 0) return btcusdLot;
+   return fixedLot;
+}
+
 bool HasOpenPosition(string symbol, long posType)
 {
    int total = PositionsTotal();
@@ -498,6 +509,8 @@ void ProcessSignals(string response)
    double fixedLot    = StringToDouble(FindJsonValue(response, "fixedLot"));
    double riskPercent = StringToDouble(FindJsonValue(response, "riskPercent"));
    double maxLots     = StringToDouble(FindJsonValue(response, "maxLots"));
+   double xauusdLot   = StringToDouble(FindJsonValue(response, "xauusdLot"));
+   double btcusdLot   = StringToDouble(FindJsonValue(response, "btcusdLot"));
    if(maxLots <= 0) maxLots = 10;
 
    double balance = AccountInfoDouble(ACCOUNT_BALANCE);
@@ -553,7 +566,7 @@ void ProcessSignals(string response)
       bool  isKnown   = (StringFind(known_signal_ids, signalId + ",") != -1);
       int   pendingType = PendingOrderTypeFromString(orderType);
       ulong ticket    = 0;
-      double lot      = fixedLot;
+      double lot      = ResolveFixedLot(symbol, fixedLot, xauusdLot, btcusdLot);
       bool  opened    = false;
 
       if(isClosed && isKnown)

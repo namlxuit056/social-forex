@@ -25,6 +25,7 @@ Choose one of two modes:
 #### Option A: Fixed Lot Size
 - Enter a fixed lot size for every trade (e.g., 0.01, 0.1, 1.0)
 - Best for: Consistent position sizing
+- Optional: set a separate lot for XAUUSD and/or BTCUSD — gold and Bitcoin move in much bigger price increments per lot than FX pairs, so the same fixed lot is rarely a safe size for both. Leave blank to fall back to the default lot size.
 
 #### Option B: % of Account (Recommended)
 - Enter a risk percentage (0.1% to 10%)

@@ -26,6 +26,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       fixedLot: true,
       riskPercent: true,
       maxLots: true,
+      xauusdLot: true,
+      btcusdLot: true,
       providerId: true,
       follower: { select: { id: true } },
       provider: { select: { id: true } },
@@ -44,6 +46,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       fixedLot: copyTrade.fixedLot,
       riskPercent: copyTrade.riskPercent,
       maxLots: copyTrade.maxLots,
+      xauusdLot: copyTrade.xauusdLot,
+      btcusdLot: copyTrade.btcusdLot,
       signals: [],
     });
   }
@@ -100,6 +104,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     fixedLot: copyTrade.fixedLot,
     riskPercent: copyTrade.riskPercent,
     maxLots: copyTrade.maxLots,
+    xauusdLot: copyTrade.xauusdLot,
+    btcusdLot: copyTrade.btcusdLot,
     signals: eligibleSignals,
   });
 }

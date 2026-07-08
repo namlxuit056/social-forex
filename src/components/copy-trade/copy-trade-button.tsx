@@ -24,6 +24,8 @@ type Props = {
   currentMode?: "LOT" | "PERCENT" | null;
   currentFixedLot?: number | null;
   currentRiskPercent?: number | null;
+  currentXauusdLot?: number | null;
+  currentBtcusdLot?: number | null;
 };
 
 export function CopyTradeButton({
@@ -34,6 +36,8 @@ export function CopyTradeButton({
   currentMode,
   currentFixedLot,
   currentRiskPercent,
+  currentXauusdLot,
+  currentBtcusdLot,
 }: Props) {
   const t = useTranslations("copyTrade");
   const [open, setOpen] = useState(false);
@@ -44,6 +48,8 @@ export function CopyTradeButton({
   const [riskPercent, setRiskPercent] = useState(
     currentRiskPercent ? String(currentRiskPercent) : "1",
   );
+  const [xauusdLot, setXauusdLot] = useState(currentXauusdLot ? String(currentXauusdLot) : "");
+  const [btcusdLot, setBtcusdLot] = useState(currentBtcusdLot ? String(currentBtcusdLot) : "");
   const [loading, setLoading] = useState(false);
   const [unsubscribing, setUnsubscribing] = useState(false);
   const [subscribed, setSubscribed] = useState(isSubscribed);
@@ -57,7 +63,11 @@ export function CopyTradeButton({
     const formData = new FormData();
     formData.set("providerId", providerId);
     formData.set("mode", mode);
-    if (mode === "LOT") formData.set("fixedLot", fixedLot);
+    if (mode === "LOT") {
+      formData.set("fixedLot", fixedLot);
+      formData.set("xauusdLot", xauusdLot);
+      formData.set("btcusdLot", btcusdLot);
+    }
     if (mode === "PERCENT") formData.set("riskPercent", riskPercent);
 
     const result = await subscribeCopyTrade(null, formData);
@@ -144,16 +154,47 @@ export function CopyTradeButton({
           </div>
 
           {mode === "LOT" ? (
-            <div>
-              <Label>{t("lotSize")}</Label>
-              <Input
-                type="number"
-                step="0.01"
-                min="0.01"
-                value={fixedLot}
-                onChange={(e) => setFixedLot(e.target.value)}
-                className="mt-1.5 font-mono"
-              />
+            <div className="space-y-3">
+              <div>
+                <Label>{t("lotSize")}</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  value={fixedLot}
+                  onChange={(e) => setFixedLot(e.target.value)}
+                  className="mt-1.5 font-mono"
+                />
+              </div>
+
+              <p className="text-xs text-muted-foreground">{t("symbolOverrideHint")}</p>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-xs">{t("xauusdLot")}</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    placeholder={t("useDefault")}
+                    value={xauusdLot}
+                    onChange={(e) => setXauusdLot(e.target.value)}
+                    className="mt-1.5 font-mono"
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs">{t("btcusdLot")}</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    placeholder={t("useDefault")}
+                    value={btcusdLot}
+                    onChange={(e) => setBtcusdLot(e.target.value)}
+                    className="mt-1.5 font-mono"
+                  />
+                </div>
+              </div>
             </div>
           ) : (
             <div>

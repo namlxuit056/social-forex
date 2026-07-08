@@ -868,6 +868,11 @@ model CopyTrade {
   fixedLot     Float?
   riskPercent  Float?
   maxLots      Float?   @default(10)
+  // Per-symbol lot overrides for LOT mode — gold/crypto move in far bigger price
+  // increments per lot than FX pairs, so a single fixedLot is rarely safe for both.
+  // Null falls back to fixedLot.
+  xauusdLot    Float?
+  btcusdLot    Float?
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt

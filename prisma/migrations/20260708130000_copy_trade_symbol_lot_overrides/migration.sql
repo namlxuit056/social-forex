@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "CopyTrade" ADD COLUMN "xauusdLot" DOUBLE PRECISION;
+ALTER TABLE "CopyTrade" ADD COLUMN "btcusdLot" DOUBLE PRECISION;
