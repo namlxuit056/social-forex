@@ -296,6 +296,7 @@ export async function POST(request: NextRequest) {
           data: {
             symbol: order.symbol.toUpperCase(),
             direction: directionFromMt5Type(order.type),
+            orderType: order.type.toUpperCase(),
             entry: order.priceOpen,
             stopLoss: order.stopLoss,
             takeProfit: order.takeProfit,
@@ -318,6 +319,7 @@ export async function POST(request: NextRequest) {
           authorId: connection.userId,
           symbol: order.symbol.toUpperCase(),
           direction: directionFromMt5Type(order.type),
+          orderType: order.type.toUpperCase(),
           entry: order.priceOpen,
           stopLoss: order.stopLoss,
           takeProfit: order.takeProfit,
@@ -367,6 +369,7 @@ export async function POST(request: NextRequest) {
           data: {
             symbol: position.symbol.toUpperCase(),
             direction: directionFromMt5Type(position.type),
+            orderType: position.type.toUpperCase(),
             entry: position.priceOpen,
             stopLoss: position.stopLoss,
             takeProfit: position.takeProfit,
@@ -424,6 +427,7 @@ export async function POST(request: NextRequest) {
           authorId: connection.userId,
           symbol: position.symbol.toUpperCase(),
           direction: directionFromMt5Type(position.type),
+          orderType: position.type.toUpperCase(),
           entry: position.priceOpen,
           stopLoss: position.stopLoss,
           takeProfit: position.takeProfit,

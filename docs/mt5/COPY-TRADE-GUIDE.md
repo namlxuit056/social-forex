@@ -97,6 +97,7 @@ Download `SocialForexCopyTrade.mq5` from the setup page.
 ⚠️ **Copy trading involves risk.** Only risk what you can afford to lose.
 
 - The EA will open trades automatically
+- If the provider places a **pending order** (limit/stop), the EA mirrors it as a pending order at the same entry price — it only fills once price actually reaches that level, same as the provider
 - You can stop copying anytime from the profile page
 - The EA only copies NEW signals — it won't copy existing open positions
 - Each trade is tracked in your journal automatically

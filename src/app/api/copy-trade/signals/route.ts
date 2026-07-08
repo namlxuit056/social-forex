@@ -55,8 +55,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       authorId: copyTrade.providerId,
       OR: [
         { status: "ACTIVE" },
+        { status: "PENDING" },
         {
-          status: { in: ["CLOSED_WIN", "CLOSED_LOSS"] },
+          status: { in: ["CLOSED_WIN", "CLOSED_LOSS", "CANCELLED"] },
           closedAt: { gte: since24h },
         },
       ],
@@ -67,6 +68,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       id: true,
       symbol: true,
       direction: true,
+      orderType: true,
       entry: true,
       stopLoss: true,
       takeProfit: true,

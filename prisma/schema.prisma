@@ -217,6 +217,10 @@ model Signal {
   authorId      String
   symbol        String
   direction     String
+  /// Raw MT5 order type (e.g. BUY, SELL, BUY_LIMIT, SELL_STOP) — used to mirror pending
+  /// orders as pending orders (not market fills) on copy-trade followers. Null for
+  /// manually-created signals (treated as an immediate market entry).
+  orderType     String?
   entry         Float
   stopLoss      Float?
   takeProfit    Float?
