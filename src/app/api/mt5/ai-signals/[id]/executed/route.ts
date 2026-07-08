@@ -48,7 +48,7 @@ export async function POST(
 
   const proposal = await prisma.aiTradeProposal.findUnique({
     where: { id },
-    select: { id: true, connectionId: true, status: true },
+    select: { id: true, connectionId: true, status: true, signalId: true },
   });
 
   if (
@@ -67,6 +67,28 @@ export async function POST(
       mt5Ticket: parsed.data.mt5Ticket,
     },
   });
+
+  // Link the MT5 ticket back to the signal created at confirm time so the next
+  // bridge heartbeat updates it in place instead of creating a duplicate signal
+  // for the same trade (kind is corrected to PENDING_ORDER/OPEN_POSITION on that
+  // heartbeat regardless of which one we guess here).
+  if (proposal.signalId) {
+    await prisma.mt5SignalLink.upsert({
+      where: {
+        connectionId_mt5Ticket: {
+          connectionId: connection.id,
+          mt5Ticket: parsed.data.mt5Ticket,
+        },
+      },
+      create: {
+        connectionId: connection.id,
+        mt5Ticket: parsed.data.mt5Ticket,
+        kind: "PENDING_ORDER",
+        signalId: proposal.signalId,
+      },
+      update: {},
+    });
+  }
 
   return NextResponse.json({ ok: true });
 }
