@@ -161,7 +161,13 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
                 providerId: userId,
               },
             },
-            select: { token: true, isActive: true },
+            select: {
+              token: true,
+              isActive: true,
+              mode: true,
+              fixedLot: true,
+              riskPercent: true,
+            },
           })
         : null,
     ]);
@@ -220,6 +226,9 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
                   providerName={displayLabel}
                   isSubscribed={!!existingCopyTrade}
                   existingToken={existingCopyTrade?.token}
+                  currentMode={existingCopyTrade?.mode}
+                  currentFixedLot={existingCopyTrade?.fixedLot}
+                  currentRiskPercent={existingCopyTrade?.riskPercent}
                 />
                 <Link
                   href={`/messages/${userId}`}

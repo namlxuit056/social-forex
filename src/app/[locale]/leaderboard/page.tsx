@@ -92,20 +92,29 @@ export default async function LeaderboardPage({
   const userIds = [...map.keys()];
 
   const session = await auth();
-  const copyTradeMap = new Map<string, string>();
+  const copyTradeMap = new Map<
+    string,
+    { token: string; mode: "LOT" | "PERCENT"; fixedLot: number | null; riskPercent: number | null }
+  >();
   const followingSet = new Set<string>();
   if (session?.user?.id) {
     const [copyTrades, follows] = await Promise.all([
       prisma.copyTrade.findMany({
         where: { followerId: session.user.id, providerId: { in: userIds }, isActive: true },
-        select: { providerId: true, token: true },
+        select: { providerId: true, token: true, mode: true, fixedLot: true, riskPercent: true },
       }),
       prisma.userFollow.findMany({
         where: { followerId: session.user.id, followingId: { in: userIds } },
         select: { followingId: true },
       }),
     ]);
-    for (const ct of copyTrades) copyTradeMap.set(ct.providerId, ct.token);
+    for (const ct of copyTrades)
+      copyTradeMap.set(ct.providerId, {
+        token: ct.token,
+        mode: ct.mode,
+        fixedLot: ct.fixedLot,
+        riskPercent: ct.riskPercent,
+      });
     for (const f of follows) followingSet.add(f.followingId);
   }
 
@@ -323,7 +332,10 @@ export default async function LeaderboardPage({
                             providerId={r.userId}
                             providerName={r.name}
                             isSubscribed={copyTradeMap.has(r.userId)}
-                            existingToken={copyTradeMap.get(r.userId)}
+                            existingToken={copyTradeMap.get(r.userId)?.token}
+                            currentMode={copyTradeMap.get(r.userId)?.mode}
+                            currentFixedLot={copyTradeMap.get(r.userId)?.fixedLot}
+                            currentRiskPercent={copyTradeMap.get(r.userId)?.riskPercent}
                           />
                         </div>
                       )}
