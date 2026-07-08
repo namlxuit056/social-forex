@@ -77,12 +77,29 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     },
   });
 
+  // Signals born from an AI trade proposal (screener/chart-analysis/scalping confirm) start
+  // with no confirmed MT5 order type — the EA decides market-vs-pending against live price
+  // only once it actually executes, and the bridge only reports that back on its next
+  // heartbeat. Until then `orderType` is null, so hold these back from followers instead of
+  // defaulting to a market copy of what may turn out to be a pending order. Plain
+  // manually-authored signals (no AI proposal) are unaffected and always eligible.
+  const unresolvedCandidateIds = signals.filter((s) => s.orderType == null).map((s) => s.id);
+  let unresolvedIds = new Set<string>();
+  if (unresolvedCandidateIds.length > 0) {
+    const unresolvedProposals = await prisma.aiTradeProposal.findMany({
+      where: { signalId: { in: unresolvedCandidateIds }, status: { in: ["CONFIRMED", "EXECUTED"] } },
+      select: { signalId: true },
+    });
+    unresolvedIds = new Set(unresolvedProposals.map((p) => p.signalId as string));
+  }
+  const eligibleSignals = signals.filter((s) => !unresolvedIds.has(s.id));
+
   return NextResponse.json({
     subscriptionId: copyTrade.id,
     mode: copyTrade.mode,
     fixedLot: copyTrade.fixedLot,
     riskPercent: copyTrade.riskPercent,
     maxLots: copyTrade.maxLots,
-    signals,
+    signals: eligibleSignals,
   });
 }

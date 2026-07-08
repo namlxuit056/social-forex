@@ -46,6 +46,9 @@ export async function POST(
       stopLoss: proposal.stopLoss ?? undefined,
       takeProfit: proposal.takeProfit ?? undefined,
       tier: "FREE",
+      // The EA decides market-vs-pending against live price only once it actually
+      // executes on MT5; until the bridge reports that back, treat this as not-yet-active.
+      status: "PENDING",
       notes,
     },
     select: { id: true },

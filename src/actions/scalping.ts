@@ -57,6 +57,15 @@ export async function confirmScalpingPick(
     .filter((l) => l !== null)
     .join("\n");
 
+  // Look up the MT5 connection first: only when one exists will an AiTradeProposal be
+  // created and eventually resolved by the bridge, so only then should the signal start
+  // as PENDING (unknown market-vs-pending) instead of ACTIVE (a plain social post).
+  const connection = await prisma.mt5Connection.findFirst({
+    where: { userId, revokedAt: null },
+    orderBy: { createdAt: "desc" },
+    select: { id: true },
+  });
+
   const signal = await prisma.signal.create({
     data: {
       authorId: userId,
@@ -66,6 +75,9 @@ export async function confirmScalpingPick(
       stopLoss: data.stopLoss,
       takeProfit: data.takeProfit,
       tier: "FREE",
+      // The EA decides market-vs-pending against live price only once it actually
+      // executes on MT5; until the bridge reports that back, treat this as not-yet-active.
+      status: connection ? "PENDING" : "ACTIVE",
       notes,
     },
     select: {
@@ -77,12 +89,6 @@ export async function confirmScalpingPick(
       takeProfit: true,
       tier: true,
     },
-  });
-
-  const connection = await prisma.mt5Connection.findFirst({
-    where: { userId, revokedAt: null },
-    orderBy: { createdAt: "desc" },
-    select: { id: true },
   });
 
   if (connection) {
@@ -129,7 +135,7 @@ export async function confirmScalpingPick(
     stopLoss: signal.stopLoss,
     takeProfit: signal.takeProfit,
     tier: signal.tier,
-    status: "ACTIVE",
+    status: connection ? "PENDING" : "ACTIVE",
   });
 
   revalidatePath("/signals");
