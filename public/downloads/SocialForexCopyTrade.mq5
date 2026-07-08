@@ -233,7 +233,7 @@ bool SyncPositionStops(ulong ticket, string symbol, double newSL, double newTP)
    double price  = 0;
    if(isBuy) price = SymbolInfoDouble(symbol, SYMBOL_BID);
    else      price = SymbolInfoDouble(symbol, SYMBOL_ASK);
-   int    digits = SymbolInfoInteger(symbol, SYMBOL_DIGITS);
+   int    digits = (int)SymbolInfoInteger(symbol, SYMBOL_DIGITS);
    double ptD    = SymbolInfoDouble(symbol, SYMBOL_POINT);
    long   stops  = SymbolInfoInteger(symbol, SYMBOL_TRADE_STOPS_LEVEL);
    double minD   = stops * ptD;
@@ -266,7 +266,7 @@ bool SyncOrderStops(ulong ticket, string symbol, double newSL, double newTP)
    double pt    = SymbolInfoDouble(symbol, SYMBOL_POINT);
    if(MathAbs(curSL - newSL) <= pt && MathAbs(curTP - newTP) <= pt) return true;
 
-   int digits = SymbolInfoInteger(symbol, SYMBOL_DIGITS);
+   int digits = (int)SymbolInfoInteger(symbol, SYMBOL_DIGITS);
 
    MqlTradeRequest req = {};
    MqlTradeResult  res = {};
@@ -390,7 +390,7 @@ bool OpenMarketTrade(string symbol, string direction, double entry, double sl, d
       price = SymbolInfoDouble(symbol, SYMBOL_BID);
 
    // Clamp SL/TP to broker's minimum stop distance (prevents Retcode 10016)
-   int    digits  = SymbolInfoInteger(symbol, SYMBOL_DIGITS);
+   int    digits  = (int)SymbolInfoInteger(symbol, SYMBOL_DIGITS);
    double ptSz    = SymbolInfoDouble(symbol, SYMBOL_POINT);
    long   stopsLv = SymbolInfoInteger(symbol, SYMBOL_TRADE_STOPS_LEVEL);
    double minDist = stopsLv * ptSz;
@@ -441,7 +441,7 @@ bool OpenPendingOrder(string symbol, int pendingType, double entry, double sl, d
       return false;
    }
 
-   int    digits  = SymbolInfoInteger(symbol, SYMBOL_DIGITS);
+   int    digits  = (int)SymbolInfoInteger(symbol, SYMBOL_DIGITS);
    double ptSz    = SymbolInfoDouble(symbol, SYMBOL_POINT);
    long   stopsLv = SymbolInfoInteger(symbol, SYMBOL_TRADE_STOPS_LEVEL);
    double minDist = stopsLv * ptSz;
