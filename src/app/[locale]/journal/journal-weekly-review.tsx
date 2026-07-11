@@ -1,4 +1,4 @@
-import { AlertTriangle, CheckCircle2, TrendingUp } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Minus, TrendingDown, TrendingUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { getTranslations } from "next-intl/server";
 import type { AiJournalAnalysis } from "@/lib/ai/types";
@@ -143,6 +143,88 @@ async function ReviewCard({ review }: { review: Review }) {
   );
 }
 
+function scoreColorClass(score: number) {
+  if (score >= 70) return "text-green-600 dark:text-green-400";
+  if (score >= 50) return "text-yellow-600 dark:text-yellow-400";
+  return "text-destructive";
+}
+
+async function WeeklyProgressTrend({ reviews }: { reviews: Review[] }) {
+  const t = await getTranslations("journal");
+
+  // reviews are ordered newest → oldest; chart reads left (oldest) to right (newest)
+  const chronological = [...reviews].reverse();
+  const scores = chronological.map((r) => r.analysis.score);
+  const width = 600;
+  const height = 120;
+  const padX = 12;
+  const padTop = 14;
+  const padBottom = 24;
+  const n = chronological.length;
+  const stepX = n > 1 ? (width - padX * 2) / (n - 1) : 0;
+  const points = scores.map((score, i) => {
+    const x = padX + stepX * i;
+    const y = padTop + (1 - score / 100) * (height - padTop - padBottom);
+    return { x, y, score };
+  });
+  const linePath = points.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ");
+
+  const latest = scores[scores.length - 1];
+  const previous = scores.length > 1 ? scores[scores.length - 2] : null;
+  const delta = previous !== null ? latest - previous : null;
+
+  const DeltaIcon = delta === null || delta === 0 ? Minus : delta > 0 ? TrendingUp : TrendingDown;
+  const deltaColor =
+    delta === null || delta === 0
+      ? "text-muted-foreground"
+      : delta > 0
+        ? "text-green-600 dark:text-green-400"
+        : "text-destructive";
+
+  return (
+    <div className="rounded-xl border bg-card p-5 space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <p className="text-sm font-semibold text-foreground">{t("weeklyProgressTitle")}</p>
+          <p className="text-xs text-muted-foreground">{t("weeklyProgressHint")}</p>
+        </div>
+        {delta !== null && (
+          <div className={`flex items-center gap-1 text-sm font-medium ${deltaColor}`}>
+            <DeltaIcon className="h-4 w-4" />
+            {delta > 0 ? `+${delta}` : delta}
+            <span className="text-xs text-muted-foreground">{t("weeklyProgressVsLastWeek")}</span>
+          </div>
+        )}
+      </div>
+
+      <svg viewBox={`0 0 ${width} ${height}`} className="h-28 w-full" preserveAspectRatio="none">
+        <line
+          x1={padX}
+          y1={padTop + (height - padTop - padBottom) / 2}
+          x2={width - padX}
+          y2={padTop + (height - padTop - padBottom) / 2}
+          stroke="currentColor"
+          strokeWidth={1}
+          strokeDasharray="4 4"
+          className="text-border"
+        />
+        {n > 1 && (
+          <path d={linePath} fill="none" stroke="currentColor" strokeWidth={2} className="text-primary" />
+        )}
+        {points.map((p, i) => (
+          <circle key={i} cx={p.x} cy={p.y} r={3.5} fill="currentColor" className={scoreColorClass(p.score)} />
+        ))}
+      </svg>
+
+      <div className="flex justify-between text-xs text-muted-foreground">
+        <span>{formatWeekRange(chronological[0].weekStart, chronological[0].weekEnd)}</span>
+        <span className={`font-semibold ${scoreColorClass(latest)}`}>{latest}/100</span>
+        <span>{formatWeekRange(chronological[n - 1].weekStart, chronological[n - 1].weekEnd)}</span>
+      </div>
+    </div>
+  );
+}
+
 export async function JournalWeeklyReview({ reviews }: { reviews: Review[] }) {
   const t = await getTranslations("journal");
 
@@ -156,10 +238,13 @@ export async function JournalWeeklyReview({ reviews }: { reviews: Review[] }) {
   }
 
   return (
-    <div className="space-y-3">
-      {reviews.map((review) => (
-        <ReviewCard key={review.id} review={review} />
-      ))}
+    <div className="space-y-4">
+      {reviews.length > 1 && <WeeklyProgressTrend reviews={reviews} />}
+      <div className="space-y-3">
+        {reviews.map((review) => (
+          <ReviewCard key={review.id} review={review} />
+        ))}
+      </div>
     </div>
   );
 }

@@ -1654,7 +1654,10 @@
     "weeklyPatterns": "Pattern insights",
     "weeklyNextPlan": "Plan for next week",
     "weeklyReviewEmpty": "No weekly reviews yet.",
-    "weeklyReviewEmptyHint": "Reviews are generated automatically every Sunday if you have at least 3 trades in the week."
+    "weeklyReviewEmptyHint": "Reviews are generated automatically every Sunday if you have at least 3 trades in the week.",
+    "weeklyProgressTitle": "Trading behavior score trend",
+    "weeklyProgressHint": "AI score per week — track it to see your progress over time.",
+    "weeklyProgressVsLastWeek": "vs last week"
   },
   "errors": {
     "invalidData": "Invalid data.",

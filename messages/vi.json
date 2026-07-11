@@ -1654,7 +1654,10 @@
     "weeklyPatterns": "Mẫu lặp",
     "weeklyNextPlan": "Kế hoạch tuần tới",
     "weeklyReviewEmpty": "Chưa có báo cáo tuần nào.",
-    "weeklyReviewEmptyHint": "Báo cáo được tạo tự động mỗi Chủ Nhật nếu bạn có ít nhất 3 giao dịch trong tuần."
+    "weeklyReviewEmptyHint": "Báo cáo được tạo tự động mỗi Chủ Nhật nếu bạn có ít nhất 3 giao dịch trong tuần.",
+    "weeklyProgressTitle": "Xu hướng điểm hành vi giao dịch",
+    "weeklyProgressHint": "Điểm AI chấm mỗi tuần — theo dõi để thấy sự tiến bộ theo thời gian.",
+    "weeklyProgressVsLastWeek": "so với tuần trước"
   },
   "errors": {
     "invalidData": "Dữ liệu không hợp lệ.",
