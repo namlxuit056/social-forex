@@ -15,18 +15,22 @@ function authorized(req: NextRequest) {
   return token === expected || req.nextUrl.searchParams.get("secret") === expected;
 }
 
-function getLastWeekRange(): { weekStart: Date; weekEnd: Date } {
+// Trả về khoảng Mon–Sun của tuần chứa "now". Đủ để dùng cho cron chạy
+// thứ 6 cuối ngày (tuần đang diễn ra, đã đóng hết lệnh Mon-Fri) lẫn cron
+// chạy Chủ Nhật tối (tuần vừa kết thúc) — cùng weekStart nên upsert dedupe
+// tự động bỏ qua nếu đã có review.
+function getCurrentWeekRange(): { weekStart: Date; weekEnd: Date } {
   const now = new Date();
   const dayOfWeek = now.getUTCDay(); // 0=Sun, 1=Mon...
-  const daysToLastMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-  const lastMonday = new Date(Date.UTC(
-    now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - daysToLastMonday - 7,
+  const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+  const monday = new Date(Date.UTC(
+    now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - daysSinceMonday,
   ));
-  const lastSunday = new Date(Date.UTC(
-    lastMonday.getUTCFullYear(), lastMonday.getUTCMonth(), lastMonday.getUTCDate() + 6,
+  const sunday = new Date(Date.UTC(
+    monday.getUTCFullYear(), monday.getUTCMonth(), monday.getUTCDate() + 6,
     23, 59, 59, 999,
   ));
-  return { weekStart: lastMonday, weekEnd: lastSunday };
+  return { weekStart: monday, weekEnd: sunday };
 }
 
 const MIN_TRADES = 3;
@@ -37,7 +41,7 @@ export async function GET(req: NextRequest) {
     return Response.json({ error: "unauthorized" }, { status: 401 });
   }
 
-  const { weekStart, weekEnd } = getLastWeekRange();
+  const { weekStart, weekEnd } = getCurrentWeekRange();
 
   const usersWithTrades = await prisma.tradeJournal.groupBy({
     by: ["userId"],
