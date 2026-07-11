@@ -1578,6 +1578,7 @@
     "signupPromptDesc": "Tạo tài khoản để lưu trade demo, ghi chú, win rate và bước tiếp theo sau mỗi buổi luyện.",
     "signupPromptCta": "Lưu journal",
     "all": "Tất cả",
+    "exportCsv": "Xuất CSV",
     "emptyFilter": "Không có giao dịch nào khớp với bộ lọc.",
     "saved": "Đã lưu giao dịch.",
     "deleted": "Đã xóa giao dịch.",

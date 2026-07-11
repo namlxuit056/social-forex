@@ -8,11 +8,10 @@ Mỗi dòng là một feature/improvement độc lập.
 
 ## High Priority
 
-- [ ] **Streak reminder notification: hardcode text → dùng i18n** — src/components/notifications/notification-list.tsx line 79 có hardcoded Vietnamese string
+_(trống — xem Medium Priority)_
 
 ## Medium Priority
 
-- [ ] **Journal: export CSV** — trader muốn export lịch sử giao dịch ra Excel; thêm nút "Export CSV" trên trang /journal
 - [ ] **Leaderboard: add pagination** — hiện load tất cả rows, cần limit 20 + "Load more"
 - [ ] **Notifications: mark single as read khi click (optimistic UI)** — markNotificationRead đã fire on click nhưng chưa có optimistic state update; cần local state để UI update ngay lập tức
 
@@ -27,6 +26,8 @@ Mỗi dòng là một feature/improvement độc lập.
 
 ## Completed
 
+- [x] Journal: export CSV — nút "Export CSV" trên bảng lịch sử /journal, xuất theo filter đang chọn (JournalTable trong src/app/[locale]/journal/journal-table.tsx)
+- [x] Streak reminder notification: hardcode text → dùng i18n — đã fix từ trước (commit 219fc9d/89d3935), notification-list.tsx dùng t("streakReminder") có key ở cả vi.json/en.json, không còn hardcoded string
 - [x] Profile /u/[userId]: Tab "Academy" hiện bài học đã hoàn thành — ProfileAcademySection tại src/components/profile/profile-academy-section.tsx, tab count badge = số bài đã hoàn thành (cũng thay thế nhu cầu "Academy: progress badge trên public profile")
 - [x] Signal detail page: Add comment reaction (like/dislike) — SignalReactions component đầy đủ tại src/app/[locale]/signals/[signalId]/signal-reactions.tsx
 - [x] Desk page: Trading dashboard widget — /desk có realtime quotes, calendar, chart, pre-trade desk tại src/app/[locale]/desk/page.tsx

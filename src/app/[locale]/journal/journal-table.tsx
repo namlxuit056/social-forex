@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useActionState } from "react";
 import { useTranslations } from "next-intl";
-import { Trash2, Pencil, X } from "lucide-react";
+import { Trash2, Pencil, X, Download } from "lucide-react";
 import { deleteTrade, updateTrade } from "@/actions/journal";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -34,6 +34,54 @@ type Filter = "ALL" | "WIN" | "LOSS" | "BREAKEVEN" | "PENDING";
 function toDatetimeLocal(iso: string | null): string {
   if (!iso) return "";
   return iso.slice(0, 16);
+}
+
+function toCsvCell(value: string | number | null): string {
+  const str = value === null ? "" : String(value);
+  return /[",\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
+}
+
+function exportTradesToCsv(trades: Trade[]): void {
+  const headers = [
+    "Symbol",
+    "Direction",
+    "Entry",
+    "StopLoss",
+    "TakeProfit",
+    "ExitPrice",
+    "LotSize",
+    "Result",
+    "PnL",
+    "Notes",
+    "OpenedAt",
+    "ClosedAt",
+  ];
+  const rows = trades.map((tr) =>
+    [
+      tr.symbol,
+      tr.direction,
+      tr.entry,
+      tr.stopLoss,
+      tr.takeProfit,
+      tr.exitPrice,
+      tr.lotSize,
+      tr.result,
+      tr.pnl,
+      tr.notes,
+      tr.openedAt,
+      tr.closedAt,
+    ]
+      .map(toCsvCell)
+      .join(","),
+  );
+  const csv = [headers.join(","), ...rows].join("\n");
+  const blob = new Blob([`﻿${csv}`], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `journal-${new Date().toISOString().slice(0, 10)}.csv`;
+  link.click();
+  URL.revokeObjectURL(url);
 }
 
 const SELECT_CLASS =
@@ -277,24 +325,37 @@ export function JournalTable({ trades, locale }: { trades: Trade[]; locale: stri
       <Card className="border-border/60">
         <CardHeader className="flex flex-col gap-3 pb-3 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle className="text-base">{t("history")}</CardTitle>
-          <div className="flex flex-wrap gap-1">
-            {filterButtons.map(({ key, label, color }) => (
-              <button
-                key={key}
-                onClick={() => setFilter(key)}
-                className={cn(
-                  "inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors",
-                  filter === key
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border/60 bg-transparent text-muted-foreground hover:border-border hover:text-foreground",
-                )}
-              >
-                <span className={filter === key ? undefined : color}>{label}</span>
-                <span className={cn("tabular-nums", filter === key ? "text-primary-foreground/70" : "text-muted-foreground/60")}>
-                  {counts[key]}
-                </span>
-              </button>
-            ))}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap gap-1">
+              {filterButtons.map(({ key, label, color }) => (
+                <button
+                  key={key}
+                  onClick={() => setFilter(key)}
+                  className={cn(
+                    "inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors",
+                    filter === key
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border/60 bg-transparent text-muted-foreground hover:border-border hover:text-foreground",
+                  )}
+                >
+                  <span className={filter === key ? undefined : color}>{label}</span>
+                  <span className={cn("tabular-nums", filter === key ? "text-primary-foreground/70" : "text-muted-foreground/60")}>
+                    {counts[key]}
+                  </span>
+                </button>
+              ))}
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-auto gap-1.5 px-2.5 py-1 text-xs"
+              disabled={filtered.length === 0}
+              onClick={() => exportTradesToCsv(filtered)}
+            >
+              <Download className="size-3.5" />
+              {t("exportCsv")}
+            </Button>
           </div>
         </CardHeader>
         <CardContent className="overflow-x-auto p-0">

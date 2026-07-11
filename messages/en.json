@@ -1578,6 +1578,7 @@
     "signupPromptDesc": "Create an account to save demo trades, notes, win rate, and next actions after each practice session.",
     "signupPromptCta": "Save my journal",
     "all": "All",
+    "exportCsv": "Export CSV",
     "emptyFilter": "No trades match the selected filter.",
     "saved": "Trade saved.",
     "deleted": "Trade deleted.",
