@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Activity, Award, RadioTower, Signal, TrendingUp, Users } from "lucide-react";
+import { Activity, Award, GraduationCap, RadioTower, Signal, TrendingUp, Users } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
+import { ProfileAcademySection } from "@/components/profile/profile-academy-section";
 import { ProfileFollowersSection } from "@/components/profile/profile-followers-section";
 import { PublicProfileHero } from "@/components/profile/public-profile-hero";
 import { auth } from "@/auth";
@@ -26,13 +27,13 @@ import { pageCtaItems } from "@/lib/page-cta-i18n";
 import { buildSignalsListHref } from "@/lib/signals/signal-list-query";
 import { cn } from "@/lib/utils";
 
-type ProfileTab = "overview" | "signals" | "mt5" | "followers";
+type ProfileTab = "overview" | "signals" | "mt5" | "academy" | "followers";
 type Props = {
   params: Promise<{ locale: string; userId: string }>;
   searchParams?: Promise<{ tab?: string }>;
 };
 
-const PROFILE_TABS: ProfileTab[] = ["overview", "signals", "mt5", "followers"];
+const PROFILE_TABS: ProfileTab[] = ["overview", "signals", "mt5", "academy", "followers"];
 
 function normalizeTab(value?: string): ProfileTab {
   return PROFILE_TABS.includes(value as ProfileTab)
@@ -119,6 +120,7 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
     hasMt5Sync,
     signalStats,
     existingCopyTrade,
+    academyCompletedCount,
   ] =
     await Promise.all([
       prisma.userFollow.count({ where: { followingId: userId } }),
@@ -172,6 +174,9 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
             },
           })
         : null,
+      prisma.academyProgress.count({
+        where: { userId, completed: true },
+      }),
     ]);
 
   const isSelf = session?.user?.id === userId;
@@ -191,6 +196,7 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
     { value: "overview", label: t("profileTabOverview"), icon: TrendingUp, count: undefined },
     { value: "signals", label: t("profileTabSignals"), icon: Signal, count: threadCount },
     { value: "mt5", label: t("profileTabMt5"), icon: RadioTower, count: undefined },
+    { value: "academy", label: t("profileTabAcademy"), icon: GraduationCap, count: academyCompletedCount },
     { value: "followers", label: t("profileTabFollowers"), icon: Users, count: followerCount },
   ] satisfies Array<{ value: ProfileTab; label: string; icon: typeof Activity; count: number | undefined }>;
 
@@ -352,6 +358,10 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
 
       {activeTab === "mt5" ? (
         <Mt5SyncedSignalsSection profileUserId={userId} locale={locale} t={t} />
+      ) : null}
+
+      {activeTab === "academy" ? (
+        <ProfileAcademySection profileUserId={userId} locale={locale} />
       ) : null}
 
       {activeTab === "followers" && followerCount > 0 ? (
