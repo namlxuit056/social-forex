@@ -6,16 +6,9 @@ Mỗi dòng là một feature/improvement độc lập.
 
 ---
 
-## High Priority — Sprint 1: Quick wins UX (est. ~1 tuần)
+## High Priority — Sprint 1: Quick wins UX
 
-Mục tiêu: giảm friction ở các flow dùng hằng ngày (notifications, leaderboard, signals).
-
-- [ ] **Notifications: mark single as read khi click (optimistic UI)** — markNotificationRead đã fire on click nhưng chưa có optimistic state update; cần local state để UI update ngay lập tức
-  - AC: click notification → dot unread biến mất ngay (không chờ server); nếu action fail thì revert + không crash; unread count ở header giảm tương ứng; refresh trang vẫn đúng trạng thái.
-- [ ] **Leaderboard: add pagination** — hiện load tất cả rows, cần limit 20 + "Load more"
-  - AC: lần đầu chỉ load 20 rows; nút "Load more" append 20 rows tiếp (giữ nguyên sort/filter đang chọn); ẩn nút khi hết data; rank number liên tục qua các trang.
-- [ ] **Signals list: filter by symbol** — thêm quick filter buttons XAUUSD / EURUSD / GBPUSD trên trang /signals
-  - AC: filter là searchParam (share được URL); kết hợp được với filter/tier hiện có; nút "All" để bỏ filter; empty state khi symbol không có signal.
+_(hoàn thành 2026-07-18 — xem Completed)_
 
 ## Medium Priority — Sprint 2: Trust & conversion (est. ~1 tuần)
 
@@ -40,6 +33,10 @@ Mục tiêu: tăng độ tin cậy trước quyết định trả tiền/copy, c
 ---
 
 ## Completed
+
+- [x] Notifications: optimistic mark-as-read khi click — local state trong notification-list.tsx, revert nếu server action fail
+- [x] Leaderboard: pagination — searchParam `limit` (default 20) + nút "Load more" giữ nguyên timeframe/sortBy, rank liên tục
+- [x] Signals list: quick filter by symbol — chips XAUUSD/EURUSD/GBPUSD mặc định (merge với watchlist), click chip active để bỏ chọn, nút "Tất cả" khi đang filter
 
 - [x] Journal Weekly Review: score trend chart — biểu đồ xu hướng điểm AI theo tuần + delta vs tuần trước, trong journal-weekly-review.tsx (theo yêu cầu user muốn thấy "sự tiến bộ" qua thời gian)
 - [x] Journal: export CSV — nút "Export CSV" trên bảng lịch sử /journal, xuất theo filter đang chọn (JournalTable trong src/app/[locale]/journal/journal-table.tsx)

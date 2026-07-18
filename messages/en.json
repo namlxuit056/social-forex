@@ -738,6 +738,8 @@
     "detailLevelsTitle": "Trade levels",
     "detailManageTitle": "Manage signal",
     "watchlistQuickLabel": "Watchlist",
+    "quickSymbolLabel": "Quick filter",
+    "quickSymbolAll": "All",
     "back": "← Signal list",
     "symbol": "Symbol",
     "directionLabel": "Direction",
@@ -895,7 +897,9 @@
     "mt5Verified": "MT5",
     "minTradesHint": "Only traders with ≥ 3 closed signals",
     "sortByPf": "Profit Factor",
-    "sortByXp": "XP"
+    "sortByXp": "XP",
+    "loadMore": "Load more",
+    "showingCount": "Showing {shown} / {total} traders"
   },
   "sentiment": {
     "title": "Market Sentiment",

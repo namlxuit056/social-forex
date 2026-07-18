@@ -738,6 +738,8 @@
     "detailLevelsTitle": "Mức giao dịch",
     "detailManageTitle": "Quản lý tín hiệu",
     "watchlistQuickLabel": "Watchlist",
+    "quickSymbolLabel": "Lọc nhanh",
+    "quickSymbolAll": "Tất cả",
     "back": "← Danh sách tín hiệu",
     "symbol": "Symbol",
     "directionLabel": "Hướng",
@@ -895,7 +897,9 @@
     "mt5Verified": "MT5",
     "minTradesHint": "Chỉ hiển thị trader có ≥ 3 lệnh đóng",
     "sortByPf": "Profit Factor",
-    "sortByXp": "XP"
+    "sortByXp": "XP",
+    "loadMore": "Tải thêm",
+    "showingCount": "Hiển thị {shown} / {total} trader"
   },
   "sentiment": {
     "title": "Tâm lý thị trường",

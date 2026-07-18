@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Bell, TrendingUp, TrendingDown } from "lucide-react";
 import { Link } from "@/i18n/navigation";
@@ -32,6 +33,21 @@ export function NotificationList({
   locale: string;
 }) {
   const t = useTranslations("notifications");
+  // Optimistic: đánh dấu read ngay khi click, revert nếu server action fail
+  const [optimisticReadIds, setOptimisticReadIds] = useState<ReadonlySet<string>>(
+    () => new Set(),
+  );
+
+  const handleClick = (id: string) => {
+    setOptimisticReadIds((prev) => new Set(prev).add(id));
+    markNotificationRead(id).catch(() => {
+      setOptimisticReadIds((prev) => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+    });
+  };
 
   if (items.length === 0) {
     return (
@@ -45,7 +61,7 @@ export function NotificationList({
   return (
     <ul className="divide-y divide-border/60 rounded-xl border border-border/60 bg-card/40">
       {items.map((n) => {
-        const unread = n.readAt === null;
+        const unread = n.readAt === null && !optimisticReadIds.has(n.id);
         const href =
           n.kind === "USER_FOLLOWED" && n.actor
             ? `/u/${n.actor.id}`
@@ -110,7 +126,7 @@ export function NotificationList({
             <Link
               href={href}
               onClick={() => {
-                void markNotificationRead(n.id);
+                if (unread) handleClick(n.id);
               }}
               className={cn(
                 "flex flex-col gap-1 px-4 py-3 transition-colors hover:bg-muted/40 sm:flex-row sm:items-center sm:justify-between",

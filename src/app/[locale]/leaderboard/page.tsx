@@ -24,6 +24,8 @@ export async function generateMetadata({
 
 export const dynamic = "force-dynamic";
 
+const PAGE_SIZE = 20;
+
 function getSince(tf: string): Date | undefined {
   const now = Date.now();
   if (tf === "30d") return new Date(now - 30 * 86400_000);
@@ -49,7 +51,7 @@ export default async function LeaderboardPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams?: Promise<{ timeframe?: string; sortBy?: string }>;
+  searchParams?: Promise<{ timeframe?: string; sortBy?: string; limit?: string }>;
 }) {
   const { locale } = await params;
   const resolvedSearchParams = await searchParams;
@@ -64,6 +66,12 @@ export default async function LeaderboardPage({
     : "all";
 
   const sortBy = resolvedSearchParams?.sortBy === "xp" ? "xp" : "pf";
+
+  const parsedLimit = Number.parseInt(resolvedSearchParams?.limit ?? "", 10);
+  const limit =
+    Number.isFinite(parsedLimit) && parsedLimit > 0
+      ? Math.min(Math.ceil(parsedLimit / PAGE_SIZE) * PAGE_SIZE, 500)
+      : PAGE_SIZE;
 
   const since = getSince(tf ?? "all");
 
@@ -194,6 +202,8 @@ export default async function LeaderboardPage({
     })
     .filter((r) => r.total >= 3);
 
+  const totalRows = rows.length;
+
   rows.sort((a, b) => {
     if (sortBy === "xp") {
       if (b.xp !== a.xp) return b.xp - a.xp;
@@ -208,6 +218,12 @@ export default async function LeaderboardPage({
     if ((b.winRate ?? 0) !== (a.winRate ?? 0)) return (b.winRate ?? 0) - (a.winRate ?? 0);
     return b.total - a.total;
   });
+
+  const visibleRows = rows.slice(0, limit);
+  const hasMore = totalRows > visibleRows.length;
+  const loadMoreHref = `/leaderboard?timeframe=${tf}${
+    sortBy !== "pf" ? `&sortBy=${sortBy}` : ""
+  }&limit=${limit + PAGE_SIZE}`;
 
   const filters = [
     { key: "30d", label: t("filter30d") },
@@ -296,7 +312,7 @@ export default async function LeaderboardPage({
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {rows.map((r, i) => (
+                {visibleRows.map((r, i) => (
                   <tr key={r.userId} className="hover:bg-muted/30">
                     <td className="px-4 py-3 font-mono text-muted-foreground">{i + 1}</td>
                     <td className="px-4 py-3 text-foreground">
@@ -363,6 +379,20 @@ export default async function LeaderboardPage({
                 ))}
               </tbody>
             </table>
+          </div>
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-xs text-muted-foreground">
+              {t("showingCount", { shown: visibleRows.length, total: totalRows })}
+            </p>
+            {hasMore && (
+              <Link
+                href={loadMoreHref}
+                scroll={false}
+                className="inline-flex items-center rounded-md border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"
+              >
+                {t("loadMore")}
+              </Link>
+            )}
           </div>
           <p className="text-xs text-muted-foreground">{t("minTradesHint")}</p>
           <PageCtaRow heading={tCommon("ctaDiscovery")} items={ctaTable} />

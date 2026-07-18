@@ -110,6 +110,8 @@ function authorInitials(label: string): string {
   return raw.slice(0, 2).toUpperCase();
 }
 
+const DEFAULT_QUICK_SYMBOLS = ["XAUUSD", "EURUSD", "GBPUSD"];
+
 const toolbarSelectClass =
   "mt-1 h-9 w-full min-w-[10rem] rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:w-auto";
 
@@ -313,12 +315,22 @@ export function SignalRoom({
           ) : null}
         </div>
 
-        {favoriteSymbols.length > 0 ? (
+        {totalUnfiltered > 0 ? (
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs font-medium text-muted-foreground">
-              {t("watchlistQuickLabel")}
+              {favoriteSymbols.length > 0
+                ? t("watchlistQuickLabel")
+                : t("quickSymbolLabel")}
             </span>
-            {favoriteSymbols.map((sym) => {
+            {[
+              ...favoriteSymbols,
+              ...DEFAULT_QUICK_SYMBOLS.filter(
+                (sym) =>
+                  !favoriteSymbols.some(
+                    (fav) => fav.toUpperCase() === sym.toUpperCase(),
+                  ),
+              ),
+            ].map((sym) => {
               const active =
                 initialSymbolFilter.trim().toUpperCase() === sym.toUpperCase();
               return (
@@ -326,7 +338,7 @@ export function SignalRoom({
                   key={sym}
                   href={buildSignalsListHref({
                     pathname,
-                    symbol: sym,
+                    symbol: active ? "" : sym,
                     author: initialAuthorFilter,
                     tier: tierFilter,
                     status: statusFilter,
@@ -347,6 +359,25 @@ export function SignalRoom({
                 </Link>
               );
             })}
+            {initialSymbolFilter.trim() !== "" ? (
+              <Link
+                href={buildSignalsListHref({
+                  pathname,
+                  symbol: "",
+                  author: initialAuthorFilter,
+                  tier: tierFilter,
+                  status: statusFilter,
+                  period: periodFilter,
+                  tz: tzFilter,
+                  sort,
+                  page: 1,
+                })}
+                scroll={false}
+                className="rounded-full border border-border/70 bg-muted/40 px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"
+              >
+                {t("quickSymbolAll")}
+              </Link>
+            ) : null}
           </div>
         ) : null}
 
