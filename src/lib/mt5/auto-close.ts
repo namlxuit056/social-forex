@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { sendPushToUser } from "@/lib/push";
+import { sendLocalizedPushToUser } from "@/lib/push-i18n";
 import { queueCloseAll } from "@/lib/mt5/commands";
 import { isWithinWeekendAutoCloseWindow, getAutoCloseWeekKey } from "@/lib/mt5/market-hours";
 
@@ -44,11 +44,11 @@ export async function maybeTriggerWeekendAutoClose(userId: string): Promise<void
   });
 
   try {
-    await sendPushToUser(userId, {
-      title: "Đã tự động đóng tất cả lệnh",
-      body: "Thị trường forex sắp đóng cửa cuối tuần, hệ thống đã đóng toàn bộ lệnh mở theo cài đặt của bạn.",
+    await sendLocalizedPushToUser(userId, (t) => ({
+      title: t("mt5AutoCloseTitle"),
+      body: t("mt5AutoCloseBody"),
       url: "/positions",
-    });
+    }));
   } catch {
     // Non-blocking
   }

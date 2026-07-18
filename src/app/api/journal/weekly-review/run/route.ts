@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAiJournalAnalysis } from "@/lib/ai/journal-analysis";
-import { sendPushToUser } from "@/lib/push";
+import { sendLocalizedPushToUser } from "@/lib/push-i18n";
 import type { AppLocale } from "@/lib/api-locale";
 
 export const dynamic = "force-dynamic";
@@ -88,11 +88,11 @@ export async function GET(req: NextRequest) {
           });
 
           try {
-            await sendPushToUser(userId, {
-              title: "Báo cáo giao dịch tuần đã sẵn sàng",
-              body: `Tuần qua bạn có ${_count.id} giao dịch. AI đã phân tích xong — xem ngay.`,
+            await sendLocalizedPushToUser(userId, (t) => ({
+              title: t("weeklyReviewTitle"),
+              body: t("weeklyReviewBody", { count: _count.id }),
               url: "/journal?tab=weekly",
-            });
+            }));
           } catch {
             // Non-blocking
           }

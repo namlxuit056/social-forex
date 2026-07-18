@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { resolveQuotes } from "@/lib/quotes/resolve-quotes";
-import { sendPushToUser } from "@/lib/push";
+import { sendLocalizedPushToUser } from "@/lib/push-i18n";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -61,12 +61,16 @@ export async function GET(req: NextRequest) {
       });
 
       try {
-        const dirLabel = alert.direction === "ABOVE" ? "vượt lên" : "chạm xuống";
-        await sendPushToUser(alert.userId, {
-          title: `${alert.symbol} đã ${dirLabel} ${alert.targetPrice}`,
-          body: `Giá hiện tại: ${price.toFixed(5)}. Alert của bạn đã kích hoạt.`,
+        await sendLocalizedPushToUser(alert.userId, (t) => ({
+          title: t(
+            alert.direction === "ABOVE"
+              ? "priceAlertAboveTitle"
+              : "priceAlertBelowTitle",
+            { symbol: alert.symbol, price: alert.targetPrice },
+          ),
+          body: t("priceAlertBody", { price: price.toFixed(5) }),
           url: "/alerts",
-        });
+        }));
       } catch {
         // Non-blocking
       }

@@ -2163,5 +2163,17 @@
     "limitReached": "You have reached the {limit} alert limit. Delete one to add more.",
     "errorInvalidData": "Invalid data.",
     "errorLimitReached": "Alert limit of {limit} reached."
+  },
+  "push": {
+    "priceAlertAboveTitle": "{symbol} broke above {price}",
+    "priceAlertBelowTitle": "{symbol} dropped below {price}",
+    "priceAlertBody": "Current price: {price}. Your alert has been triggered.",
+    "weeklyReviewTitle": "Your weekly trading review is ready",
+    "weeklyReviewBody": "You made {count} trades last week. The AI analysis is ready — check it out.",
+    "mt5AutoCloseTitle": "All positions auto-closed",
+    "mt5AutoCloseBody": "The forex market is closing for the weekend — all open positions were closed per your settings.",
+    "signalNewTitle": "New {symbol} signal",
+    "signalNewVipTitle": "New {symbol} ⭐ VIP signal",
+    "signalNewBody": "A trader you follow just posted a {symbol} signal — check it out"
   }
 }

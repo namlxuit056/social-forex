@@ -50,6 +50,7 @@ model User {
   id            String    @id @default(cuid())
   name          String?
   email         String?   @unique
+  locale        String    @default("vi")
   emailVerified DateTime?
   image         String?
   passwordHash  String?

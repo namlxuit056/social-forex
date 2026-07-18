@@ -6,6 +6,7 @@ import { routing } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 import { Globe } from "lucide-react";
 import { useTransition } from "react";
+import { setPreferredLocale } from "@/actions/locale";
 
 export function LanguageSwitcher() {
   const locale = useLocale();
@@ -17,6 +18,8 @@ export function LanguageSwitcher() {
   const nextLocale = locale === "vi" ? "en" : "vi";
 
   function handleSwitch() {
+    // Non-blocking: lưu preference cho push notification, bỏ qua nếu chưa đăng nhập
+    void setPreferredLocale(nextLocale).catch(() => {});
     startTransition(() => {
       router.replace(pathname, { locale: nextLocale });
     });

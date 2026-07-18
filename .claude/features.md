@@ -18,8 +18,6 @@ _(hoàn thành 2026-07-18 — xem Completed)_
 
 Mục tiêu: tăng độ tin cậy trước quyết định trả tiền/copy, chuẩn hoá thông báo đa ngôn ngữ.
 
-- [ ] **Push notification: cải thiện payload** — hiện dùng text cứng tiếng Việt; dùng template theo ngôn ngữ user
-  - AC: payload build từ messages/vi.json + en.json theo locale user đã chọn; user chưa có locale → default vi; các kind push hiện có (price alert, signal…) đều qua template, không còn string cứng.
 
 ## Low Priority — Sprint 3: Community
 
@@ -33,6 +31,8 @@ Mục tiêu: tăng độ tin cậy trước quyết định trả tiền/copy, c
 ---
 
 ## Completed
+
+- [x] Push notification payload i18n — User.locale (migration 20260718110000, lưu khi đổi ngôn ngữ qua LanguageSwitcher), namespace "push" trong messages, lib push-i18n dùng createTranslator (chạy được trong cron); 4 call sites price-alerts/weekly-review/mt5-auto-close/signal-create hết text cứng; followers nhận push theo ngôn ngữ từng người
 
 - [x] Journal: bỏ trần dữ liệu 200 lệnh — fetch 2000 lệnh cho stats/chart/edge/CSV, note "tính trên N lệnh gần nhất" khi chạm trần; bảng lịch sử render 200 hàng đầu + nút "Hiển thị thêm" (CSV vẫn xuất đủ)
 
