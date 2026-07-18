@@ -6,7 +6,11 @@ Mỗi dòng là một feature/improvement độc lập.
 
 ---
 
-## High Priority — Sprint 1: Quick wins UX
+## High Priority — Sprint 2: Nâng win rate
+
+_(hoàn thành 2026-07-18 — xem Completed)_
+
+## Sprint 1: Quick wins UX
 
 _(hoàn thành 2026-07-18 — xem Completed)_
 
@@ -34,6 +38,9 @@ Mục tiêu: tăng độ tin cậy trước quyết định trả tiền/copy, c
 
 ## Completed
 
+- [x] Journal Edge Analytics — tab "Thống kê" trên /journal: win rate theo symbol / phiên (Á-Âu-Mỹ, UTC) / Long-Short / nguồn lệnh, highlight nhóm thua nhiều nhất; pure logic trong src/lib/journal/edge-stats.ts (có test)
+- [x] Loss-streak guard — banner đỏ trên /journal khi ≥ 2 lệnh thua liên tiếp trong 24h, web push đúng 1 lần khi chạm 3; src/lib/journal/loss-streak.ts (có test); createTrade giờ tự set closedAt khi log lệnh W/L/BE thiếu closedAt
+- [x] News guard khi log trade — journal form check /api/calendar/upcoming (debounce 500ms) và hiện cảnh báo tin high-impact trong 24h tới cho symbol đang gõ; chỉ cảnh báo, không chặn submit
 - [x] Notifications: optimistic mark-as-read khi click — local state trong notification-list.tsx, revert nếu server action fail
 - [x] Leaderboard: pagination — searchParam `limit` (default 20) + nút "Load more" giữ nguyên timeframe/sortBy, rank liên tục
 - [x] Signals list: quick filter by symbol — chips XAUUSD/EURUSD/GBPUSD mặc định (merge với watchlist), click chip active để bỏ chọn, nút "Tất cả" khi đang filter

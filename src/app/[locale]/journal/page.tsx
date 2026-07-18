@@ -12,8 +12,11 @@ import { JournalMt5Prompt } from "./journal-mt5-prompt";
 import { JournalPerformanceChart } from "./journal-performance-chart";
 import { JournalAiPanel } from "./journal-ai-panel";
 import { JournalWeeklyReview } from "./journal-weekly-review";
+import { JournalEdgeAnalytics } from "./journal-edge-analytics";
 import { RiskCalculator } from "@/components/tools/risk-calculator";
+import { countTrailingLosses } from "@/lib/journal/loss-streak";
 import type { AiJournalAnalysis } from "@/lib/ai/types";
+import { AlertTriangle } from "lucide-react";
 
 export async function generateMetadata({
   params,
@@ -81,7 +84,8 @@ export default async function JournalPage({
     );
   }
 
-  const activeTab = query?.tab === "weekly" ? "weekly" : "trades";
+  const activeTab =
+    query?.tab === "weekly" ? "weekly" : query?.tab === "edge" ? "edge" : "trades";
 
   const [trades, mt5Connection, weeklyReviewsRaw] = await Promise.all([
     prisma.tradeJournal.findMany({
@@ -162,6 +166,14 @@ export default async function JournalPage({
       }
     : null;
 
+  // Loss-streak guard: chuỗi thua liên tiếp trong 24h qua (trades đã sort openedAt desc,
+  // sort lại theo closedAt desc cho đúng thứ tự đóng lệnh)
+  const lossStreak = countTrailingLosses(
+    closed
+      .filter((t) => t.closedAt !== null)
+      .sort((a, b) => (b.closedAt?.getTime() ?? 0) - (a.closedAt?.getTime() ?? 0)),
+  );
+
   const serialized = trades.map((t) => ({
     id: t.id,
     symbol: t.symbol,
@@ -176,6 +188,7 @@ export default async function JournalPage({
     notes: t.notes,
     openedAt: t.openedAt.toISOString(),
     closedAt: t.closedAt?.toISOString() ?? null,
+    copiedFromSignalId: t.copiedFromSignalId,
   }));
 
   const prefill = query?.symbol
@@ -192,6 +205,13 @@ export default async function JournalPage({
   return (
     <div className="space-y-8">
       <JournalHeader prefill={prefill} />
+
+      {lossStreak >= 2 && (
+        <div className="flex items-start gap-3 rounded-lg border border-red-500/30 bg-red-50 p-4 text-sm text-red-800 dark:bg-red-950/20 dark:text-red-200">
+          <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+          <p>{t("lossStreakBanner", { count: lossStreak })}</p>
+        </div>
+      )}
 
       <JournalStats
         total={trades.length}
@@ -225,10 +245,22 @@ export default async function JournalPage({
         >
           {t("tabWeekly")}
         </Link>
+        <Link
+          href="/journal?tab=edge"
+          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+            activeTab === "edge"
+              ? "border-primary text-foreground"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          {t("tabEdge")}
+        </Link>
       </nav>
 
       {activeTab === "weekly" ? (
         <JournalWeeklyReview reviews={weeklyReviews} />
+      ) : activeTab === "edge" ? (
+        <JournalEdgeAnalytics trades={serialized} />
       ) : (
         <>
           <RiskCalculator defaultBalance={mt5Account?.balance ?? null} />

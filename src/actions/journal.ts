@@ -8,6 +8,32 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { updateStreak } from "@/lib/streak";
 import { addXp } from "@/lib/add-xp";
+import { countTrailingLosses } from "@/lib/journal/loss-streak";
+import { isPushEnabled, sendPushToUser } from "@/lib/push";
+
+const LOSS_STREAK_PUSH_THRESHOLD = 3;
+
+/** Push đúng 1 lần khi chuỗi thua trong 24h vừa chạm ngưỡng. Non-blocking. */
+async function maybeNotifyLossStreak(userId: string) {
+  try {
+    if (!isPushEnabled()) return;
+    const recent = await prisma.tradeJournal.findMany({
+      where: { userId, closedAt: { not: null } },
+      orderBy: { closedAt: "desc" },
+      take: 10,
+      select: { result: true, closedAt: true },
+    });
+    if (countTrailingLosses(recent) !== LOSS_STREAK_PUSH_THRESHOLD) return;
+    const t = await getTranslations("journal");
+    await sendPushToUser(userId, {
+      title: t("lossStreakPushTitle"),
+      body: t("lossStreakPushBody", { count: LOSS_STREAK_PUSH_THRESHOLD }),
+      url: "/journal",
+    });
+  } catch {
+    // Non-blocking
+  }
+}
 
 const tradeSchema = z.object({
   symbol: z.string().min(2).max(32),
@@ -58,6 +84,9 @@ export async function createTrade(
   if (!parsed.success) return { error: te("journalInvalidData") };
 
   const d = parsed.data;
+  // Lệnh log với kết quả W/L/BE coi như đã đóng — cần closedAt cho loss-streak/edge stats
+  const closedAt =
+    d.closedAt ?? (d.result !== "PENDING" ? new Date() : null);
   await prisma.tradeJournal.create({
     data: {
       userId: session.user.id,
@@ -72,10 +101,12 @@ export async function createTrade(
       pnl: d.pnl,
       notes: d.notes,
       openedAt: d.openedAt,
-      closedAt: d.closedAt,
+      closedAt,
       copiedFromSignalId: (formData.get("copiedFromSignalId") as string) || null,
     },
   });
+
+  if (d.result === "LOSS") await maybeNotifyLossStreak(session.user.id);
 
   try {
     await updateStreak(session.user.id, "journal");
@@ -131,6 +162,9 @@ export async function updateTrade(
   if (!parsed.success) return { error: te("journalInvalidData") };
 
   const d = parsed.data;
+  const closedAt =
+    d.closedAt ??
+    (d.result !== "PENDING" ? trade.closedAt ?? new Date() : null);
   await prisma.tradeJournal.update({
     where: { id: tradeId },
     data: {
@@ -145,9 +179,13 @@ export async function updateTrade(
       pnl: d.pnl,
       notes: d.notes,
       openedAt: d.openedAt,
-      closedAt: d.closedAt,
+      closedAt,
     },
   });
+
+  if (d.result === "LOSS" && trade.result !== "LOSS") {
+    await maybeNotifyLossStreak(session.user.id);
+  }
 
   revalidatePath("/journal");
   return { ok: true };

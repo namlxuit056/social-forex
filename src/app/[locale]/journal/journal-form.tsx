@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useActionState } from "react";
-import { useTranslations } from "next-intl";
-import { X, BookOpen } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { X, BookOpen, AlertTriangle } from "lucide-react";
 import { createTrade } from "@/actions/journal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +18,14 @@ import {
 
 const SELECT_CLASS =
   "flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50";
+
+type UpcomingEvent = {
+  id: string;
+  timeUtc: string;
+  currency: string;
+  title: string;
+  impact: string;
+};
 
 type PrefillData = {
   symbol?: string;
@@ -36,12 +44,45 @@ export function JournalFormCard({
   prefill?: PrefillData;
 }) {
   const t = useTranslations("journal");
+  const locale = useLocale();
   const [, startTransition] = useTransition();
   const [state, formAction, isPending] = useActionState(createTrade, null);
+  const [symbol, setSymbol] = useState(prefill?.symbol ?? "");
+  const [newsGuard, setNewsGuard] = useState<{
+    hours: number;
+    events: UpcomingEvent[];
+  } | null>(null);
 
   useEffect(() => {
     if (state?.ok) startTransition(() => onClose());
   }, [state?.ok, startTransition, onClose]);
+
+  // News guard: check tin high-impact sắp diễn ra khi user gõ symbol (debounce 500ms)
+  useEffect(() => {
+    const q = symbol.trim().toUpperCase();
+    const controller = new AbortController();
+    const timer = setTimeout(
+      () => {
+        if (q.length < 6) {
+          setNewsGuard(null);
+          return;
+        }
+        fetch(`/api/calendar/upcoming?symbol=${encodeURIComponent(q)}`, {
+          signal: controller.signal,
+        })
+          .then((res) => (res.ok ? res.json() : null))
+          .then((data: { hours: number; events: UpcomingEvent[] } | null) => {
+            setNewsGuard(data && data.events.length > 0 ? data : null);
+          })
+          .catch(() => {});
+      },
+      q.length < 6 ? 0 : 500,
+    );
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [symbol]);
 
   return (
     <Card className="border-primary/20">
@@ -61,6 +102,33 @@ export function JournalFormCard({
         </Button>
       </CardHeader>
       <CardContent>
+        {newsGuard && (
+          <div className="mb-4 flex items-start gap-3 rounded-lg border border-amber-500/30 bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-950/20 dark:text-amber-200">
+            <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+            <div className="min-w-0 space-y-1">
+              <p className="font-medium">
+                {t("newsGuardTitle", {
+                  symbol: symbol.trim().toUpperCase(),
+                  hours: newsGuard.hours,
+                })}
+              </p>
+              <ul className="space-y-0.5 text-xs">
+                {newsGuard.events.slice(0, 3).map((e) => (
+                  <li key={e.id} className="truncate">
+                    <span className="font-mono">{e.currency}</span> ·{" "}
+                    {new Date(e.timeUtc).toLocaleString(locale, {
+                      weekday: "short",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}{" "}
+                    · {e.title}
+                  </li>
+                ))}
+              </ul>
+              <p className="text-xs">{t("newsGuardHint")}</p>
+            </div>
+          </div>
+        )}
         <form action={formAction} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {prefill?.from && (
             <input type="hidden" name="copiedFromSignalId" value={prefill.from} />
@@ -71,7 +139,8 @@ export function JournalFormCard({
               name="symbol"
               required
               placeholder="XAUUSD"
-              defaultValue={prefill?.symbol}
+              value={symbol}
+              onChange={(e) => setSymbol(e.target.value)}
               className="mt-1.5 font-mono uppercase"
             />
           </div>
