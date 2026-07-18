@@ -371,6 +371,8 @@ export default async function LeaderboardPage({
                             currentRiskPercent={copyTradeMap.get(r.userId)?.riskPercent}
                             currentXauusdLot={copyTradeMap.get(r.userId)?.xauusdLot}
                             currentBtcusdLot={copyTradeMap.get(r.userId)?.btcusdLot}
+                            providerWinRate={r.winRate}
+                            providerClosedSignals={r.total}
                           />
                         </div>
                       )}

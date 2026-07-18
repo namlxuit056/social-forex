@@ -18,8 +18,6 @@ _(hoàn thành 2026-07-18 — xem Completed)_
 
 Mục tiêu: tăng độ tin cậy trước quyết định trả tiền/copy, chuẩn hoá thông báo đa ngôn ngữ.
 
-- [ ] **Copy trade: hiển thị provider stats trước khi subscribe** — modal confirm hiện chỉ có tên, thêm winRate + signalCount
-  - AC: modal hiện winRate (%, 1 chữ số thập phân) + tổng số signal đã đóng; provider chưa có signal đóng → hiện "Chưa đủ dữ liệu" thay vì 0%; số liệu khớp với trang profile của provider.
 - [ ] **Push notification: cải thiện payload** — hiện dùng text cứng tiếng Việt; dùng template theo ngôn ngữ user
   - AC: payload build từ messages/vi.json + en.json theo locale user đã chọn; user chưa có locale → default vi; các kind push hiện có (price alert, signal…) đều qua template, không còn string cứng.
 
@@ -37,6 +35,8 @@ Mục tiêu: tăng độ tin cậy trước quyết định trả tiền/copy, c
 ---
 
 ## Completed
+
+- [x] Copy trade: provider stats trước khi subscribe — modal CopyTradeButton hiện win rate (1 chữ số thập phân) + số signal đã đóng, "chưa đủ dữ liệu" khi provider chưa có signal đóng; truyền từ leaderboard (số có sẵn) và /u/[userId] (2 count queries mới)
 
 - [x] Journal R-multiple & Expectancy — realized R mỗi lệnh (entry/SL/exit), tiles Payoff ratio + Kỳ vọng R trong JournalStats, cột R trong bảng + CSV; src/lib/journal/r-multiple.ts (có test)
 - [x] Journal Setup tags — cột setup (migration 20260718090000), dropdown 8 setup trong form thêm/sửa lệnh, nhãn setup dưới symbol trong bảng, nhóm "Theo setup" trong tab Thống kê

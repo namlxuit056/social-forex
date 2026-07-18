@@ -26,6 +26,10 @@ type Props = {
   currentRiskPercent?: number | null;
   currentXauusdLot?: number | null;
   currentBtcusdLot?: number | null;
+  /** Win rate % (1 chữ số thập phân) từ signal đã đóng; null = chưa đủ dữ liệu */
+  providerWinRate?: number | null;
+  /** Tổng số signal đã đóng (win + loss) */
+  providerClosedSignals?: number | null;
 };
 
 export function CopyTradeButton({
@@ -38,6 +42,8 @@ export function CopyTradeButton({
   currentRiskPercent,
   currentXauusdLot,
   currentBtcusdLot,
+  providerWinRate,
+  providerClosedSignals,
 }: Props) {
   const t = useTranslations("copyTrade");
   const [open, setOpen] = useState(false);
@@ -133,6 +139,33 @@ export function CopyTradeButton({
               ? t("manageHint", { name: providerName })
               : t("configureHint", { name: providerName })}
           </p>
+
+          {providerClosedSignals !== undefined && (
+            <div className="flex items-center gap-4 rounded-lg border border-border/60 bg-muted/30 px-3 py-2.5">
+              {providerClosedSignals && providerWinRate != null ? (
+                <>
+                  <div>
+                    <p className="text-xs text-muted-foreground">{t("statWinRate")}</p>
+                    <p
+                      className={`font-mono text-sm font-semibold ${
+                        providerWinRate >= 50 ? "text-emerald-500" : "text-red-500"
+                      }`}
+                    >
+                      {providerWinRate.toFixed(1)}%
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">{t("statClosedSignals")}</p>
+                    <p className="font-mono text-sm font-semibold text-foreground">
+                      {providerClosedSignals}
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <p className="text-xs text-muted-foreground">{t("statNoData")}</p>
+              )}
+            </div>
+          )}
 
           <div className="flex gap-2">
             <Button

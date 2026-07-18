@@ -121,6 +121,8 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
     signalStats,
     existingCopyTrade,
     academyCompletedCount,
+    closedWins,
+    closedTotal,
   ] =
     await Promise.all([
       prisma.userFollow.count({ where: { followingId: userId } }),
@@ -177,9 +179,18 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
       prisma.academyProgress.count({
         where: { userId, completed: true },
       }),
+      prisma.signal.count({
+        where: { authorId: userId, status: "CLOSED_WIN" },
+      }),
+      prisma.signal.count({
+        where: { authorId: userId, status: { in: ["CLOSED_WIN", "CLOSED_LOSS"] } },
+      }),
     ]);
 
   const isSelf = session?.user?.id === userId;
+
+  const providerWinRate =
+    closedTotal > 0 ? Math.round((closedWins / closedTotal) * 1000) / 10 : null;
 
   const followerItems = followerRows.map((row) => ({
     id: row.id,
@@ -239,6 +250,8 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
                   currentRiskPercent={existingCopyTrade?.riskPercent}
                   currentXauusdLot={existingCopyTrade?.xauusdLot}
                   currentBtcusdLot={existingCopyTrade?.btcusdLot}
+                  providerWinRate={providerWinRate}
+                  providerClosedSignals={closedTotal}
                 />
                 <Link
                   href={`/messages/${userId}`}
