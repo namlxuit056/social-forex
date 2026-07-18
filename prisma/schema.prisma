@@ -188,6 +188,7 @@ model ForumThread {
   title      String
   slug       String
   hidden     Boolean       @default(false)
+  isPinned   Boolean       @default(false)
   category   ForumCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   author     User          @relation(fields: [authorId], references: [id])
   posts      ForumPost[]

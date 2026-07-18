@@ -208,3 +208,25 @@ export async function reviewReport(formData: FormData) {
 
   revalidatePath("/admin/reports");
 }
+
+export async function toggleThreadPin(formData: FormData) {
+  const session = await auth();
+  if (!session?.user?.id) redirect("/auth/signin");
+  if (!(await requireMod(session.user.id))) return;
+
+  const threadId = formData.get("threadId");
+  if (typeof threadId !== "string" || !threadId) return;
+
+  const thread = await prisma.forumThread.findUnique({
+    where: { id: threadId },
+    include: { category: { select: { slug: true } } },
+  });
+  if (!thread) return;
+
+  await prisma.forumThread.update({
+    where: { id: threadId },
+    data: { isPinned: !thread.isPinned },
+  });
+
+  revalidatePath(`/forum/${thread.category.slug}`);
+}

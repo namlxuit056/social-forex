@@ -3,11 +3,13 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { BackLink } from "@/components/layout/back-link";
 import { EmptyState } from "@/components/layout/empty-state";
+import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { toggleThreadPin } from "@/actions/moderation";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { MessageSquarePlus } from "lucide-react";
+import { MessageSquarePlus, Pin, PinOff } from "lucide-react";
 
 type Props = {
   params: Promise<{ locale: string; slug: string }>;
@@ -25,6 +27,15 @@ export default async function ForumCategoryPage({ params, searchParams }: Props)
   const { q } = await searchParams;
   const query = q?.trim();
 
+  const session = await auth();
+  const viewer = session?.user?.id
+    ? await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { role: true },
+      })
+    : null;
+  const isMod = viewer?.role === "MOD" || viewer?.role === "ADMIN";
+
   const category = await prisma.forumCategory.findUnique({
     where: { slug },
     include: {
@@ -34,7 +45,7 @@ export default async function ForumCategoryPage({ params, searchParams }: Props)
               title: { contains: query, mode: "insensitive" as const },
             }
           : undefined,
-        orderBy: { updatedAt: "desc" },
+        orderBy: [{ isPinned: "desc" }, { updatedAt: "desc" }],
         take: 50,
         include: {
           author: { select: { name: true, email: true } },
@@ -92,12 +103,20 @@ export default async function ForumCategoryPage({ params, searchParams }: Props)
       ) : (
         <ul className="divide-y divide-border rounded-xl border border-border">
           {category.threads.map((row) => (
-            <li key={row.id}>
+            <li key={row.id} className="flex items-center">
               <Link
                 href={`/forum/${slug}/thread/${row.slug}`}
-                className="block p-4 transition hover:bg-muted/40"
+                className="block min-w-0 flex-1 p-4 transition hover:bg-muted/40"
               >
-                <span className="font-medium text-foreground">{row.title}</span>
+                <span className="flex items-center gap-1.5 font-medium text-foreground">
+                  {row.isPinned && (
+                    <Pin
+                      className="size-3.5 shrink-0 text-primary"
+                      aria-label={t("pinnedThread")}
+                    />
+                  )}
+                  <span className="truncate">{row.title}</span>
+                </span>
                 <div className="mt-1 flex flex-wrap gap-3 text-xs text-muted-foreground">
                   <span>
                     {row.author?.name ?? row.author?.email ?? t("anonymousAuthor")}
@@ -105,6 +124,24 @@ export default async function ForumCategoryPage({ params, searchParams }: Props)
                   <span>{new Date(row.updatedAt).toLocaleString(dateLocale)}</span>
                 </div>
               </Link>
+              {isMod && (
+                <form action={toggleThreadPin} className="shrink-0 pr-3">
+                  <input type="hidden" name="threadId" value={row.id} />
+                  <Button
+                    type="submit"
+                    variant="ghost"
+                    size="icon"
+                    className="size-8 text-muted-foreground hover:text-foreground"
+                    title={row.isPinned ? t("unpinThread") : t("pinThread")}
+                  >
+                    {row.isPinned ? (
+                      <PinOff className="size-4" />
+                    ) : (
+                      <Pin className="size-4" />
+                    )}
+                  </Button>
+                </form>
+              )}
             </li>
           ))}
         </ul>

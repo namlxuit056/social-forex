@@ -21,8 +21,7 @@ Mục tiêu: tăng độ tin cậy trước quyết định trả tiền/copy, c
 
 ## Low Priority — Sprint 3: Community
 
-- [ ] **Forum: pinned posts trong mỗi category** — MOD có thể pin thread quan trọng; thêm isPinned boolean + sort pinned first
-  - AC: chỉ MOD/ADMIN thấy nút pin/unpin; thread pinned luôn đứng đầu category (có icon pin); tối đa sort pinned-first rồi mới đến sort thường; migration Prisma + revalidatePath.
+_(trống)_
 
 ## Đề xuất mới (chưa duyệt — cần user quyết trước khi đưa vào sprint)
 - [ ] **Price alert: re-arm / recurring** — alert hiện fire 1 lần rồi tắt (cần verify); cho phép "lặp lại mỗi khi giá cắt ngưỡng" với cooldown chống spam. Câu hỏi mở: cooldown mặc định bao nhiêu phút?
@@ -31,6 +30,8 @@ Mục tiêu: tăng độ tin cậy trước quyết định trả tiền/copy, c
 ---
 
 ## Completed
+
+- [x] Forum: pinned threads trong category — isPinned (migration 20260718120000), MOD/ADMIN có nút pin/unpin trên list (role check qua DB), thread ghim luôn đứng đầu với icon Pin, action toggleThreadPin trong moderation.ts + revalidatePath
 
 - [x] Push notification payload i18n — User.locale (migration 20260718110000, lưu khi đổi ngôn ngữ qua LanguageSwitcher), namespace "push" trong messages, lib push-i18n dùng createTranslator (chạy được trong cron); 4 call sites price-alerts/weekly-review/mt5-auto-close/signal-create hết text cứng; followers nhận push theo ngôn ngữ từng người
 
