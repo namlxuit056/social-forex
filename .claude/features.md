@@ -34,6 +34,8 @@ Mục tiêu: tăng độ tin cậy trước quyết định trả tiền/copy, c
 
 ## Completed
 
+- [x] Performance chart fixes — (1) DD tooltip ở chế độ % không còn scale 2 lần; (2) custom range bắt đầu ngày 29–31 không còn mất bucket tháng (JS month overflow) → trade không biến mất khỏi chart; (3) Profit Factor tính theo range đang chọn thay vì all-time; bucket logic tách ra src/lib/journal/chart-buckets.ts kèm regression tests
+
 - [x] Journal Emotion tag — cột emotion (5 trạng thái: bình tĩnh/tự tin/FOMO/gỡ gạc/do dự), dropdown trong form thêm/sửa, hiện cạnh setup dưới symbol, nhóm "Theo cảm xúc" trong tab Thống kê (migration 20260718100000)
 - [x] Journal Chart image — cột imageUrl, JournalImageField upload qua /api/signal-images/upload (Vercel Blob dùng chung), thumbnail trong bảng lịch sử mở full-size tab mới, cột ImageUrl trong CSV
 - [x] Journal ↔ Signal link — đã có sẵn từ trước qua prefill (?symbol=&from=) + copiedFromSignalId, không cần làm thêm
