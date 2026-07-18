@@ -5,6 +5,8 @@ import { useActionState } from "react";
 import { useTranslations } from "next-intl";
 import { Trash2, Pencil, X, Download } from "lucide-react";
 import { deleteTrade, updateTrade } from "@/actions/journal";
+import { realizedR } from "@/lib/journal/r-multiple";
+import { TRADE_SETUPS, useSetupLabels } from "./use-setup-labels";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +27,7 @@ export interface Trade {
   result: string;
   pnl: number | null;
   notes: string | null;
+  setup: string | null;
   openedAt: string;
   closedAt: string | null;
 }
@@ -52,6 +55,8 @@ function exportTradesToCsv(trades: Trade[]): void {
     "LotSize",
     "Result",
     "PnL",
+    "R",
+    "Setup",
     "Notes",
     "OpenedAt",
     "ClosedAt",
@@ -67,6 +72,8 @@ function exportTradesToCsv(trades: Trade[]): void {
       tr.lotSize,
       tr.result,
       tr.pnl,
+      realizedR(tr),
+      tr.setup,
       tr.notes,
       tr.openedAt,
       tr.closedAt,
@@ -89,6 +96,7 @@ const SELECT_CLASS =
 
 function EditForm({ trade, onClose }: { trade: Trade; onClose: () => void }) {
   const t = useTranslations("journal");
+  const setupLabels = useSetupLabels();
   const [state, formAction, isPending] = useActionState(updateTrade, null);
 
   useEffect(() => {
@@ -132,6 +140,17 @@ function EditForm({ trade, onClose }: { trade: Trade; onClose: () => void }) {
           <div>
             <Label>{t("lotSize")}</Label>
             <Input name="lotSize" type="number" step="any" defaultValue={trade.lotSize ?? ""} className="mt-1.5 font-mono" />
+          </div>
+          <div>
+            <Label>{t("setup")}</Label>
+            <select name="setup" defaultValue={trade.setup ?? ""} className={`mt-1.5 ${SELECT_CLASS}`}>
+              <option value="">{t("setupNone")}</option>
+              {TRADE_SETUPS.map((s) => (
+                <option key={s} value={s}>
+                  {setupLabels[s]}
+                </option>
+              ))}
+            </select>
           </div>
           <div>
             <Label>{t("exitPrice")}</Label>
@@ -210,6 +229,8 @@ function TradeRow({
   t: ReturnType<typeof useTranslations>;
 }) {
   const isPending = trade.result === "PENDING";
+  const setupLabels = useSetupLabels();
+  const r = realizedR(trade);
 
   return (
     <tr
@@ -219,7 +240,14 @@ function TradeRow({
         isEditing && "bg-primary/5",
       )}
     >
-      <td className="px-4 py-2.5 font-mono font-medium">{trade.symbol}</td>
+      <td className="px-4 py-2.5 font-mono font-medium">
+        {trade.symbol}
+        {trade.setup && (
+          <span className="block font-sans text-[10px] font-normal text-muted-foreground">
+            {setupLabels[trade.setup as keyof typeof setupLabels] ?? trade.setup}
+          </span>
+        )}
+      </td>
       <td className="px-4 py-2.5">
         <Badge variant={trade.direction === "LONG" ? "default" : "destructive"} className="text-[11px]">
           {trade.direction}
@@ -244,6 +272,18 @@ function TradeRow({
             ? `+$${trade.pnl.toFixed(2)}`
             : `-$${Math.abs(trade.pnl).toFixed(2)}`
           : "—"}
+      </td>
+      <td
+        className={cn(
+          "px-4 py-2.5 font-mono text-xs font-medium",
+          r == null
+            ? "text-muted-foreground/40"
+            : r >= 0
+              ? "text-emerald-500"
+              : "text-red-500",
+        )}
+      >
+        {r != null && !isPending ? `${r >= 0 ? "+" : ""}${r.toFixed(2)}R` : "—"}
       </td>
       <td className="max-w-40 px-4 py-2.5 text-xs text-muted-foreground">
         {trade.notes ? (
@@ -374,6 +414,7 @@ export function JournalTable({ trades, locale }: { trades: Trade[]; locale: stri
                   <th className="px-4 py-2.5">{t("lotSize")}</th>
                   <th className="px-4 py-2.5">{t("result")}</th>
                   <th className="px-4 py-2.5">{t("pnl")}</th>
+                  <th className="px-4 py-2.5">R</th>
                   <th className="px-4 py-2.5">{t("notes")}</th>
                   <th className="px-4 py-2.5">{t("openedAt")}</th>
                   <th className="px-4 py-2.5" />

@@ -366,6 +366,7 @@ model TradeJournal {
   result     TradeResult @default(PENDING)
   pnl        Float?
   notes      String?
+  setup      String?
 
   copiedFromSignalId String?
   copiedFromSignal   Signal?  @relation(fields: [copiedFromSignalId], references: [id], onDelete: SetNull)

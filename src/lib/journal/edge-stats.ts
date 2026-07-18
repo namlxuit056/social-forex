@@ -5,6 +5,7 @@ export type EdgeTrade = {
   pnl: number | null;
   openedAt: string;
   copiedFromSignalId: string | null;
+  setup?: string | null;
 };
 
 export type EdgeRow = {
@@ -61,6 +62,7 @@ export type EdgeGroups = {
   sessions: EdgeRow[];
   directions: EdgeRow[];
   sources: EdgeRow[];
+  setups: EdgeRow[];
 };
 
 export function computeEdgeGroups(trades: EdgeTrade[]): EdgeGroups {
@@ -72,6 +74,11 @@ export function computeEdgeGroups(trades: EdgeTrade[]): EdgeGroups {
     directions: buildRows(trades, (t) => t.direction),
     sources: buildRows(trades, (t) =>
       t.copiedFromSignalId ? "signal" : "manual",
+    ),
+    // Chỉ nhóm các lệnh đã gắn setup — lệnh chưa gắn không nói lên điều gì về setup
+    setups: buildRows(
+      trades.filter((t) => t.setup != null && t.setup !== ""),
+      (t) => t.setup as string,
     ),
   };
 }

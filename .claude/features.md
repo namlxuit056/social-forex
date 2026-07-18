@@ -38,6 +38,9 @@ Mục tiêu: tăng độ tin cậy trước quyết định trả tiền/copy, c
 
 ## Completed
 
+- [x] Journal R-multiple & Expectancy — realized R mỗi lệnh (entry/SL/exit), tiles Payoff ratio + Kỳ vọng R trong JournalStats, cột R trong bảng + CSV; src/lib/journal/r-multiple.ts (có test)
+- [x] Journal Setup tags — cột setup (migration 20260718090000), dropdown 8 setup trong form thêm/sửa lệnh, nhãn setup dưới symbol trong bảng, nhóm "Theo setup" trong tab Thống kê
+
 - [x] Journal Edge Analytics — tab "Thống kê" trên /journal: win rate theo symbol / phiên (Á-Âu-Mỹ, UTC) / Long-Short / nguồn lệnh, highlight nhóm thua nhiều nhất; pure logic trong src/lib/journal/edge-stats.ts (có test)
 - [x] Loss-streak guard — banner đỏ trên /journal khi ≥ 2 lệnh thua liên tiếp trong 24h, web push đúng 1 lần khi chạm 3; src/lib/journal/loss-streak.ts (có test); createTrade giờ tự set closedAt khi log lệnh W/L/BE thiếu closedAt
 - [x] News guard khi log trade — journal form check /api/calendar/upcoming (debounce 500ms) và hiện cảnh báo tin high-impact trong 24h tới cho symbol đang gõ; chỉ cảnh báo, không chặn submit

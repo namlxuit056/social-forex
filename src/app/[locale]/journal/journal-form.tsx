@@ -5,6 +5,7 @@ import { useActionState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { X, BookOpen, AlertTriangle } from "lucide-react";
 import { createTrade } from "@/actions/journal";
+import { TRADE_SETUPS, useSetupLabels } from "./use-setup-labels";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -45,6 +46,7 @@ export function JournalFormCard({
 }) {
   const t = useTranslations("journal");
   const locale = useLocale();
+  const setupLabels = useSetupLabels();
   const [, startTransition] = useTransition();
   const [state, formAction, isPending] = useActionState(createTrade, null);
   const [symbol, setSymbol] = useState(prefill?.symbol ?? "");
@@ -189,6 +191,17 @@ export function JournalFormCard({
           <div>
             <Label>{t("lotSize")}</Label>
             <Input name="lotSize" type="number" step="any" placeholder="0.01" className="mt-1.5 font-mono" />
+          </div>
+          <div>
+            <Label>{t("setup")}</Label>
+            <select name="setup" defaultValue="" className={`mt-1.5 ${SELECT_CLASS}`}>
+              <option value="">{t("setupNone")}</option>
+              {TRADE_SETUPS.map((s) => (
+                <option key={s} value={s}>
+                  {setupLabels[s]}
+                </option>
+              ))}
+            </select>
           </div>
           <div>
             <Label>{t("exitPrice")}</Label>

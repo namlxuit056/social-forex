@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { BarChart3, TrendingUp, Trophy, DollarSign } from "lucide-react";
+import { BarChart3, TrendingUp, Trophy, DollarSign, Scale, Target } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +13,9 @@ interface Props {
   winRate: number;
   totalPnl: number;
   avgPnl: number;
+  payoffRatio: number | null;
+  avgR: number | null;
+  rCount: number;
 }
 
 export function JournalStats({
@@ -23,6 +26,9 @@ export function JournalStats({
   winRate,
   totalPnl,
   avgPnl,
+  payoffRatio,
+  avgR,
+  rCount,
 }: Props) {
   const t = useTranslations("journal");
 
@@ -59,10 +65,42 @@ export function JournalStats({
       color: avgPnl >= 0 ? "text-emerald-500" : "text-red-500",
       bg: avgPnl >= 0 ? "bg-emerald-500/10" : "bg-red-500/10",
     },
+    {
+      label: t("payoffRatio"),
+      value: payoffRatio !== null ? payoffRatio.toFixed(2) : "—",
+      sub: t("payoffRatioSub"),
+      icon: Scale,
+      color:
+        payoffRatio === null
+          ? "text-muted-foreground"
+          : payoffRatio >= 1
+            ? "text-emerald-500"
+            : "text-red-500",
+      bg:
+        payoffRatio === null
+          ? "bg-muted"
+          : payoffRatio >= 1
+            ? "bg-emerald-500/10"
+            : "bg-red-500/10",
+    },
+    {
+      label: t("expectancyR"),
+      value: avgR !== null ? `${avgR >= 0 ? "+" : ""}${avgR.toFixed(2)}R` : "—",
+      sub: rCount > 0 ? t("expectancyRSub", { count: rCount }) : t("expectancyREmpty"),
+      icon: Target,
+      color:
+        avgR === null
+          ? "text-muted-foreground"
+          : avgR >= 0
+            ? "text-emerald-500"
+            : "text-red-500",
+      bg:
+        avgR === null ? "bg-muted" : avgR >= 0 ? "bg-emerald-500/10" : "bg-red-500/10",
+    },
   ];
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {stats.map((s) => (
         <Card key={s.label} className="border-border/60">
           <CardContent className="flex items-center gap-4 p-5">

@@ -15,6 +15,7 @@ import { JournalWeeklyReview } from "./journal-weekly-review";
 import { JournalEdgeAnalytics } from "./journal-edge-analytics";
 import { RiskCalculator } from "@/components/tools/risk-calculator";
 import { countTrailingLosses } from "@/lib/journal/loss-streak";
+import { computeRStats } from "@/lib/journal/r-multiple";
 import type { AiJournalAnalysis } from "@/lib/ai/types";
 import { AlertTriangle } from "lucide-react";
 
@@ -166,6 +167,8 @@ export default async function JournalPage({
       }
     : null;
 
+  const rStats = computeRStats(trades);
+
   // Loss-streak guard: chuỗi thua liên tiếp trong 24h qua (trades đã sort openedAt desc,
   // sort lại theo closedAt desc cho đúng thứ tự đóng lệnh)
   const lossStreak = countTrailingLosses(
@@ -189,6 +192,7 @@ export default async function JournalPage({
     openedAt: t.openedAt.toISOString(),
     closedAt: t.closedAt?.toISOString() ?? null,
     copiedFromSignalId: t.copiedFromSignalId,
+    setup: t.setup,
   }));
 
   const prefill = query?.symbol
@@ -221,6 +225,9 @@ export default async function JournalPage({
         winRate={winRate}
         totalPnl={totalPnl}
         avgPnl={avgPnl}
+        payoffRatio={rStats.payoffRatio}
+        avgR={rStats.avgR}
+        rCount={rStats.rCount}
       />
 
       {/* Tab navigation */}

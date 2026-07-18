@@ -54,6 +54,18 @@ describe("computeEdgeGroups", () => {
     expect(groups.symbols[0].winRate).toBeNull();
   });
 
+  it("nhóm theo setup, bỏ lệnh chưa gắn setup", () => {
+    const groups = computeEdgeGroups([
+      trade({ setup: "BREAKOUT" }),
+      trade({ setup: "BREAKOUT", result: "LOSS" }),
+      trade({ setup: null }),
+      trade({}),
+    ]);
+    expect(groups.setups).toHaveLength(1);
+    expect(groups.setups[0].key).toBe("BREAKOUT");
+    expect(groups.setups[0].total).toBe(2);
+  });
+
   it("tách nguồn lệnh manual vs signal", () => {
     const groups = computeEdgeGroups([
       trade({}),
