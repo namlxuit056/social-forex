@@ -34,6 +34,8 @@ Mục tiêu: tăng độ tin cậy trước quyết định trả tiền/copy, c
 
 ## Completed
 
+- [x] Journal: bỏ trần dữ liệu 200 lệnh — fetch 2000 lệnh cho stats/chart/edge/CSV, note "tính trên N lệnh gần nhất" khi chạm trần; bảng lịch sử render 200 hàng đầu + nút "Hiển thị thêm" (CSV vẫn xuất đủ)
+
 - [x] Performance chart fixes — (1) DD tooltip ở chế độ % không còn scale 2 lần; (2) custom range bắt đầu ngày 29–31 không còn mất bucket tháng (JS month overflow) → trade không biến mất khỏi chart; (3) Profit Factor tính theo range đang chọn thay vì all-time; bucket logic tách ra src/lib/journal/chart-buckets.ts kèm regression tests
 
 - [x] Journal Emotion tag — cột emotion (5 trạng thái: bình tĩnh/tự tin/FOMO/gỡ gạc/do dự), dropdown trong form thêm/sửa, hiện cạnh setup dưới symbol, nhóm "Theo cảm xúc" trong tab Thống kê (migration 20260718100000)

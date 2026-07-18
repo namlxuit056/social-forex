@@ -385,10 +385,13 @@ function TradeRow({
   );
 }
 
+const TABLE_PAGE_SIZE = 200;
+
 export function JournalTable({ trades, locale }: { trades: Trade[]; locale: string }) {
   const t = useTranslations("journal");
   const [filter, setFilter] = useState<Filter>("ALL");
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [visibleCount, setVisibleCount] = useState(TABLE_PAGE_SIZE);
 
   const counts = {
     ALL: trades.length,
@@ -399,6 +402,9 @@ export function JournalTable({ trades, locale }: { trades: Trade[]; locale: stri
   };
 
   const filtered = filter === "ALL" ? trades : trades.filter((tr) => tr.result === filter);
+  // CSV export vẫn dùng `filtered` đầy đủ — chỉ giới hạn số hàng render cho DOM nhẹ
+  const visible = filtered.slice(0, visibleCount);
+  const hasMoreRows = filtered.length > visibleCount;
 
   const filterButtons: { key: Filter; label: string; color?: string }[] = [
     { key: "ALL", label: t("all") },
@@ -476,7 +482,7 @@ export function JournalTable({ trades, locale }: { trades: Trade[]; locale: stri
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/40">
-                {filtered.map((tr) => (
+                {visible.map((tr) => (
                   <TradeRow
                     key={tr.id}
                     trade={tr}
@@ -488,6 +494,21 @@ export function JournalTable({ trades, locale }: { trades: Trade[]; locale: stri
                 ))}
               </tbody>
             </table>
+          )}
+          {hasMoreRows && (
+            <div className="flex flex-col items-center gap-1 border-t border-border/40 px-4 py-3">
+              <p className="text-xs text-muted-foreground">
+                {t("tableShowingRows", { shown: visible.length, total: filtered.length })}
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setVisibleCount((c) => c + TABLE_PAGE_SIZE)}
+              >
+                {t("tableShowMore")}
+              </Button>
+            </div>
           )}
         </CardContent>
       </Card>

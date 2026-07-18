@@ -32,6 +32,9 @@ export async function generateMetadata({
 
 export const dynamic = "force-dynamic";
 
+// Trần an toàn cho stats/chart/edge — trader tích cực vài năm cũng hiếm khi chạm
+const TRADES_CAP = 2000;
+
 function parseMql5Time(v: unknown): string | null {
   if (typeof v !== "string" || !v) return null;
   const iso = v.replace(/^(\d{4})\.(\d{2})\.(\d{2})/, "$1-$2-$3").replace(" ", "T");
@@ -88,11 +91,11 @@ export default async function JournalPage({
   const activeTab =
     query?.tab === "weekly" ? "weekly" : query?.tab === "edge" ? "edge" : "trades";
 
-  const [trades, mt5Connection, weeklyReviewsRaw] = await Promise.all([
+  const [tradesRaw, mt5Connection, weeklyReviewsRaw] = await Promise.all([
     prisma.tradeJournal.findMany({
       where: { userId: session.user.id },
       orderBy: { openedAt: "desc" },
-      take: 200,
+      take: TRADES_CAP + 1,
     }),
     prisma.mt5Connection.findFirst({
       where: { userId: session.user.id, revokedAt: null },
@@ -106,6 +109,9 @@ export default async function JournalPage({
         })
       : Promise.resolve([]),
   ]);
+
+  const tradesCapped = tradesRaw.length > TRADES_CAP;
+  const trades = tradesCapped ? tradesRaw.slice(0, TRADES_CAP) : tradesRaw;
 
   const weeklyReviews = weeklyReviewsRaw.map((r) => ({
     id: r.id,
@@ -231,6 +237,12 @@ export default async function JournalPage({
         avgR={rStats.avgR}
         rCount={rStats.rCount}
       />
+
+      {tradesCapped && (
+        <p className="text-xs text-muted-foreground">
+          {t("tradesCapNote", { count: TRADES_CAP })}
+        </p>
+      )}
 
       {/* Tab navigation */}
       <nav className="flex gap-1 border-b">
