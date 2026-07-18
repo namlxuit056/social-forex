@@ -10,6 +10,7 @@ import { updateStreak } from "@/lib/streak";
 import { addXp } from "@/lib/add-xp";
 import { countTrailingLosses } from "@/lib/journal/loss-streak";
 import { parseTradeSetup } from "@/lib/journal/setups";
+import { parseJournalImageUrl, parseTradeEmotion } from "@/lib/journal/emotions";
 import { isPushEnabled, sendPushToUser } from "@/lib/push";
 
 const LOSS_STREAK_PUSH_THRESHOLD = 3;
@@ -104,6 +105,8 @@ export async function createTrade(
       openedAt: d.openedAt,
       closedAt,
       setup: parseTradeSetup(formData.get("setup")),
+      emotion: parseTradeEmotion(formData.get("emotion")),
+      imageUrl: parseJournalImageUrl(formData.get("imageUrl")),
       copiedFromSignalId: (formData.get("copiedFromSignalId") as string) || null,
     },
   });
@@ -183,6 +186,8 @@ export async function updateTrade(
       openedAt: d.openedAt,
       closedAt,
       setup: parseTradeSetup(formData.get("setup")),
+      emotion: parseTradeEmotion(formData.get("emotion")),
+      imageUrl: parseJournalImageUrl(formData.get("imageUrl")),
     },
   });
 

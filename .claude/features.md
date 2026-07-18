@@ -27,14 +27,16 @@ Mục tiêu: tăng độ tin cậy trước quyết định trả tiền/copy, c
   - AC: chỉ MOD/ADMIN thấy nút pin/unpin; thread pinned luôn đứng đầu category (có icon pin); tối đa sort pinned-first rồi mới đến sort thường; migration Prisma + revalidatePath.
 
 ## Đề xuất mới (chưa duyệt — cần user quyết trước khi đưa vào sprint)
-
-- [ ] **Journal ↔ Signal link: log trade 1 chạm từ signal** — nút "Log vào journal" trên signal detail, prefill symbol/direction/entry; giả định: tăng số entry journal → weekly AI review hữu ích hơn. Câu hỏi mở: có link ngược từ journal entry về signal không?
 - [ ] **Price alert: re-arm / recurring** — alert hiện fire 1 lần rồi tắt (cần verify); cho phép "lặp lại mỗi khi giá cắt ngưỡng" với cooldown chống spam. Câu hỏi mở: cooldown mặc định bao nhiêu phút?
 - [ ] **Onboarding checklist trên /start** — 4–5 bước (tạo journal đầu tiên, follow 1 trader, đặt 1 price alert…) + XP thưởng; giả định: tăng activation user mới. Câu hỏi mở: có gate bằng XP system hiện tại không?
 
 ---
 
 ## Completed
+
+- [x] Journal Emotion tag — cột emotion (5 trạng thái: bình tĩnh/tự tin/FOMO/gỡ gạc/do dự), dropdown trong form thêm/sửa, hiện cạnh setup dưới symbol, nhóm "Theo cảm xúc" trong tab Thống kê (migration 20260718100000)
+- [x] Journal Chart image — cột imageUrl, JournalImageField upload qua /api/signal-images/upload (Vercel Blob dùng chung), thumbnail trong bảng lịch sử mở full-size tab mới, cột ImageUrl trong CSV
+- [x] Journal ↔ Signal link — đã có sẵn từ trước qua prefill (?symbol=&from=) + copiedFromSignalId, không cần làm thêm
 
 - [x] Copy trade: provider stats trước khi subscribe — modal CopyTradeButton hiện win rate (1 chữ số thập phân) + số signal đã đóng, "chưa đủ dữ liệu" khi provider chưa có signal đóng; truyền từ leaderboard (số có sẵn) và /u/[userId] (2 count queries mới)
 

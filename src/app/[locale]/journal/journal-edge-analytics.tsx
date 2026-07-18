@@ -11,7 +11,7 @@ import {
   type EdgeRow,
   type EdgeTrade,
 } from "@/lib/journal/edge-stats";
-import { useSetupLabels } from "./use-setup-labels";
+import { useEmotionLabels, useSetupLabels } from "./use-setup-labels";
 
 const MIN_CLOSED_TRADES = 5;
 
@@ -76,6 +76,7 @@ function EdgeGroupCard({
 export function JournalEdgeAnalytics({ trades }: { trades: EdgeTrade[] }) {
   const t = useTranslations("journal");
   const setupLabels = useSetupLabels();
+  const emotionLabels = useEmotionLabels();
   const groups = useMemo(() => computeEdgeGroups(trades), [trades]);
   const closedCount = trades.filter((tr) => tr.result !== "PENDING").length;
 
@@ -105,6 +106,9 @@ export function JournalEdgeAnalytics({ trades }: { trades: EdgeTrade[] }) {
 
   const setupLabel = (key: string) =>
     setupLabels[key as keyof typeof setupLabels] ?? key;
+
+  const emotionLabel = (key: string) =>
+    emotionLabels[key as keyof typeof emotionLabels] ?? key;
 
   return (
     <div className="space-y-4">
@@ -156,6 +160,13 @@ export function JournalEdgeAnalytics({ trades }: { trades: EdgeTrade[] }) {
           rows={groups.setups}
           labelOf={setupLabel}
           worstKey={findWorstRow(groups.setups)?.key}
+          notEnoughLabel={t("edgeNotEnough")}
+        />
+        <EdgeGroupCard
+          title={t("edgeByEmotion")}
+          rows={groups.emotions}
+          labelOf={emotionLabel}
+          worstKey={findWorstRow(groups.emotions)?.key}
           notEnoughLabel={t("edgeNotEnough")}
         />
       </div>

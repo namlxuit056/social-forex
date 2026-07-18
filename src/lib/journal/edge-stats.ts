@@ -6,6 +6,7 @@ export type EdgeTrade = {
   openedAt: string;
   copiedFromSignalId: string | null;
   setup?: string | null;
+  emotion?: string | null;
 };
 
 export type EdgeRow = {
@@ -63,6 +64,7 @@ export type EdgeGroups = {
   directions: EdgeRow[];
   sources: EdgeRow[];
   setups: EdgeRow[];
+  emotions: EdgeRow[];
 };
 
 export function computeEdgeGroups(trades: EdgeTrade[]): EdgeGroups {
@@ -79,6 +81,10 @@ export function computeEdgeGroups(trades: EdgeTrade[]): EdgeGroups {
     setups: buildRows(
       trades.filter((t) => t.setup != null && t.setup !== ""),
       (t) => t.setup as string,
+    ),
+    emotions: buildRows(
+      trades.filter((t) => t.emotion != null && t.emotion !== ""),
+      (t) => t.emotion as string,
     ),
   };
 }

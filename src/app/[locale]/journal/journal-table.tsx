@@ -6,7 +6,13 @@ import { useTranslations } from "next-intl";
 import { Trash2, Pencil, X, Download } from "lucide-react";
 import { deleteTrade, updateTrade } from "@/actions/journal";
 import { realizedR } from "@/lib/journal/r-multiple";
-import { TRADE_SETUPS, useSetupLabels } from "./use-setup-labels";
+import {
+  TRADE_EMOTIONS,
+  TRADE_SETUPS,
+  useEmotionLabels,
+  useSetupLabels,
+} from "./use-setup-labels";
+import { JournalImageField } from "./journal-image-field";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +34,8 @@ export interface Trade {
   pnl: number | null;
   notes: string | null;
   setup: string | null;
+  emotion: string | null;
+  imageUrl: string | null;
   openedAt: string;
   closedAt: string | null;
 }
@@ -57,6 +65,8 @@ function exportTradesToCsv(trades: Trade[]): void {
     "PnL",
     "R",
     "Setup",
+    "Emotion",
+    "ImageUrl",
     "Notes",
     "OpenedAt",
     "ClosedAt",
@@ -74,6 +84,8 @@ function exportTradesToCsv(trades: Trade[]): void {
       tr.pnl,
       realizedR(tr),
       tr.setup,
+      tr.emotion,
+      tr.imageUrl,
       tr.notes,
       tr.openedAt,
       tr.closedAt,
@@ -97,6 +109,7 @@ const SELECT_CLASS =
 function EditForm({ trade, onClose }: { trade: Trade; onClose: () => void }) {
   const t = useTranslations("journal");
   const setupLabels = useSetupLabels();
+  const emotionLabels = useEmotionLabels();
   const [state, formAction, isPending] = useActionState(updateTrade, null);
 
   useEffect(() => {
@@ -153,6 +166,17 @@ function EditForm({ trade, onClose }: { trade: Trade; onClose: () => void }) {
             </select>
           </div>
           <div>
+            <Label>{t("emotion")}</Label>
+            <select name="emotion" defaultValue={trade.emotion ?? ""} className={`mt-1.5 ${SELECT_CLASS}`}>
+              <option value="">{t("emotionNone")}</option>
+              {TRADE_EMOTIONS.map((e) => (
+                <option key={e} value={e}>
+                  {emotionLabels[e]}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
             <Label>{t("exitPrice")}</Label>
             <Input name="exitPrice" type="number" step="any" defaultValue={trade.exitPrice ?? ""} className="mt-1.5 font-mono" />
           </div>
@@ -180,6 +204,9 @@ function EditForm({ trade, onClose }: { trade: Trade; onClose: () => void }) {
           <div className="sm:col-span-2 lg:col-span-3">
             <Label>{t("notes")}</Label>
             <Textarea name="notes" rows={2} defaultValue={trade.notes ?? ""} className="mt-1.5" />
+          </div>
+          <div className="sm:col-span-2 lg:col-span-3">
+            <JournalImageField defaultUrl={trade.imageUrl} />
           </div>
           {state?.error && (
             <p className="text-sm text-destructive sm:col-span-2 lg:col-span-3">{state.error}</p>
@@ -230,7 +257,18 @@ function TradeRow({
 }) {
   const isPending = trade.result === "PENDING";
   const setupLabels = useSetupLabels();
+  const emotionLabels = useEmotionLabels();
   const r = realizedR(trade);
+  const subLabel = [
+    trade.setup
+      ? setupLabels[trade.setup as keyof typeof setupLabels] ?? trade.setup
+      : null,
+    trade.emotion
+      ? emotionLabels[trade.emotion as keyof typeof emotionLabels] ?? trade.emotion
+      : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
     <tr
@@ -242,9 +280,9 @@ function TradeRow({
     >
       <td className="px-4 py-2.5 font-mono font-medium">
         {trade.symbol}
-        {trade.setup && (
+        {subLabel && (
           <span className="block font-sans text-[10px] font-normal text-muted-foreground">
-            {setupLabels[trade.setup as keyof typeof setupLabels] ?? trade.setup}
+            {subLabel}
           </span>
         )}
       </td>
@@ -286,13 +324,30 @@ function TradeRow({
         {r != null && !isPending ? `${r >= 0 ? "+" : ""}${r.toFixed(2)}R` : "—"}
       </td>
       <td className="max-w-40 px-4 py-2.5 text-xs text-muted-foreground">
-        {trade.notes ? (
-          <span title={trade.notes} className="block truncate">
-            {trade.notes}
-          </span>
-        ) : (
-          <span className="text-muted-foreground/40">—</span>
-        )}
+        <div className="flex items-center gap-2">
+          {trade.imageUrl && (
+            <a
+              href={trade.imageUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="shrink-0"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element -- thumbnail Blob nhỏ */}
+              <img
+                src={trade.imageUrl}
+                alt=""
+                className="h-8 w-12 rounded border border-border/60 object-cover"
+              />
+            </a>
+          )}
+          {trade.notes ? (
+            <span title={trade.notes} className="block truncate">
+              {trade.notes}
+            </span>
+          ) : (
+            !trade.imageUrl && <span className="text-muted-foreground/40">—</span>
+          )}
+        </div>
       </td>
       <td className="px-4 py-2.5 text-xs text-muted-foreground">
         {new Date(trade.openedAt).toLocaleString(locale, {

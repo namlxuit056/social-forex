@@ -193,6 +193,8 @@ export default async function JournalPage({
     closedAt: t.closedAt?.toISOString() ?? null,
     copiedFromSignalId: t.copiedFromSignalId,
     setup: t.setup,
+    emotion: t.emotion,
+    imageUrl: t.imageUrl,
   }));
 
   const prefill = query?.symbol

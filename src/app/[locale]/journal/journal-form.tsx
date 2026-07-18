@@ -5,7 +5,13 @@ import { useActionState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { X, BookOpen, AlertTriangle } from "lucide-react";
 import { createTrade } from "@/actions/journal";
-import { TRADE_SETUPS, useSetupLabels } from "./use-setup-labels";
+import {
+  TRADE_EMOTIONS,
+  TRADE_SETUPS,
+  useEmotionLabels,
+  useSetupLabels,
+} from "./use-setup-labels";
+import { JournalImageField } from "./journal-image-field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -47,6 +53,7 @@ export function JournalFormCard({
   const t = useTranslations("journal");
   const locale = useLocale();
   const setupLabels = useSetupLabels();
+  const emotionLabels = useEmotionLabels();
   const [, startTransition] = useTransition();
   const [state, formAction, isPending] = useActionState(createTrade, null);
   const [symbol, setSymbol] = useState(prefill?.symbol ?? "");
@@ -204,6 +211,17 @@ export function JournalFormCard({
             </select>
           </div>
           <div>
+            <Label>{t("emotion")}</Label>
+            <select name="emotion" defaultValue="" className={`mt-1.5 ${SELECT_CLASS}`}>
+              <option value="">{t("emotionNone")}</option>
+              {TRADE_EMOTIONS.map((e) => (
+                <option key={e} value={e}>
+                  {emotionLabels[e]}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
             <Label>{t("exitPrice")}</Label>
             <Input name="exitPrice" type="number" step="any" className="mt-1.5 font-mono" />
           </div>
@@ -231,6 +249,9 @@ export function JournalFormCard({
           <div className="sm:col-span-2 lg:col-span-3">
             <Label>{t("notes")}</Label>
             <Textarea name="notes" rows={2} className="mt-1.5" />
+          </div>
+          <div className="sm:col-span-2 lg:col-span-3">
+            <JournalImageField />
           </div>
           {state?.error && (
             <p className="text-sm text-destructive sm:col-span-2 lg:col-span-3">{state.error}</p>

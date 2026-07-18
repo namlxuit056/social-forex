@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { TRADE_SETUPS, type TradeSetup } from "@/lib/journal/setups";
+import { TRADE_EMOTIONS, type TradeEmotion } from "@/lib/journal/emotions";
 
 /** Map setup → label đã dịch, dùng chung cho form/table/edge analytics. */
 export function useSetupLabels(): Record<TradeSetup, string> {
@@ -22,4 +23,18 @@ export function useSetupLabels(): Record<TradeSetup, string> {
   );
 }
 
-export { TRADE_SETUPS };
+export function useEmotionLabels(): Record<TradeEmotion, string> {
+  const t = useTranslations("journal");
+  return useMemo(
+    () => ({
+      CALM: t("emotionCalm"),
+      CONFIDENT: t("emotionConfident"),
+      FOMO: t("emotionFomo"),
+      REVENGE: t("emotionRevenge"),
+      HESITANT: t("emotionHesitant"),
+    }),
+    [t],
+  );
+}
+
+export { TRADE_SETUPS, TRADE_EMOTIONS };
