@@ -993,6 +993,12 @@ model PriceAlert {
   /// "ABOVE" | "BELOW"
   direction   String
   isActive    Boolean   @default(true)
+  /// Recurring alerts stay active and re-fire on each threshold cross
+  isRecurring     Boolean @default(false)
+  /// Minimum minutes between two fires of a recurring alert
+  cooldownMinutes Int     @default(15)
+  /// Recurring only: false after a fire until price returns past the threshold
+  armed           Boolean @default(true)
   triggeredAt DateTime?
   createdAt   DateTime  @default(now())
 

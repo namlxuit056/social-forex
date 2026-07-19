@@ -52,6 +52,8 @@ export default async function AlertsPage({
     targetPrice: a.targetPrice,
     direction: a.direction,
     isActive: a.isActive,
+    isRecurring: a.isRecurring,
+    cooldownMinutes: a.cooldownMinutes,
     triggeredAt: a.triggeredAt?.toISOString() ?? null,
     createdAt: a.createdAt.toISOString(),
   }));

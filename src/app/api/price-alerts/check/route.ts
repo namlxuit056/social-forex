@@ -21,7 +21,17 @@ export async function GET(req: NextRequest) {
 
   const alerts = await prisma.priceAlert.findMany({
     where: { isActive: true },
-    select: { id: true, userId: true, symbol: true, targetPrice: true, direction: true },
+    select: {
+      id: true,
+      userId: true,
+      symbol: true,
+      targetPrice: true,
+      direction: true,
+      isRecurring: true,
+      cooldownMinutes: true,
+      armed: true,
+      triggeredAt: true,
+    },
   });
 
   if (alerts.length === 0) {
@@ -42,20 +52,48 @@ export async function GET(req: NextRequest) {
 
       const hit =
         alert.direction === "ABOVE" ? price >= alert.targetPrice : price <= alert.targetPrice;
-      if (!hit) return;
 
-      const today = new Date().toISOString().slice(0, 10);
-      await prisma.priceAlert.update({
-        where: { id: alert.id },
-        data: { isActive: false, triggeredAt: new Date() },
-      });
+      const now = new Date();
+
+      if (alert.isRecurring) {
+        if (!hit) {
+          // Price is back on the other side of the threshold: re-arm for the next cross
+          if (!alert.armed) {
+            await prisma.priceAlert.update({
+              where: { id: alert.id },
+              data: { armed: true },
+            });
+          }
+          return;
+        }
+        if (!alert.armed) return;
+        const cooldownMs = alert.cooldownMinutes * 60_000;
+        if (alert.triggeredAt && now.getTime() - alert.triggeredAt.getTime() < cooldownMs) {
+          return;
+        }
+        await prisma.priceAlert.update({
+          where: { id: alert.id },
+          data: { armed: false, triggeredAt: now },
+        });
+      } else {
+        if (!hit) return;
+        await prisma.priceAlert.update({
+          where: { id: alert.id },
+          data: { isActive: false, triggeredAt: now },
+        });
+      }
+
+      // Recurring alerts fire many times, so the dedupe key must be unique per fire
+      const dedupeKey = alert.isRecurring
+        ? `alert-${alert.id}-${now.getTime()}`
+        : `alert-${alert.id}-${now.toISOString().slice(0, 10)}`;
 
       await prisma.notification.upsert({
-        where: { userId_dedupeKey: { userId: alert.userId, dedupeKey: `alert-${alert.id}-${today}` } },
+        where: { userId_dedupeKey: { userId: alert.userId, dedupeKey } },
         create: {
           userId: alert.userId,
           kind: "PRICE_ALERT",
-          dedupeKey: `alert-${alert.id}-${today}`,
+          dedupeKey,
         },
         update: {},
       });

@@ -2165,7 +2165,14 @@
     "used": "used",
     "limitReached": "You have reached the {limit} alert limit. Delete one to add more.",
     "errorInvalidData": "Invalid data.",
-    "errorLimitReached": "Alert limit of {limit} reached."
+    "errorLimitReached": "Alert limit of {limit} reached.",
+    "repeat": "Repeat",
+    "repeatOnce": "One-time",
+    "repeatRecurring": "Every threshold cross",
+    "cooldown": "Cooldown",
+    "cooldownMinutes": "{minutes} min",
+    "recurringBadge": "Recurring · {minutes}m",
+    "lastTriggered": "Last fired"
   },
   "push": {
     "priceAlertAboveTitle": "{symbol} broke above {price}",

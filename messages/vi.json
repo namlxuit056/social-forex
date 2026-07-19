@@ -2165,7 +2165,14 @@
     "used": "đã dùng",
     "limitReached": "Bạn đã đạt {limit} cảnh báo tối đa. Xóa bớt để thêm mới.",
     "errorInvalidData": "Dữ liệu không hợp lệ.",
-    "errorLimitReached": "Đã đạt giới hạn {limit} cảnh báo."
+    "errorLimitReached": "Đã đạt giới hạn {limit} cảnh báo.",
+    "repeat": "Lặp lại",
+    "repeatOnce": "Một lần",
+    "repeatRecurring": "Mỗi lần cắt ngưỡng",
+    "cooldown": "Giãn cách",
+    "cooldownMinutes": "{minutes} phút",
+    "recurringBadge": "Lặp lại · {minutes}p",
+    "lastTriggered": "Lần cuối"
   },
   "push": {
     "priceAlertAboveTitle": "{symbol} đã vượt lên {price}",

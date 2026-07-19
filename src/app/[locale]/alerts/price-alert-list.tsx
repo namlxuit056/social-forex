@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { deletePriceAlert } from "@/actions/price-alerts";
 import { useTranslations } from "next-intl";
-import { Trash2 } from "lucide-react";
+import { Repeat, Trash2 } from "lucide-react";
 
 type Alert = {
   id: string;
@@ -13,6 +13,8 @@ type Alert = {
   targetPrice: number;
   direction: string;
   isActive: boolean;
+  isRecurring: boolean;
+  cooldownMinutes: number;
   triggeredAt: string | null;
   createdAt: string;
 };
@@ -47,9 +49,15 @@ export function PriceAlertList({ alerts }: { alerts: Alert[] }) {
             <span className="text-sm font-medium">
               {alert.direction === "ABOVE" ? "▲" : "▼"} {alert.targetPrice}
             </span>
-            {!alert.isActive && alert.triggeredAt && (
+            {alert.isRecurring && (
+              <Badge variant="secondary" className="shrink-0 gap-1 text-xs">
+                <Repeat className="h-3 w-3" />
+                {t("recurringBadge", { minutes: alert.cooldownMinutes })}
+              </Badge>
+            )}
+            {(!alert.isActive || alert.isRecurring) && alert.triggeredAt && (
               <span className="text-xs text-muted-foreground truncate">
-                {t("triggered")}{" "}
+                {t(alert.isRecurring ? "lastTriggered" : "triggered")}{" "}
                 {new Date(alert.triggeredAt).toLocaleDateString("vi-VN", {
                   day: "2-digit",
                   month: "2-digit",

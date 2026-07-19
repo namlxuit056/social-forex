@@ -24,12 +24,13 @@ Mục tiêu: tăng độ tin cậy trước quyết định trả tiền/copy, c
 _(trống)_
 
 ## Đề xuất mới (chưa duyệt — cần user quyết trước khi đưa vào sprint)
-- [ ] **Price alert: re-arm / recurring** — alert hiện fire 1 lần rồi tắt (cần verify); cho phép "lặp lại mỗi khi giá cắt ngưỡng" với cooldown chống spam. Câu hỏi mở: cooldown mặc định bao nhiêu phút?
-- [ ] **Onboarding checklist trên /start** — 4–5 bước (tạo journal đầu tiên, follow 1 trader, đặt 1 price alert…) + XP thưởng; giả định: tăng activation user mới. Câu hỏi mở: có gate bằng XP system hiện tại không?
+- [ ] **Onboarding checklist trên /start** — 4–5 bước (tạo journal đầu tiên, follow 1 trader, đặt 1 price alert…) + XP thưởng, user đã duyệt "có, thưởng XP" (2026-07-19); giả định: tăng activation user mới.
 
 ---
 
 ## Completed
+
+- [x] Price alert: re-arm / recurring — isRecurring + cooldownMinutes (5/15/30/60, default 15) + armed (migration 20260719090000); cron check chỉ fire khi giá cắt ngưỡng lúc đang armed và hết cooldown, disarm sau fire, re-arm khi giá quay về phía bên kia; alert recurring giữ isActive, dedupeKey theo timestamp mỗi lần fire; form có select Lặp lại + cooldown, list có badge Repeat + "lần cuối" (user duyệt 2026-07-19, cooldown default 15p)
 
 - [x] Forum: pinned threads trong category — isPinned (migration 20260718120000), MOD/ADMIN có nút pin/unpin trên list (role check qua DB), thread ghim luôn đứng đầu với icon Pin, action toggleThreadPin trong moderation.ts + revalidatePath
 
