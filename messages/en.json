@@ -335,7 +335,18 @@
       "a3": "The Exness registration link may earn us a commission. It does not change your price. You do not have to use Exness to trade — this is one supported path for beginners.",
       "q4": "Is MT5 the same as Exness?",
       "a4": "MT5 is MetaQuotes software. Exness is your broker. You log in to MT5 with the Exness demo credentials and server your broker gives you."
-    }
+    },
+    "onboardingTitle": "Getting-started checklist",
+    "onboardingDesc": "Complete 4 steps to earn a +{xp} XP bonus.",
+    "onboardingProgress": "{done}/{total} steps",
+    "onboardingStep_journal": "Log your first trade in the Journal",
+    "onboardingStep_follow": "Follow a trader on the leaderboard",
+    "onboardingStep_alert": "Set a price alert",
+    "onboardingStep_academy": "Complete an Academy lesson",
+    "onboardingClaim": "Claim +{xp} XP",
+    "onboardingClaiming": "Claiming...",
+    "onboardingClaimed": "Claimed +{xp} XP. Congrats!",
+    "onboardingClaimError": "Could not claim the bonus, try again later."
   },
   "quotes": {
     "title": "Live Quotes",

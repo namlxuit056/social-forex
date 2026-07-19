@@ -5,6 +5,7 @@ import { Disclaimer } from "@/components/layout/disclaimer";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
 import { FaqJsonLd } from "@/components/seo/faq-json-ld";
 import { AiAssistantPromptCard } from "@/components/start/ai-assistant-prompt-card";
+import { OnboardingChecklist } from "@/components/start/onboarding-checklist";
 import { buttonVariants } from "@/components/ui/button";
 import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
 import { getExnessAffiliateUrl } from "@/lib/exness-affiliate";
@@ -91,6 +92,8 @@ export default async function StartPage({
         description={t("signupPromptDesc")}
         ctaLabel={t("signupPromptCta")}
       />
+
+      <OnboardingChecklist />
 
       <ol className="space-y-6">
         <li className="relative rounded-xl border border-border bg-card/40 p-5 pl-6 ring-1 ring-foreground/5 md:p-6 md:pl-8">

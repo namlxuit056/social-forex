@@ -335,7 +335,18 @@
       "a3": "Link đăng ký Exness có thể mang lại hoa hồng cho chúng tôi. Bạn không bắt buộc dùng Exness — đây chỉ là một lộ trình gợi ý cho người mới.",
       "q4": "MT5 có phải là Exness không?",
       "a4": "MT5 là phần mềm của MetaQuotes. Exness là sàn môi giới. Bạn đăng nhập MT5 bằng tài khoản demo và máy chủ mà sàn cấp."
-    }
+    },
+    "onboardingTitle": "Checklist bắt đầu",
+    "onboardingDesc": "Hoàn thành 4 bước để nhận thưởng +{xp} XP.",
+    "onboardingProgress": "{done}/{total} bước",
+    "onboardingStep_journal": "Ghi lệnh đầu tiên vào Journal",
+    "onboardingStep_follow": "Follow 1 trader trên bảng xếp hạng",
+    "onboardingStep_alert": "Đặt 1 cảnh báo giá",
+    "onboardingStep_academy": "Hoàn thành 1 bài học Academy",
+    "onboardingClaim": "Nhận +{xp} XP",
+    "onboardingClaiming": "Đang nhận...",
+    "onboardingClaimed": "Đã nhận +{xp} XP. Chúc mừng bạn!",
+    "onboardingClaimError": "Không nhận được thưởng, thử lại sau."
   },
   "quotes": {
     "title": "Bảng tỷ giá",

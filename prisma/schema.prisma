@@ -104,6 +104,8 @@ model User {
   notifyStreakReminder Boolean   @default(true)
 
   xp                   Int       @default(0)
+  /// Set when the one-time onboarding checklist XP bonus was claimed
+  onboardingBonusAt    DateTime?
 
   /// Mã referral duy nhất (8 ký tự)
   referralCode         String?   @unique

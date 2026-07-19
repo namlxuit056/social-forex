@@ -5,6 +5,7 @@ export const XP_VALUES = {
   signalWin: 30,
   forumPost: 5,
   academyComplete: 25,
+  onboardingComplete: 50,
   streakBonus7: 50,
   streakBonus30: 200,
 } as const;
