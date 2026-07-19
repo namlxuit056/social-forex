@@ -1148,7 +1148,13 @@
     "streakSignal": "Signal",
     "profileSocialProof": "Performance snapshot",
     "profileTotalSignals": "Signals",
-    "profileXpLabel": "XP"
+    "profileXpLabel": "XP",
+    "equityChart": {
+      "title": "Performance curve (R)",
+      "viewEquity": "Equity",
+      "viewMonthly": "Monthly",
+      "note": "Based on {count} closed signals: win = entry→TP RR, loss = -1R. For reference only."
+    }
   },
   "mt5": {
     "title": "MT5 Bridge",

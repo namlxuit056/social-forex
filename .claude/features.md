@@ -31,6 +31,8 @@ _(trống)_
 
 ## Completed
 
+- [x] Provider equity chart trên /u/[userId] — tab Overview hiện card "Đường cong hiệu suất (R)" khi provider có ≥ 5 signal đã đóng: equity curve tích lũy R + bars theo tháng (fill tháng trống, month arithmetic không overflow), win = RR entry→TP (fallback +1R), loss = -1R (TODO business: chưa tính TP2/TP3/partial close); pure logic src/lib/signals/provider-equity.ts có 10 tests; SVG theo convention journal-performance-chart (user duyệt 2026-07-19)
+
 - [x] Onboarding checklist trên /start — 4 bước derive từ DB (journal đầu tiên / follow trader / price alert / bài academy hoàn thành), client component fetch /api/onboarding/status để giữ /start static; bonus +50 XP một lần qua claimOnboardingBonus (User.onboardingBonusAt, migration 20260719100000, guard updateMany chống double-claim); ẩn hoàn toàn sau khi đã nhận thưởng (user duyệt "có thưởng XP" 2026-07-19)
 
 - [x] Price alert: re-arm / recurring — isRecurring + cooldownMinutes (5/15/30/60, default 15) + armed (migration 20260719090000); cron check chỉ fire khi giá cắt ngưỡng lúc đang armed và hết cooldown, disarm sau fire, re-arm khi giá quay về phía bên kia; alert recurring giữ isActive, dedupeKey theo timestamp mỗi lần fire; form có select Lặp lại + cooldown, list có badge Repeat + "lần cuối" (user duyệt 2026-07-19, cooldown default 15p)

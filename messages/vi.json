@@ -1148,7 +1148,13 @@
     "streakSignal": "Signal",
     "profileSocialProof": "Tóm tắt hiệu suất",
     "profileTotalSignals": "Tín hiệu",
-    "profileXpLabel": "XP"
+    "profileXpLabel": "XP",
+    "equityChart": {
+      "title": "Đường cong hiệu suất (R)",
+      "viewEquity": "Equity",
+      "viewMonthly": "Theo tháng",
+      "note": "Tính trên {count} signal đã đóng: thắng = RR entry→TP, thua = -1R. Chỉ mang tính tham khảo."
+    }
   },
   "mt5": {
     "title": "MT5 Bridge",

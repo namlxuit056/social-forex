@@ -13,6 +13,7 @@ import { PinnedSignalsSection } from "@/components/profile/pinned-signals-sectio
 import { Mt5SyncedSignalsSection } from "@/components/profile/mt5-synced-signals-section";
 import { PublicTradingOverview } from "@/components/profile/public-trading-overview";
 import { ProfileTradingSummary } from "@/components/profile/profile-trading-summary";
+import { ProviderEquitySection } from "@/components/profile/provider-equity-section";
 import { StreakBadge } from "@/components/signals/streak-badge";
 import { FollowButton } from "@/components/social/follow-button";
 import { CopyTradeButton } from "@/components/copy-trade/copy-trade-button";
@@ -348,13 +349,16 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
       </nav>
 
       {activeTab === "overview" ? (
-        <div className="grid gap-6 xl:grid-cols-[0.38fr_0.62fr]">
-          <TraderPerformanceCard
-            userId={userId}
-            signalsListHref={signalsListHref}
-            signalsCtaLabel={signalsCtaLabel}
-          />
-          <PublicTradingOverview profileUserId={userId} locale={locale} t={t} />
+        <div className="space-y-6">
+          <div className="grid gap-6 xl:grid-cols-[0.38fr_0.62fr]">
+            <TraderPerformanceCard
+              userId={userId}
+              signalsListHref={signalsListHref}
+              signalsCtaLabel={signalsCtaLabel}
+            />
+            <PublicTradingOverview profileUserId={userId} locale={locale} t={t} />
+          </div>
+          <ProviderEquitySection profileUserId={userId} locale={locale} />
         </div>
       ) : null}
 
