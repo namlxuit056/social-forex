@@ -1,28 +1,3 @@
 {
-  "crons": [
-    {
-      "path": "/api/ai/articles/run",
-      "schedule": "0 2 * * *"
-    },
-    {
-      "path": "/api/journal/weekly-review/run",
-      "schedule": "0 22 * * 5"
-    },
-    {
-      "path": "/api/journal/weekly-review/run",
-      "schedule": "0 22 * * 0"
-    },
-    {
-      "path": "/api/price-alerts/check",
-      "schedule": "* * * * *"
-    },
-    {
-      "path": "/api/mt5/trailing-stop/run",
-      "schedule": "* * * * *"
-    },
-    {
-      "path": "/api/scalping/auto-run",
-      "schedule": "*/5 * * * *"
-    }
-  ]
+  "crons": []
 }
