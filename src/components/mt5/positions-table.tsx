@@ -185,6 +185,47 @@ function RiskCell({ p, equity, currency }: { p: LivePosition; equity: number | n
   );
 }
 
+const NEAR_LEVEL_THRESHOLD_PCT = 10;
+
+type ProximityAlert = { target: "sl" | "tp"; pctRemaining: number } | null;
+
+// Flags a position whose current price has travelled most of the way from entry to its
+// SL or TP — i.e. only a small fraction of that distance remains before it hits. Picks
+// whichever level (SL or TP) is closest when both are set.
+function getProximityAlert(p: LivePosition): ProximityAlert {
+  if (p.priceOpen == null || p.priceCurrent == null) return null;
+  let closest: ProximityAlert = null;
+
+  for (const target of ["sl", "tp"] as const) {
+    const level = target === "sl" ? p.stopLoss : p.takeProfit;
+    if (level == null || level === 0) continue;
+    const totalDist = Math.abs(p.priceOpen - level);
+    if (totalDist === 0) continue;
+    const remainingDist = Math.abs(p.priceCurrent - level);
+    const pctRemaining = Math.max(0, Math.min(100, (remainingDist / totalDist) * 100));
+    if (pctRemaining > NEAR_LEVEL_THRESHOLD_PCT) continue;
+    if (!closest || pctRemaining < closest.pctRemaining) {
+      closest = { target, pctRemaining };
+    }
+  }
+  return closest;
+}
+
+function ProximityBadge({ target }: { target: "sl" | "tp" }) {
+  const isSl = target === "sl";
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold whitespace-nowrap",
+        isSl ? "bg-red-500/15 text-red-500" : "bg-emerald-500/15 text-emerald-500",
+      )}
+    >
+      <span className={cn("size-1.5 rounded-full animate-pulse", isSl ? "bg-red-500" : "bg-emerald-500")} />
+      {isSl ? "Near SL" : "Near TP"}
+    </span>
+  );
+}
+
 function openedAgo(openedAt: string | null) {
   if (!openedAt) return "—";
   const d = new Date(openedAt);
@@ -623,8 +664,17 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                   const isMovingBE = movingBE.has(p.ticket);
                   const isQuickSl = quickSlPending.has(p.ticket);
                   const isQuickTp = quickTpPending.has(p.ticket);
+                  const proximity = getProximityAlert(p);
                   return (
-                    <tr key={p.ticket} className={cn("group border-t border-border transition-colors hover:bg-muted/40", isClosing && "opacity-40")}>
+                    <tr
+                      key={p.ticket}
+                      className={cn(
+                        "group border-t border-border transition-colors hover:bg-muted/40",
+                        isClosing && "opacity-40",
+                        proximity?.target === "sl" && "bg-red-500/5 dark:bg-red-500/10",
+                        proximity?.target === "tp" && "bg-emerald-500/5 dark:bg-emerald-500/10",
+                      )}
+                    >
                       <td className="px-3 py-3">
                         <input
                           type="checkbox"
@@ -635,7 +685,12 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                         />
                       </td>
                       <td className="px-2 py-3 font-mono text-xs text-muted-foreground">{p.ticket}</td>
-                      <td className="px-2 py-3 font-semibold whitespace-nowrap">{p.symbol}</td>
+                      <td className="px-2 py-3 font-semibold whitespace-nowrap">
+                        <div className="flex items-center gap-1.5">
+                          {p.symbol}
+                          {proximity && <ProximityBadge target={proximity.target} />}
+                        </div>
+                      </td>
                       <td className="px-2 py-3">
                         <SideBadge type={p.type} />
                       </td>
@@ -711,8 +766,17 @@ export function PositionsTable({ positions, currency, equity }: Props) {
               const isQuickTp = quickTpPending.has(p.ticket);
               const risk = estimateRisk(p, equity);
               const riskReward = estimateRiskReward(p, equity);
+              const proximity = getProximityAlert(p);
               return (
-                <div key={p.ticket} className={cn("relative rounded-xl border border-border bg-background p-4 transition-opacity", isClosing && "opacity-40")}>
+                <div
+                  key={p.ticket}
+                  className={cn(
+                    "relative rounded-xl border border-border bg-background p-4 transition-opacity",
+                    isClosing && "opacity-40",
+                    proximity?.target === "sl" && "bg-red-500/5 dark:bg-red-500/10",
+                    proximity?.target === "tp" && "bg-emerald-500/5 dark:bg-emerald-500/10",
+                  )}
+                >
                   <input
                     type="checkbox"
                     className="absolute left-3 top-3 size-4 rounded border-border accent-primary"
@@ -721,9 +785,10 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                     aria-label={`Select position ${p.ticket}`}
                   />
                   <div className="flex items-start justify-between gap-3 pl-6">
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <span className="text-base font-semibold">{p.symbol}</span>
                       <SideBadge type={p.type} />
+                      {proximity && <ProximityBadge target={proximity.target} />}
                     </div>
                     <div className="text-right">
                       <PL value={p.profit} className="text-base" />
