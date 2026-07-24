@@ -292,20 +292,30 @@ Return valid JSON only with these keys: title, summary, metaDescription, body.
 - title: concise, keyword-rich, under 70 characters. Do NOT start with generic phrases like "Tìm hiểu về" or "Introduction to".
 - summary: 1-2 sentences on what is happening RIGHT NOW and why traders care today. Specific, not generic.
 - metaDescription: 150-160 characters, action-oriented, includes the keyword.
-- body: markdown with H2 (##) sections. Minimum 6 sections:
+- body: markdown with H2 (##) sections. Minimum 7 sections:
   1. What is happening RIGHT NOW (cite specific price levels, indicators, news from the context above)
   2. Why this matters for traders (concrete impact on price action or sentiment)
   3. Technical analysis breakdown (reference specific RSI, EMA, key levels from the live data above if available)
-  4. Practical checklist (what to watch, what indicators/levels to track)
-  5. Common mistakes traders make with this topic
-  6. Risk management (stop-loss sizing, position sizing, capital rules)
-  7. Risk disclaimer (final section — educational only, not financial advice)
+  4. Technical bias & probability (REQUIRED, see rules below)
+  5. Practical checklist (what to watch, what indicators/levels to track)
+  6. Common mistakes traders make with this topic
+  7. Risk management (stop-loss sizing, position sizing, capital rules)
+  8. Risk disclaimer (final section — educational only, not financial advice)
+
+## Technical bias & probability section — hard requirements
+This section is mandatory in every article and must contain, in bold or a short table:
+- A single explicit bias: BUY / SELL / NEUTRAL (translate the label naturally into the article language, e.g. "MUA" / "BÁN" / "TRUNG LẬP" in Vietnamese).
+- A confidence percentage between 55% and 85% (never round numbers like exactly 50% or 100%) derived from how many of the cited technical signals (RSI, EMA/MA cross, trend structure, momentum, S/R levels) agree with each other — more agreeing signals = higher percentage, conflicting signals = lower percentage.
+- 1-2 sentences explaining which specific signals from the technical analysis section above drove that bias and percentage.
+- A concrete entry zone: a specific price range (not a single number chased at market) where entering in the bias direction lines up with a real technical level from the data above — e.g. a pullback to an EMA/support band for a BUY bias, or a retest of resistance/EMA-from-below for a SELL bias. Explain briefly why entries inside that zone have historically better odds than chasing the current price (tighter invalidation, confluence with S/R, better reward-to-risk).
+- A suggested invalidation level (where the zone thesis is wrong) just beyond the zone, on the opposite side from the trade direction.
+- Immediately state this is a technical-analysis-only read (not investment advice), that the zone is not a guarantee of a fill or a win, and that the trader must still apply their own stop-loss and position sizing regardless of the bias.
 
 ## Hard rules
 - MUST use specific numbers from the technical analysis block (RSI, EMA levels, price) — do not make up numbers.
 - NEVER write generic intros like "XAU là mã tiền tệ quốc tế cho vàng" without immediately connecting to current context.
 - NEVER use empty filler bullet points. Every bullet must contain a specific fact, level, or action.
-- Do NOT give direct buy/sell recommendations or promise profit.
+- The bias/probability/entry zone in section 4 is a technical-analysis read, not a promise of profit or a filled trade — do not phrase it as a guarantee or a signal to blindly copy.
 - Mention that readers should verify data on their broker platform, economic calendar, and chart.
 - Keep tone practical and direct. No clickbait. No vague platitudes.
 `;
@@ -356,7 +366,7 @@ export async function generateAiForexArticle({
       {
         role: "system",
         content:
-          "You are an SEO editor for an educational forex website. You write cautious, non-advisory, original articles. When live technical data is provided, you MUST cite the exact numbers.",
+          "You are an SEO editor for an educational forex website. You write cautious, non-advisory, original articles. When live technical data is provided, you MUST cite the exact numbers. Every article MUST include a clearly labeled technical bias (buy/sell/neutral) with a confidence percentage and a concrete entry zone (a price range tied to a real technical level, not the current market price) where odds are better than chasing price, all derived from the cited signals and framed as technical analysis rather than investment advice.",
       },
       { role: "user", content: buildArticlePrompt(keyword, locale, ctx) },
     ],
