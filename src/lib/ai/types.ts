@@ -119,6 +119,50 @@ export const aiJournalAnalysisSchema = z.object({
 
 export type AiJournalAnalysis = z.infer<typeof aiJournalAnalysisSchema>;
 
+/**
+ * LLMs occasionally overflow the string length limits despite prompt
+ * instructions. Truncate before Zod validation so a slightly long
+ * response doesn't hard-fail the whole analysis.
+ */
+export function sanitizeAiJournalAnalysisPayload(data: unknown): unknown {
+  if (!data || typeof data !== "object") return data;
+  const obj = data as Record<string, unknown>;
+  const sanitized: Record<string, unknown> = { ...obj };
+
+  if (typeof obj.summary === "string") sanitized.summary = truncate(obj.summary, 1200);
+
+  if (Array.isArray(obj.strengths)) {
+    sanitized.strengths = obj.strengths.map((item) => truncate(item, 220));
+  }
+
+  if (Array.isArray(obj.improvementAreas)) {
+    sanitized.improvementAreas = obj.improvementAreas.map((item) => {
+      if (!item || typeof item !== "object") return item;
+      const area = item as Record<string, unknown>;
+      return {
+        ...area,
+        title: truncate(area.title, 80),
+        evidence: truncate(area.evidence, 260),
+        action: truncate(area.action, 260),
+      };
+    });
+  }
+
+  if (Array.isArray(obj.riskFlags)) {
+    sanitized.riskFlags = obj.riskFlags.map((item) => truncate(item, 220));
+  }
+
+  if (Array.isArray(obj.patternInsights)) {
+    sanitized.patternInsights = obj.patternInsights.map((item) => truncate(item, 260));
+  }
+
+  if (Array.isArray(obj.nextReviewPlan)) {
+    sanitized.nextReviewPlan = obj.nextReviewPlan.map((item) => truncate(item, 180));
+  }
+
+  return sanitized;
+}
+
 export type AiJournalAnalysisResponse = {
   analysis: AiJournalAnalysis;
   generatedAt: string;

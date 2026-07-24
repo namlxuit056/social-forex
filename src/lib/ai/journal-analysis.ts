@@ -2,6 +2,7 @@ import type { AppLocale } from "@/lib/api-locale";
 import { createAiClient, resolveAiProvider, resolveMaxTokens } from "@/lib/ai/provider";
 import {
   aiJournalAnalysisSchema,
+  sanitizeAiJournalAnalysisPayload,
   type AiJournalAnalysis,
 } from "@/lib/ai/types";
 
@@ -184,7 +185,7 @@ export async function getAiJournalAnalysis({
     throw new Error("AI response is not valid JSON");
   }
 
-  const result = aiJournalAnalysisSchema.safeParse(parsed);
+  const result = aiJournalAnalysisSchema.safeParse(sanitizeAiJournalAnalysisPayload(parsed));
   if (!result.success) {
     throw new Error(
       `Invalid AI response format: ${result.error.issues.map((issue) => issue.message).join(", ")}`,
