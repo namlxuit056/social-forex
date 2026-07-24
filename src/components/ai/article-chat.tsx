@@ -1,29 +1,37 @@
 "use client";
 
-import { FormEvent, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Bot, Loader2, Send, Sparkles, UserRound } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { marked } from "marked";
+import { Bot, Lock, Loader2, Send, Sparkles, UserRound } from "lucide-react";
+import { Link } from "@/i18n/navigation";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import type {
-  AiAdvisorMessage,
-  AiAdvisorResponse,
+  AiArticleChatHistoryResponse,
+  AiArticleChatMessage,
+  AiArticleChatSendResponse,
   AiSuggestError,
 } from "@/lib/ai/types";
 import { cn } from "@/lib/utils";
 
-const MAX_MESSAGES_TO_SEND = 12;
+type ChatMessage = Pick<AiArticleChatMessage, "id" | "role" | "content">;
 
-type ChatMessage = AiAdvisorMessage & { id: string };
-
-function makeId() {
-  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+function renderAiMarkdown(content: string) {
+  return marked.parse(content, { async: false }) as string;
 }
 
-export function ArticleChat({ articleId }: { articleId: string }) {
+type Props = {
+  articleId: string;
+  isLoggedIn: boolean;
+  isVip: boolean;
+};
+
+export function ArticleChat({ articleId, isLoggedIn, isVip }: Props) {
   const t = useTranslations("articleChat");
   const tc = useTranslations("common");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [historyLoaded, setHistoryLoaded] = useState(false);
   const [draft, setDraft] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -31,27 +39,39 @@ export function ArticleChat({ articleId }: { articleId: string }) {
 
   const quickPrompts = [t("quickCrossed"), t("quickStillValid"), t("quickWhatNow")];
 
+  useEffect(() => {
+    if (!isVip) return;
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const res = await fetch(`/api/ai/article-chat?articleId=${encodeURIComponent(articleId)}`);
+        if (!res.ok || cancelled) return;
+        const data = (await res.json()) as AiArticleChatHistoryResponse;
+        if (!cancelled) setMessages(data.messages);
+      } finally {
+        if (!cancelled) setHistoryLoaded(true);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [articleId, isVip]);
+
   async function submitMessage(content: string) {
     const text = content.trim();
     if (!text || loading) return;
 
-    const userMessage: ChatMessage = { id: makeId(), role: "user", content: text };
-    const nextMessages = [...messages, userMessage];
-
-    setMessages(nextMessages);
     setDraft("");
     setError(null);
     setLoading(true);
 
     try {
-      const payloadMessages = nextMessages
-        .slice(-MAX_MESSAGES_TO_SEND)
-        .map(({ role, content }) => ({ role, content }));
-
       const res = await fetch("/api/ai/article-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ articleId, messages: payloadMessages }),
+        body: JSON.stringify({ articleId, content: text }),
       });
 
       if (!res.ok) {
@@ -60,10 +80,11 @@ export function ArticleChat({ articleId }: { articleId: string }) {
         return;
       }
 
-      const data = (await res.json()) as AiAdvisorResponse;
+      const data = (await res.json()) as AiArticleChatSendResponse;
       setMessages((current) => [
         ...current,
-        { id: makeId(), role: "assistant", content: data.message.content },
+        { id: data.userMessage.id, role: "user", content: data.userMessage.content },
+        { id: data.assistantMessage.id, role: "assistant", content: data.assistantMessage.content },
       ]);
     } catch {
       setError(t("error"));
@@ -78,6 +99,8 @@ export function ArticleChat({ articleId }: { articleId: string }) {
     void submitMessage(draft);
   }
 
+  const inputDisabled = loading || !historyLoaded;
+
   return (
     <section className="rounded-xl border border-border bg-card/50 p-4 ring-1 ring-foreground/5 sm:p-5">
       <div className="flex items-center gap-2">
@@ -90,8 +113,30 @@ export function ArticleChat({ articleId }: { articleId: string }) {
         </div>
       </div>
 
-      {messages.length > 0 ? (
-        <div className="mt-4 space-y-3">
+      {!isVip ? (
+        <div className="mt-4 flex flex-col items-start gap-2 rounded-lg border border-border/70 bg-muted/35 px-4 py-3">
+          <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Lock className="size-3.5 shrink-0" aria-hidden />
+            {isLoggedIn ? t("vipRequiredHint") : t("loginRequiredHint")}
+          </p>
+          <Link
+            href={
+              isLoggedIn
+                ? "/upgrade-vip"
+                : { pathname: "/auth/signin", query: { callbackUrl: "/upgrade-vip" } }
+            }
+            className={cn(buttonVariants({ size: "sm" }), "gap-1.5")}
+          >
+            {isLoggedIn ? t("vipRequiredCta") : tc("signIn")}
+          </Link>
+        </div>
+      ) : !historyLoaded ? (
+        <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
+          <Loader2 className="size-3.5 animate-spin" aria-hidden />
+          {t("loadingHistory")}
+        </div>
+      ) : messages.length > 0 ? (
+        <div className="mt-4 max-h-112 space-y-3 overflow-y-auto pr-1">
           {messages.map((message) => {
             const isUser = message.role === "user";
             return (
@@ -108,16 +153,17 @@ export function ArticleChat({ articleId }: { articleId: string }) {
                     <Bot className="size-3.5" aria-hidden />
                   )}
                 </span>
-                <div
-                  className={cn(
-                    "max-w-[85%] whitespace-pre-wrap rounded-lg px-3 py-2 text-sm leading-relaxed",
-                    isUser
-                      ? "bg-primary text-primary-foreground"
-                      : "border border-border/70 bg-muted/35 text-foreground",
-                  )}
-                >
-                  {message.content}
-                </div>
+                {isUser ? (
+                  <div className="max-w-[85%] whitespace-pre-wrap rounded-lg bg-primary px-3 py-2 text-sm leading-relaxed text-primary-foreground">
+                    {message.content}
+                  </div>
+                ) : (
+                  <div
+                    className="chat-message-body max-w-[85%] rounded-lg border border-border/70 bg-muted/35 px-3 py-2 text-sm leading-relaxed text-foreground"
+                    // AI-authored markdown, converted to HTML purely for formatting (bold, lists, etc.)
+                    dangerouslySetInnerHTML={{ __html: renderAiMarkdown(message.content) }}
+                  />
+                )}
               </div>
             );
           })}
@@ -130,62 +176,64 @@ export function ArticleChat({ articleId }: { articleId: string }) {
         </div>
       ) : null}
 
-      {error ? (
+      {isVip && error ? (
         <div className="mt-3 rounded-lg border border-red-500/25 bg-red-500/5 px-3 py-2 text-xs text-red-600 dark:text-red-300">
           {error}
         </div>
       ) : null}
 
-      <form onSubmit={onSubmit} className="mt-4">
-        {messages.length === 0 ? (
-          <div className="mb-3 grid gap-1.5 sm:grid-cols-3">
-            {quickPrompts.map((prompt) => (
-              <Button
-                key={prompt}
-                type="button"
-                variant="outline"
-                size="sm"
-                className="h-auto justify-start gap-1.5 whitespace-normal py-2 text-left text-xs"
-                disabled={loading}
-                onClick={() => void submitMessage(prompt)}
-              >
-                <Sparkles className="size-3.5 shrink-0" aria-hidden />
-                {prompt}
-              </Button>
-            ))}
+      {isVip ? (
+        <form onSubmit={onSubmit} className="mt-4">
+          {historyLoaded && messages.length === 0 ? (
+            <div className="mb-3 grid gap-1.5 sm:grid-cols-3">
+              {quickPrompts.map((prompt) => (
+                <Button
+                  key={prompt}
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-auto justify-start gap-1.5 whitespace-normal py-2 text-left text-xs"
+                  disabled={inputDisabled}
+                  onClick={() => void submitMessage(prompt)}
+                >
+                  <Sparkles className="size-3.5 shrink-0" aria-hidden />
+                  {prompt}
+                </Button>
+              ))}
+            </div>
+          ) : null}
+          <div className="flex items-end gap-2">
+            <Textarea
+              ref={textareaRef}
+              value={draft}
+              onChange={(event) => setDraft(event.target.value)}
+              placeholder={t("placeholder")}
+              className="max-h-36 min-h-12 resize-none bg-background"
+              disabled={inputDisabled}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" && !event.shiftKey) {
+                  event.preventDefault();
+                  void submitMessage(draft);
+                }
+              }}
+            />
+            <Button
+              type="submit"
+              size="icon"
+              className="size-10 shrink-0"
+              disabled={inputDisabled || !draft.trim()}
+              aria-label={tc("send")}
+            >
+              {loading ? (
+                <Loader2 className="size-4 animate-spin" aria-hidden />
+              ) : (
+                <Send className="size-4" aria-hidden />
+              )}
+            </Button>
           </div>
-        ) : null}
-        <div className="flex items-end gap-2">
-          <Textarea
-            ref={textareaRef}
-            value={draft}
-            onChange={(event) => setDraft(event.target.value)}
-            placeholder={t("placeholder")}
-            className="max-h-36 min-h-12 resize-none bg-background"
-            disabled={loading}
-            onKeyDown={(event) => {
-              if (event.key === "Enter" && !event.shiftKey) {
-                event.preventDefault();
-                void submitMessage(draft);
-              }
-            }}
-          />
-          <Button
-            type="submit"
-            size="icon"
-            className="size-10 shrink-0"
-            disabled={loading || !draft.trim()}
-            aria-label={tc("send")}
-          >
-            {loading ? (
-              <Loader2 className="size-4 animate-spin" aria-hidden />
-            ) : (
-              <Send className="size-4" aria-hidden />
-            )}
-          </Button>
-        </div>
-        <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">{t("disclaimer")}</p>
-      </form>
+          <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">{t("disclaimer")}</p>
+        </form>
+      ) : null}
     </section>
   );
 }

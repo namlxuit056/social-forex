@@ -975,8 +975,12 @@
     "quickStillValid": "Nhận định trong bài còn đúng không?",
     "quickWhatNow": "Bây giờ nên vào lệnh hay chờ thêm?",
     "thinking": "AI đang phân tích lại...",
+    "loadingHistory": "Đang tải lịch sử chat...",
     "disclaimer": "Chỉ mang tính giáo dục, không phải khuyến nghị đầu tư. Luôn kiểm tra giá thực tế trên nền tảng giao dịch của bạn.",
-    "error": "Không thể trả lời lúc này. Vui lòng thử lại."
+    "error": "Không thể trả lời lúc này. Vui lòng thử lại.",
+    "vipRequiredHint": "Tính năng chat AI này chỉ dành cho thành viên VIP.",
+    "vipRequiredCta": "Nâng cấp VIP",
+    "loginRequiredHint": "Đăng nhập để dùng tính năng chat AI này."
   },
   "resources": {
     "title": "Kho tài liệu",
@@ -1555,7 +1559,8 @@
     "apiAdvisorInvalidRequest": "Nội dung chat không hợp lệ hoặc quá dài.",
     "apiArticleChatInvalidRequest": "Nội dung chat không hợp lệ hoặc quá dài.",
     "apiArticleChatArticleNotFound": "Không tìm thấy bài viết này.",
-    "apiArticleChatRateLimitFree": "Bạn đã hỏi quá nhiều lần. Vui lòng thử lại sau ít phút.",
+    "apiArticleChatLoginRequired": "Vui lòng đăng nhập để dùng tính năng chat AI.",
+    "apiArticleChatVipOnly": "Tính năng chat AI này chỉ dành cho thành viên VIP.",
     "apiTrendLoginRequired": "Đăng nhập để dùng AI trong ngày.",
     "apiCalendarLoginRequired": "Đăng nhập để dùng AI phân tích lịch.",
     "apiJournalLoginRequired": "Đăng nhập để dùng AI phân tích journal.",

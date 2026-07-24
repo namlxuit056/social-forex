@@ -6,18 +6,75 @@ import {
 } from "@/lib/ai/article-chat";
 import {
   aiArticleChatRequestSchema,
-  type AiAdvisorResponse,
+  type AiAdvisorMessage,
+  type AiArticleChatHistoryResponse,
+  type AiArticleChatSendResponse,
   type AiSuggestError,
 } from "@/lib/ai/types";
-import { localeFromRequest } from "@/lib/api-locale";
+import { localeFromRequest, type AppLocale } from "@/lib/api-locale";
 import { pickAi } from "@/lib/messages-pick";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 import { isVipActive } from "@/lib/vip";
 
+const HISTORY_LIMIT = 50;
+const CONTEXT_LIMIT = 20;
+
 function errorJson(error: string, status: number, retryAfterMs?: number) {
   const body: AiSuggestError = { error, retryAfterMs };
   return NextResponse.json(body, { status });
+}
+
+function toRole(role: string): "user" | "assistant" {
+  return role === "assistant" ? "assistant" : "user";
+}
+
+async function requireVipUser(loc: AppLocale) {
+  const ai = pickAi(loc);
+  const session = await auth();
+  const userId = session?.user?.id;
+  if (!userId) {
+    return { error: errorJson(ai.apiArticleChatLoginRequired, 401) } as const;
+  }
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { vipUntil: true },
+  });
+  if (!isVipActive(user?.vipUntil)) {
+    return { error: errorJson(ai.apiArticleChatVipOnly, 403) } as const;
+  }
+  return { userId } as const;
+}
+
+export async function GET(req: NextRequest) {
+  const loc = localeFromRequest(req);
+  const ai = pickAi(loc);
+
+  const articleId = req.nextUrl.searchParams.get("articleId");
+  if (!articleId) {
+    return errorJson(ai.apiArticleChatInvalidRequest, 400);
+  }
+
+  const auth_ = await requireVipUser(loc);
+  if ("error" in auth_) return auth_.error;
+
+  const messages = await prisma.articleChatMessage.findMany({
+    where: { articleId, userId: auth_.userId },
+    orderBy: { createdAt: "asc" },
+    take: HISTORY_LIMIT,
+    select: { id: true, role: true, content: true, createdAt: true },
+  });
+
+  const body: AiArticleChatHistoryResponse = {
+    messages: messages.map((m) => ({
+      id: m.id,
+      role: toRole(m.role),
+      content: m.content,
+      createdAt: m.createdAt.toISOString(),
+    })),
+  };
+
+  return NextResponse.json(body);
 }
 
 export async function POST(req: NextRequest) {
@@ -46,43 +103,68 @@ export async function POST(req: NextRequest) {
     return errorJson(ai.apiArticleChatArticleNotFound, 404);
   }
 
-  const session = await auth();
-  const userId = session?.user?.id;
+  const auth_ = await requireVipUser(loc);
+  if ("error" in auth_) return auth_.error;
+  const { userId } = auth_;
 
-  let isVip = false;
-  if (userId) {
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { vipUntil: true },
-    });
-    isVip = isVipActive(user?.vipUntil);
-  }
-
-  const rateLimitKey = userId
-    ? `ai-article-chat:${userId}`
-    : `ai-article-chat:anon:${req.headers.get("x-forwarded-for") ?? "unknown"}`;
-  const maxReq = isVip ? 12 : 4;
+  const rateLimitKey = `ai-article-chat:${userId}`;
   const windowMs = 5 * 60_000;
-  const { ok, remaining } = rateLimit(rateLimitKey, maxReq, windowMs);
-
+  const { ok, remaining } = rateLimit(rateLimitKey, 12, windowMs);
   if (!ok) {
-    return errorJson(
-      isVip ? ai.apiRateLimitVip : ai.apiArticleChatRateLimitFree,
-      429,
-      remaining === 0 ? windowMs : undefined,
-    );
+    return errorJson(ai.apiRateLimitVip, 429, remaining === 0 ? windowMs : undefined);
   }
 
   try {
+    const history = await prisma.articleChatMessage.findMany({
+      where: { articleId: parsed.data.articleId, userId },
+      orderBy: { createdAt: "asc" },
+      take: CONTEXT_LIMIT,
+      select: { role: true, content: true },
+    });
+
+    const contextMessages: AiAdvisorMessage[] = [
+      ...history.map((m) => ({ role: toRole(m.role), content: m.content })),
+      { role: "user" as const, content: parsed.data.content },
+    ];
+
     const reply = await getAiArticleChatReply({
       article,
-      messages: parsed.data.messages,
+      messages: contextMessages,
       locale: loc,
     });
 
-    const response: AiAdvisorResponse = {
-      message: { role: "assistant", content: reply },
-      generatedAt: new Date().toISOString(),
+    const [userMessage, assistantMessage] = await prisma.$transaction([
+      prisma.articleChatMessage.create({
+        data: {
+          articleId: parsed.data.articleId,
+          userId,
+          role: "user",
+          content: parsed.data.content,
+        },
+      }),
+      prisma.articleChatMessage.create({
+        data: {
+          articleId: parsed.data.articleId,
+          userId,
+          role: "assistant",
+          content: reply,
+        },
+      }),
+    ]);
+
+    const response: AiArticleChatSendResponse = {
+      userMessage: {
+        id: userMessage.id,
+        role: "user",
+        content: userMessage.content,
+        createdAt: userMessage.createdAt.toISOString(),
+      },
+      assistantMessage: {
+        id: assistantMessage.id,
+        role: "assistant",
+        content: assistantMessage.content,
+        createdAt: assistantMessage.createdAt.toISOString(),
+      },
       disclaimer: ai.apiDisclaimer,
     };
 

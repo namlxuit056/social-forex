@@ -125,6 +125,7 @@ model User {
   autoScalpConfig      AutoScalpConfig?
   priceAlerts          PriceAlert[]
   weeklyReviews        AiWeeklyJournalReview[]
+  articleChatMessages  ArticleChatMessage[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -652,9 +653,27 @@ model AiGeneratedArticle {
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 
+  chatMessages ArticleChatMessage[]
+
   @@unique([locale, slug])
   @@index([locale, status, publishedAt])
   @@index([keyword, generatedAt])
+}
+
+/// Per-user chat history attached to an AI article — lets a reader ask "price
+/// already crossed X, what now?" and get the article's original call re-evaluated.
+model ArticleChatMessage {
+  id        String   @id @default(cuid())
+  articleId String
+  userId    String
+  role      String
+  content   String
+  createdAt DateTime @default(now())
+
+  article AiGeneratedArticle @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  user    User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([articleId, userId, createdAt])
 }
 
 /// Bản ghi singleton — lần đồng bộ lịch kinh tế (FMP) gần nhất.
