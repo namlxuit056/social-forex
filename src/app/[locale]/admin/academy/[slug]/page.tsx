@@ -6,6 +6,7 @@ import { Link } from "@/i18n/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LessonEditForm } from "./lesson-edit-form";
+import { ImageUrlForm } from "./image-url-form";
 
 export const dynamic = "force-dynamic";
 
@@ -76,6 +77,8 @@ export default async function EditAcademyLessonPage({
           <Badge variant="secondary">{lessons[0]?.level}</Badge>
         </div>
       </div>
+
+      <ImageUrlForm slug={slug} currentImageUrl={vi?.imageUrl ?? en?.imageUrl ?? null} />
 
       <div className="grid gap-6 lg:grid-cols-2">
         {vi && (
