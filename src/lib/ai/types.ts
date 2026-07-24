@@ -89,6 +89,11 @@ export const aiAdvisorRequestSchema = z.object({
   messages: z.array(aiAdvisorMessageSchema).min(1).max(12),
 });
 
+export const aiArticleChatRequestSchema = z.object({
+  articleId: z.string().min(1),
+  messages: z.array(aiAdvisorMessageSchema).min(1).max(12),
+});
+
 export type AiAdvisorMessage = z.infer<typeof aiAdvisorMessageSchema>;
 
 export type AiAdvisorResponse = {

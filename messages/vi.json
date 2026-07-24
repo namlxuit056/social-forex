@@ -967,6 +967,17 @@
     "relatedArticles": "Bài viết liên quan",
     "relatedLessons": "Tìm hiểu thêm tại Academy"
   },
+  "articleChat": {
+    "title": "Hỏi AI về bài này",
+    "subtitle": "Báo giá đã chạm mức nào, AI sẽ đối chiếu lại nhận định trong bài.",
+    "placeholder": "Ví dụ: giá đã vượt qua 4090, giờ nên làm gì?",
+    "quickCrossed": "Giá đã vượt vùng đề xuất trong bài, giờ sao?",
+    "quickStillValid": "Nhận định trong bài còn đúng không?",
+    "quickWhatNow": "Bây giờ nên vào lệnh hay chờ thêm?",
+    "thinking": "AI đang phân tích lại...",
+    "disclaimer": "Chỉ mang tính giáo dục, không phải khuyến nghị đầu tư. Luôn kiểm tra giá thực tế trên nền tảng giao dịch của bạn.",
+    "error": "Không thể trả lời lúc này. Vui lòng thử lại."
+  },
   "resources": {
     "title": "Kho tài liệu",
     "description": "Liên kết và tài liệu hữu ích cho trader forex.",
@@ -1542,6 +1553,9 @@
     "apiRateLimitFree": "Giới hạn 1 lần/5 phút. Nâng VIP để phân tích nhiều hơn.",
     "apiAdvisorRateLimitFree": "Giới hạn 4 câu hỏi/5 phút. Nâng VIP để chat nhiều hơn.",
     "apiAdvisorInvalidRequest": "Nội dung chat không hợp lệ hoặc quá dài.",
+    "apiArticleChatInvalidRequest": "Nội dung chat không hợp lệ hoặc quá dài.",
+    "apiArticleChatArticleNotFound": "Không tìm thấy bài viết này.",
+    "apiArticleChatRateLimitFree": "Bạn đã hỏi quá nhiều lần. Vui lòng thử lại sau ít phút.",
     "apiTrendLoginRequired": "Đăng nhập để dùng AI trong ngày.",
     "apiCalendarLoginRequired": "Đăng nhập để dùng AI phân tích lịch.",
     "apiJournalLoginRequired": "Đăng nhập để dùng AI phân tích journal.",

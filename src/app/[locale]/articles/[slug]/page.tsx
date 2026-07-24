@@ -4,6 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import Image from "next/image";
 import { marked } from "marked";
 import { Disclaimer } from "@/components/layout/disclaimer";
+import { ArticleChat } from "@/components/ai/article-chat";
 import { Badge } from "@/components/ui/badge";
 import { PageViewTracker } from "@/components/analytics/page-view-tracker";
 import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
@@ -210,6 +211,7 @@ export default async function ArticlePage({ params }: Props) {
       </article>
 
       <div className="max-w-2xl space-y-8">
+        <ArticleChat articleId={article.id} />
         <RelatedArticles articles={relatedArticles} label={t("relatedArticles")} />
         <RelatedLessons lessons={relatedLessons} label={t("relatedLessons")} />
       </div>

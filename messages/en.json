@@ -967,6 +967,17 @@
     "relatedArticles": "Related articles",
     "relatedLessons": "Learn more in Academy"
   },
+  "articleChat": {
+    "title": "Ask AI about this article",
+    "subtitle": "Tell it where price is now and it will re-check the article's call.",
+    "placeholder": "e.g. price already broke above 4090, what now?",
+    "quickCrossed": "Price already crossed the zone in this article — now what?",
+    "quickStillValid": "Is the call in this article still valid?",
+    "quickWhatNow": "Should I enter now or wait?",
+    "thinking": "AI is re-analyzing...",
+    "disclaimer": "Educational only, not investment advice. Always verify the live price on your own trading platform.",
+    "error": "Could not answer right now. Please try again."
+  },
   "resources": {
     "title": "Resource Library",
     "description": "Useful links and materials for forex traders.",
@@ -1542,6 +1553,9 @@
     "apiRateLimitFree": "Limit: 1 per 5 minutes. Upgrade to VIP for more analyses.",
     "apiAdvisorRateLimitFree": "Limit: 4 questions per 5 minutes. Upgrade to VIP for more chat.",
     "apiAdvisorInvalidRequest": "Chat content is invalid or too long.",
+    "apiArticleChatInvalidRequest": "Chat content is invalid or too long.",
+    "apiArticleChatArticleNotFound": "This article could not be found.",
+    "apiArticleChatRateLimitFree": "You've asked too many times. Please try again in a few minutes.",
     "apiTrendLoginRequired": "Sign in to use AI day view.",
     "apiCalendarLoginRequired": "Sign in to use AI calendar impact.",
     "apiJournalLoginRequired": "Sign in to use AI journal analysis.",
