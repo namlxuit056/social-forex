@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { getLevel, getXpProgress } from "@/lib/xp";
 import { ProfileReferralSection } from "@/components/profile/referral-section";
+import { ChangePasswordForm } from "@/components/profile/change-password-form";
 
 export async function generateMetadata({
   params,
@@ -237,6 +238,12 @@ export default async function ProfilePage({
             {t("notificationPrefsSave")}
           </Button>
         </form>
+      </div>
+
+      <div className="rounded-xl border border-border bg-card/50 p-6 ring-1 ring-foreground/5">
+        <h2 className="font-medium text-foreground">{t("changePasswordTitle")}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{t("changePasswordHint")}</p>
+        <ChangePasswordForm />
       </div>
 
       {dbUser?.referralCode && (
