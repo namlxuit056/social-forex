@@ -23,6 +23,7 @@ import { getDbLesson, getDbLessonQuizzes } from "@/lib/content/academy-db";
 import { AcademyAiQuiz } from "@/components/academy/academy-ai-quiz";
 import { PatternDiagram } from "@/components/academy/pattern-diagram";
 import { LessonImage } from "@/components/academy/lesson-image";
+import { SITE_AUTHOR } from "@/lib/site-author";
 
 type Props = { params: Promise<{ slug: string; locale: string }> };
 
@@ -61,6 +62,7 @@ export async function generateMetadata({ params }: Props) {
       siteName: "Social Forex",
       section: "Academy",
       tags: lesson.keywords,
+      authors: [SITE_AUTHOR.name],
       ...(lesson.imageUrl && {
         images: [{ url: lesson.imageUrl, width: 1200, height: 630, alt: lesson.title }],
       }),
@@ -121,6 +123,12 @@ export default async function AcademyLessonPage({ params }: Props) {
       name: "Social Forex",
       url: absoluteUrl("", locale),
     },
+    instructor: {
+      "@type": "Person",
+      name: SITE_AUTHOR.name,
+      jobTitle: SITE_AUTHOR.title,
+      url: absoluteUrl("", locale),
+    },
     inLanguage: locale === "vi" ? "vi" : "en",
     educationalLevel: lesson.level,
     keywords: lesson.keywords.join(", "),
@@ -165,6 +173,11 @@ export default async function AcademyLessonPage({ params }: Props) {
             {lesson.title}
           </h1>
           <p className="mt-2 text-muted-foreground">{lesson.summary}</p>
+          <p className="mt-3 text-xs text-muted-foreground">
+            <span className="font-medium text-foreground">{SITE_AUTHOR.name}</span>
+            {" · "}
+            <span>{SITE_AUTHOR.title}</span>
+          </p>
           {"imageUrl" in lesson && (
             (lesson as { imageUrl?: string | null }).imageUrl ? (
               <LessonImage

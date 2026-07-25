@@ -18,6 +18,7 @@ import { findRelatedArticles } from "@/lib/related-articles";
 import { getRelatedAcademyLessonsByKeywords } from "@/lib/content/academy";
 import { auth } from "@/auth";
 import { isVipActive } from "@/lib/vip";
+import { SITE_AUTHOR } from "@/lib/site-author";
 
 function ensureHtml(body: string): string {
   const trimmed = body.trimStart();
@@ -72,6 +73,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       section: "AI Articles",
       tags: article.sourceKeywords,
       publishedTime: article.publishedAt?.toISOString(),
+      authors: [SITE_AUTHOR.name],
       ...(article.imageUrl && {
         images: [{ url: article.imageUrl, width: 1200, height: 630, alt: article.imageAlt ?? article.keyword }],
       }),
@@ -126,8 +128,9 @@ export default async function ArticlePage({ params }: Props) {
       image: { "@type": "ImageObject", url: article.imageUrl, width: 1200, height: 630 },
     }),
     author: {
-      "@type": "Organization",
-      name: "Social Forex",
+      "@type": "Person",
+      name: SITE_AUTHOR.name,
+      jobTitle: SITE_AUTHOR.title,
       url: absoluteUrl("", locale),
     },
     publisher: {
@@ -199,6 +202,11 @@ export default async function ArticlePage({ params }: Props) {
               {article.title}
             </h1>
             <p className="mt-2 text-muted-foreground">{article.summary}</p>
+            <p className="mt-3 text-xs text-muted-foreground">
+              <span className="font-medium text-foreground">{SITE_AUTHOR.name}</span>
+              {" · "}
+              <span>{SITE_AUTHOR.title}</span>
+            </p>
           </div>
 
           {article.imageUrl && (
