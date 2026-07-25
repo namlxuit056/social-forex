@@ -61,11 +61,15 @@ export async function generateMetadata({ params }: Props) {
       siteName: "Social Forex",
       section: "Academy",
       tags: lesson.keywords,
+      ...(lesson.imageUrl && {
+        images: [{ url: lesson.imageUrl, width: 1200, height: 630, alt: lesson.title }],
+      }),
     },
     twitter: {
-      card: "summary",
+      card: lesson.imageUrl ? "summary_large_image" : "summary",
       title: lesson.title,
       description: lesson.summary,
+      ...(lesson.imageUrl && { images: [lesson.imageUrl] }),
     },
   };
 }

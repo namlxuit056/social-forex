@@ -38,6 +38,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
+  // Fetch DB content in parallel
+  const [articles, dbAcademyLessons] = await Promise.all([
+    prisma.aiGeneratedArticle.findMany({
+      where: { status: "PUBLISHED" },
+      select: { slug: true, locale: true, publishedAt: true, updatedAt: true },
+      orderBy: { publishedAt: "desc" },
+    }),
+    prisma.academyLesson.findMany({
+      where: { status: "PUBLISHED" },
+      select: { slug: true, locale: true, updatedAt: true },
+      distinct: ["slug"],
+      orderBy: { updatedAt: "desc" },
+    }),
+  ]);
+
+  const dbAcademySlugs = new Set(dbAcademyLessons.map((l) => l.slug));
+  const dbAcademyBySlug = new Map(dbAcademyLessons.map((l) => [l.slug, l]));
+
   for (const locale of routing.locales) {
     const prefix = locale === routing.defaultLocale ? "" : `/${locale}`;
 
@@ -50,7 +68,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       });
     }
 
+    // Hardcoded lessons (exclude those now in DB to avoid duplicates)
     for (const lesson of academyLessons) {
+      if (dbAcademySlugs.has(lesson.slug)) continue;
       entries.push({
         url: `${BASE}${prefix}/academy/${lesson.slug}`,
         lastModified: now,
@@ -58,15 +78,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.7,
       });
     }
+
+    // DB-generated academy lessons
+    for (const lesson of dbAcademyLessons) {
+      if (lesson.locale !== locale) continue;
+      entries.push({
+        url: `${BASE}${prefix}/academy/${lesson.slug}`,
+        lastModified: dbAcademyBySlug.get(lesson.slug)?.updatedAt ?? now,
+        changeFrequency: "monthly",
+        priority: 0.7,
+      });
+    }
   }
 
   // Published AI articles per locale
-  const articles = await prisma.aiGeneratedArticle.findMany({
-    where: { status: "PUBLISHED" },
-    select: { slug: true, locale: true, publishedAt: true, updatedAt: true },
-    orderBy: { publishedAt: "desc" },
-  });
-
   for (const article of articles) {
     const prefix =
       article.locale === routing.defaultLocale ? "" : `/${article.locale}`;

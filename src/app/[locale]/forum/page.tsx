@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Inbox } from "lucide-react";
+import { absoluteUrl } from "@/lib/site-url";
+import { routing } from "@/i18n/routing";
 
 export async function generateMetadata({
   params,
@@ -14,7 +16,18 @@ export async function generateMetadata({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("forum");
-  return { title: t("title"), description: t("description") };
+  return {
+    title: t("title"),
+    description: t("description"),
+    alternates: {
+      canonical: absoluteUrl("/forum", locale),
+      languages: {
+        vi: absoluteUrl("/forum", "vi"),
+        en: absoluteUrl("/forum", "en"),
+        "x-default": absoluteUrl("/forum", routing.defaultLocale),
+      },
+    },
+  };
 }
 
 export const dynamic = "force-dynamic";

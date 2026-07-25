@@ -42,11 +42,20 @@ export async function generateMetadata({
       siteName: "Social Forex",
       title: t("ogTitle"),
       description: t("ogDescription"),
+      images: [
+        {
+          url: `${getSiteUrl()}/og-default.png`,
+          width: 1200,
+          height: 630,
+          alt: "Social Forex",
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title: t("twitterTitle"),
       description: t("twitterDescription"),
+      images: [`${getSiteUrl()}/og-default.png`],
     },
   };
 }

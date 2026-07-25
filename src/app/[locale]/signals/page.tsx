@@ -13,6 +13,7 @@ import { prisma } from "@/lib/prisma";
 import { isVipActive } from "@/lib/vip";
 import { pageCtaItems } from "@/lib/page-cta-i18n";
 import { absoluteUrl } from "@/lib/site-url";
+import { routing } from "@/i18n/routing";
 import {
   getNewsContextHours,
   getNewsContextWindow,
@@ -36,7 +37,18 @@ export async function generateMetadata({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("signals");
-  return { title: t("title"), description: t("description") };
+  return {
+    title: t("title"),
+    description: t("description"),
+    alternates: {
+      canonical: absoluteUrl("/signals", locale),
+      languages: {
+        vi: absoluteUrl("/signals", "vi"),
+        en: absoluteUrl("/signals", "en"),
+        "x-default": absoluteUrl("/signals", routing.defaultLocale),
+      },
+    },
+  };
 }
 
 export const dynamic = "force-dynamic";

@@ -7,6 +7,8 @@ import { BreadcrumbNav } from "@/components/seo/breadcrumb-nav";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { getAcademyLessons } from "@/lib/content/academy";
+import { absoluteUrl } from "@/lib/site-url";
+import { routing } from "@/i18n/routing";
 import { getDbLessons } from "@/lib/content/academy-db";
 import { PatternDiagram } from "@/components/academy/pattern-diagram";
 import { LessonImage } from "@/components/academy/lesson-image";
@@ -24,7 +26,18 @@ export async function generateMetadata({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("academy");
-  return { title: t("title"), description: t("description") };
+  return {
+    title: t("title"),
+    description: t("description"),
+    alternates: {
+      canonical: absoluteUrl("/academy", locale),
+      languages: {
+        vi: absoluteUrl("/academy", "vi"),
+        en: absoluteUrl("/academy", "en"),
+        "x-default": absoluteUrl("/academy", routing.defaultLocale),
+      },
+    },
+  };
 }
 
 export default async function AcademyPage({

@@ -5,6 +5,8 @@ import { Disclaimer } from "@/components/layout/disclaimer";
 import { BreadcrumbNav } from "@/components/seo/breadcrumb-nav";
 import { Badge } from "@/components/ui/badge";
 import { prisma } from "@/lib/prisma";
+import { absoluteUrl } from "@/lib/site-url";
+import { routing } from "@/i18n/routing";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +18,18 @@ export async function generateMetadata({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("articles");
-  return { title: t("title"), description: t("description") };
+  return {
+    title: t("title"),
+    description: t("description"),
+    alternates: {
+      canonical: absoluteUrl("/articles", locale),
+      languages: {
+        vi: absoluteUrl("/articles", "vi"),
+        en: absoluteUrl("/articles", "en"),
+        "x-default": absoluteUrl("/articles", routing.defaultLocale),
+      },
+    },
+  };
 }
 
 function formatDate(value: Date | null, locale: string) {
