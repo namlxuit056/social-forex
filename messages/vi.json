@@ -1074,6 +1074,7 @@
     "profileTabsLabel": "Điều hướng hồ sơ trader",
     "profileTabOverview": "Overview",
     "profileTabSignals": "Signals",
+    "profileTabTrackRecord": "Track record",
     "profileTabMt5": "MT5 Live",
     "profileTabAcademy": "Academy",
     "profileTabFollowers": "Followers",
@@ -1177,6 +1178,27 @@
       "viewEquity": "Equity",
       "viewMonthly": "Theo tháng",
       "note": "Tính trên {count} signal đã đóng: thắng = RR entry→TP, thua = -1R. Chỉ mang tính tham khảo."
+    },
+    "trackRecord": {
+      "empty": "Chưa có signal nào đã đóng.",
+      "tileMaxDrawdown": "Max Drawdown",
+      "tileProfitFactor": "Profit Factor",
+      "tileAvgR": "Avg R",
+      "filterAllSymbols": "Tất cả symbol",
+      "filterAllResults": "Tất cả kết quả",
+      "resultWin": "Thắng",
+      "resultLoss": "Thua",
+      "count": "{count} signal",
+      "noMatch": "Không có signal phù hợp bộ lọc.",
+      "colSymbol": "Symbol",
+      "colDirection": "Hướng",
+      "colEntry": "Entry",
+      "colSl": "SL",
+      "colTp": "TP",
+      "colResult": "Kết quả",
+      "colR": "R",
+      "colOpened": "Mở",
+      "colClosed": "Đóng"
     }
   },
   "mt5": {

@@ -41,6 +41,7 @@ export async function generateMetadata({ params }: Props) {
   setRequestLocale(locale);
   const lesson = getAcademyLesson(slug, locale) ?? await getDbLesson(slug, locale);
   if (!lesson) return {};
+  const imageUrl = "imageUrl" in lesson ? lesson.imageUrl : null;
 
   return {
     title: lesson.title,
@@ -63,15 +64,15 @@ export async function generateMetadata({ params }: Props) {
       section: "Academy",
       tags: lesson.keywords,
       authors: [SITE_AUTHOR.name],
-      ...(lesson.imageUrl && {
-        images: [{ url: lesson.imageUrl, width: 1200, height: 630, alt: lesson.title }],
-      }),
+      ...(imageUrl
+        ? { images: [{ url: imageUrl, width: 1200, height: 630, alt: lesson.title }] }
+        : {}),
     },
     twitter: {
-      card: lesson.imageUrl ? "summary_large_image" : "summary",
+      card: imageUrl ? "summary_large_image" : "summary",
       title: lesson.title,
       description: lesson.summary,
-      ...(lesson.imageUrl && { images: [lesson.imageUrl] }),
+      ...(imageUrl ? { images: [imageUrl] } : {}),
     },
   };
 }

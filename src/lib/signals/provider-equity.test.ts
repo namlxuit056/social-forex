@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  avgR,
   buildEquityCurve,
   buildMonthlyR,
+  maxDrawdownR,
+  profitFactorR,
   signalR,
   type ClosedSignalForEquity,
 } from "./provider-equity";
@@ -97,5 +100,61 @@ describe("buildMonthlyR", () => {
 
   it("empty input gives empty list", () => {
     expect(buildMonthlyR([])).toEqual([]);
+  });
+});
+
+describe("maxDrawdownR", () => {
+  it("is 0 when equity only rises", () => {
+    const points = buildEquityCurve([
+      sig({ closedAt: new Date("2026-01-01") }),
+      sig({ closedAt: new Date("2026-01-02") }),
+    ]);
+    expect(maxDrawdownR(points)).toBe(0);
+  });
+
+  it("captures the largest peak-to-trough drop", () => {
+    // +2R, -1R, -1R → peak 2, trough 0 → drawdown -2
+    const points = buildEquityCurve([
+      sig({ closedAt: new Date("2026-01-01") }),
+      sig({ status: "CLOSED_LOSS", closedAt: new Date("2026-01-02") }),
+      sig({ status: "CLOSED_LOSS", closedAt: new Date("2026-01-03") }),
+    ]);
+    expect(maxDrawdownR(points)).toBe(-2);
+  });
+
+  it("empty input gives 0", () => {
+    expect(maxDrawdownR([])).toBe(0);
+  });
+});
+
+describe("profitFactorR", () => {
+  it("gross win / gross loss", () => {
+    const signals = [
+      sig({ closedAt: new Date("2026-01-01") }), // +2R
+      sig({ status: "CLOSED_LOSS", closedAt: new Date("2026-01-02") }), // -1R
+    ];
+    expect(profitFactorR(signals)).toBe(2);
+  });
+
+  it("Infinity when no losses and at least one win", () => {
+    expect(profitFactorR([sig({ closedAt: new Date() })])).toBe(Infinity);
+  });
+
+  it("0 for empty input", () => {
+    expect(profitFactorR([])).toBe(0);
+  });
+});
+
+describe("avgR", () => {
+  it("averages R across signals", () => {
+    const signals = [
+      sig({ closedAt: new Date("2026-01-01") }), // +2R
+      sig({ status: "CLOSED_LOSS", closedAt: new Date("2026-01-02") }), // -1R
+    ];
+    expect(avgR(signals)).toBe(0.5);
+  });
+
+  it("0 for empty input", () => {
+    expect(avgR([])).toBe(0);
   });
 });

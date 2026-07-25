@@ -1074,6 +1074,7 @@
     "profileTabsLabel": "Trader profile navigation",
     "profileTabOverview": "Overview",
     "profileTabSignals": "Signals",
+    "profileTabTrackRecord": "Track record",
     "profileTabMt5": "MT5 Live",
     "profileTabAcademy": "Academy",
     "profileTabFollowers": "Followers",
@@ -1177,6 +1178,27 @@
       "viewEquity": "Equity",
       "viewMonthly": "Monthly",
       "note": "Based on {count} closed signals: win = entry→TP RR, loss = -1R. For reference only."
+    },
+    "trackRecord": {
+      "empty": "No closed signals yet.",
+      "tileMaxDrawdown": "Max Drawdown",
+      "tileProfitFactor": "Profit Factor",
+      "tileAvgR": "Avg R",
+      "filterAllSymbols": "All symbols",
+      "filterAllResults": "All results",
+      "resultWin": "Win",
+      "resultLoss": "Loss",
+      "count": "{count} signals",
+      "noMatch": "No signals match this filter.",
+      "colSymbol": "Symbol",
+      "colDirection": "Direction",
+      "colEntry": "Entry",
+      "colSl": "SL",
+      "colTp": "TP",
+      "colResult": "Result",
+      "colR": "R",
+      "colOpened": "Opened",
+      "colClosed": "Closed"
     }
   },
   "mt5": {

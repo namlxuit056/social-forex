@@ -50,6 +50,37 @@ export function buildEquityCurve(
   });
 }
 
+/** Largest peak-to-trough drop in cumulative R (≤ 0, or 0 if equity never dipped). */
+export function maxDrawdownR(points: ProviderEquityPoint[]): number {
+  let peak = 0;
+  let maxDD = 0;
+  for (const p of points) {
+    if (p.cumR > peak) peak = p.cumR;
+    const dd = p.cumR - peak;
+    if (dd < maxDD) maxDD = dd;
+  }
+  return maxDD;
+}
+
+/** Gross win R / gross loss R. Infinity when no losses and at least one win, 0 when no signals won or lost. */
+export function profitFactorR(signals: ClosedSignalForEquity[]): number {
+  let grossWin = 0;
+  let grossLoss = 0;
+  for (const s of signals) {
+    const r = signalR(s);
+    if (r > 0) grossWin += r;
+    else grossLoss += Math.abs(r);
+  }
+  if (grossLoss === 0) return grossWin > 0 ? Infinity : 0;
+  return grossWin / grossLoss;
+}
+
+export function avgR(signals: ClosedSignalForEquity[]): number {
+  if (signals.length === 0) return 0;
+  const total = signals.reduce((sum, s) => sum + signalR(s), 0);
+  return total / signals.length;
+}
+
 function monthIndex(date: Date): number {
   return date.getFullYear() * 12 + date.getMonth();
 }

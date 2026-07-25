@@ -25,11 +25,17 @@ _(trống)_
 
 ## Đề xuất mới (chưa duyệt — cần user quyết trước khi đưa vào sprint)
 
-_(trống)_
+_Đề xuất 2026-07-20, theo goal Sprint 2 "Trust & conversion". Lưu ý: tránh feature cần cron mới cho đến khi Neon quota reset (~1/8) — tất cả bên dưới đều là request-time, không cron._
+
+- [ ] **Copier social proof** — badge "X người đang copy" trên leaderboard, /u/[userId] và modal CopyTradeButton (count query trên CopyTrade); kèm "mới nhất: N ngày trước" để thấy provider còn active.
+- [ ] **VIP teaser + funnel** — user thường thấy card VIP signal dạng blur (symbol + direction hiện, entry/SL/TP mờ) kèm win rate lịch sử của VIP tier + CTA nâng cấp; log FunnelEvent tại các bước xem-teaser → xem-pricing → tạo-order để đo conversion (model FunnelEvent + PayPal flow có sẵn).
+- [ ] **Đánh giá provider** — chỉ user đã copy provider ≥ 7 ngày mới được chấm 1–5 sao + nhận xét (model mới CopyTradeReview), hiện điểm trung bình + số review trên profile và modal copy; report/hide qua hệ thống moderation có sẵn. Effort lớn hơn 3 cái trên.
 
 ---
 
 ## Completed
+
+- [x] Track record công khai — tab "Track record" trên /u/[userId] (query param ?tab=track): toàn bộ signal đã đóng dạng bảng (symbol/hướng/entry/SL/TP/kết quả/R/mở-đóng) + filter theo symbol + kết quả, tiles Max Drawdown / Profit Factor / Avg R; thêm maxDrawdownR/profitFactorR/avgR vào src/lib/signals/provider-equity.ts (có test), tái dùng buildEquityCurve/signalR đã ship. User chọn feature này trong 3 đề xuất chưa duyệt (2026-07-25)
 
 - [x] Provider equity chart trên /u/[userId] — tab Overview hiện card "Đường cong hiệu suất (R)" khi provider có ≥ 5 signal đã đóng: equity curve tích lũy R + bars theo tháng (fill tháng trống, month arithmetic không overflow), win = RR entry→TP (fallback +1R), loss = -1R (TODO business: chưa tính TP2/TP3/partial close); pure logic src/lib/signals/provider-equity.ts có 10 tests; SVG theo convention journal-performance-chart (user duyệt 2026-07-19)
 
