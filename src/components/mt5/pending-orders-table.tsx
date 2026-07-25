@@ -21,6 +21,13 @@ function fmt(v: number | null, d = 5) {
   return v == null ? "—" : v.toFixed(d);
 }
 
+function LevelValue({ value }: { value: number | null }) {
+  if (value == null || value === 0) {
+    return <span className="italic text-muted-foreground/70">Not set</span>;
+  }
+  return <>{fmt(value)}</>;
+}
+
 // A pending order "lights up" once the market price is within this % of its trigger
 // price — % rather than fixed pips so it scales across XAUUSD, BTCUSD, EURJPY, etc.
 const NEAR_TRIGGER_PCT = 0.15;
@@ -269,11 +276,11 @@ export function PendingOrdersTable({ orders, equity }: Props) {
                         </span>
                       </td>
                       <td className="px-3 py-4 text-right font-mono tabular-nums text-muted-foreground">
-                        {fmt(o.stopLoss)}
+                        <LevelValue value={o.stopLoss} />
                         <SlAmount o={o} />
                       </td>
                       <td className="px-3 py-4 text-right font-mono tabular-nums text-muted-foreground">
-                        {fmt(o.takeProfit)}
+                        <LevelValue value={o.takeProfit} />
                         <TpAmount o={o} />
                       </td>
                       <td className="px-3 py-4 text-right">
@@ -363,7 +370,7 @@ export function PendingOrdersTable({ orders, equity }: Props) {
                       label="SL"
                       value={
                         <span className="flex flex-col items-end">
-                          {fmt(o.stopLoss)}
+                          <LevelValue value={o.stopLoss} />
                           <SlAmount o={o} />
                         </span>
                       }
@@ -373,7 +380,7 @@ export function PendingOrdersTable({ orders, equity }: Props) {
                       label="TP"
                       value={
                         <span className="flex flex-col items-end">
-                          {fmt(o.takeProfit)}
+                          <LevelValue value={o.takeProfit} />
                           <TpAmount o={o} />
                         </span>
                       }

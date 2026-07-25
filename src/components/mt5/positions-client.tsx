@@ -301,13 +301,14 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
             </TooltipProvider>
             <QuickOrderSettingsDialog config={quickOrderConfig} onSave={handleSaveQuickOrderConfig} />
             <NewOrderDialog />
+            <div className="col-span-2 sm:contents">
             <AlertDialog>
               <AlertDialogTrigger
                 render={
                   <Button
                     variant="destructive"
                     disabled={closeAllPending || !hasQueueable}
-                    className="flex-1 gap-1.5 lg:flex-none"
+                    className="w-full gap-1.5 sm:flex-1 lg:flex-none"
                   />
                 }
               >
@@ -332,6 +333,7 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
+            </div>
           </div>
         </div>
 
@@ -379,7 +381,8 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
             </TabsTrigger>
             <TabsTrigger value="orders" className="shrink-0 gap-2 rounded-full px-4 py-1.5">
               <Clock className="size-4" />
-              Pending Orders
+              <span className="sm:hidden">Orders</span>
+              <span className="hidden sm:inline">Pending Orders</span>
               <span className="flex min-w-5 items-center justify-center rounded-full bg-background px-1.5 text-xs font-semibold text-foreground">
                 {orders.length}
               </span>
