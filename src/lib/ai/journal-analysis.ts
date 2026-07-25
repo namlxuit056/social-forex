@@ -151,7 +151,7 @@ export async function getAiJournalAnalysis({
   trades: JournalAnalysisTrade[];
   locale: AppLocale;
 }): Promise<AiJournalAnalysis> {
-  const resolved = resolveAiProvider();
+  const resolved = await resolveAiProvider();
   if (!resolved) {
     throw new AiJournalAnalysisUnavailableError(
       "No AI API key configured. Add GROQ_API_KEY or OPENAI_API_KEY to .env.",

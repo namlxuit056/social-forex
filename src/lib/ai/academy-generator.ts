@@ -136,7 +136,7 @@ export type TopicIdea = {
 };
 
 // For academy generation, use the faster/cheaper flash variant on deepseek
-function academyModel(resolved: NonNullable<ReturnType<typeof resolveAiProvider>>) {
+function academyModel(resolved: NonNullable<Awaited<ReturnType<typeof resolveAiProvider>>>) {
   return resolved.provider === "deepseek" ? "deepseek-v4-flash" : resolved.model;
 }
 
@@ -144,7 +144,7 @@ export async function generateTopicIdeas(
   count: number,
   existingTitles: string[] = [],
 ): Promise<TopicIdea[]> {
-  const resolved = resolveAiProvider();
+  const resolved = await resolveAiProvider();
   if (!resolved) throw new Error("No AI API key configured.");
 
   const client = createAiClient(resolved);
@@ -197,7 +197,7 @@ export async function generateAcademyLesson(
   topic: string,
   level: LessonLevel,
 ): Promise<GeneratedLesson> {
-  const resolved = resolveAiProvider();
+  const resolved = await resolveAiProvider();
   if (!resolved) {
     throw new Error(
       "No AI API key configured. Add GROQ_API_KEY, OPENAI_API_KEY, or DEEPSEEK_API_KEY to .env.",

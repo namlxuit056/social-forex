@@ -23,7 +23,7 @@ export async function getScalpingAiSuggestion(
     return cached.suggestion;
   }
 
-  const resolved = resolveAiProvider();
+  const resolved = await resolveAiProvider();
   if (!resolved) {
     throw new AiUnavailableError(
       "No AI API key configured. Add GROQ_API_KEY (free) or OPENAI_API_KEY to .env.",

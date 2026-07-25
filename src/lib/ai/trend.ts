@@ -102,7 +102,7 @@ export async function getAiDailyTrend(
     return cached.trend;
   }
 
-  const resolved = resolveAiProvider();
+  const resolved = await resolveAiProvider();
   if (!resolved) {
     throw new AiTrendUnavailableError(
       "No AI API key configured. Add GROQ_API_KEY or OPENAI_API_KEY to .env.",

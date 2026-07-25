@@ -79,7 +79,7 @@ export async function getAiArticleChatReply({
   messages: AiAdvisorMessage[];
   locale: AppLocale;
 }): Promise<string> {
-  const resolved = resolveAiProvider();
+  const resolved = await resolveAiProvider();
   if (!resolved) {
     throw new AiArticleChatUnavailableError(
       "No AI API key configured. Add GROQ_API_KEY or OPENAI_API_KEY to .env.",

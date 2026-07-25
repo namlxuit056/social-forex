@@ -93,7 +93,7 @@ Based on the chart data and indicators above, return one conservative setup only
 export async function analyzeMt5Chart(
   payload: Mt5ChartPayload,
 ): Promise<AiSuggestion> {
-  const resolved = resolveAiProvider();
+  const resolved = await resolveAiProvider();
   if (!resolved) {
     throw new AiUnavailableError(
       "No AI API key configured. Add GROQ_API_KEY (free) or OPENAI_API_KEY to .env.",

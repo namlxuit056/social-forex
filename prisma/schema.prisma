@@ -622,6 +622,14 @@ model FunnelEvent {
   @@index([createdAt])
 }
 
+/// Singleton row (id="default") — which AI provider/model powers all AI features app-wide.
+model AiModelSetting {
+  id        String   @id @default("default")
+  provider  String   @default("deepseek")
+  model     String?
+  updatedAt DateTime @updatedAt
+}
+
 model AiArticleAutomationSetting {
   id               String    @id @default("default")
   enabled          Boolean   @default(false)

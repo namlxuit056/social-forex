@@ -91,7 +91,7 @@ export async function getAiPositionReview({
   position: OpenPositionForReview;
   locale: AppLocale;
 }): Promise<{ review: AiPositionReview; tvContext: TradingViewTechnicalContext | null }> {
-  const resolved = resolveAiProvider();
+  const resolved = await resolveAiProvider();
   if (!resolved) {
     throw new AiPositionReviewUnavailableError(
       "No AI API key configured. Add DEEPSEEK_API_KEY, GROQ_API_KEY, or OPENAI_API_KEY to .env.",

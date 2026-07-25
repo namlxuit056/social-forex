@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
   const { keyword, title, summary, metaDescription, body, locale } = parsed.data;
   const language = locale === "en" ? "English" : "Vietnamese";
 
-  const config = resolveAiProvider();
+  const config = await resolveAiProvider();
   if (!config) {
     return Response.json({ error: "no_ai_provider" }, { status: 500 });
   }

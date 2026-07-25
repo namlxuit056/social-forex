@@ -49,8 +49,8 @@ Required in `.env`:
 - `NEXTAUTH_URL` — App URL
 
 Optional (AI suggestions feature):
-- `GROQ_API_KEY` or `OPENAI_API_KEY` — AI provider keys (Groq is tried first, then OpenAI)
-- `AI_PROVIDER` — Force a specific provider (`groq` or `openai`)
+- `DEEPSEEK_API_KEY`, `GROQ_API_KEY`, `OPENAI_API_KEY`, `ANTHROPIC_API_KEY` — AI provider keys. Priority: admin setting (`/admin/ai-settings`, DB-backed) → `AI_PROVIDER` env override → DeepSeek → Groq → OpenAI → Anthropic
+- `AI_PROVIDER` — Force a specific provider (`deepseek`, `groq`, `openai`, or `anthropic`) when no admin setting is saved
 - `QUOTES_PROVIDER` — Override quote source (`yahoo` | `massive` | `mock`)
 
 Image uploads: `BLOB_READ_WRITE_TOKEN` (Vercel Blob)

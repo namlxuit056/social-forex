@@ -29,7 +29,7 @@ export async function analyzeTvChart(
   fallbackPrice: number,
   locale: "vi" | "en" = "vi",
 ): Promise<{ suggestion: AiSuggestion; tvContext: TradingViewTechnicalContext }> {
-  const resolved = resolveAiProvider();
+  const resolved = await resolveAiProvider();
   if (!resolved) {
     throw new AiUnavailableError(
       "No AI API key configured. Add DEEPSEEK_API_KEY (recommended), GROQ_API_KEY, or OPENAI_API_KEY to .env.",

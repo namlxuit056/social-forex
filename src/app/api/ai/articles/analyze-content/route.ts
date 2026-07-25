@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
   if (!parsed.success) return Response.json({ error: "invalid_input" }, { status: 400 });
 
   const { keyword, title, locale, body } = parsed.data;
-  const config = resolveAiProvider();
+  const config = await resolveAiProvider();
   if (!config) return Response.json({ error: "no_ai_provider" }, { status: 500 });
 
   const lang = locale === "vi" ? "Vietnamese" : "English";

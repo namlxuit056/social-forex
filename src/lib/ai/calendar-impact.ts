@@ -126,7 +126,7 @@ export async function getAiCalendarImpact(
   events: CalendarEvent[],
   locale: AppLocale = "vi",
 ): Promise<AiCalendarImpact> {
-  const resolved = resolveAiProvider();
+  const resolved = await resolveAiProvider();
   if (!resolved) {
     throw new AiCalendarImpactUnavailableError(
       "No AI API key configured. Add GROQ_API_KEY or OPENAI_API_KEY to .env.",

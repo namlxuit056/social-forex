@@ -40,7 +40,7 @@ function responseLanguage(locale: AppLocale) {
 }
 
 // Portfolio review is a lightweight, frequent-ish scan — use the faster/cheaper deepseek variant
-function portfolioModel(resolved: NonNullable<ReturnType<typeof resolveAiProvider>>) {
+function portfolioModel(resolved: NonNullable<Awaited<ReturnType<typeof resolveAiProvider>>>) {
   return resolved.provider === "deepseek" ? "deepseek-v4-flash" : resolved.model;
 }
 
@@ -76,7 +76,7 @@ export async function getAiPortfolioReview({
   positions: PortfolioReviewPosition[];
   locale: AppLocale;
 }): Promise<AiPortfolioReview> {
-  const resolved = resolveAiProvider();
+  const resolved = await resolveAiProvider();
   if (!resolved) {
     throw new AiPortfolioReviewUnavailableError(
       "No AI API key configured. Add DEEPSEEK_API_KEY, GROQ_API_KEY, or OPENAI_API_KEY to .env.",

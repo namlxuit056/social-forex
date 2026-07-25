@@ -79,7 +79,7 @@ export async function getAiAdvisorReply({
   locale: AppLocale;
   quotes: QuoteRow[];
 }): Promise<string> {
-  const resolved = resolveAiProvider();
+  const resolved = await resolveAiProvider();
   if (!resolved) {
     throw new AiAdvisorUnavailableError(
       "No AI API key configured. Add GROQ_API_KEY or OPENAI_API_KEY to .env.",

@@ -336,7 +336,7 @@ export async function generateAiForexArticle({
   sourceKeywords: string[];
   newsItems?: NewsItem[];
 }) {
-  const config = resolveAiProvider();
+  const config = await resolveAiProvider();
   if (!config) {
     return { ok: false as const, error: "missing_ai_provider" };
   }
