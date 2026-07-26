@@ -79,8 +79,8 @@ Trả về JSON hợp lệ với cấu trúc sau (KHÔNG thêm markdown, chỉ J
     {
       "questionVi": "Câu hỏi tiếng Việt?",
       "questionEn": "English question?",
-      "optionsVi": ["Đáp án A", "Đáp án B", "Đáp án C", "Đáp án D"],
-      "optionsEn": ["Option A", "Option B", "Option C", "Option D"],
+      "optionsVi": ["Mô tả đầy đủ của lựa chọn 1", "Mô tả đầy đủ của lựa chọn 2", "Mô tả đầy đủ của lựa chọn 3", "Mô tả đầy đủ của lựa chọn 4"],
+      "optionsEn": ["Full description of option 1", "Full description of option 2", "Full description of option 3", "Full description of option 4"],
       "correctIndex": 0
     }
   ]
@@ -108,7 +108,8 @@ Yêu cầu quiz:
 - Mỗi câu có đúng 4 lựa chọn
 - correctIndex là index (0-3) của đáp án đúng
 - Câu hỏi phải kiểm tra kiến thức thực tế từ bài học, không phải câu hỏi chung chung
-- Phân phối correctIndex đa dạng (không phải tất cả đều là 0 hoặc 1)`;
+- Phân phối correctIndex đa dạng (không phải tất cả đều là 0 hoặc 1)
+- QUAN TRỌNG: mỗi lựa chọn trong optionsVi/optionsEn PHẢI là một câu hoặc cụm từ đầy đủ mô tả nội dung đáp án (tối thiểu vài từ). TUYỆT ĐỐI KHÔNG dùng chỉ chữ cái đơn lẻ như "A", "B", "C", "D" hay "Đáp án A"/"Option A" làm nội dung đáp án`;
 }
 
 function slugify(text: string): string {
@@ -205,18 +206,20 @@ export async function generateAcademyLesson(
   }
 
   const client = createAiClient(resolved);
-  const messages = [
+  const messages: { role: "system" | "user" | "assistant"; content: string }[] = [
     {
-      role: "system" as const,
+      role: "system",
       content:
         "You are a bilingual (Vietnamese/English) forex education expert. Always respond with valid JSON only, no markdown code blocks.",
     },
-    { role: "user" as const, content: buildPrompt(topic, level) },
+    { role: "user", content: buildPrompt(topic, level) },
   ];
 
-  // Retry up to 3 times — catches API errors, empty responses, and invalid JSON
+  // Retry up to 3 times — catches API errors, empty responses, invalid JSON, and
+  // schema validation failures (e.g. quiz options too short); on validation failure
+  // the specific Zod issues are fed back to the model so it can self-correct.
   const MAX_RETRIES = 3;
-  let parsed: unknown;
+  let validated: ReturnType<typeof lessonSchema.safeParse> | null = null;
   let lastError: Error | null = null;
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     if (attempt > 0) {
@@ -226,7 +229,7 @@ export async function generateAcademyLesson(
     try {
       const response = await client.chat.completions.create({
         model: academyModel(resolved),
-        max_tokens: resolved.maxTokens,
+        max_tokens: resolveMaxTokens(resolved, resolved.maxTokens),
         ...(resolved.supportsTemperature ? { temperature: 0.4 } : {}),
         ...(resolved.supportsJsonResponseFormat ? { response_format: { type: "json_object" } } : {}),
         messages,
@@ -247,25 +250,37 @@ export async function generateAcademyLesson(
       ? (stripped.match(/```(?:json)?\s*([\s\S]*?)```/)?.[1] ?? stripped).trim()
       : stripped;
 
+    let parsed: unknown;
     try {
       parsed = JSON.parse(jsonStr);
-      lastError = null;
-      break;
     } catch {
       lastError = new Error(`AI returned invalid JSON: ${raw.slice(0, 300)}`);
+      continue;
     }
-  }
 
-  if (!parsed) {
-    throw lastError ?? new Error("AI returned empty response after retries");
-  }
+    validated = lessonSchema.safeParse(parsed);
+    if (validated.success) {
+      lastError = null;
+      break;
+    }
 
-  const validated = lessonSchema.safeParse(parsed);
-  if (!validated.success) {
     const issues = validated.error.issues
       .map((i) => `${i.path.join(".")}: ${i.message}`)
       .join(", ");
-    throw new Error(`AI response validation failed: ${issues}`);
+    lastError = new Error(`AI response validation failed: ${issues}`);
+    if (attempt < MAX_RETRIES) {
+      messages.push(
+        { role: "assistant", content: jsonStr.slice(0, 6000) },
+        {
+          role: "user",
+          content: `JSON trên chưa hợp lệ: ${issues}. Hãy trả lại TOÀN BỘ JSON đã sửa lỗi (đầy đủ tất cả field theo đúng cấu trúc ban đầu), đặc biệt optionsVi/optionsEn phải là câu/cụm từ đầy đủ mô tả đáp án, KHÔNG dùng chữ cái đơn lẻ như "A", "B", "C", "D".`,
+        },
+      );
+    }
+  }
+
+  if (!validated?.success) {
+    throw lastError ?? new Error("AI returned empty response after retries");
   }
 
   const data = validated.data;
