@@ -34,6 +34,8 @@ _Đề xuất 2026-07-20, theo goal Sprint 2 "Trust & conversion". Lưu ý: trá
 
 ## Completed
 
+- [x] Academy auto-generate cron — daily cron (`0 3 * * *` UTC, /api/academy/auto-generate/run) tự chọn 3 chủ đề mới (dedupe với title đã có) qua generateTopicIdeas rồi generate + publish full lesson (VI+EN) cho từng chủ đề; logic saveLesson tách ra src/lib/ai/academy-auto-generate.ts dùng chung với admin bulk-generate. 1 topic lỗi không chặn 2 topic còn lại. Thêm bất chấp ghi chú "tránh cron mới đến khi Neon quota reset ~1/8" vì đây là cron 1 lần/ngày (không giữ DB thức như per-minute cron cũ) — cùng loại rủi ro thấp như ai/articles/run và journal/weekly-review/run đã bật lại trước đó (2026-07-26)
+
 - [x] Copier social proof — badge "X đang copy" trên leaderboard (dưới tên trader), hero badges của /u/[userId], và modal CopyTradeButton (kèm "mới nhất: N ngày trước"/"hôm nay"); count + most-recent query trên CopyTrade (isActive), không cần model mới. "Mới nhất" đo theo thời điểm subscribe gần nhất (createdAt), không phải lần copy lệnh thực tế vì schema chưa có log copy riêng — đã note trong code. User chọn feature này trong 3 đề xuất chưa duyệt (2026-07-26)
 
 - [x] Track record công khai — tab "Track record" trên /u/[userId] (query param ?tab=track): toàn bộ signal đã đóng dạng bảng (symbol/hướng/entry/SL/TP/kết quả/R/mở-đóng) + filter theo symbol + kết quả, tiles Max Drawdown / Profit Factor / Avg R; thêm maxDrawdownR/profitFactorR/avgR vào src/lib/signals/provider-equity.ts (có test), tái dùng buildEquityCurve/signalR đã ship. User chọn feature này trong 3 đề xuất chưa duyệt (2026-07-25)

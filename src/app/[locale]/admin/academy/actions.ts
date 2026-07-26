@@ -5,8 +5,9 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { generateAcademyLesson, generateTopicIdeas } from "@/lib/ai/academy-generator";
+import { generateTopicIdeas } from "@/lib/ai/academy-generator";
 import type { LessonLevel } from "@/lib/ai/academy-generator";
+import { saveLesson } from "@/lib/ai/academy-auto-generate";
 import { generateLessonImage } from "@/lib/ai/gemini-image";
 import { pollinationsImageUrl } from "@/lib/ai/pollinations-image";
 
@@ -64,60 +65,6 @@ export async function generateAcademyLessonForBulkAction(
 const bulkSchema = z.object({
   count: z.coerce.number().int().min(1).max(10),
 });
-
-async function saveLesson(topic: string, level: LessonLevel) {
-  const generated = await generateAcademyLesson(topic, level);
-
-  let slug = generated.slug;
-  const conflict = await prisma.academyLesson.findFirst({ where: { slug } });
-  if (conflict) slug = `${slug}-${Date.now().toString(36)}`;
-
-  const publishedAt = new Date();
-
-  // Create Vietnamese lesson
-  await prisma.academyLesson.create({
-    data: {
-      slug,
-      locale: "vi",
-      level: generated.level,
-      title: generated.titleVi,
-      summary: generated.summaryVi,
-      body: generated.bodyVi,
-      keywords: generated.keywordsVi,
-      imageUrl: generated.imageUrl,
-      status: "PUBLISHED",
-      publishedAt,
-      quizQuestions: generated.quizzes.map((q, i) => ({
-        question: q.questionVi,
-        options: q.optionsVi,
-        correctIndex: q.correctIndex,
-        order: i,
-      })),
-    },
-  });
-
-  // Create English lesson
-  await prisma.academyLesson.create({
-    data: {
-      slug,
-      locale: "en",
-      level: generated.level,
-      title: generated.titleEn,
-      summary: generated.summaryEn,
-      body: generated.bodyEn,
-      keywords: generated.keywordsEn,
-      imageUrl: generated.imageUrl,
-      status: "PUBLISHED",
-      publishedAt,
-      quizQuestions: generated.quizzes.map((q, i) => ({
-        question: q.questionEn,
-        options: q.optionsEn,
-        correctIndex: q.correctIndex,
-        order: i,
-      })),
-    },
-  });
-}
 
 export async function getTopicIdeasForBulkAction(
   count: number,
