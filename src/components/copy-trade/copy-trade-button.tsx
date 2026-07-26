@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Check, ChevronDown, ChevronUp, Copy, Loader2 } from "lucide-react";
+import { Check, ChevronDown, ChevronUp, Copy, Loader2, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,6 +30,10 @@ type Props = {
   providerWinRate?: number | null;
   /** Tổng số signal đã đóng (win + loss) */
   providerClosedSignals?: number | null;
+  /** Số người đang copy trade (isActive) provider này */
+  providerCopierCount?: number | null;
+  /** Số ngày kể từ lượt copy gần nhất; null = chưa có ai copy */
+  providerLastCopyDaysAgo?: number | null;
 };
 
 export function CopyTradeButton({
@@ -44,6 +48,8 @@ export function CopyTradeButton({
   currentBtcusdLot,
   providerWinRate,
   providerClosedSignals,
+  providerCopierCount,
+  providerLastCopyDaysAgo,
 }: Props) {
   const t = useTranslations("copyTrade");
   const [open, setOpen] = useState(false);
@@ -139,6 +145,23 @@ export function CopyTradeButton({
               ? t("manageHint", { name: providerName })
               : t("configureHint", { name: providerName })}
           </p>
+
+          {!!providerCopierCount && (
+            <div className="flex items-center gap-2 rounded-lg border border-primary/25 bg-primary/5 px-3 py-2 text-xs">
+              <Users className="size-3.5 shrink-0 text-primary" />
+              <span className="font-medium text-foreground">
+                {t("statCopiers", { count: providerCopierCount })}
+              </span>
+              {providerLastCopyDaysAgo != null && (
+                <span className="text-muted-foreground">
+                  ·{" "}
+                  {providerLastCopyDaysAgo <= 0
+                    ? t("lastCopyToday")
+                    : t("lastCopyDaysAgo", { days: providerLastCopyDaysAgo })}
+                </span>
+              )}
+            </div>
+          )}
 
           {providerClosedSignals !== undefined && (
             <div className="flex items-center gap-4 rounded-lg border border-border/60 bg-muted/30 px-3 py-2.5">

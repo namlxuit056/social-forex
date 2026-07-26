@@ -37,6 +37,10 @@ type Props = {
 
 const PROFILE_TABS: ProfileTab[] = ["overview", "signals", "track", "mt5", "academy", "followers"];
 
+function daysSince(date: Date): number {
+  return Math.max(0, Math.floor((Date.now() - date.getTime()) / 86_400_000));
+}
+
 function normalizeTab(value?: string): ProfileTab {
   return PROFILE_TABS.includes(value as ProfileTab)
     ? (value as ProfileTab)
@@ -122,6 +126,8 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
     hasMt5Sync,
     signalStats,
     existingCopyTrade,
+    copierCount,
+    lastCopyRow,
     academyCompletedCount,
     closedWins,
     closedTotal,
@@ -178,6 +184,14 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
             },
           })
         : null,
+      prisma.copyTrade.count({
+        where: { providerId: userId, isActive: true },
+      }),
+      prisma.copyTrade.findFirst({
+        where: { providerId: userId, isActive: true },
+        orderBy: { createdAt: "desc" },
+        select: { createdAt: true },
+      }),
       prisma.academyProgress.count({
         where: { userId, completed: true },
       }),
@@ -194,6 +208,8 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
   const providerWinRate =
     closedTotal > 0 ? Math.round((closedWins / closedTotal) * 1000) / 10 : null;
 
+  const lastCopyDaysAgo = lastCopyRow ? daysSince(lastCopyRow.createdAt) : null;
+
   const followerItems = followerRows.map((row) => ({
     id: row.id,
     userId: row.follower.id,
@@ -204,6 +220,7 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
   const heroBadges = [
     t("profileBadgePublicTrader"),
     ...(hasMt5Sync ? [t("mt5ReadOnlyBadge")] : []),
+    ...(copierCount > 0 ? [t("profileBadgeCopiers", { count: copierCount })] : []),
   ];
   const tabs = [
     { value: "overview", label: t("profileTabOverview"), icon: TrendingUp, count: undefined },
@@ -255,6 +272,8 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
                   currentBtcusdLot={existingCopyTrade?.btcusdLot}
                   providerWinRate={providerWinRate}
                   providerClosedSignals={closedTotal}
+                  providerCopierCount={copierCount}
+                  providerLastCopyDaysAgo={lastCopyDaysAgo}
                 />
                 <Link
                   href={`/messages/${userId}`}

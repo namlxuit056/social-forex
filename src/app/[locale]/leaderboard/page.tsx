@@ -1,4 +1,4 @@
-import { ShieldCheck, Trophy } from "lucide-react";
+import { ShieldCheck, Trophy, Users } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { EmptyState } from "@/components/layout/empty-state";
@@ -26,6 +26,10 @@ export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 20;
 
+function daysSince(date: Date): number {
+  return Math.max(0, Math.floor((Date.now() - date.getTime()) / 86_400_000));
+}
+
 function getSince(tf: string): Date | undefined {
   const now = Date.now();
   if (tf === "30d") return new Date(now - 30 * 86400_000);
@@ -44,6 +48,8 @@ type Row = {
   hasMt5: boolean;
   streakSignal: number;
   xp: number;
+  copierCount: number;
+  lastCopyDaysAgo: number | null;
 };
 
 export default async function LeaderboardPage({
@@ -143,6 +149,22 @@ export default async function LeaderboardPage({
     for (const f of follows) followingSet.add(f.followingId);
   }
 
+  // Copier social proof: count + most recent subscription per provider (public data)
+  const copyTradeRows = await prisma.copyTrade.findMany({
+    where: { providerId: { in: userIds }, isActive: true },
+    select: { providerId: true, createdAt: true },
+  });
+  const copierStatsMap = new Map<string, { count: number; lastCreatedAt: Date }>();
+  for (const row of copyTradeRows) {
+    const cur = copierStatsMap.get(row.providerId);
+    if (!cur) {
+      copierStatsMap.set(row.providerId, { count: 1, lastCreatedAt: row.createdAt });
+    } else {
+      cur.count += 1;
+      if (row.createdAt > cur.lastCreatedAt) cur.lastCreatedAt = row.createdAt;
+    }
+  }
+
   // Query profit factor data from TradeJournal
   const journalRows = await prisma.tradeJournal.findMany({
     where: {
@@ -187,6 +209,7 @@ export default async function LeaderboardPage({
           : pfData && pfData.grossWin > 0
             ? null
             : null;
+      const copierStats = copierStatsMap.get(userId);
       return {
         userId,
         name: v.label,
@@ -198,6 +221,8 @@ export default async function LeaderboardPage({
         hasMt5: mt5Set.has(userId),
         streakSignal: streakSignalMap.get(userId) ?? 0,
         xp: xpMap.get(userId) ?? 0,
+        copierCount: copierStats?.count ?? 0,
+        lastCopyDaysAgo: copierStats ? daysSince(copierStats.lastCreatedAt) : null,
       };
     })
     .filter((r) => r.total >= 3);
@@ -319,6 +344,12 @@ export default async function LeaderboardPage({
                       <Link href={`/u/${r.userId}`} className="font-medium text-primary hover:underline">
                         {r.name}
                       </Link>
+                      {r.copierCount > 0 && (
+                        <p className="mt-0.5 flex items-center gap-1 text-[11px] text-muted-foreground">
+                          <Users className="size-3" />
+                          {t("copiersCount", { count: r.copierCount })}
+                        </p>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-primary">{r.wins}</td>
                     <td className="px-4 py-3 text-destructive">{r.losses}</td>
@@ -373,6 +404,8 @@ export default async function LeaderboardPage({
                             currentBtcusdLot={copyTradeMap.get(r.userId)?.btcusdLot}
                             providerWinRate={r.winRate}
                             providerClosedSignals={r.total}
+                            providerCopierCount={r.copierCount}
+                            providerLastCopyDaysAgo={r.lastCopyDaysAgo}
                           />
                         </div>
                       )}
