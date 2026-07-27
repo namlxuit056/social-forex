@@ -11,6 +11,10 @@
     {
       "path": "/api/academy/auto-generate/run",
       "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/mt5/reconcile-signals/run",
+      "schedule": "0 4 * * *"
     }
   ]
 }
