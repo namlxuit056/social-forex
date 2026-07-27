@@ -500,6 +500,36 @@ string RemoveFromList(string list, string id)
    return lhs + rhs;
 }
 
+// known_signal_ids used to live only in RAM, rebuilt on every EA restart from whatever
+// EA-tagged positions/orders happen to still be open. If a position had already been
+// closed independently (broker-side SL/TP hit before the provider got around to marking
+// the signal CLOSED_*) at the moment of restart, that reconstruction would "forget" the
+// signal — then the very next poll would treat it as brand new and open a duplicate
+// trade for an already-finished signal. Persisting to a file keyed by CopyToken survives
+// restarts/reboots and closes that hole.
+string KnownIdsFilePath()
+{
+   return "SocialForex\\known_" + CopyToken + ".txt";
+}
+
+void SaveKnownIds()
+{
+   int handle = FileOpen(KnownIdsFilePath(), FILE_WRITE | FILE_TXT | FILE_ANSI);
+   if(handle == INVALID_HANDLE) return;
+   FileWriteString(handle, known_signal_ids);
+   FileClose(handle);
+}
+
+void LoadKnownIds()
+{
+   int handle = FileOpen(KnownIdsFilePath(), FILE_READ | FILE_TXT | FILE_ANSI);
+   if(handle == INVALID_HANDLE) return;
+   long size = FileSize(handle);
+   if(size > 0)
+      known_signal_ids = FileReadString(handle, (int)size);
+   FileClose(handle);
+}
+
 void ProcessSignals(string response)
 {
    string signalsStr = FindJsonValue(response, "signals");
@@ -580,6 +610,7 @@ void ProcessSignals(string response)
             if(ticket > 0) CancelOrder(ticket);
          }
          known_signal_ids = RemoveFromList(known_signal_ids, signalId);
+         SaveKnownIds();
       }
       else if(!isClosed && isKnown)
       {
@@ -603,7 +634,11 @@ void ProcessSignals(string response)
          else
             opened = OpenMarketTrade(symbol, direction, entry, sl, tp, lot, signalId);
 
-         if(opened) known_signal_ids += signalId + ",";
+         if(opened)
+         {
+            known_signal_ids += signalId + ",";
+            SaveKnownIds();
+         }
       }
    }
 }
@@ -631,7 +666,11 @@ int OnInit()
 {
    EventSetTimer(MathMax(5, PollSeconds));
 
-   // Rebuild known_signal_ids from existing EA-managed positions after restart
+   // Restore persisted dedupe state first (survives EA/terminal/VPS restarts) ...
+   LoadKnownIds();
+
+   // ... then merge in anything found from currently-open EA-managed positions, in case
+   // this is the very first run (no file yet) or the file is out of sync.
    int total = PositionsTotal();
    for(int idx = 0; idx < total; idx++)
    {
@@ -660,6 +699,8 @@ int OnInit()
       if(StringFind(known_signal_ids, sigId + ",") == -1)
          known_signal_ids += sigId + ",";
    }
+
+   SaveKnownIds();
 
    Print("SocialForexCopyTrade initialized. Token=", CopyToken, " tracking=", known_signal_ids);
    return INIT_SUCCEEDED;

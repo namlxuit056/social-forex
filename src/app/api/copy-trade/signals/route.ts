@@ -29,6 +29,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       xauusdLot: true,
       btcusdLot: true,
       providerId: true,
+      createdAt: true,
       follower: { select: { id: true } },
       provider: { select: { id: true } },
     },
@@ -54,12 +55,17 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
   const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
+  // ACTIVE/PENDING signals are only offered from the point the follower actually
+  // subscribed onward. Without this, a signal that's been open for days (provider
+  // just hasn't clicked "close" yet) gets served forever to every poll, and a
+  // follower whose EA loses its in-memory dedupe state (terminal/VPS restart) treats
+  // it as brand new and opens a fresh market trade at a stale, long-gone entry price.
   const signals = await prisma.signal.findMany({
     where: {
       authorId: copyTrade.providerId,
       OR: [
-        { status: "ACTIVE" },
-        { status: "PENDING" },
+        { status: "ACTIVE", createdAt: { gte: copyTrade.createdAt } },
+        { status: "PENDING", createdAt: { gte: copyTrade.createdAt } },
         {
           status: { in: ["CLOSED_WIN", "CLOSED_LOSS", "CANCELLED"] },
           closedAt: { gte: since24h },
