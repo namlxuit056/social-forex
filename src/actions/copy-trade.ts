@@ -112,3 +112,21 @@ export async function unsubscribeCopyTrade(providerId: string): Promise<{ ok?: b
   revalidatePath(`/u/${providerId}`);
   return { ok: true };
 }
+
+const setCopyTradingPausedSchema = z.object({ paused: z.boolean() });
+
+export async function setCopyTradingPaused(paused: boolean): Promise<{ error?: string }> {
+  const session = await auth();
+  if (!session?.user?.id) redirect("/auth/signin");
+
+  const parsed = setCopyTradingPausedSchema.safeParse({ paused });
+  if (!parsed.success) return { error: "invalid_params" };
+
+  await prisma.user.update({
+    where: { id: session.user.id },
+    data: { copyTradingPaused: parsed.data.paused },
+  });
+
+  revalidatePath("/positions");
+  return {};
+}
