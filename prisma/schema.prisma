@@ -118,6 +118,8 @@ model User {
   pushSubscriptions    UserPushSubscription[]
   copyTradesAsFollower CopyTrade[] @relation("CopyTradeFollower")
   copyTradesAsProvider CopyTrade[] @relation("CopyTradeProvider")
+  /// Trader tạm dừng copy-trade — lệnh MT5 mới vẫn tạo Signal nhưng không bắn cho copier/Telegram
+  copyTradingPaused    Boolean     @default(false)
   hostedWebinars       Webinar[]
   webinarRegistrations WebinarRegistration[]
   aiTradeProposals     AiTradeProposal[]
@@ -233,6 +235,9 @@ model Signal {
   takeProfit3   Float?
   tier          SignalTier         @default(FREE)
   status        SignalStatus       @default(ACTIVE)
+  /// Snapshot of author's copyTradingPaused at creation time — never re-evaluated later, so
+  /// toggling copyTradingPaused doesn't retroactively change which past signals are copyable
+  excludedFromCopy Boolean            @default(false)
   notes         String?
   /// Thời điểm đóng lệnh (khi chuyển khỏi ACTIVE)
   closedAt      DateTime?
