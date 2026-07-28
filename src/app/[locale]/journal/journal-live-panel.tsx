@@ -33,6 +33,7 @@ export type Mt5AccountInfo = {
   openPositions: number;
   lastSeenAt: string | null;
   autoCloseBeforeWeekend: boolean;
+  copyTradingPaused: boolean;
 };
 
 interface Props {

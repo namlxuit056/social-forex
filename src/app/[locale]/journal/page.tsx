@@ -100,6 +100,7 @@ export default async function JournalPage({
     prisma.mt5Connection.findFirst({
       where: { userId: session.user.id, revokedAt: null },
       orderBy: { lastSeenAt: "desc" },
+      include: { user: { select: { copyTradingPaused: true } } },
     }),
     activeTab === "weekly"
       ? prisma.aiWeeklyJournalReview.findMany({
@@ -170,6 +171,7 @@ export default async function JournalPage({
         openPositions: mt5Connection.openPositions,
         lastSeenAt: mt5Connection.lastSeenAt?.toISOString() ?? null,
         autoCloseBeforeWeekend: mt5Connection.autoCloseBeforeWeekend,
+        copyTradingPaused: mt5Connection.user.copyTradingPaused,
       }
     : null;
 
