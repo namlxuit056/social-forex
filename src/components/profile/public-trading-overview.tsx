@@ -144,10 +144,8 @@ export async function PublicTradingOverview({
         ) : null}
       </div>
 
-      <PublicPerformanceChart trades={serializedTrades} locale={locale} />
-
       <div className="grid gap-4 sm:grid-cols-2">
-        <Card className="border-border/60 bg-card/55">
+        <Card className="border-border/60 bg-card/55 sm:col-span-2">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-base">
               <RadioTower className="size-4 text-emerald-500" />
@@ -156,7 +154,7 @@ export async function PublicTradingOverview({
           </CardHeader>
           <CardContent className="space-y-3">
             {mt5Connection ? (
-              <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="grid grid-cols-2 gap-2 text-xs sm:max-w-xs">
                 <div className="rounded-md bg-muted/25 px-2 py-1.5">
                   <p className="text-muted-foreground">{t("profileBalance")}</p>
                   <p className="font-mono text-foreground">
@@ -176,30 +174,50 @@ export async function PublicTradingOverview({
                 {t("profileNoLivePositions")}
               </p>
             ) : (
-              <div className="space-y-2">
-                {livePositions.slice(0, 5).map((position) => (
-                  <div key={position.ticket} className="rounded-md border border-border/60 p-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="font-mono text-sm font-semibold text-foreground">
-                        {position.symbol} {position.type}
-                      </div>
-                      <span className={cn("font-mono text-xs", (position.profit ?? 0) >= 0 ? "text-emerald-500" : "text-red-500")}>
-                        {position.profit == null ? "—" : fmtCurrency(position.profit)}
-                      </span>
-                    </div>
-                    <div className="mt-2 grid grid-cols-3 gap-2 text-[11px] text-muted-foreground">
-                      <span>{t("profileLot")}: {position.volume ?? "—"}</span>
-                      <span>{t("profileEntry")}: {position.priceOpen ?? "—"}</span>
-                      <span>{t("profileCurrent")}: {position.priceCurrent ?? "—"}</span>
-                    </div>
-                  </div>
-                ))}
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-120 text-xs">
+                  <thead>
+                    <tr className="text-muted-foreground">
+                      <th className="px-2 pb-2 text-left font-medium">{t("profileSymbol")}</th>
+                      <th className="px-2 pb-2 text-left font-medium">{t("profileDirection")}</th>
+                      <th className="px-2 pb-2 text-right font-medium">{t("profileLot")}</th>
+                      <th className="px-2 pb-2 text-right font-medium">{t("profileEntry")}</th>
+                      <th className="px-2 pb-2 text-right font-medium">{t("profileCurrent")}</th>
+                      <th className="px-2 pb-2 text-right font-medium">{t("profilePnl")}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {livePositions.slice(0, 5).map((position) => {
+                      const isProfit = (position.profit ?? 0) >= 0;
+                      return (
+                        <tr
+                          key={position.ticket}
+                          className={cn("border-t border-border/60", isProfit ? "bg-emerald-500/5" : "bg-red-500/5")}
+                        >
+                          <td className="px-2 py-2 font-mono font-semibold text-foreground">{position.symbol}</td>
+                          <td className="px-2 py-2 font-mono text-muted-foreground">{position.type}</td>
+                          <td className="px-2 py-2 text-right font-mono text-muted-foreground">{position.volume ?? "—"}</td>
+                          <td className="px-2 py-2 text-right font-mono text-muted-foreground">{position.priceOpen ?? "—"}</td>
+                          <td className="px-2 py-2 text-right font-mono text-muted-foreground">{position.priceCurrent ?? "—"}</td>
+                          <td
+                            className={cn(
+                              "px-2 py-2 text-right font-mono font-semibold",
+                              isProfit ? "text-emerald-500" : "text-red-500",
+                            )}
+                          >
+                            {position.profit == null ? "—" : fmtCurrency(position.profit)}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
             )}
           </CardContent>
         </Card>
 
-        <Card className="border-border/60 bg-card/55">
+        <Card className="border-border/60 bg-card/55 sm:col-span-2">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-base">
               <CircleDollarSign className="size-4 text-chart-4" />
@@ -225,6 +243,8 @@ export async function PublicTradingOverview({
           </CardContent>
         </Card>
       </div>
+
+      <PublicPerformanceChart trades={serializedTrades} locale={locale} />
 
       <Card className="border-border/60 bg-card/55">
         <CardHeader className="pb-2">
