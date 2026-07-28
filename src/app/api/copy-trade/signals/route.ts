@@ -63,6 +63,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   const signals = await prisma.signal.findMany({
     where: {
       authorId: copyTrade.providerId,
+      excludedFromCopy: false,
       OR: [
         { status: "ACTIVE", createdAt: { gte: copyTrade.createdAt } },
         { status: "PENDING", createdAt: { gte: copyTrade.createdAt } },
