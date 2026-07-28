@@ -111,7 +111,14 @@ export async function POST(request: NextRequest) {
   const tokenHash = hashMt5BridgeToken(token);
   const connection = await prisma.mt5Connection.findUnique({
     where: { tokenHash },
-    select: { id: true, userId: true, revokedAt: true, lastTradeHash: true, lastSnapshotAt: true },
+    select: {
+      id: true,
+      userId: true,
+      revokedAt: true,
+      lastTradeHash: true,
+      lastSnapshotAt: true,
+      user: { select: { copyTradingPaused: true } },
+    },
   });
 
   if (!connection || connection.revokedAt) {
@@ -242,6 +249,7 @@ export async function POST(request: NextRequest) {
           tier: "FREE",
           status: "PENDING",
           notes: noteForMt5("pending", order.ticket, order.volume),
+          excludedFromCopy: connection.user.copyTradingPaused,
         mt5Link: {
           create: {
             connectionId: connection.id,
@@ -254,16 +262,18 @@ export async function POST(request: NextRequest) {
         },
         select: { id: true },
       });
-      newMt5Signals.push({
-        id: signal.id,
-        symbol: order.symbol.toUpperCase(),
-        direction: directionFromMt5Type(order.type),
-        entry: order.priceOpen,
-        stopLoss: order.stopLoss,
-        takeProfit: order.takeProfit,
-        tier: "FREE",
-        status: "PENDING",
-      });
+      if (!connection.user.copyTradingPaused) {
+        newMt5Signals.push({
+          id: signal.id,
+          symbol: order.symbol.toUpperCase(),
+          direction: directionFromMt5Type(order.type),
+          entry: order.priceOpen,
+          stopLoss: order.stopLoss,
+          takeProfit: order.takeProfit,
+          tier: "FREE",
+          status: "PENDING",
+        });
+      }
       touchedSignalIds.push(signal.id);
     }
 
@@ -350,6 +360,7 @@ export async function POST(request: NextRequest) {
           tier: "FREE",
           status: "ACTIVE",
           notes: noteForMt5("active", mt5Ticket, position.volume),
+          excludedFromCopy: connection.user.copyTradingPaused,
           mt5Link: {
             create: {
               connectionId: connection.id,
@@ -363,16 +374,18 @@ export async function POST(request: NextRequest) {
         },
         select: { id: true },
       });
-      newMt5Signals.push({
-        id: signal.id,
-        symbol: position.symbol.toUpperCase(),
-        direction: directionFromMt5Type(position.type),
-        entry: position.priceOpen,
-        stopLoss: position.stopLoss,
-        takeProfit: position.takeProfit,
-        tier: "FREE",
-        status: "ACTIVE",
-      });
+      if (!connection.user.copyTradingPaused) {
+        newMt5Signals.push({
+          id: signal.id,
+          symbol: position.symbol.toUpperCase(),
+          direction: directionFromMt5Type(position.type),
+          entry: position.priceOpen,
+          stopLoss: position.stopLoss,
+          takeProfit: position.takeProfit,
+          tier: "FREE",
+          status: "ACTIVE",
+        });
+      }
       touchedSignalIds.push(signal.id);
     }
 
