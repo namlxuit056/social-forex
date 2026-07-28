@@ -12,6 +12,7 @@ import { TraderPerformanceCard } from "@/components/profile/trader-performance-c
 import { PinnedSignalsSection } from "@/components/profile/pinned-signals-section";
 import { Mt5SyncedSignalsSection } from "@/components/profile/mt5-synced-signals-section";
 import { PublicTradingOverview } from "@/components/profile/public-trading-overview";
+import { PublicLivePositions } from "@/components/profile/public-live-positions";
 import { ProfileTradingSummary } from "@/components/profile/profile-trading-summary";
 import { ProviderEquitySection } from "@/components/profile/provider-equity-section";
 import { TrackRecordSection } from "@/components/profile/track-record-section";
@@ -371,6 +372,7 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
 
       {activeTab === "overview" ? (
         <div className="space-y-6">
+          <PublicLivePositions profileUserId={userId} locale={locale} t={t} />
           <div className="grid gap-6 xl:grid-cols-[0.38fr_0.62fr]">
             <TraderPerformanceCard
               userId={userId}
