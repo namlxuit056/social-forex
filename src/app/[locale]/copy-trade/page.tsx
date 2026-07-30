@@ -164,14 +164,7 @@ export default async function CopyTradePage({
             <Download className="size-4" />
             {t("downloadEX5")}
           </a>
-          <a
-            href="/downloads/SocialForexCopyTrade.mq5"
-            download="SocialForexCopyTrade.mq5"
-            className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-muted"
-          >
-            <Download className="size-4" />
-            {t("downloadMQ5")}
-          </a>
+
           <Link
             href="/leaderboard"
             className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-muted"
