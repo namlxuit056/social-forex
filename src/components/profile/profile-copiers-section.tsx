@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { cn } from "@/lib/utils";
 import { getInitialsFromLabel, getPublicDisplayLabel } from "@/lib/profile/display";
 import { CopierBlockButton } from "@/components/copy-trade/copier-block-button";
+import { CopierPositionsPanel } from "./copier-positions-panel";
 import { parseLivePositions } from "./public-live-positions";
 
 const MAX_COPIERS = 100;
@@ -15,30 +16,6 @@ function modeSummary(
   if (copier.mode === "PERCENT") return `${tCopy("modePercent")}: ${copier.riskPercent ?? "—"}%`;
   if (copier.mode === "RATIO") return `${tCopy("modeRatio")}: ${copier.lotPercent ?? "—"}%`;
   return `${tCopy("modeLot")}: ${copier.fixedLot ?? "—"}`;
-}
-
-function directionChipClass(type: string, variant: "solid" | "outline" = "solid"): string {
-  const upper = type.toUpperCase();
-  const isBuy = upper.startsWith("BUY");
-  const isSell = upper.startsWith("SELL");
-  if (variant === "outline") {
-    if (isBuy) return "border border-dashed border-emerald-500/40 text-emerald-600 dark:text-emerald-400";
-    if (isSell) return "border border-dashed border-red-500/40 text-red-600 dark:text-red-400";
-    return "border border-dashed border-border text-muted-foreground";
-  }
-  if (isBuy) return "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400";
-  if (isSell) return "bg-red-500/10 text-red-600 dark:text-red-400";
-  return "bg-muted/40 text-muted-foreground";
-}
-
-function formatChipLabel(
-  t: (key: string) => string,
-  position: { symbol: string; type: string; volume: number | null; stopLoss: number | null; takeProfit: number | null },
-): string {
-  const parts = [`${position.symbol} ${position.type} ${position.volume ?? "—"}`];
-  if (position.stopLoss != null) parts.push(`${t("mt5Sl")} ${position.stopLoss}`);
-  if (position.takeProfit != null) parts.push(`${t("mt5Tp")} ${position.takeProfit}`);
-  return parts.join(" · ");
 }
 
 /**
@@ -211,41 +188,7 @@ export async function ProfileCopiersSection({
               <p className="text-xs text-muted-foreground">{t("profileCopierNoBridge")}</p>
             )}
 
-            {conn ? (
-              positions.length > 0 ? (
-                <div className="flex flex-wrap gap-1.5">
-                  {positions.map((position) => (
-                    <span
-                      key={position.ticket}
-                      className={cn("rounded-full px-2 py-0.5 font-mono text-xs", directionChipClass(position.type))}
-                    >
-                      {formatChipLabel(t, position)}
-                    </span>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-xs text-muted-foreground">{t("profileNoLivePositions")}</p>
-              )
-            ) : null}
-
-            {conn && pendingOrders.length > 0 ? (
-              <div className="space-y-1">
-                <p className="text-[11px] font-medium text-muted-foreground">{t("mt5KindPending")}</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {pendingOrders.map((order) => (
-                    <span
-                      key={order.ticket}
-                      className={cn(
-                        "rounded-full px-2 py-0.5 font-mono text-xs",
-                        directionChipClass(order.type, "outline"),
-                      )}
-                    >
-                      {formatChipLabel(t, order)}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ) : null}
+            {conn ? <CopierPositionsPanel positions={positions} pendingOrders={pendingOrders} /> : null}
 
             {conn?.lastSeenAt ? (
               <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">

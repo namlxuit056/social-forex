@@ -1158,6 +1158,7 @@
     "profileEquity": "Equity",
     "profileFloatingPnl": "Lãi/lỗ nổi",
     "profileNoLivePositions": "Không có lệnh realtime đang chạy.",
+    "profileNoPendingOrders": "Không có lệnh chờ nào.",
     "profileLot": "Lot",
     "profileEntry": "Entry",
     "profileCurrent": "Current",

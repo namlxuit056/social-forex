@@ -1158,6 +1158,7 @@
     "profileEquity": "Equity",
     "profileFloatingPnl": "Floating P/L",
     "profileNoLivePositions": "No live positions running.",
+    "profileNoPendingOrders": "No pending orders.",
     "profileLot": "Lot",
     "profileEntry": "Entry",
     "profileCurrent": "Current",
