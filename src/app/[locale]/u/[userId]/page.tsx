@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Activity, Award, GraduationCap, History, RadioTower, Signal, TrendingUp, Users } from "lucide-react";
+import { Activity, Award, Copy, GraduationCap, History, RadioTower, Signal, TrendingUp, Users } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
 import { ProfileAcademySection } from "@/components/profile/profile-academy-section";
 import { ProfileFollowersSection } from "@/components/profile/profile-followers-section";
+import { ProfileCopiersSection } from "@/components/profile/profile-copiers-section";
 import { PublicProfileHero } from "@/components/profile/public-profile-hero";
 import { auth } from "@/auth";
 import { TraderPerformanceCard } from "@/components/profile/trader-performance-card";
@@ -30,13 +31,21 @@ import { pageCtaItems } from "@/lib/page-cta-i18n";
 import { buildSignalsListHref } from "@/lib/signals/signal-list-query";
 import { cn } from "@/lib/utils";
 
-type ProfileTab = "overview" | "signals" | "track" | "mt5" | "academy" | "followers";
+type ProfileTab = "overview" | "signals" | "track" | "mt5" | "academy" | "followers" | "copiers";
 type Props = {
   params: Promise<{ locale: string; userId: string }>;
   searchParams?: Promise<{ tab?: string }>;
 };
 
-const PROFILE_TABS: ProfileTab[] = ["overview", "signals", "track", "mt5", "academy", "followers"];
+const PROFILE_TABS: ProfileTab[] = [
+  "overview",
+  "signals",
+  "track",
+  "mt5",
+  "academy",
+  "followers",
+  "copiers",
+];
 
 function daysSince(date: Date): number {
   return Math.max(0, Math.floor((Date.now() - date.getTime()) / 86_400_000));
@@ -231,6 +240,9 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
     { value: "mt5", label: t("profileTabMt5"), icon: RadioTower, count: undefined },
     { value: "academy", label: t("profileTabAcademy"), icon: GraduationCap, count: academyCompletedCount },
     { value: "followers", label: t("profileTabFollowers"), icon: Users, count: followerCount },
+    ...(isSelf
+      ? [{ value: "copiers" as const, label: t("profileTabCopiers"), icon: Copy, count: copierCount }]
+      : []),
   ] satisfies Array<{ value: ProfileTab; label: string; icon: typeof Activity; count: number | undefined }>;
 
   return (
@@ -418,6 +430,10 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
         <section className="rounded-lg border border-dashed border-border/70 p-6 text-center text-sm text-muted-foreground">
           {t("profileNoFollowers")}
         </section>
+      ) : null}
+
+      {activeTab === "copiers" && isSelf ? (
+        <ProfileCopiersSection profileUserId={userId} viewerUserId={session?.user?.id} locale={locale} />
       ) : null}
 
       <PageCtaRow heading={tCommon("ctaDiscovery")} items={ctaRow} />

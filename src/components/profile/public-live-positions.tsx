@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 type Translator = (key: string) => string;
 
-type LivePosition = {
+export type LivePosition = {
   ticket: string;
   symbol: string;
   type: string;
@@ -27,7 +27,7 @@ function numberOrNull(value: unknown) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-function parseLivePositions(value: unknown): LivePosition[] {
+export function parseLivePositions(value: unknown): LivePosition[] {
   if (!Array.isArray(value)) return [];
 
   return value.flatMap((position) => {
