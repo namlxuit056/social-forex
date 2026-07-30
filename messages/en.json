@@ -1156,6 +1156,7 @@
     "profileLiveTitle": "Running positions",
     "profileBalance": "Balance",
     "profileEquity": "Equity",
+    "profileFloatingPnl": "Floating P/L",
     "profileNoLivePositions": "No live positions running.",
     "profileLot": "Lot",
     "profileEntry": "Entry",

@@ -1156,6 +1156,7 @@
     "profileLiveTitle": "Lệnh đang chạy",
     "profileBalance": "Balance",
     "profileEquity": "Equity",
+    "profileFloatingPnl": "Lãi/lỗ nổi",
     "profileNoLivePositions": "Không có lệnh realtime đang chạy.",
     "profileLot": "Lot",
     "profileEntry": "Entry",

@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { prisma } from "@/lib/prisma";
+import { cn } from "@/lib/utils";
 import { getInitialsFromLabel, getPublicDisplayLabel } from "@/lib/profile/display";
 import { CopierBlockButton } from "@/components/copy-trade/copier-block-button";
 import { parseLivePositions } from "./public-live-positions";
@@ -89,6 +90,10 @@ export async function ProfileCopiersSection({
       {copiers.map((copier) => {
         const conn = copier.follower.mt5Connections[0];
         const positions = conn ? parseLivePositions(conn.lastPositions) : [];
+        const floatingPnl =
+          conn?.balance != null && conn?.equity != null ? conn.equity - conn.balance : null;
+        const floatingPnlPercent =
+          floatingPnl != null && conn?.balance ? (floatingPnl / conn.balance) * 100 : null;
         const label = getPublicDisplayLabel(copier.follower.name, copier.follower.email);
         const initials = getInitialsFromLabel(label);
 
@@ -134,7 +139,7 @@ export async function ProfileCopiersSection({
             </div>
 
             {conn ? (
-              <div className="grid grid-cols-2 gap-2 text-xs sm:max-w-xs">
+              <div className="grid grid-cols-3 gap-2 text-xs">
                 <div className="rounded-md bg-muted/25 px-2 py-1.5">
                   <p className="text-muted-foreground">{t("profileBalance")}</p>
                   <p className="font-mono text-foreground">
@@ -147,6 +152,34 @@ export async function ProfileCopiersSection({
                     {conn.equity == null ? "—" : `${conn.equity.toFixed(2)} ${conn.accountCurrency ?? ""}`}
                   </p>
                 </div>
+                <div
+                  className={cn(
+                    "rounded-md px-2 py-1.5",
+                    floatingPnl == null
+                      ? "bg-muted/25"
+                      : floatingPnl >= 0
+                        ? "bg-emerald-500/10"
+                        : "bg-red-500/10",
+                  )}
+                >
+                  <p className={cn("text-muted-foreground", floatingPnl == null ? "" : floatingPnl >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400")}>
+                    {t("profileFloatingPnl")}
+                  </p>
+                  <p
+                    className={cn(
+                      "font-mono",
+                      floatingPnl == null
+                        ? "text-foreground"
+                        : floatingPnl >= 0
+                          ? "text-emerald-600 dark:text-emerald-400"
+                          : "text-red-600 dark:text-red-400",
+                    )}
+                  >
+                    {floatingPnl == null
+                      ? "—"
+                      : `${floatingPnl >= 0 ? "+" : ""}${floatingPnl.toFixed(2)}${floatingPnlPercent == null ? "" : ` (${floatingPnl >= 0 ? "+" : ""}${floatingPnlPercent.toFixed(1)}%)`}`}
+                  </p>
+                </div>
               </div>
             ) : (
               <p className="text-xs text-muted-foreground">{t("profileCopierNoBridge")}</p>
@@ -155,14 +188,25 @@ export async function ProfileCopiersSection({
             {conn ? (
               positions.length > 0 ? (
                 <div className="flex flex-wrap gap-1.5">
-                  {positions.map((position) => (
-                    <span
-                      key={position.ticket}
-                      className="rounded-full bg-muted/40 px-2 py-0.5 font-mono text-xs text-muted-foreground"
-                    >
-                      {position.symbol} {position.type} {position.volume ?? "—"}
-                    </span>
-                  ))}
+                  {positions.map((position) => {
+                    const isBuy = position.type.toUpperCase().startsWith("BUY");
+                    const isSell = position.type.toUpperCase().startsWith("SELL");
+                    return (
+                      <span
+                        key={position.ticket}
+                        className={cn(
+                          "rounded-full px-2 py-0.5 font-mono text-xs",
+                          isBuy
+                            ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                            : isSell
+                              ? "bg-red-500/10 text-red-600 dark:text-red-400"
+                              : "bg-muted/40 text-muted-foreground",
+                        )}
+                      >
+                        {position.symbol} {position.type} {position.volume ?? "—"}
+                      </span>
+                    );
+                  })}
                 </div>
               ) : (
                 <p className="text-xs text-muted-foreground">{t("profileNoLivePositions")}</p>
@@ -170,7 +214,8 @@ export async function ProfileCopiersSection({
             ) : null}
 
             {conn?.lastSeenAt ? (
-              <p className="text-[11px] text-muted-foreground">
+              <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                <span className="inline-block size-1.5 rounded-full bg-emerald-500" />
                 {t("liveLastSeen")}{" "}
                 {conn.lastSeenAt.toLocaleString(locale === "vi" ? "vi-VN" : "en-US", {
                   month: "numeric",
