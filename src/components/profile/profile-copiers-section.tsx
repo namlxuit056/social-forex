@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { prisma } from "@/lib/prisma";
 import { getInitialsFromLabel, getPublicDisplayLabel } from "@/lib/profile/display";
+import { CopierBlockButton } from "@/components/copy-trade/copier-block-button";
 import { parseLivePositions } from "./public-live-positions";
 
 const MAX_COPIERS = 100;
@@ -44,6 +45,7 @@ export async function ProfileCopiersSection({
         fixedLot: true,
         riskPercent: true,
         lotPercent: true,
+        blockedByProvider: true,
         follower: {
           select: {
             id: true,
@@ -118,9 +120,17 @@ export async function ProfileCopiersSection({
                 </span>
                 <span className="truncate">{label}</span>
               </Link>
-              <span className="rounded-full bg-muted/40 px-2 py-0.5 text-xs text-muted-foreground">
-                {modeSummary(tCopy, copier)}
-              </span>
+              <div className="flex flex-wrap items-center gap-2">
+                {copier.blockedByProvider ? (
+                  <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">
+                    {tCopy("blockedBadge")}
+                  </span>
+                ) : null}
+                <span className="rounded-full bg-muted/40 px-2 py-0.5 text-xs text-muted-foreground">
+                  {modeSummary(tCopy, copier)}
+                </span>
+                <CopierBlockButton copyTradeId={copier.id} initialBlocked={copier.blockedByProvider} />
+              </div>
             </div>
 
             {conn ? (

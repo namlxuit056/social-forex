@@ -22,6 +22,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     select: {
       id: true,
       isActive: true,
+      blockedByProvider: true,
       mode: true,
       fixedLot: true,
       riskPercent: true,
@@ -38,6 +39,23 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
   if (!copyTrade || !copyTrade.isActive) {
     return NextResponse.json({ error: "Invalid or inactive subscription" }, { status: 404 });
+  }
+
+  // Provider blocked this specific follower — keep the subscription (token, sizing
+  // config) intact so unblocking resumes copying without a resubscribe, just serve
+  // no signals in the meantime.
+  if (copyTrade.blockedByProvider) {
+    return NextResponse.json({
+      subscriptionId: copyTrade.id,
+      mode: copyTrade.mode,
+      fixedLot: copyTrade.fixedLot,
+      riskPercent: copyTrade.riskPercent,
+      lotPercent: copyTrade.lotPercent,
+      maxLots: copyTrade.maxLots,
+      xauusdLot: copyTrade.xauusdLot,
+      btcusdLot: copyTrade.btcusdLot,
+      signals: [],
+    });
   }
 
   // Prevent infinite loop when bridge and copy trade run on the same account

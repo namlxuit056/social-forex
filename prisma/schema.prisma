@@ -921,6 +921,11 @@ model CopyTrade {
   xauusdLot    Float?
   btcusdLot    Float?
   isActive     Boolean  @default(true)
+  // Provider-side block: distinct from `isActive` (which the follower controls).
+  // While true, the follower's EA gets no new signals from this provider, but the
+  // subscription (token, mode, lot settings) is preserved so unblocking resumes
+  // copying without the follower having to resubscribe.
+  blockedByProvider Boolean @default(false)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

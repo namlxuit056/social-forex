@@ -120,6 +120,38 @@ export async function unsubscribeCopyTrade(providerId: string): Promise<{ ok?: b
   return { ok: true };
 }
 
+const setCopierBlockedSchema = z.object({ copyTradeId: z.string().min(1), blocked: z.boolean() });
+
+export async function setCopierBlocked(
+  copyTradeId: string,
+  blocked: boolean,
+): Promise<{ error?: string; ok?: boolean }> {
+  const session = await auth();
+  if (!session?.user?.id) redirect("/auth/signin");
+
+  const parsed = setCopierBlockedSchema.safeParse({ copyTradeId, blocked });
+  if (!parsed.success) return { error: "invalid_params" };
+
+  const { ok } = rateLimit(`copy-trade-block:${session.user.id}`, 30, 60_000);
+  if (!ok) return { error: "rate_limited" };
+
+  const copyTrade = await prisma.copyTrade.findUnique({
+    where: { id: parsed.data.copyTradeId },
+    select: { providerId: true },
+  });
+  if (!copyTrade || copyTrade.providerId !== session.user.id) {
+    return { error: "not_found" };
+  }
+
+  await prisma.copyTrade.update({
+    where: { id: parsed.data.copyTradeId },
+    data: { blockedByProvider: parsed.data.blocked },
+  });
+
+  revalidatePath(`/u/${session.user.id}`);
+  return { ok: true };
+}
+
 const setCopyTradingPausedSchema = z.object({ paused: z.boolean() });
 
 export async function setCopyTradingPaused(paused: boolean): Promise<{ error?: string }> {
