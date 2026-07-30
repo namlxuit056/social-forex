@@ -11,9 +11,10 @@ import { generateReferralCode } from "@/lib/referral";
 
 const copyTradeSchema = z.object({
   providerId: z.string().min(1),
-  mode: z.enum(["LOT", "PERCENT"]),
+  mode: z.enum(["LOT", "PERCENT", "RATIO"]),
   fixedLot: z.coerce.number().positive().optional(),
   riskPercent: z.coerce.number().min(0.1).max(10).optional(),
+  lotPercent: z.coerce.number().min(1).max(500).optional(),
   xauusdLot: z.coerce.number().positive().optional(),
   btcusdLot: z.coerce.number().positive().optional(),
 });
@@ -31,6 +32,7 @@ export async function subscribeCopyTrade(
     mode: formData.get("mode"),
     fixedLot: formData.get("fixedLot") ?? undefined,
     riskPercent: formData.get("riskPercent") ?? undefined,
+    lotPercent: formData.get("lotPercent") ?? undefined,
     // Empty string means "clear the override", not "keep the current value" — map it
     // to undefined so a blank field results in null (fall back to fixedLot).
     xauusdLot: formData.get("xauusdLot") || undefined,
@@ -39,7 +41,7 @@ export async function subscribeCopyTrade(
 
   if (!parsed.success) return { error: t("invalidData") };
 
-  const { providerId, mode, fixedLot, riskPercent, xauusdLot, btcusdLot } = parsed.data;
+  const { providerId, mode, fixedLot, riskPercent, lotPercent, xauusdLot, btcusdLot } = parsed.data;
   const followerId = session.user.id;
 
   if (providerId === followerId) {
@@ -61,6 +63,9 @@ export async function subscribeCopyTrade(
   if (mode === "PERCENT" && (!riskPercent || riskPercent <= 0 || riskPercent > 10)) {
     return { error: "Risk percent must be between 0.1% and 10%" };
   }
+  if (mode === "RATIO" && (!lotPercent || lotPercent <= 0 || lotPercent > 500)) {
+    return { error: "Lot percent must be between 1% and 500%" };
+  }
 
   const existing = await prisma.copyTrade.findUnique({
     where: { followerId_providerId: { followerId, providerId } },
@@ -73,6 +78,7 @@ export async function subscribeCopyTrade(
         mode,
         fixedLot,
         riskPercent,
+        lotPercent,
         xauusdLot: xauusdLot ?? null,
         btcusdLot: btcusdLot ?? null,
         isActive: true,
@@ -92,6 +98,7 @@ export async function subscribeCopyTrade(
       mode,
       fixedLot,
       riskPercent,
+      lotPercent,
       xauusdLot,
       btcusdLot,
     },

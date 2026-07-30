@@ -54,6 +54,7 @@ export default async function CopyTradePage({
         t("step2Detail2"),
         t("step2Detail3"),
         t("step2Detail4"),
+        t("step2Detail6"),
         t("step2Detail5"),
       ],
     },

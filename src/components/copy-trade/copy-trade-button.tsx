@@ -21,9 +21,10 @@ type Props = {
   providerName: string;
   isSubscribed: boolean;
   existingToken?: string | null;
-  currentMode?: "LOT" | "PERCENT" | null;
+  currentMode?: "LOT" | "PERCENT" | "RATIO" | null;
   currentFixedLot?: number | null;
   currentRiskPercent?: number | null;
+  currentLotPercent?: number | null;
   currentXauusdLot?: number | null;
   currentBtcusdLot?: number | null;
   /** Win rate % (1 chữ số thập phân) từ signal đã đóng; null = chưa đủ dữ liệu */
@@ -44,6 +45,7 @@ export function CopyTradeButton({
   currentMode,
   currentFixedLot,
   currentRiskPercent,
+  currentLotPercent,
   currentXauusdLot,
   currentBtcusdLot,
   providerWinRate,
@@ -53,12 +55,15 @@ export function CopyTradeButton({
 }: Props) {
   const t = useTranslations("copyTrade");
   const [open, setOpen] = useState(false);
-  const [mode, setMode] = useState<"LOT" | "PERCENT">(currentMode ?? "LOT");
+  const [mode, setMode] = useState<"LOT" | "PERCENT" | "RATIO">(currentMode ?? "LOT");
   const [fixedLot, setFixedLot] = useState(
     currentFixedLot ? String(currentFixedLot) : "0.01",
   );
   const [riskPercent, setRiskPercent] = useState(
     currentRiskPercent ? String(currentRiskPercent) : "1",
+  );
+  const [lotPercent, setLotPercent] = useState(
+    currentLotPercent ? String(currentLotPercent) : "50",
   );
   const [xauusdLot, setXauusdLot] = useState(currentXauusdLot ? String(currentXauusdLot) : "");
   const [btcusdLot, setBtcusdLot] = useState(currentBtcusdLot ? String(currentBtcusdLot) : "");
@@ -81,6 +86,7 @@ export function CopyTradeButton({
       formData.set("btcusdLot", btcusdLot);
     }
     if (mode === "PERCENT") formData.set("riskPercent", riskPercent);
+    if (mode === "RATIO") formData.set("lotPercent", lotPercent);
 
     const result = await subscribeCopyTrade(null, formData);
     setLoading(false);
@@ -207,6 +213,14 @@ export function CopyTradeButton({
             >
               {t("modePercent")}
             </Button>
+            <Button
+              variant={mode === "RATIO" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setMode("RATIO")}
+              className="flex-1"
+            >
+              {t("modeRatio")}
+            </Button>
           </div>
 
           {mode === "LOT" ? (
@@ -252,7 +266,7 @@ export function CopyTradeButton({
                 </div>
               </div>
             </div>
-          ) : (
+          ) : mode === "PERCENT" ? (
             <div>
               <Label>{t("riskPercent")}</Label>
               <Input
@@ -265,6 +279,20 @@ export function CopyTradeButton({
                 className="mt-1.5 font-mono"
               />
               <p className="mt-1 text-xs text-muted-foreground">{t("percentHint")}</p>
+            </div>
+          ) : (
+            <div>
+              <Label>{t("lotPercentLabel")}</Label>
+              <Input
+                type="number"
+                step="1"
+                min="1"
+                max="500"
+                value={lotPercent}
+                onChange={(e) => setLotPercent(e.target.value)}
+                className="mt-1.5 font-mono"
+              />
+              <p className="mt-1 text-xs text-muted-foreground">{t("lotPercentHint")}</p>
             </div>
           )}
 

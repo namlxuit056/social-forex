@@ -180,6 +180,7 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
               mode: true,
               fixedLot: true,
               riskPercent: true,
+              lotPercent: true,
               xauusdLot: true,
               btcusdLot: true,
             },
@@ -269,6 +270,7 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
                   currentMode={existingCopyTrade?.mode}
                   currentFixedLot={existingCopyTrade?.fixedLot}
                   currentRiskPercent={existingCopyTrade?.riskPercent}
+                  currentLotPercent={existingCopyTrade?.lotPercent}
                   currentXauusdLot={existingCopyTrade?.xauusdLot}
                   currentBtcusdLot={existingCopyTrade?.btcusdLot}
                   providerWinRate={providerWinRate}

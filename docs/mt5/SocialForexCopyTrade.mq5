@@ -161,6 +161,27 @@ double CalcLotSize(string symbol, double balance, double riskPercent, double ent
    return NormalizeDouble(lot, 2);
 }
 
+// RATIO mode: follower's lot is a fixed % of the provider's own lot size on that
+// signal (e.g. lotPercent=50 means "always trade half of what they traded"). Falls
+// back to 0.01 if the provider's lot wasn't captured (older signals, manual entries).
+double CalcRatioLot(string symbol, double providerLot, double lotPercent)
+{
+   if(providerLot <= 0 || lotPercent <= 0)
+      return 0.01;
+
+   double lot     = providerLot * lotPercent / 100.0;
+   double minLot  = SymbolInfoDouble(symbol, SYMBOL_VOLUME_MIN);
+   double maxLot  = SymbolInfoDouble(symbol, SYMBOL_VOLUME_MAX);
+   double stepLot = SymbolInfoDouble(symbol, SYMBOL_VOLUME_STEP);
+   if(stepLot <= 0) stepLot = 0.01;
+
+   lot = MathFloor(lot / stepLot) * stepLot;
+   lot = MathMax(lot, minLot);
+   lot = MathMin(lot, maxLot);
+
+   return NormalizeDouble(lot, 2);
+}
+
 // Gold/crypto move in far bigger price increments per lot than FX pairs, so a single
 // fixedLot picked for EURUSD is rarely a safe size for XAUUSD/BTCUSD. Falls back to
 // fixedLot when no override is set for the symbol (matches broker suffixes like
@@ -538,6 +559,7 @@ void ProcessSignals(string response)
    string mode        = FindJsonValue(response, "mode");
    double fixedLot    = StringToDouble(FindJsonValue(response, "fixedLot"));
    double riskPercent = StringToDouble(FindJsonValue(response, "riskPercent"));
+   double lotPercent  = StringToDouble(FindJsonValue(response, "lotPercent"));
    double maxLots     = StringToDouble(FindJsonValue(response, "maxLots"));
    double xauusdLot   = StringToDouble(FindJsonValue(response, "xauusdLot"));
    double btcusdLot   = StringToDouble(FindJsonValue(response, "btcusdLot"));
@@ -587,6 +609,7 @@ void ProcessSignals(string response)
       double entry     = StringToDouble(FindJsonValue(signalObj, "entry"));
       double sl        = StringToDouble(FindJsonValue(signalObj, "stopLoss"));
       double tp        = StringToDouble(FindJsonValue(signalObj, "takeProfit"));
+      double providerLot = StringToDouble(FindJsonValue(signalObj, "lotSize"));
       string status    = FindJsonValue(signalObj, "status");
 
       if(signalId == "" || symbol == "") continue;
@@ -626,6 +649,7 @@ void ProcessSignals(string response)
       else if(!isClosed && !isKnown && direction != "")
       {
          if(mode == "PERCENT") lot = CalcLotSize(symbol, balance, riskPercent, entry, sl);
+         else if(mode == "RATIO") lot = CalcRatioLot(symbol, providerLot, lotPercent);
          lot = MathMin(lot, maxLots);
          if(lot <= 0) lot = 0.01;
 

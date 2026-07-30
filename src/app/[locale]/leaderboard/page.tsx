@@ -110,9 +110,10 @@ export default async function LeaderboardPage({
     string,
     {
       token: string;
-      mode: "LOT" | "PERCENT";
+      mode: "LOT" | "PERCENT" | "RATIO";
       fixedLot: number | null;
       riskPercent: number | null;
+      lotPercent: number | null;
       xauusdLot: number | null;
       btcusdLot: number | null;
     }
@@ -128,6 +129,7 @@ export default async function LeaderboardPage({
           mode: true,
           fixedLot: true,
           riskPercent: true,
+          lotPercent: true,
           xauusdLot: true,
           btcusdLot: true,
         },
@@ -143,6 +145,7 @@ export default async function LeaderboardPage({
         mode: ct.mode,
         fixedLot: ct.fixedLot,
         riskPercent: ct.riskPercent,
+        lotPercent: ct.lotPercent,
         xauusdLot: ct.xauusdLot,
         btcusdLot: ct.btcusdLot,
       });
@@ -400,6 +403,7 @@ export default async function LeaderboardPage({
                             currentMode={copyTradeMap.get(r.userId)?.mode}
                             currentFixedLot={copyTradeMap.get(r.userId)?.fixedLot}
                             currentRiskPercent={copyTradeMap.get(r.userId)?.riskPercent}
+                            currentLotPercent={copyTradeMap.get(r.userId)?.lotPercent}
                             currentXauusdLot={copyTradeMap.get(r.userId)?.xauusdLot}
                             currentBtcusdLot={copyTradeMap.get(r.userId)?.btcusdLot}
                             providerWinRate={r.winRate}
