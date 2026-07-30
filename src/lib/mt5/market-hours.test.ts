@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { isWithinWeekendAutoCloseWindow, getAutoCloseWeekKey } from "./market-hours";
+import {
+  isWithinWeekendAutoCloseWindow,
+  getAutoCloseWeekKey,
+  isWithinEndOfDayAutoCloseWindow,
+  getAutoCloseDayKey,
+} from "./market-hours";
 
 describe("isWithinWeekendAutoCloseWindow", () => {
   it("is false just before the window (Friday 19:59 UTC)", () => {
@@ -36,5 +41,34 @@ describe("getAutoCloseWeekKey", () => {
 
   it("returns the most recent past Friday when now is earlier in the following week", () => {
     expect(getAutoCloseWeekKey(new Date("2026-06-29T10:00:00Z"))).toBe("2026-06-26");
+  });
+});
+
+describe("isWithinEndOfDayAutoCloseWindow", () => {
+  it("is false just before the window (Monday 19:59 UTC)", () => {
+    expect(isWithinEndOfDayAutoCloseWindow(new Date("2026-06-29T19:59:00Z"))).toBe(false);
+  });
+
+  it("is true within the window on a weekday (Tuesday 20:30 UTC)", () => {
+    expect(isWithinEndOfDayAutoCloseWindow(new Date("2026-06-30T20:30:00Z"))).toBe(true);
+  });
+
+  it("is false at close (Wednesday 21:00 UTC)", () => {
+    expect(isWithinEndOfDayAutoCloseWindow(new Date("2026-07-01T21:00:00Z"))).toBe(false);
+  });
+
+  it("is false on Friday (handled by the weekend auto-close instead)", () => {
+    expect(isWithinEndOfDayAutoCloseWindow(new Date("2026-07-03T20:30:00Z"))).toBe(false);
+  });
+
+  it("is false on the weekend", () => {
+    expect(isWithinEndOfDayAutoCloseWindow(new Date("2026-07-04T20:30:00Z"))).toBe(false);
+    expect(isWithinEndOfDayAutoCloseWindow(new Date("2026-07-05T20:30:00Z"))).toBe(false);
+  });
+});
+
+describe("getAutoCloseDayKey", () => {
+  it("returns the date portion of the given instant", () => {
+    expect(getAutoCloseDayKey(new Date("2026-06-30T20:30:00Z"))).toBe("2026-06-30");
   });
 });

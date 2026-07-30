@@ -2259,6 +2259,8 @@
     "weeklyReviewBody": "Tuần qua bạn có {count} giao dịch. AI đã phân tích xong — xem ngay.",
     "mt5AutoCloseTitle": "Đã tự động đóng tất cả lệnh",
     "mt5AutoCloseBody": "Thị trường forex sắp đóng cửa cuối tuần, hệ thống đã đóng toàn bộ lệnh mở theo cài đặt của bạn.",
+    "mt5AutoCloseEodTitle": "Đã tự động đóng tất cả lệnh cuối ngày",
+    "mt5AutoCloseEodBody": "Sắp hết ngày giao dịch, hệ thống đã đóng toàn bộ lệnh mở theo cài đặt của bạn.",
     "signalNewTitle": "{symbol} Signal mới",
     "signalNewVipTitle": "{symbol} ⭐ Signal VIP mới",
     "signalNewBody": "Trader bạn follow vừa đăng signal {symbol} — Xem ngay"

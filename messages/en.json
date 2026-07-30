@@ -2259,6 +2259,8 @@
     "weeklyReviewBody": "You made {count} trades last week. The AI analysis is ready — check it out.",
     "mt5AutoCloseTitle": "All positions auto-closed",
     "mt5AutoCloseBody": "The forex market is closing for the weekend — all open positions were closed per your settings.",
+    "mt5AutoCloseEodTitle": "All positions auto-closed for the day",
+    "mt5AutoCloseEodBody": "The trading day is ending — all open positions were closed per your settings.",
     "signalNewTitle": "New {symbol} signal",
     "signalNewVipTitle": "New {symbol} ⭐ VIP signal",
     "signalNewBody": "A trader you follow just posted a {symbol} signal — check it out"

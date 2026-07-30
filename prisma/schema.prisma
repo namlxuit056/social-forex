@@ -754,6 +754,8 @@ model Mt5Connection {
   lastError       String?
   autoCloseBeforeWeekend    Boolean   @default(false)
   lastAutoCloseTriggeredAt  DateTime?
+  autoCloseEndOfDay         Boolean   @default(false)
+  lastAutoCloseEodTriggeredAt DateTime?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 

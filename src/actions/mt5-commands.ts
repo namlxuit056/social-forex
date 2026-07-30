@@ -272,3 +272,21 @@ export async function setMt5AutoCloseBeforeWeekend(enabled: boolean): Promise<{ 
 
   return {};
 }
+
+export async function setMt5AutoCloseEndOfDay(enabled: boolean): Promise<{ error?: string }> {
+  const session = await auth();
+  if (!session?.user?.id) redirect("/auth/signin");
+
+  const parsed = autoCloseSchema.safeParse({ enabled });
+  if (!parsed.success) return { error: "invalid_params" };
+
+  const connection = await getActiveConnection(session.user.id);
+  if (!connection) return { error: "no_connection" };
+
+  await prisma.mt5Connection.update({
+    where: { id: connection.id },
+    data: { autoCloseEndOfDay: parsed.data.enabled },
+  });
+
+  return {};
+}

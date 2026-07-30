@@ -38,7 +38,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { closeAllPositions, placeOrder, setMt5AutoCloseBeforeWeekend } from "@/actions/mt5-commands";
+import { closeAllPositions, placeOrder, setMt5AutoCloseBeforeWeekend, setMt5AutoCloseEndOfDay } from "@/actions/mt5-commands";
 import { setCopyTradingPaused } from "@/actions/copy-trade";
 import { PositionsTable } from "./positions-table";
 import { PendingOrdersTable } from "./pending-orders-table";
@@ -102,6 +102,7 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
   const [quickOrderPending, startQuickOrder] = useTransition();
   const [quickOrderSide, setQuickOrderSide] = useState<"BUY" | "SELL" | null>(null);
   const [autoClosePending, startAutoClose] = useTransition();
+  const [autoCloseEodPending, startAutoCloseEod] = useTransition();
   const [copyTradingPausePending, startCopyTradingPause] = useTransition();
   const [activeSessions, setActiveSessions] = useState(() => getActiveTradingSessions());
   const [quickOrderConfig, setQuickOrderConfig] = useState<QuickOrderConfig>(DEFAULT_QUICK_ORDER_CONFIG);
@@ -192,6 +193,14 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
     setAccount((prev) => (prev ? { ...prev, autoCloseBeforeWeekend: next } : prev));
     startAutoClose(async () => {
       await setMt5AutoCloseBeforeWeekend(next);
+    });
+  }
+
+  function handleToggleAutoCloseEod() {
+    const next = !account?.autoCloseEndOfDay;
+    setAccount((prev) => (prev ? { ...prev, autoCloseEndOfDay: next } : prev));
+    startAutoCloseEod(async () => {
+      await setMt5AutoCloseEndOfDay(next);
     });
   }
 
@@ -370,6 +379,34 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
               className={cn(
                 "pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-md transition-transform",
                 account?.autoCloseBeforeWeekend ? "translate-x-5" : "translate-x-0",
+              )}
+            />
+          </button>
+        </div>
+
+        <div className="mt-4 flex items-center justify-between gap-3 border-t border-border pt-4">
+          <div>
+            <p className="text-sm font-medium text-foreground">Auto-close at end of day</p>
+            <p className="text-xs text-muted-foreground">
+              Automatically close all positions 1 hour before the trading day ends (Mon–Thu).
+              Only works while this page is open at that time.
+            </p>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={account?.autoCloseEndOfDay ?? false}
+            disabled={autoCloseEodPending || !account}
+            onClick={handleToggleAutoCloseEod}
+            className={cn(
+              "relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors focus:outline-none disabled:opacity-50",
+              account?.autoCloseEndOfDay ? "bg-primary" : "bg-muted",
+            )}
+          >
+            <span
+              className={cn(
+                "pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-md transition-transform",
+                account?.autoCloseEndOfDay ? "translate-x-5" : "translate-x-0",
               )}
             />
           </button>

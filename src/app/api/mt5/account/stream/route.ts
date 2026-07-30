@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { getMt5AccountSnapshot } from "@/lib/mt5/account-snapshot";
-import { maybeTriggerWeekendAutoClose } from "@/lib/mt5/auto-close";
+import { maybeTriggerWeekendAutoClose, maybeTriggerEndOfDayAutoClose } from "@/lib/mt5/auto-close";
 
 export const runtime = "nodejs";
 
@@ -38,6 +38,12 @@ export async function GET(): Promise<Response> {
 
         try {
           await maybeTriggerWeekendAutoClose(userId);
+        } catch {
+          // never let the auto-close check break the stream
+        }
+
+        try {
+          await maybeTriggerEndOfDayAutoClose(userId);
         } catch {
           // never let the auto-close check break the stream
         }
