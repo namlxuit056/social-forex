@@ -13,6 +13,8 @@ import { JournalPerformanceChart } from "./journal-performance-chart";
 import { JournalAiPanel } from "./journal-ai-panel";
 import { JournalWeeklyReview } from "./journal-weekly-review";
 import { JournalEdgeAnalytics } from "./journal-edge-analytics";
+import { JournalCalendar } from "./journal-calendar";
+import { JournalAdvancedStats } from "./journal-advanced-stats";
 import { RiskCalculator } from "@/components/tools/risk-calculator";
 import { countTrailingLosses } from "@/lib/journal/loss-streak";
 import { computeRStats } from "@/lib/journal/r-multiple";
@@ -89,7 +91,13 @@ export default async function JournalPage({
   }
 
   const activeTab =
-    query?.tab === "weekly" ? "weekly" : query?.tab === "edge" ? "edge" : "trades";
+    query?.tab === "weekly"
+      ? "weekly"
+      : query?.tab === "edge"
+        ? "edge"
+        : query?.tab === "stats"
+          ? "stats"
+          : "trades";
 
   const [tradesRaw, mt5Connection, weeklyReviewsRaw] = await Promise.all([
     prisma.tradeJournal.findMany({
@@ -279,12 +287,31 @@ export default async function JournalPage({
         >
           {t("tabEdge")}
         </Link>
+        <Link
+          href="/journal?tab=stats"
+          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+            activeTab === "stats"
+              ? "border-primary text-foreground"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          {t("tabStats")}
+        </Link>
       </nav>
 
       {activeTab === "weekly" ? (
         <JournalWeeklyReview reviews={weeklyReviews} />
       ) : activeTab === "edge" ? (
         <JournalEdgeAnalytics trades={serialized} />
+      ) : activeTab === "stats" ? (
+        <div className="space-y-6">
+          <JournalCalendar trades={serialized} locale={locale} />
+          <JournalAdvancedStats
+            trades={serialized}
+            locale={locale}
+            accountBalance={mt5Connection?.balance ?? mt5Connection?.equity ?? null}
+          />
+        </div>
       ) : (
         <>
           <RiskCalculator defaultBalance={mt5Account?.balance ?? null} />
