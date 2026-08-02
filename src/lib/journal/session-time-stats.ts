@@ -72,10 +72,20 @@ export const TIME_WINDOWS = [
   { key: "20-24", from: 20, to: 24 },
 ] as const;
 
-/** Nhóm theo khung 4h (giờ UTC mở lệnh), chỉ trả các khung có ít nhất 1 lệnh đã đóng. */
-export function computeTimeWindowStats(trades: SessionTimeTrade[]): GroupStat[] {
+/** Múi giờ Việt Nam (ICT) — cố định UTC+7, không có DST. */
+export const VN_UTC_OFFSET_HOURS = 7;
+
+/**
+ * Nhóm theo khung 4h giờ mở lệnh, chỉ trả các khung có ít nhất 1 lệnh đã đóng.
+ * `offsetHours` dịch giờ UTC sang múi giờ hiển thị (vd. +7 cho giờ Việt Nam).
+ */
+export function computeTimeWindowStats(
+  trades: SessionTimeTrade[],
+  offsetHours = 0,
+): GroupStat[] {
   return buildGroupStats(trades, (t) => {
-    const h = new Date(t.openedAt).getUTCHours();
+    const utcHour = new Date(t.openedAt).getUTCHours();
+    const h = (utcHour + offsetHours + 24) % 24;
     const w = TIME_WINDOWS.find((w) => h >= w.from && h < w.to);
     return w ? w.key : "unknown";
   }).sort((a, b) => a.key.localeCompare(b.key));

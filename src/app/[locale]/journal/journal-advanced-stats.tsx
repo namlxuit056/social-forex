@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { BarChart3 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +14,7 @@ import {
 import {
   computeSessionStats,
   computeTimeWindowStats,
+  VN_UTC_OFFSET_HOURS,
   type GroupStat,
   type SessionTimeTrade,
 } from "@/lib/journal/session-time-stats";
@@ -80,18 +81,21 @@ function GroupStatsTable({
   rows,
   emptyLabel,
   labelOf,
+  headerAction,
 }: {
   title: string;
   rows: { key: string; stat: GroupStat | null }[];
   emptyLabel: string;
   labelOf: (key: string) => string;
+  headerAction?: React.ReactNode;
 }) {
   const t = useTranslations("journal");
   const hasAny = rows.some((r) => r.stat !== null);
   return (
     <Card className="border-border/60">
-      <CardHeader className="pb-2">
+      <CardHeader className="flex-row items-center justify-between gap-3 pb-2">
         <CardTitle className="text-sm">{title}</CardTitle>
+        {headerAction}
       </CardHeader>
       <CardContent>
         {!hasAny ? (
@@ -324,7 +328,11 @@ export function JournalAdvancedStats({
     [trades, locale],
   );
   const sessionStats = useMemo(() => computeSessionStats(trades), [trades]);
-  const timeWindowStats = useMemo(() => computeTimeWindowStats(trades), [trades]);
+  const [timeWindowTz, setTimeWindowTz] = useState<"vn" | "utc">("vn");
+  const timeWindowStats = useMemo(
+    () => computeTimeWindowStats(trades, timeWindowTz === "vn" ? VN_UTC_OFFSET_HOURS : 0),
+    [trades, timeWindowTz],
+  );
 
   if (stats.closedTrades < MIN_CLOSED_TRADES) {
     return (
@@ -474,8 +482,27 @@ export function JournalAdvancedStats({
       <GroupStatsTable
         title={t("statsByTimeTitle")}
         rows={timeRows}
-        labelOf={(k) => `${k} UTC`}
+        labelOf={(k) => `${k} ${timeWindowTz === "vn" ? t("tzVietnamShort") : "UTC"}`}
         emptyLabel={t("statsByTimeEmpty")}
+        headerAction={
+          <div className="flex rounded-md border border-border/60 p-0.5">
+            {(["vn", "utc"] as const).map((tz) => (
+              <button
+                key={tz}
+                type="button"
+                onClick={() => setTimeWindowTz(tz)}
+                className={cn(
+                  "inline-flex h-6 items-center rounded-sm px-2 text-[11px] font-medium transition-colors",
+                  timeWindowTz === tz
+                    ? "bg-foreground text-background"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+              >
+                {tz === "vn" ? t("tzVietnam") : t("tzUtc")}
+              </button>
+            ))}
+          </div>
+        }
       />
 
       <div>

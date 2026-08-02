@@ -48,4 +48,16 @@ describe("computeTimeWindowStats", () => {
     const rows = computeTimeWindowStats([trade(21), trade(1), trade(9)]);
     expect(rows.map((r) => r.key)).toEqual(["00-04", "08-12", "20-24"]);
   });
+
+  it("shifts buckets by offsetHours (e.g. +7 for Vietnam time)", () => {
+    // UTC 21h -> 04h VN (next bucket), UTC 1h -> 08h VN, UTC 9h -> 16h VN
+    const rows = computeTimeWindowStats([trade(21), trade(1), trade(9)], 7);
+    expect(rows.map((r) => r.key)).toEqual(["04-08", "08-12", "16-20"]);
+  });
+
+  it("wraps hours across midnight when shifting", () => {
+    // UTC 20h + 7 = 27 -> 03h VN
+    const rows = computeTimeWindowStats([trade(20)], 7);
+    expect(rows.map((r) => r.key)).toEqual(["00-04"]);
+  });
 });
