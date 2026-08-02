@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Check, ChevronDown, ChevronUp, Copy, Loader2, Users } from "lucide-react";
+import { Check, ChevronDown, ChevronUp, Copy, Loader2, Star, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,6 +35,10 @@ type Props = {
   providerCopierCount?: number | null;
   /** Số ngày kể từ lượt copy gần nhất; null = chưa có ai copy */
   providerLastCopyDaysAgo?: number | null;
+  /** Điểm đánh giá trung bình (1-5) từ CopyTradeReview; null = chưa có đánh giá */
+  providerAvgRating?: number | null;
+  /** Tổng số đánh giá */
+  providerReviewCount?: number | null;
 };
 
 export function CopyTradeButton({
@@ -52,6 +56,8 @@ export function CopyTradeButton({
   providerClosedSignals,
   providerCopierCount,
   providerLastCopyDaysAgo,
+  providerAvgRating,
+  providerReviewCount,
 }: Props) {
   const t = useTranslations("copyTrade");
   const [open, setOpen] = useState(false);
@@ -151,6 +157,14 @@ export function CopyTradeButton({
               ? t("manageHint", { name: providerName })
               : t("configureHint", { name: providerName })}
           </p>
+
+          {!!providerReviewCount && providerAvgRating != null && (
+            <div className="flex items-center gap-1.5 rounded-lg border border-amber-500/25 bg-amber-500/5 px-3 py-2 text-xs">
+              <Star className="size-3.5 shrink-0 fill-amber-400 text-amber-400" />
+              <span className="font-medium text-foreground">{providerAvgRating.toFixed(1)}</span>
+              <span className="text-muted-foreground">{t("reviewCount", { count: providerReviewCount })}</span>
+            </div>
+          )}
 
           {!!providerCopierCount && (
             <div className="flex items-center gap-2 rounded-lg border border-primary/25 bg-primary/5 px-3 py-2 text-xs">

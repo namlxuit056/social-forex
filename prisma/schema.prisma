@@ -118,6 +118,8 @@ model User {
   pushSubscriptions    UserPushSubscription[]
   copyTradesAsFollower CopyTrade[] @relation("CopyTradeFollower")
   copyTradesAsProvider CopyTrade[] @relation("CopyTradeProvider")
+  copyTradeReviewsGiven    CopyTradeReview[] @relation("CopyTradeReviewReviewer")
+  copyTradeReviewsReceived CopyTradeReview[] @relation("CopyTradeReviewProvider")
   /// Trader tạm dừng copy-trade — lệnh MT5 mới vẫn tạo Signal nhưng không bắn cho copier/Telegram
   copyTradingPaused    Boolean     @default(false)
   hostedWebinars       Webinar[]
@@ -449,26 +451,29 @@ enum ReportStatus {
 }
 
 model ForumReport {
-  id              String       @id @default(cuid())
-  reporterId      String
-  postId          String?
-  threadId        String?
-  signalCommentId String?
-  reason          String
-  status          ReportStatus @default(OPEN)
-  reviewedBy      String?
-  reviewNote      String?
+  id                String       @id @default(cuid())
+  reporterId        String
+  postId            String?
+  threadId          String?
+  signalCommentId   String?
+  copyTradeReviewId String?
+  reason            String
+  status            ReportStatus @default(OPEN)
+  reviewedBy        String?
+  reviewNote        String?
 
-  reporter      User           @relation("ForumReporter", fields: [reporterId], references: [id], onDelete: Cascade)
-  post          ForumPost?     @relation(fields: [postId], references: [id], onDelete: SetNull)
-  thread        ForumThread?   @relation(fields: [threadId], references: [id], onDelete: SetNull)
-  signalComment SignalComment? @relation(fields: [signalCommentId], references: [id], onDelete: SetNull)
+  reporter        User             @relation("ForumReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  post            ForumPost?       @relation(fields: [postId], references: [id], onDelete: SetNull)
+  thread          ForumThread?     @relation(fields: [threadId], references: [id], onDelete: SetNull)
+  signalComment   SignalComment?   @relation(fields: [signalCommentId], references: [id], onDelete: SetNull)
+  copyTradeReview CopyTradeReview? @relation(fields: [copyTradeReviewId], references: [id], onDelete: SetNull)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([status, createdAt])
   @@index([signalCommentId])
+  @@index([copyTradeReviewId])
 }
 
 model VipAuditLog {
@@ -935,6 +940,27 @@ model CopyTrade {
   @@unique([followerId, providerId])
   @@index([providerId, isActive])
   @@index([token])
+}
+
+// One review per (reviewer, provider) pair — upserted, not appended, so a follower's
+// opinion can change over time without spamming the list. Eligibility (reviewer must
+// have copied the provider for >= 7 days) is enforced in the server action, not here.
+model CopyTradeReview {
+  id         String   @id @default(cuid())
+  providerId String
+  reviewerId String
+  rating     Int
+  comment    String?
+  hidden     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  provider User          @relation("CopyTradeReviewProvider", fields: [providerId], references: [id], onDelete: Cascade)
+  reviewer User          @relation("CopyTradeReviewReviewer", fields: [reviewerId], references: [id], onDelete: Cascade)
+  reports  ForumReport[]
+
+  @@unique([reviewerId, providerId])
+  @@index([providerId, hidden])
 }
 
 enum CopyTradeMode {

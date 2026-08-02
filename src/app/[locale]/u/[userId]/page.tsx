@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Activity, Award, Copy, GraduationCap, History, RadioTower, Signal, TrendingUp, Users } from "lucide-react";
+import { Activity, Award, Copy, GraduationCap, History, RadioTower, Signal, Star, TrendingUp, Users } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
 import { ProfileAcademySection } from "@/components/profile/profile-academy-section";
@@ -17,6 +17,7 @@ import { PublicLivePositions } from "@/components/profile/public-live-positions"
 import { ProfileTradingSummary } from "@/components/profile/profile-trading-summary";
 import { ProviderEquitySection } from "@/components/profile/provider-equity-section";
 import { TrackRecordSection } from "@/components/profile/track-record-section";
+import { ProviderReviewSection } from "@/components/copy-trade/provider-review-section";
 import { StreakBadge } from "@/components/signals/streak-badge";
 import { FollowButton } from "@/components/social/follow-button";
 import { CopyTradeButton } from "@/components/copy-trade/copy-trade-button";
@@ -31,7 +32,7 @@ import { pageCtaItems } from "@/lib/page-cta-i18n";
 import { buildSignalsListHref } from "@/lib/signals/signal-list-query";
 import { cn } from "@/lib/utils";
 
-type ProfileTab = "overview" | "signals" | "track" | "mt5" | "academy" | "followers" | "copiers";
+type ProfileTab = "overview" | "signals" | "track" | "reviews" | "mt5" | "academy" | "followers" | "copiers";
 type Props = {
   params: Promise<{ locale: string; userId: string }>;
   searchParams?: Promise<{ tab?: string }>;
@@ -41,6 +42,7 @@ const PROFILE_TABS: ProfileTab[] = [
   "overview",
   "signals",
   "track",
+  "reviews",
   "mt5",
   "academy",
   "followers",
@@ -141,6 +143,7 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
     academyCompletedCount,
     closedWins,
     closedTotal,
+    reviewAggregate,
   ] =
     await Promise.all([
       prisma.userFollow.count({ where: { followingId: userId } }),
@@ -212,6 +215,11 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
       prisma.signal.count({
         where: { authorId: userId, status: { in: ["CLOSED_WIN", "CLOSED_LOSS"] } },
       }),
+      prisma.copyTradeReview.aggregate({
+        where: { providerId: userId, hidden: false },
+        _avg: { rating: true },
+        _count: { rating: true },
+      }),
     ]);
 
   const isSelf = session?.user?.id === userId;
@@ -220,6 +228,8 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
     closedTotal > 0 ? Math.round((closedWins / closedTotal) * 1000) / 10 : null;
 
   const lastCopyDaysAgo = lastCopyRow ? daysSince(lastCopyRow.createdAt) : null;
+  const avgRating = reviewAggregate._avg.rating;
+  const reviewCount = reviewAggregate._count.rating;
 
   const followerItems = followerRows.map((row) => ({
     id: row.id,
@@ -232,11 +242,15 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
     t("profileBadgePublicTrader"),
     ...(hasMt5Sync ? [t("mt5ReadOnlyBadge")] : []),
     ...(copierCount > 0 ? [t("profileBadgeCopiers", { count: copierCount })] : []),
+    ...(reviewCount > 0 && avgRating != null
+      ? [t("profileBadgeRating", { rating: avgRating.toFixed(1), count: reviewCount })]
+      : []),
   ];
   const tabs = [
     { value: "overview", label: t("profileTabOverview"), icon: TrendingUp, count: undefined },
     { value: "signals", label: t("profileTabSignals"), icon: Signal, count: threadCount },
     { value: "track", label: t("profileTabTrackRecord"), icon: History, count: closedTotal },
+    { value: "reviews", label: t("profileTabReviews"), icon: Star, count: reviewCount },
     { value: "mt5", label: t("profileTabMt5"), icon: RadioTower, count: undefined },
     { value: "academy", label: t("profileTabAcademy"), icon: GraduationCap, count: academyCompletedCount },
     { value: "followers", label: t("profileTabFollowers"), icon: Users, count: followerCount },
@@ -289,6 +303,8 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
                   providerClosedSignals={closedTotal}
                   providerCopierCount={copierCount}
                   providerLastCopyDaysAgo={lastCopyDaysAgo}
+                  providerAvgRating={avgRating}
+                  providerReviewCount={reviewCount}
                 />
                 <Link
                   href={`/messages/${userId}`}
@@ -412,6 +428,10 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
 
       {activeTab === "track" ? (
         <TrackRecordSection profileUserId={userId} locale={locale} />
+      ) : null}
+
+      {activeTab === "reviews" ? (
+        <ProviderReviewSection profileUserId={userId} locale={locale} />
       ) : null}
 
       {activeTab === "mt5" ? (

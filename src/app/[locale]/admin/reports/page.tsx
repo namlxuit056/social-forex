@@ -77,6 +77,14 @@ export default async function AdminReportsPage({
           signal: { select: { id: true, symbol: true } },
         },
       },
+      copyTradeReview: {
+        select: {
+          id: true,
+          rating: true,
+          comment: true,
+          providerId: true,
+        },
+      },
     },
     take: 100,
   });
@@ -120,6 +128,10 @@ export default async function AdminReportsPage({
 
             const signalUrl = r.signalComment
               ? `/signals/${r.signalComment.signal.id}`
+              : null;
+
+            const reviewUrl = r.copyTradeReview
+              ? `/u/${r.copyTradeReview.providerId}?tab=reviews`
               : null;
 
             return (
@@ -175,6 +187,14 @@ export default async function AdminReportsPage({
                         </em>
                       </span>
                     )}
+                    {r.copyTradeReview && (
+                      <span>
+                        {t("reportTargetReview")} ({r.copyTradeReview.rating}/5):{" "}
+                        <em className="line-clamp-1 max-w-md text-xs">
+                          {r.copyTradeReview.comment?.slice(0, 120) ?? "—"}
+                        </em>
+                      </span>
+                    )}
                     {threadUrl && (
                       <Link
                         href={threadUrl}
@@ -191,6 +211,15 @@ export default async function AdminReportsPage({
                         target="_blank"
                       >
                         {t("viewSignal")} →
+                      </Link>
+                    )}
+                    {reviewUrl && (
+                      <Link
+                        href={reviewUrl}
+                        className="text-primary hover:underline"
+                        target="_blank"
+                      >
+                        {t("viewReview")} →
                       </Link>
                     )}
                   </div>

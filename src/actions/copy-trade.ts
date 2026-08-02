@@ -152,6 +152,57 @@ export async function setCopierBlocked(
   return { ok: true };
 }
 
+const providerReviewSchema = z.object({
+  providerId: z.string().min(1),
+  rating: z.coerce.number().int().min(1).max(5),
+  comment: z.string().trim().max(500).optional(),
+});
+
+const REVIEW_ELIGIBILITY_DAYS = 7;
+
+export async function submitProviderReview(
+  _prev: { error?: string; ok?: boolean } | null,
+  formData: FormData,
+): Promise<{ error?: string; ok?: boolean }> {
+  const session = await auth();
+  if (!session?.user?.id) redirect("/auth/signin");
+
+  const t = await getTranslations("errors");
+  const parsed = providerReviewSchema.safeParse({
+    providerId: formData.get("providerId"),
+    rating: formData.get("rating"),
+    comment: formData.get("comment") || undefined,
+  });
+  if (!parsed.success) return { error: t("invalidData") };
+
+  const { providerId, rating, comment } = parsed.data;
+  const reviewerId = session.user.id;
+  if (providerId === reviewerId) {
+    return { error: "Cannot review yourself" };
+  }
+
+  const { ok } = rateLimit(`provider-review:${reviewerId}`, 10, 60_000);
+  if (!ok) return { error: t("rateLimitOneMinute") };
+
+  const eligibleSince = new Date(Date.now() - REVIEW_ELIGIBILITY_DAYS * 86_400_000);
+  const eligibleCopyTrade = await prisma.copyTrade.findFirst({
+    where: { followerId: reviewerId, providerId, createdAt: { lte: eligibleSince } },
+    select: { id: true },
+  });
+  if (!eligibleCopyTrade) {
+    return { error: t("reviewNotEligible") };
+  }
+
+  await prisma.copyTradeReview.upsert({
+    where: { reviewerId_providerId: { reviewerId, providerId } },
+    update: { rating, comment: comment || null },
+    create: { reviewerId, providerId, rating, comment: comment || null },
+  });
+
+  revalidatePath(`/u/${providerId}`);
+  return { ok: true };
+}
+
 const setCopyTradingPausedSchema = z.object({ paused: z.boolean() });
 
 export async function setCopyTradingPaused(paused: boolean): Promise<{ error?: string }> {

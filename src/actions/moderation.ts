@@ -12,6 +12,7 @@ const reportSchema = z.object({
   postId: z.string().min(1).optional(),
   threadId: z.string().min(1).optional(),
   signalCommentId: z.string().min(1).optional(),
+  copyTradeReviewId: z.string().min(1).optional(),
   reason: z.string().min(3).max(500),
 });
 
@@ -34,12 +35,13 @@ export async function reportPost(
     postId: formData.get("postId") || undefined,
     threadId: formData.get("threadId") || undefined,
     signalCommentId: formData.get("signalCommentId") || undefined,
+    copyTradeReviewId: formData.get("copyTradeReviewId") || undefined,
     reason: formData.get("reason"),
   });
   if (!parsed.success) return { error: t("reportReasonInvalid") };
 
-  const { postId, threadId, signalCommentId, reason } = parsed.data;
-  const n = [postId, threadId, signalCommentId].filter(Boolean).length;
+  const { postId, threadId, signalCommentId, copyTradeReviewId, reason } = parsed.data;
+  const n = [postId, threadId, signalCommentId, copyTradeReviewId].filter(Boolean).length;
   if (n === 0) return { error: t("reportMissingTarget") };
   if (n > 1) return { error: t("reportOneTarget") };
 
@@ -61,6 +63,12 @@ export async function reportPost(
       select: { id: true },
     });
     if (!th) return { error: t("reportTargetNotFound") };
+  } else if (copyTradeReviewId) {
+    const r = await prisma.copyTradeReview.findUnique({
+      where: { id: copyTradeReviewId },
+      select: { id: true },
+    });
+    if (!r) return { error: t("reportTargetNotFound") };
   }
 
   await prisma.forumReport.create({
@@ -69,6 +77,7 @@ export async function reportPost(
       postId: postId ?? null,
       threadId: threadId ?? null,
       signalCommentId: signalCommentId ?? null,
+      copyTradeReviewId: copyTradeReviewId ?? null,
       reason,
     },
   });
@@ -206,6 +215,50 @@ export async function reviewReport(formData: FormData) {
     },
   });
 
+  revalidatePath("/admin/reports");
+}
+
+export async function hideReview(formData: FormData) {
+  const session = await auth();
+  if (!session?.user?.id) redirect("/auth/signin");
+  if (!(await requireMod(session.user.id))) return;
+
+  const reviewId = formData.get("copyTradeReviewId");
+  if (typeof reviewId !== "string" || !reviewId) return;
+
+  const review = await prisma.copyTradeReview.findUnique({
+    where: { id: reviewId },
+    select: { providerId: true },
+  });
+  if (!review) return;
+
+  await prisma.copyTradeReview.update({
+    where: { id: reviewId },
+    data: { hidden: true },
+  });
+  revalidatePath(`/u/${review.providerId}`);
+  revalidatePath("/admin/reports");
+}
+
+export async function unhideReview(formData: FormData) {
+  const session = await auth();
+  if (!session?.user?.id) redirect("/auth/signin");
+  if (!(await requireMod(session.user.id))) return;
+
+  const reviewId = formData.get("copyTradeReviewId");
+  if (typeof reviewId !== "string" || !reviewId) return;
+
+  const review = await prisma.copyTradeReview.findUnique({
+    where: { id: reviewId },
+    select: { providerId: true },
+  });
+  if (!review) return;
+
+  await prisma.copyTradeReview.update({
+    where: { id: reviewId },
+    data: { hidden: false },
+  });
+  revalidatePath(`/u/${review.providerId}`);
   revalidatePath("/admin/reports");
 }
 

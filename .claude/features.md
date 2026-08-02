@@ -28,11 +28,12 @@ _(trống)_
 _Đề xuất 2026-07-20, theo goal Sprint 2 "Trust & conversion". Lưu ý: tránh feature cần cron mới cho đến khi Neon quota reset (~1/8) — tất cả bên dưới đều là request-time, không cron._
 
 - [ ] **VIP teaser + funnel** — user thường thấy card VIP signal dạng blur (symbol + direction hiện, entry/SL/TP mờ) kèm win rate lịch sử của VIP tier + CTA nâng cấp; log FunnelEvent tại các bước xem-teaser → xem-pricing → tạo-order để đo conversion (model FunnelEvent + PayPal flow có sẵn).
-- [ ] **Đánh giá provider** — chỉ user đã copy provider ≥ 7 ngày mới được chấm 1–5 sao + nhận xét (model mới CopyTradeReview), hiện điểm trung bình + số review trên profile và modal copy; report/hide qua hệ thống moderation có sẵn. Effort lớn hơn 3 cái trên.
 
 ---
 
 ## Completed
+
+- [x] Đánh giá provider — model CopyTradeReview (rating 1-5 + comment, unique [reviewerId, providerId], upsert), chỉ follower có CopyTrade ≥ 7 ngày với provider mới được đánh giá (kể cả đã unsubscribe); tab "Đánh giá" mới trên /u/[userId] hiện avg rating + phân bố sao + danh sách review, badge rating trên hero profile khi có ≥1 review, stat rating trong modal CopyTradeButton; report review + hide/unhide (MOD/ADMIN) tái dùng ForumReport (thêm copyTradeReviewId nullable FK) và pattern hideSignalComment, thêm block report vào /admin/reports. User chọn feature này trong 2 đề xuất chưa duyệt Sprint 2 (2026-08-02)
 
 - [x] Academy auto-generate cron — daily cron (`0 3 * * *` UTC, /api/academy/auto-generate/run) tự chọn 3 chủ đề mới (dedupe với title đã có) qua generateTopicIdeas rồi generate + publish full lesson (VI+EN) cho từng chủ đề; logic saveLesson tách ra src/lib/ai/academy-auto-generate.ts dùng chung với admin bulk-generate. 1 topic lỗi không chặn 2 topic còn lại. Thêm bất chấp ghi chú "tránh cron mới đến khi Neon quota reset ~1/8" vì đây là cron 1 lần/ngày (không giữ DB thức như per-minute cron cũ) — cùng loại rủi ro thấp như ai/articles/run và journal/weekly-review/run đã bật lại trước đó (2026-07-26)
 
