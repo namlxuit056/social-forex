@@ -14,11 +14,11 @@ export type GroupStat = {
   expectancy: number | null;
 };
 
-function buildGroupStats(
-  trades: SessionTimeTrade[],
-  keyOf: (t: SessionTimeTrade) => string,
+function buildGroupStats<T extends RTrade>(
+  trades: T[],
+  keyOf: (t: T) => string,
 ): GroupStat[] {
-  const map = new Map<string, SessionTimeTrade[]>();
+  const map = new Map<string, T[]>();
   for (const t of trades) {
     if (t.result !== "WIN" && t.result !== "LOSS" && t.result !== "BREAKEVEN") continue;
     const key = keyOf(t);
@@ -89,4 +89,28 @@ export function computeTimeWindowStats(
     const w = TIME_WINDOWS.find((w) => h >= w.from && h < w.to);
     return w ? w.key : "unknown";
   }).sort((a, b) => a.key.localeCompare(b.key));
+}
+
+export type SymbolTrade = RTrade & { symbol: string };
+
+export type SymbolStat = GroupStat & { symbol: string };
+
+/**
+ * Xếp hạng theo cặp tiền: winRate desc, hoà thì netPnl desc.
+ * Chỉ tính các cặp có đủ `minTrades` lệnh đã đóng để tránh nhiễu do mẫu quá nhỏ.
+ */
+export function computeSymbolStats(
+  trades: SymbolTrade[],
+  minTrades = 3,
+): SymbolStat[] {
+  return buildGroupStats(trades, (t) => t.symbol.toUpperCase())
+    .filter((s) => s.total >= minTrades)
+    .map((s) => ({ ...s, symbol: s.key }))
+    .sort((a, b) => {
+      if (a.winRate === null && b.winRate === null) return b.netPnl - a.netPnl;
+      if (a.winRate === null) return 1;
+      if (b.winRate === null) return -1;
+      if (b.winRate !== a.winRate) return b.winRate - a.winRate;
+      return b.netPnl - a.netPnl;
+    });
 }

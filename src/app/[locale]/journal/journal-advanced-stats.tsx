@@ -13,16 +13,19 @@ import {
 } from "@/lib/journal/risk-discipline";
 import {
   computeSessionStats,
+  computeSymbolStats,
   computeTimeWindowStats,
   VN_UTC_OFFSET_HOURS,
   type GroupStat,
   type SessionTimeTrade,
+  type SymbolTrade,
 } from "@/lib/journal/session-time-stats";
 import type { EdgeSession } from "@/lib/journal/edge-stats";
 
 export type AdvancedStatsPageTrade = AdvancedStatsTrade &
   DisciplineTrade &
-  SessionTimeTrade;
+  SessionTimeTrade &
+  SymbolTrade;
 
 const MIN_CLOSED_TRADES = 5;
 
@@ -82,12 +85,14 @@ function GroupStatsTable({
   emptyLabel,
   labelOf,
   headerAction,
+  bestKey,
 }: {
   title: string;
   rows: { key: string; stat: GroupStat | null }[];
   emptyLabel: string;
   labelOf: (key: string) => string;
   headerAction?: React.ReactNode;
+  bestKey?: string;
 }) {
   const t = useTranslations("journal");
   const hasAny = rows.some((r) => r.stat !== null);
@@ -106,7 +111,10 @@ function GroupStatsTable({
               .filter((r) => r.stat !== null)
               .map(({ key, stat }) => (
                 <div key={key} className="space-y-1.5 text-sm">
-                  <p className="font-semibold text-amber-500">{labelOf(key)}</p>
+                  <p className="flex items-center gap-1 font-semibold text-amber-500">
+                    {key === bestKey && <span aria-hidden>🏆</span>}
+                    {labelOf(key)}
+                  </p>
                   <div className="flex justify-between text-muted-foreground">
                     <span>{t("totalTrades")}</span>
                     <span className="font-mono text-foreground">{stat!.total}</span>
@@ -333,6 +341,7 @@ export function JournalAdvancedStats({
     () => computeTimeWindowStats(trades, timeWindowTz === "vn" ? VN_UTC_OFFSET_HOURS : 0),
     [trades, timeWindowTz],
   );
+  const symbolStats = useMemo(() => computeSymbolStats(trades), [trades]);
 
   if (stats.closedTrades < MIN_CLOSED_TRADES) {
     return (
@@ -358,6 +367,8 @@ export function JournalAdvancedStats({
   ).map((key) => ({ key, stat: sessionStats[key] }));
 
   const timeRows = timeWindowStats.map((s) => ({ key: s.key, stat: s }));
+  const symbolRows = symbolStats.map((s) => ({ key: s.symbol, stat: s }));
+  const bestSymbol = symbolStats[0]?.symbol;
 
   return (
     <div className="space-y-6">
@@ -503,6 +514,14 @@ export function JournalAdvancedStats({
             ))}
           </div>
         }
+      />
+
+      <GroupStatsTable
+        title={t("statsByPairTitle")}
+        rows={symbolRows}
+        labelOf={(k) => k}
+        emptyLabel={t("statsByPairEmpty", { min: 3 })}
+        bestKey={bestSymbol}
       />
 
       <div>

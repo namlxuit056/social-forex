@@ -1839,6 +1839,8 @@
     "statsBySessionTitle": "Analysis by Session",
     "statsByTimeTitle": "Analysis by Time Window",
     "statsByTimeEmpty": "No data yet",
+    "statsByPairTitle": "Best Performing Pairs",
+    "statsByPairEmpty": "Needs at least {min} closed trades on the same pair to rank",
     "tzVietnam": "Vietnam time",
     "tzVietnamShort": "VN time",
     "tzUtc": "UTC",

@@ -1839,6 +1839,8 @@
     "statsBySessionTitle": "Phân Tích Theo Phiên",
     "statsByTimeTitle": "Phân Tích Theo Khung Thời Gian",
     "statsByTimeEmpty": "Chưa có dữ liệu",
+    "statsByPairTitle": "Cặp Tiền Giao Dịch Tốt Nhất",
+    "statsByPairEmpty": "Cần ít nhất {min} lệnh đã đóng trên cùng một cặp để xếp hạng",
     "tzVietnam": "Giờ Việt Nam",
     "tzVietnamShort": "giờ VN",
     "tzUtc": "UTC",
