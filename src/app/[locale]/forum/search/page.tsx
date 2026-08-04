@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
+import { absoluteUrl } from "@/lib/site-url";
 
 export async function generateMetadata({
   params,
@@ -15,7 +16,12 @@ export async function generateMetadata({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("forum");
-  return { title: t("searchMetaTitle") };
+  return {
+    title: t("searchMetaTitle"),
+    alternates: { canonical: absoluteUrl("/forum/search", locale) },
+    // Query-param search results are low-value/duplicate for search engines.
+    robots: { index: false, follow: true },
+  };
 }
 
 export const dynamic = "force-dynamic";

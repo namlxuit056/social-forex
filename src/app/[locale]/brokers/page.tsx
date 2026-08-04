@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { pageCtaItems } from "@/lib/page-cta-i18n";
 import { getExnessAffiliateUrl } from "@/lib/exness-affiliate";
+import { absoluteUrl } from "@/lib/site-url";
 import { cn } from "@/lib/utils";
 
 type Broker = {
@@ -229,7 +230,11 @@ export async function generateMetadata({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("brokers");
-  return { title: t("title"), description: t("description") };
+  return {
+    title: t("title"),
+    description: t("description"),
+    alternates: { canonical: absoluteUrl("/brokers", locale) },
+  };
 }
 
 function ScoreDots({ score }: { score: number }) {

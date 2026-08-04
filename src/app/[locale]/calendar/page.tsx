@@ -6,6 +6,7 @@ import { PageCtaRow } from "@/components/layout/page-cta-row";
 import { parseCalendarCurrencySearchParams } from "@/lib/calendar/parse-currency-search-params";
 import { resolveCalendarEvents } from "@/lib/calendar/resolve-calendar";
 import { pageCtaItems } from "@/lib/page-cta-i18n";
+import { absoluteUrl } from "@/lib/site-url";
 
 export async function generateMetadata({
   params,
@@ -15,7 +16,11 @@ export async function generateMetadata({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("calendar");
-  return { title: t("title"), description: t("description") };
+  return {
+    title: t("title"),
+    description: t("description"),
+    alternates: { canonical: absoluteUrl("/calendar", locale) },
+  };
 }
 
 export const dynamic = "force-dynamic";
