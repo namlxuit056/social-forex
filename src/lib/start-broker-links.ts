@@ -1,7 +1,7 @@
 /** Official MetaTrader 5 download (MetaQuotes). */
 export function getMt5DownloadUrl(locale: string): string {
   return locale === "vi"
-    ? "https://www.metatrader5.com/vi/download"
+    ? "https://www.metatrader5.com/en/download"
     : "https://www.metatrader5.com/en/download";
 }
 
