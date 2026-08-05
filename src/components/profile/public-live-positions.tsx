@@ -88,6 +88,7 @@ export async function PublicLivePositions({
   if (!mt5Connection) return null;
 
   const livePositions = parseLivePositions(latestSnapshot?.positions);
+  const totalProfit = livePositions.reduce((sum, position) => sum + (position.profit ?? 0), 0);
 
   return (
     <Card className="border-border/60 bg-card/55">
@@ -111,7 +112,7 @@ export async function PublicLivePositions({
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className="grid grid-cols-2 gap-2 text-xs sm:max-w-xs">
+        <div className="grid grid-cols-3 gap-2 text-xs sm:max-w-md">
           <div className="rounded-md bg-muted/25 px-2 py-1.5">
             <p className="text-muted-foreground">{t("profileBalance")}</p>
             <p className="font-mono text-foreground">
@@ -126,6 +127,21 @@ export async function PublicLivePositions({
               {mt5Connection.equity == null
                 ? "—"
                 : `${mt5Connection.equity.toFixed(2)} ${mt5Connection.accountCurrency ?? ""}`}
+            </p>
+          </div>
+          <div className="rounded-md bg-muted/25 px-2 py-1.5">
+            <p className="text-muted-foreground">{t("profileFloatingPnl")}</p>
+            <p
+              className={cn(
+                "font-mono font-semibold",
+                livePositions.length === 0
+                  ? "text-foreground"
+                  : totalProfit >= 0
+                    ? "text-emerald-500"
+                    : "text-red-500",
+              )}
+            >
+              {livePositions.length === 0 ? "—" : fmtCurrency(totalProfit)}
             </p>
           </div>
         </div>
@@ -175,6 +191,21 @@ export async function PublicLivePositions({
                   );
                 })}
               </tbody>
+              <tfoot>
+                <tr className="border-t border-border/60">
+                  <td colSpan={7} className="px-2 py-2 text-right font-medium text-muted-foreground">
+                    {t("profileFloatingPnl")}
+                  </td>
+                  <td
+                    className={cn(
+                      "px-2 py-2 text-right font-mono font-semibold",
+                      totalProfit >= 0 ? "text-emerald-500" : "text-red-500",
+                    )}
+                  >
+                    {fmtCurrency(totalProfit)}
+                  </td>
+                </tr>
+              </tfoot>
             </table>
           </div>
         )}
