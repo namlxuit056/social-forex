@@ -64,6 +64,8 @@ export default async function EditAiArticlePage({ params }: Props) {
         defaultSummary={article.summary}
         defaultMetaDescription={article.metaDescription}
         defaultBody={article.body}
+        defaultImageUrl={article.imageUrl}
+        defaultImageAlt={article.imageAlt}
         cancelHref="/admin/articles"
       />
     </div>

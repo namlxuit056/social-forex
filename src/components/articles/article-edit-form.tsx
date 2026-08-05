@@ -12,6 +12,7 @@ import { Link } from "@/i18n/navigation";
 import { ArticleEditorCK, type ArticleEditorCKHandle } from "./article-editor-ck";
 import { ArticleSeoPanel } from "./article-seo-panel";
 import { ArticleContentAnalyzer } from "./article-content-analyzer";
+import { ArticleThumbnailField } from "./article-thumbnail-field";
 import { updateAiArticle } from "@/app/[locale]/admin/articles/actions";
 
 type Props = {
@@ -23,6 +24,8 @@ type Props = {
   defaultSummary: string;
   defaultMetaDescription: string;
   defaultBody: string;
+  defaultImageUrl?: string | null;
+  defaultImageAlt?: string | null;
   cancelHref: string;
 };
 
@@ -35,6 +38,8 @@ export function ArticleEditForm({
   defaultSummary,
   defaultMetaDescription,
   defaultBody,
+  defaultImageUrl,
+  defaultImageAlt,
   cancelHref,
 }: Props) {
   const [title, setTitle] = useState(defaultTitle);
@@ -78,6 +83,11 @@ export function ArticleEditForm({
                 {state.error}
               </div>
             )}
+
+            <ArticleThumbnailField
+              defaultImageUrl={defaultImageUrl}
+              defaultImageAlt={defaultImageAlt}
+            />
 
             <div>
               <Label htmlFor="title">

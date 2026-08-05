@@ -134,6 +134,8 @@ const updateArticleSchema = z.object({
   summary: z.string().min(30).max(280).trim(),
   metaDescription: z.string().min(50).max(180).trim(),
   body: z.string().min(100).max(200000).trim(),
+  imageUrl: z.string().trim().max(2000).optional().or(z.literal("")),
+  imageAlt: z.string().trim().max(200).optional().or(z.literal("")),
 });
 
 export type UpdateArticleState = { error: string } | { ok: true } | null;
@@ -149,15 +151,24 @@ export async function updateAiArticle(
     summary: formData.get("summary"),
     metaDescription: formData.get("metaDescription"),
     body: formData.get("body"),
+    imageUrl: formData.get("imageUrl") ?? "",
+    imageAlt: formData.get("imageAlt") ?? "",
   });
   if (!parsed.success) {
     const first = parsed.error.issues[0];
     return { error: `${first?.path.join(".") ?? "field"}: ${first?.message ?? "Invalid"}` };
   }
 
-  const { id, ...data } = parsed.data;
+  const { id, imageUrl, imageAlt, ...data } = parsed.data;
   try {
-    await prisma.aiGeneratedArticle.update({ where: { id }, data });
+    await prisma.aiGeneratedArticle.update({
+      where: { id },
+      data: {
+        ...data,
+        imageUrl: imageUrl || null,
+        imageAlt: imageAlt || null,
+      },
+    });
   } catch {
     return { error: "Lỗi cơ sở dữ liệu. Vui lòng thử lại." };
   }
