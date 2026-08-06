@@ -103,7 +103,7 @@ export default async function JournalPage({
             ? "chat"
             : "trades";
 
-  const [tradesRaw, mt5Connection, weeklyReviewsRaw, chatUser] = await Promise.all([
+  const [tradesRaw, mt5Connection, weeklyReviewsRaw, dbUser] = await Promise.all([
     prisma.tradeJournal.findMany({
       where: { userId: session.user.id },
       orderBy: { openedAt: "desc" },
@@ -127,7 +127,7 @@ export default async function JournalPage({
     }),
   ]);
 
-  const isVip = isVipActive(chatUser?.vipUntil);
+  const isVip = isVipActive(dbUser?.vipUntil);
 
   const tradesCapped = tradesRaw.length > TRADES_CAP;
   const trades = tradesCapped ? tradesRaw.slice(0, TRADES_CAP) : tradesRaw;
