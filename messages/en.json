@@ -983,6 +983,21 @@
     "vipRequiredCta": "Upgrade to VIP",
     "loginRequiredHint": "Sign in to use this AI chat."
   },
+  "journalChat": {
+    "title": "AI Chat with your trading journal",
+    "subtitle": "Ask why you lost money, find ways to improve, or get a pre-trade reference check — the AI uses your own journal stats to answer.",
+    "placeholder": "e.g. why did I lose so much on XAUUSD this week?",
+    "quickLossReview": "Why do I keep losing on recent trades?",
+    "quickImprove": "Find ways to improve my win rate",
+    "quickPreTrade": "I'm about to enter a trade, give me a reference check",
+    "thinking": "AI is answering...",
+    "loadingHistory": "Loading chat history...",
+    "disclaimer": "Educational only, not investment advice. You are solely responsible for your trading decisions.",
+    "error": "Could not answer right now. Please try again.",
+    "vipRequiredHint": "The journal AI chat is a VIP-only feature.",
+    "vipRequiredCta": "Upgrade to VIP",
+    "loginRequiredHint": "Sign in to use the journal AI chat."
+  },
   "resources": {
     "title": "Resource Library",
     "description": "Useful links and materials for forex traders.",
@@ -1620,7 +1635,11 @@
     "apiSignalCreated": "AI signal posted.",
     "apiSignalCreateFailed": "Could not post the AI signal right now.",
     "apiEntryPriceViolation": "AI suggested an entry price that is not better than the current market price. Please analyze again.",
-    "apiDisclaimer": "AI suggestions are for education only, not investment advice. You are solely responsible for your trading decisions."
+    "apiDisclaimer": "AI suggestions are for education only, not investment advice. You are solely responsible for your trading decisions.",
+    "apiJournalChatLoginRequired": "Sign in to use the journal AI chat.",
+    "apiJournalChatVipOnly": "The journal AI chat is a VIP-only feature.",
+    "apiJournalChatInvalidRequest": "Chat content is invalid or too long.",
+    "apiJournalChatRateLimitVip": "Limit of 12 questions/5 minutes. Please wait."
   },
   "journal": {
     "title": "Trading Journal",
@@ -1737,6 +1756,7 @@
     "tabWeekly": "Weekly review",
     "tabEdge": "Edge stats",
     "tabStats": "Advanced",
+    "tabChat": "AI Chat",
     "tradesCapNote": "Stats computed over your latest {count} trades — older trades are not loaded.",
     "tableShowingRows": "Showing {shown} / {total} trades",
     "tableShowMore": "Show more",

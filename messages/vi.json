@@ -983,6 +983,21 @@
     "vipRequiredCta": "Nâng cấp VIP",
     "loginRequiredHint": "Đăng nhập để dùng tính năng chat AI này."
   },
+  "journalChat": {
+    "title": "Chat AI với nhật ký giao dịch",
+    "subtitle": "Hỏi vì sao thua lỗ, tìm phương pháp cải thiện, hoặc tham khảo trước khi vào lệnh — AI dùng thống kê nhật ký của bạn để trả lời.",
+    "placeholder": "Ví dụ: sao tuần này tôi thua nhiều với XAUUSD?",
+    "quickLossReview": "Vì sao tôi hay thua lệnh gần đây?",
+    "quickImprove": "Tìm phương pháp cải thiện win rate",
+    "quickPreTrade": "Tôi định vào lệnh, cho tôi tham khảo trước",
+    "thinking": "AI đang trả lời...",
+    "loadingHistory": "Đang tải lịch sử chat...",
+    "disclaimer": "Chỉ mang tính giáo dục, không phải khuyến nghị đầu tư. Bạn tự chịu trách nhiệm về quyết định giao dịch.",
+    "error": "Không thể trả lời lúc này. Vui lòng thử lại.",
+    "vipRequiredHint": "Tính năng chat AI trong nhật ký chỉ dành cho thành viên VIP.",
+    "vipRequiredCta": "Nâng cấp VIP",
+    "loginRequiredHint": "Đăng nhập để dùng tính năng chat AI trong nhật ký."
+  },
   "resources": {
     "title": "Kho tài liệu",
     "description": "Liên kết và tài liệu hữu ích cho trader forex.",
@@ -1620,7 +1635,11 @@
     "apiSignalCreated": "Đã đăng tín hiệu từ AI.",
     "apiSignalCreateFailed": "Không thể đăng tín hiệu từ AI lúc này.",
     "apiEntryPriceViolation": "AI đề xuất giá vào lệnh không tốt hơn thị trường hiện tại. Vui lòng phân tích lại.",
-    "apiDisclaimer": "Đề xuất AI chỉ mang tính tham khảo và giáo dục, không phải tư vấn đầu tư. Bạn tự chịu trách nhiệm về mọi quyết định giao dịch."
+    "apiDisclaimer": "Đề xuất AI chỉ mang tính tham khảo và giáo dục, không phải tư vấn đầu tư. Bạn tự chịu trách nhiệm về mọi quyết định giao dịch.",
+    "apiJournalChatLoginRequired": "Vui lòng đăng nhập để dùng tính năng chat AI trong nhật ký.",
+    "apiJournalChatVipOnly": "Tính năng chat AI trong nhật ký chỉ dành cho thành viên VIP.",
+    "apiJournalChatInvalidRequest": "Nội dung chat không hợp lệ hoặc quá dài.",
+    "apiJournalChatRateLimitVip": "Giới hạn 12 câu hỏi/5 phút. Vui lòng chờ."
   },
   "journal": {
     "title": "Nhật ký giao dịch",
@@ -1737,6 +1756,7 @@
     "tabWeekly": "Báo cáo tuần",
     "tabEdge": "Thống kê",
     "tabStats": "Nâng cao",
+    "tabChat": "AI Chat",
     "tradesCapNote": "Số liệu tính trên {count} lệnh gần nhất — lệnh cũ hơn không được tải.",
     "tableShowingRows": "Hiển thị {shown} / {total} lệnh",
     "tableShowMore": "Hiển thị thêm",
