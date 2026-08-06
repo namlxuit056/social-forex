@@ -113,6 +113,27 @@ export type AiArticleChatSendResponse = {
   disclaimer: string;
 };
 
+export const aiJournalChatRequestSchema = z.object({
+  content: z.string().trim().min(1).max(2000),
+});
+
+export type AiJournalChatMessage = {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  createdAt: string;
+};
+
+export type AiJournalChatHistoryResponse = {
+  messages: AiJournalChatMessage[];
+};
+
+export type AiJournalChatSendResponse = {
+  userMessage: AiJournalChatMessage;
+  assistantMessage: AiJournalChatMessage;
+  disclaimer: string;
+};
+
 export type AiAdvisorResponse = {
   message: AiAdvisorMessage;
   generatedAt: string;
