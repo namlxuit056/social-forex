@@ -130,6 +130,7 @@ model User {
   priceAlerts          PriceAlert[]
   weeklyReviews        AiWeeklyJournalReview[]
   articleChatMessages  ArticleChatMessage[]
+  journalChatMessages  JournalChatMessage[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -695,6 +696,21 @@ model ArticleChatMessage {
   user    User                @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([articleId, userId, createdAt])
+}
+
+/// Single ongoing per-user chat thread in the Journal "AI Chat" tab — loss
+/// review, improvement coaching, and pre-trade reference checklists, all in
+/// one continuous thread (not split per trade).
+model JournalChatMessage {
+  id        String   @id @default(cuid())
+  userId    String
+  role      String
+  content   String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
 }
 
 /// Bản ghi singleton — lần đồng bộ lịch kinh tế (FMP) gần nhất.
