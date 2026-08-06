@@ -34,7 +34,8 @@ Rules:
 - Educational coaching only. Not financial advice. Do not promise profit or guarantee a result.
 - Be direct but supportive, like a professional mentor reviewing a trader's log.
 - Keep answers focused — this is a chat, not a full report. Use short paragraphs or bullet points.
-- If the trader's message is unrelated to their trading/journal, answer briefly and steer back to journal topics.`;
+- If the trader's message is unrelated to their trading/journal, answer briefly and steer back to journal topics.
+- This chat has no live price feed or market data — never imply current prices or market conditions, and tell the trader to check the live price on their own broker platform.`;
 }
 
 export async function getAiJournalChatReply({
