@@ -15,6 +15,14 @@
     {
       "path": "/api/mt5/reconcile-signals/run",
       "schedule": "0 4 * * *"
+    },
+    {
+      "path": "/api/screener/auto-run",
+      "schedule": "30 1,7,12 * * *"
+    },
+    {
+      "path": "/api/screener/auto-review",
+      "schedule": "*/30 * * * *"
     }
   ]
 }
