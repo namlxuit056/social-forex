@@ -11,6 +11,7 @@ import {
   Bot,
   BookOpen,
   Cpu,
+  Timer,
 } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
@@ -113,6 +114,7 @@ export default async function AdminDashboardPage({
     { href: "/admin/articles", label: t("manageAiArticles"), icon: Bot },
     { href: "/admin/academy", label: "Bài học Academy AI", icon: BookOpen },
     { href: "/admin/ai-settings", label: t("aiModelSettings"), icon: Cpu },
+    { href: "/admin/crons", label: t("manageCrons"), icon: Timer },
   ];
 
   return (
