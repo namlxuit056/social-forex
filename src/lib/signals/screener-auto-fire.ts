@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { getScreenerAiPicks } from "@/lib/ai/screener-picks";
 import { createScreenerSignal, SCREENER_AUTO_TIMEFRAME } from "@/lib/signals/create-screener-signal";
+import { resolveScreenerLotSize } from "@/lib/signals/screener-lot-config";
 
 // Fixed for every user — this cron posts under one shared bot account, not a per-user config.
 export const SCREENER_AUTO_FIRE_MIN_SCORE = 70;
@@ -66,6 +67,8 @@ export async function runScreenerAutoFire(): Promise<ScreenerAutoFireSummary> {
       continue;
     }
 
+    const lotSize = await resolveScreenerLotSize(pick.symbol);
+
     const { signalId } = await createScreenerSignal(
       bot.userId,
       {
@@ -78,6 +81,7 @@ export async function runScreenerAutoFire(): Promise<ScreenerAutoFireSummary> {
         qualityScore: pick.qualityScore,
         reasoning: pick.reasoning,
         checklist: pick.checklist,
+        lotSize,
       },
       SCREENER_AUTO_TIMEFRAME,
     );

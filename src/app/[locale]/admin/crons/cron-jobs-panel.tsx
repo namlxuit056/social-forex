@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { AlertTriangle, Loader2, Play } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { AlertTriangle, Loader2, Play, Settings2 } from "lucide-react";
+import { Link } from "@/i18n/navigation";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -16,6 +17,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { cn } from "@/lib/utils";
 import { runCronJob, type RunCronJobResult } from "./actions";
 import type { CronJobKey, CronJobMeta } from "./job-registry";
 
@@ -72,7 +74,16 @@ function JobCard({ job }: { job: CronJobMeta }) {
       <CardContent>
         <p className="text-sm text-muted-foreground">{job.description}</p>
 
-        <div className="mt-4">
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          {job.settingsHref && (
+            <Link
+              href={job.settingsHref}
+              className={cn(buttonVariants({ size: "sm", variant: "ghost" }), "gap-1.5")}
+            >
+              <Settings2 className="size-3.5" aria-hidden />
+              {job.settingsLabel ?? "Cấu hình"}
+            </Link>
+          )}
           {job.risk === "trade" ? (
             <AlertDialog>
               <AlertDialogTrigger

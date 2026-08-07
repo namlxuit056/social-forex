@@ -15,6 +15,9 @@ export type CronJobMeta = {
   schedule: string;
   /** "trade" jobs can place/close real orders — the UI asks for confirmation first. */
   risk: "trade" | "normal";
+  /** Optional link to a settings sub-page for this job (e.g. lot-size config). */
+  settingsHref?: string;
+  settingsLabel?: string;
 };
 
 export const CRON_JOBS: CronJobMeta[] = [
@@ -24,6 +27,8 @@ export const CRON_JOBS: CronJobMeta[] = [
     description: "Quét AI picks từ /screener, đăng Signal thật dưới tài khoản bot (SCREENER_BOT_USER_EMAIL) cho pick có điểm ≥ 70.",
     schedule: "3 lần/ngày · 8:30, 14:30, 19:30 (giờ VN)",
     risk: "trade",
+    settingsHref: "/admin/crons/lot-sizes",
+    settingsLabel: "Cấu hình lot",
   },
   {
     key: "screener-auto-review",

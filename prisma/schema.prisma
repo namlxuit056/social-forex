@@ -1075,6 +1075,16 @@ model AutoScalpSymbol {
   @@index([configId, enabled])
 }
 
+model ScreenerLotConfig {
+  id        String   @id @default(cuid())
+  /// Real symbol (e.g. "XAUUSD") or the "DEFAULT" sentinel — fallback lot size used
+  /// for any symbol without its own row. Admin-managed at /admin/crons/lot-sizes.
+  symbol    String   @unique
+  lotSize   Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model PriceAlert {
   id          String    @id @default(cuid())
   userId      String
