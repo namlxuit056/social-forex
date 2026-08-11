@@ -75,6 +75,7 @@ model User {
   signalComments       SignalComment[]
   signalReactions      SignalReaction[]
   tradeJournals        TradeJournal[]
+  emotionDiaryEntries  EmotionDiaryEntry[]
   notifications        Notification[]       @relation("NotificationRecipient")
   notificationsAsActor Notification[]       @relation("NotificationActor")
   signalEditLogs       SignalEditLog[]
@@ -399,6 +400,22 @@ model TradeJournal {
 
   @@index([userId, openedAt])
   @@index([copiedFromSignalId])
+}
+
+/// Nhật ký cảm xúc: 1 ghi chú mỗi ngày, ghi lại trạng thái tâm lý và lý do ra quyết định vào lệnh.
+model EmotionDiaryEntry {
+  id     String   @id @default(cuid())
+  userId String
+  date   DateTime
+  note   String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@index([userId, date])
 }
 
 model DailyTradingPlan {

@@ -221,3 +221,50 @@ export async function deleteTrade(formData: FormData) {
   await prisma.tradeJournal.delete({ where: { id: tradeId } });
   revalidateJournalPaths();
 }
+
+const emotionDiarySchema = z.object({
+  date: z.coerce.date(),
+  note: z.string().trim().min(1).max(4000),
+});
+
+export async function upsertEmotionDiaryEntry(
+  _prev: { error?: string; ok?: boolean } | null,
+  formData: FormData,
+) {
+  const session = await auth();
+  if (!session?.user?.id) redirect("/auth/signin");
+
+  const te = await getTranslations("errors");
+
+  const parsed = emotionDiarySchema.safeParse({
+    date: formData.get("date"),
+    note: formData.get("note"),
+  });
+  if (!parsed.success) return { error: te("journalInvalidData") };
+
+  const day = new Date(parsed.data.date);
+  day.setUTCHours(0, 0, 0, 0);
+
+  await prisma.emotionDiaryEntry.upsert({
+    where: { userId_date: { userId: session.user.id, date: day } },
+    create: { userId: session.user.id, date: day, note: parsed.data.note },
+    update: { note: parsed.data.note },
+  });
+
+  revalidateJournalPaths();
+  return { ok: true };
+}
+
+export async function deleteEmotionDiaryEntry(formData: FormData) {
+  const session = await auth();
+  if (!session?.user?.id) redirect("/auth/signin");
+
+  const id = formData.get("id") as string;
+  if (!id) return;
+
+  const entry = await prisma.emotionDiaryEntry.findUnique({ where: { id } });
+  if (!entry || entry.userId !== session.user.id) return;
+
+  await prisma.emotionDiaryEntry.delete({ where: { id } });
+  revalidateJournalPaths();
+}

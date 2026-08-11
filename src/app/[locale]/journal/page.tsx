@@ -16,6 +16,7 @@ import { JournalEdgeAnalytics } from "./journal-edge-analytics";
 import { JournalCalendar } from "./journal-calendar";
 import { JournalAdvancedStats } from "./journal-advanced-stats";
 import { JournalChat } from "./journal-chat";
+import { JournalEmotionDiary } from "./journal-emotion-diary";
 import { RiskCalculator } from "@/components/tools/risk-calculator";
 import { countTrailingLosses } from "@/lib/journal/loss-streak";
 import { computeRStats } from "@/lib/journal/r-multiple";
@@ -101,9 +102,11 @@ export default async function JournalPage({
           ? "stats"
           : query?.tab === "chat"
             ? "chat"
-            : "trades";
+            : query?.tab === "emotion"
+              ? "emotion"
+              : "trades";
 
-  const [tradesRaw, mt5Connection, weeklyReviewsRaw, dbUser] = await Promise.all([
+  const [tradesRaw, mt5Connection, weeklyReviewsRaw, dbUser, emotionEntriesRaw] = await Promise.all([
     prisma.tradeJournal.findMany({
       where: { userId: session.user.id },
       orderBy: { openedAt: "desc" },
@@ -125,7 +128,20 @@ export default async function JournalPage({
       where: { id: session.user.id },
       select: { vipUntil: true },
     }),
+    activeTab === "emotion"
+      ? prisma.emotionDiaryEntry.findMany({
+          where: { userId: session.user.id },
+          orderBy: { date: "desc" },
+          take: 365,
+        })
+      : Promise.resolve([]),
   ]);
+
+  const emotionEntries = emotionEntriesRaw.map((e) => ({
+    id: e.id,
+    date: e.date.toISOString().slice(0, 10),
+    note: e.note,
+  }));
 
   const isVip = isVipActive(dbUser?.vipUntil);
 
@@ -317,6 +333,16 @@ export default async function JournalPage({
         >
           {t("tabChat")}
         </Link>
+        <Link
+          href="/journal?tab=emotion"
+          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+            activeTab === "emotion"
+              ? "border-primary text-foreground"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          {t("tabEmotion")}
+        </Link>
       </nav>
 
       {activeTab === "weekly" ? (
@@ -334,6 +360,8 @@ export default async function JournalPage({
         </div>
       ) : activeTab === "chat" ? (
         <JournalChat isLoggedIn={true} isVip={isVip} />
+      ) : activeTab === "emotion" ? (
+        <JournalEmotionDiary entries={emotionEntries} locale={locale} />
       ) : (
         <>
           <RiskCalculator defaultBalance={mt5Account?.balance ?? null} />
