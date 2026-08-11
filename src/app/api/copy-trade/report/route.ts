@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { routing } from "@/i18n/routing";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
@@ -55,7 +56,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       },
     });
 
-    revalidatePath("/journal");
+    for (const locale of routing.locales) {
+      revalidatePath(`/${locale}/journal`, "page");
+    }
   }
 
   return NextResponse.json({ ok: true });

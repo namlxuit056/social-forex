@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { auth } from "@/auth";
+import { routing } from "@/i18n/routing";
 import { prisma } from "@/lib/prisma";
 import { updateStreak } from "@/lib/streak";
 import { addXp } from "@/lib/add-xp";
@@ -14,6 +15,12 @@ import { parseJournalImageUrl, parseTradeEmotion } from "@/lib/journal/emotions"
 import { isPushEnabled, sendPushToUser } from "@/lib/push";
 
 const LOSS_STREAK_PUSH_THRESHOLD = 3;
+
+function revalidateJournalPaths() {
+  for (const locale of routing.locales) {
+    revalidatePath(`/${locale}/journal`, "page");
+  }
+}
 
 /** Push đúng 1 lần khi chuỗi thua trong 24h vừa chạm ngưỡng. Non-blocking. */
 async function maybeNotifyLossStreak(userId: string) {
@@ -126,7 +133,7 @@ export async function createTrade(
     // Non-blocking
   }
 
-  revalidatePath("/journal");
+  revalidateJournalPaths();
   return { ok: true };
 }
 
@@ -195,7 +202,7 @@ export async function updateTrade(
     await maybeNotifyLossStreak(session.user.id);
   }
 
-  revalidatePath("/journal");
+  revalidateJournalPaths();
   return { ok: true };
 }
 
@@ -212,5 +219,5 @@ export async function deleteTrade(formData: FormData) {
   if (!trade || trade.userId !== session.user.id) return;
 
   await prisma.tradeJournal.delete({ where: { id: tradeId } });
-  revalidatePath("/journal");
+  revalidateJournalPaths();
 }

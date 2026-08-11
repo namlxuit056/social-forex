@@ -1,4 +1,5 @@
 import { revalidatePath } from "next/cache";
+import { routing } from "@/i18n/routing";
 import { prisma } from "@/lib/prisma";
 import { notifyTelegramClosedSignal } from "@/lib/telegram";
 import { positionSchema, pendingOrderSchema } from "@/lib/mt5/schemas";
@@ -65,7 +66,9 @@ export async function reconcileStaleMt5Signals(): Promise<{
   if (allClosedSignalIds.length > 0) {
     revalidatePath("/mt5");
     revalidatePath("/signals");
-    revalidatePath("/journal");
+    for (const locale of routing.locales) {
+      revalidatePath(`/${locale}/journal`, "page");
+    }
     for (const userId of touchedUserIds) {
       revalidatePath(`/u/${userId}`);
     }
