@@ -34,6 +34,7 @@ export type Mt5AccountInfo = {
   lastSeenAt: string | null;
   autoCloseBeforeWeekend: boolean;
   autoCloseEndOfDay: boolean;
+  closeAllAtBreakeven: boolean;
   copyTradingPaused: boolean;
 };
 

@@ -206,6 +206,7 @@ export default async function JournalPage({
         lastSeenAt: mt5Connection.lastSeenAt?.toISOString() ?? null,
         autoCloseBeforeWeekend: mt5Connection.autoCloseBeforeWeekend,
         autoCloseEndOfDay: mt5Connection.autoCloseEndOfDay,
+        closeAllAtBreakeven: mt5Connection.closeAllAtBreakeven,
         copyTradingPaused: mt5Connection.user.copyTradingPaused,
       }
     : null;

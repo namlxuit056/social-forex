@@ -2385,6 +2385,8 @@
     "mt5AutoCloseBody": "Thị trường forex sắp đóng cửa cuối tuần, hệ thống đã đóng toàn bộ lệnh mở theo cài đặt của bạn.",
     "mt5AutoCloseEodTitle": "Đã tự động đóng tất cả lệnh cuối ngày",
     "mt5AutoCloseEodBody": "Sắp hết ngày giao dịch, hệ thống đã đóng toàn bộ lệnh mở theo cài đặt của bạn.",
+    "mt5AutoCloseBreakevenTitle": "Đã tự động đóng tất cả lệnh về hoà vốn",
+    "mt5AutoCloseBreakevenBody": "Lợi nhuận tổng đã về 0, hệ thống đã đóng toàn bộ lệnh mở để bảo toàn lời theo cài đặt của bạn.",
     "signalNewTitle": "{symbol} Signal mới",
     "signalNewVipTitle": "{symbol} ⭐ Signal VIP mới",
     "signalNewBody": "Trader bạn follow vừa đăng signal {symbol} — Xem ngay"

@@ -46,6 +46,7 @@ export async function getMt5AccountSnapshot(userId: string): Promise<Mt5AccountR
       lastOrders: true,
       autoCloseBeforeWeekend: true,
       autoCloseEndOfDay: true,
+      closeAllAtBreakeven: true,
       user: { select: { copyTradingPaused: true } },
     },
   });
@@ -160,6 +161,7 @@ export async function getMt5AccountSnapshot(userId: string): Promise<Mt5AccountR
       lastSeenAt: connection.lastSeenAt?.toISOString() ?? null,
       autoCloseBeforeWeekend: connection.autoCloseBeforeWeekend,
       autoCloseEndOfDay: connection.autoCloseEndOfDay,
+      closeAllAtBreakeven: connection.closeAllAtBreakeven,
       copyTradingPaused: connection.user.copyTradingPaused,
     },
     positions,
