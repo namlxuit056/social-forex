@@ -118,6 +118,7 @@ export async function POST(request: NextRequest) {
       revokedAt: true,
       lastTradeHash: true,
       lastSnapshotAt: true,
+      lastSeenAt: true,
       user: { select: { copyTradingPaused: true } },
     },
   });
@@ -134,6 +135,29 @@ export async function POST(request: NextRequest) {
   const snapshotExpired =
     !connection.lastSnapshotAt || now.getTime() - connection.lastSnapshotAt.getTime() >= 60_000;
   const shouldCreateSnapshot = tradeChanged || snapshotExpired;
+
+  // The EA may heartbeat far more often than anything ever reads this data —
+  // the web dashboard itself only polls every 8s (see positions-client.tsx),
+  // so writing faster than that is pure Neon compute cost with zero benefit.
+  // Skip the write (but still ack) unless a trade actually changed or enough
+  // time has passed since the last persisted heartbeat.
+  const MIN_HEARTBEAT_WRITE_INTERVAL_MS = 5_000;
+  const heartbeatAge = connection.lastSeenAt ? now.getTime() - connection.lastSeenAt.getTime() : Infinity;
+  const shouldPersistHeartbeat = tradeChanged || heartbeatAge >= MIN_HEARTBEAT_WRITE_INTERVAL_MS;
+
+  if (!shouldPersistHeartbeat) {
+    return NextResponse.json({
+      ok: true,
+      receivedAt: now.toISOString(),
+      positions: positions.length,
+      orders: orders.length,
+      signals: 0,
+      closedSignals: 0,
+      snapshotCreated: false,
+      tradeChanged: false,
+      throttled: true,
+    });
+  }
   const activeMt5Tickets = new Set(positions.map((position) => position.identifier ?? position.ticket));
   const pendingMt5Tickets = new Set(orders.map((order) => order.ticket));
 
@@ -179,11 +203,11 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    for (const order of orders) {
+    if (orders.length > 0) {
       await tx.mt5SignalLink.updateMany({
         where: {
           connectionId: connection.id,
-          mt5Ticket: order.ticket,
+          mt5Ticket: { in: orders.map((order) => order.ticket) },
           kind: "PENDING_ORDER",
         },
         data: { lastSeenAt: now },
