@@ -2387,6 +2387,8 @@
     "mt5AutoCloseEodBody": "The trading day is ending — all open positions were closed per your settings.",
     "mt5AutoCloseBreakevenTitle": "All positions auto-closed at breakeven",
     "mt5AutoCloseBreakevenBody": "Your total floating P/L returned to breakeven — all open positions were closed to protect the gain, per your settings.",
+    "mt5AutoCloseScheduledTitle": "All positions auto-closed at scheduled time",
+    "mt5AutoCloseScheduledBody": "Your scheduled close time was reached — all open positions were closed per your settings.",
     "signalNewTitle": "New {symbol} signal",
     "signalNewVipTitle": "New {symbol} ⭐ VIP signal",
     "signalNewBody": "A trader you follow just posted a {symbol} signal — check it out"

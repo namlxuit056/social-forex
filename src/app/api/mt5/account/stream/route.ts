@@ -1,14 +1,13 @@
 import { auth } from "@/auth";
 import { getMt5AccountSnapshot } from "@/lib/mt5/account-snapshot";
-import {
-  maybeTriggerWeekendAutoClose,
-  maybeTriggerEndOfDayAutoClose,
-  maybeTriggerBreakevenAutoClose,
-} from "@/lib/mt5/auto-close";
+import { runAutoCloseChecks } from "@/lib/mt5/auto-close";
 
 export const runtime = "nodejs";
 
-const POLL_MS = 2_000;
+// Kept well above the ~5min Neon autosuspend idle window's worth of queries —
+// this stream is the single biggest driver of Neon compute-hours since it
+// runs continuously for as long as a user has /positions open.
+const POLL_MS = 8_000;
 const HEARTBEAT_MS = 30_000;
 
 export async function GET(): Promise<Response> {
@@ -41,19 +40,7 @@ export async function GET(): Promise<Response> {
         }
 
         try {
-          await maybeTriggerWeekendAutoClose(userId);
-        } catch {
-          // never let the auto-close check break the stream
-        }
-
-        try {
-          await maybeTriggerEndOfDayAutoClose(userId);
-        } catch {
-          // never let the auto-close check break the stream
-        }
-
-        try {
-          await maybeTriggerBreakevenAutoClose(userId);
+          await runAutoCloseChecks(userId);
         } catch {
           // never let the auto-close check break the stream
         }

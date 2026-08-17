@@ -44,6 +44,7 @@ import {
   setMt5AutoCloseBeforeWeekend,
   setMt5AutoCloseEndOfDay,
   setMt5CloseAllAtBreakeven,
+  setMt5ScheduledClose,
 } from "@/actions/mt5-commands";
 import { setCopyTradingPaused } from "@/actions/copy-trade";
 import { PositionsTable } from "./positions-table";
@@ -110,6 +111,13 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
   const [autoClosePending, startAutoClose] = useTransition();
   const [autoCloseEodPending, startAutoCloseEod] = useTransition();
   const [closeAtBreakevenPending, startCloseAtBreakeven] = useTransition();
+  const [scheduledClosePending, startScheduledClose] = useTransition();
+  const [scheduledCloseTimeInput, setScheduledCloseTimeInput] = useState(
+    initialAccount?.scheduledCloseTime ?? "22:00",
+  );
+  const [scheduledCloseTzInput, setScheduledCloseTzInput] = useState<"utc" | "vn">(
+    initialAccount?.scheduledCloseTz ?? "vn",
+  );
   const [copyTradingPausePending, startCopyTradingPause] = useTransition();
   const [activeSessions, setActiveSessions] = useState(() => getActiveTradingSessions());
   const [quickOrderConfig, setQuickOrderConfig] = useState<QuickOrderConfig>(DEFAULT_QUICK_ORDER_CONFIG);
@@ -216,6 +224,43 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
     setAccount((prev) => (prev ? { ...prev, closeAllAtBreakeven: next } : prev));
     startCloseAtBreakeven(async () => {
       await setMt5CloseAllAtBreakeven(next);
+    });
+  }
+
+  function handleToggleScheduledClose() {
+    const next = !account?.scheduledCloseEnabled;
+    setAccount((prev) =>
+      prev
+        ? {
+            ...prev,
+            scheduledCloseEnabled: next,
+            scheduledCloseTime: scheduledCloseTimeInput,
+            scheduledCloseTz: scheduledCloseTzInput,
+          }
+        : prev,
+    );
+    startScheduledClose(async () => {
+      await setMt5ScheduledClose({
+        enabled: next,
+        time: scheduledCloseTimeInput,
+        tz: scheduledCloseTzInput,
+      });
+    });
+  }
+
+  function handleScheduledCloseTimeChange(value: string) {
+    setScheduledCloseTimeInput(value);
+    if (!account?.scheduledCloseEnabled) return;
+    startScheduledClose(async () => {
+      await setMt5ScheduledClose({ enabled: true, time: value, tz: scheduledCloseTzInput });
+    });
+  }
+
+  function handleScheduledCloseTzChange(value: "utc" | "vn") {
+    setScheduledCloseTzInput(value);
+    if (!account?.scheduledCloseEnabled) return;
+    startScheduledClose(async () => {
+      await setMt5ScheduledClose({ enabled: true, time: scheduledCloseTimeInput, tz: value });
     });
   }
 
@@ -454,6 +499,52 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
               )}
             />
           </button>
+        </div>
+
+        <div className="mt-4 flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-medium text-foreground">Scheduled close</p>
+            <p className="text-xs text-muted-foreground">
+              Automatically close all positions at a set time every day. Only works while this
+              page is open at that time.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="time"
+              value={scheduledCloseTimeInput}
+              disabled={scheduledClosePending || !account}
+              onChange={(e) => handleScheduledCloseTimeChange(e.target.value)}
+              className="h-9 rounded-md border border-input bg-background px-2 text-sm text-foreground"
+            />
+            <select
+              value={scheduledCloseTzInput}
+              disabled={scheduledClosePending || !account}
+              onChange={(e) => handleScheduledCloseTzChange(e.target.value as "utc" | "vn")}
+              className="h-9 rounded-md border border-input bg-background px-2 text-sm text-foreground"
+            >
+              <option value="vn">VN time</option>
+              <option value="utc">UTC</option>
+            </select>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={account?.scheduledCloseEnabled ?? false}
+              disabled={scheduledClosePending || !account}
+              onClick={handleToggleScheduledClose}
+              className={cn(
+                "relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors focus:outline-none disabled:opacity-50",
+                account?.scheduledCloseEnabled ? "bg-primary" : "bg-muted",
+              )}
+            >
+              <span
+                className={cn(
+                  "pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-md transition-transform",
+                  account?.scheduledCloseEnabled ? "translate-x-5" : "translate-x-0",
+                )}
+              />
+            </button>
+          </div>
         </div>
 
         <div className="mt-4 flex items-center justify-between gap-3 border-t border-border pt-4">

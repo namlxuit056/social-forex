@@ -308,3 +308,39 @@ export async function setMt5CloseAllAtBreakeven(enabled: boolean): Promise<{ err
 
   return {};
 }
+
+const scheduledCloseSchema = z.object({
+  enabled: z.boolean(),
+  time: z
+    .string()
+    .regex(/^([01]\d|2[0-3]):[0-5]\d$/)
+    .nullable(),
+  tz: z.enum(["utc", "vn"]),
+});
+
+export async function setMt5ScheduledClose(params: {
+  enabled: boolean;
+  time: string | null;
+  tz: "utc" | "vn";
+}): Promise<{ error?: string }> {
+  const session = await auth();
+  if (!session?.user?.id) redirect("/auth/signin");
+
+  const parsed = scheduledCloseSchema.safeParse(params);
+  if (!parsed.success) return { error: "invalid_params" };
+  if (parsed.data.enabled && !parsed.data.time) return { error: "invalid_params" };
+
+  const connection = await getActiveConnection(session.user.id);
+  if (!connection) return { error: "no_connection" };
+
+  await prisma.mt5Connection.update({
+    where: { id: connection.id },
+    data: {
+      scheduledCloseEnabled: parsed.data.enabled,
+      scheduledCloseTime: parsed.data.time,
+      scheduledCloseTz: parsed.data.tz,
+    },
+  });
+
+  return {};
+}

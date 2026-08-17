@@ -798,6 +798,10 @@ model Mt5Connection {
   autoCloseEndOfDay         Boolean   @default(false)
   lastAutoCloseEodTriggeredAt DateTime?
   closeAllAtBreakeven       Boolean   @default(false)
+  scheduledCloseEnabled     Boolean   @default(false)
+  scheduledCloseTime        String?
+  scheduledCloseTz          String    @default("utc")
+  lastScheduledCloseTriggeredAt DateTime?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 

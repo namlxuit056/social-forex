@@ -32,3 +32,47 @@ export function isWithinEndOfDayAutoCloseWindow(now: Date = new Date()): boolean
 export function getAutoCloseDayKey(now: Date = new Date()): string {
   return now.toISOString().slice(0, 10);
 }
+
+export type ScheduledCloseTz = "utc" | "vn";
+
+const VN_TIME_ZONE = "Asia/Ho_Chi_Minh";
+// Positions page polls every 2s while open, but a user isn't guaranteed to
+// have it open at the exact scheduled minute — this grace window is how long
+// after the scheduled time the trigger still fires (matched against the same
+// day, so it never fires twice).
+const SCHEDULED_CLOSE_GRACE_MINUTES = 5;
+
+export function isValidScheduledCloseTime(value: string): boolean {
+  return /^([01]\d|2[0-3]):[0-5]\d$/.test(value);
+}
+
+function getWallClockMinutes(now: Date, tz: ScheduledCloseTz): number {
+  if (tz === "utc") return now.getUTCHours() * 60 + now.getUTCMinutes();
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: VN_TIME_ZONE,
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(now);
+  const hour = Number(parts.find((p) => p.type === "hour")?.value ?? "0");
+  const minute = Number(parts.find((p) => p.type === "minute")?.value ?? "0");
+  return hour * 60 + minute;
+}
+
+export function isWithinScheduledCloseWindow(
+  now: Date,
+  timeHHmm: string,
+  tz: ScheduledCloseTz,
+): boolean {
+  if (!isValidScheduledCloseTime(timeHHmm)) return false;
+  const [hour, minute] = timeHHmm.split(":").map(Number);
+  const scheduledMinutes = hour * 60 + minute;
+  const nowMinutes = getWallClockMinutes(now, tz);
+  const diff = (nowMinutes - scheduledMinutes + 1440) % 1440;
+  return diff < SCHEDULED_CLOSE_GRACE_MINUTES;
+}
+
+export function getScheduledCloseDayKey(now: Date, tz: ScheduledCloseTz): string {
+  if (tz === "utc") return now.toISOString().slice(0, 10);
+  return new Intl.DateTimeFormat("en-CA", { timeZone: VN_TIME_ZONE }).format(now);
+}

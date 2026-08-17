@@ -207,6 +207,9 @@ export default async function JournalPage({
         autoCloseBeforeWeekend: mt5Connection.autoCloseBeforeWeekend,
         autoCloseEndOfDay: mt5Connection.autoCloseEndOfDay,
         closeAllAtBreakeven: mt5Connection.closeAllAtBreakeven,
+        scheduledCloseEnabled: mt5Connection.scheduledCloseEnabled,
+        scheduledCloseTime: mt5Connection.scheduledCloseTime,
+        scheduledCloseTz: mt5Connection.scheduledCloseTz === "vn" ? ("vn" as const) : ("utc" as const),
         copyTradingPaused: mt5Connection.user.copyTradingPaused,
       }
     : null;

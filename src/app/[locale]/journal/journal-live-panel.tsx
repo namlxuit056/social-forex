@@ -35,6 +35,9 @@ export type Mt5AccountInfo = {
   autoCloseBeforeWeekend: boolean;
   autoCloseEndOfDay: boolean;
   closeAllAtBreakeven: boolean;
+  scheduledCloseEnabled: boolean;
+  scheduledCloseTime: string | null;
+  scheduledCloseTz: "utc" | "vn";
   copyTradingPaused: boolean;
 };
 
