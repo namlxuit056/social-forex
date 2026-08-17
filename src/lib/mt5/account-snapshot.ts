@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import type { LivePosition, Mt5AccountInfo } from "@/app/[locale]/journal/journal-live-panel";
 import type { ClosedTrade } from "@/components/mt5/history-table";
+import { parseMql5Time } from "@/lib/mt5/parse-mql5-time";
 
 export type LivePendingOrder = {
   ticket: string;
@@ -21,13 +22,6 @@ export type Mt5AccountResponse = {
 };
 
 const HISTORY_LIMIT = 100;
-
-function parseMql5Time(v: unknown): string | null {
-  if (typeof v !== "string" || !v) return null;
-  const iso = v.replace(/^(\d{4})\.(\d{2})\.(\d{2})/, "$1-$2-$3").replace(" ", "T");
-  const d = new Date(iso);
-  return Number.isFinite(d.getTime()) ? d.toISOString() : null;
-}
 
 export async function getMt5AccountSnapshot(userId: string): Promise<Mt5AccountResponse | null> {
   const connection = await prisma.mt5Connection.findFirst({

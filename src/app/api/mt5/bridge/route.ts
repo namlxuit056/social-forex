@@ -18,6 +18,54 @@ import {
   positionSchema,
 } from "@/lib/mt5/schemas";
 import { closeStaleSignalLinks } from "@/lib/mt5/close-stale-signal-links";
+import { parseMql5Time } from "@/lib/mt5/parse-mql5-time";
+import { publishMt5LiveUpdate, type Mt5LiveUpdate } from "@/lib/mt5/live-redis";
+import { runAutoCloseChecks } from "@/lib/mt5/auto-close";
+
+function toLiveUpdate(
+  account: z.infer<typeof accountSchema>,
+  positions: z.infer<typeof positionSchema>[],
+  orders: z.infer<typeof pendingOrderSchema>[],
+  now: Date,
+): Mt5LiveUpdate {
+  return {
+    account: {
+      balance: account.balance,
+      equity: account.equity,
+      margin: account.margin ?? null,
+      freeMargin: account.freeMargin ?? null,
+      currency: account.currency ?? null,
+      openPositions: positions.length,
+      lastSeenAt: now.toISOString(),
+    },
+    positions: positions.map((p) => ({
+      ticket: p.ticket,
+      symbol: p.symbol,
+      type: p.type,
+      volume: p.volume,
+      priceOpen: p.priceOpen,
+      priceCurrent: p.priceCurrent ?? null,
+      stopLoss: p.stopLoss,
+      takeProfit: p.takeProfit,
+      profit: p.profit ?? null,
+      swap: p.swap ?? null,
+      openedAt: parseMql5Time(p.openedAt),
+      // Rarely-changing config, not part of the EA heartbeat payload — the
+      // client preserves its last-known value per ticket across live updates.
+      trailingPips: null,
+    })),
+    orders: orders.map((o) => ({
+      ticket: o.ticket,
+      symbol: o.symbol,
+      type: o.type,
+      volume: o.volume,
+      priceOpen: o.priceOpen,
+      stopLoss: o.stopLoss,
+      takeProfit: o.takeProfit,
+      openedAt: parseMql5Time(o.openedAt),
+    })),
+  };
+}
 
 const payloadSchema = z.object({
   token: z.string().optional(),
@@ -136,11 +184,15 @@ export async function POST(request: NextRequest) {
     !connection.lastSnapshotAt || now.getTime() - connection.lastSnapshotAt.getTime() >= 60_000;
   const shouldCreateSnapshot = tradeChanged || snapshotExpired;
 
-  // The EA may heartbeat far more often than anything ever reads this data —
-  // the web dashboard itself only polls every 8s (see positions-client.tsx),
-  // so writing faster than that is pure Neon compute cost with zero benefit.
-  // Skip the write (but still ack) unless a trade actually changed or enough
-  // time has passed since the last persisted heartbeat.
+  // Live UI freshness is decoupled from Postgres entirely: publish to Redis
+  // on every heartbeat (cheap, doesn't touch Neon) so connected browser tabs
+  // get sub-second updates regardless of how the Postgres write below is
+  // throttled. If Redis isn't configured this is a no-op.
+  await publishMt5LiveUpdate(connection.id, toLiveUpdate(account, positions, orders, now));
+
+  // The EA may heartbeat far more often than the durable snapshot needs —
+  // skip the Postgres write (but still ack fast) unless a trade actually
+  // changed or enough time has passed since the last persisted heartbeat.
   const MIN_HEARTBEAT_WRITE_INTERVAL_MS = 5_000;
   const heartbeatAge = connection.lastSeenAt ? now.getTime() - connection.lastSeenAt.getTime() : Infinity;
   const shouldPersistHeartbeat = tradeChanged || heartbeatAge >= MIN_HEARTBEAT_WRITE_INTERVAL_MS;
@@ -158,6 +210,16 @@ export async function POST(request: NextRequest) {
       throttled: true,
     });
   }
+
+  // Runs on the same throttle cadence as the write above, using its own
+  // fresh read — this is what makes weekend/EOD/breakeven/scheduled close
+  // work even with no browser tab open, as long as the EA is running.
+  try {
+    await runAutoCloseChecks(connection.userId);
+  } catch {
+    // never let the auto-close check break the bridge heartbeat
+  }
+
   const activeMt5Tickets = new Set(positions.map((position) => position.identifier ?? position.ticket));
   const pendingMt5Tickets = new Set(orders.map((order) => order.ticket));
 

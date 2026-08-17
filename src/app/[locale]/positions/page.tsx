@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { getMt5AccountSnapshot } from "@/lib/mt5/account-snapshot";
+import { isMt5LiveRedisEnabled } from "@/lib/mt5/live-redis";
 import { PositionsClient } from "@/components/mt5/positions-client";
 
 export const dynamic = "force-dynamic";
@@ -53,6 +54,7 @@ export default async function PositionsPage({
           initialPositions={snapshot.positions}
           initialOrders={snapshot.orders}
           initialHistory={snapshot.history}
+          liveEnabled={isMt5LiveRedisEnabled()}
         />
       )}
     </div>

@@ -21,6 +21,7 @@ import { RiskCalculator } from "@/components/tools/risk-calculator";
 import { countTrailingLosses } from "@/lib/journal/loss-streak";
 import { computeRStats } from "@/lib/journal/r-multiple";
 import { isVipActive } from "@/lib/vip";
+import { isMt5LiveRedisEnabled } from "@/lib/mt5/live-redis";
 import type { AiJournalAnalysis } from "@/lib/ai/types";
 import { AlertTriangle } from "lucide-react";
 
@@ -382,6 +383,7 @@ export default async function JournalPage({
             account={mt5Account}
             positions={livePositions}
             locale={locale}
+            liveEnabled={isMt5LiveRedisEnabled()}
           />
 
           {trades.length === 0 ? (

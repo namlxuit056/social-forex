@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import type { Mt5AccountResponse } from "@/app/api/mt5/account/route";
+import type { Mt5LiveUpdate } from "@/lib/mt5/live-redis";
 
 export type LivePosition = {
   ticket: string;
@@ -45,24 +46,83 @@ interface Props {
   account: Mt5AccountInfo | null;
   positions: LivePosition[];
   locale: string;
+  liveEnabled: boolean;
 }
 
 function fmt(value: number | null, digits = 2): string {
   return value == null ? "—" : value.toFixed(digits);
 }
 
-export function JournalLivePanel({ account: initialAccount, positions: initialPositions, locale }: Props) {
+export function JournalLivePanel({
+  account: initialAccount,
+  positions: initialPositions,
+  locale,
+  liveEnabled,
+}: Props) {
   const t = useTranslations("journal");
   const [account, setAccount] = useState<Mt5AccountInfo | null>(initialAccount);
   const [positions, setPositions] = useState<LivePosition[]>(initialPositions);
   const [spinning, setSpinning] = useState(false);
 
+  // Sub-second live updates via a Redis-backed SSE stream — no Postgres
+  // query happens for the life of the connection. Falls back to polling
+  // below when Redis isn't configured.
+  useEffect(() => {
+    if (!initialAccount || !liveEnabled) return;
+
+    let source: EventSource | null = null;
+    let spinTimeout: number | null = null;
+
+    function handleMessage(event: MessageEvent<string>) {
+      try {
+        const update = JSON.parse(event.data) as Mt5LiveUpdate;
+        setAccount((prev) => (prev ? { ...prev, ...update.account } : prev));
+        setPositions((prev) => {
+          const trailingByTicket = new Map(prev.map((p) => [p.ticket, p.trailingPips]));
+          return update.positions.map((p) => ({
+            ...p,
+            trailingPips: trailingByTicket.get(p.ticket) ?? null,
+          }));
+        });
+        setSpinning(true);
+        if (spinTimeout) window.clearTimeout(spinTimeout);
+        spinTimeout = window.setTimeout(() => setSpinning(false), 400);
+      } catch {
+        // ignore malformed payloads / heartbeat comments
+      }
+    }
+
+    function connect() {
+      source = new EventSource("/api/mt5/account/stream");
+      source.onmessage = handleMessage;
+    }
+
+    function handleVisibility() {
+      if (document.visibilityState === "visible") {
+        if (!source) connect();
+      } else {
+        source?.close();
+        source = null;
+      }
+    }
+
+    if (document.visibilityState === "visible") connect();
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibility);
+      if (spinTimeout) window.clearTimeout(spinTimeout);
+      source?.close();
+    };
+  }, [initialAccount, liveEnabled]);
+
   // Plain fetch on an interval instead of a server-held SSE connection — an
   // open ReadableStream keeps its Prisma connection (and the Neon compute
   // behind it) alive for as long as the tab stays open, regardless of poll
   // frequency, which is far more expensive than short-lived polled requests.
+  // Used only when Redis isn't configured (see `liveEnabled` above).
   useEffect(() => {
-    if (!initialAccount) return;
+    if (!initialAccount || liveEnabled) return;
 
     let timer: number | null = null;
     let spinTimeout: number | null = null;
@@ -111,7 +171,7 @@ export function JournalLivePanel({ account: initialAccount, positions: initialPo
       if (spinTimeout) window.clearTimeout(spinTimeout);
       stop();
     };
-  }, [initialAccount]);
+  }, [initialAccount, liveEnabled]);
 
   if (!account) {
     return (
