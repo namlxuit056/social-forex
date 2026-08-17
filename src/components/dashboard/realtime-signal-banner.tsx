@@ -5,42 +5,47 @@ import { useTranslations } from "next-intl";
 import { Radio } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Badge } from "@/components/ui/badge";
+import type { LiveSignal } from "@/app/api/signals/live/route";
 
-type NewSignal = {
-  id: string;
-  symbol: string;
-  direction: string;
-  tier: string;
-  author: string;
-};
+type NewSignal = LiveSignal;
+
+const POLL_MS = 30_000;
 
 export function RealtimeSignalBanner() {
   const t = useTranslations("dashboard");
   const [newSignals, setNewSignals] = useState<NewSignal[]>([]);
 
+  // Plain fetch on an interval instead of a server-held SSE connection — an
+  // open ReadableStream keeps its Prisma connection (and the Neon compute
+  // behind it) alive for as long as the dashboard tab stays open, regardless
+  // of poll frequency, which is far more expensive than short-lived polls.
   useEffect(() => {
-    const eventSource = new EventSource("/api/sse/signals");
+    let cancelled = false;
 
-    eventSource.onmessage = (event) => {
+    async function poll() {
       try {
-        const data = JSON.parse(event.data);
-        if (data.type === "new_signal") {
-          setNewSignals((prev) => {
-            const exists = prev.some((s) => s.id === data.signal.id);
-            if (exists) return prev;
-            return [data.signal, ...prev].slice(0, 5);
-          });
-        }
+        const res = await fetch(`/api/signals/live?sinceMs=${POLL_MS + 15_000}`, {
+          credentials: "include",
+        });
+        if (!res.ok || cancelled) return;
+        const data = (await res.json()) as { signals: LiveSignal[] };
+        setNewSignals((prev) => {
+          const prevIds = new Set(prev.map((s) => s.id));
+          const fresh = data.signals.filter((s) => !prevIds.has(s.id));
+          if (fresh.length === 0) return prev;
+          return [...fresh, ...prev].slice(0, 5);
+        });
       } catch {
         // Silent fail
       }
-    };
+    }
 
-    eventSource.onerror = () => {
-      eventSource.close();
+    void poll();
+    const timer = window.setInterval(() => void poll(), POLL_MS);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
     };
-
-    return () => eventSource.close();
   }, []);
 
   useEffect(() => {

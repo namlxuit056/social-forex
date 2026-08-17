@@ -57,46 +57,59 @@ export function JournalLivePanel({ account: initialAccount, positions: initialPo
   const [positions, setPositions] = useState<LivePosition[]>(initialPositions);
   const [spinning, setSpinning] = useState(false);
 
+  // Plain fetch on an interval instead of a server-held SSE connection — an
+  // open ReadableStream keeps its Prisma connection (and the Neon compute
+  // behind it) alive for as long as the tab stays open, regardless of poll
+  // frequency, which is far more expensive than short-lived polled requests.
   useEffect(() => {
     if (!initialAccount) return;
 
-    let source: EventSource | null = null;
+    let timer: number | null = null;
     let spinTimeout: number | null = null;
 
-    function handleMessage(event: MessageEvent<string>) {
+    async function poll() {
       try {
-        const data = JSON.parse(event.data) as Mt5AccountResponse;
+        const res = await fetch("/api/mt5/account", { credentials: "include" });
+        if (!res.ok) return;
+        const data = (await res.json()) as Mt5AccountResponse;
         setAccount(data.account);
         setPositions(data.positions);
         setSpinning(true);
         if (spinTimeout) window.clearTimeout(spinTimeout);
         spinTimeout = window.setTimeout(() => setSpinning(false), 400);
       } catch {
-        // ignore malformed payloads
+        // silent — keep showing last known data
       }
     }
 
-    function connect() {
-      source = new EventSource("/api/mt5/account/stream");
-      source.onmessage = handleMessage;
+    function schedule() {
+      if (timer != null) return;
+      timer = window.setInterval(() => void poll(), 8_000);
+    }
+
+    function stop() {
+      if (timer != null) {
+        window.clearInterval(timer);
+        timer = null;
+      }
     }
 
     function handleVisibility() {
       if (document.visibilityState === "visible") {
-        if (!source) connect();
+        void poll();
+        schedule();
       } else {
-        source?.close();
-        source = null;
+        stop();
       }
     }
 
-    if (document.visibilityState === "visible") connect();
+    if (document.visibilityState === "visible") schedule();
     document.addEventListener("visibilitychange", handleVisibility);
 
     return () => {
       document.removeEventListener("visibilitychange", handleVisibility);
       if (spinTimeout) window.clearTimeout(spinTimeout);
-      source?.close();
+      stop();
     };
   }, [initialAccount]);
 

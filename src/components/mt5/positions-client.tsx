@@ -56,6 +56,8 @@ import { PortfolioReviewPanel } from "./portfolio-review-panel";
 import type { LivePosition, Mt5AccountInfo } from "@/app/[locale]/journal/journal-live-panel";
 import type { LivePendingOrder, Mt5AccountResponse } from "@/app/api/mt5/account/route";
 
+const POSITIONS_POLL_MS = 8_000;
+
 function fmtMoney(v: number | null, currency: string) {
   if (v == null) return "—";
   const sign = v > 0 ? "+" : "";
@@ -140,7 +142,7 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
     setHistory(data.history ?? []);
   }, []);
 
-  // Manual refresh button - the automatic updates below come from the SSE stream.
+  // Used for both the manual refresh button and the background poll below.
   const fetchData = useCallback(async () => {
     setSpinning(true);
     try {
@@ -155,47 +157,44 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
     }
   }, [applySnapshot]);
 
+  // Plain fetch on an interval instead of a server-held SSE connection — an
+  // open ReadableStream keeps its Prisma connection (and the Neon compute
+  // behind it) alive for as long as the tab stays open, regardless of poll
+  // frequency, which is far more expensive than short-lived polled requests.
   useEffect(() => {
     if (!initialAccount) return;
 
-    let source: EventSource | null = null;
-    let spinTimeout: number | null = null;
+    let timer: number | null = null;
 
-    function handleMessage(event: MessageEvent<string>) {
-      try {
-        const data = JSON.parse(event.data) as Mt5AccountResponse;
-        applySnapshot(data);
-        setSpinning(true);
-        if (spinTimeout) window.clearTimeout(spinTimeout);
-        spinTimeout = window.setTimeout(() => setSpinning(false), 400);
-      } catch {
-        // ignore malformed payloads
-      }
+    function schedule() {
+      if (timer != null) return;
+      timer = window.setInterval(() => void fetchData(), POSITIONS_POLL_MS);
     }
 
-    function connect() {
-      source = new EventSource("/api/mt5/account/stream");
-      source.onmessage = handleMessage;
+    function stop() {
+      if (timer != null) {
+        window.clearInterval(timer);
+        timer = null;
+      }
     }
 
     function handleVisibility() {
       if (document.visibilityState === "visible") {
-        if (!source) connect();
+        void fetchData();
+        schedule();
       } else {
-        source?.close();
-        source = null;
+        stop();
       }
     }
 
-    if (document.visibilityState === "visible") connect();
+    if (document.visibilityState === "visible") schedule();
     document.addEventListener("visibilitychange", handleVisibility);
 
     return () => {
       document.removeEventListener("visibilitychange", handleVisibility);
-      if (spinTimeout) window.clearTimeout(spinTimeout);
-      source?.close();
+      stop();
     };
-  }, [initialAccount, applySnapshot]);
+  }, [initialAccount, fetchData]);
 
   function handleCloseAll() {
     startCloseAll(async () => {
@@ -619,7 +618,7 @@ export function PositionsClient({ initialAccount, initialPositions, initialOrder
       </Tabs>
 
       <p className="text-center text-xs text-muted-foreground">
-        Live updates via realtime feed · Commands execute on next EA heartbeat
+        Updates every few seconds while this page is open · Commands execute on next EA heartbeat
       </p>
     </div>
   );
