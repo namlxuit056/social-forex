@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { LossStreakGuard } from "@/components/journal/loss-streak-guard";
 import { JournalFormCard } from "./journal-form";
 
 type PrefillData = {
@@ -29,10 +30,12 @@ export function JournalHeader({ prefill }: { prefill?: PrefillData }) {
           <p className="mt-2 text-muted-foreground">{t("description")}</p>
         </div>
         {!open && (
-          <Button onClick={() => setOpen(true)} className="shrink-0 gap-1.5">
-            <Plus className="size-4" />
-            {t("addTrade")}
-          </Button>
+          <LossStreakGuard>
+            <Button onClick={() => setOpen(true)} className="shrink-0 gap-1.5">
+              <Plus className="size-4" />
+              {t("addTrade")}
+            </Button>
+          </LossStreakGuard>
         )}
       </div>
 

@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { subscribeCopyTrade, unsubscribeCopyTrade } from "@/actions/copy-trade";
+import { LossStreakGuard } from "@/components/journal/loss-streak-guard";
 
 type Props = {
   providerId: string;
@@ -135,14 +136,19 @@ export function CopyTradeButton({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger
-        render={
-          <Button variant={subscribed ? "outline" : "default"} size="sm" className="gap-1.5" />
-        }
-      >
-        <Copy className="size-3.5" />
-        {subscribed ? t("manage") : t("copy")}
-      </DialogTrigger>
+      {subscribed ? (
+        <DialogTrigger render={<Button variant="outline" size="sm" className="gap-1.5" />}>
+          <Copy className="size-3.5" />
+          {t("manage")}
+        </DialogTrigger>
+      ) : (
+        <LossStreakGuard compact>
+          <DialogTrigger render={<Button variant="default" size="sm" className="gap-1.5" />}>
+            <Copy className="size-3.5" />
+            {t("copy")}
+          </DialogTrigger>
+        </LossStreakGuard>
+      )}
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">

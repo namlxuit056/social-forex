@@ -33,9 +33,6 @@ _Đề xuất 2026-07-20, theo goal Sprint 2 "Trust & conversion". Lưu ý: trá
 
 Goal: (1) phát hiện/ngăn trading khi tâm lý xấu, quá tải rủi ro, revenge trading; (2) giúp trader ra quyết định tốt hơn dựa trên data journal/signal/screener đã có. Đã rà soát để không trùng: Journal Emotion Diary, Loss-streak banner (chỉ cảnh báo, chưa khoá), Journal Advanced Stats, Journal Edge Analytics, News guard, DailyTradingPlan (đã có field maxRiskPercent/maxTrades/checklist nhưng **chưa enforce ở đâu cả**).
 
-**P0**
-- [ ] **Revenge-trading cooldown** — nâng cấp `loss-streak.ts` từ banner-only thành khoá tạm: sau N lệnh thua liên tiếp trong X giờ (ngưỡng hiện có), ẩn nút "Copy trade" + form thêm lệnh journal trong Y phút, có nút "Tôi đã bình tĩnh, tiếp tục" để override thủ công (không khoá cứng). Lý do: banner hiện tại dễ bị lướt qua, đây là nguyên nhân cháy tài khoản phổ biến nhất.
-
 **P1**
 - [ ] **Pre-trade checklist gate** — `DailyTradingPlan` đã có `checkedNews/checkedLevels/checkedRisk/checkedEmotion/checkedJournal` nhưng chưa gate gì cả; khi checklist ngày hôm đó chưa hoàn thành, hiện nhắc nhở mềm ở form log trade/copy-trade (không chặn submit, giống pattern News guard).
 - [ ] **Setup playbook match** — Journal Edge Analytics đã tính win rate theo setup/symbol/session; cho trader chốt 1-2 "best setup" rồi cảnh báo ngay trong form khi lệnh đang log không khớp điều kiện setup tốt nhất của chính họ.
@@ -48,6 +45,8 @@ Goal: (1) phát hiện/ngăn trading khi tâm lý xấu, quá tải rủi ro, re
 ---
 
 ## Completed
+
+- [x] Revenge-trading cooldown — nâng cấp `loss-streak.ts` từ banner-only thành khoá tạm: khi chạm ngưỡng 3 lệnh thua liên tiếp trong 24h (ngưỡng đã dùng cho push notification, gộp về 1 constant `COOLDOWN_THRESHOLD_LOSSES`), ẩn nút "Thêm lệnh" trên `/journal` và nút "Copy" (chỉ khi subscribe mới, không chặn "Manage" của user đã đang copy) trong 30 phút (`COOLDOWN_DURATION_MS`) kể từ lệnh thua gần nhất, có nút "Tôi đã bình tĩnh, tiếp tục" để bỏ qua bất cứ lúc nào (không khoá cứng). Component dùng chung `LossStreakGuard` (`src/components/journal/loss-streak-guard.tsx`) fetch `/api/journal/loss-streak-status`; pure logic `getLossStreakCooldown` trong `loss-streak.ts` (có test). P0 thứ 2 trong Sprint 4 "Kiểm soát trạng thái & tăng tỷ lệ thắng" (2026-08-17)
 
 - [x] Daily limit enforcement — dùng field có sẵn `DailyTradingPlan.maxTrades` (trước đó chỉ lưu, không kiểm tra ở đâu cả): khi log trade mới trong `/journal` hoặc đặt lệnh MT5 (`New Order` dialog + quick Buy/Sell) vượt số lệnh tự đặt cho hôm đó (UTC), hiện cảnh báo dạng confirm — không hard-block, có nút "vẫn lưu/vẫn đặt" gửi lại kèm `confirmedOverLimit`. Logic đếm dùng chung `src/lib/journal/daily-limit.ts` (có test) cho cả `TradeJournal` và `Mt5Command`. TODO business: `maxRiskPercent` **chưa** enforce — journal không có account equity đáng tin cậy (không phải lệnh nào cũng gắn MT5), còn market order MT5 không lưu giá khớp lệnh nên không tính lại được risk $ đã dùng trong ngày mà không đoán số liệu; cần thêm field lưu risk $ tại thời điểm tạo lệnh nếu muốn làm đúng. Đây là P0 đầu tiên trong đề xuất Sprint 4 "Kiểm soát trạng thái & tăng tỷ lệ thắng" (2026-08-17)
 

@@ -9,13 +9,11 @@ import { routing } from "@/i18n/routing";
 import { prisma } from "@/lib/prisma";
 import { updateStreak } from "@/lib/streak";
 import { addXp } from "@/lib/add-xp";
-import { countTrailingLosses } from "@/lib/journal/loss-streak";
+import { countTrailingLosses, COOLDOWN_THRESHOLD_LOSSES } from "@/lib/journal/loss-streak";
 import { isOverDailyTradeLimit, utcDayRange } from "@/lib/journal/daily-limit";
 import { parseTradeSetup } from "@/lib/journal/setups";
 import { parseJournalImageUrl, parseTradeEmotion } from "@/lib/journal/emotions";
 import { isPushEnabled, sendPushToUser } from "@/lib/push";
-
-const LOSS_STREAK_PUSH_THRESHOLD = 3;
 
 function revalidateJournalPaths() {
   for (const locale of routing.locales) {
@@ -33,11 +31,11 @@ async function maybeNotifyLossStreak(userId: string) {
       take: 10,
       select: { result: true, closedAt: true },
     });
-    if (countTrailingLosses(recent) !== LOSS_STREAK_PUSH_THRESHOLD) return;
+    if (countTrailingLosses(recent) !== COOLDOWN_THRESHOLD_LOSSES) return;
     const t = await getTranslations("journal");
     await sendPushToUser(userId, {
       title: t("lossStreakPushTitle"),
-      body: t("lossStreakPushBody", { count: LOSS_STREAK_PUSH_THRESHOLD }),
+      body: t("lossStreakPushBody", { count: COOLDOWN_THRESHOLD_LOSSES }),
       url: "/journal",
     });
   } catch {
