@@ -8,6 +8,7 @@ import { commandExpiresAt } from "@/lib/mt5/command-ttl";
 import { queueCloseAll } from "@/lib/mt5/commands";
 import { resolveQuotes } from "@/lib/quotes/resolve-quotes";
 import { estimateStopLossForRisk, roundToSymbolPrecision } from "@/lib/calculators";
+import { isOverDailyTradeLimit, utcDayRange } from "@/lib/journal/daily-limit";
 
 // Orders placed with no explicit SL get one sized to risk 10% of account
 // equity, so a position is never left fully unprotected. Same pip-value
@@ -41,6 +42,34 @@ async function estimateDefaultStopLoss(params: {
     riskPct: DEFAULT_STOP_LOSS_RISK_PCT,
   });
   return stopLoss == null ? null : roundToSymbolPrecision(stopLoss, symbol);
+}
+
+/**
+ * So với DailyTradingPlan.maxTrades của user (ngày hiện tại, UTC). Đếm lệnh mới đã
+ * đặt trong ngày qua Mt5Command (type PLACE_*) của connection đang active.
+ *
+ * TODO business: maxRiskPercent chưa enforce ở đây — market order (BUY/SELL) không
+ * lưu giá vào lệnh (price chỉ lưu cho lệnh pending) nên không thể tính lại risk $ đã
+ * dùng trong ngày từ Mt5Command một cách đáng tin cậy mà không đoán số liệu.
+ */
+async function checkDailyOrderLimit(userId: string, connectionId: string) {
+  const { start, end } = utcDayRange(new Date());
+  const plan = await prisma.dailyTradingPlan.findUnique({
+    where: { userId_planDate: { userId, planDate: start } },
+    select: { maxTrades: true },
+  });
+  if (!plan?.maxTrades) return null;
+
+  const ordersPlacedToday = await prisma.mt5Command.count({
+    where: {
+      connectionId,
+      type: { startsWith: "PLACE_" },
+      createdAt: { gte: start, lt: end },
+    },
+  });
+  if (!isOverDailyTradeLimit(ordersPlacedToday, plan.maxTrades)) return null;
+
+  return { ordersPlacedToday, maxTrades: plan.maxTrades };
 }
 
 async function getActiveConnection(userId: string) {
@@ -198,7 +227,11 @@ export async function placeOrder(input: {
   price: number | null;
   stopLoss: number | null;
   takeProfit: number | null;
-}): Promise<{ error?: string }> {
+  confirmedOverLimit?: boolean;
+}): Promise<{
+  error?: string;
+  dailyLimitWarning?: { ordersPlacedToday: number; maxTrades: number };
+}> {
   const session = await auth();
   if (!session?.user?.id) redirect("/auth/signin");
 
@@ -212,6 +245,11 @@ export async function placeOrder(input: {
 
   const connection = await getActiveConnection(session.user.id);
   if (!connection) return { error: "no_connection" };
+
+  if (!input.confirmedOverLimit) {
+    const limit = await checkDailyOrderLimit(session.user.id, connection.id);
+    if (limit) return { dailyLimitWarning: limit };
+  }
 
   const isBuy = parsed.data.orderType.startsWith("BUY");
   const stopLoss =

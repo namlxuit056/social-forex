@@ -10,6 +10,7 @@ import { prisma } from "@/lib/prisma";
 import { updateStreak } from "@/lib/streak";
 import { addXp } from "@/lib/add-xp";
 import { countTrailingLosses } from "@/lib/journal/loss-streak";
+import { isOverDailyTradeLimit, utcDayRange } from "@/lib/journal/daily-limit";
 import { parseTradeSetup } from "@/lib/journal/setups";
 import { parseJournalImageUrl, parseTradeEmotion } from "@/lib/journal/emotions";
 import { isPushEnabled, sendPushToUser } from "@/lib/push";
@@ -44,6 +45,30 @@ async function maybeNotifyLossStreak(userId: string) {
   }
 }
 
+/**
+ * So với DailyTradingPlan.maxTrades của ngày `openedAt`. Trả về thông tin vượt
+ * ngưỡng (để hiện cảnh báo dạng confirm) hoặc null nếu không có plan/không giới hạn.
+ *
+ * TODO business: maxRiskPercent chưa enforce ở đây — TradeJournal không có field
+ * risk% hay account equity đáng tin cậy (không phải lệnh nào cũng gắn MT5 connection),
+ * nên không có cách tính risk% thực đã dùng trong ngày mà không đoán số liệu.
+ */
+async function checkDailyTradeLimit(userId: string, openedAt: Date) {
+  const { start, end } = utcDayRange(openedAt);
+  const plan = await prisma.dailyTradingPlan.findUnique({
+    where: { userId_planDate: { userId, planDate: start } },
+    select: { maxTrades: true },
+  });
+  if (!plan?.maxTrades) return null;
+
+  const tradesLoggedToday = await prisma.tradeJournal.count({
+    where: { userId, openedAt: { gte: start, lt: end } },
+  });
+  if (!isOverDailyTradeLimit(tradesLoggedToday, plan.maxTrades)) return null;
+
+  return { tradesLoggedToday, maxTrades: plan.maxTrades };
+}
+
 const tradeSchema = z.object({
   symbol: z.string().min(2).max(32),
   direction: z.enum(["LONG", "SHORT"]),
@@ -67,7 +92,9 @@ function parseOptNum(fd: FormData, key: string): number | null {
 }
 
 export async function createTrade(
-  _prev: { error?: string; ok?: boolean } | null,
+  _prev:
+    | { error?: string; ok?: boolean; dailyLimitWarning?: { tradesLoggedToday: number; maxTrades: number } }
+    | null,
   formData: FormData,
 ) {
   const session = await auth();
@@ -93,6 +120,13 @@ export async function createTrade(
   if (!parsed.success) return { error: te("journalInvalidData") };
 
   const d = parsed.data;
+  const openedAt = d.openedAt ?? new Date();
+
+  if (formData.get("confirmedOverLimit") !== "1") {
+    const limit = await checkDailyTradeLimit(session.user.id, openedAt);
+    if (limit) return { dailyLimitWarning: limit };
+  }
+
   // Lệnh log với kết quả W/L/BE coi như đã đóng — cần closedAt cho loss-streak/edge stats
   const closedAt =
     d.closedAt ?? (d.result !== "PENDING" ? new Date() : null);
@@ -109,7 +143,7 @@ export async function createTrade(
       result: d.result,
       pnl: d.pnl,
       notes: d.notes,
-      openedAt: d.openedAt,
+      openedAt,
       closedAt,
       setup: parseTradeSetup(formData.get("setup")),
       emotion: parseTradeEmotion(formData.get("emotion")),

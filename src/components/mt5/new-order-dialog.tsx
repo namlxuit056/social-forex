@@ -39,6 +39,10 @@ export function NewOrderDialog() {
   const [tp, setTp] = useState("");
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [dailyLimitWarning, setDailyLimitWarning] = useState<{
+    ordersPlacedToday: number;
+    maxTrades: number;
+  } | null>(null);
   const [marketPrice, setMarketPrice] = useState<{ bid: number; ask: number } | null>(null);
 
   const isPendingType = orderType !== "BUY" && orderType !== "SELL";
@@ -80,8 +84,9 @@ export function NewOrderDialog() {
     [symbol, isBuy, referencePrice, volume, sl, tp],
   );
 
-  function handleSubmit() {
+  function handleSubmit(confirmedOverLimit = false) {
     setError(null);
+    if (!confirmedOverLimit) setDailyLimitWarning(null);
     if (isPendingType && !price) {
       setError("price_required");
       return;
@@ -94,7 +99,12 @@ export function NewOrderDialog() {
         price: isPendingType ? Number(price) : null,
         stopLoss: sl === "" ? null : Number(sl),
         takeProfit: tp === "" ? null : Number(tp),
+        confirmedOverLimit,
       });
+      if (result.dailyLimitWarning) {
+        setDailyLimitWarning(result.dailyLimitWarning);
+        return;
+      }
       if (result.error) {
         setError(result.error);
         return;
@@ -205,6 +215,12 @@ export function NewOrderDialog() {
 
           <RiskRewardPreview riskReward={risk.riskReward} />
 
+          {dailyLimitWarning && (
+            <p className="text-sm text-amber-600 dark:text-amber-400">
+              You&apos;ve placed {dailyLimitWarning.ordersPlacedToday}/{dailyLimitWarning.maxTrades} orders
+              today, hitting the daily limit from your trading plan. Place this one anyway?
+            </p>
+          )}
           {error && <p className="text-sm text-destructive">{error}</p>}
           <p className="text-xs text-muted-foreground">
             Command queued — MT5 EA executes on next poll.
@@ -212,9 +228,15 @@ export function NewOrderDialog() {
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-          <Button onClick={handleSubmit} disabled={isPending}>
-            {isPending ? "Queuing…" : "Place order"}
-          </Button>
+          {dailyLimitWarning ? (
+            <Button variant="outline" onClick={() => handleSubmit(true)} disabled={isPending}>
+              {isPending ? "Queuing…" : "Place anyway"}
+            </Button>
+          ) : (
+            <Button onClick={() => handleSubmit(false)} disabled={isPending}>
+              {isPending ? "Queuing…" : "Place order"}
+            </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

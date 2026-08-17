@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useActionState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { X, BookOpen, AlertTriangle } from "lucide-react";
@@ -61,10 +61,17 @@ export function JournalFormCard({
     hours: number;
     events: UpcomingEvent[];
   } | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+  const confirmOverLimitRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (state?.ok) startTransition(() => onClose());
   }, [state?.ok, startTransition, onClose]);
+
+  function confirmOverDailyLimit() {
+    if (confirmOverLimitRef.current) confirmOverLimitRef.current.value = "1";
+    formRef.current?.requestSubmit();
+  }
 
   // News guard: check tin high-impact sắp diễn ra khi user gõ symbol (debounce 500ms)
   useEffect(() => {
@@ -138,10 +145,43 @@ export function JournalFormCard({
             </div>
           </div>
         )}
-        <form action={formAction} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {state?.dailyLimitWarning && (
+          <div className="mb-4 flex items-start gap-3 rounded-lg border border-amber-500/30 bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-950/20 dark:text-amber-200">
+            <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+            <div className="min-w-0 flex-1 space-y-2">
+              <p className="font-medium">
+                {t("dailyLimitTradesTitle", {
+                  count: state.dailyLimitWarning.tradesLoggedToday,
+                  max: state.dailyLimitWarning.maxTrades,
+                })}
+              </p>
+              <p className="text-xs">{t("dailyLimitHint")}</p>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={confirmOverDailyLimit}
+                disabled={isPending}
+              >
+                {t("dailyLimitConfirmAnyway")}
+              </Button>
+            </div>
+          </div>
+        )}
+        <form
+          ref={formRef}
+          action={formAction}
+          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
+        >
           {prefill?.from && (
             <input type="hidden" name="copiedFromSignalId" value={prefill.from} />
           )}
+          <input
+            ref={confirmOverLimitRef}
+            type="hidden"
+            name="confirmedOverLimit"
+            defaultValue=""
+          />
           <div>
             <Label>{t("symbol")}</Label>
             <Input

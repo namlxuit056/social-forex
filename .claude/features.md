@@ -29,9 +29,27 @@ _Đề xuất 2026-07-20, theo goal Sprint 2 "Trust & conversion". Lưu ý: trá
 
 - [ ] **VIP teaser + funnel** — user thường thấy card VIP signal dạng blur (symbol + direction hiện, entry/SL/TP mờ) kèm win rate lịch sử của VIP tier + CTA nâng cấp; log FunnelEvent tại các bước xem-teaser → xem-pricing → tạo-order để đo conversion (model FunnelEvent + PayPal flow có sẵn).
 
+### Đề xuất 2026-08-17 — Sprint 4: Kiểm soát trạng thái & tăng tỷ lệ thắng
+
+Goal: (1) phát hiện/ngăn trading khi tâm lý xấu, quá tải rủi ro, revenge trading; (2) giúp trader ra quyết định tốt hơn dựa trên data journal/signal/screener đã có. Đã rà soát để không trùng: Journal Emotion Diary, Loss-streak banner (chỉ cảnh báo, chưa khoá), Journal Advanced Stats, Journal Edge Analytics, News guard, DailyTradingPlan (đã có field maxRiskPercent/maxTrades/checklist nhưng **chưa enforce ở đâu cả**).
+
+**P0**
+- [ ] **Revenge-trading cooldown** — nâng cấp `loss-streak.ts` từ banner-only thành khoá tạm: sau N lệnh thua liên tiếp trong X giờ (ngưỡng hiện có), ẩn nút "Copy trade" + form thêm lệnh journal trong Y phút, có nút "Tôi đã bình tĩnh, tiếp tục" để override thủ công (không khoá cứng). Lý do: banner hiện tại dễ bị lướt qua, đây là nguyên nhân cháy tài khoản phổ biến nhất.
+
+**P1**
+- [ ] **Pre-trade checklist gate** — `DailyTradingPlan` đã có `checkedNews/checkedLevels/checkedRisk/checkedEmotion/checkedJournal` nhưng chưa gate gì cả; khi checklist ngày hôm đó chưa hoàn thành, hiện nhắc nhở mềm ở form log trade/copy-trade (không chặn submit, giống pattern News guard).
+- [ ] **Setup playbook match** — Journal Edge Analytics đã tính win rate theo setup/symbol/session; cho trader chốt 1-2 "best setup" rồi cảnh báo ngay trong form khi lệnh đang log không khớp điều kiện setup tốt nhất của chính họ.
+- [ ] **Overexposure guard** — cảnh báo khi tổng vị thế MT5 đang mở (từ `Mt5Snapshot`) cùng hướng trên các symbol tương quan cao (vd. XAUUSD + USD pairs) vượt ngưỡng risk% tổng hợp.
+
+**P2**
+- [ ] **1-tap mood check-in** — tách khỏi `EmotionDiaryEntry` (note dài): 1 chạm chọn trạng thái (tốt/bình thường/mệt/stress) đầu phiên, hiện badge nhắc nhở site-wide nếu tự đánh dấu "not good" hôm đó.
+- [ ] **Instant post-trade AI review** — chấm điểm nhanh ngay khi đóng lệnh (đã tuân thủ setup/tin tức/risk plan chưa) thay vì đợi tới Weekly Review, tái dùng logic AiWeeklyJournalReview ở quy mô 1 lệnh.
+
 ---
 
 ## Completed
+
+- [x] Daily limit enforcement — dùng field có sẵn `DailyTradingPlan.maxTrades` (trước đó chỉ lưu, không kiểm tra ở đâu cả): khi log trade mới trong `/journal` hoặc đặt lệnh MT5 (`New Order` dialog + quick Buy/Sell) vượt số lệnh tự đặt cho hôm đó (UTC), hiện cảnh báo dạng confirm — không hard-block, có nút "vẫn lưu/vẫn đặt" gửi lại kèm `confirmedOverLimit`. Logic đếm dùng chung `src/lib/journal/daily-limit.ts` (có test) cho cả `TradeJournal` và `Mt5Command`. TODO business: `maxRiskPercent` **chưa** enforce — journal không có account equity đáng tin cậy (không phải lệnh nào cũng gắn MT5), còn market order MT5 không lưu giá khớp lệnh nên không tính lại được risk $ đã dùng trong ngày mà không đoán số liệu; cần thêm field lưu risk $ tại thời điểm tạo lệnh nếu muốn làm đúng. Đây là P0 đầu tiên trong đề xuất Sprint 4 "Kiểm soát trạng thái & tăng tỷ lệ thắng" (2026-08-17)
 
 - [x] Đánh giá provider — model CopyTradeReview (rating 1-5 + comment, unique [reviewerId, providerId], upsert), chỉ follower có CopyTrade ≥ 7 ngày với provider mới được đánh giá (kể cả đã unsubscribe); tab "Đánh giá" mới trên /u/[userId] hiện avg rating + phân bố sao + danh sách review, badge rating trên hero profile khi có ≥1 review, stat rating trong modal CopyTradeButton; report review + hide/unhide (MOD/ADMIN) tái dùng ForumReport (thêm copyTradeReviewId nullable FK) và pattern hideSignalComment, thêm block report vào /admin/reports. User chọn feature này trong 2 đề xuất chưa duyệt Sprint 2 (2026-08-02)
 

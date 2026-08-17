@@ -339,7 +339,7 @@ export function PositionsClient({
   function handleQuickOrder(orderType: "BUY" | "SELL") {
     setQuickOrderSide(orderType);
     startQuickOrder(async () => {
-      await placeOrder({
+      const result = await placeOrder({
         symbol: quickOrderConfig.symbol,
         orderType,
         volume: quickOrderConfig.volume,
@@ -347,6 +347,23 @@ export function PositionsClient({
         stopLoss: null,
         takeProfit: null,
       });
+      if (result.dailyLimitWarning) {
+        const { ordersPlacedToday, maxTrades } = result.dailyLimitWarning;
+        const proceed = window.confirm(
+          `You've placed ${ordersPlacedToday}/${maxTrades} orders today, hitting the daily limit from your trading plan. Place this one anyway?`,
+        );
+        if (proceed) {
+          await placeOrder({
+            symbol: quickOrderConfig.symbol,
+            orderType,
+            volume: quickOrderConfig.volume,
+            price: null,
+            stopLoss: null,
+            takeProfit: null,
+            confirmedOverLimit: true,
+          });
+        }
+      }
       setQuickOrderSide(null);
     });
   }
