@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   computeEdgeGroups,
+  findBestRow,
   findWorstRow,
   sessionOfUtcHour,
   type EdgeTrade,
@@ -90,5 +91,22 @@ describe("findWorstRow", () => {
   it("trả null khi không nhóm nào đủ lệnh", () => {
     const worst = findWorstRow(computeEdgeGroups([trade({})]).symbols, 5);
     expect(worst).toBeNull();
+  });
+});
+
+describe("findBestRow", () => {
+  it("chọn nhóm winRate cao nhất có đủ số lệnh", () => {
+    const trades: EdgeTrade[] = [
+      ...Array.from({ length: 5 }, () => trade({ setup: "BREAKOUT", result: "LOSS", pnl: -10 })),
+      ...Array.from({ length: 5 }, () => trade({ setup: "PULLBACK", result: "WIN" })),
+    ];
+    const best = findBestRow(computeEdgeGroups(trades).setups, 5);
+    expect(best?.key).toBe("PULLBACK");
+    expect(best?.winRate).toBe(100);
+  });
+
+  it("trả null khi không nhóm nào đủ lệnh", () => {
+    const best = findBestRow(computeEdgeGroups([trade({ setup: "BREAKOUT" })]).setups, 5);
+    expect(best).toBeNull();
   });
 });

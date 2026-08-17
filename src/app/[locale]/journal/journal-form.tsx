@@ -11,6 +11,7 @@ import {
   useEmotionLabels,
   useSetupLabels,
 } from "./use-setup-labels";
+import type { BestSetupInfo } from "@/lib/journal/setups";
 import { JournalImageField } from "./journal-image-field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,9 +47,11 @@ type PrefillData = {
 export function JournalFormCard({
   onClose,
   prefill,
+  bestSetup,
 }: {
   onClose: () => void;
   prefill?: PrefillData;
+  bestSetup?: BestSetupInfo | null;
 }) {
   const t = useTranslations("journal");
   const locale = useLocale();
@@ -57,6 +60,7 @@ export function JournalFormCard({
   const [, startTransition] = useTransition();
   const [state, formAction, isPending] = useActionState(createTrade, null);
   const [symbol, setSymbol] = useState(prefill?.symbol ?? "");
+  const [setup, setSetup] = useState("");
   const [newsGuard, setNewsGuard] = useState<{
     hours: number;
     events: UpcomingEvent[];
@@ -241,7 +245,12 @@ export function JournalFormCard({
           </div>
           <div>
             <Label>{t("setup")}</Label>
-            <select name="setup" defaultValue="" className={`mt-1.5 ${SELECT_CLASS}`}>
+            <select
+              name="setup"
+              value={setup}
+              onChange={(e) => setSetup(e.target.value)}
+              className={`mt-1.5 ${SELECT_CLASS}`}
+            >
               <option value="">{t("setupNone")}</option>
               {TRADE_SETUPS.map((s) => (
                 <option key={s} value={s}>
@@ -249,6 +258,15 @@ export function JournalFormCard({
                 </option>
               ))}
             </select>
+            {bestSetup && setup !== bestSetup.setup && (
+              <p className="mt-1.5 text-xs text-amber-600 dark:text-amber-400">
+                {t("setupPlaybookHint", {
+                  setup: setupLabels[bestSetup.setup],
+                  winRate: bestSetup.winRate,
+                  total: bestSetup.total,
+                })}
+              </p>
+            )}
           </div>
           <div>
             <Label>{t("emotion")}</Label>

@@ -1774,6 +1774,7 @@
     "tableShowMore": "Show more",
     "setup": "Setup",
     "setupNone": "— Not set —",
+    "setupPlaybookHint": "Your best setup is {setup} ({winRate}% win, {total} trades) — this one doesn't match, think it over.",
     "setupBreakout": "Breakout",
     "setupPullback": "Pullback",
     "setupTrend": "Trend-follow",

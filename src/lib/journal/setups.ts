@@ -18,3 +18,10 @@ export function parseTradeSetup(value: unknown): TradeSetup | null {
     ? (value as TradeSetup)
     : null;
 }
+
+/** Setup có winRate cao nhất của trader (>= 5 lệnh W/L) — dùng cho playbook match trong journal-form. */
+export type BestSetupInfo = {
+  setup: TradeSetup;
+  winRate: number;
+  total: number;
+};

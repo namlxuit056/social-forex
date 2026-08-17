@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import {
   computeEdgeGroups,
+  findBestRow,
   findWorstRow,
   type EdgeRow,
   type EdgeTrade,
@@ -20,12 +21,14 @@ function EdgeGroupCard({
   rows,
   labelOf,
   worstKey,
+  bestKey,
   notEnoughLabel,
 }: {
   title: string;
   rows: EdgeRow[];
   labelOf: (key: string) => string;
   worstKey?: string | null;
+  bestKey?: string | null;
   notEnoughLabel: string;
 }) {
   if (rows.length === 0) return null;
@@ -37,13 +40,14 @@ function EdgeGroupCard({
       <CardContent className="space-y-3">
         {rows.slice(0, 8).map((r) => {
           const isWorst = worstKey != null && r.key === worstKey;
+          const isBest = bestKey != null && r.key === bestKey;
           return (
             <div key={r.key} className="space-y-1">
               <div className="flex items-baseline justify-between gap-2 text-sm">
                 <span
                   className={cn(
                     "font-mono font-medium",
-                    isWorst ? "text-red-500" : "text-foreground",
+                    isWorst ? "text-red-500" : isBest ? "text-emerald-500" : "text-foreground",
                   )}
                 >
                   {labelOf(r.key)}
@@ -160,6 +164,7 @@ export function JournalEdgeAnalytics({ trades }: { trades: EdgeTrade[] }) {
           rows={groups.setups}
           labelOf={setupLabel}
           worstKey={findWorstRow(groups.setups)?.key}
+          bestKey={findBestRow(groups.setups)?.key}
           notEnoughLabel={t("edgeNotEnough")}
         />
         <EdgeGroupCard

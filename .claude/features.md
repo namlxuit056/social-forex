@@ -35,7 +35,6 @@ Goal: (1) phát hiện/ngăn trading khi tâm lý xấu, quá tải rủi ro, re
 
 **P1**
 - [ ] **Pre-trade checklist gate** — `DailyTradingPlan` đã có `checkedNews/checkedLevels/checkedRisk/checkedEmotion/checkedJournal` nhưng chưa gate gì cả; khi checklist ngày hôm đó chưa hoàn thành, hiện nhắc nhở mềm ở form log trade/copy-trade (không chặn submit, giống pattern News guard).
-- [ ] **Setup playbook match** — Journal Edge Analytics đã tính win rate theo setup/symbol/session; cho trader chốt 1-2 "best setup" rồi cảnh báo ngay trong form khi lệnh đang log không khớp điều kiện setup tốt nhất của chính họ.
 - [ ] **Overexposure guard** — cảnh báo khi tổng vị thế MT5 đang mở (từ `Mt5Snapshot`) cùng hướng trên các symbol tương quan cao (vd. XAUUSD + USD pairs) vượt ngưỡng risk% tổng hợp.
 
 **P2**
@@ -45,6 +44,8 @@ Goal: (1) phát hiện/ngăn trading khi tâm lý xấu, quá tải rủi ro, re
 ---
 
 ## Completed
+
+- [x] Setup playbook match — dùng thẳng Journal Edge Analytics (win rate theo setup, đã có sẵn `computeEdgeGroups`): thêm `findBestRow` (đối xứng với `findWorstRow` đã có) chọn setup winRate cao nhất có ≥5 lệnh W/L, tính server-side trên `/journal` rồi truyền xuống form. Khi trader chọn setup khác setup tốt nhất đó trong form "+ Thêm lệnh", hiện gợi ý mềm màu vàng (không chặn submit) "Setup tốt nhất của bạn là X (68% thắng, 12 lệnh)..."; tab "Thống kê" cũng tô xanh setup tốt nhất tương tự cách tô đỏ setup tệ nhất đã có. Đơn giản hoá so với đề xuất ban đầu: **tự động tính**, không cho trader tự chọn/pin "1-2 best setup" thủ công — tránh thêm field/migration, tự cập nhật khi có thêm data. P1 đầu tiên trong Sprint 4 (2026-08-17)
 
 - [x] Revenge-trading cooldown — nâng cấp `loss-streak.ts` từ banner-only thành khoá tạm: khi chạm ngưỡng 3 lệnh thua liên tiếp trong 24h (ngưỡng đã dùng cho push notification, gộp về 1 constant `COOLDOWN_THRESHOLD_LOSSES`), ẩn nút "Thêm lệnh" trên `/journal` và nút "Copy" (chỉ khi subscribe mới, không chặn "Manage" của user đã đang copy) trong 30 phút (`COOLDOWN_DURATION_MS`) kể từ lệnh thua gần nhất, có nút "Tôi đã bình tĩnh, tiếp tục" để bỏ qua bất cứ lúc nào (không khoá cứng). Component dùng chung `LossStreakGuard` (`src/components/journal/loss-streak-guard.tsx`) fetch `/api/journal/loss-streak-status`; pure logic `getLossStreakCooldown` trong `loss-streak.ts` (có test). P0 thứ 2 trong Sprint 4 "Kiểm soát trạng thái & tăng tỷ lệ thắng" (2026-08-17)
 

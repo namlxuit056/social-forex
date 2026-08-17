@@ -19,6 +19,8 @@ import { JournalChat } from "./journal-chat";
 import { JournalEmotionDiary } from "./journal-emotion-diary";
 import { RiskCalculator } from "@/components/tools/risk-calculator";
 import { countTrailingLosses } from "@/lib/journal/loss-streak";
+import { computeEdgeGroups, findBestRow } from "@/lib/journal/edge-stats";
+import { parseTradeSetup } from "@/lib/journal/setups";
 import { computeRStats } from "@/lib/journal/r-multiple";
 import { isVipActive } from "@/lib/vip";
 import { isMt5LiveRedisEnabled } from "@/lib/mt5/live-redis";
@@ -245,6 +247,19 @@ export default async function JournalPage({
     imageUrl: t.imageUrl,
   }));
 
+  // Setup playbook match: setup có winRate cao nhất (>= 5 lệnh W/L) — dùng để cảnh báo
+  // mềm trong form khi lệnh đang log không khớp setup tốt nhất của chính trader đó.
+  const bestSetupRow = findBestRow(computeEdgeGroups(serialized).setups);
+  const bestSetupKey = bestSetupRow ? parseTradeSetup(bestSetupRow.key) : null;
+  const bestSetup =
+    bestSetupRow && bestSetupKey
+      ? {
+          setup: bestSetupKey,
+          winRate: bestSetupRow.winRate ?? 0,
+          total: bestSetupRow.wins + bestSetupRow.losses,
+        }
+      : null;
+
   const prefill = query?.symbol
     ? {
         symbol: query.symbol,
@@ -258,7 +273,7 @@ export default async function JournalPage({
 
   return (
     <div className="space-y-8">
-      <JournalHeader prefill={prefill} />
+      <JournalHeader prefill={prefill} bestSetup={bestSetup} />
 
       {lossStreak >= 2 && (
         <div className="flex items-start gap-3 rounded-lg border border-red-500/30 bg-red-50 p-4 text-sm text-red-800 dark:bg-red-950/20 dark:text-red-200">

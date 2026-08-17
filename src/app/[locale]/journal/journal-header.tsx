@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LossStreakGuard } from "@/components/journal/loss-streak-guard";
+import type { BestSetupInfo } from "@/lib/journal/setups";
 import { JournalFormCard } from "./journal-form";
 
 type PrefillData = {
@@ -16,7 +17,13 @@ type PrefillData = {
   from?: string;
 };
 
-export function JournalHeader({ prefill }: { prefill?: PrefillData }) {
+export function JournalHeader({
+  prefill,
+  bestSetup,
+}: {
+  prefill?: PrefillData;
+  bestSetup?: BestSetupInfo | null;
+}) {
   const t = useTranslations("journal");
   const [open, setOpen] = useState(!!prefill?.symbol);
 
@@ -43,6 +50,7 @@ export function JournalHeader({ prefill }: { prefill?: PrefillData }) {
         <JournalFormCard
           onClose={() => setOpen(false)}
           prefill={prefill}
+          bestSetup={bestSetup}
         />
       )}
     </div>

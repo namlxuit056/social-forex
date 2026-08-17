@@ -98,3 +98,13 @@ export function findWorstRow(rows: EdgeRow[], minTrades = 5): EdgeRow | null {
   }
   return worst;
 }
+
+/** Nhóm tốt nhất: winRate cao nhất trong các nhóm có ≥ minTrades lệnh W/L. Dùng cho setup playbook match. */
+export function findBestRow(rows: EdgeRow[], minTrades = 5): EdgeRow | null {
+  let best: EdgeRow | null = null;
+  for (const r of rows) {
+    if (r.wins + r.losses < minTrades || r.winRate === null) continue;
+    if (best === null || r.winRate > (best.winRate ?? -1)) best = r;
+  }
+  return best;
+}
