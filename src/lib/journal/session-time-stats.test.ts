@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { computeSessionStats, computeTimeWindowStats, type SessionTimeTrade } from "./session-time-stats";
+import {
+  computeDayOfWeekStats,
+  computeSessionStats,
+  computeTimeWindowStats,
+  type SessionTimeTrade,
+} from "./session-time-stats";
 
 function trade(hourUtc: number, overrides: Partial<SessionTimeTrade> = {}): SessionTimeTrade {
   const openedAt = `2026-01-01T${String(hourUtc).padStart(2, "0")}:00:00.000Z`;
@@ -59,5 +64,35 @@ describe("computeTimeWindowStats", () => {
     // UTC 20h + 7 = 27 -> 03h VN
     const rows = computeTimeWindowStats([trade(20)], 7);
     expect(rows.map((r) => r.key)).toEqual(["00-04"]);
+  });
+});
+
+function tradeOnDate(isoDate: string, overrides: Partial<SessionTimeTrade> = {}): SessionTimeTrade {
+  return trade(12, { openedAt: `${isoDate}T12:00:00.000Z`, ...overrides });
+}
+
+describe("computeDayOfWeekStats", () => {
+  it("nhóm theo thứ và sort Thứ 2 -> Chủ nhật", () => {
+    const rows = computeDayOfWeekStats([
+      tradeOnDate("2026-01-01"), // Thu
+      tradeOnDate("2026-01-04"), // Sun
+      tradeOnDate("2026-01-05"), // Mon
+    ]);
+    // getUTCDay(): Mon=1, Thu=4, Sun=0
+    expect(rows.map((r) => r.key)).toEqual(["1", "4", "0"]);
+  });
+
+  it("dịch offsetHours có thể đổi thứ khi qua nửa đêm", () => {
+    // 2026-01-04 (Sun) 23:00 UTC + 7h = 2026-01-05 06:00 -> Mon
+    const rows = computeDayOfWeekStats(
+      [trade(23, { openedAt: "2026-01-04T23:00:00.000Z" })],
+      7,
+    );
+    expect(rows.map((r) => r.key)).toEqual(["1"]);
+  });
+
+  it("bỏ thứ không có lệnh đã đóng", () => {
+    const rows = computeDayOfWeekStats([tradeOnDate("2026-01-05")]);
+    expect(rows).toHaveLength(1);
   });
 });

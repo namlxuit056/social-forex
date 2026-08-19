@@ -120,10 +120,12 @@ export async function createTrade(
   const d = parsed.data;
   const openedAt = d.openedAt ?? new Date();
 
-  if (formData.get("confirmedOverLimit") !== "1") {
+  const overrodeDailyLimit = formData.get("confirmedOverLimit") === "1";
+  if (!overrodeDailyLimit) {
     const limit = await checkDailyTradeLimit(session.user.id, openedAt);
     if (limit) return { dailyLimitWarning: limit };
   }
+  const overrodeLossStreakGuard = formData.get("overrodeLossStreakGuard") === "1";
 
   // Lệnh log với kết quả W/L/BE coi như đã đóng — cần closedAt cho loss-streak/edge stats
   const closedAt =
@@ -147,6 +149,8 @@ export async function createTrade(
       emotion: parseTradeEmotion(formData.get("emotion")),
       imageUrl: parseJournalImageUrl(formData.get("imageUrl")),
       copiedFromSignalId: (formData.get("copiedFromSignalId") as string) || null,
+      overrodeDailyLimit,
+      overrodeLossStreakGuard,
     },
   });
 

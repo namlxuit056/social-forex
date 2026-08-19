@@ -19,13 +19,21 @@ type Status = {
 export function LossStreakGuard({
   children,
   compact = false,
+  onOverride,
 }: {
   children: ReactNode;
   compact?: boolean;
+  /** Gọi đúng 1 lần khi user bấm "Tôi đã bình tĩnh, tiếp tục" — dùng để log lần bỏ qua guard. */
+  onOverride?: () => void;
 }) {
   const t = useTranslations("journal");
   const [status, setStatus] = useState<Status | null>(null);
   const [unlocked, setUnlocked] = useState(false);
+
+  function unlock() {
+    setUnlocked(true);
+    onOverride?.();
+  }
 
   useEffect(() => {
     const controller = new AbortController();
@@ -51,7 +59,7 @@ export function LossStreakGuard({
         size="sm"
         title={title}
         className="gap-1.5 border-red-500/40 text-red-600 dark:text-red-300"
-        onClick={() => setUnlocked(true)}
+        onClick={unlock}
       >
         <Lock className="size-3.5" />
         {t("lossStreakCooldownCompact")}
@@ -63,7 +71,7 @@ export function LossStreakGuard({
     <div className="flex items-center gap-3 rounded-lg border border-red-500/30 bg-red-50 px-3 py-2 text-sm text-red-800 dark:bg-red-950/20 dark:text-red-200">
       <Lock className="size-4 shrink-0" />
       <span className="flex-1">{title}</span>
-      <Button type="button" variant="outline" size="sm" onClick={() => setUnlocked(true)}>
+      <Button type="button" variant="outline" size="sm" onClick={unlock}>
         {t("lossStreakCooldownButton")}
       </Button>
     </div>

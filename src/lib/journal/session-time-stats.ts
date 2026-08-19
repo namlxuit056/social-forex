@@ -14,7 +14,7 @@ export type GroupStat = {
   expectancy: number | null;
 };
 
-function buildGroupStats<T extends RTrade>(
+export function buildGroupStats<T extends RTrade>(
   trades: T[],
   keyOf: (t: T) => string,
 ): GroupStat[] {
@@ -89,6 +89,28 @@ export function computeTimeWindowStats(
     const w = TIME_WINDOWS.find((w) => h >= w.from && h < w.to);
     return w ? w.key : "unknown";
   }).sort((a, b) => a.key.localeCompare(b.key));
+}
+
+// Thứ 2 -> Chủ nhật, đúng convention getUTCDay() (0=CN) để tái dùng key với
+// nhãn calWeekday0..6 đã có trong journal-calendar.
+const DAY_OF_WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0];
+
+/**
+ * Nhóm theo thứ trong tuần lúc mở lệnh (đã dịch theo offsetHours), chỉ trả các
+ * thứ có ít nhất 1 lệnh đã đóng, sort Thứ 2 -> Chủ nhật. key = getUTCDay() dạng string.
+ */
+export function computeDayOfWeekStats(
+  trades: SessionTimeTrade[],
+  offsetHours = 0,
+): GroupStat[] {
+  const rows = buildGroupStats(trades, (t) => {
+    const shifted = new Date(new Date(t.openedAt).getTime() + offsetHours * 60 * 60 * 1000);
+    return String(shifted.getUTCDay());
+  });
+  const byKey = new Map(rows.map((r) => [r.key, r]));
+  return DAY_OF_WEEK_ORDER.map((d) => byKey.get(String(d))).filter(
+    (r): r is GroupStat => r != null,
+  );
 }
 
 export type SymbolTrade = RTrade & { symbol: string };

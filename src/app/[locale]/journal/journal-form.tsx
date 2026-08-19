@@ -48,10 +48,12 @@ export function JournalFormCard({
   onClose,
   prefill,
   bestSetup,
+  overrodeLossStreakGuard,
 }: {
   onClose: () => void;
   prefill?: PrefillData;
   bestSetup?: BestSetupInfo | null;
+  overrodeLossStreakGuard?: boolean;
 }) {
   const t = useTranslations("journal");
   const locale = useLocale();
@@ -186,6 +188,9 @@ export function JournalFormCard({
             name="confirmedOverLimit"
             defaultValue=""
           />
+          {overrodeLossStreakGuard && (
+            <input type="hidden" name="overrodeLossStreakGuard" value="1" />
+          )}
           <div>
             <Label>{t("symbol")}</Label>
             <Input

@@ -26,6 +26,7 @@ export function JournalHeader({
 }) {
   const t = useTranslations("journal");
   const [open, setOpen] = useState(!!prefill?.symbol);
+  const [overrodeLossStreakGuard, setOverrodeLossStreakGuard] = useState(false);
 
   return (
     <div className="space-y-4">
@@ -37,7 +38,7 @@ export function JournalHeader({
           <p className="mt-2 text-muted-foreground">{t("description")}</p>
         </div>
         {!open && (
-          <LossStreakGuard>
+          <LossStreakGuard onOverride={() => setOverrodeLossStreakGuard(true)}>
             <Button onClick={() => setOpen(true)} className="shrink-0 gap-1.5">
               <Plus className="size-4" />
               {t("addTrade")}
@@ -51,6 +52,7 @@ export function JournalHeader({
           onClose={() => setOpen(false)}
           prefill={prefill}
           bestSetup={bestSetup}
+          overrodeLossStreakGuard={overrodeLossStreakGuard}
         />
       )}
     </div>

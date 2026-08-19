@@ -387,6 +387,11 @@ model TradeJournal {
   emotion    String?
   imageUrl   String?
 
+  // Đánh dấu trader bấm "vẫn lưu"/"vẫn tiếp tục" để bỏ qua guard khi log lệnh này —
+  // dùng để tính stat "lần bỏ qua cảnh báo" trong Journal Advanced Stats.
+  overrodeDailyLimit      Boolean @default(false)
+  overrodeLossStreakGuard Boolean @default(false)
+
   copiedFromSignalId String?
   copiedFromSignal   Signal?  @relation(fields: [copiedFromSignalId], references: [id], onDelete: SetNull)
 

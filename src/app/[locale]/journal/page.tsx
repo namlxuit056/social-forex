@@ -21,6 +21,8 @@ import { RiskCalculator } from "@/components/tools/risk-calculator";
 import { countTrailingLosses } from "@/lib/journal/loss-streak";
 import { computeEdgeGroups, findBestRow } from "@/lib/journal/edge-stats";
 import { parseTradeSetup } from "@/lib/journal/setups";
+import { computePlanCompliance } from "@/lib/journal/plan-compliance";
+import { computeGuardOverrideStats } from "@/lib/journal/guard-overrides";
 import { computeRStats } from "@/lib/journal/r-multiple";
 import { isVipActive } from "@/lib/vip";
 import { isMt5LiveRedisEnabled } from "@/lib/mt5/live-redis";
@@ -109,36 +111,43 @@ export default async function JournalPage({
               ? "emotion"
               : "trades";
 
-  const [tradesRaw, mt5Connection, weeklyReviewsRaw, dbUser, emotionEntriesRaw] = await Promise.all([
-    prisma.tradeJournal.findMany({
-      where: { userId: session.user.id },
-      orderBy: { openedAt: "desc" },
-      take: TRADES_CAP + 1,
-    }),
-    prisma.mt5Connection.findFirst({
-      where: { userId: session.user.id, revokedAt: null },
-      orderBy: { lastSeenAt: "desc" },
-      include: { user: { select: { copyTradingPaused: true } } },
-    }),
-    activeTab === "weekly"
-      ? prisma.aiWeeklyJournalReview.findMany({
-          where: { userId: session.user.id },
-          orderBy: { weekStart: "desc" },
-          take: 10,
-        })
-      : Promise.resolve([]),
-    prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { vipUntil: true },
-    }),
-    activeTab === "emotion"
-      ? prisma.emotionDiaryEntry.findMany({
-          where: { userId: session.user.id },
-          orderBy: { date: "desc" },
-          take: 365,
-        })
-      : Promise.resolve([]),
-  ]);
+  const [tradesRaw, mt5Connection, weeklyReviewsRaw, dbUser, emotionEntriesRaw, planLimitsRaw] =
+    await Promise.all([
+      prisma.tradeJournal.findMany({
+        where: { userId: session.user.id },
+        orderBy: { openedAt: "desc" },
+        take: TRADES_CAP + 1,
+      }),
+      prisma.mt5Connection.findFirst({
+        where: { userId: session.user.id, revokedAt: null },
+        orderBy: { lastSeenAt: "desc" },
+        include: { user: { select: { copyTradingPaused: true } } },
+      }),
+      activeTab === "weekly"
+        ? prisma.aiWeeklyJournalReview.findMany({
+            where: { userId: session.user.id },
+            orderBy: { weekStart: "desc" },
+            take: 10,
+          })
+        : Promise.resolve([]),
+      prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { vipUntil: true },
+      }),
+      activeTab === "emotion"
+        ? prisma.emotionDiaryEntry.findMany({
+            where: { userId: session.user.id },
+            orderBy: { date: "desc" },
+            take: 365,
+          })
+        : Promise.resolve([]),
+      activeTab === "stats"
+        ? prisma.dailyTradingPlan.findMany({
+            where: { userId: session.user.id, maxTrades: { not: null } },
+            select: { planDate: true, maxTrades: true },
+          })
+        : Promise.resolve([]),
+    ]);
 
   const emotionEntries = emotionEntriesRaw.map((e) => ({
     id: e.id,
@@ -245,6 +254,8 @@ export default async function JournalPage({
     setup: t.setup,
     emotion: t.emotion,
     imageUrl: t.imageUrl,
+    overrodeDailyLimit: t.overrodeDailyLimit,
+    overrodeLossStreakGuard: t.overrodeLossStreakGuard,
   }));
 
   // Setup playbook match: setup có winRate cao nhất (>= 5 lệnh W/L) — dùng để cảnh báo
@@ -259,6 +270,15 @@ export default async function JournalPage({
           total: bestSetupRow.wins + bestSetupRow.losses,
         }
       : null;
+
+  const planCompliance = computePlanCompliance(
+    planLimitsRaw
+      .filter((p) => p.maxTrades != null)
+      .map((p) => ({ planDate: p.planDate, maxTrades: p.maxTrades as number })),
+    serialized,
+  );
+
+  const guardOverrideStats = computeGuardOverrideStats(serialized);
 
   const prefill = query?.symbol
     ? {
@@ -376,6 +396,8 @@ export default async function JournalPage({
             trades={serialized}
             locale={locale}
             accountBalance={mt5Connection?.balance ?? mt5Connection?.equity ?? null}
+            planCompliance={planCompliance}
+            guardOverrideStats={guardOverrideStats}
           />
         </div>
       ) : activeTab === "chat" ? (

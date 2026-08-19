@@ -12,6 +12,7 @@ import {
   type DisciplineTrade,
 } from "@/lib/journal/risk-discipline";
 import {
+  computeDayOfWeekStats,
   computeSessionStats,
   computeSymbolStats,
   computeTimeWindowStats,
@@ -21,6 +22,8 @@ import {
   type SymbolTrade,
 } from "@/lib/journal/session-time-stats";
 import type { EdgeSession } from "@/lib/journal/edge-stats";
+import type { PlanComplianceStats } from "@/lib/journal/plan-compliance";
+import type { GuardOverrideStats } from "@/lib/journal/guard-overrides";
 
 export type AdvancedStatsPageTrade = AdvancedStatsTrade &
   DisciplineTrade &
@@ -319,10 +322,14 @@ export function JournalAdvancedStats({
   trades,
   locale,
   accountBalance,
+  planCompliance,
+  guardOverrideStats,
 }: {
   trades: AdvancedStatsPageTrade[];
   locale: string;
   accountBalance: number | null;
+  planCompliance?: PlanComplianceStats;
+  guardOverrideStats?: GuardOverrideStats;
 }) {
   const t = useTranslations("journal");
 
@@ -342,6 +349,10 @@ export function JournalAdvancedStats({
     [trades, timeWindowTz],
   );
   const symbolStats = useMemo(() => computeSymbolStats(trades), [trades]);
+  const dayOfWeekStats = useMemo(
+    () => computeDayOfWeekStats(trades, timeWindowTz === "vn" ? VN_UTC_OFFSET_HOURS : 0),
+    [trades, timeWindowTz],
+  );
 
   if (stats.closedTrades < MIN_CLOSED_TRADES) {
     return (
@@ -369,6 +380,7 @@ export function JournalAdvancedStats({
   const timeRows = timeWindowStats.map((s) => ({ key: s.key, stat: s }));
   const symbolRows = symbolStats.map((s) => ({ key: s.symbol, stat: s }));
   const bestSymbol = symbolStats[0]?.symbol;
+  const dayOfWeekRows = dayOfWeekStats.map((s) => ({ key: s.key, stat: s }));
 
   return (
     <div className="space-y-6">
@@ -524,6 +536,13 @@ export function JournalAdvancedStats({
         bestKey={bestSymbol}
       />
 
+      <GroupStatsTable
+        title={t("statsByDayOfWeekTitle")}
+        rows={dayOfWeekRows}
+        labelOf={(k) => t(`calWeekday${k}`)}
+        emptyLabel={t("edgeEmpty", { min: MIN_CLOSED_TRADES })}
+      />
+
       <div>
         <h3 className="font-heading text-lg font-semibold">{t("riskDisciplineTitle")}</h3>
         <p className="mb-3 text-sm text-muted-foreground">{t("riskDisciplineNote")}</p>
@@ -569,6 +588,56 @@ export function JournalAdvancedStats({
           </Card>
         </div>
       </div>
+
+      {planCompliance && planCompliance.evaluableDays > 0 && (
+        <div>
+          <h3 className="font-heading text-lg font-semibold">{t("planComplianceTitle")}</h3>
+          <p className="mb-3 text-sm text-muted-foreground">{t("planComplianceNote")}</p>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <StatCard
+              label={t("planComplianceDays")}
+              value={`${planCompliance.compliantDays}/${planCompliance.evaluableDays}`}
+            />
+            <StatCard
+              label={t("riskComplianceRate")}
+              value={
+                planCompliance.complianceRate !== null
+                  ? `${planCompliance.complianceRate}%`
+                  : "—"
+              }
+              tone={
+                planCompliance.complianceRate === null
+                  ? "neutral"
+                  : planCompliance.complianceRate >= 80
+                    ? "positive"
+                    : "negative"
+              }
+            />
+          </div>
+        </div>
+      )}
+
+      {guardOverrideStats && (
+        <div>
+          <h3 className="font-heading text-lg font-semibold">{t("guardOverrideTitle")}</h3>
+          <p className="mb-3 text-sm text-muted-foreground">{t("guardOverrideNote")}</p>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <StatCard
+              label={t("guardOverrideTotal")}
+              value={String(guardOverrideStats.totalOverrides)}
+              tone={guardOverrideStats.totalOverrides > 0 ? "negative" : "positive"}
+            />
+            <StatCard
+              label={t("guardOverrideDailyLimit")}
+              value={String(guardOverrideStats.dailyLimitOverrides)}
+            />
+            <StatCard
+              label={t("guardOverrideLossStreak")}
+              value={String(guardOverrideStats.lossStreakOverrides)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
