@@ -1816,6 +1816,7 @@
     "edgeWorstHint": "Bạn đang thua nhiều nhất ở {label}: win rate {winRate}% trên {count} lệnh — cân nhắc giảm size hoặc tránh setup này.",
     "edgeWorstSessionHint": "Phiên yếu nhất: {session} ({winRate}%).",
     "edgeSessionNote": "Phiên tính theo giờ UTC: Á 22:00–07:00, Âu 07:00–13:00, Mỹ 13:00–22:00.",
+    "playbookAdherenceHint": "Lệnh KHÔNG khớp setup tốt nhất ({setup}) có tỷ lệ thua {offLossRate}% ({offCount} lệnh) — so với {onLossRate}% ({onCount} lệnh) khi khớp đúng setup đó.",
     "lossStreakBanner": "Bạn đã thua {count} lệnh liên tiếp trong 24h qua. Cân nhắc nghỉ tay và xem lại journal thay vì cố gỡ.",
     "lossStreakPushTitle": "Cảnh báo chuỗi thua",
     "lossStreakPushBody": "Bạn vừa thua {count} lệnh liên tiếp. Nghỉ tay một chút và xem lại journal nhé.",

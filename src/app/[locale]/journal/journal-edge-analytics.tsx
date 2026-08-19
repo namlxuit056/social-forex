@@ -12,6 +12,7 @@ import {
   type EdgeRow,
   type EdgeTrade,
 } from "@/lib/journal/edge-stats";
+import { computePlaybookAdherence } from "@/lib/journal/playbook-adherence";
 import { useEmotionLabels, useSetupLabels } from "./use-setup-labels";
 
 const MIN_CLOSED_TRADES = 5;
@@ -86,6 +87,10 @@ export function JournalEdgeAnalytics({ trades }: { trades: EdgeTrade[] }) {
 
   const worstSymbol = findWorstRow(groups.symbols);
   const worstSession = findWorstRow(groups.sessions);
+  const bestSetupRow = findBestRow(groups.setups);
+  const playbookAdherence = bestSetupRow
+    ? computePlaybookAdherence(trades, bestSetupRow.key)
+    : null;
 
   if (closedCount < MIN_CLOSED_TRADES) {
     return (
@@ -164,7 +169,7 @@ export function JournalEdgeAnalytics({ trades }: { trades: EdgeTrade[] }) {
           rows={groups.setups}
           labelOf={setupLabel}
           worstKey={findWorstRow(groups.setups)?.key}
-          bestKey={findBestRow(groups.setups)?.key}
+          bestKey={bestSetupRow?.key}
           notEnoughLabel={t("edgeNotEnough")}
         />
         <EdgeGroupCard
@@ -175,6 +180,24 @@ export function JournalEdgeAnalytics({ trades }: { trades: EdgeTrade[] }) {
           notEnoughLabel={t("edgeNotEnough")}
         />
       </div>
+
+      {playbookAdherence &&
+        playbookAdherence.onPlaybook.lossRate !== null &&
+        playbookAdherence.offPlaybook.lossRate !== null && (
+          <div className="flex items-start gap-3 rounded-lg border border-border/60 bg-muted/20 p-4 text-sm">
+            <BarChart3 className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+            <p>
+              {t("playbookAdherenceHint", {
+                setup: setupLabel(bestSetupRow!.key),
+                offLossRate: playbookAdherence.offPlaybook.lossRate,
+                offCount: playbookAdherence.offPlaybook.wins + playbookAdherence.offPlaybook.losses,
+                onLossRate: playbookAdherence.onPlaybook.lossRate,
+                onCount: playbookAdherence.onPlaybook.wins + playbookAdherence.onPlaybook.losses,
+              })}
+            </p>
+          </div>
+        )}
+
       <p className="text-xs text-muted-foreground">{t("edgeSessionNote")}</p>
     </div>
   );

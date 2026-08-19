@@ -1816,6 +1816,7 @@
     "edgeWorstHint": "You lose the most on {label}: {winRate}% win rate over {count} trades — consider reducing size or avoiding this setup.",
     "edgeWorstSessionHint": "Weakest session: {session} ({winRate}%).",
     "edgeSessionNote": "Sessions in UTC: Asia 22:00–07:00, London 07:00–13:00, New York 13:00–22:00.",
+    "playbookAdherenceHint": "Trades that DON'T match your best setup ({setup}) lose {offLossRate}% of the time ({offCount} trades) — vs {onLossRate}% ({onCount} trades) when they match it.",
     "lossStreakBanner": "You've lost {count} trades in a row in the last 24h. Consider taking a break and reviewing your journal instead of revenge trading.",
     "lossStreakPushTitle": "Loss streak warning",
     "lossStreakPushBody": "You just lost {count} trades in a row. Take a break and review your journal.",
