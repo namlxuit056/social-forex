@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { formatInTimeZone } from "date-fns-tz";
 import { Button } from "@/components/ui/button";
@@ -61,6 +61,8 @@ type Props = {
   serverNowIso: string;
   /** Từ URL — set ban đầu; parent nên đổi `key` khi query đổi để reset filter. */
   initialSelectedCurrencies?: string[];
+  /** ID sự kiện cần cuộn tới + highlight (từ link "News today" ở /positions). */
+  initialHighlightEventId?: string;
 };
 
 export function EconomicCalendar({
@@ -70,14 +72,22 @@ export function EconomicCalendar({
   syncedAt,
   serverNowIso,
   initialSelectedCurrencies = [],
+  initialHighlightEventId,
 }: Props) {
   const t = useTranslations("calendar");
   const intlLocale = useLocale();
 
   const [zone, setZone] = useState<Zone>("vn");
-  const [dateRange, setDateRange] = useState<DateRange>("today");
+  // Deep-linked from a highlight: broaden the default filters so the target event
+  // is visible regardless of which day/status it falls under.
+  const [dateRange, setDateRange] = useState<DateRange>(
+    () => (initialHighlightEventId ? "week" : "today"),
+  );
   const [selectedStatuses, setSelectedStatuses] = useState<Set<StatusFilter>>(
-    () => new Set(["live", "upcoming"]),
+    () =>
+      initialHighlightEventId
+        ? new Set(["live", "upcoming", "finished"])
+        : new Set(["live", "upcoming"]),
   );
   const [selectedCurrencies, setSelectedCurrencies] = useState<Set<string>>(
     () => new Set(initialSelectedCurrencies),
@@ -87,6 +97,7 @@ export function EconomicCalendar({
   );
   const [isPending, startTransition] = useTransition();
   const now = useSyncedNow(serverNowIso);
+  const highlightRefs = useRef(new Map<string, HTMLElement>());
 
   const statusText = (s: CalendarEventStatus) =>
     s === "upcoming"
@@ -222,6 +233,17 @@ export function EconomicCalendar({
         .filter(({ status }) => selectedStatuses.has(status)),
     [filtered, now, selectedStatuses],
   );
+
+  useEffect(() => {
+    if (!initialHighlightEventId) return;
+    const el = highlightRefs.current.get(initialHighlightEventId);
+    el?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [initialHighlightEventId, rows]);
+
+  function setHighlightRef(id: string, el: HTMLElement | null) {
+    if (el) highlightRefs.current.set(id, el);
+    else highlightRefs.current.delete(id);
+  }
 
   const tz = zone === "utc" ? "UTC" : "Asia/Ho_Chi_Minh";
   const zoneLabel = zone === "utc" ? t("zoneUtc") : t("zoneVn");
@@ -477,12 +499,15 @@ export function EconomicCalendar({
             const values =
               [ev.forecast, ev.previous, ev.actual].filter(Boolean).join(" · ") ||
               "—";
+            const isHighlighted = ev.id === initialHighlightEventId;
             return (
               <article
                 key={ev.id}
+                ref={(el) => setHighlightRef(ev.id, el)}
                 className={cn(
                   "rounded-xl border border-border bg-card/60 p-3",
                   status === "live" && "border-primary/35 bg-primary/7",
+                  isHighlighted && "border-amber-500/60 bg-amber-500/10 ring-1 ring-amber-500/40",
                 )}
               >
                 <div className="flex items-start justify-between gap-3">
@@ -545,9 +570,11 @@ export function EconomicCalendar({
               rows.map(({ ev, status }) => (
                 <tr
                   key={ev.id}
+                  ref={(el) => setHighlightRef(ev.id, el)}
                   className={cn(
                     "hover:bg-muted/30",
                     status === "live" && "bg-primary/6",
+                    ev.id === initialHighlightEventId && "bg-amber-500/10 ring-2 ring-inset ring-amber-500/50",
                   )}
                 >
                   <td className="px-4 py-3 font-mono text-foreground/90">

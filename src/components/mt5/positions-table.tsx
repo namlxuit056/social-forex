@@ -2,6 +2,8 @@
 
 import { useMemo, useState, useTransition, type ReactNode } from "react";
 import { formatDistanceToNowStrict } from "date-fns";
+import { useLocale } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import {
   Activity,
   AlertTriangle,
@@ -47,6 +49,7 @@ import { TrailingStopDialog } from "./trailing-stop-dialog";
 import { PositionReviewDialog } from "./position-review-dialog";
 import { LockProfitMenu } from "./lock-profit-menu";
 import type { LivePosition } from "@/app/[locale]/journal/journal-live-panel";
+import type { TodayNewsEvent } from "@/lib/calendar/news-context-db";
 
 type SortKey = "symbol" | "profit" | "openedAt" | null;
 type SortDir = "asc" | "desc";
@@ -228,24 +231,53 @@ function ProximityBadge({ target }: { target: "sl" | "tp" }) {
   );
 }
 
-function hasNewsToday(p: LivePosition, newsCurrenciesToday: string[]): boolean {
-  if (newsCurrenciesToday.length === 0) return false;
-  const pairCurrencies = symbolToCurrencies(p.symbol);
-  return pairCurrencies.some((c) => newsCurrenciesToday.includes(c));
+function getPositionNewsEvents(p: LivePosition, newsEventsToday: TodayNewsEvent[]): TodayNewsEvent[] {
+  if (newsEventsToday.length === 0) return [];
+  const pairCurrencies = new Set(symbolToCurrencies(p.symbol));
+  if (pairCurrencies.size === 0) return [];
+  return newsEventsToday.filter((ev) => pairCurrencies.has(ev.currency));
 }
 
-function NewsBadge() {
+function formatNewsEventTime(timeUtc: string, locale: string) {
+  const timeZone = locale === "vi" ? "Asia/Ho_Chi_Minh" : "UTC";
+  return new Intl.DateTimeFormat(locale === "vi" ? "vi-VN" : "en-US", {
+    timeZone,
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(timeUtc));
+}
+
+function NewsBadge({ events }: { events: TodayNewsEvent[] }) {
+  const locale = useLocale();
+  if (events.length === 0) return null;
+
+  const currencies = Array.from(new Set(events.map((ev) => ev.currency))).sort();
+  const target = events[0];
+
   return (
     <Tooltip>
       <TooltipTrigger
         render={
-          <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-semibold whitespace-nowrap text-amber-600 dark:text-amber-400" />
+          <Link
+            href={{ pathname: "/calendar", query: { currencies: currencies.join(","), highlight: target.id } }}
+            className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-semibold whitespace-nowrap text-amber-600 transition-colors hover:bg-amber-500/25 dark:text-amber-400"
+          />
         }
       >
         <Calendar className="size-3" />
-        News today
+        {events.length > 1 ? `News today (${events.length})` : "News today"}
       </TooltipTrigger>
-      <TooltipContent>High-impact news scheduled today for this pair</TooltipContent>
+      <TooltipContent className="flex-col items-stretch gap-1.5">
+        {events.map((ev) => (
+          <div key={ev.id} className="flex items-start gap-1.5 text-left">
+            <span className="shrink-0 font-mono tabular-nums text-background/70">
+              {formatNewsEventTime(ev.timeUtc, locale)}
+            </span>
+            <span className="shrink-0 font-semibold">{ev.currency}</span>
+            <span>{ev.title}</span>
+          </div>
+        ))}
+      </TooltipContent>
     </Tooltip>
   );
 }
@@ -416,10 +448,10 @@ type Props = {
   positions: LivePosition[];
   currency: string | null;
   equity: number | null;
-  newsCurrenciesToday: string[];
+  newsEventsToday: TodayNewsEvent[];
 };
 
-export function PositionsTable({ positions, currency, equity, newsCurrenciesToday }: Props) {
+export function PositionsTable({ positions, currency, equity, newsEventsToday }: Props) {
   const [modifyTarget, setModifyTarget] = useState<LivePosition | null>(null);
   const [partialCloseTarget, setPartialCloseTarget] = useState<LivePosition | null>(null);
   const [trailingTarget, setTrailingTarget] = useState<LivePosition | null>(null);
@@ -690,7 +722,7 @@ export function PositionsTable({ positions, currency, equity, newsCurrenciesToda
                   const isQuickSl = quickSlPending.has(p.ticket);
                   const isQuickTp = quickTpPending.has(p.ticket);
                   const proximity = getProximityAlert(p);
-                  const newsToday = hasNewsToday(p, newsCurrenciesToday);
+                  const newsEvents = getPositionNewsEvents(p, newsEventsToday);
                   return (
                     <tr
                       key={p.ticket}
@@ -699,7 +731,7 @@ export function PositionsTable({ positions, currency, equity, newsCurrenciesToda
                         isClosing && "opacity-40",
                         proximity?.target === "sl" && "bg-red-500/5 dark:bg-red-500/10",
                         proximity?.target === "tp" && "bg-emerald-500/5 dark:bg-emerald-500/10",
-                        !proximity && newsToday && "bg-amber-500/5 dark:bg-amber-500/10",
+                        !proximity && newsEvents.length > 0 && "bg-amber-500/5 dark:bg-amber-500/10",
                       )}
                     >
                       <td className="px-3 py-3">
@@ -716,7 +748,7 @@ export function PositionsTable({ positions, currency, equity, newsCurrenciesToda
                         <div className="flex items-center gap-1.5">
                           {p.symbol}
                           {proximity && <ProximityBadge target={proximity.target} />}
-                          {newsToday && <NewsBadge />}
+                          <NewsBadge events={newsEvents} />
                         </div>
                       </td>
                       <td className="px-2 py-3">
@@ -795,7 +827,7 @@ export function PositionsTable({ positions, currency, equity, newsCurrenciesToda
               const risk = estimateRisk(p, equity);
               const riskReward = estimateRiskReward(p, equity);
               const proximity = getProximityAlert(p);
-              const newsToday = hasNewsToday(p, newsCurrenciesToday);
+              const newsEvents = getPositionNewsEvents(p, newsEventsToday);
               return (
                 <div
                   key={p.ticket}
@@ -804,7 +836,7 @@ export function PositionsTable({ positions, currency, equity, newsCurrenciesToda
                     isClosing && "opacity-40",
                     proximity?.target === "sl" && "bg-red-500/5 dark:bg-red-500/10",
                     proximity?.target === "tp" && "bg-emerald-500/5 dark:bg-emerald-500/10",
-                    !proximity && newsToday && "bg-amber-500/5 dark:bg-amber-500/10",
+                    !proximity && newsEvents.length > 0 && "bg-amber-500/5 dark:bg-amber-500/10",
                   )}
                 >
                   <input
@@ -819,7 +851,7 @@ export function PositionsTable({ positions, currency, equity, newsCurrenciesToda
                       <span className="text-base font-semibold">{p.symbol}</span>
                       <SideBadge type={p.type} />
                       {proximity && <ProximityBadge target={proximity.target} />}
-                      {newsToday && <NewsBadge />}
+                      <NewsBadge events={newsEvents} />
                     </div>
                     <div className="text-right">
                       <PL value={p.profit} className="text-base" />

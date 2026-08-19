@@ -85,12 +85,19 @@ export async function getUpcomingHighAndMediumImpactEvents(params: {
   return rows;
 }
 
+/** Serializable for client components. */
+export type TodayNewsEvent = {
+  id: string;
+  timeUtc: string;
+  currency: string;
+  title: string;
+};
+
 /**
- * Currencies (ISO codes) with a high-impact event scheduled today (VN calendar day) —
- * used to flag open positions on a currency pair that has news due, without pulling
- * the full event list.
+ * High-impact events scheduled today (VN calendar day) — used to flag open positions
+ * on a currency pair that has news due, and to show what/when on hover.
  */
-export async function getTodayHighImpactCurrencies(now: Date = new Date()): Promise<string[]> {
+export async function getTodayHighImpactEvents(now: Date = new Date()): Promise<TodayNewsEvent[]> {
   const range = getCreatedAtRangeForPeriod("today", now);
   if (!range) return [];
 
@@ -99,11 +106,16 @@ export async function getTodayHighImpactCurrencies(now: Date = new Date()): Prom
       timeUtc: { gte: range.gte, lte: range.lte },
       impact: { equals: "high", mode: "insensitive" },
     },
-    distinct: ["currency"],
-    select: { currency: true },
+    orderBy: { timeUtc: "asc" },
+    select: { id: true, timeUtc: true, currency: true, title: true },
   });
 
-  return rows.map((r) => r.currency);
+  return rows.map((r) => ({
+    id: r.id,
+    timeUtc: r.timeUtc.toISOString(),
+    currency: r.currency,
+    title: r.title,
+  }));
 }
 
 export function getNewsContextWindow(from: Date = new Date()): { from: Date; to: Date } {

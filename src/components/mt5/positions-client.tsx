@@ -56,6 +56,7 @@ import { PortfolioReviewPanel } from "./portfolio-review-panel";
 import type { LivePosition, Mt5AccountInfo } from "@/app/[locale]/journal/journal-live-panel";
 import type { LivePendingOrder, Mt5AccountResponse } from "@/app/api/mt5/account/route";
 import type { Mt5LiveUpdate } from "@/lib/mt5/live-redis";
+import type { TodayNewsEvent } from "@/lib/calendar/news-context-db";
 
 const POSITIONS_POLL_MS = 8_000;
 
@@ -101,7 +102,7 @@ type Props = {
   initialOrders: LivePendingOrder[];
   initialHistory: ClosedTrade[];
   liveEnabled: boolean;
-  newsCurrenciesToday: string[];
+  newsEventsToday: TodayNewsEvent[];
 };
 
 export function PositionsClient({
@@ -110,7 +111,7 @@ export function PositionsClient({
   initialOrders,
   initialHistory,
   liveEnabled,
-  newsCurrenciesToday,
+  newsEventsToday,
 }: Props) {
   const [account, setAccount] = useState<Mt5AccountInfo | null>(initialAccount);
   const [positions, setPositions] = useState<LivePosition[]>(initialPositions);
@@ -695,7 +696,7 @@ export function PositionsClient({
             positions={positions}
             currency={currency}
             equity={account?.equity ?? null}
-            newsCurrenciesToday={newsCurrenciesToday}
+            newsEventsToday={newsEventsToday}
           />
         </TabsContent>
         <TabsContent value="orders">

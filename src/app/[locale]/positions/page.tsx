@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { getMt5AccountSnapshot } from "@/lib/mt5/account-snapshot";
 import { isMt5LiveRedisEnabled } from "@/lib/mt5/live-redis";
-import { getTodayHighImpactCurrencies } from "@/lib/calendar/news-context-db";
+import { getTodayHighImpactEvents } from "@/lib/calendar/news-context-db";
 import { PositionsClient } from "@/components/mt5/positions-client";
 
 export const dynamic = "force-dynamic";
@@ -27,9 +27,9 @@ export default async function PositionsPage({
   const session = await auth();
   if (!session?.user?.id) redirect("/auth/signin");
 
-  const [snapshot, newsCurrenciesToday] = await Promise.all([
+  const [snapshot, newsEventsToday] = await Promise.all([
     getMt5AccountSnapshot(session.user.id),
-    getTodayHighImpactCurrencies(),
+    getTodayHighImpactEvents(),
   ]);
 
   return (
@@ -59,7 +59,7 @@ export default async function PositionsPage({
           initialOrders={snapshot.orders}
           initialHistory={snapshot.history}
           liveEnabled={isMt5LiveRedisEnabled()}
-          newsCurrenciesToday={newsCurrenciesToday}
+          newsEventsToday={newsEventsToday}
         />
       )}
     </div>

@@ -30,7 +30,7 @@ export default async function CalendarPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ currencies?: string; currency?: string }>;
+  searchParams: Promise<{ currencies?: string; currency?: string; highlight?: string }>;
 }) {
   const { locale } = await params;
   const sp = await searchParams;
@@ -40,10 +40,10 @@ export default async function CalendarPage({
   const [cal, session] = await Promise.all([resolveCalendarEvents(), auth()]);
 
   const initialCurrencies = parseCalendarCurrencySearchParams(sp);
+  const initialHighlightEventId = sp.highlight?.trim() || undefined;
   const calendarFilterKey =
-    initialCurrencies.length > 0
-      ? [...initialCurrencies].sort().join(",")
-      : "all";
+    (initialCurrencies.length > 0 ? [...initialCurrencies].sort().join(",") : "all") +
+    (initialHighlightEventId ? `:${initialHighlightEventId}` : "");
 
   const warningText =
     cal.warning &&
@@ -69,6 +69,7 @@ export default async function CalendarPage({
         syncedAt={cal.syncedAt}
         serverNowIso={new Date().toISOString()}
         initialSelectedCurrencies={initialCurrencies}
+        initialHighlightEventId={initialHighlightEventId}
       />
       {!session?.user?.id ? (
         <SignupPrompt
