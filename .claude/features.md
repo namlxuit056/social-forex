@@ -35,7 +35,6 @@ Goal: (1) phát hiện/ngăn trading khi tâm lý xấu, quá tải rủi ro, re
 
 **P1**
 - [ ] **Pre-trade checklist gate** — `DailyTradingPlan` đã có `checkedNews/checkedLevels/checkedRisk/checkedEmotion/checkedJournal` nhưng chưa gate gì cả; khi checklist ngày hôm đó chưa hoàn thành, hiện nhắc nhở mềm ở form log trade/copy-trade (không chặn submit, giống pattern News guard).
-- [ ] **Overexposure guard** — cảnh báo khi tổng vị thế MT5 đang mở (từ `Mt5Snapshot`) cùng hướng trên các symbol tương quan cao (vd. XAUUSD + USD pairs) vượt ngưỡng risk% tổng hợp.
 
 **P2**
 - [ ] **1-tap mood check-in** — tách khỏi `EmotionDiaryEntry` (note dài): 1 chạm chọn trạng thái (tốt/bình thường/mệt/stress) đầu phiên, hiện badge nhắc nhở site-wide nếu tự đánh dấu "not good" hôm đó.
@@ -44,6 +43,8 @@ Goal: (1) phát hiện/ngăn trading khi tâm lý xấu, quá tải rủi ro, re
 ---
 
 ## Completed
+
+- [x] Overexposure guard — không cần làm: `/positions` đã có sẵn "AI Portfolio Review" (`portfolio-review-panel.tsx` + `/api/ai/portfolio-review`, dùng `src/lib/ai/portfolio-review.ts`) phân tích toàn bộ vị thế đang mở cùng lúc — cảnh báo correlation (long/short trùng hoặc tương quan), tổng % risk so với equity, risk level, khuyến nghị hold/trim/close từng lệnh. Đúng nội dung đề xuất ban đầu, chỉ khác là on-demand (bấm nút, dùng AI) thay vì tự động hiện (rule-based, miễn phí) như hình dung lúc đề xuất. User chọn "bỏ qua, coi như đã xong" khi phát hiện trùng lặp lúc research để implement (2026-08-19)
 
 - [x] Setup playbook match — dùng thẳng Journal Edge Analytics (win rate theo setup, đã có sẵn `computeEdgeGroups`): thêm `findBestRow` (đối xứng với `findWorstRow` đã có) chọn setup winRate cao nhất có ≥5 lệnh W/L, tính server-side trên `/journal` rồi truyền xuống form. Khi trader chọn setup khác setup tốt nhất đó trong form "+ Thêm lệnh", hiện gợi ý mềm màu vàng (không chặn submit) "Setup tốt nhất của bạn là X (68% thắng, 12 lệnh)..."; tab "Thống kê" cũng tô xanh setup tốt nhất tương tự cách tô đỏ setup tệ nhất đã có. Đơn giản hoá so với đề xuất ban đầu: **tự động tính**, không cho trader tự chọn/pin "1-2 best setup" thủ công — tránh thêm field/migration, tự cập nhật khi có thêm data. P1 đầu tiên trong Sprint 4 (2026-08-17)
 
