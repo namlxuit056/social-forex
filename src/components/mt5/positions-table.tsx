@@ -8,6 +8,7 @@ import {
   ArrowDownRight,
   ArrowUpRight,
   BrainCircuit,
+  Calendar,
   ChevronDown,
   ChevronUp,
   Crosshair,
@@ -19,6 +20,7 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
+import { symbolToCurrencies } from "@/lib/signals/symbol-currencies";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -226,6 +228,28 @@ function ProximityBadge({ target }: { target: "sl" | "tp" }) {
   );
 }
 
+function hasNewsToday(p: LivePosition, newsCurrenciesToday: string[]): boolean {
+  if (newsCurrenciesToday.length === 0) return false;
+  const pairCurrencies = symbolToCurrencies(p.symbol);
+  return pairCurrencies.some((c) => newsCurrenciesToday.includes(c));
+}
+
+function NewsBadge() {
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-semibold whitespace-nowrap text-amber-600 dark:text-amber-400" />
+        }
+      >
+        <Calendar className="size-3" />
+        News today
+      </TooltipTrigger>
+      <TooltipContent>High-impact news scheduled today for this pair</TooltipContent>
+    </Tooltip>
+  );
+}
+
 function openedAgo(openedAt: string | null) {
   if (!openedAt) return "—";
   const d = new Date(openedAt);
@@ -392,9 +416,10 @@ type Props = {
   positions: LivePosition[];
   currency: string | null;
   equity: number | null;
+  newsCurrenciesToday: string[];
 };
 
-export function PositionsTable({ positions, currency, equity }: Props) {
+export function PositionsTable({ positions, currency, equity, newsCurrenciesToday }: Props) {
   const [modifyTarget, setModifyTarget] = useState<LivePosition | null>(null);
   const [partialCloseTarget, setPartialCloseTarget] = useState<LivePosition | null>(null);
   const [trailingTarget, setTrailingTarget] = useState<LivePosition | null>(null);
@@ -665,6 +690,7 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                   const isQuickSl = quickSlPending.has(p.ticket);
                   const isQuickTp = quickTpPending.has(p.ticket);
                   const proximity = getProximityAlert(p);
+                  const newsToday = hasNewsToday(p, newsCurrenciesToday);
                   return (
                     <tr
                       key={p.ticket}
@@ -673,6 +699,7 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                         isClosing && "opacity-40",
                         proximity?.target === "sl" && "bg-red-500/5 dark:bg-red-500/10",
                         proximity?.target === "tp" && "bg-emerald-500/5 dark:bg-emerald-500/10",
+                        !proximity && newsToday && "bg-amber-500/5 dark:bg-amber-500/10",
                       )}
                     >
                       <td className="px-3 py-3">
@@ -689,6 +716,7 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                         <div className="flex items-center gap-1.5">
                           {p.symbol}
                           {proximity && <ProximityBadge target={proximity.target} />}
+                          {newsToday && <NewsBadge />}
                         </div>
                       </td>
                       <td className="px-2 py-3">
@@ -767,6 +795,7 @@ export function PositionsTable({ positions, currency, equity }: Props) {
               const risk = estimateRisk(p, equity);
               const riskReward = estimateRiskReward(p, equity);
               const proximity = getProximityAlert(p);
+              const newsToday = hasNewsToday(p, newsCurrenciesToday);
               return (
                 <div
                   key={p.ticket}
@@ -775,6 +804,7 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                     isClosing && "opacity-40",
                     proximity?.target === "sl" && "bg-red-500/5 dark:bg-red-500/10",
                     proximity?.target === "tp" && "bg-emerald-500/5 dark:bg-emerald-500/10",
+                    !proximity && newsToday && "bg-amber-500/5 dark:bg-amber-500/10",
                   )}
                 >
                   <input
@@ -789,6 +819,7 @@ export function PositionsTable({ positions, currency, equity }: Props) {
                       <span className="text-base font-semibold">{p.symbol}</span>
                       <SideBadge type={p.type} />
                       {proximity && <ProximityBadge target={proximity.target} />}
+                      {newsToday && <NewsBadge />}
                     </div>
                     <div className="text-right">
                       <PL value={p.profit} className="text-base" />

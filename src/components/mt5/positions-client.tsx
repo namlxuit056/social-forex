@@ -101,6 +101,7 @@ type Props = {
   initialOrders: LivePendingOrder[];
   initialHistory: ClosedTrade[];
   liveEnabled: boolean;
+  newsCurrenciesToday: string[];
 };
 
 export function PositionsClient({
@@ -109,6 +110,7 @@ export function PositionsClient({
   initialOrders,
   initialHistory,
   liveEnabled,
+  newsCurrenciesToday,
 }: Props) {
   const [account, setAccount] = useState<Mt5AccountInfo | null>(initialAccount);
   const [positions, setPositions] = useState<LivePosition[]>(initialPositions);
@@ -689,7 +691,12 @@ export function PositionsClient({
         </div>
 
         <TabsContent value="positions">
-          <PositionsTable positions={positions} currency={currency} equity={account?.equity ?? null} />
+          <PositionsTable
+            positions={positions}
+            currency={currency}
+            equity={account?.equity ?? null}
+            newsCurrenciesToday={newsCurrenciesToday}
+          />
         </TabsContent>
         <TabsContent value="orders">
           <PendingOrdersTable orders={orders} equity={account?.equity ?? null} />

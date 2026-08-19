@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { getCreatedAtRangeForPeriod } from "@/lib/signals/signal-list-date-range";
 
 /** Khung giờ lấy sự kiện “bối cảnh tin” (mặc định 24, tối đa 168). */
 export function getNewsContextHours(): number {
@@ -82,6 +83,27 @@ export async function getUpcomingHighAndMediumImpactEvents(params: {
   });
 
   return rows;
+}
+
+/**
+ * Currencies (ISO codes) with a high-impact event scheduled today (VN calendar day) —
+ * used to flag open positions on a currency pair that has news due, without pulling
+ * the full event list.
+ */
+export async function getTodayHighImpactCurrencies(now: Date = new Date()): Promise<string[]> {
+  const range = getCreatedAtRangeForPeriod("today", now);
+  if (!range) return [];
+
+  const rows = await prisma.economicCalendarEvent.findMany({
+    where: {
+      timeUtc: { gte: range.gte, lte: range.lte },
+      impact: { equals: "high", mode: "insensitive" },
+    },
+    distinct: ["currency"],
+    select: { currency: true },
+  });
+
+  return rows.map((r) => r.currency);
 }
 
 export function getNewsContextWindow(from: Date = new Date()): { from: Date; to: Date } {
