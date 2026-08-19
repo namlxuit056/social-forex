@@ -2,7 +2,7 @@ import type { CalendarEvent, Impact } from "@/lib/calendar/types";
 
 const CALENDAR_URL = "https://nfs.faireconomy.media/ff_calendar_thisweek.json";
 
-const CACHE_TTL_MS = 30 * 60 * 1000;
+const CACHE_TTL_MS = 15 * 60 * 1000;
 let cachedEvents: CalendarEvent[] | null = null;
 let cachedAt = 0;
 
@@ -25,7 +25,7 @@ function mapImpact(raw: string): Impact {
 
 /**
  * Fetch economic calendar from Forex Factory / Fair Economy (free, no API key).
- * Results cached in-memory for 30 minutes to avoid rate limiting.
+ * Results cached in-memory for 15 minutes to avoid rate limiting.
  */
 export async function fetchInvestingCalendar(): Promise<CalendarEvent[]> {
   if (cachedEvents && Date.now() - cachedAt < CACHE_TTL_MS) {

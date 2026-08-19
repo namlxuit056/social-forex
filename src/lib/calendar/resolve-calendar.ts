@@ -15,7 +15,7 @@ const SYNC_ID = "default";
 
 function ttlMs(): number {
   const m = Number(process.env.CALENDAR_SYNC_TTL_MINUTES);
-  return (Number.isFinite(m) && m > 0 ? m : 45) * 60 * 1000;
+  return (Number.isFinite(m) && m > 0 ? m : 15) * 60 * 1000;
 }
 
 function dbToEvent(row: {
@@ -87,8 +87,11 @@ async function persistToDb(events: CalendarEvent[]) {
         },
       });
     });
-  } catch {
-    // DB persist failed silently — in-memory cache still works
+  } catch (e) {
+    console.error(
+      "[calendar] persistToDb failed, lastSyncAt not advanced:",
+      e instanceof Error ? e.message : e,
+    );
   }
 }
 
