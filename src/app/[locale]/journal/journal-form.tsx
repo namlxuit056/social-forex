@@ -12,6 +12,7 @@ import {
   useSetupLabels,
 } from "./use-setup-labels";
 import type { BestSetupInfo } from "@/lib/journal/setups";
+import { ChecklistGuardHint } from "@/components/journal/checklist-guard-hint";
 import { JournalImageField } from "./journal-image-field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -124,6 +125,7 @@ export function JournalFormCard({
         </Button>
       </CardHeader>
       <CardContent>
+        <ChecklistGuardHint />
         {newsGuard && (
           <div className="mb-4 flex items-start gap-3 rounded-lg border border-amber-500/30 bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-950/20 dark:text-amber-200">
             <AlertTriangle className="mt-0.5 size-4 shrink-0" />

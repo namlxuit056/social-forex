@@ -1822,6 +1822,8 @@
     "lossStreakPushBody": "Bạn vừa thua {count} lệnh liên tiếp. Nghỉ tay một chút và xem lại journal nhé.",
     "newsGuardTitle": "{symbol} có tin high-impact trong {hours}h tới",
     "newsGuardHint": "Chỉ là cảnh báo — cân nhắc biến động mạnh quanh giờ ra tin trước khi vào lệnh.",
+    "checklistGuardHint": "Checklist kế hoạch hôm nay chưa hoàn thành ({count}/{total}).",
+    "checklistGuardLink": "Hoàn thành ở /plan",
     "dailyLimitTradesTitle": "Bạn đã log {count}/{max} lệnh hôm nay theo giới hạn tự đặt trong kế hoạch ngày",
     "dailyLimitHint": "Chỉ là cảnh báo — cân nhắc kỹ trước khi vào thêm lệnh ngoài kế hoạch.",
     "dailyLimitConfirmAnyway": "Vẫn lưu lệnh này",

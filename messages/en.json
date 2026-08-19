@@ -1822,6 +1822,8 @@
     "lossStreakPushBody": "You just lost {count} trades in a row. Take a break and review your journal.",
     "newsGuardTitle": "{symbol} has high-impact news within the next {hours}h",
     "newsGuardHint": "Just a heads-up — expect strong volatility around the release before entering.",
+    "checklistGuardHint": "Today's trading plan checklist isn't done yet ({count}/{total}).",
+    "checklistGuardLink": "Finish it on /plan",
     "dailyLimitTradesTitle": "You've logged {count}/{max} trades today based on your own daily plan limit",
     "dailyLimitHint": "Just a heads-up — think it over before adding a trade outside your plan.",
     "dailyLimitConfirmAnyway": "Log it anyway",

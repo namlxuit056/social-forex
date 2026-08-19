@@ -16,6 +16,7 @@ import {
 import { toast } from "sonner";
 import { subscribeCopyTrade, unsubscribeCopyTrade } from "@/actions/copy-trade";
 import { LossStreakGuard } from "@/components/journal/loss-streak-guard";
+import { ChecklistGuardHint } from "@/components/journal/checklist-guard-hint";
 
 type Props = {
   providerId: string;
@@ -163,6 +164,8 @@ export function CopyTradeButton({
               ? t("manageHint", { name: providerName })
               : t("configureHint", { name: providerName })}
           </p>
+
+          {!subscribed && <ChecklistGuardHint />}
 
           {!!providerReviewCount && providerAvgRating != null && (
             <div className="flex items-center gap-1.5 rounded-lg border border-amber-500/25 bg-amber-500/5 px-3 py-2 text-xs">

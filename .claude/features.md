@@ -33,9 +33,6 @@ _Đề xuất 2026-07-20, theo goal Sprint 2 "Trust & conversion". Lưu ý: trá
 
 Goal: (1) phát hiện/ngăn trading khi tâm lý xấu, quá tải rủi ro, revenge trading; (2) giúp trader ra quyết định tốt hơn dựa trên data journal/signal/screener đã có. Đã rà soát để không trùng: Journal Emotion Diary, Loss-streak banner (chỉ cảnh báo, chưa khoá), Journal Advanced Stats, Journal Edge Analytics, News guard, DailyTradingPlan (đã có field maxRiskPercent/maxTrades/checklist nhưng **chưa enforce ở đâu cả**).
 
-**P1**
-- [ ] **Pre-trade checklist gate** — `DailyTradingPlan` đã có `checkedNews/checkedLevels/checkedRisk/checkedEmotion/checkedJournal` nhưng chưa gate gì cả; khi checklist ngày hôm đó chưa hoàn thành, hiện nhắc nhở mềm ở form log trade/copy-trade (không chặn submit, giống pattern News guard).
-
 **P2**
 - [ ] **1-tap mood check-in** — tách khỏi `EmotionDiaryEntry` (note dài): 1 chạm chọn trạng thái (tốt/bình thường/mệt/stress) đầu phiên, hiện badge nhắc nhở site-wide nếu tự đánh dấu "not good" hôm đó.
 - [ ] **Instant post-trade AI review** — chấm điểm nhanh ngay khi đóng lệnh (đã tuân thủ setup/tin tức/risk plan chưa) thay vì đợi tới Weekly Review, tái dùng logic AiWeeklyJournalReview ở quy mô 1 lệnh.
@@ -43,6 +40,8 @@ Goal: (1) phát hiện/ngăn trading khi tâm lý xấu, quá tải rủi ro, re
 ---
 
 ## Completed
+
+- [x] Pre-trade checklist gate — dùng field có sẵn `DailyTradingPlan.checkedNews/checkedLevels/checkedRisk/checkedEmotion/checkedJournal` (trước đó chỉ lưu để hiển thị ở `/plan`, không gate gì cả): khi checklist hôm nay (UTC) chưa hoàn thành, hiện nhắc nhở mềm màu vàng kèm link "/plan" ở form "+ Thêm lệnh" journal và modal Copy trade (chỉ khi subscribe mới, không hiện khi Manage) — chỉ thông tin, không chặn submit, giống pattern News guard. Component dùng chung `ChecklistGuardHint` (`src/components/journal/checklist-guard-hint.tsx`) fetch `/api/journal/checklist-status`. P1 cuối cùng của Sprint 4, đóng hết mục risk-control trong roadmap (2026-08-19)
 
 - [x] Off-playbook loss rate — trên tab Edge Analytics (`?tab=edge`), callout mới so tỷ lệ thua giữa lệnh khớp setup tốt nhất (từ Setup playbook match) và lệnh không khớp/chưa gắn setup: "Lệnh KHÔNG khớp setup tốt nhất có tỷ lệ thua X% (N lệnh) — so với Y% (M lệnh) khi khớp đúng". `computePlaybookAdherence` trong `src/lib/journal/playbook-adherence.ts` (pure, có test), chỉ hiện khi cả 2 nhóm có ≥2 lệnh W/L. Đóng vòng lặp cho Setup playbook match — trả lời "tôi có đang tự làm hại mình không" thay vì chỉ liệt kê win-rate-theo-setup. Đề xuất 2026-08-19, user chọn trong 3 ý cho tab journal
 
