@@ -1035,6 +1035,96 @@ Phân tích xu hướng là bối cảnh. Entry và rủi ro vẫn cần quy t�
     },
   ),
   lesson(
+    "price-action-basics",
+    "beginner",
+    {
+      title: "What is price action trading?",
+      summary:
+        "A beginner-friendly introduction to price action: what it means, why traders use it, and the four building blocks you need before touching a chart.",
+      keywords: [
+        "what is price action",
+        "price action trading for beginners",
+        "price action forex",
+        "how to learn price action",
+      ],
+      body: `## What is price action?
+
+Price action is the practice of making trading decisions from the raw movement of price on a chart — candles, highs, lows and the levels price reacts to — instead of relying mainly on lagging indicators. It does not mean "no indicators ever." It means the chart itself is the primary source of information.
+
+## Why beginners are drawn to it
+
+- It works the same way on any market and any timeframe, from M5 to Weekly.
+- It forces you to understand *why* a setup exists instead of following a signal blindly.
+- It removes the lag: indicators are calculated from past price, price action reads the present.
+
+The tradeoff is that price action is more subjective than a fixed indicator rule. It takes deliberate practice to read consistently.
+
+## The four building blocks
+
+1. **Candles** — a single candle shows who won the fight between buyers and sellers over that period. Long wicks, small bodies and long bodies all tell a different story.
+2. **Structure and trend** — sequences of higher highs/higher lows or lower highs/lower lows show which side is in control right now.
+3. **Support and resistance** — the zones where price has reacted before and is likely to react again, because other traders are watching the same levels.
+4. **Patterns** — repeatable shapes (candlestick patterns like pin bar and engulfing, or chart patterns like double top) that summarize the first three blocks into a decision point.
+
+## A learning order that works
+
+Most beginners get overwhelmed trying to learn every pattern at once. A more reliable order:
+
+1. Learn to read a single candle, then a few candles together (candlestick patterns).
+2. Learn to mark support and resistance zones on a clean chart.
+3. Learn to identify trend and market structure.
+4. Learn reversal chart patterns that combine structure with support and resistance.
+5. Only then, study specific entry setups (pin bar, engulfing, inside bar) and how to combine them with the zones and trend you already know how to find.
+
+## The mistake to avoid from day one
+
+The most common beginner mistake is memorizing what a pattern looks like without asking where it appeared. The same pin bar is a low-probability trade in the middle of a range and a high-probability trade at a well-tested support zone after a pullback. Location and context always come before the shape of the candle.`,
+    },
+    {
+      title: "Price action là gì? Bắt đầu học từ đâu",
+      summary:
+        "Giới thiệu dễ hiểu cho người mới: price action nghĩa là gì, vì sao trader dùng nó, và 4 nền tảng cần nắm trước khi đọc biểu đồ.",
+      keywords: [
+        "price action là gì",
+        "price action cho người mới bắt đầu",
+        "price action forex",
+        "học price action từ đâu",
+      ],
+      body: `## Price action là gì?
+
+Price action là cách ra quyết định giao dịch dựa trên chuyển động giá thô trên biểu đồ — nến, đỉnh, đáy và các vùng giá phản ứng — thay vì chủ yếu dựa vào indicator có độ trễ. Điều này không có nghĩa "không bao giờ dùng indicator". Nó có nghĩa là biểu đồ giá là nguồn thông tin chính.
+
+## Vì sao người mới thường chọn price action
+
+- Áp dụng được trên mọi thị trường và mọi khung thời gian, từ M5 đến Weekly.
+- Buộc bạn hiểu *vì sao* một setup xuất hiện thay vì làm theo tín hiệu một cách mù quáng.
+- Loại bỏ độ trễ: indicator được tính từ giá quá khứ, còn price action đọc hiện tại.
+
+Đánh đổi là price action mang tính chủ quan hơn một quy tắc indicator cố định. Cần luyện tập có chủ đích để đọc nhất quán.
+
+## Bốn nền tảng cần nắm
+
+1. **Nến** — một cây nến đơn cho thấy ai đang thắng trong cuộc giằng co giữa bên mua và bên bán trong khoảng thời gian đó. Bóng dài, thân nhỏ hay thân dài đều kể một câu chuyện khác nhau.
+2. **Cấu trúc và xu hướng** — chuỗi đỉnh cao dần/đáy cao dần hoặc đỉnh thấp dần/đáy thấp dần cho biết bên nào đang kiểm soát.
+3. **Hỗ trợ và kháng cự** — các vùng giá từng phản ứng trước đó và có khả năng phản ứng lại, vì nhiều trader khác cũng đang theo dõi các mức này.
+4. **Mô hình** — các hình dạng lặp lại (mô hình nến như pin bar, engulfing, hoặc mô hình biểu đồ như double top) tóm gọn ba nền tảng trên thành một điểm ra quyết định.
+
+## Thứ tự học hợp lý
+
+Phần lớn người mới bị quá tải khi cố học mọi mô hình cùng lúc. Một thứ tự đáng tin cậy hơn:
+
+1. Học đọc một cây nến đơn, rồi vài cây nến liên tiếp (mô hình nến).
+2. Học đánh dấu vùng hỗ trợ và kháng cự trên biểu đồ sạch.
+3. Học nhận diện xu hướng và cấu trúc thị trường.
+4. Học các mô hình đảo chiều kết hợp cấu trúc với vùng hỗ trợ kháng cự.
+5. Sau đó mới học các setup entry cụ thể (pin bar, engulfing, inside bar) và cách kết hợp chúng với vùng giá, xu hướng đã biết cách xác định.
+
+## Sai lầm cần tránh ngay từ đầu
+
+Sai lầm phổ biến nhất của người mới là học thuộc hình dạng mô hình mà không hỏi nó xuất hiện ở đâu. Cùng một pin bar là một lệnh xác suất thấp nếu ở giữa vùng đi ngang, nhưng là lệnh xác suất cao nếu ở vùng hỗ trợ đã được kiểm định nhiều lần sau một nhịp pullback. Vị trí và bối cảnh luôn quan trọng hơn hình dạng cây nến.`,
+    },
+  ),
+  lesson(
     "candlestick-patterns-forex",
     "beginner",
     {
@@ -1086,6 +1176,92 @@ Inside bar nằm trong phạm vi của cây nến trước. Nó có thể cho th
 ## Đừng giao dịch mô hình nến đơn lẻ
 
 Hãy hỏi: mô hình xuất hiện ở đâu, xu hướng là gì, điểm vô hiệu ở đâu và risk reward có hợp lý không?`,
+    },
+  ),
+  lesson(
+    "chart-patterns-reversal-forex",
+    "beginner",
+    {
+      title: "Reversal chart patterns: double top, double bottom and head and shoulders",
+      summary:
+        "How to recognize double top, double bottom and head and shoulders patterns, and how to trade the neckline break with a clear stop and target.",
+      keywords: [
+        "double top forex",
+        "double bottom forex",
+        "head and shoulders pattern",
+        "reversal chart patterns forex",
+        "price action forex",
+      ],
+      body: `## Chart patterns vs candlestick patterns
+
+Candlestick patterns form from one to three candles. Chart patterns form from many candles across several swing highs and lows, so they only become visible after you have already learned to spot support, resistance and trend structure.
+
+## Double top
+
+A double top forms after an uptrend, when price makes a high, pulls back, then rallies again to roughly the same high and fails a second time — an "M" shape. The level connecting the low between the two peaks is the **neckline**. The pattern is confirmed once price closes below the neckline, not just when the second peak forms.
+
+## Double bottom
+
+A double bottom is the mirror image after a downtrend: two lows near the same level with a peak between them, a "W" shape. The neckline is the level of that peak, and the pattern confirms when price closes above it.
+
+## Head and shoulders
+
+A head and shoulders forms after an uptrend, with three peaks: a left shoulder, a higher head in the middle, and a right shoulder close to the height of the left shoulder. The neckline connects the two lows on either side of the head. A break below the neckline signals the uptrend may be reversing. The inverse head and shoulders is the same idea after a downtrend, signaling a possible move up.
+
+## How to trade the break
+
+1. Mark the neckline once you can see both shoulders (or both tops/bottoms) clearly.
+2. Wait for a candle to close beyond the neckline — do not enter on the first touch.
+3. A conservative entry waits for price to retest the neckline from the other side before continuing.
+4. Stop loss goes beyond the most recent shoulder/peak on the entry side.
+5. A common target is the pattern's height (distance from the head or peak to the neckline) projected from the breakout point.
+
+## Common mistakes
+
+- Calling a pattern "confirmed" before the neckline actually breaks with a closed candle.
+- Trading a reversal pattern that fights a strong higher-timeframe trend without extra confirmation.
+- Ignoring how symmetric the shoulders are — very lopsided shoulders are a weaker signal than clean, similar-height ones.`,
+    },
+    {
+      title: "Mô hình đảo chiều: double top, double bottom và vai đầu vai",
+      summary:
+        "Cách nhận diện double top, double bottom và vai đầu vai (head and shoulders), và cách giao dịch khi giá phá đường neckline với stop loss, target rõ ràng.",
+      keywords: [
+        "double top forex",
+        "double bottom forex",
+        "mô hình vai đầu vai",
+        "mô hình đảo chiều forex",
+        "price action forex",
+      ],
+      body: `## Mô hình biểu đồ khác mô hình nến ở đâu
+
+Mô hình nến hình thành từ một đến ba cây nến. Mô hình biểu đồ hình thành từ nhiều cây nến, qua nhiều đỉnh đáy, nên chỉ nhìn rõ được sau khi bạn đã biết cách xác định hỗ trợ, kháng cự và cấu trúc xu hướng.
+
+## Double top (hai đỉnh)
+
+Double top hình thành sau một xu hướng tăng, khi giá tạo đỉnh, pullback, rồi tăng lại gần bằng đỉnh trước và thất bại lần hai — tạo hình chữ "M". Mức nối đáy giữa hai đỉnh gọi là **neckline**. Mô hình chỉ được xác nhận khi giá đóng cửa dưới neckline, không phải ngay khi đỉnh thứ hai vừa hình thành.
+
+## Double bottom (hai đáy)
+
+Double bottom là hình ảnh ngược lại sau một xu hướng giảm: hai đáy gần bằng nhau với một đỉnh ở giữa, tạo hình chữ "W". Neckline là mức của đỉnh đó, và mô hình xác nhận khi giá đóng cửa trên neckline.
+
+## Vai đầu vai (head and shoulders)
+
+Mô hình vai đầu vai hình thành sau xu hướng tăng, với ba đỉnh: vai trái, đầu ở giữa cao hơn, và vai phải gần bằng độ cao vai trái. Neckline nối hai đáy hai bên đầu. Giá phá xuống dưới neckline báo hiệu xu hướng tăng có thể đảo chiều. Vai đầu vai ngược (inverse head and shoulders) là ý tưởng tương tự sau xu hướng giảm, báo hiệu khả năng đảo chiều tăng.
+
+## Cách giao dịch khi giá phá vỡ
+
+1. Đánh dấu neckline khi đã thấy rõ cả hai vai (hoặc cả hai đỉnh/đáy).
+2. Chờ một cây nến đóng cửa qua neckline — không vào lệnh ngay lần chạm đầu tiên.
+3. Cách vào lệnh thận trọng hơn là chờ giá retest lại neckline từ phía đối diện rồi mới tiếp tục.
+4. Stop loss đặt ngoài vai/đỉnh gần nhất phía vào lệnh.
+5. Target phổ biến là chiều cao mô hình (khoảng cách từ đầu hoặc đỉnh đến neckline) chiếu từ điểm breakout.
+
+## Sai lầm thường gặp
+
+- Coi mô hình là "đã xác nhận" trước khi neckline thực sự bị phá bởi một nến đóng cửa.
+- Giao dịch mô hình đảo chiều ngược với xu hướng khung lớn mạnh mà không có xác nhận thêm.
+- Bỏ qua độ đối xứng của hai vai — vai quá lệch nhau là tín hiệu yếu hơn so với hai vai cao gần bằng nhau.`,
     },
   ),
   lesson(
@@ -1719,3 +1895,27 @@ export function getRelatedAcademyLessonsByKeywords(
 }
 
 export const academyLessons = getAcademyLessons("vi");
+
+/**
+ * Curated "Price action for beginners" learning path: fundamentals first,
+ * then specific entry setups, ending with the more advanced structure lesson.
+ * Rendered as its own section on the academy list page.
+ */
+export const PRICE_ACTION_PATH_SLUGS = [
+  "price-action-basics",
+  "candlestick-patterns-forex",
+  "support-and-resistance-basics",
+  "forex-trend-analysis",
+  "chart-patterns-reversal-forex",
+  "price-action-pin-bar",
+  "price-action-engulfing",
+  "price-action-inside-bar",
+  "price-action-bos-choch-fvg",
+] as const;
+
+export function getPriceActionPathLessons(locale: string): Lesson[] {
+  const bySlug = new Map(getAcademyLessons(locale).map((l) => [l.slug, l]));
+  return PRICE_ACTION_PATH_SLUGS.map((slug) => bySlug.get(slug)).filter(
+    (l): l is Lesson => Boolean(l),
+  );
+}

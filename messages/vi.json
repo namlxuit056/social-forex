@@ -957,7 +957,10 @@
     "quizWrong": "Chưa đúng, hãy thử lại",
     "quizOption": "Chọn đáp án",
     "aiQuizNext": "Câu tiếp →",
-    "quizResult": "{correct}/{total} câu đúng — {score}/100 điểm"
+    "quizResult": "{correct}/{total} câu đúng — {score}/100 điểm",
+    "priceActionSectionTitle": "Price Action cho người mới bắt đầu",
+    "priceActionSectionDesc": "Lộ trình học price action theo thứ tự đề xuất: từ đọc nến, vùng hỗ trợ kháng cự, xu hướng, mô hình đảo chiều, đến các setup entry cụ thể.",
+    "otherLessonsTitle": "Các bài học khác"
   },
   "articles": {
     "title": "Bài viết AI về forex",

@@ -957,7 +957,10 @@
     "quizWrong": "Not quite, try again",
     "quizOption": "Choose an answer",
     "aiQuizNext": "Next →",
-    "quizResult": "{correct}/{total} correct — {score}/100 pts"
+    "quizResult": "{correct}/{total} correct — {score}/100 pts",
+    "priceActionSectionTitle": "Price Action for beginners",
+    "priceActionSectionDesc": "A suggested price action learning path: from reading candles, support and resistance, trend, reversal patterns, to specific entry setups.",
+    "otherLessonsTitle": "Other lessons"
   },
   "articles": {
     "title": "AI forex articles",
