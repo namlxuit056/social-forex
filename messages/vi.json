@@ -646,6 +646,7 @@
     "vipNote": "VIP: chỉ tài khoản có vipUntil còn hạn.",
     "maskedTitle": "Chi tiết VIP đang bị khóa",
     "maskedMessage": "Tín hiệu VIP — nâng cấp tài khoản để xem entry / SL / TP.",
+    "vipWinRateStat": "Tỷ lệ thắng lịch sử của tín hiệu VIP: {rate}% ({count} lệnh đã đóng)",
     "upgradeVipCta": "Nâng cấp VIP",
     "status": "Trạng thái",
     "list": "Danh sách",

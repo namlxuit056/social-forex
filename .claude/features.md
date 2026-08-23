@@ -27,8 +27,6 @@ _(trống)_
 
 _Đề xuất 2026-07-20, theo goal Sprint 2 "Trust & conversion". Lưu ý: tránh feature cần cron mới cho đến khi Neon quota reset (~1/8) — tất cả bên dưới đều là request-time, không cron._
 
-- [ ] **VIP teaser + funnel** — user thường thấy card VIP signal dạng blur (symbol + direction hiện, entry/SL/TP mờ) kèm win rate lịch sử của VIP tier + CTA nâng cấp; log FunnelEvent tại các bước xem-teaser → xem-pricing → tạo-order để đo conversion (model FunnelEvent + PayPal flow có sẵn).
-
 ### Đề xuất 2026-08-17 — Sprint 4: Kiểm soát trạng thái & tăng tỷ lệ thắng
 
 Goal: (1) phát hiện/ngăn trading khi tâm lý xấu, quá tải rủi ro, revenge trading; (2) giúp trader ra quyết định tốt hơn dựa trên data journal/signal/screener đã có. Đã rà soát để không trùng: Journal Emotion Diary, Loss-streak banner (chỉ cảnh báo, chưa khoá), Journal Advanced Stats, Journal Edge Analytics, News guard, DailyTradingPlan (đã có field maxRiskPercent/maxTrades/checklist nhưng **chưa enforce ở đâu cả**).
@@ -40,6 +38,8 @@ Goal: (1) phát hiện/ngăn trading khi tâm lý xấu, quá tải rủi ro, re
 ---
 
 ## Completed
+
+- [x] VIP teaser + funnel — teaser card VIP (masked) trên `/signals` và `/signals/[signalId]` giờ kèm dòng win rate lịch sử VIP tier (`getVipTierWinRateStats`, ẩn nếu <5 lệnh đã đóng — dùng chung ngưỡng `TRADER_STATS_MIN_SAMPLE`), component dùng chung `VipSignalTeaser` (`src/components/signals/vip-signal-teaser.tsx`). Log FunnelEvent qua 3 bước: xem-teaser (`signal_vip_blocked`, đã có sẵn constant nhưng chưa wire), bấm CTA → xem-pricing (`vip_upgrade_click` khi bấm, `vip_upgrade_view` khi `/upgrade-vip` render — cả 2 constant có sẵn nhưng chưa wire), tạo-order (`vip_order_create`, constant mới, log ngay khi PayPal `createOrder` trả về order id thành công). Dùng property `surface`/`cta` có sẵn trong `FunnelEvent` (không dùng `signalId`/`plan` tự do vì route `/api/analytics/track` chỉ whitelist surface/cta/destination/reason/locale). Đề xuất 2026-07-20, user chọn giữa 3 đề xuất chưa duyệt (2026-08-23)
 
 - [x] Pre-trade checklist gate — dùng field có sẵn `DailyTradingPlan.checkedNews/checkedLevels/checkedRisk/checkedEmotion/checkedJournal` (trước đó chỉ lưu để hiển thị ở `/plan`, không gate gì cả): khi checklist hôm nay (UTC) chưa hoàn thành, hiện nhắc nhở mềm màu vàng kèm link "/plan" ở form "+ Thêm lệnh" journal và modal Copy trade (chỉ khi subscribe mới, không hiện khi Manage) — chỉ thông tin, không chặn submit, giống pattern News guard. Component dùng chung `ChecklistGuardHint` (`src/components/journal/checklist-guard-hint.tsx`) fetch `/api/journal/checklist-status`. P1 cuối cùng của Sprint 4, đóng hết mục risk-control trong roadmap (2026-08-19)
 

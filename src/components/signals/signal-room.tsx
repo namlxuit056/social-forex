@@ -27,6 +27,7 @@ import {
 import type { SignalCardNewsEvent } from "@/lib/signals/signal-list-news";
 import { signalLevel } from "@/components/signals/signal-level-classes";
 import { FollowButton } from "@/components/social/follow-button";
+import { VipSignalTeaser } from "@/components/signals/vip-signal-teaser";
 import { cn } from "@/lib/utils";
 
 type SignalRow = {
@@ -135,11 +136,13 @@ export function SignalRoom({
   newsContextHours = 24,
   favoriteSymbols = [],
   currentUserId = null,
+  vipWinRateLabel = null,
 }: {
   signals: SignalRow[];
   showCreate: boolean;
   currentUserId?: string | null;
   favoriteSymbols?: string[];
+  vipWinRateLabel?: string | null;
   initialSymbolFilter?: string;
   initialAuthorFilter?: string;
   initialStatusFilter?: SignalStatusFilter;
@@ -766,17 +769,14 @@ export function SignalRoom({
                         />
 
                         {s.masked ? (
-                          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2">
-                            <p className="text-sm text-amber-400/90">
-                              {t("maskedMessage")}
-                            </p>
-                            <Link
-                              href="/upgrade-vip"
-                              className={cn(buttonVariants({ variant: "default", size: "sm" }), "shrink-0 text-xs")}
-                            >
-                              {t("upgradeVipCta")}
-                            </Link>
-                          </div>
+                          <VipSignalTeaser
+                            signalId={s.id}
+                            surface="signals_list"
+                            variant="compact"
+                            message={t("maskedMessage")}
+                            ctaLabel={t("upgradeVipCta")}
+                            winRateLabel={vipWinRateLabel}
+                          />
                         ) : (
                           <div className="space-y-2 rounded-lg border border-border/60 bg-muted/20 p-3">
                             <div className="grid grid-cols-2 gap-2 sm:gap-3">

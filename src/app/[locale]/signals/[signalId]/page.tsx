@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { ChevronDown, Lock, MessageCircle, UserRound } from "lucide-react";
+import { ChevronDown, MessageCircle, UserRound } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { auth } from "@/auth";
@@ -23,6 +23,8 @@ import {
 } from "@/lib/calendar/news-context-db";
 import { symbolToCurrencies } from "@/lib/signals/symbol-currencies";
 import { signalStatusLabel, signalTierLabel } from "@/lib/signals/signal-detail-meta";
+import { getVipTierWinRateStats } from "@/lib/signals/vip-win-rate";
+import { VipSignalTeaser } from "@/components/signals/vip-signal-teaser";
 import { absoluteUrl } from "@/lib/site-url";
 import { signalLevelDetail } from "@/components/signals/signal-level-classes";
 import { SignalShareCopy } from "@/components/signals/signal-share-copy";
@@ -198,6 +200,13 @@ export default async function SignalDetailPage({
   const canViewVip = isVipActive(dbUser?.vipUntil);
   const masked =
     signal.tier === "VIP" && !canViewVip && userId !== signal.authorId;
+  const vipWinRate = masked ? await getVipTierWinRateStats() : null;
+  const vipWinRateLabel = vipWinRate
+    ? t("vipWinRateStat", {
+        rate: vipWinRate.winRate,
+        count: vipWinRate.closedCount,
+      })
+    : null;
   const shareUrl = absoluteUrl(`/signals/${signalId}`, locale);
   const metaDescription = t("detailMetaDescription", {
     symbol: signal.symbol,
@@ -418,28 +427,15 @@ export default async function SignalDetailPage({
           />
 
           {masked ? (
-            <div className="flex flex-col gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-start gap-3">
-                <Lock className="mt-0.5 size-4 shrink-0 text-amber-500" aria-hidden />
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-foreground">
-                    {t("maskedTitle")}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {t("maskedMessage")}
-                  </p>
-                </div>
-              </div>
-              <Link
-                href="/upgrade-vip"
-                className={cn(
-                  buttonVariants({ variant: "default", size: "sm" }),
-                  "min-h-9 w-full sm:w-auto",
-                )}
-              >
-                {t("upgradeVipCta")}
-              </Link>
-            </div>
+            <VipSignalTeaser
+              signalId={signal.id}
+              surface="signal_detail"
+              variant="detailed"
+              title={t("maskedTitle")}
+              message={t("maskedMessage")}
+              ctaLabel={t("upgradeVipCta")}
+              winRateLabel={vipWinRateLabel}
+            />
           ) : (
             <>
               <section

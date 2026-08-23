@@ -646,6 +646,7 @@
     "vipNote": "VIP: only accounts with active vipUntil.",
     "maskedTitle": "VIP details are locked",
     "maskedMessage": "VIP signal — upgrade your account to view entry / SL / TP.",
+    "vipWinRateStat": "Historical VIP signal win rate: {rate}% ({count} closed signals)",
     "upgradeVipCta": "Upgrade VIP",
     "status": "Status",
     "list": "List",

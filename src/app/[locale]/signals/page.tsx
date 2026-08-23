@@ -28,6 +28,7 @@ import {
 } from "@/lib/signals/signal-list-query";
 import { mapCalendarEventsToSignals } from "@/lib/signals/signal-list-news";
 import { symbolToCurrencies } from "@/lib/signals/symbol-currencies";
+import { getVipTierWinRateStats } from "@/lib/signals/vip-win-rate";
 
 export async function generateMetadata({
   params,
@@ -140,6 +141,14 @@ export default async function SignalsPage({
   }
 
   const hasVipSignals = vipCount > 0;
+
+  const vipWinRate = !canViewVip ? await getVipTierWinRateStats() : null;
+  const vipWinRateLabel = vipWinRate
+    ? t("vipWinRateStat", {
+        rate: vipWinRate.winRate,
+        count: vipWinRate.closedCount,
+      })
+    : null;
 
   const authorIds = [...new Set(rows.map((r) => r.authorId))];
   let followingIdSet = new Set<string>();
@@ -278,6 +287,7 @@ export default async function SignalsPage({
         showCreate={!!session?.user}
         currentUserId={userId ?? null}
         favoriteSymbols={favoriteSymbols}
+        vipWinRateLabel={vipWinRateLabel}
         initialSymbolFilter={symbol}
         initialAuthorFilter={author}
         initialStatusFilter={status}

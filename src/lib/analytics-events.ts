@@ -16,6 +16,7 @@ export const ANALYTICS_EVENTS = {
   signupPromptClick: "signup_prompt_click",
   vipUpgradeView: "vip_upgrade_view",
   vipUpgradeClick: "vip_upgrade_click",
+  vipOrderCreate: "vip_order_create",
 
   // Core feature usage
   signalView: "signal_view",

@@ -16,6 +16,7 @@ import { EmptyState } from "@/components/layout/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { PayPalVipCheckout } from "@/components/vip/paypal-vip-checkout";
+import { VipPricingViewTracker } from "@/components/vip/vip-pricing-view-tracker";
 import { getPayPalPublicClientId } from "@/lib/paypal-vip";
 import { cn } from "@/lib/utils";
 
@@ -64,6 +65,7 @@ export default async function UpgradeVipPage({
 
   return (
     <div className="mx-auto max-w-4xl space-y-10">
+      {!vip && <VipPricingViewTracker />}
       {/* Header */}
       <div className="text-center">
         <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-yellow-500/10">

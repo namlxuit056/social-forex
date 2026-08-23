@@ -3,8 +3,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Script from "next/script";
 import { useRouter, useSearchParams } from "next/navigation";
+import { track } from "@vercel/analytics";
 import { CheckCircle2, Loader2, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ANALYTICS_EVENTS } from "@/lib/analytics-events";
+import { trackInternalEvent } from "@/lib/internal-analytics";
 import { VIP_PLANS, type VipPlanKey } from "@/lib/vip-plans";
 import { cn } from "@/lib/utils";
 
@@ -91,6 +94,9 @@ export function PayPalVipCheckout({
           setStatus("error");
           throw new Error(data.error ?? "create_order_failed");
         }
+        const properties = { surface: "upgrade_vip_page", cta: planKey };
+        track(ANALYTICS_EVENTS.vipOrderCreate, properties);
+        trackInternalEvent(ANALYTICS_EVENTS.vipOrderCreate, properties);
         return data.id;
       },
       onApprove: async (data) => {
