@@ -23,6 +23,7 @@ import {
 } from "@/lib/journal/session-time-stats";
 import type { EdgeSession } from "@/lib/journal/edge-stats";
 import type { PlanComplianceStats } from "@/lib/journal/plan-compliance";
+import type { ChecklistComplianceStats } from "@/lib/journal/checklist-compliance";
 import type { GuardOverrideStats } from "@/lib/journal/guard-overrides";
 
 export type AdvancedStatsPageTrade = AdvancedStatsTrade &
@@ -323,12 +324,14 @@ export function JournalAdvancedStats({
   locale,
   accountBalance,
   planCompliance,
+  checklistCompliance,
   guardOverrideStats,
 }: {
   trades: AdvancedStatsPageTrade[];
   locale: string;
   accountBalance: number | null;
   planCompliance?: PlanComplianceStats;
+  checklistCompliance?: ChecklistComplianceStats;
   guardOverrideStats?: GuardOverrideStats;
 }) {
   const t = useTranslations("journal");
@@ -609,6 +612,74 @@ export function JournalAdvancedStats({
                 planCompliance.complianceRate === null
                   ? "neutral"
                   : planCompliance.complianceRate >= 80
+                    ? "positive"
+                    : "negative"
+              }
+            />
+          </div>
+        </div>
+      )}
+
+      {checklistCompliance && checklistCompliance.evaluableDays > 0 && (
+        <div>
+          <h3 className="font-heading text-lg font-semibold">{t("checklistComplianceTitle")}</h3>
+          <p className="mb-3 text-sm text-muted-foreground">{t("checklistComplianceNote")}</p>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <StatCard
+              label={t("checklistComplianceDays")}
+              value={`${checklistCompliance.completeDays}/${checklistCompliance.evaluableDays}`}
+            />
+            <StatCard
+              label={t("riskComplianceRate")}
+              value={
+                checklistCompliance.completionRate !== null
+                  ? `${checklistCompliance.completionRate}%`
+                  : "—"
+              }
+              tone={
+                checklistCompliance.completionRate === null
+                  ? "neutral"
+                  : checklistCompliance.completionRate >= 80
+                    ? "positive"
+                    : "negative"
+              }
+            />
+            <StatCard
+              label={t("checklistWinRateComplete")}
+              value={
+                checklistCompliance.complete.winRate !== null
+                  ? `${checklistCompliance.complete.winRate}%`
+                  : "—"
+              }
+              sub={
+                checklistCompliance.complete.winRate !== null
+                  ? `${checklistCompliance.complete.wins}W / ${checklistCompliance.complete.losses}L`
+                  : null
+              }
+              tone={
+                checklistCompliance.complete.winRate === null
+                  ? "neutral"
+                  : checklistCompliance.complete.winRate >= 50
+                    ? "positive"
+                    : "negative"
+              }
+            />
+            <StatCard
+              label={t("checklistWinRateIncomplete")}
+              value={
+                checklistCompliance.incomplete.winRate !== null
+                  ? `${checklistCompliance.incomplete.winRate}%`
+                  : "—"
+              }
+              sub={
+                checklistCompliance.incomplete.winRate !== null
+                  ? `${checklistCompliance.incomplete.wins}W / ${checklistCompliance.incomplete.losses}L`
+                  : null
+              }
+              tone={
+                checklistCompliance.incomplete.winRate === null
+                  ? "neutral"
+                  : checklistCompliance.incomplete.winRate >= 50
                     ? "positive"
                     : "negative"
               }

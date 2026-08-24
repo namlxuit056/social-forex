@@ -35,9 +35,25 @@ Goal: (1) phát hiện/ngăn trading khi tâm lý xấu, quá tải rủi ro, re
 - [ ] **1-tap mood check-in** — tách khỏi `EmotionDiaryEntry` (note dài): 1 chạm chọn trạng thái (tốt/bình thường/mệt/stress) đầu phiên, hiện badge nhắc nhở site-wide nếu tự đánh dấu "not good" hôm đó.
 - [ ] **Instant post-trade AI review** — chấm điểm nhanh ngay khi đóng lệnh (đã tuân thủ setup/tin tức/risk plan chưa) thay vì đợi tới Weekly Review, tái dùng logic AiWeeklyJournalReview ở quy mô 1 lệnh.
 
+### Đề xuất 2026-08-24 — Journal: thống kê nâng cao thêm
+
+Goal: khai thác thêm data đã capture nhưng chưa lên stat, và bổ sung vài biểu đồ/metric phổ biến cho trading journal còn thiếu. Đã rà soát để không trùng: Journal Advanced Stats (tab Thống kê), Journal Edge Analytics (tab Edge), Journal Emotion Diary (tab Cảm xúc), Equity curve trên tab Trades — xem `project-journal-advanced-stats.md` trong memory.
+
+**P1 — data đã có sẵn, chỉ cần thêm lib + UI**
+- [ ] **Emotion diary correlation với performance** — `EmotionDiaryEntry` (ghi chú tâm trạng theo ngày) hiện là journal thuần, chưa cross-reference với P&L/win-rate cùng ngày. Cần phân loại note tích cực/tiêu cực (rule-based từ khoá hoặc field mood riêng) rồi so hiệu suất giữa 2 nhóm ngày.
+- [ ] **R-multiple distribution histogram** — `r-multiple.ts` đã tính avgR/payoffRatio nhưng chưa có biểu đồ phân phối từng lệnh theo bucket R (vd: <-2R, -2..-1R, -1..0, 0..1R, 1..2R, >2R) trên tab Thống kê.
+- [ ] **Drawdown chart dạng đường** — `advanced-stats.ts` chỉ trả 1 con số `maxDrawdown`; thêm chart drawdown chạy theo thời gian, build trên cùng data equity curve đã có (`chart-buckets.ts`).
+
+**P2 — cần thêm field/schema hoặc effort lớn hơn**
+- [ ] **MAE/MFE (max adverse/favorable excursion)** — chưa có field này trên `TradeJournal`; cần thêm cột + luồng capture (có thể chỉ làm được cho lệnh có link MT5 vì cần theo dõi giá suốt đời lệnh) trước khi lên được stat.
+- [ ] **PDF/report export** — hiện chỉ có CSV (`journal-table.tsx`); thêm report định dạng để chia sẻ (mentor, prop-firm eval).
+- [ ] **Goal tracking vs kế hoạch** — chưa có gì trong schema/UI; đặt target win-rate/R/PnL tháng rồi so với thực tế.
+
 ---
 
 ## Completed
+
+- [x] Checklist compliance stat — `computeChecklistCompliance` (`src/lib/journal/checklist-compliance.ts`, 6 tests) trên tab Thống kê /journal: so % ngày hoàn thành đủ 5/5 mục `DailyTradingPlan.checked*` với win-rate của lệnh log vào ngày đó, tách 2 nhóm ngày đủ/thiếu checklist (theo pattern `playbook-adherence.ts`); đóng vòng lặp đo lường cho Pre-trade checklist gate (`checklist-guard-hint.tsx`) vốn trước đó chỉ nhắc nhở chứ không đo tác động. Đề xuất 2026-08-24 từ audit "journal thống kê còn thiếu gì" (2026-08-24)
 
 - [x] VIP teaser + funnel — teaser card VIP (masked) trên `/signals` và `/signals/[signalId]` giờ kèm dòng win rate lịch sử VIP tier (`getVipTierWinRateStats`, ẩn nếu <5 lệnh đã đóng — dùng chung ngưỡng `TRADER_STATS_MIN_SAMPLE`), component dùng chung `VipSignalTeaser` (`src/components/signals/vip-signal-teaser.tsx`). Log FunnelEvent qua 3 bước: xem-teaser (`signal_vip_blocked`, đã có sẵn constant nhưng chưa wire), bấm CTA → xem-pricing (`vip_upgrade_click` khi bấm, `vip_upgrade_view` khi `/upgrade-vip` render — cả 2 constant có sẵn nhưng chưa wire), tạo-order (`vip_order_create`, constant mới, log ngay khi PayPal `createOrder` trả về order id thành công). Dùng property `surface`/`cta` có sẵn trong `FunnelEvent` (không dùng `signalId`/`plan` tự do vì route `/api/analytics/track` chỉ whitelist surface/cta/destination/reason/locale). Đề xuất 2026-07-20, user chọn giữa 3 đề xuất chưa duyệt (2026-08-23)
 

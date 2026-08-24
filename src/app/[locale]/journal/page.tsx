@@ -22,6 +22,7 @@ import { countTrailingLosses } from "@/lib/journal/loss-streak";
 import { computeEdgeGroups, findBestRow } from "@/lib/journal/edge-stats";
 import { parseTradeSetup } from "@/lib/journal/setups";
 import { computePlanCompliance } from "@/lib/journal/plan-compliance";
+import { computeChecklistCompliance } from "@/lib/journal/checklist-compliance";
 import { computeGuardOverrideStats } from "@/lib/journal/guard-overrides";
 import { computeRStats } from "@/lib/journal/r-multiple";
 import { isVipActive } from "@/lib/vip";
@@ -143,8 +144,16 @@ export default async function JournalPage({
         : Promise.resolve([]),
       activeTab === "stats"
         ? prisma.dailyTradingPlan.findMany({
-            where: { userId: session.user.id, maxTrades: { not: null } },
-            select: { planDate: true, maxTrades: true },
+            where: { userId: session.user.id },
+            select: {
+              planDate: true,
+              maxTrades: true,
+              checkedNews: true,
+              checkedLevels: true,
+              checkedRisk: true,
+              checkedEmotion: true,
+              checkedJournal: true,
+            },
           })
         : Promise.resolve([]),
     ]);
@@ -278,6 +287,8 @@ export default async function JournalPage({
     serialized,
   );
 
+  const checklistCompliance = computeChecklistCompliance(planLimitsRaw, serialized);
+
   const guardOverrideStats = computeGuardOverrideStats(serialized);
 
   const prefill = query?.symbol
@@ -397,6 +408,7 @@ export default async function JournalPage({
             locale={locale}
             accountBalance={mt5Connection?.balance ?? mt5Connection?.equity ?? null}
             planCompliance={planCompliance}
+            checklistCompliance={checklistCompliance}
             guardOverrideStats={guardOverrideStats}
           />
         </div>
