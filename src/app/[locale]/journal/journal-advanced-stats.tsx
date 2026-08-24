@@ -24,6 +24,7 @@ import {
 import type { EdgeSession } from "@/lib/journal/edge-stats";
 import type { PlanComplianceStats } from "@/lib/journal/plan-compliance";
 import type { ChecklistComplianceStats } from "@/lib/journal/checklist-compliance";
+import type { EmotionDiaryCorrelationStats } from "@/lib/journal/emotion-diary-correlation";
 import type { GuardOverrideStats } from "@/lib/journal/guard-overrides";
 
 export type AdvancedStatsPageTrade = AdvancedStatsTrade &
@@ -325,6 +326,7 @@ export function JournalAdvancedStats({
   accountBalance,
   planCompliance,
   checklistCompliance,
+  emotionCorrelation,
   guardOverrideStats,
 }: {
   trades: AdvancedStatsPageTrade[];
@@ -332,6 +334,7 @@ export function JournalAdvancedStats({
   accountBalance: number | null;
   planCompliance?: PlanComplianceStats;
   checklistCompliance?: ChecklistComplianceStats;
+  emotionCorrelation?: EmotionDiaryCorrelationStats;
   guardOverrideStats?: GuardOverrideStats;
 }) {
   const t = useTranslations("journal");
@@ -680,6 +683,60 @@ export function JournalAdvancedStats({
                 checklistCompliance.incomplete.winRate === null
                   ? "neutral"
                   : checklistCompliance.incomplete.winRate >= 50
+                    ? "positive"
+                    : "negative"
+              }
+            />
+          </div>
+        </div>
+      )}
+
+      {emotionCorrelation && emotionCorrelation.negativeDays > 0 && (
+        <div>
+          <h3 className="font-heading text-lg font-semibold">{t("emotionCorrelationTitle")}</h3>
+          <p className="mb-3 text-sm text-muted-foreground">{t("emotionCorrelationNote")}</p>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <StatCard
+              label={t("emotionCorrelationNegativeDays")}
+              value={String(emotionCorrelation.negativeDays)}
+              tone="negative"
+            />
+            <StatCard
+              label={t("emotionCorrelationWinRateNegative")}
+              value={
+                emotionCorrelation.negative.winRate !== null
+                  ? `${emotionCorrelation.negative.winRate}%`
+                  : "—"
+              }
+              sub={
+                emotionCorrelation.negative.winRate !== null
+                  ? `${emotionCorrelation.negative.wins}W / ${emotionCorrelation.negative.losses}L`
+                  : null
+              }
+              tone={
+                emotionCorrelation.negative.winRate === null
+                  ? "neutral"
+                  : emotionCorrelation.negative.winRate >= 50
+                    ? "positive"
+                    : "negative"
+              }
+            />
+            <StatCard
+              label={t("emotionCorrelationWinRateOther")}
+              value={
+                emotionCorrelation.nonNegative.winRate !== null
+                  ? `${emotionCorrelation.nonNegative.winRate}%`
+                  : "—"
+              }
+              sub={
+                emotionCorrelation.nonNegative.winRate !== null
+                  ? `${emotionCorrelation.nonNegative.wins}W / ${emotionCorrelation.nonNegative.losses}L`
+                  : null
+              }
+              tone={
+                emotionCorrelation.nonNegative.winRate === null
+                  ? "neutral"
+                  : emotionCorrelation.nonNegative.winRate >= 50
                     ? "positive"
                     : "negative"
               }

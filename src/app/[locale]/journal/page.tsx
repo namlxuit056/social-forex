@@ -23,6 +23,7 @@ import { computeEdgeGroups, findBestRow } from "@/lib/journal/edge-stats";
 import { parseTradeSetup } from "@/lib/journal/setups";
 import { computePlanCompliance } from "@/lib/journal/plan-compliance";
 import { computeChecklistCompliance } from "@/lib/journal/checklist-compliance";
+import { computeEmotionDiaryCorrelation } from "@/lib/journal/emotion-diary-correlation";
 import { computeGuardOverrideStats } from "@/lib/journal/guard-overrides";
 import { computeRStats } from "@/lib/journal/r-multiple";
 import { isVipActive } from "@/lib/vip";
@@ -135,7 +136,7 @@ export default async function JournalPage({
         where: { id: session.user.id },
         select: { vipUntil: true },
       }),
-      activeTab === "emotion"
+      activeTab === "emotion" || activeTab === "stats"
         ? prisma.emotionDiaryEntry.findMany({
             where: { userId: session.user.id },
             orderBy: { date: "desc" },
@@ -289,6 +290,8 @@ export default async function JournalPage({
 
   const checklistCompliance = computeChecklistCompliance(planLimitsRaw, serialized);
 
+  const emotionCorrelation = computeEmotionDiaryCorrelation(emotionEntries, serialized);
+
   const guardOverrideStats = computeGuardOverrideStats(serialized);
 
   const prefill = query?.symbol
@@ -409,6 +412,7 @@ export default async function JournalPage({
             accountBalance={mt5Connection?.balance ?? mt5Connection?.equity ?? null}
             planCompliance={planCompliance}
             checklistCompliance={checklistCompliance}
+            emotionCorrelation={emotionCorrelation}
             guardOverrideStats={guardOverrideStats}
           />
         </div>

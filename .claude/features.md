@@ -40,7 +40,6 @@ Goal: (1) phát hiện/ngăn trading khi tâm lý xấu, quá tải rủi ro, re
 Goal: khai thác thêm data đã capture nhưng chưa lên stat, và bổ sung vài biểu đồ/metric phổ biến cho trading journal còn thiếu. Đã rà soát để không trùng: Journal Advanced Stats (tab Thống kê), Journal Edge Analytics (tab Edge), Journal Emotion Diary (tab Cảm xúc), Equity curve trên tab Trades — xem `project-journal-advanced-stats.md` trong memory.
 
 **P1 — data đã có sẵn, chỉ cần thêm lib + UI**
-- [ ] **Emotion diary correlation với performance** — `EmotionDiaryEntry` (ghi chú tâm trạng theo ngày) hiện là journal thuần, chưa cross-reference với P&L/win-rate cùng ngày. Cần phân loại note tích cực/tiêu cực (rule-based từ khoá hoặc field mood riêng) rồi so hiệu suất giữa 2 nhóm ngày.
 - [ ] **R-multiple distribution histogram** — `r-multiple.ts` đã tính avgR/payoffRatio nhưng chưa có biểu đồ phân phối từng lệnh theo bucket R (vd: <-2R, -2..-1R, -1..0, 0..1R, 1..2R, >2R) trên tab Thống kê.
 - [ ] **Drawdown chart dạng đường** — `advanced-stats.ts` chỉ trả 1 con số `maxDrawdown`; thêm chart drawdown chạy theo thời gian, build trên cùng data equity curve đã có (`chart-buckets.ts`).
 
@@ -52,6 +51,8 @@ Goal: khai thác thêm data đã capture nhưng chưa lên stat, và bổ sung v
 ---
 
 ## Completed
+
+- [x] Emotion diary correlation với performance — `computeEmotionDiaryCorrelation` + `classifyDiaryMood` (`src/lib/journal/emotion-diary-correlation.ts`, 11 tests) trên tab Thống kê /journal: phân loại tâm trạng ghi chú `EmotionDiaryEntry` bằng rule-based keyword matching (bỏ dấu, word-boundary, không gọi AI — ưu tiên tiêu cực khi note khớp cả 2 loại từ khoá), so win-rate lệnh log vào ngày tâm trạng tiêu cực với các ngày còn lại; badge "Tâm trạng tiêu cực/tích cực" cũng hiện trên mỗi entry ở tab Cảm xúc để trader thấy classification đang dùng. Đóng vòng lặp cho Emotion Diary vốn trước đó chỉ là journal thuần. Đề xuất 2026-08-24 từ audit "journal thống kê còn thiếu gì" (2026-08-24)
 
 - [x] Checklist compliance stat — `computeChecklistCompliance` (`src/lib/journal/checklist-compliance.ts`, 6 tests) trên tab Thống kê /journal: so % ngày hoàn thành đủ 5/5 mục `DailyTradingPlan.checked*` với win-rate của lệnh log vào ngày đó, tách 2 nhóm ngày đủ/thiếu checklist (theo pattern `playbook-adherence.ts`); đóng vòng lặp đo lường cho Pre-trade checklist gate (`checklist-guard-hint.tsx`) vốn trước đó chỉ nhắc nhở chứ không đo tác động. Đề xuất 2026-08-24 từ audit "journal thống kê còn thiếu gì" (2026-08-24)
 

@@ -11,6 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/layout/empty-state";
+import { cn } from "@/lib/utils";
+import { classifyDiaryMood } from "@/lib/journal/emotion-diary-correlation";
 
 export type EmotionDiaryEntryData = {
   id: string;
@@ -108,19 +110,35 @@ export function JournalEmotionDiary({
         />
       ) : (
         <div className="space-y-3">
-          {entries.map((entry) => (
+          {entries.map((entry) => {
+            const mood = classifyDiaryMood(entry.note);
+            return (
             <Card key={entry.id}>
               <CardContent className="flex items-start justify-between gap-4 py-4">
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-foreground">
-                    {new Date(entry.date).toLocaleDateString(locale, {
-                      weekday: "long",
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                      timeZone: "UTC",
-                    })}
-                  </p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="text-sm font-medium text-foreground">
+                      {new Date(entry.date).toLocaleDateString(locale, {
+                        weekday: "long",
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                        timeZone: "UTC",
+                      })}
+                    </p>
+                    {mood !== "neutral" && (
+                      <span
+                        className={cn(
+                          "rounded-full px-2 py-0.5 text-xs font-medium",
+                          mood === "negative"
+                            ? "bg-red-500/10 text-red-600 dark:text-red-400"
+                            : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+                        )}
+                      >
+                        {mood === "negative" ? t("emotionMoodNegative") : t("emotionMoodPositive")}
+                      </span>
+                    )}
+                  </div>
                   <p className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">
                     {entry.note}
                   </p>
@@ -157,7 +175,8 @@ export function JournalEmotionDiary({
                 </div>
               </CardContent>
             </Card>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
