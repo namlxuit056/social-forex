@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  computeBestPairSuggestion,
   computeEdgeGroups,
   findBestRow,
   findWorstRow,
@@ -108,5 +109,54 @@ describe("findBestRow", () => {
   it("trả null khi không nhóm nào đủ lệnh", () => {
     const best = findBestRow(computeEdgeGroups([trade({ setup: "BREAKOUT" })]).setups, 5);
     expect(best).toBeNull();
+  });
+});
+
+describe("computeBestPairSuggestion", () => {
+  it("trả về symbol, session và setup tốt nhất khi đủ dữ liệu", () => {
+    const trades: EdgeTrade[] = [
+      ...Array.from({ length: 3 }, () =>
+        trade({
+          symbol: "EURUSD",
+          result: "WIN",
+          setup: "BREAKOUT",
+          openedAt: "2026-07-15T08:00:00.000Z", // london
+        }),
+      ),
+      ...Array.from({ length: 2 }, () =>
+        trade({
+          symbol: "EURUSD",
+          result: "WIN",
+          setup: "PULLBACK",
+          openedAt: "2026-07-15T02:00:00.000Z", // asia
+        }),
+      ),
+    ];
+    const suggestion = computeBestPairSuggestion(trades);
+    expect(suggestion?.symbol).toBe("EURUSD");
+    expect(suggestion?.winRate).toBe(100);
+    expect(suggestion?.total).toBe(5);
+    expect(suggestion?.bestSession?.key).toBe("london");
+    expect(suggestion?.bestSetup?.key).toBe("BREAKOUT");
+  });
+
+  it("trả null khi chưa đủ dữ liệu tổng thể", () => {
+    const suggestion = computeBestPairSuggestion([trade({ symbol: "EURUSD", result: "WIN" })]);
+    expect(suggestion).toBeNull();
+  });
+
+  it("đủ dữ liệu symbol nhưng chưa đủ dữ liệu session/setup con thì trả session/setup null", () => {
+    const hours = [2, 8, 14, 3, 9];
+    const trades: EdgeTrade[] = hours.map((h) =>
+      trade({
+        symbol: "EURUSD",
+        result: "WIN",
+        openedAt: `2026-07-15T${String(h).padStart(2, "0")}:00:00.000Z`,
+      }),
+    );
+    const suggestion = computeBestPairSuggestion(trades);
+    expect(suggestion?.symbol).toBe("EURUSD");
+    expect(suggestion?.bestSession).toBeNull();
+    expect(suggestion?.bestSetup).toBeNull();
   });
 });

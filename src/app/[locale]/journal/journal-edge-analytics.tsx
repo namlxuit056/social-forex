@@ -2,10 +2,11 @@
 
 import { useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { BarChart3, AlertTriangle } from "lucide-react";
+import { BarChart3, AlertTriangle, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import {
+  computeBestPairSuggestion,
   computeEdgeGroups,
   findBestRow,
   findWorstRow,
@@ -83,6 +84,7 @@ export function JournalEdgeAnalytics({ trades }: { trades: EdgeTrade[] }) {
   const setupLabels = useSetupLabels();
   const emotionLabels = useEmotionLabels();
   const groups = useMemo(() => computeEdgeGroups(trades), [trades]);
+  const pairSuggestion = useMemo(() => computeBestPairSuggestion(trades), [trades]);
   const closedCount = trades.filter((tr) => tr.result !== "PENDING").length;
 
   const worstSymbol = findWorstRow(groups.symbols);
@@ -121,6 +123,27 @@ export function JournalEdgeAnalytics({ trades }: { trades: EdgeTrade[] }) {
 
   return (
     <div className="space-y-4">
+      {pairSuggestion && (
+        <div className="flex items-start gap-3 rounded-lg border border-emerald-500/30 bg-emerald-50 p-4 text-sm text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-200">
+          <TrendingUp className="mt-0.5 size-4 shrink-0" />
+          <p>
+            {t("pairSuggestionHint", {
+              symbol: pairSuggestion.symbol,
+              winRate: pairSuggestion.winRate,
+              count: pairSuggestion.total,
+              pnl: pairSuggestion.pnl >= 0 ? `+$${pairSuggestion.pnl.toFixed(2)}` : `-$${Math.abs(pairSuggestion.pnl).toFixed(2)}`,
+            })}
+            {pairSuggestion.bestSession &&
+              ` ${t("pairSuggestionSessionHint", {
+                session: sessionLabel(pairSuggestion.bestSession.key),
+              })}`}
+            {pairSuggestion.bestSetup &&
+              ` ${t("pairSuggestionSetupHint", {
+                setup: setupLabel(pairSuggestion.bestSetup.key),
+              })}`}
+          </p>
+        </div>
+      )}
       {worstSymbol && (
         <div className="flex items-start gap-3 rounded-lg border border-amber-500/30 bg-amber-50 p-4 text-sm text-amber-800 dark:bg-amber-950/20 dark:text-amber-200">
           <AlertTriangle className="mt-0.5 size-4 shrink-0" />

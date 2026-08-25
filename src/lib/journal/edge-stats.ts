@@ -108,3 +108,39 @@ export function findBestRow(rows: EdgeRow[], minTrades = 5): EdgeRow | null {
   }
   return best;
 }
+
+export type PairSuggestion = {
+  symbol: string;
+  winRate: number;
+  total: number;
+  pnl: number;
+  /** Phiên tốt nhất trong các lệnh của riêng symbol này — null nếu chưa đủ dữ liệu con */
+  bestSession: EdgeRow | null;
+  /** Setup tốt nhất trong các lệnh của riêng symbol này — null nếu chưa đủ dữ liệu con */
+  bestSetup: EdgeRow | null;
+};
+
+/**
+ * Đề xuất cặp tiền nên trade: symbol có winRate cao nhất (≥ minTrades lệnh W/L),
+ * kèm session/setup tốt nhất riêng cho symbol đó (ngưỡng thấp hơn vì tập con nhỏ hơn).
+ */
+export function computeBestPairSuggestion(
+  trades: EdgeTrade[],
+  minTrades = 5,
+): PairSuggestion | null {
+  const groups = computeEdgeGroups(trades);
+  const best = findBestRow(groups.symbols, minTrades);
+  if (!best) return null;
+
+  const symbolTrades = trades.filter((t) => t.symbol.toUpperCase() === best.key);
+  const subGroups = computeEdgeGroups(symbolTrades);
+
+  return {
+    symbol: best.key,
+    winRate: best.winRate ?? 0,
+    total: best.wins + best.losses,
+    pnl: best.pnl,
+    bestSession: findBestRow(subGroups.sessions, 3),
+    bestSetup: findBestRow(subGroups.setups, 3),
+  };
+}
