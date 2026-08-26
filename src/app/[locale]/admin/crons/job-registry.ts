@@ -42,7 +42,7 @@ export const CRON_JOBS: CronJobMeta[] = [
     key: "scalping-auto-run",
     label: "Auto-Scalp (multi-symbol)",
     description: "Chạy AI scalping cho từng symbol đã bật trong Auto-Scalp Config của mỗi user VIP, tự bắn lệnh nếu đạt ngưỡng điểm/độ tin cậy riêng của user đó.",
-    schedule: "Mỗi giờ, phút 0 (đầu giờ)",
+    schedule: "Mỗi 30 phút, phút 15 và 45",
     risk: "trade",
     settingsHref: "/admin/scalping-calibration",
     settingsLabel: "Xem calibration",
