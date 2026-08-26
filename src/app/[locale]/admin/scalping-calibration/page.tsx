@@ -55,6 +55,17 @@ function formatDateTime(value: Date) {
   return new Intl.DateTimeFormat("vi-VN", { dateStyle: "short", timeStyle: "short" }).format(value);
 }
 
+function pnlColor(pnl: number) {
+  if (pnl > 0) return "text-emerald-600 dark:text-emerald-400";
+  if (pnl < 0) return "text-destructive";
+  return "text-muted-foreground";
+}
+
+function formatPnl(pnl: number) {
+  const sign = pnl > 0 ? "+" : "";
+  return `${sign}${pnl.toFixed(2)}`;
+}
+
 function HistoryTable({ rows }: { rows: AutoScalpHistoryRow[] }) {
   if (rows.length === 0) {
     return <p className="text-sm text-muted-foreground">Không có lệnh nào khớp bộ lọc.</p>;
@@ -73,6 +84,7 @@ function HistoryTable({ rows }: { rows: AutoScalpHistoryRow[] }) {
             <th className="py-2 pr-4">Lot</th>
             <th className="py-2 pr-4">Score/Conf</th>
             <th className="py-2 pr-4">Trạng thái</th>
+            <th className="py-2 pr-4">P/L</th>
             <th className="py-2">AI</th>
           </tr>
         </thead>
@@ -99,6 +111,9 @@ function HistoryTable({ rows }: { rows: AutoScalpHistoryRow[] }) {
                 {row.qualityScore ?? "—"} / {row.confidence ?? "—"}
               </td>
               <td className="py-2 pr-4">{statusBadge(row.signalStatus)}</td>
+              <td className={cn("py-2 pr-4 whitespace-nowrap font-mono font-semibold", row.pnl === null ? "text-muted-foreground" : pnlColor(row.pnl))}>
+                {row.pnl === null ? "—" : formatPnl(row.pnl)}
+              </td>
               <td className="py-2">
                 <details>
                   <summary className="cursor-pointer text-xs text-primary hover:underline">Xem</summary>
@@ -250,8 +265,39 @@ export default async function ScalpingCalibrationPage({
             </p>
             <p className="text-xs text-muted-foreground">Win rate tổng</p>
           </div>
+          <div>
+            <p
+              className={cn(
+                "text-2xl font-bold tabular-nums",
+                calibration.totalPnl === null ? "text-foreground" : pnlColor(calibration.totalPnl),
+              )}
+            >
+              {calibration.totalPnl === null ? "—" : formatPnl(calibration.totalPnl)}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Tổng lợi nhuận{calibration.pnlKnownCount > 0 ? ` (${calibration.pnlKnownCount} lệnh có dữ liệu)` : ""}
+            </p>
+          </div>
+          <div>
+            <p
+              className={cn(
+                "text-2xl font-bold tabular-nums",
+                calibration.avgPnlPerTrade === null ? "text-foreground" : pnlColor(calibration.avgPnlPerTrade),
+              )}
+            >
+              {calibration.avgPnlPerTrade === null ? "—" : formatPnl(calibration.avgPnlPerTrade)}
+            </p>
+            <p className="text-xs text-muted-foreground">Lợi nhuận trung bình / lệnh</p>
+          </div>
         </CardContent>
       </Card>
+
+      {calibration.totalClosed > calibration.pnlKnownCount && (
+        <p className="text-xs text-muted-foreground">
+          P/L chỉ tính được cho {calibration.pnlKnownCount}/{calibration.totalClosed} lệnh đã đóng — số còn lại
+          chưa có TradeJournal gắn kèm (bridge MT5 chưa từng gửi heartbeat nào cho lệnh đó trước khi đóng).
+        </p>
+      )}
 
       {calibration.totalClosed > 0 && calibration.totalClosed < MIN_SAMPLE_FOR_TRUST && (
         <p className="rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-xs text-amber-700 dark:text-amber-400">

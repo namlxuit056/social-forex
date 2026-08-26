@@ -4,6 +4,9 @@ export type CalibrationRow = {
   qualityScore: number;
   confidence: number;
   outcome: CalibrationOutcome;
+  /** Realized P/L in account currency, from TradeJournal.pnl. Null when the trade closed
+   * but the bridge never attached a journal (e.g. no heartbeat came in before close). */
+  pnl: number | null;
 };
 
 export type CalibrationBucket = {
@@ -54,16 +57,26 @@ export type AutoScalpCalibration = {
   totalClosed: number;
   totalOpen: number;
   overallWinRatePct: number | null;
+  /** Sum of pnl across trades where it's known (null-pnl trades excluded, not treated as 0). */
+  totalPnl: number | null;
+  pnlKnownCount: number;
+  avgPnlPerTrade: number | null;
   byScoreBucket: CalibrationBucket[];
   byConfidence: CalibrationBucket[];
 };
 
 export function summarizeCalibration(rows: CalibrationRow[], totalOpen: number): AutoScalpCalibration {
   const wins = rows.filter((r) => r.outcome === "WIN").length;
+  const knownPnls = rows.map((r) => r.pnl).filter((pnl): pnl is number => pnl !== null);
+  const totalPnl = knownPnls.length > 0 ? knownPnls.reduce((sum, pnl) => sum + pnl, 0) : null;
+
   return {
     totalClosed: rows.length,
     totalOpen,
     overallWinRatePct: rows.length > 0 ? Math.round((wins / rows.length) * 1000) / 10 : null,
+    totalPnl: totalPnl === null ? null : Math.round(totalPnl * 100) / 100,
+    pnlKnownCount: knownPnls.length,
+    avgPnlPerTrade: totalPnl === null ? null : Math.round((totalPnl / knownPnls.length) * 100) / 100,
     byScoreBucket: calibrateByScoreBucket(rows),
     byConfidence: calibrateByConfidence(rows),
   };

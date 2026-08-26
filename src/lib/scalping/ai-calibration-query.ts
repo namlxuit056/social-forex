@@ -22,16 +22,17 @@ export async function getAutoScalpCalibration(): Promise<AutoScalpCalibration> {
   const signalIds = proposals.map((p) => p.signalId!).filter(Boolean);
   const signals = await prisma.signal.findMany({
     where: { id: { in: signalIds } },
-    select: { id: true, status: true },
+    select: { id: true, status: true, mt5Link: { select: { journal: { select: { pnl: true } } } } },
   });
-  const statusById = new Map(signals.map((s) => [s.id, s.status]));
+  const signalById = new Map(signals.map((s) => [s.id, s]));
 
   const rows: CalibrationRow[] = [];
   let totalOpen = 0;
   for (const p of proposals) {
-    const status = statusById.get(p.signalId!);
-    if (status === "CLOSED_WIN") rows.push({ qualityScore: p.qualityScore!, confidence: p.confidence!, outcome: "WIN" });
-    else if (status === "CLOSED_LOSS") rows.push({ qualityScore: p.qualityScore!, confidence: p.confidence!, outcome: "LOSS" });
+    const signal = signalById.get(p.signalId!);
+    const pnl = signal?.mt5Link?.journal?.pnl ?? null;
+    if (signal?.status === "CLOSED_WIN") rows.push({ qualityScore: p.qualityScore!, confidence: p.confidence!, outcome: "WIN", pnl });
+    else if (signal?.status === "CLOSED_LOSS") rows.push({ qualityScore: p.qualityScore!, confidence: p.confidence!, outcome: "LOSS", pnl });
     else totalOpen += 1; // ACTIVE, PENDING, CANCELLED, or missing — not resolved yet
   }
 

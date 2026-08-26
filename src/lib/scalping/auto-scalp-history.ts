@@ -26,6 +26,9 @@ export type AutoScalpHistoryRow = {
   mt5Ticket: string | null;
   signalStatus: SignalStatus | null;
   closedAt: Date | null;
+  /** Realized P/L in account currency, from TradeJournal.pnl. Null while open, or if the
+   * bridge never attached a journal to this trade's Mt5SignalLink. */
+  pnl: number | null;
 };
 
 // AiTradeProposal doesn't have a DB relation to Signal (only a signalId string), so we
@@ -65,7 +68,12 @@ export async function getAutoScalpHistory(
   const signals = signalIds.length
     ? await prisma.signal.findMany({
         where: { id: { in: signalIds } },
-        select: { id: true, status: true, closedAt: true },
+        select: {
+          id: true,
+          status: true,
+          closedAt: true,
+          mt5Link: { select: { journal: { select: { pnl: true } } } },
+        },
       })
     : [];
   const signalById = new Map(signals.map((s) => [s.id, s]));
@@ -89,6 +97,7 @@ export async function getAutoScalpHistory(
       mt5Ticket: p.mt5Ticket,
       signalStatus: signal?.status ?? null,
       closedAt: signal?.closedAt ?? null,
+      pnl: signal?.mt5Link?.journal?.pnl ?? null,
     };
   });
 
