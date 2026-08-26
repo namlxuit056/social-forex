@@ -12,6 +12,7 @@ import {
   BookOpen,
   Cpu,
   Timer,
+  Gauge,
 } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
@@ -115,6 +116,7 @@ export default async function AdminDashboardPage({
     { href: "/admin/academy", label: "Bài học Academy AI", icon: BookOpen },
     { href: "/admin/ai-settings", label: t("aiModelSettings"), icon: Cpu },
     { href: "/admin/crons", label: t("manageCrons"), icon: Timer },
+    { href: "/admin/scalping-calibration", label: t("scalpingCalibration"), icon: Gauge },
   ];
 
   return (

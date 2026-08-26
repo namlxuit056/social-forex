@@ -4,6 +4,7 @@ import { resolveQuotes } from "@/lib/quotes/resolve-quotes";
 import { QUOTE_DEFINITIONS } from "@/lib/quotes/definitions";
 import { getScalpingTechnicalContext } from "@/lib/ai/scalping-tradingview-context";
 import { getScalpingAiSuggestion } from "@/lib/ai/scalping-suggest";
+import { getAiNewsContext } from "@/lib/ai/news-context";
 import { notifyTelegramNewSignal } from "@/lib/telegram";
 import { notifySignalSubscribers } from "@/lib/signals/notify-on-signal-create";
 import { Prisma } from "@/generated/prisma/client";
@@ -91,8 +92,13 @@ async function runAutoScalp(userId: string, config: {
   // AI analysis
   let ai;
   try {
-    const tvContext = await getScalpingTechnicalContext(quote).catch(() => null);
-    ai = await getScalpingAiSuggestion(quote, tvContext, null, "vi");
+    const [tvResult, newsResult] = await Promise.allSettled([
+      getScalpingTechnicalContext(quote),
+      getAiNewsContext(quote.symbol),
+    ]);
+    const tvContext = tvResult.status === "fulfilled" ? tvResult.value : null;
+    const newsContext = newsResult.status === "fulfilled" ? newsResult.value : null;
+    ai = await getScalpingAiSuggestion(quote, tvContext, newsContext, "vi");
   } catch {
     return { ...base, status: "failed", reason: "ai_error" };
   }

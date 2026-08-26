@@ -44,6 +44,8 @@ export const CRON_JOBS: CronJobMeta[] = [
     description: "Chạy AI scalping cho từng symbol đã bật trong Auto-Scalp Config của mỗi user VIP, tự bắn lệnh nếu đạt ngưỡng điểm/độ tin cậy riêng của user đó.",
     schedule: "Mỗi giờ, phút 0 (đầu giờ)",
     risk: "trade",
+    settingsHref: "/admin/scalping-calibration",
+    settingsLabel: "Xem calibration",
   },
   {
     key: "mt5-reconcile-signals",

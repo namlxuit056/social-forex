@@ -1421,6 +1421,8 @@
     "aiModelSettingsHint": "Chỉ hiện các provider đã có API key trong biến môi trường (.env). Thay đổi có thể mất tới 5 phút để áp dụng do cơ chế cache.",
     "manageCrons": "Cron Jobs",
     "manageCronsDesc": "Chạy thủ công các cron job (auto-fire Screener/Auto-Scalp, reconcile MT5, trailing stop, price alert, weekly review, academy...) để test hoặc xử lý ngay mà không cần chờ lịch tự động.",
+    "scalpingCalibration": "AI Scalp Calibration",
+    "scalpingCalibrationDesc": "Đối chiếu qualityScore/confidence mà AI tự chấm lúc vào lệnh Auto-Scalp với kết quả thắng/thua thực tế, để biết ngưỡng minScore/minConfidence hiện tại có thực sự đáng tin không.",
     "aiArticles": "Bài viết AI",
     "aiArticlesDesc": "Tự động lấy keyword forex đang được quan tâm, dùng AI tạo bài giáo dục và lưu thành draft hoặc publish.",
     "aiArticlesSettings": "Cấu hình automation",
