@@ -14,6 +14,7 @@ RULES:
 - M15 confirms intermediate structure (swing high/low, key level, breakout zone) and is the primary source for SL placement
 - M5 gives the entry signal (momentum, MACD cross, EMA rejection, RSI divergence) and doubles as the precision timing frame — confirm the entry candle pattern on M5 itself
 - ENTRY CONSTRAINT for scalping: Market-order entries are acceptable. Entry may be at or very near current price (within 1-2 pips for FX majors). For LONG: entry must be at or slightly below current Ask. For SHORT: entry must be at or slightly above current Bid. Avoid entries that require waiting more than 3-5 pips from current price
+- ENTRY ZONE QUALITY (do this before committing to a direction): the entry-constraint rule above tells you HOW to price an entry, not whether NOW is actually a reasonable moment to buy or sell. Judge the zone itself first: reject it as a chase entry if price sits more than ~1.5x ATR(M5) away from EMA20(M5) with no pullback yet, or RSI(M5) is at an extreme against the trade direction (overbought for LONG, oversold for SHORT), or price just spiked through the M15 key level without any consolidation. When the zone looks like a chase, do not force an actionable-looking setup — cap qualityScore at 55 or below and confidence at 2, and say plainly in reasoning that price should pull back before entry rather than buying/selling immediately. Never inflate the score just to produce a market entry when the zone itself is bad
 - SL MUST BE REASONABLE, not an arbitrary round number: place it just beyond the nearest real M15 swing high/low or key level (plus a small buffer for noise), and its distance from entry must be at least 1x ATR(M15) so normal volatility doesn't stop it out prematurely, but no more than ~3x ATR(M15) so it stays a genuine scalping SL (never a swing-trading SL). As a sanity bound this typically lands around 5-20 pips for FX majors/minors (8-25 pips for JPY pairs), 0.5-1.5% for metals, 0.8-2% for crypto — but the ATR/structure logic above takes priority over these numbers when they conflict
 - TP must target at least 1.5:1 reward-to-risk ratio against that structure-based SL. For scalping, TP is typically 10-40 pips for FX majors
 - keyLevels.support must be below current mid price; keyLevels.resistance must be above current mid price
@@ -22,10 +23,10 @@ RULES:
 - NEWS RISK: High-impact news event within 30 minutes = fail; within 60 minutes = warn. Never scalp into a news spike
 - Confidence is 1 (very low) to 5 (very high). Scalping carries higher uncertainty — never recommend confidence above 3 unless H1 + M15 + M5 all align strongly with momentum
 - qualityScore is 0-100 reflecting setup quality for scalping (not general swing trading)
-- tradeChecklist must have exactly 5 items: H1 bias alignment, spread/cost check, M15 momentum (ADX/RSI), M5 entry signal, news/time risk
+- tradeChecklist must have exactly 5 items: H1 bias alignment, spread/cost check, M15 momentum (ADX/RSI), M5 entry signal & entry zone quality, news/time risk
 - tradeChecklist.label MUST be <= 80 characters. tradeChecklist.detail MUST be <= 180 characters (be concise, one short clause, no filler). reasoning MUST be <= 1500 characters total
 - Checklist status: "pass" = good condition, "warn" = acceptable but needs caution, "fail" = setup should be skipped
-- reasoning must be 3-5 concise sentences covering: H1 bias, M5 entry signal, SL invalidation, TP target, and spread/news risk
+- reasoning must be 3-5 concise sentences covering: H1 bias, M5 entry signal AND whether current price is a reasonable zone to enter now vs. chasing, SL invalidation, TP target, and spread/news risk
 - Follow the requested response language exactly for all human-readable strings
 - This is educational analysis only — not investment advice
 
@@ -141,7 +142,7 @@ ${formatScalpingContext(scalpingContext)}
 
 ${formatNewsContext(newsContext)}
 
-SCALPING ENTRY CONSTRAINT: Entry may be AT or very near current market price. For LONG set entry ≤ ${quote.ask.toFixed(quote.ask > 100 ? 2 : 5)} (current Ask + 2 pip tolerance). For SHORT set entry ≥ ${quote.bid.toFixed(quote.bid > 100 ? 2 : 5)} (current Bid - 2 pip tolerance). Scalping entries close to market are expected.
+SCALPING ENTRY CONSTRAINT: Entry may be AT or very near current market price. For LONG set entry ≤ ${quote.ask.toFixed(quote.ask > 100 ? 2 : 5)} (current Ask + 2 pip tolerance). For SHORT set entry ≥ ${quote.bid.toFixed(quote.bid > 100 ? 2 : 5)} (current Bid - 2 pip tolerance). Scalping entries close to market are expected — but only once you've judged the current price zone itself is reasonable to enter now (see ENTRY ZONE QUALITY rule), not just that direction looks right.
 
-Return one conservative scalping setup only. Prioritize low spread cost, strong M5/M15 momentum, and H1 alignment. Place SL just beyond the nearest M15 structure (validated against ATR(M15), not an arbitrary distance), with a realistic scalping TP.`;
+Return one conservative scalping setup only. Prioritize low spread cost, strong M5/M15 momentum, and H1 alignment. If price is chasing / overextended right now, say so plainly and score it low rather than dressing up a bad entry as actionable. Place SL just beyond the nearest M15 structure (validated against ATR(M15), not an arbitrary distance), with a realistic scalping TP.`;
 }
