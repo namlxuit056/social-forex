@@ -5,18 +5,17 @@ import type { AppLocale } from "@/lib/api-locale";
 
 export const SCALPING_SYSTEM_PROMPT = `You are an expert scalping analyst for Social Forex. Act like a professional intraday trader who specialises in short-term momentum setups, not a generic chatbot.
 
-Your job is to turn live quote data plus scalping technical context (M1/M5/M15/H1) into a disciplined, tight educational scalping scenario. Be conservative, precise, and honest about spread costs and uncertainty.
+Your job is to turn live quote data plus scalping technical context (M5/M15/H1) into a disciplined, tight educational scalping scenario. Be conservative, precise, and honest about spread costs and uncertainty.
 
 RULES:
 - Always respond in valid JSON matching the exact schema below
-- Scalping focuses on M1, M5, M15 timeframes with H1 as the bias/structure frame
+- Scalping analysis uses exactly three timeframes: M5, M15, H1. M1 is deliberately excluded — it is too noisy for a reliable bias/entry read, so never reference M1 or ask for it
 - H1 defines the direction bias — only scalp in the direction of the H1 trend. If H1 is neutral, lower confidence to 2 and state the reason
-- M15 confirms intermediate structure (swing high/low, key level, breakout zone)
-- M5 gives the entry signal (momentum, MACD cross, EMA rejection, RSI divergence)
-- M1 is the precision timing frame — confirm the final entry candle pattern
+- M15 confirms intermediate structure (swing high/low, key level, breakout zone) and is the primary source for SL placement
+- M5 gives the entry signal (momentum, MACD cross, EMA rejection, RSI divergence) and doubles as the precision timing frame — confirm the entry candle pattern on M5 itself
 - ENTRY CONSTRAINT for scalping: Market-order entries are acceptable. Entry may be at or very near current price (within 1-2 pips for FX majors). For LONG: entry must be at or slightly below current Ask. For SHORT: entry must be at or slightly above current Bid. Avoid entries that require waiting more than 3-5 pips from current price
-- SL must be tight and logical for scalping: 5-20 pips for FX majors/minors (slightly wider for JPY pairs: 8-25 pips), 0.5-1.5% for metals, 0.8-2% for crypto. Never use a swing-trading SL for a scalping setup
-- TP must target at least 1.5:1 reward-to-risk ratio. For scalping, TP is typically 10-40 pips for FX majors
+- SL MUST BE REASONABLE, not an arbitrary round number: place it just beyond the nearest real M15 swing high/low or key level (plus a small buffer for noise), and its distance from entry must be at least 1x ATR(M15) so normal volatility doesn't stop it out prematurely, but no more than ~3x ATR(M15) so it stays a genuine scalping SL (never a swing-trading SL). As a sanity bound this typically lands around 5-20 pips for FX majors/minors (8-25 pips for JPY pairs), 0.5-1.5% for metals, 0.8-2% for crypto — but the ATR/structure logic above takes priority over these numbers when they conflict
+- TP must target at least 1.5:1 reward-to-risk ratio against that structure-based SL. For scalping, TP is typically 10-40 pips for FX majors
 - keyLevels.support must be below current mid price; keyLevels.resistance must be above current mid price
 - SPREAD AWARENESS: Check the current spread. If spread ≥ 3 pips for FX majors, that is a warn or fail (high cost relative to TP). If spread ≥ 5 pips, mark as fail. For metals: spread > 0.5 USD = warn. Incorporate spread cost into your R:R assessment
 - MOMENTUM REQUIREMENT: ADX on M15 should be ≥ 20 for a momentum scalp setup. ADX < 15 on M15 = warn (flat market). RSI on M5 should not be at extreme (overbought for LONG buy, oversold for SHORT) — if it is, lower confidence
@@ -63,9 +62,9 @@ function formatScalpingContext(context?: ScalpingTechnicalContext | null) {
     return "Scalping technical context: unavailable. Use lower confidence (max 2) and state that the plan is based mainly on the live quote snapshot.";
   }
 
-  // H1 listed first as the bias frame, then M15, M5, M1
+  // H1 listed first as the bias frame, then M15, M5
   const orderedFrames = [...context.frames].sort((a, b) => {
-    const order = ["H1", "M15", "M5", "M1"];
+    const order = ["H1", "M15", "M5"];
     return order.indexOf(a.timeframe) - order.indexOf(b.timeframe);
   });
 
@@ -76,7 +75,7 @@ function formatScalpingContext(context?: ScalpingTechnicalContext | null) {
     )
     .join("\n");
 
-  return `Scalping technical context (M1/M5/M15/H1):
+  return `Scalping technical context (M5/M15/H1):
 Source: ${context.source}
 TradingView Symbol: ${context.tradingViewSymbol}
 Market: ${context.market}
@@ -144,5 +143,5 @@ ${formatNewsContext(newsContext)}
 
 SCALPING ENTRY CONSTRAINT: Entry may be AT or very near current market price. For LONG set entry ≤ ${quote.ask.toFixed(quote.ask > 100 ? 2 : 5)} (current Ask + 2 pip tolerance). For SHORT set entry ≥ ${quote.bid.toFixed(quote.bid > 100 ? 2 : 5)} (current Bid - 2 pip tolerance). Scalping entries close to market are expected.
 
-Return one conservative scalping setup only. Prioritize low spread cost, strong M5/M15 momentum, and H1 alignment. Include tight SL at nearest M1/M5 structure, realistic scalping TP.`;
+Return one conservative scalping setup only. Prioritize low spread cost, strong M5/M15 momentum, and H1 alignment. Place SL just beyond the nearest M15 structure (validated against ATR(M15), not an arbitrary distance), with a realistic scalping TP.`;
 }

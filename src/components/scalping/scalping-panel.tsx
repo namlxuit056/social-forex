@@ -69,7 +69,7 @@ function AnalysisCard({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  const SCALP_TIMEFRAMES = ["M1", "M5", "M15", "H1"];
+  const SCALP_TIMEFRAMES = ["M5", "M15", "H1"];
 
   function handleConfirm() {
     const lot = parseFloat(lotSize);
@@ -469,7 +469,7 @@ export function ScalpingPanel({ isLoggedIn, isVip }: Props) {
         )}
 
         <div className="ml-auto flex gap-1">
-          {["M1", "M5", "M15", "H1"].map((tf) => (
+          {["M5", "M15", "H1"].map((tf) => (
             <span
               key={tf}
               className="text-[10px] font-medium rounded px-1.5 py-0.5 bg-muted/50 text-muted-foreground"

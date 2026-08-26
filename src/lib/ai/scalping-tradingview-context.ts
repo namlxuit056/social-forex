@@ -2,13 +2,13 @@ import type { QuoteRow } from "@/lib/quotes/types";
 import { toTradingViewSymbol } from "@/lib/quotes/tradingview-symbols";
 
 type ScannerMarket = "forex" | "cfd" | "crypto";
-type ScalpingTimeframeCode = "1" | "5" | "15" | "60";
+type ScalpingTimeframeCode = "5" | "15" | "60";
 
+// M1 deliberately excluded — too noisy for a reliable scalping bias/entry read.
 const SCALPING_TIMEFRAMES: Array<{
   code: ScalpingTimeframeCode;
-  label: "M1" | "M5" | "M15" | "H1";
+  label: "M5" | "M15" | "H1";
 }> = [
-  { code: "1", label: "M1" },
   { code: "5", label: "M5" },
   { code: "15", label: "M15" },
   { code: "60", label: "H1" },
@@ -40,7 +40,7 @@ const METRICS = [
 type Metric = (typeof METRICS)[number];
 
 export type ScalpingTechnicalFrame = {
-  timeframe: "M1" | "M5" | "M15" | "H1";
+  timeframe: "M5" | "M15" | "H1";
   recommendation: number | null;
   maRecommendation: number | null;
   oscillatorRecommendation: number | null;
