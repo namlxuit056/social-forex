@@ -42,6 +42,20 @@ async function runAutoScalp(userId: string, config: {
     return { ...base, status: "skipped", reason: "vip_expired" };
   }
 
+  // Skip if this symbol still has an open signal — don't stack a new auto-scalp trade
+  // on top of one that hasn't closed yet, regardless of how the cooldown timer looks.
+  const openSignal = await prisma.signal.findFirst({
+    where: {
+      authorId: userId,
+      symbol: config.symbol.toUpperCase(),
+      status: { in: ["ACTIVE", "PENDING"] },
+    },
+    select: { id: true },
+  });
+  if (openSignal) {
+    return { ...base, status: "skipped", reason: "duplicate_open_signal" };
+  }
+
   // Cooldown check
   if (config.lastTradeAt) {
     const elapsed = Date.now() - config.lastTradeAt.getTime();
