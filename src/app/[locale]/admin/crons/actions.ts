@@ -10,6 +10,7 @@ import { reconcileStaleMt5Signals } from "@/lib/mt5/reconcile-signals";
 import { runTrailingStopUpdate } from "@/lib/mt5/trailing-stop-run";
 import { checkPriceAlerts } from "@/lib/price-alerts/check";
 import { runJournalWeeklyReview } from "@/lib/journal/weekly-review-run";
+import { runJournalDailyReview } from "@/lib/journal/daily-review-run";
 import { runAcademyAutoGenerate } from "@/lib/ai/academy-auto-generate";
 import type { CronJobKey } from "./job-registry";
 
@@ -54,6 +55,9 @@ export async function runCronJob(jobKey: CronJobKey): Promise<RunCronJobResult> 
         break;
       case "journal-weekly-review":
         summary = await runJournalWeeklyReview();
+        break;
+      case "journal-daily-review":
+        summary = await runJournalDailyReview();
         break;
       case "academy-auto-generate":
         summary = await runAcademyAutoGenerate(3);

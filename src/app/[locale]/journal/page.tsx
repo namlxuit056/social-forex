@@ -12,6 +12,7 @@ import { JournalMt5Prompt } from "./journal-mt5-prompt";
 import { JournalPerformanceChart } from "./journal-performance-chart";
 import { JournalAiPanel } from "./journal-ai-panel";
 import { JournalWeeklyReview } from "./journal-weekly-review";
+import { JournalDailyReview } from "./journal-daily-review";
 import { JournalEdgeAnalytics } from "./journal-edge-analytics";
 import { JournalCalendar } from "./journal-calendar";
 import { JournalAdvancedStats } from "./journal-advanced-stats";
@@ -103,17 +104,19 @@ export default async function JournalPage({
   const activeTab =
     query?.tab === "weekly"
       ? "weekly"
-      : query?.tab === "edge"
-        ? "edge"
-        : query?.tab === "stats"
-          ? "stats"
-          : query?.tab === "chat"
-            ? "chat"
-            : query?.tab === "emotion"
-              ? "emotion"
-              : "trades";
+      : query?.tab === "daily"
+        ? "daily"
+        : query?.tab === "edge"
+          ? "edge"
+          : query?.tab === "stats"
+            ? "stats"
+            : query?.tab === "chat"
+              ? "chat"
+              : query?.tab === "emotion"
+                ? "emotion"
+                : "trades";
 
-  const [tradesRaw, mt5Connection, weeklyReviewsRaw, dbUser, emotionEntriesRaw, planLimitsRaw] =
+  const [tradesRaw, mt5Connection, weeklyReviewsRaw, dailyReviewsRaw, dbUser, emotionEntriesRaw, planLimitsRaw] =
     await Promise.all([
       prisma.tradeJournal.findMany({
         where: { userId: session.user.id },
@@ -130,6 +133,13 @@ export default async function JournalPage({
             where: { userId: session.user.id },
             orderBy: { weekStart: "desc" },
             take: 10,
+          })
+        : Promise.resolve([]),
+      activeTab === "daily"
+        ? prisma.aiDailyJournalReview.findMany({
+            where: { userId: session.user.id },
+            orderBy: { day: "desc" },
+            take: 14,
           })
         : Promise.resolve([]),
       prisma.user.findUnique({
@@ -174,6 +184,13 @@ export default async function JournalPage({
     id: r.id,
     weekStart: r.weekStart.toISOString(),
     weekEnd: r.weekEnd.toISOString(),
+    tradeCount: r.tradeCount,
+    analysis: r.analysis as AiJournalAnalysis,
+  }));
+
+  const dailyReviews = dailyReviewsRaw.map((r) => ({
+    id: r.id,
+    day: r.day.toISOString(),
     tradeCount: r.tradeCount,
     analysis: r.analysis as AiJournalAnalysis,
   }));
@@ -358,6 +375,16 @@ export default async function JournalPage({
           {t("tabWeekly")}
         </Link>
         <Link
+          href="/journal?tab=daily"
+          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+            activeTab === "daily"
+              ? "border-primary text-foreground"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          {t("tabDaily")}
+        </Link>
+        <Link
           href="/journal?tab=edge"
           className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
             activeTab === "edge"
@@ -401,6 +428,8 @@ export default async function JournalPage({
 
       {activeTab === "weekly" ? (
         <JournalWeeklyReview reviews={weeklyReviews} />
+      ) : activeTab === "daily" ? (
+        <JournalDailyReview reviews={dailyReviews} />
       ) : activeTab === "edge" ? (
         <JournalEdgeAnalytics trades={serialized} />
       ) : activeTab === "stats" ? (

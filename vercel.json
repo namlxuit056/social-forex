@@ -9,6 +9,10 @@
       "schedule": "0 22 * * 5"
     },
     {
+      "path": "/api/journal/daily-review/run",
+      "schedule": "5 17 * * *"
+    },
+    {
       "path": "/api/academy/auto-generate/run",
       "schedule": "0 3 * * *"
     },

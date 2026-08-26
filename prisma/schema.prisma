@@ -130,6 +130,7 @@ model User {
   autoScalpConfig      AutoScalpConfig?
   priceAlerts          PriceAlert[]
   weeklyReviews        AiWeeklyJournalReview[]
+  dailyReviews         AiDailyJournalReview[]
   articleChatMessages  ArticleChatMessage[]
   journalChatMessages  JournalChatMessage[]
 
@@ -1152,6 +1153,25 @@ model AiWeeklyJournalReview {
 
   @@unique([userId, weekStart])
   @@index([userId, weekStart])
+}
+
+model AiDailyJournalReview {
+  id         String   @id @default(cuid())
+  userId     String
+  /// 00:00 giờ VN của ngày (lưu dạng UTC)
+  day        DateTime
+  /// 23:59:59 giờ VN của ngày (lưu dạng UTC)
+  dayEnd     DateTime
+  tradeCount Int
+  /// AiJournalAnalysis JSON
+  analysis   Json
+  locale     String   @default("vi")
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, day])
+  @@index([userId, day])
 }
 
 model ScreenerAlert {

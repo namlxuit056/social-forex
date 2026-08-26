@@ -6,6 +6,7 @@ export type CronJobKey =
   | "mt5-trailing-stop"
   | "price-alerts-check"
   | "journal-weekly-review"
+  | "journal-daily-review"
   | "academy-auto-generate";
 
 export type CronJobMeta = {
@@ -70,6 +71,13 @@ export const CRON_JOBS: CronJobMeta[] = [
     label: "Journal: AI Weekly Review",
     description: "Sinh bài review AI hàng tuần cho user có ≥ 3 lệnh đóng trong tuần (bỏ qua user đã có review).",
     schedule: "Thứ 6 22:00 UTC (chính) + Chủ nhật 22:00 UTC (catch-up)",
+    risk: "normal",
+  },
+  {
+    key: "journal-daily-review",
+    label: "Journal: AI Daily Review",
+    description: "Sinh bài review AI hàng ngày cho user có ≥ 1 lệnh đóng trong ngày hôm trước (giờ VN, bỏ qua user đã có review).",
+    schedule: "Hàng ngày 17:05 UTC (00:05 giờ VN, review ngày hôm trước)",
     risk: "normal",
   },
   {
