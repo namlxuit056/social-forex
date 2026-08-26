@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { auth } from "@/auth";
+import { getPathname } from "@/i18n/navigation";
 import { prisma } from "@/lib/prisma";
 import { parseAndValidateImageUrls } from "@/lib/signal-images";
 import { updateStreak } from "@/lib/streak";
@@ -123,7 +124,9 @@ export async function saveDailyTradingPlan(
   const session = await auth();
   const locale = parseLocale(formData);
   if (!session?.user?.id) {
-    redirect(`/${locale}/auth/signin?callbackUrl=/${locale}/plan`);
+    const signInPath = getPathname({ href: "/auth/signin", locale });
+    const planPath = getPathname({ href: "/plan", locale });
+    redirect(`${signInPath}?callbackUrl=${encodeURIComponent(planPath)}`);
   }
 
   const t = await getTranslations("tradingPlan");

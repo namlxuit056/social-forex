@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { getPathname } from "@/i18n/navigation";
 import {
   AlertTriangle,
   Calculator,
@@ -149,7 +150,7 @@ export function PreTradeDesk({
         .map((event) => `${event.currency} ${event.title}`)
         .join("; "),
     });
-    return `/${locale}/plan?${params.toString()}`;
+    return `${getPathname({ href: "/plan", locale })}?${params.toString()}`;
   }, [locale, relatedEvents, riskPct, symbol]);
 
   return (

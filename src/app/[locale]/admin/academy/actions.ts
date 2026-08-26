@@ -124,7 +124,7 @@ export async function regenerateImageAction(formData: FormData) {
   revalidatePath("/admin/academy");
   revalidatePath("/academy");
   revalidatePath(`/vi/academy/${slug}`);
-  revalidatePath(`/en/academy/${slug}`);
+  revalidatePath(`/academy/${slug}`);
 }
 
 export async function updateLessonAction(
@@ -154,7 +154,7 @@ export async function updateLessonAction(
     revalidatePath("/admin/academy");
     revalidatePath("/academy");
     revalidatePath(`/vi/academy/${slug}`);
-    revalidatePath(`/en/academy/${slug}`);
+    revalidatePath(`/academy/${slug}`);
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Lỗi không xác định" };
@@ -174,7 +174,7 @@ export async function updateImageUrlAction(formData: FormData) {
   revalidatePath("/admin/academy");
   revalidatePath("/academy");
   revalidatePath(`/vi/academy/${slug}`);
-  revalidatePath(`/en/academy/${slug}`);
+  revalidatePath(`/academy/${slug}`);
 }
 
 export async function deleteAcademyLesson(formData: FormData) {

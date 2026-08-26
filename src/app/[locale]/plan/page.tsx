@@ -2,7 +2,7 @@ import { CalendarDays, ChartCandlestick, ClipboardCheck, ChevronLeft, ChevronRig
 import { formatInTimeZone } from "date-fns-tz";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { auth } from "@/auth";
-import { Link } from "@/i18n/navigation";
+import { Link, getPathname } from "@/i18n/navigation";
 import { EmptyState } from "@/components/layout/empty-state";
 import { SignupPrompt } from "@/components/analytics/signup-prompt";
 import { Badge } from "@/components/ui/badge";
@@ -153,7 +153,7 @@ export default async function TradingPlanPage({
   const selectedDate = parseDateParam(sp?.date, today);
   const selectedPlanDate = dateFromDateOnly(selectedDate);
   const session = await auth();
-  const planPath = `/${locale}/plan`;
+  const planPath = getPathname({ href: "/plan", locale });
 
   if (!session?.user?.id) {
     return (

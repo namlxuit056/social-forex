@@ -1,8 +1,5 @@
-import { revalidatePath } from "next/cache";
-import { routing } from "@/i18n/routing";
+import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 
 export function revalidateNotificationSurfaces() {
-  for (const locale of routing.locales) {
-    revalidatePath(`/${locale}`, "layout");
-  }
+  revalidateLocalizedPath("/", "layout");
 }

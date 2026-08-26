@@ -25,7 +25,7 @@ export function GET() {
     "## Identity",
     "- Product: Social Forex (web app)",
     "- Audience: retail forex traders, especially beginners",
-    `- Locales: default ${routing.defaultLocale}; English at /en/…`,
+    `- Locales: default ${routing.defaultLocale} (no prefix); other locales at /{locale}/…`,
     "",
     "## Canonical URLs",
     `- Beginner path: ${abs("/start", routing.defaultLocale)}`,

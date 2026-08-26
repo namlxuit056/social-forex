@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { routing } from "@/i18n/routing";
 import { prisma } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
+import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 
 export const runtime = "nodejs";
 
@@ -56,9 +55,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       },
     });
 
-    for (const locale of routing.locales) {
-      revalidatePath(`/${locale}/journal`, "page");
-    }
+    revalidateLocalizedPath("/journal", "page");
   }
 
   return NextResponse.json({ ok: true });

@@ -1,11 +1,10 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { isVipActive } from "@/lib/vip";
 import { revalidateNotificationSurfaces } from "@/lib/revalidate-notification-surfaces";
-import { routing } from "@/i18n/routing";
+import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 
 export async function markNotificationRead(notificationId: string) {
   const session = await auth();
@@ -51,7 +50,5 @@ export async function updateNotificationSettings(formData: FormData) {
     },
   });
 
-  for (const locale of routing.locales) {
-    revalidatePath(`/${locale}/profile`, "page");
-  }
+  revalidateLocalizedPath("/profile", "page");
 }

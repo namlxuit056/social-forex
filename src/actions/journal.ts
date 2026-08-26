@@ -1,11 +1,9 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { auth } from "@/auth";
-import { routing } from "@/i18n/routing";
 import { prisma } from "@/lib/prisma";
 import { updateStreak } from "@/lib/streak";
 import { addXp } from "@/lib/add-xp";
@@ -14,11 +12,10 @@ import { isOverDailyTradeLimit, utcDayRange } from "@/lib/journal/daily-limit";
 import { parseTradeSetup } from "@/lib/journal/setups";
 import { parseJournalImageUrl, parseTradeEmotion } from "@/lib/journal/emotions";
 import { isPushEnabled, sendPushToUser } from "@/lib/push";
+import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 
 function revalidateJournalPaths() {
-  for (const locale of routing.locales) {
-    revalidatePath(`/${locale}/journal`, "page");
-  }
+  revalidateLocalizedPath("/journal", "page");
 }
 
 /** Push đúng 1 lần khi chuỗi thua trong 24h vừa chạm ngưỡng. Non-blocking. */

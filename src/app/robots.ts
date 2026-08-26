@@ -21,6 +21,7 @@ export default function robots(): MetadataRoute.Robots {
           "/alerts",
           "/mt5",
           "/upgrade-vip",
+          "/vi/profile",
           "/vi/positions",
           "/vi/journal",
           "/vi/dashboard",

@@ -3,7 +3,7 @@ import { revalidatePath } from "next/cache";
 import { createHash } from "crypto";
 import { z } from "zod";
 import { hashMt5BridgeToken, MT5_BRIDGE_TOKEN_PREFIX } from "@/lib/mt5-bridge";
-import { routing } from "@/i18n/routing";
+import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 import { prisma } from "@/lib/prisma";
 import {
   notifyTelegramNewSignal,
@@ -500,9 +500,7 @@ export async function POST(request: NextRequest) {
   const changedSignalIds = Array.from(new Set([...touchedSignalIds, ...closedSignalIds]));
   if (changedSignalIds.length > 0) {
     revalidatePath("/signals");
-    for (const locale of routing.locales) {
-      revalidatePath(`/${locale}/journal`, "page");
-    }
+    revalidateLocalizedPath("/journal", "page");
     revalidatePath(`/u/${connection.userId}`);
     for (const signalId of changedSignalIds) {
       revalidatePath(`/signals/${signalId}`);

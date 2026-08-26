@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidateNotificationSurfaces } from "@/lib/revalidate-notification-surfaces";
-import { routing } from "@/i18n/routing";
+import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 
 const FOLLOW_DEDUPE_PREFIX = "f:";
 
@@ -67,8 +67,6 @@ export async function toggleFollowUser(formData: FormData): Promise<void> {
 
   revalidatePath(`/u/${targetId}`);
   revalidatePath("/profile");
-  for (const locale of routing.locales) {
-    revalidatePath(`/${locale}/signals`, "page");
-  }
+  revalidateLocalizedPath("/signals", "page");
   revalidateNotificationSurfaces();
 }
