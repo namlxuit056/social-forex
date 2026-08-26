@@ -15,9 +15,9 @@ export function getSiteUrl(): string {
 /** Absolute URL for a locale-prefixed app path (default locale has no /vi prefix). */
 export function absoluteUrl(path: string, locale: string): string {
   const base = getSiteUrl();
-  const p = path.startsWith("/") ? path : `/${path}`;
+  const p = path === "/" ? "" : path.startsWith("/") ? path : `/${path}`;
   if (locale === routing.defaultLocale) {
-    return `${base}${p}`;
+    return `${base}${p}` || base;
   }
   return `${base}/${locale}${p}`;
 }
