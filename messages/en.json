@@ -1422,7 +1422,7 @@
     "manageCrons": "Cron Jobs",
     "manageCronsDesc": "Manually run cron jobs (Screener/Auto-Scalp auto-fire, MT5 reconcile, trailing stop, price alerts, weekly review, academy...) to test or process them right away without waiting for the schedule.",
     "scalpingCalibration": "AI Scalp Calibration",
-    "scalpingCalibrationDesc": "Compares the qualityScore/confidence the AI gave itself when auto-firing a scalp trade against the real win/loss outcome, to check whether the current minScore/minConfidence thresholds actually track real performance.",
+    "scalpingCalibrationDesc": "Compares the qualityScore/confidence the AI gave itself when auto-firing a scalp trade against the real win/loss outcome, with per-trade history and AI reasoning, to check whether the current minScore/minConfidence thresholds actually track real performance.",
     "aiArticles": "AI articles",
     "aiArticlesDesc": "Fetch trending forex keywords, generate educational AI articles, and save them as drafts or publish them.",
     "aiArticlesSettings": "Automation settings",

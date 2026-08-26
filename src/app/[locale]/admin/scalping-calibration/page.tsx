@@ -5,8 +5,10 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { Link } from "@/i18n/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { getAutoScalpCalibration } from "@/lib/scalping/ai-calibration-query";
 import type { CalibrationBucket } from "@/lib/scalping/ai-calibration";
+import { getAutoScalpHistory, type AutoScalpHistoryFilter, type AutoScalpHistoryRow } from "@/lib/scalping/auto-scalp-history";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -21,6 +23,115 @@ function winRateColor(pct: number) {
   if (pct >= 55) return "text-emerald-600 dark:text-emerald-400";
   if (pct >= 45) return "text-amber-600 dark:text-amber-500";
   return "text-destructive";
+}
+
+const STATUS_OPTIONS: Array<{ value: AutoScalpHistoryFilter; label: string }> = [
+  { value: "all", label: "Tất cả" },
+  { value: "ACTIVE", label: "Đang mở" },
+  { value: "PENDING", label: "Chờ khớp" },
+  { value: "CLOSED_WIN", label: "Thắng" },
+  { value: "CLOSED_LOSS", label: "Thua" },
+  { value: "CANCELLED", label: "Đã huỷ" },
+];
+
+function statusBadge(status: AutoScalpHistoryRow["signalStatus"]) {
+  switch (status) {
+    case "ACTIVE":
+      return <Badge variant="outline" className="border-blue-500/40 text-blue-600 dark:text-blue-400">Đang mở</Badge>;
+    case "PENDING":
+      return <Badge variant="outline" className="border-muted-foreground/40 text-muted-foreground">Chờ khớp</Badge>;
+    case "CLOSED_WIN":
+      return <Badge className="bg-emerald-500/15 text-emerald-700 hover:bg-emerald-500/15 dark:text-emerald-400">Thắng</Badge>;
+    case "CLOSED_LOSS":
+      return <Badge variant="destructive">Thua</Badge>;
+    case "CANCELLED":
+      return <Badge variant="outline" className="text-muted-foreground">Đã huỷ</Badge>;
+    default:
+      return <Badge variant="outline" className="text-muted-foreground">Không rõ</Badge>;
+  }
+}
+
+function formatDateTime(value: Date) {
+  return new Intl.DateTimeFormat("vi-VN", { dateStyle: "short", timeStyle: "short" }).format(value);
+}
+
+function HistoryTable({ rows }: { rows: AutoScalpHistoryRow[] }) {
+  if (rows.length === 0) {
+    return <p className="text-sm text-muted-foreground">Không có lệnh nào khớp bộ lọc.</p>;
+  }
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="border-b border-border/60 text-left text-xs text-muted-foreground">
+            <th className="py-2 pr-4">Thời gian</th>
+            <th className="py-2 pr-4">User</th>
+            <th className="py-2 pr-4">Symbol</th>
+            <th className="py-2 pr-4">Hướng</th>
+            <th className="py-2 pr-4">Entry/SL/TP</th>
+            <th className="py-2 pr-4">Lot</th>
+            <th className="py-2 pr-4">Score/Conf</th>
+            <th className="py-2 pr-4">Trạng thái</th>
+            <th className="py-2">AI</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr key={row.id} className="border-b border-border/30 align-top last:border-0">
+              <td className="py-2 pr-4 whitespace-nowrap text-xs text-muted-foreground">
+                {formatDateTime(row.createdAt)}
+              </td>
+              <td className="py-2 pr-4 max-w-[160px] truncate text-xs" title={row.userEmail}>
+                {row.userEmail}
+              </td>
+              <td className="py-2 pr-4 font-mono font-semibold">{row.symbol}</td>
+              <td className="py-2 pr-4">
+                <span className={row.direction === "LONG" ? "text-emerald-600 dark:text-emerald-400" : "text-destructive"}>
+                  {row.direction}
+                </span>
+              </td>
+              <td className="py-2 pr-4 whitespace-nowrap font-mono text-xs">
+                {row.entry} / {row.stopLoss ?? "—"} / {row.takeProfit ?? "—"}
+              </td>
+              <td className="py-2 pr-4">{row.lotSize ?? "—"}</td>
+              <td className="py-2 pr-4 whitespace-nowrap">
+                {row.qualityScore ?? "—"} / {row.confidence ?? "—"}
+              </td>
+              <td className="py-2 pr-4">{statusBadge(row.signalStatus)}</td>
+              <td className="py-2">
+                <details>
+                  <summary className="cursor-pointer text-xs text-primary hover:underline">Xem</summary>
+                  <div className="mt-2 max-w-md space-y-2">
+                    <p className="text-xs text-muted-foreground whitespace-pre-wrap">{row.reasoning}</p>
+                    {row.checklist.length > 0 && (
+                      <ul className="space-y-1">
+                        {row.checklist.map((item, i) => (
+                          <li key={i} className="text-xs">
+                            <span
+                              className={cn(
+                                "mr-1 font-semibold",
+                                item.status === "pass" && "text-emerald-600 dark:text-emerald-400",
+                                item.status === "warn" && "text-amber-600 dark:text-amber-500",
+                                item.status === "fail" && "text-destructive",
+                              )}
+                            >
+                              [{item.status}]
+                            </span>
+                            <span className="font-medium">{item.label}:</span> {item.detail}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </details>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 }
 
 function BucketTable({ title, rows, keyLabel }: { title: string; rows: CalibrationBucket[]; keyLabel: string }) {
@@ -68,12 +179,18 @@ function BucketTable({ title, rows, keyLabel }: { title: string; rows: Calibrati
 
 export default async function ScalpingCalibrationPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ status?: string }>;
 }) {
   const { locale } = await params;
+  const { status: rawStatus } = await searchParams;
   setRequestLocale(locale);
   const t = await getTranslations("admin");
+
+  const statusFilter: AutoScalpHistoryFilter =
+    STATUS_OPTIONS.some((o) => o.value === rawStatus) ? (rawStatus as AutoScalpHistoryFilter) : "all";
 
   const session = await auth();
   if (!session?.user?.id) redirect("/auth/signin");
@@ -92,7 +209,10 @@ export default async function ScalpingCalibrationPage({
     );
   }
 
-  const calibration = await getAutoScalpCalibration();
+  const [calibration, history] = await Promise.all([
+    getAutoScalpCalibration(),
+    getAutoScalpHistory(statusFilter, 50),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -144,6 +264,36 @@ export default async function ScalpingCalibrationPage({
         <BucketTable title="Win rate theo qualityScore" rows={calibration.byScoreBucket} keyLabel="Score" />
         <BucketTable title="Win rate theo confidence" rows={calibration.byConfidence} keyLabel="Confidence" />
       </div>
+
+      <Card className="border-border/70">
+        <CardHeader>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <CardTitle className="text-base">Lịch sử lệnh Auto-Scalp (gần nhất 50)</CardTitle>
+            <form method="get" className="flex items-center gap-2">
+              <select
+                name="status"
+                defaultValue={statusFilter}
+                className="h-8 rounded-md border border-input bg-background px-2 text-xs"
+              >
+                {STATUS_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="submit"
+                className="h-8 rounded-md border border-input bg-background px-3 text-xs font-medium hover:bg-accent"
+              >
+                Lọc
+              </button>
+            </form>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <HistoryTable rows={history} />
+        </CardContent>
+      </Card>
     </div>
   );
 }
