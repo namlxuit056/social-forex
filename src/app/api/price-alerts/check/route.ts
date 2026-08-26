@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
 import { checkPriceAlerts } from "@/lib/price-alerts/check";
+import { isCronJobEnabled } from "@/lib/cron/job-enabled";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -15,6 +16,9 @@ function authorized(req: NextRequest) {
 export async function GET(req: NextRequest) {
   if (!authorized(req)) {
     return Response.json({ error: "unauthorized" }, { status: 401 });
+  }
+  if (!(await isCronJobEnabled("price-alerts-check"))) {
+    return Response.json({ ok: true, skipped: true, reason: "disabled_by_admin" });
   }
 
   const result = await checkPriceAlerts();

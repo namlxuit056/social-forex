@@ -667,6 +667,13 @@ model AiModelSetting {
   updatedAt DateTime @updatedAt
 }
 
+/// Per-job on/off switch for scheduled cron endpoints, keyed by CronJobKey (src/app/[locale]/admin/crons/job-registry.ts). Missing row = enabled (default).
+model CronJobSetting {
+  key       String   @id
+  enabled   Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+}
+
 model AiArticleAutomationSetting {
   id               String    @id @default("default")
   enabled          Boolean   @default(false)

@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
 import { runScreenerAutoFire } from "@/lib/signals/screener-auto-fire";
+import { isCronJobEnabled } from "@/lib/cron/job-enabled";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -15,6 +16,9 @@ function authorized(req: NextRequest) {
 export async function GET(req: NextRequest) {
   if (!authorized(req)) {
     return Response.json({ ok: false, error: "unauthorized" }, { status: 401 });
+  }
+  if (!(await isCronJobEnabled("screener-auto-run"))) {
+    return Response.json({ ok: true, skipped: true, reason: "disabled_by_admin" });
   }
 
   const result = await runScreenerAutoFire();

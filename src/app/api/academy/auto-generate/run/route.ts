@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
 import { runAcademyAutoGenerate } from "@/lib/ai/academy-auto-generate";
+import { isCronJobEnabled } from "@/lib/cron/job-enabled";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,9 @@ function authorized(req: NextRequest) {
 export async function GET(req: NextRequest) {
   if (!authorized(req)) {
     return Response.json({ ok: false, error: "unauthorized" }, { status: 401 });
+  }
+  if (!(await isCronJobEnabled("academy-auto-generate"))) {
+    return Response.json({ ok: true, skipped: true, reason: "disabled_by_admin" });
   }
 
   const result = await runAcademyAutoGenerate(LESSONS_PER_RUN);

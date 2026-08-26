@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { Timer } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { getCronJobEnabledMap } from "@/lib/cron/job-enabled";
 import { CRON_JOBS } from "./job-registry";
 import { CronJobsPanel } from "./cron-jobs-panel";
 
@@ -45,6 +46,8 @@ export default async function AdminCronsPage({
     );
   }
 
+  const enabledMap = await getCronJobEnabledMap();
+
   return (
     <div className="space-y-6">
       <div>
@@ -55,7 +58,7 @@ export default async function AdminCronsPage({
         <p className="mt-1 text-sm text-muted-foreground">{t("manageCronsDesc")}</p>
       </div>
 
-      <CronJobsPanel jobs={CRON_JOBS} />
+      <CronJobsPanel jobs={CRON_JOBS} initialEnabledMap={enabledMap} />
     </div>
   );
 }

@@ -3,6 +3,8 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
+import { getCronJobEnabledMap, setCronJobEnabled } from "@/lib/cron/job-enabled";
 import { runScreenerAutoFire } from "@/lib/signals/screener-auto-fire";
 import { runScreenerAutoReview } from "@/lib/signals/screener-auto-review";
 import { runScalpingAutoRunAll } from "@/lib/scalping/auto-run";
@@ -69,4 +71,15 @@ export async function runCronJob(jobKey: CronJobKey): Promise<RunCronJobResult> 
   } catch (err) {
     return { ok: false, jobKey, at, error: err instanceof Error ? err.message : "unknown_error" };
   }
+}
+
+export async function getJobEnabledMap(): Promise<Record<CronJobKey, boolean>> {
+  await requireAdmin();
+  return getCronJobEnabledMap();
+}
+
+export async function toggleCronJob(jobKey: CronJobKey, enabled: boolean): Promise<void> {
+  await requireAdmin();
+  await setCronJobEnabled(jobKey, enabled);
+  revalidateLocalizedPath("/admin/crons");
 }

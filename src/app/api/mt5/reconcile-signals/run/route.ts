@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
 import { reconcileStaleMt5Signals } from "@/lib/mt5/reconcile-signals";
+import { isCronJobEnabled } from "@/lib/cron/job-enabled";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,9 @@ export async function GET(req: NextRequest) {
   if (!authorized(req)) {
     return Response.json({ ok: false, error: "unauthorized" }, { status: 401 });
   }
+  if (!(await isCronJobEnabled("mt5-reconcile-signals"))) {
+    return Response.json({ ok: true, skipped: true, reason: "disabled_by_admin" });
+  }
 
   const result = await reconcileStaleMt5Signals();
   return Response.json({ ok: true, ...result });
@@ -29,6 +33,9 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   if (!authorized(req)) {
     return Response.json({ ok: false, error: "unauthorized" }, { status: 401 });
+  }
+  if (!(await isCronJobEnabled("mt5-reconcile-signals"))) {
+    return Response.json({ ok: true, skipped: true, reason: "disabled_by_admin" });
   }
 
   const result = await reconcileStaleMt5Signals();

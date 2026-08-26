@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { runTrailingStopUpdate } from "@/lib/mt5/trailing-stop-run";
+import { isCronJobEnabled } from "@/lib/cron/job-enabled";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -16,6 +17,9 @@ function authorized(req: NextRequest) {
 export async function GET(req: NextRequest) {
   if (!authorized(req)) {
     return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
+  }
+  if (!(await isCronJobEnabled("mt5-trailing-stop"))) {
+    return NextResponse.json({ ok: true, skipped: true, reason: "disabled_by_admin" });
   }
 
   const result = await runTrailingStopUpdate();
