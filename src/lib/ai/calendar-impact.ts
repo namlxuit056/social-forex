@@ -2,7 +2,7 @@ import { z } from "zod";
 import type { AppLocale } from "@/lib/api-locale";
 import { createAiClient, resolveAiProvider, resolveMaxTokens } from "@/lib/ai/provider";
 import type { CalendarEvent } from "@/lib/calendar/types";
-import { QUOTE_DEFINITIONS } from "@/lib/quotes/definitions";
+import { affectedPairsForCurrency } from "@/lib/calendar/pairs";
 
 export const aiCalendarImpactSchema = z.object({
   summary: z.string().min(20).max(420),
@@ -45,19 +45,6 @@ function responseLanguage(locale: AppLocale) {
   return locale === "en"
     ? "English. Do not use Vietnamese words or Vietnamese sentence structure."
     : "Vietnamese.";
-}
-
-function affectedPairsForCurrency(currency: string) {
-  const c = currency.toUpperCase();
-  const pairs = QUOTE_DEFINITIONS.filter((quote) => {
-    if (quote.group === "major" || quote.group === "minor") {
-      return quote.symbol.includes(c);
-    }
-    if (c === "USD") return ["XAUUSD", "XAGUSD", "USOIL", "BTCUSD", "ETHUSD"].includes(quote.symbol);
-    return false;
-  }).map((quote) => quote.symbol);
-
-  return pairs.length > 0 ? pairs : ["No direct app pair"];
 }
 
 function compactEvent(event: CalendarEvent) {

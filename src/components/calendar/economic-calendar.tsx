@@ -3,8 +3,14 @@
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { formatInTimeZone } from "date-fns-tz";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CalendarEventAiAnalysis } from "@/components/calendar/calendar-event-ai-analysis";
+import {
+  CalendarEventAiAnalysis,
+  actionClass,
+  biasClass,
+} from "@/components/calendar/calendar-event-ai-analysis";
+import { computeActualSignal } from "@/lib/calendar/actual-signal";
 import { cn } from "@/lib/utils";
 import type {
   CalendarEvent,
@@ -140,6 +146,58 @@ export function EconomicCalendar({
       >
         {statusText(s)}
       </span>
+    );
+  };
+
+  const valuesLabel = (ev: CalendarEvent) => (
+    <span className="space-x-1.5">
+      <span>
+        {t("valueForecast")}: {ev.forecast || "—"}
+      </span>
+      <span className="text-muted-foreground/60">·</span>
+      <span>
+        {t("valuePrevious")}: {ev.previous || "—"}
+      </span>
+      <span className="text-muted-foreground/60">·</span>
+      <span
+        className={cn(
+          ev.actual ? "font-semibold text-foreground" : "text-muted-foreground",
+        )}
+      >
+        {t("valueActual")}: {ev.actual || "—"}
+      </span>
+    </span>
+  );
+
+  const signalBlock = (ev: CalendarEvent) => {
+    const signal = computeActualSignal(ev);
+    if (!signal || signal.bias === "neutral" || signal.pairs.length === 0) return null;
+    return (
+      <div className="flex flex-wrap items-center gap-1.5">
+        <span className="text-xs text-muted-foreground">
+          {t("signalLabel", {
+            baseline: t(
+              signal.baseline === "forecast"
+                ? "signalBaselineForecast"
+                : "signalBaselinePrevious",
+            ),
+          })}
+        </span>
+        <Badge variant="outline" className={cn("font-mono", biasClass(signal.bias))}>
+          {ev.currency} {t(`aiBias.${signal.bias}`)}
+        </Badge>
+        {signal.pairs
+          .filter((p) => p.actionBias !== "neutral")
+          .map((p) => (
+            <Badge
+              key={p.pair}
+              variant="outline"
+              className={cn("font-mono", actionClass(p.actionBias))}
+            >
+              {p.pair} {t(`aiAction.${p.actionBias}`)}
+            </Badge>
+          ))}
+      </div>
     );
   };
 
@@ -496,9 +554,6 @@ export function EconomicCalendar({
           </div>
         ) : (
           rows.map(({ ev, status }) => {
-            const values =
-              [ev.forecast, ev.previous, ev.actual].filter(Boolean).join(" · ") ||
-              "—";
             const isHighlighted = ev.id === initialHighlightEventId;
             return (
               <article
@@ -530,11 +585,11 @@ export function EconomicCalendar({
                   </div>
                 </div>
                 <div className="mt-3 rounded-md bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
-                  <span className="font-medium text-foreground/80">
-                    {t("tableValues")}:
-                  </span>{" "}
-                  {values}
+                  {valuesLabel(ev)}
                 </div>
+                {signalBlock(ev) ? (
+                  <div className="mt-2">{signalBlock(ev)}</div>
+                ) : null}
                 <CalendarEventAiAnalysis event={ev} compact />
               </article>
             );
@@ -589,12 +644,13 @@ export function EconomicCalendar({
                   <td className="px-4 py-3">{ev.title}</td>
                   <td className="px-4 py-3">{impactBadge(ev.impact)}</td>
                   <td className="px-4 py-3 text-muted-foreground">
-                    {[ev.forecast, ev.previous, ev.actual]
-                      .filter(Boolean)
-                      .join(" · ") || "—"}
+                    {valuesLabel(ev)}
                   </td>
                   <td className="min-w-80 px-4 py-3 align-top">
-                    <CalendarEventAiAnalysis event={ev} />
+                    <div className="space-y-2">
+                      {signalBlock(ev)}
+                      <CalendarEventAiAnalysis event={ev} />
+                    </div>
                   </td>
                 </tr>
               ))

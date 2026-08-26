@@ -37,14 +37,14 @@ type Props = {
   compact?: boolean;
 };
 
-function biasClass(bias: string) {
+export function biasClass(bias: string) {
   if (bias === "bullish") return "border-emerald-500/40 bg-emerald-500/12 text-emerald-700 dark:text-emerald-200";
   if (bias === "bearish") return "border-red-500/40 bg-red-500/12 text-red-700 dark:text-red-200";
   if (bias === "volatility") return "border-amber-500/40 bg-amber-500/12 text-amber-700 dark:text-amber-100";
   return "border-sky-500/40 bg-sky-500/12 text-sky-700 dark:text-sky-100";
 }
 
-function actionClass(action: string) {
+export function actionClass(action: string) {
   if (action === "buy") return "border-emerald-500/40 bg-emerald-500/12 text-emerald-700 dark:text-emerald-200";
   if (action === "sell") return "border-red-500/40 bg-red-500/12 text-red-700 dark:text-red-200";
   return "border-muted-foreground/35 bg-muted/35 text-muted-foreground";
