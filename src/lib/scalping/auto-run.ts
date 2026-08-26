@@ -5,6 +5,7 @@ import { QUOTE_DEFINITIONS } from "@/lib/quotes/definitions";
 import { getScalpingTechnicalContext } from "@/lib/ai/scalping-tradingview-context";
 import { getScalpingAiSuggestion } from "@/lib/ai/scalping-suggest";
 import { getAiNewsContext } from "@/lib/ai/news-context";
+import { parseMt5TicketSets } from "@/lib/mt5/schemas";
 import { notifyTelegramNewSignal } from "@/lib/telegram";
 import { notifySignalSubscribers } from "@/lib/signals/notify-on-signal-create";
 import { Prisma } from "@/generated/prisma/client";
@@ -14,6 +15,36 @@ const COOLDOWN_MS = 30 * 60 * 1000; // 30 phút giữa các lệnh
 function startOfDayUTC(): Date {
   const now = new Date();
   return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+}
+
+// A Signal is created immediately at confirm time (see runAutoScalp below) and only ever
+// gets closed via an Mt5SignalLink once the EA reports back that it actually executed the
+// order — a user with no MT5 connection, or a proposal the EA never picked up, leaves the
+// Signal stuck at status ACTIVE forever with nothing to close it. Checking Signal.status
+// alone would then permanently block re-entry on that symbol even though nothing is really
+// open. Instead, verify against the connection's last-known MT5 snapshot directly.
+async function hasLiveAutoScalpPosition(userId: string, symbol: string): Promise<boolean> {
+  const link = await prisma.mt5SignalLink.findFirst({
+    where: {
+      connection: { userId },
+      signal: { authorId: userId, symbol, status: { in: ["ACTIVE", "PENDING"] } },
+    },
+    select: {
+      kind: true,
+      mt5Ticket: true,
+      connection: { select: { lastPositions: true, lastOrders: true } },
+    },
+  });
+  if (!link) return false;
+
+  const { activeMt5Tickets, pendingMt5Tickets } = parseMt5TicketSets(
+    link.connection.lastPositions,
+    link.connection.lastOrders,
+  );
+
+  return link.kind === "OPEN_POSITION"
+    ? activeMt5Tickets.has(link.mt5Ticket)
+    : pendingMt5Tickets.has(link.mt5Ticket);
 }
 
 export type ScalpingAutoRunResult = {
@@ -43,17 +74,10 @@ async function runAutoScalp(userId: string, config: {
     return { ...base, status: "skipped", reason: "vip_expired" };
   }
 
-  // Skip if this symbol still has an open signal — don't stack a new auto-scalp trade
-  // on top of one that hasn't closed yet, regardless of how the cooldown timer looks.
-  const openSignal = await prisma.signal.findFirst({
-    where: {
-      authorId: userId,
-      symbol: config.symbol.toUpperCase(),
-      status: { in: ["ACTIVE", "PENDING"] },
-    },
-    select: { id: true },
-  });
-  if (openSignal) {
+  // Skip if this symbol still has a real, MT5-confirmed open position/order — don't stack
+  // a new auto-scalp trade on top of one that hasn't closed yet, regardless of the cooldown
+  // timer. Deliberately does NOT key off Signal.status alone (see hasLiveAutoScalpPosition).
+  if (await hasLiveAutoScalpPosition(userId, config.symbol.toUpperCase())) {
     return { ...base, status: "skipped", reason: "duplicate_open_signal" };
   }
 

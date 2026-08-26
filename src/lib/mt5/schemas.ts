@@ -58,6 +58,22 @@ export function directionFromMt5Type(type: string) {
   return type.toUpperCase().startsWith("BUY") ? "LONG" : "SHORT";
 }
 
+/** Parses a connection's last-known heartbeat snapshot into ticket sets — the same
+ * "what does MT5 currently say is open" view used to detect stale Signal links. */
+export function parseMt5TicketSets(
+  lastPositions: unknown,
+  lastOrders: unknown,
+): { activeMt5Tickets: Set<string>; pendingMt5Tickets: Set<string> } {
+  const parsedPositions = positionSchema.array().safeParse(lastPositions);
+  const parsedOrders = pendingOrderSchema.array().safeParse(lastOrders);
+  const positions = parsedPositions.success ? parsedPositions.data : [];
+  const orders = parsedOrders.success ? parsedOrders.data : [];
+  return {
+    activeMt5Tickets: new Set(positions.map((p) => p.identifier ?? p.ticket)),
+    pendingMt5Tickets: new Set(orders.map((o) => o.ticket)),
+  };
+}
+
 export type ClosedDealInfo = { price: number; profit: number; closedAt: Date };
 
 // A position can be closed via multiple exit deals (partial closes finishing with a final

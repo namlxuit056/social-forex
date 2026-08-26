@@ -2,7 +2,7 @@ import { revalidatePath } from "next/cache";
 import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 import { prisma } from "@/lib/prisma";
 import { notifyTelegramClosedSignal } from "@/lib/telegram";
-import { positionSchema, pendingOrderSchema } from "@/lib/mt5/schemas";
+import { parseMt5TicketSets } from "@/lib/mt5/schemas";
 import { closeStaleSignalLinks } from "@/lib/mt5/close-stale-signal-links";
 
 // Safety-net reconciliation for the copy-trade pipeline. The MT5 bridge
@@ -38,12 +38,10 @@ export async function reconcileStaleMt5Signals(): Promise<{
   const touchedUserIds = new Set<string>();
 
   for (const connection of connections) {
-    const parsedPositions = positionSchema.array().safeParse(connection.lastPositions);
-    const parsedOrders = pendingOrderSchema.array().safeParse(connection.lastOrders);
-    const positions = parsedPositions.success ? parsedPositions.data : [];
-    const orders = parsedOrders.success ? parsedOrders.data : [];
-    const activeMt5Tickets = new Set(positions.map((position) => position.identifier ?? position.ticket));
-    const pendingMt5Tickets = new Set(orders.map((order) => order.ticket));
+    const { activeMt5Tickets, pendingMt5Tickets } = parseMt5TicketSets(
+      connection.lastPositions,
+      connection.lastOrders,
+    );
 
     const { closedSignalIds, closedMt5Signals } = await prisma.$transaction((tx) =>
       closeStaleSignalLinks(tx, connection.id, {
