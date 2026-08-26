@@ -2372,7 +2372,7 @@
     "disclaimer": "AI analysis based on TradingView M1/M5/M15/H1 data. For reference only — not investment advice.",
     "autoSection": "Automated trading (Auto-Scalp)",
     "autoTitle": "AI Auto-Scalp",
-    "autoDesc": "Automatically analyzes and places trades when a signal meets your threshold — runs every 5 minutes.",
+    "autoDesc": "Automatically analyzes and places trades when a signal meets your threshold — runs every hour.",
     "autoSymbol": "Symbol",
     "autoLot": "Lot size",
     "autoMinScore": "Min quality score",

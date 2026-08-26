@@ -2372,7 +2372,7 @@
     "disclaimer": "AI phân tích dựa trên TradingView M1/M5/M15/H1. Chỉ mang tính tham khảo, không phải tư vấn đầu tư.",
     "autoSection": "Tự động vào lệnh (Auto-Scalp)",
     "autoTitle": "AI Auto-Scalp",
-    "autoDesc": "Tự động phân tích và vào lệnh khi có tín hiệu đủ tốt — chạy mỗi 5 phút.",
+    "autoDesc": "Tự động phân tích và vào lệnh khi có tín hiệu đủ tốt — chạy mỗi 1 giờ.",
     "autoSymbol": "Cặp tiền",
     "autoLot": "Lot size",
     "autoMinScore": "Score tối thiểu",
