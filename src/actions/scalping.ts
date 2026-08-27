@@ -169,7 +169,16 @@ export async function recheckAutoScalpPendingAction(
   const { ok } = rateLimit(`scalping-recheck:${session.user.id}`, 20, 60_000);
   if (!ok) return { ok: false, error: "rate_limited" };
 
-  const result = await recheckAutoScalpPending(proposalId);
-  revalidateLocalizedPath("/admin/scalping-calibration");
-  return result;
+  try {
+    const result = await recheckAutoScalpPending(proposalId);
+    revalidateLocalizedPath("/admin/scalping-calibration");
+    return result;
+  } catch (err) {
+    console.error("[recheckAutoScalpPendingAction] failed", { proposalId, error: err });
+    return {
+      ok: false,
+      error: "internal_error",
+      detail: err instanceof Error ? err.message : String(err),
+    };
+  }
 }

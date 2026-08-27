@@ -16,6 +16,7 @@ const ERROR_LABELS: Record<string, string> = {
   symbol_not_found: "Symbol không được hỗ trợ",
   ai_unavailable: "Chưa cấu hình AI API key",
   ai_error: "AI lỗi, thử lại sau",
+  internal_error: "Lỗi hệ thống",
 };
 
 export function AutoScalpRecheckButton({ proposalId }: { proposalId: string }) {
@@ -46,7 +47,10 @@ export function AutoScalpRecheckButton({ proposalId }: { proposalId: string }) {
       </button>
 
       {result && !result.ok && (
-        <p className="text-xs text-destructive">Lỗi: {ERROR_LABELS[result.error] ?? result.error}</p>
+        <p className="max-w-xs text-xs text-destructive">
+          Lỗi: {ERROR_LABELS[result.error] ?? result.error}
+          {result.detail && <span className="block text-muted-foreground">{result.detail}</span>}
+        </p>
       )}
 
       {result && result.ok && (

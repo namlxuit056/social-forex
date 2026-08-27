@@ -28,7 +28,7 @@ export type AutoScalpRecheckResult =
       reason?: string;
       mt5CancelQueued?: boolean;
     }
-  | { ok: false; error: string };
+  | { ok: false; error: string; detail?: string };
 
 function fmtNow(): string {
   return new Intl.DateTimeFormat("vi-VN", { dateStyle: "short", timeStyle: "short" }).format(new Date());
@@ -103,7 +103,17 @@ export async function recheckAutoScalpPending(proposalId: string): Promise<AutoS
       { skipCache: true },
     );
   } catch (err) {
-    return { ok: false, error: err instanceof AiUnavailableError ? "ai_unavailable" : "ai_error" };
+    console.error("[auto-scalp-recheck] AI call failed", {
+      proposalId,
+      symbol: proposal.symbol,
+      error: err,
+    });
+    if (err instanceof AiUnavailableError) return { ok: false, error: "ai_unavailable" };
+    return {
+      ok: false,
+      error: "ai_error",
+      detail: err instanceof Error ? err.message : String(err),
+    };
   }
 
   const config = await prisma.autoScalpConfig.findUnique({
