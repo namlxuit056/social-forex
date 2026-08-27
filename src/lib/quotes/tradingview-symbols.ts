@@ -23,3 +23,10 @@ const TV_MAP: Record<string, string> = {
 export function toTradingViewSymbol(symbol: string): string {
   return TV_MAP[symbol.toUpperCase()] ?? `OANDA:${symbol.toUpperCase()}`;
 }
+
+/** Full-page TradingView chart URL for a symbol — opens in a new tab. */
+export function tradingViewChartUrl(symbol: string): string {
+  return `https://www.tradingview.com/chart/?symbol=${encodeURIComponent(
+    toTradingViewSymbol(symbol),
+  )}`;
+}

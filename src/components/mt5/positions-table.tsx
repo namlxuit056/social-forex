@@ -23,6 +23,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { symbolToCurrencies } from "@/lib/signals/symbol-currencies";
+import { SymbolChartLink } from "./symbol-chart-link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -746,7 +747,7 @@ export function PositionsTable({ positions, currency, equity, newsEventsToday }:
                       <td className="px-2 py-3 font-mono text-xs text-muted-foreground">{p.ticket}</td>
                       <td className="px-2 py-3 font-semibold whitespace-nowrap">
                         <div className="flex items-center gap-1.5">
-                          {p.symbol}
+                          <SymbolChartLink symbol={p.symbol} />
                           {proximity && <ProximityBadge target={proximity.target} />}
                           <NewsBadge events={newsEvents} />
                         </div>
@@ -848,7 +849,7 @@ export function PositionsTable({ positions, currency, equity, newsEventsToday }:
                   />
                   <div className="flex items-start justify-between gap-3 pl-6">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-base font-semibold">{p.symbol}</span>
+                      <SymbolChartLink symbol={p.symbol} className="text-base font-semibold" />
                       <SideBadge type={p.type} />
                       {proximity && <ProximityBadge target={proximity.target} />}
                       <NewsBadge events={newsEvents} />

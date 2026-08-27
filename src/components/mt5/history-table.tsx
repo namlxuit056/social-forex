@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { Activity, ArrowDownRight, ArrowUpRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SymbolChartLink } from "./symbol-chart-link";
 import { cn } from "@/lib/utils";
 
 export type ClosedTrade = {
@@ -237,7 +238,7 @@ export function HistoryTable({ trades, currency }: Props) {
               <tbody>
                 {filteredTrades.map((t) => (
                   <tr key={t.id} className="border-t border-border transition-colors hover:bg-muted/40">
-                    <td className="px-3 py-3 font-semibold whitespace-nowrap">{t.symbol}</td>
+                    <td className="px-3 py-3 font-semibold whitespace-nowrap"><SymbolChartLink symbol={t.symbol} /></td>
                     <td className="px-2 py-3">
                       <DirectionBadge direction={t.direction} />
                     </td>
@@ -278,7 +279,7 @@ export function HistoryTable({ trades, currency }: Props) {
               <div key={t.id} className="rounded-xl border border-border bg-background p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-2">
-                    <span className="text-base font-semibold">{t.symbol}</span>
+                    <SymbolChartLink symbol={t.symbol} className="text-base font-semibold" />
                     <DirectionBadge direction={t.direction} />
                   </div>
                   <div className="text-right">

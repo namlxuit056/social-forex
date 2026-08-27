@@ -4,6 +4,7 @@ import { useEffect, useState, useTransition, type ReactNode } from "react";
 import { ArrowDownRight, ArrowUpRight, Ban, Clock, Percent, Target } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { SymbolChartLink } from "./symbol-chart-link";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { cancelOrder, modifyOrder } from "@/actions/mt5-commands";
@@ -264,7 +265,7 @@ export function PendingOrdersTable({ orders, equity }: Props) {
                       )}
                     >
                       <td className="px-6 py-4 font-mono text-xs text-muted-foreground">{o.ticket}</td>
-                      <td className="px-3 py-4 font-semibold">{o.symbol}</td>
+                      <td className="px-3 py-4 font-semibold"><SymbolChartLink symbol={o.symbol} /></td>
                       <td className="px-3 py-4">
                         <TypeBadge type={o.type} />
                       </td>
@@ -356,7 +357,7 @@ export function PendingOrdersTable({ orders, equity }: Props) {
                 >
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
-                      <span className="text-base font-semibold">{o.symbol}</span>
+                      <SymbolChartLink symbol={o.symbol} className="text-base font-semibold" />
                       <TypeBadge type={o.type} />
                       {isNear && <NearTriggerBadge />}
                     </div>
