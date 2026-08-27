@@ -15,6 +15,9 @@ import { AutoScalpRecheckButton } from "@/components/admin/auto-scalp-recheck-bu
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
+// The "Re-check" server action makes a live AI call (reasoning models can take
+// 30-60s); keep the invoking page's function budget above the platform default.
+export const maxDuration = 60;
 
 export async function generateMetadata() {
   return { title: "AI Scalp Calibration" };
