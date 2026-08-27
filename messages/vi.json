@@ -64,7 +64,8 @@
     "learning": "Học tập",
     "mobileAppMenuAria": "Menu app di động",
     "scrollPrimaryAria": "Mục chính",
-    "scrollSecondaryAria": "Liên kết và công cụ thêm"
+    "scrollSecondaryAria": "Liên kết và công cụ thêm",
+    "missions": "Nhiệm vụ"
   },
   "footer": {
     "tagline": "Công cụ, lịch kinh tế và bài học cho người mới — kèm cộng đồng khi bạn sẵn sàng.",
@@ -2509,5 +2510,47 @@
     "signalNewTitle": "{symbol} Signal mới",
     "signalNewVipTitle": "{symbol} ⭐ Signal VIP mới",
     "signalNewBody": "Trader bạn follow vừa đăng signal {symbol} — Xem ngay"
+  },
+  "missions": {
+    "title": "Bảng nhiệm vụ người mới",
+    "subtitle": "Lộ trình từng bước để bắt đầu giao dịch một cách an toàn và có kỷ luật.",
+    "intro": "Mỗi nhiệm vụ được tự động kiểm chứng từ hoạt động thật của bạn trên nền tảng — không cần tự khai. Hoàn thành để nhận XP và lên cấp.",
+    "loginRequired": "Đăng nhập để xem nhiệm vụ",
+    "loginHint": "Bảng nhiệm vụ theo dõi tiến độ của riêng bạn, cần đăng nhập.",
+    "signupPromptTitle": "Bắt đầu hành trình trading",
+    "signupPromptDesc": "Tạo tài khoản miễn phí để nhận nhiệm vụ, XP và lộ trình học.",
+    "signupPromptCta": "Tạo tài khoản",
+    "startCta": "Bắt đầu",
+    "claimCta": "Nhận +{xp} XP",
+    "claiming": "Đang nhận…",
+    "claimedToast": "Đã nhận +{xp} XP",
+    "summaryDone": "Nhiệm vụ đã nhận thưởng",
+    "summaryEarnedXp": "XP đã nhận",
+    "summaryClaimableXp": "XP đang chờ nhận",
+    "summaryLevel": "Cấp hiện tại",
+    "summaryTotalXp": "Tổng cộng {xp} XP cho toàn bộ nhiệm vụ",
+    "verifiedNote": "Tiến độ được tính tự động từ dữ liệu của bạn — làm ở các trang tương ứng là nhiệm vụ tự cập nhật.",
+    "allDoneTitle": "Hoàn thành toàn bộ nhiệm vụ khởi động!",
+    "allDoneBody": "Bạn đã xây được nền tảng vững. Giờ hãy duy trì thói quen ghi nhật ký và lập kế hoạch mỗi ngày.",
+    "allDoneCtaJournal": "Mở nhật ký",
+    "allDoneCtaAcademy": "Học tiếp Academy",
+    "tier": {
+      "setup": "Cấp 1 · Chuẩn bị",
+      "firstTrades": "Cấp 2 · Lệnh đầu tiên",
+      "discipline": "Cấp 3 · Kỷ luật",
+      "habits": "Cấp 4 · Thói quen"
+    },
+    "tierDesc": {
+      "setup": "Dựng công cụ và môi trường trước khi vào lệnh thật.",
+      "firstTrades": "Ghi lại những lệnh đầu tiên đúng cách để học từ chúng.",
+      "discipline": "Tập các thói quen giữ cho tài khoản sống sót.",
+      "habits": "Biến việc theo dõi bản thân thành nếp hằng ngày."
+    },
+    "claimError": {
+      "rate_limited": "Bạn thao tác hơi nhanh, thử lại sau giây lát.",
+      "unknown_mission": "Nhiệm vụ không hợp lệ.",
+      "not_complete": "Nhiệm vụ chưa hoàn thành.",
+      "already_claimed": "Bạn đã nhận thưởng nhiệm vụ này rồi."
+    }
   }
 }

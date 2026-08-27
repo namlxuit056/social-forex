@@ -34,7 +34,7 @@ export function GET() {
     `- Live quotes: ${abs("/quotes", routing.defaultLocale)} | ${abs("/quotes", "en")}`,
     `- Economic calendar: ${abs("/calendar", routing.defaultLocale)} | ${abs("/calendar", "en")}`,
     `- Academy: ${abs("/academy", routing.defaultLocale)} | ${abs("/academy", "en")}`,
-    `- Risk lesson (1–2% rule): ${abs("/academy/risk-1pct", routing.defaultLocale)}`,
+    `- Risk lesson (1–2% rule): ${abs("/academy/forex-position-sizing-1-percent-rule", routing.defaultLocale)}`,
     `- Tools: ${abs("/tools", routing.defaultLocale)} | ${abs("/tools", "en")}`,
     `- Signals (community ideas only): ${abs("/signals", routing.defaultLocale)}`,
     "",

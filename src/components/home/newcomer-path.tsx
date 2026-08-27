@@ -15,7 +15,7 @@ export async function NewcomerPathSection() {
       titleKey: "newcomerStep1Title" as const,
       descKey: "newcomerStep1Desc" as const,
       ctaKey: "newcomerStep1Cta" as const,
-      href: "/academy/risk-1pct" as const,
+      href: "/academy/forex-position-sizing-1-percent-rule" as const,
     },
     {
       titleKey: "newcomerStep2Title" as const,

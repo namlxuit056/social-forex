@@ -134,6 +134,7 @@ model User {
   tradeReviews         AiTradeReview[]
   moodCheckins         MoodCheckin[]
   tradingGoals         TradingGoal[]
+  missionClaims        UserMissionClaim[]
   articleChatMessages  ArticleChatMessage[]
   journalChatMessages  JournalChatMessage[]
 
@@ -1205,6 +1206,21 @@ model TradingGoal {
 
   @@unique([userId, month])
   @@index([userId, month])
+}
+
+/// Một nhiệm vụ khởi động ("Bảng nhiệm vụ người mới") mà user đã hoàn thành và nhận thưởng XP.
+/// Điều kiện hoàn thành được kiểm chứng lại server-side khi claim — bảng này chỉ chống nhận thưởng 2 lần.
+model UserMissionClaim {
+  id        String   @id @default(cuid())
+  userId    String
+  missionId String
+  xpAwarded Int
+  claimedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, missionId])
+  @@index([userId])
 }
 
 /// Điểm danh tâm lý 1 chạm mỗi ngày (tách khỏi EmotionDiaryEntry vốn cần note dài).

@@ -64,7 +64,8 @@
     "learning": "Learning",
     "mobileAppMenuAria": "Mobile app menu",
     "scrollPrimaryAria": "Primary sections",
-    "scrollSecondaryAria": "More links and tools"
+    "scrollSecondaryAria": "More links and tools",
+    "missions": "Missions"
   },
   "footer": {
     "tagline": "Forex tools, calendar, and lessons for new traders — plus community when you are ready.",
@@ -2509,5 +2510,47 @@
     "signalNewTitle": "New {symbol} signal",
     "signalNewVipTitle": "New {symbol} ⭐ VIP signal",
     "signalNewBody": "A trader you follow just posted a {symbol} signal — check it out"
+  },
+  "missions": {
+    "title": "Beginner mission board",
+    "subtitle": "A step-by-step path to start trading safely and with discipline.",
+    "intro": "Every mission is verified automatically from your real activity on the platform — no self-reporting. Complete them to earn XP and level up.",
+    "loginRequired": "Sign in to see missions",
+    "loginHint": "The mission board tracks your own progress, so it needs an account.",
+    "signupPromptTitle": "Start your trading journey",
+    "signupPromptDesc": "Create a free account to unlock missions, XP and a learning path.",
+    "signupPromptCta": "Create account",
+    "startCta": "Start",
+    "claimCta": "Claim +{xp} XP",
+    "claiming": "Claiming…",
+    "claimedToast": "+{xp} XP claimed",
+    "summaryDone": "Missions claimed",
+    "summaryEarnedXp": "XP earned",
+    "summaryClaimableXp": "XP ready to claim",
+    "summaryLevel": "Current level",
+    "summaryTotalXp": "{xp} XP across all missions",
+    "verifiedNote": "Progress is counted automatically from your data — just do the thing on the matching page and the mission updates itself.",
+    "allDoneTitle": "All starter missions complete!",
+    "allDoneBody": "You've built a solid foundation. Now keep the journaling and daily-planning habits going.",
+    "allDoneCtaJournal": "Open journal",
+    "allDoneCtaAcademy": "Continue Academy",
+    "tier": {
+      "setup": "Level 1 · Setup",
+      "firstTrades": "Level 2 · First trades",
+      "discipline": "Level 3 · Discipline",
+      "habits": "Level 4 · Habits"
+    },
+    "tierDesc": {
+      "setup": "Set up your tools and environment before risking real money.",
+      "firstTrades": "Record your first trades properly so you can learn from them.",
+      "discipline": "Practise the habits that keep an account alive.",
+      "habits": "Turn self-tracking into a daily routine."
+    },
+    "claimError": {
+      "rate_limited": "You're going a bit fast — try again in a moment.",
+      "unknown_mission": "Invalid mission.",
+      "not_complete": "This mission isn't complete yet.",
+      "already_claimed": "You've already claimed this mission."
+    }
   }
 }

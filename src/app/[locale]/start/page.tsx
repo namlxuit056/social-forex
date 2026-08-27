@@ -51,6 +51,7 @@ export default async function StartPage({
   setRequestLocale(locale);
   const t = await getTranslations("start");
   const tCommon = await getTranslations("common");
+  const tMissions = await getTranslations("missions");
   const ctaRow = await pageCtaItems("learn", "explore");
 
   const origin = getSiteUrl();
@@ -94,6 +95,26 @@ export default async function StartPage({
       />
 
       <OnboardingChecklist />
+
+      <div className="flex flex-col gap-3 rounded-xl border border-primary/25 bg-primary/5 p-5 ring-1 ring-primary/10 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="font-heading text-base font-medium text-foreground">
+            {tMissions("title")}
+          </h2>
+          <p className="mt-1 text-sm text-muted-foreground">{tMissions("subtitle")}</p>
+        </div>
+        <TrackedLink
+          href="/missions"
+          eventName={ANALYTICS_EVENTS.startCtaClick}
+          eventProperties={{ cta: "missions_from_start", destination: "/missions" }}
+          className={cn(
+            buttonVariants({ variant: "default", size: "sm" }),
+            "shrink-0 text-xs font-medium",
+          )}
+        >
+          {tMissions("startCta")}
+        </TrackedLink>
+      </div>
 
       <ol className="space-y-6">
         <li className="relative rounded-xl border border-border bg-card/40 p-5 pl-6 ring-1 ring-foreground/5 md:p-6 md:pl-8">

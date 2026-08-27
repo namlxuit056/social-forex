@@ -61,7 +61,7 @@ const challengeDays = [
   },
   {
     titleKey: "day4Title" as const,
-    href: "/academy/risk-1pct" as const,
+    href: "/academy/forex-position-sizing-1-percent-rule" as const,
     icon: BookOpen,
   },
   {

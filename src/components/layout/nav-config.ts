@@ -35,6 +35,7 @@ export const communityNavKeys = [
 export const learningNavKeys = [
   { href: "/articles", key: "articles" },
   { href: "/challenge", key: "challenge" },
+  { href: "/missions", key: "missions" },
   { href: "/start", key: "startHere" },
   { href: "/webinar", key: "webinar" },
   { href: "/resources", key: "resources" },
