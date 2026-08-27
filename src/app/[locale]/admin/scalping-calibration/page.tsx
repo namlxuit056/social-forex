@@ -7,7 +7,7 @@ import { Link } from "@/i18n/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getAutoScalpCalibration } from "@/lib/scalping/ai-calibration-query";
-import type { CalibrationBucket } from "@/lib/scalping/ai-calibration";
+import type { CalibrationBucket, ThresholdSimRow } from "@/lib/scalping/ai-calibration";
 import { getAutoScalpHistory, type AutoScalpHistoryFilter, type AutoScalpHistoryRow } from "@/lib/scalping/auto-scalp-history";
 import { QUOTE_DEFINITIONS } from "@/lib/quotes/definitions";
 import { ScalpingPromptInspector } from "@/components/admin/scalping-prompt-inspector";
@@ -160,6 +160,12 @@ function HistoryTable({ rows }: { rows: AutoScalpHistoryRow[] }) {
   );
 }
 
+function rColor(r: number) {
+  if (r > 0.05) return "text-emerald-600 dark:text-emerald-400";
+  if (r < -0.05) return "text-destructive";
+  return "text-muted-foreground";
+}
+
 function BucketTable({ title, rows, keyLabel }: { title: string; rows: CalibrationBucket[]; keyLabel: string }) {
   return (
     <Card className="border-border/70">
@@ -177,7 +183,11 @@ function BucketTable({ title, rows, keyLabel }: { title: string; rows: Calibrati
                   <th className="py-2 pr-4">{keyLabel}</th>
                   <th className="py-2 pr-4">Số lệnh</th>
                   <th className="py-2 pr-4">Thắng</th>
-                  <th className="py-2">Win rate</th>
+                  <th className="py-2 pr-4">Win rate</th>
+                  <th className="py-2 pr-4" title="Kỳ vọng R trung bình mỗi lệnh (TP/SL kế hoạch cho lệnh thắng, −1R cho lệnh thua)">
+                    Avg R
+                  </th>
+                  <th className="py-2">Tổng P/L</th>
                 </tr>
               </thead>
               <tbody>
@@ -186,14 +196,111 @@ function BucketTable({ title, rows, keyLabel }: { title: string; rows: Calibrati
                     <td className="py-2 pr-4 font-mono">{row.key}</td>
                     <td className="py-2 pr-4">{row.count}</td>
                     <td className="py-2 pr-4">{row.wins}</td>
-                    <td className={cn("py-2 font-semibold", winRateColor(row.winRatePct))}>
+                    <td className={cn("py-2 pr-4 font-semibold", winRateColor(row.winRatePct))}>
                       {row.winRatePct}%
                       {row.count < MIN_SAMPLE_FOR_TRUST && (
                         <span className="ml-1.5 font-normal text-muted-foreground">(mẫu nhỏ)</span>
                       )}
                     </td>
+                    <td className={cn("py-2 pr-4 font-mono font-semibold", rColor(row.avgR))}>
+                      {row.avgR > 0 ? "+" : ""}
+                      {row.avgR.toFixed(2)}R
+                    </td>
+                    <td
+                      className={cn(
+                        "py-2 font-mono",
+                        row.totalPnl === null ? "text-muted-foreground" : pnlColor(row.totalPnl),
+                      )}
+                    >
+                      {row.totalPnl === null ? "—" : formatPnl(row.totalPnl)}
+                    </td>
                   </tr>
                 ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function ThresholdSimTable({
+  rows,
+  configured,
+}: {
+  rows: ThresholdSimRow[];
+  configured: Array<{ minScore: number; minConfidence: number }>;
+}) {
+  const isConfigured = (r: ThresholdSimRow) =>
+    configured.some((c) => c.minScore === r.minScore && c.minConfidence === r.minConfidence);
+
+  return (
+    <Card className="border-border/70">
+      <CardHeader>
+        <CardTitle className="text-base">Mô phỏng ngưỡng lọc (nếu siết chặt hơn)</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <p className="text-xs text-muted-foreground">
+          Chạy lại toàn bộ lệnh đã đóng qua từng cặp ngưỡng <code>minScore</code>/<code>minConfidence</code>.
+          Dòng <span className="font-medium text-foreground">tô đậm</span> là ngưỡng đang bật trên một
+          AutoScalpConfig. Dữ liệu chỉ gồm lệnh đã vượt ngưỡng thực tế nên chỉ mô phỏng được việc{" "}
+          <span className="font-medium">siết chặt</span>, không nới lỏng.
+        </p>
+        {rows.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Chưa có lệnh đã đóng để mô phỏng.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-border/60 text-left text-xs text-muted-foreground">
+                  <th className="py-2 pr-4">Ngưỡng</th>
+                  <th className="py-2 pr-4">Giữ lại</th>
+                  <th className="py-2 pr-4">Loại bỏ</th>
+                  <th className="py-2 pr-4">Win rate</th>
+                  <th className="py-2 pr-4">Avg R</th>
+                  <th className="py-2 pr-4">Tổng R</th>
+                  <th className="py-2">Tổng P/L</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((row) => {
+                  const active = isConfigured(row);
+                  return (
+                    <tr
+                      key={`${row.minScore}/${row.minConfidence}`}
+                      className={cn(
+                        "border-b border-border/30 last:border-0",
+                        active && "bg-primary/5 font-medium",
+                      )}
+                    >
+                      <td className="py-2 pr-4 font-mono">
+                        ≥{row.minScore} / ≥{row.minConfidence}
+                        {active && <span className="ml-1.5 text-[10px] uppercase text-primary">đang bật</span>}
+                      </td>
+                      <td className="py-2 pr-4">{row.kept}</td>
+                      <td className="py-2 pr-4 text-muted-foreground">−{row.filtered}</td>
+                      <td className={cn("py-2 pr-4 font-semibold", winRateColor(row.winRatePct))}>
+                        {row.kept === 0 ? "—" : `${row.winRatePct}%`}
+                      </td>
+                      <td className={cn("py-2 pr-4 font-mono font-semibold", rColor(row.avgR))}>
+                        {row.kept === 0 ? "—" : `${row.avgR > 0 ? "+" : ""}${row.avgR.toFixed(2)}R`}
+                      </td>
+                      <td className={cn("py-2 pr-4 font-mono", rColor(row.totalR))}>
+                        {row.totalR > 0 ? "+" : ""}
+                        {row.totalR.toFixed(1)}R
+                      </td>
+                      <td
+                        className={cn(
+                          "py-2 font-mono",
+                          row.totalPnl === null ? "text-muted-foreground" : pnlColor(row.totalPnl),
+                        )}
+                      >
+                        {row.totalPnl === null ? "—" : formatPnl(row.totalPnl)}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -321,6 +428,10 @@ export default async function ScalpingCalibrationPage({
         <BucketTable title="Win rate theo qualityScore" rows={calibration.byScoreBucket} keyLabel="Score" />
         <BucketTable title="Win rate theo confidence" rows={calibration.byConfidence} keyLabel="Confidence" />
       </div>
+
+      <BucketTable title="Win rate theo symbol" rows={calibration.bySymbol} keyLabel="Symbol" />
+
+      <ThresholdSimTable rows={calibration.thresholdSim} configured={calibration.configuredThresholds} />
 
       <Card className="border-border/70">
         <CardHeader>
