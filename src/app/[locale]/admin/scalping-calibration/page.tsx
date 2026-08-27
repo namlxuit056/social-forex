@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { getAutoScalpCalibration } from "@/lib/scalping/ai-calibration-query";
 import type { CalibrationBucket } from "@/lib/scalping/ai-calibration";
 import { getAutoScalpHistory, type AutoScalpHistoryFilter, type AutoScalpHistoryRow } from "@/lib/scalping/auto-scalp-history";
+import { QUOTE_DEFINITIONS } from "@/lib/quotes/definitions";
+import { ScalpingPromptInspector } from "@/components/admin/scalping-prompt-inspector";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -310,6 +312,15 @@ export default async function ScalpingCalibrationPage({
         <BucketTable title="Win rate theo qualityScore" rows={calibration.byScoreBucket} keyLabel="Score" />
         <BucketTable title="Win rate theo confidence" rows={calibration.byConfidence} keyLabel="Confidence" />
       </div>
+
+      <Card className="border-border/70">
+        <CardHeader>
+          <CardTitle className="text-base">Prompt gửi lên AI (Auto-Scalp)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ScalpingPromptInspector symbols={QUOTE_DEFINITIONS.map((d) => d.symbol)} />
+        </CardContent>
+      </Card>
 
       <Card className="border-border/70">
         <CardHeader>
