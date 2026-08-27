@@ -12,8 +12,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { modifyOrder, modifyPosition } from "@/actions/mt5-commands";
-import { estimateOrderRisk } from "@/lib/calculators";
+import {
+  estimateOrderRisk,
+  estimateStopLossForRisk,
+  estimateTakeProfitForReward,
+  roundToSymbolPrecision,
+} from "@/lib/calculators";
 import { SlAmountHint, TpAmountHint, RiskRewardPreview } from "./risk-reward-preview";
+
+const PCT_PRESETS = [1, 2, 5, 10, 20];
 
 type Props = {
   open: boolean;
@@ -25,6 +32,8 @@ type Props = {
   entryPrice?: number | null;
   volume?: number | null;
   isBuy?: boolean;
+  /** Account equity — enables the %-of-account quick-set buttons for SL/TP. */
+  equity?: number | null;
   kind?: "position" | "order";
   onQueued?: () => void;
 };
@@ -39,6 +48,7 @@ export function ModifyDialog({
   entryPrice = null,
   volume = null,
   isBuy = true,
+  equity = null,
   kind = "position",
   onQueued,
 }: Props) {
@@ -46,6 +56,35 @@ export function ModifyDialog({
   const [tp, setTp] = useState(currentTp?.toString() ?? "");
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+
+  const canQuickSet =
+    entryPrice != null && entryPrice > 0 && volume != null && volume > 0 && equity != null && equity > 0;
+
+  function applySlPct(pct: number) {
+    if (!canQuickSet) return;
+    const price = estimateStopLossForRisk({
+      symbol,
+      isBuy,
+      entryPrice: entryPrice as number,
+      volume: volume as number,
+      equity: equity as number,
+      riskPct: pct,
+    });
+    if (price != null) setSl(String(roundToSymbolPrecision(price, symbol)));
+  }
+
+  function applyTpPct(pct: number) {
+    if (!canQuickSet) return;
+    const price = estimateTakeProfitForReward({
+      symbol,
+      isBuy,
+      entryPrice: entryPrice as number,
+      volume: volume as number,
+      equity: equity as number,
+      rewardPct: pct,
+    });
+    if (price != null) setTp(String(roundToSymbolPrecision(price, symbol)));
+  }
 
   const risk = useMemo(
     () =>
@@ -94,6 +133,23 @@ export function ModifyDialog({
               value={sl}
               onChange={(e) => setSl(e.target.value)}
             />
+            {canQuickSet && (
+              <div className="flex flex-wrap gap-1">
+                <span className="self-center text-[11px] text-muted-foreground">Risk % of account:</span>
+                {PCT_PRESETS.map((pct) => (
+                  <Button
+                    key={pct}
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-6 px-2 text-xs"
+                    onClick={() => applySlPct(pct)}
+                  >
+                    {pct}%
+                  </Button>
+                ))}
+              </div>
+            )}
             <SlAmountHint amount={risk.slAmount} />
           </div>
           <div className="grid gap-1.5">
@@ -106,6 +162,23 @@ export function ModifyDialog({
               value={tp}
               onChange={(e) => setTp(e.target.value)}
             />
+            {canQuickSet && (
+              <div className="flex flex-wrap gap-1">
+                <span className="self-center text-[11px] text-muted-foreground">Reward % of account:</span>
+                {PCT_PRESETS.map((pct) => (
+                  <Button
+                    key={pct}
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-6 px-2 text-xs"
+                    onClick={() => applyTpPct(pct)}
+                  >
+                    {pct}%
+                  </Button>
+                ))}
+              </div>
+            )}
             <TpAmountHint amount={risk.tpAmount} />
           </div>
           <RiskRewardPreview riskReward={risk.riskReward} />
