@@ -1,12 +1,15 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 import { isVipActive } from "@/lib/vip";
 import { notifyTelegramNewSignal } from "@/lib/telegram";
 import { notifySignalSubscribers } from "@/lib/signals/notify-on-signal-create";
+import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
+import { recheckAutoScalpPending, type AutoScalpRecheckResult } from "@/lib/scalping/auto-scalp-recheck";
 import { Prisma } from "@/generated/prisma/client";
 
 type ChecklistItem = {
@@ -142,4 +145,31 @@ export async function confirmScalpingPick(
   revalidatePath("/mt5");
 
   return { ok: true, signalId: signal.id };
+}
+
+/** Admin-only: re-run the Auto-Scalp AI for one still-pending order and keep or
+ * cancel it based on the fresh analysis. Backs the "Re-check" button on
+ * /admin/scalping-calibration. */
+export async function recheckAutoScalpPendingAction(
+  proposalId: string,
+): Promise<AutoScalpRecheckResult> {
+  const session = await auth();
+  if (!session?.user?.id) redirect("/auth/signin");
+
+  const admin = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { role: true },
+  });
+  if (admin?.role !== "ADMIN") return { ok: false, error: "forbidden" };
+
+  if (typeof proposalId !== "string" || proposalId.length < 1 || proposalId.length > 64) {
+    return { ok: false, error: "invalid_params" };
+  }
+
+  const { ok } = rateLimit(`scalping-recheck:${session.user.id}`, 20, 60_000);
+  if (!ok) return { ok: false, error: "rate_limited" };
+
+  const result = await recheckAutoScalpPending(proposalId);
+  revalidateLocalizedPath("/admin/scalping-calibration");
+  return result;
 }

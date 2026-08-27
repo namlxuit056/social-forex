@@ -16,11 +16,14 @@ export async function getScalpingAiSuggestion(
   scalpingContext?: ScalpingTechnicalContext | null,
   newsContext?: AiNewsContext | null,
   locale: AppLocale = "vi",
+  opts?: { skipCache?: boolean },
 ): Promise<AiSuggestion> {
   const cacheKey = `${CACHE_SCHEMA_VERSION}:${locale}:${quote.symbol}`;
-  const cached = cache.get(cacheKey);
-  if (cached && Date.now() - cached.at < CACHE_TTL_MS) {
-    return cached.suggestion;
+  if (!opts?.skipCache) {
+    const cached = cache.get(cacheKey);
+    if (cached && Date.now() - cached.at < CACHE_TTL_MS) {
+      return cached.suggestion;
+    }
   }
 
   const resolved = await resolveAiProvider();

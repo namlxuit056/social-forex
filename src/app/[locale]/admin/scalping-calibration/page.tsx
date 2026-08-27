@@ -11,6 +11,7 @@ import type { CalibrationBucket } from "@/lib/scalping/ai-calibration";
 import { getAutoScalpHistory, type AutoScalpHistoryFilter, type AutoScalpHistoryRow } from "@/lib/scalping/auto-scalp-history";
 import { QUOTE_DEFINITIONS } from "@/lib/quotes/definitions";
 import { ScalpingPromptInspector } from "@/components/admin/scalping-prompt-inspector";
+import { AutoScalpRecheckButton } from "@/components/admin/auto-scalp-recheck-button";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -117,6 +118,11 @@ function HistoryTable({ rows }: { rows: AutoScalpHistoryRow[] }) {
                 {row.pnl === null ? "—" : formatPnl(row.pnl)}
               </td>
               <td className="py-2">
+                {row.signalStatus === "PENDING" && (
+                  <div className="mb-2">
+                    <AutoScalpRecheckButton proposalId={row.id} />
+                  </div>
+                )}
                 <details>
                   <summary className="cursor-pointer text-xs text-primary hover:underline">Xem</summary>
                   <div className="mt-2 max-w-md space-y-2">
