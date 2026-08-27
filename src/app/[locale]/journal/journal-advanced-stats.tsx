@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { BarChart3 } from "lucide-react";
+import { BarChart3, FileText } from "lucide-react";
+import { Link } from "@/i18n/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import {
@@ -546,9 +547,18 @@ export function JournalAdvancedStats({
     <div className="space-y-6">
       {goalTracker}
 
-      <div>
-        <h3 className="font-heading text-lg font-semibold">{t("statsAdvancedTitle")}</h3>
-        <p className="text-sm text-muted-foreground">{t("statsAdvancedDesc")}</p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h3 className="font-heading text-lg font-semibold">{t("statsAdvancedTitle")}</h3>
+          <p className="text-sm text-muted-foreground">{t("statsAdvancedDesc")}</p>
+        </div>
+        <Link
+          href="/journal/report"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:border-primary hover:text-foreground"
+        >
+          <FileText className="size-3.5" />
+          {t("reportExport")}
+        </Link>
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">

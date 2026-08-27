@@ -39,11 +39,12 @@ Goal: khai thác thêm data đã capture nhưng chưa lên stat, và bổ sung v
 
 **P2 — cần thêm field/schema hoặc effort lớn hơn**
 - [ ] **MAE/MFE (max adverse/favorable excursion)** — chưa có field này trên `TradeJournal`; cần thêm cột + luồng capture (có thể chỉ làm được cho lệnh có link MT5 vì cần theo dõi giá suốt đời lệnh) trước khi lên được stat.
-- [ ] **PDF/report export** — hiện chỉ có CSV (`journal-table.tsx`); thêm report định dạng để chia sẻ (mentor, prop-firm eval).
 
 ---
 
 ## Completed
+
+- [x] PDF / report export — route mới `/[locale]/journal/report` (`?range=30|90|365|all`, default 90, cap 3000 lệnh, `robots: noindex`): báo cáo 1 trang server-rendered — header (tên trader + khoảng ngày), grid 8 stat (`computeAdvancedStats`), equity curve SVG tĩnh (cumulative P/L), goal progress tháng (`computeGoalProgress`), R-distribution 6 bucket, bảng top setup + win-rate theo phiên (`computeEdgeGroups`). In qua `window.print()` — client island `ReportPrintButton` (`?print=1` auto-mở dialog); layout.tsx bọc SiteHeader/SiteFooter/BottomAppNav/TelegramFloatButton/MoodCheckinNudge trong `print:hidden` + `<main>` thêm `print:p-0`. Không thêm dep PDF (dùng print dialog của trình duyệt → Save as PDF). Nút "Xuất báo cáo" ở header tab Thống kê. i18n `journal.report*`. Đề xuất 2026-08-24 P2 (2026-08-27)
 
 - [x] Goal tracking vs kế hoạch — model `TradingGoal` (`@@unique [userId, month]`, month = ngày đầu tháng UTC; targetWinRate/targetAvgR/targetNetPnl/targetTrades nullable + note), migration `20260827300000_add_trading_goal`. Pure `src/lib/journal/goal-progress.ts` (`goalMonthStart` / `tradesInGoalMonth` / `computeGoalProgress`, 6 tests): so target với thực tế tháng hiện tại (win-rate từ W/L, avg realized R, net P/L, số lệnh đã đóng), trả `{ items[{metric,target,actual,ratio,met}], metCount, totalCount }`, ratio clamp 0..1. Action `saveTradingGoal` (upsert theo tháng, xoá khi bỏ trống hết, rate-limit 20/60s). UI `JournalGoalTracker` (`src/components/journal/journal-goal-tracker.tsx`) đầu tab Thống kê — hiện cả khi <5 lệnh: badge "N/M đạt", progress bar mỗi metric (xanh khi đạt), form inline 4 ô. Page fetch `tradingGoal` cho tab stats, truyền qua `JournalAdvancedStats`. Đề xuất 2026-08-24 P2, user chọn trong 4 hướng (2026-08-27)
 

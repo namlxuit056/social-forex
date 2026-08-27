@@ -81,14 +81,18 @@ export default async function LocaleLayout({
   return (
     <NextIntlClientProvider messages={messages}>
       <AppProviders>
-        <SiteHeader />
-        <main className="mx-auto min-h-[60vh] max-w-7xl px-4 pb-28 pt-10 lg:pb-10">
+        <div className="print:hidden">
+          <SiteHeader />
+        </div>
+        <main className="mx-auto min-h-[60vh] max-w-7xl px-4 pb-28 pt-10 lg:pb-10 print:min-h-0 print:max-w-none print:p-0">
           {children}
         </main>
-        <SiteFooter />
-        <TelegramFloatButton />
-        {session?.user?.id ? <BottomAppNav userId={session.user.id} /> : null}
-        {session?.user?.id ? <MoodCheckinNudge /> : null}
+        <div className="print:hidden">
+          <SiteFooter />
+          <TelegramFloatButton />
+          {session?.user?.id ? <BottomAppNav userId={session.user.id} /> : null}
+          {session?.user?.id ? <MoodCheckinNudge /> : null}
+        </div>
       </AppProviders>
     </NextIntlClientProvider>
   );
