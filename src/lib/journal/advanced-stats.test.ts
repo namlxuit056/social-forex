@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { computeAdvancedStats, type AdvancedStatsTrade } from "./advanced-stats";
+import {
+  computeAdvancedStats,
+  computeDrawdownSeries,
+  type AdvancedStatsTrade,
+} from "./advanced-stats";
 
 function trade(
   result: "WIN" | "LOSS" | "BREAKEVEN" | "PENDING",
@@ -122,5 +126,38 @@ describe("computeAdvancedStats", () => {
     const stats = computeAdvancedStats(trades);
     expect(stats.closedTrades).toBe(1);
     expect(stats.totalTrades).toBe(2);
+  });
+});
+
+describe("computeDrawdownSeries", () => {
+  it("tracks cumulative P/L and drawdown from the running peak", () => {
+    const trades: AdvancedStatsTrade[] = [
+      trade("WIN", 100, { closedAt: "2026-01-01T00:30:00.000Z" }),
+      trade("LOSS", -40, { closedAt: "2026-01-02T00:30:00.000Z" }),
+      trade("LOSS", -30, { closedAt: "2026-01-03T00:30:00.000Z" }),
+      trade("WIN", 20, { closedAt: "2026-01-04T00:30:00.000Z" }),
+    ];
+    const series = computeDrawdownSeries(trades);
+    expect(series.map((p) => p.cumPnl)).toEqual([100, 60, 30, 50]);
+    expect(series.map((p) => p.drawdown)).toEqual([0, -40, -70, -50]);
+    expect(series[0].index).toBe(1);
+  });
+
+  it("stays at 0 while equity keeps making new highs", () => {
+    const series = computeDrawdownSeries([
+      trade("WIN", 10, { closedAt: "2026-01-01T00:30:00.000Z" }),
+      trade("WIN", 10, { closedAt: "2026-01-02T00:30:00.000Z" }),
+    ]);
+    expect(series.every((p) => p.drawdown === 0)).toBe(true);
+  });
+
+  it("excludes PENDING trades and orders by closedAt", () => {
+    const series = computeDrawdownSeries([
+      trade("PENDING", null, { closedAt: null }),
+      trade("LOSS", -50, { closedAt: "2026-01-05T00:30:00.000Z" }),
+      trade("WIN", 80, { closedAt: "2026-01-01T00:30:00.000Z" }),
+    ]);
+    expect(series).toHaveLength(2);
+    expect(series.map((p) => p.cumPnl)).toEqual([80, 30]);
   });
 });

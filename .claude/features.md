@@ -37,10 +37,6 @@ Goal: (1) phát hiện/ngăn trading khi tâm lý xấu, quá tải rủi ro, re
 
 Goal: khai thác thêm data đã capture nhưng chưa lên stat, và bổ sung vài biểu đồ/metric phổ biến cho trading journal còn thiếu. Đã rà soát để không trùng: Journal Advanced Stats (tab Thống kê), Journal Edge Analytics (tab Edge), Journal Emotion Diary (tab Cảm xúc), Equity curve trên tab Trades — xem `project-journal-advanced-stats.md` trong memory.
 
-**P1 — data đã có sẵn, chỉ cần thêm lib + UI**
-- [ ] **R-multiple distribution histogram** — `r-multiple.ts` đã tính avgR/payoffRatio nhưng chưa có biểu đồ phân phối từng lệnh theo bucket R (vd: <-2R, -2..-1R, -1..0, 0..1R, 1..2R, >2R) trên tab Thống kê.
-- [ ] **Drawdown chart dạng đường** — `advanced-stats.ts` chỉ trả 1 con số `maxDrawdown`; thêm chart drawdown chạy theo thời gian, build trên cùng data equity curve đã có (`chart-buckets.ts`).
-
 **P2 — cần thêm field/schema hoặc effort lớn hơn**
 - [ ] **MAE/MFE (max adverse/favorable excursion)** — chưa có field này trên `TradeJournal`; cần thêm cột + luồng capture (có thể chỉ làm được cho lệnh có link MT5 vì cần theo dõi giá suốt đời lệnh) trước khi lên được stat.
 - [ ] **PDF/report export** — hiện chỉ có CSV (`journal-table.tsx`); thêm report định dạng để chia sẻ (mentor, prop-firm eval).
@@ -49,6 +45,8 @@ Goal: khai thác thêm data đã capture nhưng chưa lên stat, và bổ sung v
 ---
 
 ## Completed
+
+- [x] Journal viz P1 — 2 biểu đồ mới trên tab Thống kê (`journal-advanced-stats.tsx`, cùng style SVG inline với ComplianceDonut/MonthlyViolationsChart): (1) **R-multiple distribution histogram** — `computeRMultipleDistribution` (`src/lib/journal/r-distribution.ts`, 4 tests) chia lệnh đã đóng có tính được R vào 6 bucket cố định (<-2R / -2..-1 / -1..0 / 0..1R / 1..2R / >2R, quy ước min<r<=max), bar đỏ/xanh theo win. (2) **Drawdown curve** — `computeDrawdownSeries` (thêm vào `advanced-stats.ts`, 3 tests) đi qua từng lệnh sort closedAt asc, P/L cộng dồn − đỉnh (≤0), line + area đỏ, chấm đáy + nhãn $. Đề xuất 2026-08-24 P1, data sẵn không cần schema (2026-08-27)
 
 - [x] Unplanned-pair guard khi đặt lệnh MT5 — `placeOrder` thêm check `checkSymbolPlanned`: nếu cặp đang vào KHÔNG nằm trong `DailyTradingPlan.watchedSymbols` của ngày UTC hiện tại (kể cả chưa lập plan nào), trả `planWarning: { symbol, hasPlan }`. Không chặn lệnh — client hiện cảnh báo amber + nút "Place anyway" (`NewOrderDialog`, clear khi đổi symbol) hoặc `window.confirm` gộp lý do (quick Buy/Sell trong `positions-client.tsx`), resubmit với `confirmedNoPlan: true`. Gộp chung 1 response với `dailyLimitWarning` (check song song, "Place anyway" bỏ qua cả hai). Chỉ áp dụng MT5 New Order + quick Buy/Sell (user chọn scope này, không làm journal/copy-trade). Text tiếng Anh theo phần còn lại của /positions (2026-08-27)
 

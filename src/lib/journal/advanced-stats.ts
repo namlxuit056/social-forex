@@ -114,6 +114,40 @@ function estimateRiskOfRuin(
   return Math.min(1, Math.max(0, ror));
 }
 
+export type DrawdownPoint = {
+  /** 1-based trade sequence number */
+  index: number;
+  closedAt: string;
+  cumPnl: number;
+  /** cumulative P/L minus running peak — always <= 0 */
+  drawdown: number;
+};
+
+/**
+ * Đường drawdown theo thời gian: đi qua từng lệnh đã đóng (sort closedAt asc),
+ * cộng dồn P/L, giữ đỉnh cao nhất, drawdown = cộng dồn − đỉnh (≤ 0). Pure —
+ * dùng cho drawdown chart tab Thống kê, cùng dữ liệu với maxDrawdown.
+ */
+export function computeDrawdownSeries(trades: AdvancedStatsTrade[]): DrawdownPoint[] {
+  const sorted = sortByClosedAtAsc(trades).filter(
+    (t) => t.result === "WIN" || t.result === "LOSS" || t.result === "BREAKEVEN",
+  );
+  const points: DrawdownPoint[] = [];
+  let cum = 0;
+  let peak = 0;
+  sorted.forEach((t, i) => {
+    cum += t.pnl ?? 0;
+    if (cum > peak) peak = cum;
+    points.push({
+      index: i + 1,
+      closedAt: new Date(t.closedAt!).toISOString(),
+      cumPnl: Math.round(cum * 100) / 100,
+      drawdown: Math.round((cum - peak) * 100) / 100,
+    });
+  });
+  return points;
+}
+
 export function computeAdvancedStats(
   trades: AdvancedStatsTrade[],
   accountBalance: number | null = null,

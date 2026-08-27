@@ -5,7 +5,16 @@ import { useTranslations } from "next-intl";
 import { BarChart3 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { computeAdvancedStats, type AdvancedStatsTrade } from "@/lib/journal/advanced-stats";
+import {
+  computeAdvancedStats,
+  computeDrawdownSeries,
+  type AdvancedStatsTrade,
+  type DrawdownPoint,
+} from "@/lib/journal/advanced-stats";
+import {
+  computeRMultipleDistribution,
+  type RDistribution,
+} from "@/lib/journal/r-distribution";
 import {
   computeMonthlyViolations,
   computeRiskDiscipline,
@@ -173,6 +182,139 @@ function GroupStatsTable({
         )}
       </CardContent>
     </Card>
+  );
+}
+
+function RDistributionChart({ dist }: { dist: RDistribution }) {
+  const t = useTranslations("journal");
+  const width = 320;
+  const height = 170;
+  const bottomPad = 26;
+  const topPad = 14;
+  const max = Math.max(1, ...dist.buckets.map((b) => b.count));
+  const barGap = 10;
+  const barWidth = Math.max(8, width / dist.buckets.length - barGap);
+
+  if (dist.total === 0) {
+    return <p className="py-8 text-center text-xs text-muted-foreground">{t("rDistEmpty")}</p>;
+  }
+
+  return (
+    <svg viewBox={`0 0 ${width} ${height}`} className="h-44 w-full">
+      {[0, 0.25, 0.5, 0.75, 1].map((f) => (
+        <line
+          key={f}
+          x1={0}
+          x2={width}
+          y1={height - bottomPad - f * (height - bottomPad - topPad)}
+          y2={height - bottomPad - f * (height - bottomPad - topPad)}
+          className="stroke-border/40"
+          strokeWidth="1"
+          strokeDasharray="4 4"
+        />
+      ))}
+      {dist.buckets.map((b, i) => {
+        const barHeight = (b.count / max) * (height - bottomPad - topPad);
+        const x = i * (barWidth + barGap) + barGap / 2;
+        const y = height - bottomPad - barHeight;
+        return (
+          <g key={b.key}>
+            {b.count > 0 && (
+              <text
+                x={x + barWidth / 2}
+                y={y - 4}
+                textAnchor="middle"
+                className="fill-foreground text-[10px] font-medium"
+              >
+                {b.count}
+              </text>
+            )}
+            <rect
+              x={x}
+              y={y}
+              width={barWidth}
+              height={Math.max(1, barHeight)}
+              rx="2"
+              className={b.win ? "fill-emerald-500/70" : "fill-red-500/70"}
+            />
+            <text
+              x={x + barWidth / 2}
+              y={height - 9}
+              textAnchor="middle"
+              className="fill-muted-foreground text-[8px]"
+            >
+              {b.label}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+function DrawdownChart({ points, locale }: { points: DrawdownPoint[]; locale: string }) {
+  const t = useTranslations("journal");
+  const width = 320;
+  const height = 170;
+  const pad = 22;
+
+  if (points.length < 2) {
+    return <p className="py-8 text-center text-xs text-muted-foreground">{t("drawdownEmpty")}</p>;
+  }
+
+  const minDd = Math.min(0, ...points.map((p) => p.drawdown));
+  const range = Math.abs(minDd) || 1;
+  const n = points.length;
+  const topY = 12;
+  const xAt = (i: number) => pad + (i / (n - 1)) * (width - pad * 2);
+  const yAt = (dd: number) => topY + (Math.abs(dd) / range) * (height - pad - topY);
+
+  const line = points.map((p, i) => `${xAt(i)},${yAt(p.drawdown)}`).join(" ");
+  const area = `${pad},${yAt(0)} ${line} ${xAt(n - 1)},${yAt(0)}`;
+
+  const trough = points.reduce((a, b) => (b.drawdown < a.drawdown ? b : a), points[0]);
+  const troughIdx = points.indexOf(trough);
+
+  return (
+    <div className="space-y-1">
+      <svg viewBox={`0 0 ${width} ${height}`} className="h-44 w-full">
+        <line
+          x1={pad}
+          x2={width - pad}
+          y1={yAt(0)}
+          y2={yAt(0)}
+          className="stroke-border"
+          strokeWidth="1"
+        />
+        <polygon points={area} className="fill-red-500/15" />
+        <polyline
+          points={line}
+          fill="none"
+          className="stroke-red-500"
+          strokeWidth="1.5"
+          strokeLinejoin="round"
+        />
+        {trough.drawdown < 0 && (
+          <>
+            <circle cx={xAt(troughIdx)} cy={yAt(trough.drawdown)} r="2.5" className="fill-red-500" />
+            <text
+              x={Math.min(width - pad, Math.max(pad, xAt(troughIdx)))}
+              y={yAt(trough.drawdown) + 12}
+              textAnchor="middle"
+              className="fill-red-500 text-[9px] font-medium"
+            >
+              {fmtMoney(trough.drawdown)}
+            </text>
+          </>
+        )}
+      </svg>
+      <p className="text-center text-[10px] text-muted-foreground">
+        {t("drawdownAxisNote", {
+          from: new Date(points[0].closedAt).toLocaleDateString(locale, { day: "2-digit", month: "2-digit" }),
+          to: new Date(points[n - 1].closedAt).toLocaleDateString(locale, { day: "2-digit", month: "2-digit" }),
+        })}
+      </p>
+    </div>
   );
 }
 
@@ -355,6 +497,8 @@ export function JournalAdvancedStats({
     [trades, timeWindowTz],
   );
   const symbolStats = useMemo(() => computeSymbolStats(trades), [trades]);
+  const rDistribution = useMemo(() => computeRMultipleDistribution(trades), [trades]);
+  const drawdownSeries = useMemo(() => computeDrawdownSeries(trades), [trades]);
   const dayOfWeekStats = useMemo(
     () => computeDayOfWeekStats(trades, timeWindowTz === "vn" ? VN_UTC_OFFSET_HOURS : 0),
     [trades, timeWindowTz],
@@ -499,6 +643,27 @@ export function JournalAdvancedStats({
           value={stats.riskOfRuin !== null ? `${(stats.riskOfRuin * 100).toFixed(1)}%` : "—"}
           tone={stats.riskOfRuin === null ? "neutral" : stats.riskOfRuin < 0.05 ? "positive" : "negative"}
         />
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card className="border-border/60">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">{t("rDistTitle")}</CardTitle>
+            <p className="text-xs text-muted-foreground">{t("rDistNote")}</p>
+          </CardHeader>
+          <CardContent>
+            <RDistributionChart dist={rDistribution} />
+          </CardContent>
+        </Card>
+        <Card className="border-border/60">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">{t("drawdownTitle")}</CardTitle>
+            <p className="text-xs text-muted-foreground">{t("drawdownNote")}</p>
+          </CardHeader>
+          <CardContent>
+            <DrawdownChart points={drawdownSeries} locale={locale} />
+          </CardContent>
+        </Card>
       </div>
 
       <GroupStatsTable
