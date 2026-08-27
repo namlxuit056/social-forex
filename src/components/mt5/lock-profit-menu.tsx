@@ -47,7 +47,7 @@ export function LockProfitMenu({ position: p, disabled, queued, onLock, classNam
             size="sm"
             variant="outline"
             disabled={disabled || queued || atBreakeven || !canMoveBE}
-            className={cn("w-full gap-1.5", className)}
+            className={cn("gap-1.5", className)}
             title="Move stop loss to lock in profit"
           />
         }
