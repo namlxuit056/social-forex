@@ -43,6 +43,7 @@ export function NewOrderDialog() {
     ordersPlacedToday: number;
     maxTrades: number;
   } | null>(null);
+  const [planWarning, setPlanWarning] = useState<{ symbol: string; hasPlan: boolean } | null>(null);
   const [marketPrice, setMarketPrice] = useState<{ bid: number; ask: number } | null>(null);
 
   const isPendingType = orderType !== "BUY" && orderType !== "SELL";
@@ -84,9 +85,12 @@ export function NewOrderDialog() {
     [symbol, isBuy, referencePrice, volume, sl, tp],
   );
 
-  function handleSubmit(confirmedOverLimit = false) {
+  function handleSubmit(confirmed = false) {
     setError(null);
-    if (!confirmedOverLimit) setDailyLimitWarning(null);
+    if (!confirmed) {
+      setDailyLimitWarning(null);
+      setPlanWarning(null);
+    }
     if (isPendingType && !price) {
       setError("price_required");
       return;
@@ -99,10 +103,12 @@ export function NewOrderDialog() {
         price: isPendingType ? Number(price) : null,
         stopLoss: sl === "" ? null : Number(sl),
         takeProfit: tp === "" ? null : Number(tp),
-        confirmedOverLimit,
+        confirmedOverLimit: confirmed,
+        confirmedNoPlan: confirmed,
       });
-      if (result.dailyLimitWarning) {
-        setDailyLimitWarning(result.dailyLimitWarning);
+      if (result.dailyLimitWarning || result.planWarning) {
+        setDailyLimitWarning(result.dailyLimitWarning ?? null);
+        setPlanWarning(result.planWarning ?? null);
         return;
       }
       if (result.error) {
@@ -113,6 +119,8 @@ export function NewOrderDialog() {
       setPrice("");
       setSl("");
       setTp("");
+      setDailyLimitWarning(null);
+      setPlanWarning(null);
     });
   }
 
@@ -129,7 +137,15 @@ export function NewOrderDialog() {
         <div className="grid gap-4 py-2">
           <div className="grid gap-1.5">
             <Label htmlFor="order-symbol">Symbol</Label>
-            <Select value={symbol} onValueChange={(value) => value && setSymbol(value)}>
+            <Select
+              value={symbol}
+              onValueChange={(value) => {
+                if (!value) return;
+                setSymbol(value);
+                setPlanWarning(null);
+                setDailyLimitWarning(null);
+              }}
+            >
               <SelectTrigger id="order-symbol" className="w-full">
                 <SelectValue />
               </SelectTrigger>
@@ -215,6 +231,14 @@ export function NewOrderDialog() {
 
           <RiskRewardPreview riskReward={risk.riskReward} />
 
+          {planWarning && (
+            <p className="text-sm text-amber-600 dark:text-amber-400">
+              {planWarning.hasPlan
+                ? `${planWarning.symbol} isn't in today's trading plan.`
+                : `You haven't set a trading plan for today.`}{" "}
+              Trading an unplanned pair is a common discipline slip — place this order anyway?
+            </p>
+          )}
           {dailyLimitWarning && (
             <p className="text-sm text-amber-600 dark:text-amber-400">
               You&apos;ve placed {dailyLimitWarning.ordersPlacedToday}/{dailyLimitWarning.maxTrades} orders
@@ -228,7 +252,7 @@ export function NewOrderDialog() {
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-          {dailyLimitWarning ? (
+          {dailyLimitWarning || planWarning ? (
             <Button variant="outline" onClick={() => handleSubmit(true)} disabled={isPending}>
               {isPending ? "Queuing…" : "Place anyway"}
             </Button>

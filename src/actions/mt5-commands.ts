@@ -72,6 +72,25 @@ async function checkDailyOrderLimit(userId: string, connectionId: string) {
   return { ordersPlacedToday, maxTrades: plan.maxTrades };
 }
 
+/**
+ * Cảnh báo mềm khi cặp đang vào lệnh KHÔNG nằm trong plan hôm nay
+ * (DailyTradingPlan.watchedSymbols của ngày UTC hiện tại) — kể cả khi chưa lập plan
+ * nào. Không chặn lệnh, chỉ để client hiện confirm "vẫn đặt".
+ */
+async function checkSymbolPlanned(
+  userId: string,
+  symbol: string,
+): Promise<{ symbol: string; hasPlan: boolean } | null> {
+  const { start } = utcDayRange(new Date());
+  const plan = await prisma.dailyTradingPlan.findUnique({
+    where: { userId_planDate: { userId, planDate: start } },
+    select: { watchedSymbols: true },
+  });
+  const planned = (plan?.watchedSymbols ?? []).map((s) => s.toUpperCase());
+  if (planned.includes(symbol.toUpperCase())) return null;
+  return { symbol, hasPlan: (plan?.watchedSymbols?.length ?? 0) > 0 };
+}
+
 async function getActiveConnection(userId: string) {
   return prisma.mt5Connection.findFirst({
     where: { userId, revokedAt: null },
@@ -228,9 +247,11 @@ export async function placeOrder(input: {
   stopLoss: number | null;
   takeProfit: number | null;
   confirmedOverLimit?: boolean;
+  confirmedNoPlan?: boolean;
 }): Promise<{
   error?: string;
   dailyLimitWarning?: { ordersPlacedToday: number; maxTrades: number };
+  planWarning?: { symbol: string; hasPlan: boolean };
 }> {
   const session = await auth();
   if (!session?.user?.id) redirect("/auth/signin");
@@ -246,9 +267,21 @@ export async function placeOrder(input: {
   const connection = await getActiveConnection(session.user.id);
   if (!connection) return { error: "no_connection" };
 
-  if (!input.confirmedOverLimit) {
-    const limit = await checkDailyOrderLimit(session.user.id, connection.id);
-    if (limit) return { dailyLimitWarning: limit };
+  if (!input.confirmedOverLimit || !input.confirmedNoPlan) {
+    const [planWarning, limit] = await Promise.all([
+      input.confirmedNoPlan
+        ? Promise.resolve(null)
+        : checkSymbolPlanned(session.user.id, parsed.data.symbol),
+      input.confirmedOverLimit
+        ? Promise.resolve(null)
+        : checkDailyOrderLimit(session.user.id, connection.id),
+    ]);
+    if (planWarning || limit) {
+      return {
+        ...(planWarning ? { planWarning } : {}),
+        ...(limit ? { dailyLimitWarning: limit } : {}),
+      };
+    }
   }
 
   const isBuy = parsed.data.orderType.startsWith("BUY");

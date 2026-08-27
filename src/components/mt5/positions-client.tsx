@@ -350,11 +350,22 @@ export function PositionsClient({
         stopLoss: null,
         takeProfit: null,
       });
-      if (result.dailyLimitWarning) {
-        const { ordersPlacedToday, maxTrades } = result.dailyLimitWarning;
-        const proceed = window.confirm(
-          `You've placed ${ordersPlacedToday}/${maxTrades} orders today, hitting the daily limit from your trading plan. Place this one anyway?`,
-        );
+      if (result.dailyLimitWarning || result.planWarning) {
+        const lines: string[] = [];
+        if (result.planWarning) {
+          lines.push(
+            result.planWarning.hasPlan
+              ? `${result.planWarning.symbol} isn't in today's trading plan.`
+              : `You haven't set a trading plan for today.`,
+          );
+        }
+        if (result.dailyLimitWarning) {
+          const { ordersPlacedToday, maxTrades } = result.dailyLimitWarning;
+          lines.push(
+            `You've placed ${ordersPlacedToday}/${maxTrades} orders today, hitting your daily limit.`,
+          );
+        }
+        const proceed = window.confirm(`${lines.join("\n")}\n\nPlace this order anyway?`);
         if (proceed) {
           await placeOrder({
             symbol: quickOrderConfig.symbol,
@@ -364,6 +375,7 @@ export function PositionsClient({
             stopLoss: null,
             takeProfit: null,
             confirmedOverLimit: true,
+            confirmedNoPlan: true,
           });
         }
       }
