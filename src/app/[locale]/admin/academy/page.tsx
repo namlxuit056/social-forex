@@ -155,7 +155,12 @@ export default async function AdminAcademyPage() {
                         <span className="text-xs text-amber-500">✗ Chưa có ảnh</span>
                       )}
                     </div>
-                    <p className="text-sm font-semibold text-foreground">{lesson.title}</p>
+                    <Link
+                      href={`/admin/academy/${lesson.slug}`}
+                      className="block text-sm font-semibold text-foreground hover:underline"
+                    >
+                      {lesson.title}
+                    </Link>
                     <p className="font-mono text-xs text-muted-foreground">/academy/{lesson.slug}</p>
                     <div className="flex flex-wrap gap-2 pt-1">
                       <Link
