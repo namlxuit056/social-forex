@@ -26,7 +26,7 @@
     },
     {
       "path": "/api/scalping/auto-run",
-      "schedule": "15,45 * * * *"
+      "schedule": "5,35 * * * *"
     },
     {
       "path": "/api/screener/auto-review",
