@@ -103,11 +103,14 @@ export function buildTradeReviewContext({
   plan,
   bestSetup,
   priorLossStreak,
+  dayMood = null,
 }: {
   trade: TradeForReview;
   plan: DayPlanForReview;
   bestSetup: BestSetupForReview;
   priorLossStreak: number;
+  /** 1-tap mood check-in for the day this trade was opened, if any. */
+  dayMood?: string | null;
 }): TradeReviewContext {
   const r = realizedR(trade);
   const rr = plannedRR(trade);
@@ -141,7 +144,10 @@ export function buildTradeReviewContext({
     );
   }
   if (trade.emotion) {
-    facts.push(`Trader tagged their emotional state as "${trade.emotion}".`);
+    facts.push(`Trader tagged the trade's emotional state as "${trade.emotion}".`);
+  }
+  if (dayMood === "tired" || dayMood === "stressed") {
+    facts.push(`Trader's 1-tap mood check-in that day was "${dayMood}" (a negative state).`);
   }
   if (!trade.setup) {
     facts.push("No setup/strategy tag was attached — the trade rationale is undocumented.");

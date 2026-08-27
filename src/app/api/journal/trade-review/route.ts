@@ -95,7 +95,7 @@ export async function POST(req: NextRequest) {
   const { start, end } = utcDayRange(trade.openedAt);
   const closedAt = trade.closedAt ?? new Date();
 
-  const [planRow, tradesLoggedThatDay, priorClosed, recentTrades] = await Promise.all([
+  const [planRow, tradesLoggedThatDay, priorClosed, recentTrades, moodRow] = await Promise.all([
     prisma.dailyTradingPlan.findUnique({
       where: { userId_planDate: { userId, planDate: start } },
       select: {
@@ -137,6 +137,10 @@ export async function POST(req: NextRequest) {
         setup: true,
         emotion: true,
       },
+    }),
+    prisma.moodCheckin.findUnique({
+      where: { userId_day: { userId, day: start } },
+      select: { mood: true },
     }),
   ]);
 
@@ -203,6 +207,7 @@ export async function POST(req: NextRequest) {
     plan,
     bestSetup,
     priorLossStreak,
+    dayMood: moodRow?.mood ?? null,
   });
 
   try {

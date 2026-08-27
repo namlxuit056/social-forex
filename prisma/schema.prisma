@@ -132,6 +132,7 @@ model User {
   weeklyReviews        AiWeeklyJournalReview[]
   dailyReviews         AiDailyJournalReview[]
   tradeReviews         AiTradeReview[]
+  moodCheckins         MoodCheckin[]
   articleChatMessages  ArticleChatMessage[]
   journalChatMessages  JournalChatMessage[]
 
@@ -1178,6 +1179,24 @@ model AiDailyJournalReview {
   createdAt  DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, day])
+  @@index([userId, day])
+}
+
+/// Điểm danh tâm lý 1 chạm mỗi ngày (tách khỏi EmotionDiaryEntry vốn cần note dài).
+model MoodCheckin {
+  id     String   @id @default(cuid())
+  userId String
+  /// 00:00 UTC của ngày điểm danh
+  day    DateTime
+  /// "good" | "ok" | "tired" | "stressed"
+  mood   String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([userId, day])
   @@index([userId, day])

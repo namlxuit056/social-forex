@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/layout/empty-state";
 import { cn } from "@/lib/utils";
 import { classifyDiaryMood } from "@/lib/journal/emotion-diary-correlation";
+import { MoodTodayPicker } from "@/components/journal/mood-today-picker";
 
 export type EmotionDiaryEntryData = {
   id: string;
@@ -51,6 +52,7 @@ export function JournalEmotionDiary({
 
   return (
     <div className="space-y-6">
+      <MoodTodayPicker />
       <Card>
         <CardHeader>
           <CardTitle className="text-base">{t("emotionDiaryFormTitle")}</CardTitle>

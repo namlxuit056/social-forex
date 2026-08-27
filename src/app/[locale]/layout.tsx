@@ -7,6 +7,7 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { TelegramFloatButton } from "@/components/layout/telegram-float-button";
 import { BottomAppNav } from "@/components/layout/bottom-app-nav";
+import { MoodCheckinNudge } from "@/components/journal/mood-checkin-nudge";
 import { AppProviders } from "@/components/providers/app-providers";
 import { getSiteUrl } from "@/lib/site-url";
 import { auth } from "@/auth";
@@ -87,6 +88,7 @@ export default async function LocaleLayout({
         <SiteFooter />
         <TelegramFloatButton />
         {session?.user?.id ? <BottomAppNav userId={session.user.id} /> : null}
+        {session?.user?.id ? <MoodCheckinNudge /> : null}
       </AppProviders>
     </NextIntlClientProvider>
   );
