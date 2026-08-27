@@ -1,17 +1,21 @@
 import type { QuoteRow } from "@/lib/quotes/types";
 import { toTradingViewSymbol } from "@/lib/quotes/tradingview-symbols";
+import { pivotClassic } from "@/lib/calculators";
 
 type ScannerMarket = "forex" | "cfd" | "crypto";
-type ScalpingTimeframeCode = "5" | "15" | "60";
+// "" = D1 (TradingView scanner rejects "|1D" and returns null for the D1 suffix)
+type ScalpingTimeframeCode = "5" | "15" | "60" | "";
 
 // M1 deliberately excluded — too noisy for a reliable scalping bias/entry read.
+// D1 added only as a higher-timeframe wall + source of previous-day pivot levels.
 const SCALPING_TIMEFRAMES: Array<{
   code: ScalpingTimeframeCode;
-  label: "M5" | "M15" | "H1";
+  label: "M5" | "M15" | "H1" | "D1";
 }> = [
   { code: "5", label: "M5" },
   { code: "15", label: "M15" },
   { code: "60", label: "H1" },
+  { code: "", label: "D1" },
 ];
 
 const METRICS = [
@@ -25,13 +29,23 @@ const METRICS = [
   "EMA200",
   "ATR",
   "ADX",
+  "ADX+DI",
+  "ADX-DI",
   "MACD.macd",
   "MACD.signal",
+  "BB.upper",
+  "BB.lower",
+  "BB.basis",
+  "VWAP",
+  "Stoch.K",
+  "Stoch.D",
   "open",
   "high",
   "low",
   "close",
   "open[1]",
+  "high[1]",
+  "low[1]",
   "close[1]",
   "volume",
   "change",
@@ -39,8 +53,23 @@ const METRICS = [
 
 type Metric = (typeof METRICS)[number];
 
+export type BbPosition =
+  | "above upper band"
+  | "upper half"
+  | "lower half"
+  | "below lower band"
+  | "unknown";
+
+export type AdxRegime =
+  | "strong uptrend"
+  | "strong downtrend"
+  | "weak uptrend"
+  | "weak downtrend"
+  | "ranging / no trend"
+  | "unknown";
+
 export type ScalpingTechnicalFrame = {
-  timeframe: "M5" | "M15" | "H1";
+  timeframe: "M5" | "M15" | "H1" | "D1";
   recommendation: number | null;
   maRecommendation: number | null;
   oscillatorRecommendation: number | null;
@@ -50,8 +79,21 @@ export type ScalpingTechnicalFrame = {
   ema200: number | null;
   atr: number | null;
   adx: number | null;
+  plusDI: number | null;
+  minusDI: number | null;
+  adxRegime: AdxRegime;
   macd: number | null;
   macdSignal: number | null;
+  bbUpper: number | null;
+  bbLower: number | null;
+  bbBasis: number | null;
+  bbPosition: BbPosition;
+  vwap: number | null;
+  /** (close - vwap) / ATR — how stretched price is from the intraday mean */
+  vwapDistanceAtr: number | null;
+  stochK: number | null;
+  stochD: number | null;
+  stochState: "overbought" | "oversold" | "neutral";
   open: number | null;
   high: number | null;
   low: number | null;
@@ -66,13 +108,30 @@ export type ScalpingTechnicalFrame = {
   candlePattern: string;
 };
 
+export type ScalpingKeyLevels = {
+  /** classic pivots computed from the previous D1 candle */
+  pivot: number;
+  r1: number;
+  r2: number;
+  r3: number;
+  s1: number;
+  s2: number;
+  s3: number;
+};
+
 export type ScalpingTechnicalContext = {
   source: "TradingView scanner";
   symbol: string;
   tradingViewSymbol: string;
   market: ScannerMarket;
   updatedAt: string;
+  /** M5, M15, H1 — the scalping frames */
   frames: ScalpingTechnicalFrame[];
+  /** D1 frame — higher-timeframe wall only, not a scalp frame */
+  daily: ScalpingTechnicalFrame | null;
+  /** previous completed D1 candle */
+  prevDay: { high: number; low: number; close: number } | null;
+  keyLevels: ScalpingKeyLevels | null;
   summary: string;
 };
 
@@ -119,6 +178,45 @@ function emaBias(
   if (close > ema20 && ema20 > ema50 && ema50 > ema200) return "bullish";
   if (close < ema20 && ema20 < ema50 && ema50 < ema200) return "bearish";
   return "mixed";
+}
+
+/** Where the last close sits relative to the Bollinger Bands. */
+export function bbPosition(
+  close: number | null,
+  upper: number | null,
+  lower: number | null,
+  basis: number | null,
+): BbPosition {
+  if (close === null || upper === null || lower === null || basis === null) {
+    return "unknown";
+  }
+  if (close > upper) return "above upper band";
+  if (close < lower) return "below lower band";
+  return close >= basis ? "upper half" : "lower half";
+}
+
+export function stochState(k: number | null): ScalpingTechnicalFrame["stochState"] {
+  if (k === null) return "neutral";
+  if (k >= 80) return "overbought";
+  if (k <= 20) return "oversold";
+  return "neutral";
+}
+
+/**
+ * ADX + DI regime — the chop filter. Below ~20 with DI intertwined = ranging
+ * (fade extremes); above ~23 with DI separated = trend (only take pullbacks).
+ */
+export function adxRegime(
+  adx: number | null,
+  plusDI: number | null,
+  minusDI: number | null,
+): AdxRegime {
+  if (adx === null || plusDI === null || minusDI === null) return "unknown";
+  const up = plusDI > minusDI;
+  const separation = Math.abs(plusDI - minusDI);
+  if (adx < 18 || separation < 4) return "ranging / no trend";
+  if (adx >= 25) return up ? "strong uptrend" : "strong downtrend";
+  return up ? "weak uptrend" : "weak downtrend";
 }
 
 function candlePattern({
@@ -172,26 +270,18 @@ function valueAt(
   metric: Metric,
   code: ScalpingTimeframeCode,
 ) {
-  return values.get(`${metric}|${code}`) ?? null;
+  return values.get(code ? `${metric}|${code}` : metric) ?? null;
 }
 
-function buildSummary(frames: ScalpingTechnicalFrame[]) {
-  return frames
-    .map((frame) => {
-      const rsi = frame.rsi === null ? "n/a" : frame.rsi.toFixed(1);
-      const adx = frame.adx === null ? "n/a" : frame.adx.toFixed(1);
-      return `${frame.timeframe}: ${frame.trend}, RSI ${rsi} (${frame.rsiState}), ADX ${adx}, EMA ${frame.emaBias}, candle ${frame.candlePattern}`;
-    })
-    .join("; ");
-}
-
-function recommendationText(value: number | null) {
-  if (value === null) return "no signal";
-  if (value >= 0.5) return "strong buy";
-  if (value >= 0.1) return "buy";
-  if (value <= -0.5) return "strong sell";
-  if (value <= -0.1) return "sell";
-  return "neutral";
+function buildSummary(frames: ScalpingTechnicalFrame[], daily: ScalpingTechnicalFrame | null) {
+  const parts = frames.map((frame) => {
+    const rsi = frame.rsi === null ? "n/a" : frame.rsi.toFixed(1);
+    return `${frame.timeframe}: ${frame.trend}, ${frame.adxRegime}, RSI ${rsi} (${frame.rsiState}), BB ${frame.bbPosition}, Stoch ${frame.stochState}, candle ${frame.candlePattern}`;
+  });
+  if (daily) {
+    parts.push(`D1 wall: ${daily.trend}, EMA ${daily.emaBias}, RSI ${daily.rsi?.toFixed(1) ?? "n/a"}`);
+  }
+  return parts.join("; ");
 }
 
 export async function getScalpingTechnicalContext(
@@ -207,7 +297,7 @@ export async function getScalpingTechnicalContext(
   }
 
   const columns = SCALPING_TIMEFRAMES.flatMap(({ code }) =>
-    METRICS.map((metric) => `${metric}|${code}`),
+    METRICS.map((metric) => (code ? `${metric}|${code}` : metric)),
   );
 
   const response = await fetch(`https://scanner.tradingview.com/${market}/scan`, {
@@ -235,7 +325,7 @@ export async function getScalpingTechnicalContext(
     values.set(column, typeof raw === "number" && Number.isFinite(raw) ? raw : null);
   });
 
-  const frames = SCALPING_TIMEFRAMES.map(({ code, label }) => {
+  const allFrames = SCALPING_TIMEFRAMES.map(({ code, label }) => {
     const open = valueAt(values, "open", code);
     const high = valueAt(values, "high", code);
     const low = valueAt(values, "low", code);
@@ -247,6 +337,20 @@ export async function getScalpingTechnicalContext(
     const ema200 = valueAt(values, "EMA200", code);
     const recommendation = valueAt(values, "Recommend.All", code);
     const rsi = valueAt(values, "RSI", code);
+    const atr = valueAt(values, "ATR", code);
+    const adx = valueAt(values, "ADX", code);
+    const plusDI = valueAt(values, "ADX+DI", code);
+    const minusDI = valueAt(values, "ADX-DI", code);
+    const bbUpper = valueAt(values, "BB.upper", code);
+    const bbLower = valueAt(values, "BB.lower", code);
+    const bbBasis = valueAt(values, "BB.basis", code);
+    const vwap = valueAt(values, "VWAP", code);
+    const stochK = valueAt(values, "Stoch.K", code);
+
+    const vwapDistanceAtr =
+      close !== null && vwap !== null && atr !== null && atr > 0
+        ? Math.round(((close - vwap) / atr) * 100) / 100
+        : null;
 
     return {
       timeframe: label,
@@ -257,10 +361,22 @@ export async function getScalpingTechnicalContext(
       ema20,
       ema50,
       ema200,
-      atr: valueAt(values, "ATR", code),
-      adx: valueAt(values, "ADX", code),
+      atr,
+      adx,
+      plusDI,
+      minusDI,
+      adxRegime: adxRegime(adx, plusDI, minusDI),
       macd: valueAt(values, "MACD.macd", code),
       macdSignal: valueAt(values, "MACD.signal", code),
+      bbUpper,
+      bbLower,
+      bbBasis,
+      bbPosition: bbPosition(close, bbUpper, bbLower, bbBasis),
+      vwap,
+      vwapDistanceAtr,
+      stochK,
+      stochD: valueAt(values, "Stoch.D", code),
+      stochState: stochState(stochK),
       open,
       high,
       low,
@@ -276,6 +392,32 @@ export async function getScalpingTechnicalContext(
     } satisfies ScalpingTechnicalFrame;
   });
 
+  const frames = allFrames.filter((f) => f.timeframe !== "D1");
+  const daily = allFrames.find((f) => f.timeframe === "D1") ?? null;
+
+  // Previous completed D1 candle → classic pivots for scalp SL/TP anchoring
+  const prevHigh = valueAt(values, "high[1]", "");
+  const prevLow = valueAt(values, "low[1]", "");
+  const prevClose = valueAt(values, "close[1]", "");
+  const prevDay =
+    prevHigh !== null && prevLow !== null && prevClose !== null
+      ? { high: prevHigh, low: prevLow, close: prevClose }
+      : null;
+  const keyLevels = prevDay
+    ? (() => {
+        const p = pivotClassic(prevDay.high, prevDay.low, prevDay.close);
+        return {
+          pivot: p.pivot,
+          r1: p.r1,
+          r2: p.r2,
+          r3: p.r3,
+          s1: p.s1,
+          s2: p.s2,
+          s3: p.s3,
+        };
+      })()
+    : null;
+
   const context: ScalpingTechnicalContext = {
     source: "TradingView scanner",
     symbol: quote.symbol,
@@ -283,11 +425,11 @@ export async function getScalpingTechnicalContext(
     market,
     updatedAt: new Date().toISOString(),
     frames,
-    summary: buildSummary(frames),
+    daily,
+    prevDay,
+    keyLevels,
+    summary: buildSummary(frames, daily),
   };
-
-  // Build summary with recommendation text for each frame (used internally)
-  void recommendationText; // keep import-like reference
 
   cache.set(cacheKey, { context, at: Date.now() });
   return context;
