@@ -424,7 +424,7 @@ export function PositionsClient({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-2 border-t border-border pt-4 sm:flex sm:flex-wrap sm:items-center lg:flex-nowrap lg:border-t-0 lg:pt-0">
+          <div className="grid grid-cols-2 gap-2 border-t border-border pt-4 sm:flex sm:flex-wrap sm:items-center sm:justify-end lg:min-w-0 lg:border-t-0 lg:pt-0">
             {/* <Button
               variant="outline"
               size="icon"
@@ -483,7 +483,7 @@ export function PositionsClient({
                   <Button
                     variant="destructive"
                     disabled={closeAllPending || !hasQueueable}
-                    className="w-full gap-1.5 sm:flex-1 lg:flex-none"
+                    className="w-full gap-1.5 sm:w-auto"
                   />
                 }
               >
