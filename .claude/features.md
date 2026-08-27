@@ -33,7 +33,6 @@ Goal: (1) phát hiện/ngăn trading khi tâm lý xấu, quá tải rủi ro, re
 
 **P2**
 - [ ] **1-tap mood check-in** — tách khỏi `EmotionDiaryEntry` (note dài): 1 chạm chọn trạng thái (tốt/bình thường/mệt/stress) đầu phiên, hiện badge nhắc nhở site-wide nếu tự đánh dấu "not good" hôm đó.
-- [ ] **Instant post-trade AI review** — chấm điểm nhanh ngay khi đóng lệnh (đã tuân thủ setup/tin tức/risk plan chưa) thay vì đợi tới Weekly Review, tái dùng logic AiWeeklyJournalReview ở quy mô 1 lệnh.
 
 ### Đề xuất 2026-08-24 — Journal: thống kê nâng cao thêm
 
@@ -51,6 +50,8 @@ Goal: khai thác thêm data đã capture nhưng chưa lên stat, và bổ sung v
 ---
 
 ## Completed
+
+- [x] Instant post-trade AI review — model `AiTradeReview` (unique tradeId, cache JSON review, hand-written migration `20260827100000_add_trade_review`); `src/lib/ai/trade-review.ts` với `buildTradeReviewContext` pure (9 tests) + `getAiTradeReview` (dùng chung `resolveAiProvider`, không cần cron). Chấm điểm **quy trình & kỷ luật** 1 lệnh (không phải thắng/thua): SL discipline, planned R:R, tuân thủ DailyTradingPlan ngày đó (maxTrades/checklist/bias/newsToAvoid), setup vs best-setup của trader, emotion, guard override, chất lượng note. Trả `{ score, verdict: disciplined|acceptable|undisciplined, summary, wentRight[], wentWrong[], disciplineFlags[], nextAction }`. API `POST /api/journal/trade-review` (auth + rate-limit VIP 5/60s free 2/300s + cache DB + `refresh` regen). UI: nút Sparkles per closed-trade trong `journal-table.tsx` mở expandable `TradeReviewCard`; sau khi log lệnh đã đóng, `journal-form.tsx` hiện luôn thẻ review inline (createTrade trả `{ tradeId, closed }`). Đề xuất Sprint 4 P2 (2026-08-17), user chọn trong 4 hướng (2026-08-27)
 
 - [x] Emotion diary correlation với performance — `computeEmotionDiaryCorrelation` + `classifyDiaryMood` (`src/lib/journal/emotion-diary-correlation.ts`, 11 tests) trên tab Thống kê /journal: phân loại tâm trạng ghi chú `EmotionDiaryEntry` bằng rule-based keyword matching (bỏ dấu, word-boundary, không gọi AI — ưu tiên tiêu cực khi note khớp cả 2 loại từ khoá), so win-rate lệnh log vào ngày tâm trạng tiêu cực với các ngày còn lại; badge "Tâm trạng tiêu cực/tích cực" cũng hiện trên mỗi entry ở tab Cảm xúc để trader thấy classification đang dùng. Đóng vòng lặp cho Emotion Diary vốn trước đó chỉ là journal thuần. Đề xuất 2026-08-24 từ audit "journal thống kê còn thiếu gì" (2026-08-24)
 

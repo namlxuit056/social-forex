@@ -131,6 +131,7 @@ model User {
   priceAlerts          PriceAlert[]
   weeklyReviews        AiWeeklyJournalReview[]
   dailyReviews         AiDailyJournalReview[]
+  tradeReviews         AiTradeReview[]
   articleChatMessages  ArticleChatMessage[]
   journalChatMessages  JournalChatMessage[]
 
@@ -396,8 +397,9 @@ model TradeJournal {
   copiedFromSignalId String?
   copiedFromSignal   Signal?  @relation(fields: [copiedFromSignalId], references: [id], onDelete: SetNull)
 
-  user    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  mt5Link Mt5SignalLink?
+  user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mt5Link  Mt5SignalLink?
+  aiReview AiTradeReview?
 
   openedAt  DateTime  @default(now())
   closedAt  DateTime?
@@ -1179,6 +1181,22 @@ model AiDailyJournalReview {
 
   @@unique([userId, day])
   @@index([userId, day])
+}
+
+/// Chấm điểm AI cho một lệnh journal ngay khi đóng — phản hồi tức thì thay vì đợi Weekly/Daily Review.
+model AiTradeReview {
+  id        String   @id @default(cuid())
+  userId    String
+  tradeId   String   @unique
+  /// AiTradeReviewResult JSON
+  review    Json
+  locale    String   @default("vi")
+  createdAt DateTime @default(now())
+
+  user  User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trade TradeJournal @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
 }
 
 model ScreenerAlert {

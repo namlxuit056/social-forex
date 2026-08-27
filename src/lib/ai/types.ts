@@ -302,3 +302,44 @@ export function sanitizeAiPortfolioReviewPayload(data: unknown): unknown {
 
   return sanitized;
 }
+
+export const aiTradeReviewSchema = z.object({
+  score: z.number().min(0).max(100),
+  verdict: z.enum(["disciplined", "acceptable", "undisciplined"]),
+  summary: z.string().min(10).max(500),
+  wentRight: z.array(z.string().min(3).max(220)).max(4),
+  wentWrong: z.array(z.string().min(3).max(220)).max(4),
+  disciplineFlags: z.array(z.string().min(3).max(180)).max(4),
+  nextAction: z.string().min(5).max(240),
+});
+
+export type AiTradeReviewResult = z.infer<typeof aiTradeReviewSchema>;
+
+export type AiTradeReviewResponse = {
+  review: AiTradeReviewResult;
+  cached: boolean;
+  generatedAt: string;
+  disclaimer: string;
+};
+
+/**
+ * LLMs occasionally overflow the string length limits despite prompt
+ * instructions. Truncate before Zod validation so a slightly long
+ * response doesn't hard-fail the whole review.
+ */
+export function sanitizeAiTradeReviewPayload(data: unknown): unknown {
+  if (!data || typeof data !== "object") return data;
+  const obj = data as Record<string, unknown>;
+  const sanitized: Record<string, unknown> = { ...obj };
+
+  if (typeof obj.summary === "string") sanitized.summary = truncate(obj.summary, 500);
+  if (typeof obj.nextAction === "string") sanitized.nextAction = truncate(obj.nextAction, 240);
+
+  for (const key of ["wentRight", "wentWrong", "disciplineFlags"] as const) {
+    if (Array.isArray(obj[key])) {
+      sanitized[key] = (obj[key] as unknown[]).slice(0, 4).map((item) => truncate(item, 220));
+    }
+  }
+
+  return sanitized;
+}

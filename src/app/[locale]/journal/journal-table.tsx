@@ -3,9 +3,10 @@
 import { useState, useEffect } from "react";
 import { useActionState } from "react";
 import { useTranslations } from "next-intl";
-import { Trash2, Pencil, X, Download } from "lucide-react";
+import { Trash2, Pencil, X, Download, Sparkles } from "lucide-react";
 import { deleteTrade, updateTrade } from "@/actions/journal";
 import { realizedR } from "@/lib/journal/r-multiple";
+import { TradeReviewCard } from "@/components/journal/trade-review-card";
 import {
   TRADE_EMOTIONS,
   TRADE_SETUPS,
@@ -246,13 +247,17 @@ function TradeRow({
   trade,
   locale,
   isEditing,
+  isReviewing,
   onEdit,
+  onToggleReview,
   t,
 }: {
   trade: Trade;
   locale: string;
   isEditing: boolean;
+  isReviewing: boolean;
   onEdit: () => void;
+  onToggleReview: () => void;
   t: ReturnType<typeof useTranslations>;
 }) {
   const isPending = trade.result === "PENDING";
@@ -271,11 +276,12 @@ function TradeRow({
     .join(" · ");
 
   return (
+    <>
     <tr
       className={cn(
         "transition-colors hover:bg-muted/30",
         isPending && "opacity-60",
-        isEditing && "bg-primary/5",
+        (isEditing || isReviewing) && "bg-primary/5",
       )}
     >
       <td className="px-4 py-2.5 font-mono font-medium">
@@ -359,6 +365,18 @@ function TradeRow({
       </td>
       <td className="px-4 py-2.5">
         <div className="flex items-center gap-1">
+          {!isPending && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              title={t("tradeReviewButton")}
+              className={cn("size-7", isReviewing ? "text-primary" : "text-muted-foreground hover:text-foreground")}
+              onClick={onToggleReview}
+            >
+              <Sparkles className="size-3.5" />
+            </Button>
+          )}
           <Button
             type="button"
             variant="ghost"
@@ -382,6 +400,19 @@ function TradeRow({
         </div>
       </td>
     </tr>
+      {isReviewing && (
+        <tr className="bg-primary/5">
+          <td colSpan={13} className="px-4 pb-4 pt-1">
+            <TradeReviewCard
+              tradeId={trade.id}
+              symbol={trade.symbol}
+              direction={trade.direction}
+              autoLoad
+            />
+          </td>
+        </tr>
+      )}
+    </>
   );
 }
 
@@ -391,6 +422,7 @@ export function JournalTable({ trades, locale }: { trades: Trade[]; locale: stri
   const t = useTranslations("journal");
   const [filter, setFilter] = useState<Filter>("ALL");
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [reviewingId, setReviewingId] = useState<string | null>(null);
   const [visibleCount, setVisibleCount] = useState(TABLE_PAGE_SIZE);
 
   const counts = {
@@ -488,7 +520,11 @@ export function JournalTable({ trades, locale }: { trades: Trade[]; locale: stri
                     trade={tr}
                     locale={locale}
                     isEditing={editingId === tr.id}
+                    isReviewing={reviewingId === tr.id}
                     onEdit={() => setEditingId(editingId === tr.id ? null : tr.id)}
+                    onToggleReview={() =>
+                      setReviewingId(reviewingId === tr.id ? null : tr.id)
+                    }
                     t={t}
                   />
                 ))}

@@ -88,7 +88,13 @@ function parseOptNum(fd: FormData, key: string): number | null {
 
 export async function createTrade(
   _prev:
-    | { error?: string; ok?: boolean; dailyLimitWarning?: { tradesLoggedToday: number; maxTrades: number } }
+    | {
+        error?: string;
+        ok?: boolean;
+        tradeId?: string;
+        closed?: boolean;
+        dailyLimitWarning?: { tradesLoggedToday: number; maxTrades: number };
+      }
     | null,
   formData: FormData,
 ) {
@@ -127,7 +133,7 @@ export async function createTrade(
   // Lệnh log với kết quả W/L/BE coi như đã đóng — cần closedAt cho loss-streak/edge stats
   const closedAt =
     d.closedAt ?? (d.result !== "PENDING" ? new Date() : null);
-  await prisma.tradeJournal.create({
+  const created = await prisma.tradeJournal.create({
     data: {
       userId: session.user.id,
       symbol: d.symbol.toUpperCase(),
@@ -149,6 +155,7 @@ export async function createTrade(
       overrodeDailyLimit,
       overrodeLossStreakGuard,
     },
+    select: { id: true },
   });
 
   if (d.result === "LOSS") await maybeNotifyLossStreak(session.user.id);
@@ -167,7 +174,7 @@ export async function createTrade(
   }
 
   revalidateJournalPaths();
-  return { ok: true };
+  return { ok: true, tradeId: created.id, closed: d.result !== "PENDING" };
 }
 
 export async function updateTrade(

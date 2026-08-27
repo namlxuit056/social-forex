@@ -5,6 +5,7 @@ import { useActionState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { X, BookOpen, AlertTriangle } from "lucide-react";
 import { createTrade } from "@/actions/journal";
+import { TradeReviewCard } from "@/components/journal/trade-review-card";
 import {
   TRADE_EMOTIONS,
   TRADE_SETUPS,
@@ -70,10 +71,28 @@ export function JournalFormCard({
   } | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const confirmOverLimitRef = useRef<HTMLInputElement>(null);
+  const [submitted, setSubmitted] = useState<{ symbol: string; direction: string }>({
+    symbol: "",
+    direction: "LONG",
+  });
+
+  const loggedReview =
+    state?.ok && state.closed && state.tradeId
+      ? { tradeId: state.tradeId, ...submitted }
+      : null;
 
   useEffect(() => {
-    if (state?.ok) startTransition(() => onClose());
-  }, [state?.ok, startTransition, onClose]);
+    if (state?.ok && !state.closed) startTransition(() => onClose());
+  }, [state?.ok, state?.closed, startTransition, onClose]);
+
+  function captureSubmitted() {
+    setSubmitted({
+      symbol:
+        (formRef.current?.elements.namedItem("symbol") as HTMLInputElement)?.value ?? symbol,
+      direction:
+        (formRef.current?.elements.namedItem("direction") as HTMLSelectElement)?.value ?? "LONG",
+    });
+  }
 
   function confirmOverDailyLimit() {
     if (confirmOverLimitRef.current) confirmOverLimitRef.current.value = "1";
@@ -125,6 +144,24 @@ export function JournalFormCard({
         </Button>
       </CardHeader>
       <CardContent>
+        {loggedReview ? (
+          <div className="space-y-4">
+            <TradeReviewCard
+              tradeId={loggedReview.tradeId}
+              symbol={loggedReview.symbol}
+              direction={loggedReview.direction}
+              autoLoad
+            />
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => startTransition(() => onClose())}
+            >
+              {t("tradeReviewDone")}
+            </Button>
+          </div>
+        ) : (
+          <>
         <ChecklistGuardHint />
         {newsGuard && (
           <div className="mb-4 flex items-start gap-3 rounded-lg border border-amber-500/30 bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-950/20 dark:text-amber-200">
@@ -179,6 +216,7 @@ export function JournalFormCard({
         <form
           ref={formRef}
           action={formAction}
+          onSubmit={captureSubmitted}
           className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
         >
           {prefill?.from && (
@@ -327,6 +365,8 @@ export function JournalFormCard({
             </Button>
           </div>
         </form>
+          </>
+        )}
       </CardContent>
     </Card>
   );
