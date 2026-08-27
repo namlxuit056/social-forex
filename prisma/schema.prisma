@@ -133,6 +133,7 @@ model User {
   dailyReviews         AiDailyJournalReview[]
   tradeReviews         AiTradeReview[]
   moodCheckins         MoodCheckin[]
+  tradingGoals         TradingGoal[]
   articleChatMessages  ArticleChatMessage[]
   journalChatMessages  JournalChatMessage[]
 
@@ -1182,6 +1183,28 @@ model AiDailyJournalReview {
 
   @@unique([userId, day])
   @@index([userId, day])
+}
+
+/// Mục tiêu giao dịch theo tháng — so target với thực tế trên tab Thống kê.
+model TradingGoal {
+  id            String   @id @default(cuid())
+  userId        String
+  /// Ngày đầu tháng, 00:00 UTC — kỳ áp dụng mục tiêu
+  month         DateTime
+  /// % (0–100)
+  targetWinRate Float?
+  targetAvgR    Float?
+  targetNetPnl  Float?
+  targetTrades  Int?
+  note          String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, month])
+  @@index([userId, month])
 }
 
 /// Điểm danh tâm lý 1 chạm mỗi ngày (tách khỏi EmotionDiaryEntry vốn cần note dài).

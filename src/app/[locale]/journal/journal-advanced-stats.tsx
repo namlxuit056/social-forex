@@ -35,6 +35,7 @@ import type { PlanComplianceStats } from "@/lib/journal/plan-compliance";
 import type { ChecklistComplianceStats } from "@/lib/journal/checklist-compliance";
 import type { EmotionDiaryCorrelationStats } from "@/lib/journal/emotion-diary-correlation";
 import type { GuardOverrideStats } from "@/lib/journal/guard-overrides";
+import { JournalGoalTracker, type TradingGoalData } from "@/components/journal/journal-goal-tracker";
 
 export type AdvancedStatsPageTrade = AdvancedStatsTrade &
   DisciplineTrade &
@@ -470,6 +471,7 @@ export function JournalAdvancedStats({
   checklistCompliance,
   emotionCorrelation,
   guardOverrideStats,
+  tradingGoal,
 }: {
   trades: AdvancedStatsPageTrade[];
   locale: string;
@@ -478,6 +480,7 @@ export function JournalAdvancedStats({
   checklistCompliance?: ChecklistComplianceStats;
   emotionCorrelation?: EmotionDiaryCorrelationStats;
   guardOverrideStats?: GuardOverrideStats;
+  tradingGoal?: TradingGoalData | null;
 }) {
   const t = useTranslations("journal");
 
@@ -504,13 +507,20 @@ export function JournalAdvancedStats({
     [trades, timeWindowTz],
   );
 
+  const goalTracker = (
+    <JournalGoalTracker goal={tradingGoal ?? null} trades={trades} locale={locale} />
+  );
+
   if (stats.closedTrades < MIN_CLOSED_TRADES) {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border/60 bg-muted/20 px-6 py-12 text-center">
-        <BarChart3 className="size-10 text-muted-foreground" aria-hidden />
-        <p className="text-sm text-muted-foreground">
-          {t("edgeEmpty", { min: MIN_CLOSED_TRADES })}
-        </p>
+      <div className="space-y-6">
+        {goalTracker}
+        <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border/60 bg-muted/20 px-6 py-12 text-center">
+          <BarChart3 className="size-10 text-muted-foreground" aria-hidden />
+          <p className="text-sm text-muted-foreground">
+            {t("edgeEmpty", { min: MIN_CLOSED_TRADES })}
+          </p>
+        </div>
       </div>
     );
   }
@@ -534,6 +544,8 @@ export function JournalAdvancedStats({
 
   return (
     <div className="space-y-6">
+      {goalTracker}
+
       <div>
         <h3 className="font-heading text-lg font-semibold">{t("statsAdvancedTitle")}</h3>
         <p className="text-sm text-muted-foreground">{t("statsAdvancedDesc")}</p>

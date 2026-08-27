@@ -116,8 +116,16 @@ export default async function JournalPage({
                 ? "emotion"
                 : "trades";
 
-  const [tradesRaw, mt5Connection, weeklyReviewsRaw, dailyReviewsRaw, dbUser, emotionEntriesRaw, planLimitsRaw] =
-    await Promise.all([
+  const [
+    tradesRaw,
+    mt5Connection,
+    weeklyReviewsRaw,
+    dailyReviewsRaw,
+    dbUser,
+    emotionEntriesRaw,
+    planLimitsRaw,
+    tradingGoalRaw,
+  ] = await Promise.all([
       prisma.tradeJournal.findMany({
         where: { userId: session.user.id },
         orderBy: { openedAt: "desc" },
@@ -167,6 +175,25 @@ export default async function JournalPage({
             },
           })
         : Promise.resolve([]),
+      activeTab === "stats"
+        ? prisma.tradingGoal.findUnique({
+            where: {
+              userId_month: {
+                userId: session.user.id,
+                month: new Date(
+                  Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1),
+                ),
+              },
+            },
+            select: {
+              targetWinRate: true,
+              targetAvgR: true,
+              targetNetPnl: true,
+              targetTrades: true,
+              note: true,
+            },
+          })
+        : Promise.resolve(null),
     ]);
 
   const emotionEntries = emotionEntriesRaw.map((e) => ({
@@ -443,6 +470,7 @@ export default async function JournalPage({
             checklistCompliance={checklistCompliance}
             emotionCorrelation={emotionCorrelation}
             guardOverrideStats={guardOverrideStats}
+            tradingGoal={tradingGoalRaw}
           />
         </div>
       ) : activeTab === "chat" ? (

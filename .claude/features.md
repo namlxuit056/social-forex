@@ -40,11 +40,12 @@ Goal: khai thác thêm data đã capture nhưng chưa lên stat, và bổ sung v
 **P2 — cần thêm field/schema hoặc effort lớn hơn**
 - [ ] **MAE/MFE (max adverse/favorable excursion)** — chưa có field này trên `TradeJournal`; cần thêm cột + luồng capture (có thể chỉ làm được cho lệnh có link MT5 vì cần theo dõi giá suốt đời lệnh) trước khi lên được stat.
 - [ ] **PDF/report export** — hiện chỉ có CSV (`journal-table.tsx`); thêm report định dạng để chia sẻ (mentor, prop-firm eval).
-- [ ] **Goal tracking vs kế hoạch** — chưa có gì trong schema/UI; đặt target win-rate/R/PnL tháng rồi so với thực tế.
 
 ---
 
 ## Completed
+
+- [x] Goal tracking vs kế hoạch — model `TradingGoal` (`@@unique [userId, month]`, month = ngày đầu tháng UTC; targetWinRate/targetAvgR/targetNetPnl/targetTrades nullable + note), migration `20260827300000_add_trading_goal`. Pure `src/lib/journal/goal-progress.ts` (`goalMonthStart` / `tradesInGoalMonth` / `computeGoalProgress`, 6 tests): so target với thực tế tháng hiện tại (win-rate từ W/L, avg realized R, net P/L, số lệnh đã đóng), trả `{ items[{metric,target,actual,ratio,met}], metCount, totalCount }`, ratio clamp 0..1. Action `saveTradingGoal` (upsert theo tháng, xoá khi bỏ trống hết, rate-limit 20/60s). UI `JournalGoalTracker` (`src/components/journal/journal-goal-tracker.tsx`) đầu tab Thống kê — hiện cả khi <5 lệnh: badge "N/M đạt", progress bar mỗi metric (xanh khi đạt), form inline 4 ô. Page fetch `tradingGoal` cho tab stats, truyền qua `JournalAdvancedStats`. Đề xuất 2026-08-24 P2, user chọn trong 4 hướng (2026-08-27)
 
 - [x] Journal viz P1 — 2 biểu đồ mới trên tab Thống kê (`journal-advanced-stats.tsx`, cùng style SVG inline với ComplianceDonut/MonthlyViolationsChart): (1) **R-multiple distribution histogram** — `computeRMultipleDistribution` (`src/lib/journal/r-distribution.ts`, 4 tests) chia lệnh đã đóng có tính được R vào 6 bucket cố định (<-2R / -2..-1 / -1..0 / 0..1R / 1..2R / >2R, quy ước min<r<=max), bar đỏ/xanh theo win. (2) **Drawdown curve** — `computeDrawdownSeries` (thêm vào `advanced-stats.ts`, 3 tests) đi qua từng lệnh sort closedAt asc, P/L cộng dồn − đỉnh (≤0), line + area đỏ, chấm đáy + nhãn $. Đề xuất 2026-08-24 P1, data sẵn không cần schema (2026-08-27)
 
