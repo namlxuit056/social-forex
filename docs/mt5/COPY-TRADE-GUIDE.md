@@ -125,6 +125,15 @@ Other causes:
 - Insufficient margin → reduce lot size or top up your account
 - `MaxSlippage` too tight → increase to 50–100 points for volatile pairs
 
+### `Cannot select symbol XAUUSD` (Standard / cent accounts)
+
+Standard and cent accounts name every symbol with a suffix (`XAUUSDm`, `EURUSD.r`,
+`GBPUSDc`). The provider publishes the bare name (`XAUUSD`), so from EA v1.01 the
+copy EA auto-detects your broker's suffix and maps each signal onto the matching
+local symbol — no configuration needed. Just make sure at least one standard pair
+(e.g. `XAUUSDm` / `EURUSDm`) is visible in Market Watch so the suffix can be
+detected, and re-download the EA if you're on an older build.
+
 ### How to stop copying
 1. Go to the trader's profile on Social Forex
 2. Click **"Manage Copy"**

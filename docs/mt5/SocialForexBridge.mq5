@@ -6,7 +6,7 @@
 //| It never opens new positions on its own.                          |
 //+------------------------------------------------------------------+
 #property copyright "Social Forex"
-#property version   "1.33"
+#property version   "1.34"
 #property strict
 
 input string BridgeEndpoint   = "https://www.toolforex.xyz/api/mt5/bridge";
@@ -83,6 +83,92 @@ double GetPipSize(string symbol)
 
 datetime last_send_at = 0;
 datetime last_poll_at = 0;
+
+//+------------------------------------------------------------------+
+//| Broker symbol resolution                                          |
+//| The dashboard queues orders with the bare instrument name          |
+//| ("XAUUSD"). Standard/cent accounts append a suffix to every symbol |
+//| (XAUUSDm, EURUSD.r, GBPUSDc), so map the requested name onto       |
+//| whatever this terminal actually calls it before trading.           |
+//+------------------------------------------------------------------+
+string g_broker_suffix = "\x01"; // "\x01" = not detected yet
+
+bool AffixLooksLikeSuffix(string s)
+{
+   int n = StringLen(s);
+   if(n == 0) return true;
+   if(n > 5)  return false;
+   for(int i = 0; i < n; i++)
+   {
+      ushort c = StringGetCharacter(s, i);
+      bool ok = c == '.' || c == '-' || c == '_' || c == '+' || c == '#' ||
+                (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
+                (c >= '0' && c <= '9');
+      if(!ok) return false;
+   }
+   return true;
+}
+
+string DetectBrokerSuffix()
+{
+   if(g_broker_suffix != "\x01") return g_broker_suffix;
+   g_broker_suffix = "";
+
+   string bases[] = {"EURUSD","GBPUSD","USDJPY","USDCHF","AUDUSD","USDCAD",
+                     "NZDUSD","EURJPY","GBPJPY","XAUUSD","XAGUSD","BTCUSD"};
+
+   string chart = _Symbol;
+   StringToUpper(chart);
+   for(int b = 0; b < ArraySize(bases); b++)
+      if(StringFind(chart, bases[b]) == 0)
+      {
+         g_broker_suffix = StringSubstr(_Symbol, StringLen(bases[b]));
+         return g_broker_suffix;
+      }
+
+   int total = SymbolsTotal(false);
+   for(int i = 0; i < total; i++)
+   {
+      string name  = SymbolName(i, false);
+      string nameU = name;
+      StringToUpper(nameU);
+      for(int b = 0; b < ArraySize(bases); b++)
+         if(StringFind(nameU, bases[b]) == 0)
+         {
+            string rest = StringSubstr(name, StringLen(bases[b]));
+            if(AffixLooksLikeSuffix(rest)) { g_broker_suffix = rest; return g_broker_suffix; }
+         }
+   }
+   return g_broker_suffix;
+}
+
+// Tradable local name for a requested symbol, or "" if this broker has no match.
+string ResolveBrokerSymbol(string want)
+{
+   if(want == "") return "";
+
+   if(SymbolSelect(want, true)) return want;
+
+   string suf = DetectBrokerSuffix();
+   if(suf != "" && SymbolSelect(want + suf, true)) return want + suf;
+
+   string wantU = want;
+   StringToUpper(wantU);
+   string best = "";
+   int total = SymbolsTotal(false);
+   for(int i = 0; i < total; i++)
+   {
+      string name  = SymbolName(i, false);
+      string nameU = name;
+      StringToUpper(nameU);
+      if(StringFind(nameU, wantU) != 0) continue;
+      string suffix = StringSubstr(name, StringLen(want));
+      if(!AffixLooksLikeSuffix(suffix)) continue;
+      if(!SymbolSelect(name, true)) continue;
+      if(best == "" || StringLen(name) < StringLen(best)) best = name;
+   }
+   return best;
+}
 
 string JsonEscape(string value)
 {
@@ -660,11 +746,13 @@ bool PlaceOrderCmd(string symbol, string orderTypeStr, double volume, double pri
       errMsg = "invalid symbol/volume";
       return false;
    }
-   if(!SymbolSelect(symbol, true))
+   string resolved = ResolveBrokerSymbol(symbol);
+   if(resolved == "")
    {
       errMsg = "symbol not found: " + symbol;
       return false;
    }
+   symbol = resolved; // e.g. "XAUUSD" -> "XAUUSDm" on Standard/cent accounts
 
    int digits    = (int)SymbolInfoInteger(symbol, SYMBOL_DIGITS);
    double safeSL = sl > 0 ? NormalizeDouble(sl, digits) : 0;

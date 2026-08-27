@@ -3,7 +3,7 @@
 //| Auto copy trades from signal providers on Social Forex.          |
 //+------------------------------------------------------------------+
 #property copyright "Social Forex"
-#property version   "1.00"
+#property version   "1.01"
 #property strict
 
 input string ApiEndpoint = "https://www.toolforex.xyz/api/copy-trade/signals";
@@ -136,6 +136,96 @@ string FindJsonValue(string json, string key)
    return StringSubstr(json, start, pos - start);
 }
 
+//+------------------------------------------------------------------+
+//| Broker symbol resolution                                          |
+//| Providers publish the bare instrument name ("XAUUSD"). Many        |
+//| brokers - Standard/cent accounts especially - append a suffix to   |
+//| every symbol (XAUUSDm, EURUSD.r, BTCUSD-ECN, GBPUSDc). Map the     |
+//| provider's name onto whatever this terminal actually calls it so   |
+//| suffixed (Standard) and plain (Pro/Raw) accounts both copy.        |
+//+------------------------------------------------------------------+
+string g_broker_suffix = "\x01"; // "\x01" = not detected yet
+
+bool AffixLooksLikeSuffix(string s)
+{
+   int n = StringLen(s);
+   if(n == 0) return true;
+   if(n > 5)  return false;
+   for(int i = 0; i < n; i++)
+   {
+      ushort c = StringGetCharacter(s, i);
+      bool ok = c == '.' || c == '-' || c == '_' || c == '+' || c == '#' ||
+                (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
+                (c >= '0' && c <= '9');
+      if(!ok) return false;
+   }
+   return true;
+}
+
+string DetectBrokerSuffix()
+{
+   if(g_broker_suffix != "\x01") return g_broker_suffix;
+   g_broker_suffix = "";
+
+   string bases[] = {"EURUSD","GBPUSD","USDJPY","USDCHF","AUDUSD","USDCAD",
+                     "NZDUSD","EURJPY","GBPJPY","XAUUSD","XAGUSD","BTCUSD"};
+
+   string chart = _Symbol;
+   StringToUpper(chart);
+   for(int b = 0; b < ArraySize(bases); b++)
+      if(StringFind(chart, bases[b]) == 0)
+      {
+         g_broker_suffix = StringSubstr(_Symbol, StringLen(bases[b]));
+         return g_broker_suffix;
+      }
+
+   int total = SymbolsTotal(false);
+   for(int i = 0; i < total; i++)
+   {
+      string name  = SymbolName(i, false);
+      string nameU = name;
+      StringToUpper(nameU);
+      for(int b = 0; b < ArraySize(bases); b++)
+         if(StringFind(nameU, bases[b]) == 0)
+         {
+            string rest = StringSubstr(name, StringLen(bases[b]));
+            if(AffixLooksLikeSuffix(rest)) { g_broker_suffix = rest; return g_broker_suffix; }
+         }
+   }
+   return g_broker_suffix;
+}
+
+// Tradable local name for a provider symbol, or "" if this broker has no match.
+string ResolveBrokerSymbol(string want)
+{
+   if(want == "") return "";
+
+   // 1. Exact - Pro/Raw accounts, or a provider already sending the local name.
+   if(SymbolSelect(want, true)) return want;
+
+   // 2. Provider name + this broker's detected suffix (XAUUSD -> XAUUSDm).
+   string suf = DetectBrokerSuffix();
+   if(suf != "" && SymbolSelect(want + suf, true)) return want + suf;
+
+   // 3. Full scan: shortest "<want><short-affix>" symbol the broker offers.
+   string wantU = want;
+   StringToUpper(wantU);
+   string best = "";
+   int total = SymbolsTotal(false);
+   for(int i = 0; i < total; i++)
+   {
+      string name  = SymbolName(i, false);
+      string nameU = name;
+      StringToUpper(nameU);
+      if(StringFind(nameU, wantU) != 0) continue; // must start with the provider symbol
+      string suffix = StringSubstr(name, StringLen(want));
+      if(!AffixLooksLikeSuffix(suffix)) continue;
+      if(!SymbolSelect(name, true)) continue;
+      if(best == "" || StringLen(name) < StringLen(best)) best = name;
+   }
+   return best;
+}
+
 double CalcLotSize(string symbol, double balance, double riskPercent, double entry, double sl)
 {
    if(riskPercent <= 0 || entry <= 0 || sl <= 0)
@@ -256,6 +346,7 @@ int PendingOrderTypeFromString(string orderType)
 bool SyncPositionStops(ulong ticket, string symbol, double newSL, double newTP)
 {
    if(!PositionSelectByTicket(ticket)) return false;
+   symbol = PositionGetString(POSITION_SYMBOL); // authoritative local name
    double curSL  = PositionGetDouble(POSITION_SL);
    double curTP  = PositionGetDouble(POSITION_TP);
    double pt     = SymbolInfoDouble(symbol, SYMBOL_POINT);
@@ -293,6 +384,7 @@ bool SyncPositionStops(ulong ticket, string symbol, double newSL, double newTP)
 bool SyncOrderStops(ulong ticket, string symbol, double newSL, double newTP)
 {
    if(!OrderSelect(ticket)) return false;
+   symbol = OrderGetString(ORDER_SYMBOL); // authoritative local name
    double curSL = OrderGetDouble(ORDER_SL);
    double curTP = OrderGetDouble(ORDER_TP);
    double pt    = SymbolInfoDouble(symbol, SYMBOL_POINT);
@@ -338,6 +430,7 @@ bool CancelOrder(ulong ticket)
 bool ClosePosition(ulong ticket, string symbol)
 {
    if(!PositionSelectByTicket(ticket)) return false;
+   symbol = PositionGetString(POSITION_SYMBOL); // authoritative local name
    double volume  = PositionGetDouble(POSITION_VOLUME);
    long   posType = PositionGetInteger(POSITION_TYPE);
 
@@ -613,6 +706,12 @@ void ProcessSignals(string response)
       string status    = FindJsonValue(signalObj, "status");
 
       if(signalId == "" || symbol == "") continue;
+
+      // Map the provider's bare symbol ("XAUUSD") onto this broker's name for it
+      // ("XAUUSDm" on Standard/cent accounts). Leave it untouched if nothing
+      // matches so the open path still logs a clear "cannot select" message.
+      string brokerSymbol = ResolveBrokerSymbol(symbol);
+      if(brokerSymbol != "") symbol = brokerSymbol;
 
       bool  isClosed  = (status == "CLOSED_WIN" || status == "CLOSED_LOSS" || status == "CANCELLED");
       bool  isPending = (status == "PENDING");
