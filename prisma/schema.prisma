@@ -387,6 +387,11 @@ model TradeJournal {
   lotSize    Float?
   result     TradeResult @default(PENDING)
   pnl        Float?
+  /// Max adverse / favorable excursion in account currency — the worst and best
+  /// floating P/L the position ever showed while open, sampled from MT5 bridge
+  /// heartbeats and finalised at close. Only populated for MT5-linked trades.
+  maeProfit  Float?
+  mfeProfit  Float?
   notes      String?
   setup      String?
   emotion    String?
@@ -854,6 +859,10 @@ model Mt5SignalLink {
   mt5Ticket    String
   kind         Mt5SignalKind
   lastProfit   Float?
+  /// Running max adverse / favorable excursion (floating P/L extremes) while the
+  /// position is open — copied onto the linked TradeJournal when it closes.
+  maeProfit    Float?
+  mfeProfit    Float?
   lastSeenAt   DateTime      @default(now())
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt

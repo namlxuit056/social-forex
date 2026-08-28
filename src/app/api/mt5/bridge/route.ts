@@ -375,8 +375,20 @@ export async function POST(request: NextRequest) {
             mt5Ticket,
           },
         },
-        select: { id: true, signalId: true, journalId: true },
+        select: { id: true, signalId: true, journalId: true, maeProfit: true, mfeProfit: true },
       });
+
+      // Track the worst/best floating P/L this position has ever shown (max adverse /
+      // favorable excursion). `position.profit` can be absent on a heartbeat — skip those.
+      const liveProfit = typeof position.profit === "number" ? position.profit : null;
+      const nextMae =
+        liveProfit === null
+          ? (existing?.maeProfit ?? null)
+          : Math.min(existing?.maeProfit ?? liveProfit, liveProfit);
+      const nextMfe =
+        liveProfit === null
+          ? (existing?.mfeProfit ?? null)
+          : Math.max(existing?.mfeProfit ?? liveProfit, liveProfit);
 
       if (existing) {
         const signal = await tx.signal.update({
@@ -417,7 +429,14 @@ export async function POST(request: NextRequest) {
 
         await tx.mt5SignalLink.update({
           where: { id: existing.id },
-          data: { kind: "OPEN_POSITION", lastProfit: position.profit, lastSeenAt: now, journalId },
+          data: {
+            kind: "OPEN_POSITION",
+            lastProfit: position.profit,
+            maeProfit: nextMae,
+            mfeProfit: nextMfe,
+            lastSeenAt: now,
+            journalId,
+          },
         });
         touchedSignalIds.push(signal.id);
         continue;
@@ -458,6 +477,8 @@ export async function POST(request: NextRequest) {
               mt5Ticket,
               kind: "OPEN_POSITION",
               lastProfit: position.profit,
+              maeProfit: nextMae,
+              mfeProfit: nextMfe,
               lastSeenAt: now,
               journalId: journal.id,
             },

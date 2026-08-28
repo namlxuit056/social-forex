@@ -16,6 +16,7 @@ import {
   computeRMultipleDistribution,
   type RDistribution,
 } from "@/lib/journal/r-distribution";
+import { computeExcursionStats, type ExcursionTrade } from "@/lib/journal/excursion-stats";
 import {
   computeMonthlyViolations,
   computeRiskDiscipline,
@@ -41,7 +42,8 @@ import { JournalGoalTracker, type TradingGoalData } from "@/components/journal/j
 export type AdvancedStatsPageTrade = AdvancedStatsTrade &
   DisciplineTrade &
   SessionTimeTrade &
-  SymbolTrade;
+  SymbolTrade &
+  ExcursionTrade;
 
 const MIN_CLOSED_TRADES = 5;
 
@@ -503,6 +505,7 @@ export function JournalAdvancedStats({
   const symbolStats = useMemo(() => computeSymbolStats(trades), [trades]);
   const rDistribution = useMemo(() => computeRMultipleDistribution(trades), [trades]);
   const drawdownSeries = useMemo(() => computeDrawdownSeries(trades), [trades]);
+  const excursion = useMemo(() => computeExcursionStats(trades), [trades]);
   const dayOfWeekStats = useMemo(
     () => computeDayOfWeekStats(trades, timeWindowTz === "vn" ? VN_UTC_OFFSET_HOURS : 0),
     [trades, timeWindowTz],
@@ -687,6 +690,74 @@ export function JournalAdvancedStats({
           </CardContent>
         </Card>
       </div>
+
+      {excursion.sampleSize >= 3 && (
+        <Card className="border-border/60">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">{t("excursionTitle")}</CardTitle>
+            <p className="text-xs text-muted-foreground">
+              {t("excursionNote", { n: excursion.sampleSize })}
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <StatCard
+                label={t("excursionCapture")}
+                value={
+                  excursion.avgMfeCapturePct !== null
+                    ? `${Math.round(excursion.avgMfeCapturePct * 100)}%`
+                    : "—"
+                }
+                sub={t("excursionCaptureHint")}
+                tone={
+                  excursion.avgMfeCapturePct === null
+                    ? "neutral"
+                    : excursion.avgMfeCapturePct >= 0.6
+                      ? "positive"
+                      : excursion.avgMfeCapturePct < 0.4
+                        ? "negative"
+                        : "neutral"
+                }
+              />
+              <StatCard
+                label={t("excursionHeat")}
+                value={
+                  excursion.avgHeatOnWinners !== null
+                    ? fmtMoney(excursion.avgHeatOnWinners)
+                    : "—"
+                }
+              />
+              <StatCard
+                label={t("excursionGiveBack")}
+                value={
+                  excursion.avgGiveBackOnLosers !== null
+                    ? t("excursionGiveBackValue", {
+                        count: excursion.giveBackCount,
+                        amount: fmtMoney(excursion.avgGiveBackOnLosers),
+                      })
+                    : "—"
+                }
+                tone={excursion.giveBackCount > 0 ? "negative" : "neutral"}
+              />
+            </div>
+            {excursion.avgMfeCapturePct !== null && excursion.avgMfeCapturePct < 0.5 && (
+              <p className="text-xs text-amber-600 dark:text-amber-500">
+                {t("excursionInsightEarly", {
+                  pct: Math.round(excursion.avgMfeCapturePct * 100),
+                })}
+              </p>
+            )}
+            {excursion.giveBackCount >= 2 && excursion.avgGiveBackOnLosers !== null && (
+              <p className="text-xs text-amber-600 dark:text-amber-500">
+                {t("excursionInsightGiveBack", {
+                  count: excursion.giveBackCount,
+                  amount: fmtMoney(excursion.avgGiveBackOnLosers),
+                })}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <GroupStatsTable
         title={t("statsBySessionTitle")}

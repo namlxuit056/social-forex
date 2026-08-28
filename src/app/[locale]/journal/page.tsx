@@ -301,6 +301,8 @@ export default async function JournalPage({
     lotSize: t.lotSize,
     result: t.result,
     pnl: t.pnl,
+    maeProfit: t.maeProfit,
+    mfeProfit: t.mfeProfit,
     notes: t.notes,
     openedAt: t.openedAt.toISOString(),
     closedAt: t.closedAt?.toISOString() ?? null,

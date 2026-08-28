@@ -40,6 +40,8 @@ export async function closeStaleSignalLinks(
       mt5Ticket: true,
       kind: true,
       lastProfit: true,
+      maeProfit: true,
+      mfeProfit: true,
       signalId: true,
       journalId: true,
       signal: { select: { status: true, symbol: true, direction: true } },
@@ -104,9 +106,26 @@ export async function closeStaleSignalLinks(
                 ? "LOSS"
                 : "BREAKEVEN"
             : "PENDING";
+        // Finalise the excursion extremes: the realized close can itself be the most
+        // adverse/favorable point (TP/SL hit between heartbeats), so fold `profit` in.
+        const maeProfit =
+          typeof profit === "number"
+            ? Math.min(link.maeProfit ?? profit, profit)
+            : link.maeProfit;
+        const mfeProfit =
+          typeof profit === "number"
+            ? Math.max(link.mfeProfit ?? profit, profit)
+            : link.mfeProfit;
         await tx.tradeJournal.update({
           where: { id: link.journalId },
-          data: { result, pnl: profit, closedAt, exitPrice: closedDeal?.price ?? null },
+          data: {
+            result,
+            pnl: profit,
+            closedAt,
+            exitPrice: closedDeal?.price ?? null,
+            maeProfit,
+            mfeProfit,
+          },
         });
       }
 
