@@ -18,6 +18,7 @@ import { JournalCalendar } from "./journal-calendar";
 import { JournalAdvancedStats } from "./journal-advanced-stats";
 import { JournalChat } from "./journal-chat";
 import { JournalEmotionDiary } from "./journal-emotion-diary";
+import { JournalLessons } from "./journal-lessons";
 import { RiskCalculator } from "@/components/tools/risk-calculator";
 import { countTrailingLosses } from "@/lib/journal/loss-streak";
 import { computeEdgeGroups, findBestRow } from "@/lib/journal/edge-stats";
@@ -118,7 +119,9 @@ export default async function JournalPage({
               ? "chat"
               : query?.tab === "emotion"
                 ? "emotion"
-                : "trades";
+                : query?.tab === "lessons"
+                  ? "lessons"
+                  : "trades";
 
   const [
     tradesRaw,
@@ -130,6 +133,7 @@ export default async function JournalPage({
     planLimitsRaw,
     tradingGoalRaw,
     moodCheckinsRaw,
+    journalLessonsRaw,
   ] = await Promise.all([
       prisma.tradeJournal.findMany({
         where: { userId: session.user.id },
@@ -205,6 +209,13 @@ export default async function JournalPage({
             orderBy: { day: "desc" },
             take: 365,
             select: { day: true, mood: true },
+          })
+        : Promise.resolve([]),
+      activeTab === "lessons"
+        ? prisma.journalLesson.findMany({
+            where: { userId: session.user.id },
+            orderBy: { createdAt: "desc" },
+            take: 200,
           })
         : Promise.resolve([]),
     ]);
@@ -489,6 +500,16 @@ export default async function JournalPage({
         >
           {t("tabEmotion")}
         </Link>
+        <Link
+          href="/journal?tab=lessons"
+          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+            activeTab === "lessons"
+              ? "border-primary text-foreground"
+              : "border-transparent text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          {t("tabLessons")}
+        </Link>
       </nav>
 
       {activeTab === "weekly" ? (
@@ -519,6 +540,16 @@ export default async function JournalPage({
         <JournalChat isLoggedIn={true} isVip={isVip} />
       ) : activeTab === "emotion" ? (
         <JournalEmotionDiary entries={emotionEntries} locale={locale} />
+      ) : activeTab === "lessons" ? (
+        <JournalLessons
+          lessons={journalLessonsRaw.map((l) => ({
+            id: l.id,
+            body: l.body,
+            imageUrl: l.imageUrl,
+            createdAt: l.createdAt.toISOString(),
+          }))}
+          locale={locale}
+        />
       ) : (
         <>
           <RiskCalculator defaultBalance={mt5Account?.balance ?? null} />

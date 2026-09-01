@@ -311,3 +311,55 @@ export async function deleteEmotionDiaryEntry(formData: FormData) {
   await prisma.emotionDiaryEntry.delete({ where: { id } });
   revalidateJournalPaths();
 }
+
+const lessonSchema = z.object({
+  body: z.string().trim().min(1).max(4000),
+});
+
+export async function saveJournalLesson(
+  _prev: { error?: string; ok?: boolean } | null,
+  formData: FormData,
+) {
+  const session = await auth();
+  if (!session?.user?.id) redirect("/auth/signin");
+
+  const te = await getTranslations("errors");
+
+  const parsed = lessonSchema.safeParse({ body: formData.get("body") });
+  if (!parsed.success) return { error: te("journalInvalidData") };
+
+  const imageUrl = parseJournalImageUrl(formData.get("imageUrl"));
+  const lessonId = (formData.get("lessonId") as string) || null;
+
+  if (lessonId) {
+    const lesson = await prisma.journalLesson.findUnique({ where: { id: lessonId } });
+    if (!lesson || lesson.userId !== session.user.id) {
+      return { error: te("journalForbidden") };
+    }
+    await prisma.journalLesson.update({
+      where: { id: lessonId },
+      data: { body: parsed.data.body, imageUrl },
+    });
+  } else {
+    await prisma.journalLesson.create({
+      data: { userId: session.user.id, body: parsed.data.body, imageUrl },
+    });
+  }
+
+  revalidateJournalPaths();
+  return { ok: true };
+}
+
+export async function deleteJournalLesson(formData: FormData) {
+  const session = await auth();
+  if (!session?.user?.id) redirect("/auth/signin");
+
+  const id = formData.get("id") as string;
+  if (!id) return;
+
+  const lesson = await prisma.journalLesson.findUnique({ where: { id } });
+  if (!lesson || lesson.userId !== session.user.id) return;
+
+  await prisma.journalLesson.delete({ where: { id } });
+  revalidateJournalPaths();
+}

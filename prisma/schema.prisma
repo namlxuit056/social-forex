@@ -76,6 +76,7 @@ model User {
   signalReactions      SignalReaction[]
   tradeJournals        TradeJournal[]
   emotionDiaryEntries  EmotionDiaryEntry[]
+  journalLessons       JournalLesson[]
   notifications        Notification[]       @relation("NotificationRecipient")
   notificationsAsActor Notification[]       @relation("NotificationActor")
   signalEditLogs       SignalEditLog[]
@@ -435,6 +436,21 @@ model EmotionDiaryEntry {
 
   @@unique([userId, date])
   @@index([userId, date])
+}
+
+/// Bài học trader tự ghi lại (những điểm cần cải thiện) — kèm 1 ảnh tùy chọn.
+model JournalLesson {
+  id       String  @id @default(cuid())
+  userId   String
+  body     String
+  imageUrl String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, createdAt])
 }
 
 model DailyTradingPlan {
