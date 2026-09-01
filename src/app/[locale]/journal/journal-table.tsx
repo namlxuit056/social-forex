@@ -7,10 +7,12 @@ import { Trash2, Pencil, X, Download, Sparkles } from "lucide-react";
 import { deleteTrade, updateTrade } from "@/actions/journal";
 import { realizedR } from "@/lib/journal/r-multiple";
 import { TradeReviewCard } from "@/components/journal/trade-review-card";
+import { MistakeCheckboxes } from "@/components/journal/mistake-checkboxes";
 import {
   TRADE_EMOTIONS,
   TRADE_SETUPS,
   useEmotionLabels,
+  useMistakeLabels,
   useSetupLabels,
 } from "./use-setup-labels";
 import { JournalImageField } from "./journal-image-field";
@@ -36,6 +38,7 @@ export interface Trade {
   notes: string | null;
   setup: string | null;
   emotion: string | null;
+  mistakes: string[];
   imageUrl: string | null;
   openedAt: string;
   closedAt: string | null;
@@ -67,6 +70,7 @@ function exportTradesToCsv(trades: Trade[]): void {
     "R",
     "Setup",
     "Emotion",
+    "Mistakes",
     "ImageUrl",
     "Notes",
     "OpenedAt",
@@ -86,6 +90,7 @@ function exportTradesToCsv(trades: Trade[]): void {
       realizedR(tr),
       tr.setup,
       tr.emotion,
+      tr.mistakes.join(";"),
       tr.imageUrl,
       tr.notes,
       tr.openedAt,
@@ -202,6 +207,7 @@ function EditForm({ trade, onClose }: { trade: Trade; onClose: () => void }) {
             <Label>{t("closedAt")}</Label>
             <Input name="closedAt" type="datetime-local" defaultValue={toDatetimeLocal(trade.closedAt)} className="mt-1.5" />
           </div>
+          <MistakeCheckboxes defaultSelected={trade.mistakes} />
           <div className="sm:col-span-2 lg:col-span-3">
             <Label>{t("notes")}</Label>
             <Textarea name="notes" rows={2} defaultValue={trade.notes ?? ""} className="mt-1.5" />
@@ -263,7 +269,11 @@ function TradeRow({
   const isPending = trade.result === "PENDING";
   const setupLabels = useSetupLabels();
   const emotionLabels = useEmotionLabels();
+  const mistakeLabels = useMistakeLabels();
   const r = realizedR(trade);
+  const mistakeText = trade.mistakes
+    .map((m) => mistakeLabels[m as keyof typeof mistakeLabels] ?? m)
+    .join(", ");
   const subLabel = [
     trade.setup
       ? setupLabels[trade.setup as keyof typeof setupLabels] ?? trade.setup
@@ -289,6 +299,14 @@ function TradeRow({
         {subLabel && (
           <span className="block font-sans text-[10px] font-normal text-muted-foreground">
             {subLabel}
+          </span>
+        )}
+        {mistakeText && (
+          <span
+            title={mistakeText}
+            className="block max-w-40 truncate font-sans text-[10px] font-normal text-amber-600 dark:text-amber-500"
+          >
+            ⚠ {mistakeText}
           </span>
         )}
       </td>

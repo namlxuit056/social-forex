@@ -395,6 +395,9 @@ model TradeJournal {
   notes      String?
   setup      String?
   emotion    String?
+  /// Self-reported process mistakes on this trade (fixed catalog in
+  /// src/lib/journal/mistakes.ts). Used for the "cost of mistakes" ranking.
+  mistakes   String[]    @default([])
   imageUrl   String?
 
   // Đánh dấu trader bấm "vẫn lưu"/"vẫn tiếp tục" để bỏ qua guard khi log lệnh này —

@@ -10,6 +10,7 @@ import { addXp } from "@/lib/add-xp";
 import { countTrailingLosses, COOLDOWN_THRESHOLD_LOSSES } from "@/lib/journal/loss-streak";
 import { isOverDailyTradeLimit, utcDayRange } from "@/lib/journal/daily-limit";
 import { parseTradeSetup } from "@/lib/journal/setups";
+import { parseMistakes } from "@/lib/journal/mistakes";
 import { parseJournalImageUrl, parseTradeEmotion } from "@/lib/journal/emotions";
 import { isPushEnabled, sendPushToUser } from "@/lib/push";
 import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
@@ -150,6 +151,7 @@ export async function createTrade(
       closedAt,
       setup: parseTradeSetup(formData.get("setup")),
       emotion: parseTradeEmotion(formData.get("emotion")),
+      mistakes: parseMistakes(formData.getAll("mistakes")),
       imageUrl: parseJournalImageUrl(formData.get("imageUrl")),
       copiedFromSignalId: (formData.get("copiedFromSignalId") as string) || null,
       overrodeDailyLimit,
@@ -234,6 +236,7 @@ export async function updateTrade(
       closedAt,
       setup: parseTradeSetup(formData.get("setup")),
       emotion: parseTradeEmotion(formData.get("emotion")),
+      mistakes: parseMistakes(formData.getAll("mistakes")),
       imageUrl: parseJournalImageUrl(formData.get("imageUrl")),
     },
   });

@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { X, BookOpen, AlertTriangle } from "lucide-react";
 import { createTrade } from "@/actions/journal";
 import { TradeReviewCard } from "@/components/journal/trade-review-card";
+import { MistakeCheckboxes } from "@/components/journal/mistake-checkboxes";
 import {
   TRADE_EMOTIONS,
   TRADE_SETUPS,
@@ -349,6 +350,7 @@ export function JournalFormCard({
             <Label>{t("closedAt")}</Label>
             <Input name="closedAt" type="datetime-local" className="mt-1.5" />
           </div>
+          <MistakeCheckboxes />
           <div className="sm:col-span-2 lg:col-span-3">
             <Label>{t("notes")}</Label>
             <Textarea name="notes" rows={2} className="mt-1.5" />

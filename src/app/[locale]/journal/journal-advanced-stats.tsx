@@ -38,6 +38,8 @@ import type { ChecklistComplianceStats } from "@/lib/journal/checklist-complianc
 import type { EmotionDiaryCorrelationStats } from "@/lib/journal/emotion-diary-correlation";
 import type { GuardOverrideStats } from "@/lib/journal/guard-overrides";
 import type { DisciplineScorecard, RuleId } from "@/lib/journal/discipline-scorecard";
+import type { MistakeStats } from "@/lib/journal/mistake-stats";
+import { useMistakeLabels } from "./use-setup-labels";
 import { JournalGoalTracker, type TradingGoalData } from "@/components/journal/journal-goal-tracker";
 
 export type AdvancedStatsPageTrade = AdvancedStatsTrade &
@@ -47,6 +49,7 @@ export type AdvancedStatsPageTrade = AdvancedStatsTrade &
   ExcursionTrade;
 
 const MIN_CLOSED_TRADES = 5;
+const MIN_CLOSED_TRADES_MISTAKES = 3;
 
 function fmtMoney(v: number) {
   const sign = v >= 0 ? "+" : "-";
@@ -436,6 +439,89 @@ function DisciplineScorecardCard({ scorecard }: { scorecard: DisciplineScorecard
   );
 }
 
+function MistakeCostCard({ stats }: { stats: MistakeStats }) {
+  const t = useTranslations("journal");
+  const labels = useMistakeLabels();
+  if (stats.taggedTrades < MIN_CLOSED_TRADES_MISTAKES) return null;
+
+  const worst = stats.rows[0];
+  const maxAbs = Math.max(1, ...stats.rows.map((r) => Math.abs(r.totalPnl)));
+
+  return (
+    <Card className="border-border/60">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm">{t("mistakeCostTitle")}</CardTitle>
+        <p className="text-xs text-muted-foreground">
+          {t("mistakeCostNote", { n: stats.taggedTrades })}
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {worst && worst.totalPnl < 0 && (
+          <p className="text-xs text-amber-600 dark:text-amber-500">
+            {t("mistakeCostInsight", {
+              mistake: labels[worst.tag],
+              count: worst.count,
+              total: fmtMoney(worst.totalPnl),
+              avg: worst.avgPnl !== null ? fmtMoney(worst.avgPnl) : "—",
+            })}
+          </p>
+        )}
+
+        <div className="space-y-1.5">
+          {stats.rows.map((r) => (
+            <div key={r.tag} className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+              <span className="w-44 shrink-0 truncate text-foreground">{labels[r.tag]}</span>
+              <span className="w-16 shrink-0 text-right font-mono text-muted-foreground">
+                {t("mistakeCostCount", { count: r.count })}
+              </span>
+              <span
+                className={cn(
+                  "w-14 shrink-0 text-right font-mono",
+                  r.winRate === null
+                    ? "text-muted-foreground/50"
+                    : r.winRate >= 50
+                      ? "text-emerald-500"
+                      : "text-red-500",
+                )}
+              >
+                {r.winRate !== null ? `${r.winRate}%` : "—"}
+              </span>
+              <span className="flex flex-1 items-center justify-end gap-2">
+                <span className="hidden h-1.5 w-24 overflow-hidden rounded bg-muted sm:block">
+                  <span
+                    className={cn(
+                      "block h-full rounded",
+                      r.totalPnl >= 0 ? "bg-emerald-500/60" : "bg-red-500/60",
+                    )}
+                    style={{ width: `${(Math.abs(r.totalPnl) / maxAbs) * 100}%` }}
+                  />
+                </span>
+                <span
+                  className={cn(
+                    "w-20 text-right font-mono font-medium",
+                    r.totalPnl >= 0 ? "text-emerald-500" : "text-red-500",
+                  )}
+                >
+                  {fmtMoney(r.totalPnl)}
+                </span>
+              </span>
+            </div>
+          ))}
+        </div>
+
+        {stats.withMistakeWinRate !== null && stats.withoutMistakeWinRate !== null && (
+          <p className="text-xs text-muted-foreground">
+            {t("mistakeCostCompare", {
+              withRate: stats.withMistakeWinRate,
+              withoutRate: stats.withoutMistakeWinRate,
+            })}
+          </p>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 function ComplianceDonut({
   compliant,
   violations,
@@ -589,6 +675,7 @@ export function JournalAdvancedStats({
   emotionCorrelation,
   guardOverrideStats,
   scorecard,
+  mistakeStats,
   tradingGoal,
 }: {
   trades: AdvancedStatsPageTrade[];
@@ -599,6 +686,7 @@ export function JournalAdvancedStats({
   emotionCorrelation?: EmotionDiaryCorrelationStats;
   guardOverrideStats?: GuardOverrideStats;
   scorecard?: DisciplineScorecard;
+  mistakeStats?: MistakeStats;
   tradingGoal?: TradingGoalData | null;
 }) {
   const t = useTranslations("journal");
@@ -667,6 +755,8 @@ export function JournalAdvancedStats({
       {goalTracker}
 
       {scorecard && <DisciplineScorecardCard scorecard={scorecard} />}
+
+      {mistakeStats && <MistakeCostCard stats={mistakeStats} />}
 
       <div className="flex items-start justify-between gap-3">
         <div>
