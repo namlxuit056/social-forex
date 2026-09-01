@@ -2014,7 +2014,20 @@
     "riskViolationLegend": "Vi phạm",
     "riskNALegend": "N/A",
     "riskNotEnoughData": "Chưa đủ dữ liệu (cần SL và giá đóng lệnh) để đánh giá kỷ luật rủi ro.",
-    "riskMonthlyChartTitle": "Vi Phạm Risk Theo Tháng"
+    "riskMonthlyChartTitle": "Vi Phạm Risk Theo Tháng",
+    "scorecardTitle": "Bảng điểm kỷ luật",
+    "scorecardNote": "Điểm trung bình mỗi lệnh trên {n} lệnh đã đóng — mỗi lệnh chấm theo các quy tắc kỷ luật.",
+    "scorecardTopLever": "Đòn bẩy lớn nhất của bạn: {rule} — thắng {followed}% khi tuân thủ so với {violated}% khi vi phạm ({gap}đ). Tập trung cải thiện điểm này.",
+    "scorecardNoLever": "Chưa quy tắc nào đủ dữ liệu cả hai phía để xác định đòn bẩy lớn nhất.",
+    "scorecardNotEnough": "chưa đủ dữ liệu",
+    "scorecardGapUnit": "đ",
+    "scorecardRuleHasStopLoss": "Luôn đặt stop-loss",
+    "scorecardRuleRiskWithinLimit": "R không vượt ngưỡng rủi ro",
+    "scorecardRuleWithinDailyLimit": "Trong giới hạn số lệnh/ngày",
+    "scorecardRuleNoRevengeOverride": "Không phá khoá revenge-trading",
+    "scorecardRuleChecklistComplete": "Hoàn thành checklist trước phiên",
+    "scorecardRulePositiveMood": "Vào lệnh khi tâm lý ổn",
+    "scorecardRuleOnPlaybook": "Đúng setup sở trường"
   },
   "errors": {
     "invalidData": "Dữ liệu không hợp lệ.",

@@ -37,6 +37,7 @@ import type { PlanComplianceStats } from "@/lib/journal/plan-compliance";
 import type { ChecklistComplianceStats } from "@/lib/journal/checklist-compliance";
 import type { EmotionDiaryCorrelationStats } from "@/lib/journal/emotion-diary-correlation";
 import type { GuardOverrideStats } from "@/lib/journal/guard-overrides";
+import type { DisciplineScorecard, RuleId } from "@/lib/journal/discipline-scorecard";
 import { JournalGoalTracker, type TradingGoalData } from "@/components/journal/journal-goal-tracker";
 
 export type AdvancedStatsPageTrade = AdvancedStatsTrade &
@@ -322,6 +323,119 @@ function DrawdownChart({ points, locale }: { points: DrawdownPoint[]; locale: st
   );
 }
 
+const SCORECARD_RULE_KEY: Record<RuleId, string> = {
+  hasStopLoss: "scorecardRuleHasStopLoss",
+  riskWithinLimit: "scorecardRuleRiskWithinLimit",
+  withinDailyLimit: "scorecardRuleWithinDailyLimit",
+  noRevengeOverride: "scorecardRuleNoRevengeOverride",
+  checklistComplete: "scorecardRuleChecklistComplete",
+  positiveMood: "scorecardRulePositiveMood",
+  onPlaybook: "scorecardRuleOnPlaybook",
+};
+
+function DisciplineScorecardCard({ scorecard }: { scorecard: DisciplineScorecard }) {
+  const t = useTranslations("journal");
+  const score = scorecard.overallScore;
+  if (score === null || scorecard.sampleSize < MIN_CLOSED_TRADES) return null;
+
+  const scoreColor =
+    score >= 80 ? "text-emerald-500" : score >= 60 ? "text-amber-500" : "text-red-500";
+
+  const top =
+    scorecard.topLever !== null
+      ? scorecard.rules.find((r) => r.id === scorecard.topLever) ?? null
+      : null;
+
+  // Xếp quy tắc có xếp hạng + gap lớn nhất lên đầu; phần còn lại giữ thứ tự khai báo
+  // (Array.prototype.sort ổn định).
+  const ordered = [...scorecard.rules].sort((a, b) => {
+    const aG = a.ranked && a.winRateGap !== null ? a.winRateGap : -Infinity;
+    const bG = b.ranked && b.winRateGap !== null ? b.winRateGap : -Infinity;
+    return bG - aG;
+  });
+
+  return (
+    <Card className="border-border/60">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm">{t("scorecardTitle")}</CardTitle>
+        <p className="text-xs text-muted-foreground">
+          {t("scorecardNote", { n: scorecard.sampleSize })}
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-baseline gap-2">
+          <span className={cn("font-mono text-3xl font-bold tabular-nums", scoreColor)}>
+            {score}
+          </span>
+          <span className="text-sm text-muted-foreground">/ 100</span>
+        </div>
+
+        {top && top.winRateGap !== null ? (
+          <p
+            className={cn(
+              "text-xs",
+              score >= 80
+                ? "text-emerald-600 dark:text-emerald-500"
+                : "text-amber-600 dark:text-amber-500",
+            )}
+          >
+            {t("scorecardTopLever", {
+              rule: t(SCORECARD_RULE_KEY[top.id]),
+              followed: top.followedWinRate ?? 0,
+              violated: top.violatedWinRate ?? 0,
+              gap: `+${top.winRateGap}`,
+            })}
+          </p>
+        ) : (
+          <p className="text-xs text-muted-foreground">{t("scorecardNoLever")}</p>
+        )}
+
+        <div className="space-y-1.5">
+          {ordered.map((r) => (
+            <div key={r.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+              <span className="w-44 shrink-0 truncate text-foreground">
+                {t(SCORECARD_RULE_KEY[r.id])}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="block h-1.5 w-14 overflow-hidden rounded bg-muted">
+                  <span
+                    className="block h-full rounded bg-foreground/50"
+                    style={{ width: `${r.followedPct ?? 0}%` }}
+                  />
+                </span>
+                <span className="w-9 text-right font-mono text-muted-foreground">
+                  {r.followedPct !== null ? `${Math.round(r.followedPct)}%` : "—"}
+                </span>
+              </span>
+              {r.ranked && r.winRateGap !== null ? (
+                <span className="ml-auto flex items-center gap-2 font-mono">
+                  <span className="text-muted-foreground">
+                    {r.followedWinRate}% ✓ / {r.violatedWinRate}% ✗
+                  </span>
+                  <span
+                    className={cn(
+                      "rounded px-1 py-0.5 tabular-nums",
+                      r.winRateGap > 0
+                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-500"
+                        : "bg-red-500/10 text-red-600 dark:text-red-500",
+                    )}
+                  >
+                    {r.winRateGap > 0 ? "+" : ""}
+                    {r.winRateGap}
+                    {t("scorecardGapUnit")}
+                  </span>
+                </span>
+              ) : (
+                <span className="ml-auto text-muted-foreground/60">{t("scorecardNotEnough")}</span>
+              )}
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 function ComplianceDonut({
   compliant,
   violations,
@@ -474,6 +588,7 @@ export function JournalAdvancedStats({
   checklistCompliance,
   emotionCorrelation,
   guardOverrideStats,
+  scorecard,
   tradingGoal,
 }: {
   trades: AdvancedStatsPageTrade[];
@@ -483,6 +598,7 @@ export function JournalAdvancedStats({
   checklistCompliance?: ChecklistComplianceStats;
   emotionCorrelation?: EmotionDiaryCorrelationStats;
   guardOverrideStats?: GuardOverrideStats;
+  scorecard?: DisciplineScorecard;
   tradingGoal?: TradingGoalData | null;
 }) {
   const t = useTranslations("journal");
@@ -549,6 +665,8 @@ export function JournalAdvancedStats({
   return (
     <div className="space-y-6">
       {goalTracker}
+
+      {scorecard && <DisciplineScorecardCard scorecard={scorecard} />}
 
       <div className="flex items-start justify-between gap-3">
         <div>

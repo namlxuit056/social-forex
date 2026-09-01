@@ -2014,7 +2014,20 @@
     "riskViolationLegend": "Violated",
     "riskNALegend": "N/A",
     "riskNotEnoughData": "Not enough data (needs SL and exit price) to evaluate risk discipline.",
-    "riskMonthlyChartTitle": "Risk Violations by Month"
+    "riskMonthlyChartTitle": "Risk Violations by Month",
+    "scorecardTitle": "Discipline scorecard",
+    "scorecardNote": "Average per-trade score across {n} closed trades — each trade graded against your discipline rules.",
+    "scorecardTopLever": "Your biggest lever: {rule} — {followed}% win rate when you follow it vs {violated}% when you break it ({gap}pp). Focus here.",
+    "scorecardNoLever": "No rule has enough data on both sides yet to name the biggest lever.",
+    "scorecardNotEnough": "not enough data",
+    "scorecardGapUnit": "pp",
+    "scorecardRuleHasStopLoss": "Always set a stop-loss",
+    "scorecardRuleRiskWithinLimit": "R within risk limit",
+    "scorecardRuleWithinDailyLimit": "Within daily trade limit",
+    "scorecardRuleNoRevengeOverride": "Don't override revenge-trade lock",
+    "scorecardRuleChecklistComplete": "Pre-session checklist done",
+    "scorecardRulePositiveMood": "Trade only when steady",
+    "scorecardRuleOnPlaybook": "Traded your best setup"
   },
   "errors": {
     "invalidData": "Invalid data.",

@@ -26,6 +26,7 @@ import { computePlanCompliance } from "@/lib/journal/plan-compliance";
 import { computeChecklistCompliance } from "@/lib/journal/checklist-compliance";
 import { computeEmotionDiaryCorrelation } from "@/lib/journal/emotion-diary-correlation";
 import { computeGuardOverrideStats } from "@/lib/journal/guard-overrides";
+import { computeDisciplineScorecard } from "@/lib/journal/discipline-scorecard";
 import { computeRStats } from "@/lib/journal/r-multiple";
 import { isVipActive } from "@/lib/vip";
 import { isMt5LiveRedisEnabled } from "@/lib/mt5/live-redis";
@@ -125,6 +126,7 @@ export default async function JournalPage({
     emotionEntriesRaw,
     planLimitsRaw,
     tradingGoalRaw,
+    moodCheckinsRaw,
   ] = await Promise.all([
       prisma.tradeJournal.findMany({
         where: { userId: session.user.id },
@@ -194,6 +196,14 @@ export default async function JournalPage({
             },
           })
         : Promise.resolve(null),
+      activeTab === "stats"
+        ? prisma.moodCheckin.findMany({
+            where: { userId: session.user.id },
+            orderBy: { day: "desc" },
+            take: 365,
+            select: { day: true, mood: true },
+          })
+        : Promise.resolve([]),
     ]);
 
   const emotionEntries = emotionEntriesRaw.map((e) => ({
@@ -340,6 +350,14 @@ export default async function JournalPage({
 
   const guardOverrideStats = computeGuardOverrideStats(serialized);
 
+  const disciplineScorecard = computeDisciplineScorecard({
+    trades: serialized,
+    plans: planLimitsRaw,
+    moods: moodCheckinsRaw.map((m) => ({ day: m.day, mood: m.mood })),
+    diary: emotionEntries.map((e) => ({ date: e.date, note: e.note })),
+    bestSetup: bestSetupRow?.key ?? null,
+  });
+
   const prefill = query?.symbol
     ? {
         symbol: query.symbol,
@@ -472,6 +490,7 @@ export default async function JournalPage({
             checklistCompliance={checklistCompliance}
             emotionCorrelation={emotionCorrelation}
             guardOverrideStats={guardOverrideStats}
+            scorecard={disciplineScorecard}
             tradingGoal={tradingGoalRaw}
           />
         </div>
