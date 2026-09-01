@@ -39,6 +39,7 @@ import type { EmotionDiaryCorrelationStats } from "@/lib/journal/emotion-diary-c
 import type { GuardOverrideStats } from "@/lib/journal/guard-overrides";
 import type { DisciplineScorecard, RuleId } from "@/lib/journal/discipline-scorecard";
 import type { MistakeStats } from "@/lib/journal/mistake-stats";
+import type { TiltDay, TiltDaysResult, TiltSignal } from "@/lib/journal/tilt-days";
 import { useMistakeLabels } from "./use-setup-labels";
 import { JournalGoalTracker, type TradingGoalData } from "@/components/journal/journal-goal-tracker";
 
@@ -522,6 +523,119 @@ function MistakeCostCard({ stats }: { stats: MistakeStats }) {
   );
 }
 
+const MIN_TILT_TRADING_DAYS = 5;
+
+function TiltDaysCard({ result, locale }: { result: TiltDaysResult; locale: string }) {
+  const t = useTranslations("journal");
+  if (result.tiltDays.length === 0 || result.tradingDays < MIN_TILT_TRADING_DAYS) return null;
+
+  function signalLabel(sig: TiltSignal, day: TiltDay): string {
+    switch (sig) {
+      case "lossStreak":
+        return t("tiltSignalLossStreak", { count: day.lossStreak });
+      case "sizeEscalation":
+        return t("tiltSignalSizeEscalation");
+      case "overtrading":
+        return t("tiltSignalOvertrading", { count: day.tradeCount });
+      case "guardOverride":
+        return t("tiltSignalGuardOverride");
+      case "revenge":
+        return t("tiltSignalRevenge");
+      case "deepLoss":
+        return t("tiltSignalDeepLoss", { r: day.netR ?? 0 });
+    }
+  }
+
+  return (
+    <Card className="border-border/60">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm">{t("tiltTitle")}</CardTitle>
+        <p className="text-xs text-muted-foreground">
+          {t("tiltNote", { count: result.tiltDays.length, total: result.tradingDays })}
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {result.tiltWinRate !== null && result.normalWinRate !== null && (
+          <p className="text-xs text-amber-600 dark:text-amber-500">
+            {t("tiltPayoff", {
+              tiltPnl: fmtMoney(result.tiltNetPnl),
+              tiltRate: result.tiltWinRate,
+              normalPnl: fmtMoney(result.normalNetPnl),
+              normalRate: result.normalWinRate,
+            })}
+          </p>
+        )}
+
+        <div className="space-y-2">
+          {result.tiltDays.slice(0, 10).map((day) => (
+            <details key={day.day} className="rounded-lg border border-border/60 px-3 py-2">
+              <summary className="flex cursor-pointer flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                <span className="font-medium text-foreground">
+                  {new Date(`${day.day}T00:00:00Z`).toLocaleDateString(locale, {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "2-digit",
+                  })}
+                </span>
+                <span className="text-muted-foreground">
+                  {t("mistakeCostCount", { count: day.tradeCount })}
+                </span>
+                <span
+                  className={cn(
+                    "font-mono font-medium",
+                    day.netPnl >= 0 ? "text-emerald-500" : "text-red-500",
+                  )}
+                >
+                  {fmtMoney(day.netPnl)}
+                </span>
+                <span className="flex flex-wrap gap-1">
+                  {day.signals.map((sig) => (
+                    <span
+                      key={sig}
+                      className="rounded bg-amber-500/10 px-1.5 py-0.5 text-[10px] text-amber-600 dark:text-amber-500"
+                    >
+                      {signalLabel(sig, day)}
+                    </span>
+                  ))}
+                </span>
+              </summary>
+              <div className="mt-2 space-y-1 border-t border-border/40 pt-2">
+                {day.trades.map((tr, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center justify-between gap-3 font-mono text-[11px] text-muted-foreground"
+                  >
+                    <span className="text-foreground">{tr.symbol}</span>
+                    <span
+                      className={cn(
+                        tr.result === "WIN"
+                          ? "text-emerald-500"
+                          : tr.result === "LOSS"
+                            ? "text-red-500"
+                            : "text-muted-foreground",
+                      )}
+                    >
+                      {tr.result}
+                    </span>
+                    <span>{tr.lotSize ?? "—"}</span>
+                    <span
+                      className={cn(
+                        (tr.pnl ?? 0) >= 0 ? "text-emerald-500" : "text-red-500",
+                      )}
+                    >
+                      {tr.pnl !== null ? fmtMoney(tr.pnl) : "—"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </details>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 function ComplianceDonut({
   compliant,
   violations,
@@ -676,6 +790,7 @@ export function JournalAdvancedStats({
   guardOverrideStats,
   scorecard,
   mistakeStats,
+  tiltDays,
   tradingGoal,
 }: {
   trades: AdvancedStatsPageTrade[];
@@ -687,6 +802,7 @@ export function JournalAdvancedStats({
   guardOverrideStats?: GuardOverrideStats;
   scorecard?: DisciplineScorecard;
   mistakeStats?: MistakeStats;
+  tiltDays?: TiltDaysResult;
   tradingGoal?: TradingGoalData | null;
 }) {
   const t = useTranslations("journal");
@@ -757,6 +873,8 @@ export function JournalAdvancedStats({
       {scorecard && <DisciplineScorecardCard scorecard={scorecard} />}
 
       {mistakeStats && <MistakeCostCard stats={mistakeStats} />}
+
+      {tiltDays && <TiltDaysCard result={tiltDays} locale={locale} />}
 
       <div className="flex items-start justify-between gap-3">
         <div>

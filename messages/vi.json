@@ -2046,7 +2046,16 @@
     "mistakeCostNote": "Trên {n} lệnh đã đóng có gắn ít nhất một lỗi.",
     "mistakeCostInsight": "Lỗi đắt nhất: {mistake} — {count} lệnh, tổng {total} (TB {avg}/lệnh).",
     "mistakeCostCount": "{count} lệnh",
-    "mistakeCostCompare": "Lệnh có ≥1 lỗi thắng {withRate}% so với {withoutRate}% khi sạch lỗi."
+    "mistakeCostCompare": "Lệnh có ≥1 lỗi thắng {withRate}% so với {withoutRate}% khi sạch lỗi.",
+    "tiltTitle": "Ngày tilt (xổ đồ)",
+    "tiltNote": "{count} ngày tilt trên {total} ngày giao dịch — ngày có ≥2 dấu hiệu mất kiểm soát.",
+    "tiltPayoff": "Các ngày tilt tổng {tiltPnl} (thắng {tiltRate}%) so với {normalPnl} ({normalRate}%) các ngày còn lại.",
+    "tiltSignalLossStreak": "Chuỗi thua ×{count}",
+    "tiltSignalSizeEscalation": "Tăng size sau thua",
+    "tiltSignalOvertrading": "Giao dịch quá nhiều ({count})",
+    "tiltSignalGuardOverride": "Phá cảnh báo guard",
+    "tiltSignalRevenge": "Gỡ gạc / FOMO",
+    "tiltSignalDeepLoss": "{r}R trong ngày"
   },
   "errors": {
     "invalidData": "Dữ liệu không hợp lệ.",

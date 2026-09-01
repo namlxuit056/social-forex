@@ -2046,7 +2046,16 @@
     "mistakeCostNote": "Across {n} closed trades with at least one tagged mistake.",
     "mistakeCostInsight": "Most expensive mistake: {mistake} — {count} trades, {total} total ({avg}/trade).",
     "mistakeCostCount": "{count} trades",
-    "mistakeCostCompare": "Trades with ≥1 mistake win {withRate}% vs {withoutRate}% when clean."
+    "mistakeCostCompare": "Trades with ≥1 mistake win {withRate}% vs {withoutRate}% when clean.",
+    "tiltTitle": "Tilt days",
+    "tiltNote": "{count} tilt days out of {total} trading days — days with 2+ loss-of-control signals.",
+    "tiltPayoff": "Tilt days total {tiltPnl} (won {tiltRate}%) vs {normalPnl} ({normalRate}%) on the rest.",
+    "tiltSignalLossStreak": "Loss streak ×{count}",
+    "tiltSignalSizeEscalation": "Sized up after a loss",
+    "tiltSignalOvertrading": "Overtraded ({count})",
+    "tiltSignalGuardOverride": "Overrode a guard",
+    "tiltSignalRevenge": "Revenge / FOMO",
+    "tiltSignalDeepLoss": "{r}R on the day"
   },
   "errors": {
     "invalidData": "Invalid data.",

@@ -28,6 +28,7 @@ import { computeEmotionDiaryCorrelation } from "@/lib/journal/emotion-diary-corr
 import { computeGuardOverrideStats } from "@/lib/journal/guard-overrides";
 import { computeDisciplineScorecard } from "@/lib/journal/discipline-scorecard";
 import { computeMistakeStats } from "@/lib/journal/mistake-stats";
+import { computeTiltDays } from "@/lib/journal/tilt-days";
 import { computeRStats } from "@/lib/journal/r-multiple";
 import { isVipActive } from "@/lib/vip";
 import { isMt5LiveRedisEnabled } from "@/lib/mt5/live-redis";
@@ -362,6 +363,11 @@ export default async function JournalPage({
 
   const mistakeStats = computeMistakeStats(serialized);
 
+  const tiltDays = computeTiltDays(
+    serialized,
+    planLimitsRaw.map((p) => ({ planDate: p.planDate, maxTrades: p.maxTrades })),
+  );
+
   const prefill = query?.symbol
     ? {
         symbol: query.symbol,
@@ -496,6 +502,7 @@ export default async function JournalPage({
             guardOverrideStats={guardOverrideStats}
             scorecard={disciplineScorecard}
             mistakeStats={mistakeStats}
+            tiltDays={tiltDays}
             tradingGoal={tradingGoalRaw}
           />
         </div>
