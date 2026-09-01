@@ -2055,7 +2055,18 @@
     "tiltSignalOvertrading": "Giao dịch quá nhiều ({count})",
     "tiltSignalGuardOverride": "Phá cảnh báo guard",
     "tiltSignalRevenge": "Gỡ gạc / FOMO",
-    "tiltSignalDeepLoss": "{r}R trong ngày"
+    "tiltSignalDeepLoss": "{r}R trong ngày",
+    "greenTitle": "Ngày trade tốt (theo quy trình)",
+    "greenNote": "{count} ngày kỷ luật trên {total} ngày giao dịch — thực thi sạch bất kể lãi/lỗ.",
+    "greenPortrait": "Ngày tốt của bạn thường: {parts}.",
+    "greenPayoff": "Ngày kỷ luật tổng {greenPnl} (thắng {greenRate}%) so với {otherPnl} ({otherRate}%) ngày còn lại.",
+    "greenSignalChecklist": "Đủ checklist",
+    "greenSignalWithinLimit": "Trong giới hạn số lệnh",
+    "greenSignalAllStop": "Mọi lệnh có SL",
+    "greenSignalNoMistakes": "Không tag lỗi",
+    "greenSignalSteadyMood": "Tâm lý ổn",
+    "greenSignalHitTarget": "+{r}R trong ngày",
+    "greenSignalOnPlaybook": "Đúng setup sở trường"
   },
   "errors": {
     "invalidData": "Dữ liệu không hợp lệ.",

@@ -40,7 +40,8 @@ import type { GuardOverrideStats } from "@/lib/journal/guard-overrides";
 import type { DisciplineScorecard, RuleId } from "@/lib/journal/discipline-scorecard";
 import type { MistakeStats } from "@/lib/journal/mistake-stats";
 import type { TiltDay, TiltDaysResult, TiltSignal } from "@/lib/journal/tilt-days";
-import { useMistakeLabels } from "./use-setup-labels";
+import type { GreenDay, GreenDaysResult, GreenSignal } from "@/lib/journal/green-days";
+import { useMistakeLabels, useSetupLabels } from "./use-setup-labels";
 import { JournalGoalTracker, type TradingGoalData } from "@/components/journal/journal-goal-tracker";
 
 export type AdvancedStatsPageTrade = AdvancedStatsTrade &
@@ -525,6 +526,145 @@ function MistakeCostCard({ stats }: { stats: MistakeStats }) {
 
 const MIN_TILT_TRADING_DAYS = 5;
 
+const GREEN_SIGNAL_KEY: Record<GreenSignal, string> = {
+  checklistDone: "greenSignalChecklist",
+  withinLimit: "greenSignalWithinLimit",
+  allHaveStop: "greenSignalAllStop",
+  noMistakes: "greenSignalNoMistakes",
+  steadyMood: "greenSignalSteadyMood",
+  hitTarget: "greenSignalHitTarget",
+  onPlaybook: "greenSignalOnPlaybook",
+};
+
+function GreenDaysCard({
+  result,
+  locale,
+}: {
+  result: GreenDaysResult;
+  locale: string;
+}) {
+  const t = useTranslations("journal");
+  const setupLabels = useSetupLabels();
+  if (result.greenDays.length === 0 || result.tradingDays < MIN_TILT_TRADING_DAYS) return null;
+
+  const { common } = result;
+  const moodLabel: Record<string, string> = {
+    good: t("moodGood"),
+    ok: t("moodOk"),
+    tired: t("moodTired"),
+    stressed: t("moodStressed"),
+  };
+  const portraitParts = [
+    common.symbol,
+    common.setup ? setupLabels[common.setup as keyof typeof setupLabels] ?? common.setup : null,
+    common.session
+      ? common.session === "asia"
+        ? t("sessionAsia")
+        : common.session === "london"
+          ? t("sessionLondon")
+          : t("sessionNewYork")
+      : null,
+    common.avgTradeCount !== null ? t("mistakeCostCount", { count: common.avgTradeCount }) : null,
+    common.mood ? moodLabel[common.mood] ?? common.mood : null,
+  ].filter(Boolean);
+
+  function signalLabel(sig: GreenSignal, day: GreenDay): string {
+    if (sig === "hitTarget") return t("greenSignalHitTarget", { r: day.netR ?? 0 });
+    return t(GREEN_SIGNAL_KEY[sig]);
+  }
+
+  return (
+    <Card className="border-border/60">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm">{t("greenTitle")}</CardTitle>
+        <p className="text-xs text-muted-foreground">
+          {t("greenNote", { count: result.greenDays.length, total: result.tradingDays })}
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {portraitParts.length > 0 && (
+          <p className="text-xs text-emerald-600 dark:text-emerald-500">
+            {t("greenPortrait", { parts: portraitParts.join(" · ") })}
+          </p>
+        )}
+
+        {result.greenWinRate !== null && result.otherWinRate !== null && (
+          <p className="text-xs text-muted-foreground">
+            {t("greenPayoff", {
+              greenPnl: fmtMoney(result.greenNetPnl),
+              greenRate: result.greenWinRate,
+              otherPnl: fmtMoney(result.otherNetPnl),
+              otherRate: result.otherWinRate,
+            })}
+          </p>
+        )}
+
+        <div className="space-y-2">
+          {result.greenDays.slice(0, 10).map((day) => (
+            <details key={day.day} className="rounded-lg border border-border/60 px-3 py-2">
+              <summary className="flex cursor-pointer flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                <span className="font-medium text-foreground">
+                  {new Date(`${day.day}T00:00:00Z`).toLocaleDateString(locale, {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "2-digit",
+                  })}
+                </span>
+                <span className="text-muted-foreground">
+                  {t("mistakeCostCount", { count: day.tradeCount })}
+                </span>
+                <span
+                  className={cn(
+                    "font-mono font-medium",
+                    day.netPnl >= 0 ? "text-emerald-500" : "text-red-500",
+                  )}
+                >
+                  {fmtMoney(day.netPnl)}
+                </span>
+                <span className="flex flex-wrap gap-1">
+                  {day.signals.map((sig) => (
+                    <span
+                      key={sig}
+                      className="rounded bg-emerald-500/10 px-1.5 py-0.5 text-[10px] text-emerald-600 dark:text-emerald-500"
+                    >
+                      {signalLabel(sig, day)}
+                    </span>
+                  ))}
+                </span>
+              </summary>
+              <div className="mt-2 space-y-1 border-t border-border/40 pt-2">
+                {day.trades.map((tr, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center justify-between gap-3 font-mono text-[11px] text-muted-foreground"
+                  >
+                    <span className="text-foreground">{tr.symbol}</span>
+                    <span
+                      className={cn(
+                        tr.result === "WIN"
+                          ? "text-emerald-500"
+                          : tr.result === "LOSS"
+                            ? "text-red-500"
+                            : "text-muted-foreground",
+                      )}
+                    >
+                      {tr.result}
+                    </span>
+                    <span>{tr.lotSize ?? "—"}</span>
+                    <span className={cn((tr.pnl ?? 0) >= 0 ? "text-emerald-500" : "text-red-500")}>
+                      {tr.pnl !== null ? fmtMoney(tr.pnl) : "—"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </details>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 function TiltDaysCard({ result, locale }: { result: TiltDaysResult; locale: string }) {
   const t = useTranslations("journal");
   if (result.tiltDays.length === 0 || result.tradingDays < MIN_TILT_TRADING_DAYS) return null;
@@ -790,6 +930,7 @@ export function JournalAdvancedStats({
   guardOverrideStats,
   scorecard,
   mistakeStats,
+  greenDays,
   tiltDays,
   tradingGoal,
 }: {
@@ -802,6 +943,7 @@ export function JournalAdvancedStats({
   guardOverrideStats?: GuardOverrideStats;
   scorecard?: DisciplineScorecard;
   mistakeStats?: MistakeStats;
+  greenDays?: GreenDaysResult;
   tiltDays?: TiltDaysResult;
   tradingGoal?: TradingGoalData | null;
 }) {
@@ -873,6 +1015,8 @@ export function JournalAdvancedStats({
       {scorecard && <DisciplineScorecardCard scorecard={scorecard} />}
 
       {mistakeStats && <MistakeCostCard stats={mistakeStats} />}
+
+      {greenDays && <GreenDaysCard result={greenDays} locale={locale} />}
 
       {tiltDays && <TiltDaysCard result={tiltDays} locale={locale} />}
 

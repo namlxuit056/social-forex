@@ -2055,7 +2055,18 @@
     "tiltSignalOvertrading": "Overtraded ({count})",
     "tiltSignalGuardOverride": "Overrode a guard",
     "tiltSignalRevenge": "Revenge / FOMO",
-    "tiltSignalDeepLoss": "{r}R on the day"
+    "tiltSignalDeepLoss": "{r}R on the day",
+    "greenTitle": "Good trading days (by process)",
+    "greenNote": "{count} disciplined days out of {total} trading days — clean execution regardless of P/L.",
+    "greenPortrait": "Your good days usually look like: {parts}.",
+    "greenPayoff": "Disciplined days total {greenPnl} (won {greenRate}%) vs {otherPnl} ({otherRate}%) on the rest.",
+    "greenSignalChecklist": "Checklist done",
+    "greenSignalWithinLimit": "Within trade limit",
+    "greenSignalAllStop": "Every trade had a stop",
+    "greenSignalNoMistakes": "No mistake tags",
+    "greenSignalSteadyMood": "Steady mindset",
+    "greenSignalHitTarget": "+{r}R on the day",
+    "greenSignalOnPlaybook": "Traded your best setup"
   },
   "errors": {
     "invalidData": "Invalid data.",

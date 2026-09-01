@@ -29,6 +29,7 @@ import { computeGuardOverrideStats } from "@/lib/journal/guard-overrides";
 import { computeDisciplineScorecard } from "@/lib/journal/discipline-scorecard";
 import { computeMistakeStats } from "@/lib/journal/mistake-stats";
 import { computeTiltDays } from "@/lib/journal/tilt-days";
+import { computeGreenDays } from "@/lib/journal/green-days";
 import { computeRStats } from "@/lib/journal/r-multiple";
 import { isVipActive } from "@/lib/vip";
 import { isMt5LiveRedisEnabled } from "@/lib/mt5/live-redis";
@@ -368,6 +369,13 @@ export default async function JournalPage({
     planLimitsRaw.map((p) => ({ planDate: p.planDate, maxTrades: p.maxTrades })),
   );
 
+  const greenDays = computeGreenDays(
+    serialized,
+    planLimitsRaw,
+    moodCheckinsRaw.map((m) => ({ day: m.day, mood: m.mood })),
+    bestSetupRow?.key ?? null,
+  );
+
   const prefill = query?.symbol
     ? {
         symbol: query.symbol,
@@ -502,6 +510,7 @@ export default async function JournalPage({
             guardOverrideStats={guardOverrideStats}
             scorecard={disciplineScorecard}
             mistakeStats={mistakeStats}
+            greenDays={greenDays}
             tiltDays={tiltDays}
             tradingGoal={tradingGoalRaw}
           />
