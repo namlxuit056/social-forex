@@ -293,6 +293,7 @@ enum NotificationKind {
   JOURNAL_REVIEW
   SCREENER_ALERT
   MT5_AUTO_CLOSE
+  CALENDAR_ACTUAL_SIGNAL
 }
 
 model Notification {

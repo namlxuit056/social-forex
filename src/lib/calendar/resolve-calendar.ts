@@ -9,6 +9,7 @@ import type {
   ResolveCalendarResult,
 } from "@/lib/calendar/types";
 import { sampleCalendar } from "@/lib/data/calendar-sample";
+import { captureActualBaseline, notifyActualTransitions } from "@/lib/calendar/notify-actual-signal";
 import { prisma } from "@/lib/prisma";
 
 const SYNC_ID = "default";
@@ -57,6 +58,8 @@ async function persistToDb(events: CalendarEvent[]) {
     return true;
   });
 
+  const baseline = await captureActualBaseline();
+
   try {
     await prisma.$transaction(async (tx) => {
       await tx.economicCalendarEvent.deleteMany({});
@@ -92,6 +95,13 @@ async function persistToDb(events: CalendarEvent[]) {
       "[calendar] persistToDb failed, lastSyncAt not advanced:",
       e instanceof Error ? e.message : e,
     );
+    return;
+  }
+
+  try {
+    await notifyActualTransitions(unique, baseline);
+  } catch (e) {
+    console.error("[calendar] notifyActualTransitions failed:", e);
   }
 }
 
@@ -195,6 +205,7 @@ async function resolveViaFmp(): Promise<ResolveCalendarResult> {
 
   try {
     const fetched = await fetchFmpEconomicCalendar(key);
+    const fmpBaseline = await captureActualBaseline();
 
     await prisma.$transaction(async (tx) => {
       await tx.economicCalendarEvent.deleteMany({});
@@ -225,6 +236,24 @@ async function resolveViaFmp(): Promise<ResolveCalendarResult> {
         },
       });
     });
+
+    try {
+      await notifyActualTransitions(
+        fetched.map((r) => ({
+          id: r.externalId,
+          timeUtc: r.timeUtc.toISOString(),
+          currency: r.currency,
+          title: r.title,
+          impact: r.impact,
+          forecast: r.forecast ?? undefined,
+          previous: r.previous ?? undefined,
+          actual: r.actual ?? undefined,
+        })),
+        fmpBaseline,
+      );
+    } catch (e) {
+      console.error("[calendar] notifyActualTransitions (fmp) failed:", e);
+    }
 
     const rows = await prisma.economicCalendarEvent.findMany({
       orderBy: { timeUtc: "asc" },

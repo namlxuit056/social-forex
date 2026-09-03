@@ -1329,7 +1329,8 @@
     "streakReminder": "Don't forget to write your journal / plan for today!",
     "priceAlert": "Price alert triggered",
     "journalReview": "Weekly trading report is ready",
-    "mt5AutoClose": "All positions were auto-closed before the market close"
+    "mt5AutoClose": "All positions were auto-closed before the market close",
+    "calendarActualSignal": "New economic calendar actual data — see the buy/sell signal"
   },
   "auth": {
     "signInTitle": "Sign in",
@@ -2579,7 +2580,13 @@
     "mt5AutoCloseScheduledBody": "Your scheduled close time was reached — all open positions were closed per your settings.",
     "signalNewTitle": "New {symbol} signal",
     "signalNewVipTitle": "New {symbol} ⭐ VIP signal",
-    "signalNewBody": "A trader you follow just posted a {symbol} signal — check it out"
+    "signalNewBody": "A trader you follow just posted a {symbol} signal — check it out",
+    "calendarActualBullishTitle": "{currency} strengthens after the release",
+    "calendarActualBearishTitle": "{currency} weakens after the release",
+    "calendarActualBodyForecast": "{event}: actual {actual} vs forecast {baseline}. {pairs}",
+    "calendarActualBodyPrevious": "{event}: actual {actual} vs previous {baseline}. {pairs}",
+    "calendarActualBuy": "BUY",
+    "calendarActualSell": "SELL"
   },
   "missions": {
     "title": "Beginner mission board",

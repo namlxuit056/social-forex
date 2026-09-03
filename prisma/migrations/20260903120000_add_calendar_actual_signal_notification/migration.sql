@@ -1,0 +1,2 @@
+-- AlterEnum
+ALTER TYPE "NotificationKind" ADD VALUE 'CALENDAR_ACTUAL_SIGNAL';

@@ -1329,7 +1329,8 @@
     "streakReminder": "Đừng quên ghi nhật ký / lập kế hoạch hôm nay!",
     "priceAlert": "Cảnh báo giá đã kích hoạt",
     "journalReview": "Báo cáo giao dịch tuần đã sẵn sàng",
-    "mt5AutoClose": "Đã tự động đóng tất cả lệnh trước giờ thị trường đóng cửa"
+    "mt5AutoClose": "Đã tự động đóng tất cả lệnh trước giờ thị trường đóng cửa",
+    "calendarActualSignal": "Có dữ liệu thực tế mới trên lịch kinh tế — xem tín hiệu buy/sell"
   },
   "auth": {
     "signInTitle": "Đăng nhập",
@@ -2579,7 +2580,13 @@
     "mt5AutoCloseScheduledBody": "Đến giờ hẹn đóng lệnh, hệ thống đã đóng toàn bộ lệnh mở theo cài đặt của bạn.",
     "signalNewTitle": "{symbol} Signal mới",
     "signalNewVipTitle": "{symbol} ⭐ Signal VIP mới",
-    "signalNewBody": "Trader bạn follow vừa đăng signal {symbol} — Xem ngay"
+    "signalNewBody": "Trader bạn follow vừa đăng signal {symbol} — Xem ngay",
+    "calendarActualBullishTitle": "{currency} mạnh lên sau tin",
+    "calendarActualBearishTitle": "{currency} yếu đi sau tin",
+    "calendarActualBodyForecast": "{event}: thực tế {actual} so với dự báo {baseline}. {pairs}",
+    "calendarActualBodyPrevious": "{event}: thực tế {actual} so với kỳ trước {baseline}. {pairs}",
+    "calendarActualBuy": "MUA",
+    "calendarActualSell": "BÁN"
   },
   "missions": {
     "title": "Bảng nhiệm vụ người mới",
