@@ -51,6 +51,7 @@ export default async function NotificationsPage({
     readAt: n.readAt?.toISOString() ?? null,
     signal: n.signal,
     actor: n.actor,
+    meta: n.meta as Record<string, unknown> | null,
   }));
 
   const hasUnread = rows.some((n) => n.readAt === null);

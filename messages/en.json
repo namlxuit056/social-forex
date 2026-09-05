@@ -393,7 +393,29 @@
     "rowUnpinWatchlist": "Remove {symbol} from watchlist",
     "signupPromptWatchlistTitle": "Save this watchlist",
     "signupPromptWatchlistDesc": "Sign up to keep favorite pairs like XAUUSD across devices and receive relevant signal context later.",
-    "signupPromptWatchlistCta": "Save watchlist"
+    "signupPromptWatchlistCta": "Save watchlist",
+    "technicalRatingTitle": "Confident technical signals",
+    "technicalRatingDescription": "History of Strong Buy/Sell signals (TradingView, 4H confirmed by 1D in the same direction) that notified you.",
+    "technicalRatingEmpty": "No confident signals recorded yet.",
+    "technicalRatingColSymbol": "Pair",
+    "technicalRatingColSignal": "Signal",
+    "technicalRatingColScore4h": "4H score",
+    "technicalRatingColScore1d": "1D score",
+    "technicalRatingColTime": "Time",
+    "technicalRatingBuy": "STRONG BUY",
+    "technicalRatingSell": "STRONG SELL",
+    "technicalRatingScoreHint": "Scale -1 (Strong Sell) to +1 (Strong Buy), TradingView's aggregated technical indicators.",
+    "technicalRatingTabDay": "Today",
+    "technicalRatingTabWeek": "7 days",
+    "technicalRatingTabMonth": "30 days",
+    "technicalRatingSummaryEmpty": "No summary for this range yet — the summary cron runs at the end of each day.",
+    "technicalRatingTotalSignals": "Total signals",
+    "technicalRatingBuySignals": "BUY signals",
+    "technicalRatingSellSignals": "SELL signals",
+    "technicalRatingHeldSignals": "Still holding direction",
+    "technicalRatingHeldHint": "Signals whose current direction (at summary time) still matches — not a real profit/loss evaluation.",
+    "technicalRatingTopSymbols": "Top symbols",
+    "technicalRatingHistoryTitle": "Signal-by-signal history"
   },
   "advisor": {
     "metaTitle": "AI Forex Advisor — Social Forex",
@@ -1331,7 +1353,9 @@
     "journalReview": "Weekly trading report is ready",
     "mt5AutoClose": "All positions were auto-closed before the market close",
     "calendarActualSignal": "New economic calendar actual data — see the buy/sell signal",
-    "technicalRatingSignal": "A confident technical signal (TradingView) fired for a symbol you follow"
+    "technicalRatingSignal": "A confident technical signal (TradingView) fired for a symbol you follow",
+    "technicalRatingSignalBuy": "{symbol}: strong technical BUY signal",
+    "technicalRatingSignalSell": "{symbol}: strong technical SELL signal"
   },
   "auth": {
     "signInTitle": "Sign in",
@@ -2595,7 +2619,7 @@
     "calendarActualSell": "SELL",
     "technicalRatingBuyTitle": "{symbol}: strong technical BUY signal",
     "technicalRatingSellTitle": "{symbol}: strong technical SELL signal",
-    "technicalRatingBody": "4H is Strong Buy/Sell and 1D agrees — check TradingView for details."
+    "technicalRatingBody": "Technical score: 4H {score4h} · 1D {score1d} (scale -1..1). See TradingView for details."
   },
   "missions": {
     "title": "Beginner mission board",

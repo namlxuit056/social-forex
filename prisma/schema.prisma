@@ -306,6 +306,9 @@ model Notification {
   signalId    String?
   /// Người follow (chỉ dùng khi kind = USER_FOLLOWED)
   actorUserId String?
+  /// Chi tiết hiển thị riêng theo kind, VD TECHNICAL_RATING_SIGNAL:
+  /// { symbol, signal: "buy"|"sell", score4h, score1d }
+  meta        Json?
   readAt      DateTime?
   createdAt   DateTime         @default(now())
 
@@ -1315,6 +1318,23 @@ model ScreenerAlertLog {
   alert ScreenerAlert @relation(fields: [alertId], references: [id], onDelete: Cascade)
 
   @@index([alertId, triggeredAt])
+}
+
+/// Tổng kết cuối ngày (cron) cho các tín hiệu kỹ thuật "chắc chắn" đã gửi trong ngày UTC đó.
+/// Tuần/tháng tính bằng cách cộng dồn các dòng ngày trong khoảng — không lưu riêng.
+model TechnicalRatingDailySummary {
+  id           String   @id @default(cuid())
+  /// Đầu ngày UTC (00:00) — 1 dòng / ngày.
+  day          DateTime @unique
+  totalSignals Int
+  buySignals   Int
+  sellSignals  Int
+  /// Số tín hiệu vẫn cùng chiều tại thời điểm cron chạy (cuối ngày) — proxy đơn giản cho
+  /// "tín hiệu có giữ được không", KHÔNG phải đánh giá lời/lỗ thực tế (chưa có hạ tầng theo dõi giá).
+  heldSignals  Int
+  /// [{ symbol, count }] — top symbol theo số lần fire trong ngày.
+  topSymbols   Json
+  createdAt    DateTime @default(now())
 }
 
 model AcademyLesson {

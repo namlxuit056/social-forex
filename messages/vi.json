@@ -393,7 +393,29 @@
     "rowUnpinWatchlist": "Gỡ {symbol} khỏi watchlist",
     "signupPromptWatchlistTitle": "Lưu watchlist này",
     "signupPromptWatchlistDesc": "Đăng ký để giữ các cặp yêu thích như XAUUSD trên nhiều thiết bị và nhận ngữ cảnh tín hiệu phù hợp sau này.",
-    "signupPromptWatchlistCta": "Lưu watchlist"
+    "signupPromptWatchlistCta": "Lưu watchlist",
+    "technicalRatingTitle": "Tín hiệu kỹ thuật chắc chắn",
+    "technicalRatingDescription": "Lịch sử các tín hiệu Strong Buy/Sell (TradingView, khung 4H được khung 1D xác nhận cùng chiều) đã gửi thông báo cho bạn.",
+    "technicalRatingEmpty": "Chưa có tín hiệu chắc chắn nào được ghi nhận.",
+    "technicalRatingColSymbol": "Cặp",
+    "technicalRatingColSignal": "Tín hiệu",
+    "technicalRatingColScore4h": "Điểm 4H",
+    "technicalRatingColScore1d": "Điểm 1D",
+    "technicalRatingColTime": "Thời gian",
+    "technicalRatingBuy": "MUA mạnh",
+    "technicalRatingSell": "BÁN mạnh",
+    "technicalRatingScoreHint": "Thang điểm -1 (Strong Sell) → +1 (Strong Buy), tổng hợp từ các chỉ báo kỹ thuật của TradingView.",
+    "technicalRatingTabDay": "Hôm nay",
+    "technicalRatingTabWeek": "7 ngày",
+    "technicalRatingTabMonth": "30 ngày",
+    "technicalRatingSummaryEmpty": "Chưa có tổng kết cho khoảng này — cron tổng kết chạy cuối mỗi ngày.",
+    "technicalRatingTotalSignals": "Tổng tín hiệu",
+    "technicalRatingBuySignals": "Tín hiệu MUA",
+    "technicalRatingSellSignals": "Tín hiệu BÁN",
+    "technicalRatingHeldSignals": "Còn giữ chiều",
+    "technicalRatingHeldHint": "Số tín hiệu mà chiều hiện tại (lúc tổng kết) vẫn khớp — không phải đánh giá lời/lỗ thực tế.",
+    "technicalRatingTopSymbols": "Symbol nổi bật",
+    "technicalRatingHistoryTitle": "Lịch sử từng tín hiệu"
   },
   "advisor": {
     "metaTitle": "AI cố vấn Forex — Social Forex",
@@ -1331,7 +1353,9 @@
     "journalReview": "Báo cáo giao dịch tuần đã sẵn sàng",
     "mt5AutoClose": "Đã tự động đóng tất cả lệnh trước giờ thị trường đóng cửa",
     "calendarActualSignal": "Có dữ liệu thực tế mới trên lịch kinh tế — xem tín hiệu buy/sell",
-    "technicalRatingSignal": "Có tín hiệu kỹ thuật chắc chắn (TradingView) cho symbol bạn theo dõi"
+    "technicalRatingSignal": "Có tín hiệu kỹ thuật chắc chắn (TradingView) cho symbol bạn theo dõi",
+    "technicalRatingSignalBuy": "{symbol}: Tín hiệu kỹ thuật MUA mạnh",
+    "technicalRatingSignalSell": "{symbol}: Tín hiệu kỹ thuật BÁN mạnh"
   },
   "auth": {
     "signInTitle": "Đăng nhập",
@@ -2595,7 +2619,7 @@
     "calendarActualSell": "BÁN",
     "technicalRatingBuyTitle": "{symbol}: Tín hiệu kỹ thuật MUA mạnh",
     "technicalRatingSellTitle": "{symbol}: Tín hiệu kỹ thuật BÁN mạnh",
-    "technicalRatingBody": "Khung 4H đang Strong Buy/Sell, khung 1D đồng thuận — xem chi tiết trên TradingView."
+    "technicalRatingBody": "Điểm kỹ thuật: 4H {score4h} · 1D {score1d} (thang -1..1). Xem chi tiết trên TradingView."
   },
   "missions": {
     "title": "Bảng nhiệm vụ người mới",

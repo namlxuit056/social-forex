@@ -7,6 +7,13 @@ import { Link } from "@/i18n/navigation";
 import { markNotificationRead } from "@/actions/notifications";
 import { cn } from "@/lib/utils";
 
+type TechnicalRatingMeta = {
+  symbol: string;
+  signal: "buy" | "sell";
+  score4h: number;
+  score1d: number;
+};
+
 export type NotificationRow = {
   id: string;
   kind:
@@ -25,7 +32,26 @@ export type NotificationRow = {
   readAt: string | null;
   signal: { id: string; symbol: string; direction: string } | null;
   actor: { id: string; name: string | null; email: string | null } | null;
+  meta?: Record<string, unknown> | null;
 };
+
+function asTechnicalRatingMeta(meta: NotificationRow["meta"]): TechnicalRatingMeta | null {
+  if (
+    !meta ||
+    typeof meta.symbol !== "string" ||
+    (meta.signal !== "buy" && meta.signal !== "sell") ||
+    typeof meta.score4h !== "number" ||
+    typeof meta.score1d !== "number"
+  ) {
+    return null;
+  }
+  return {
+    symbol: meta.symbol,
+    signal: meta.signal,
+    score4h: meta.score4h,
+    score1d: meta.score1d,
+  };
+}
 
 export function NotificationList({
   items,
@@ -39,7 +65,6 @@ export function NotificationList({
   const [optimisticReadIds, setOptimisticReadIds] = useState<ReadonlySet<string>>(
     () => new Set(),
   );
-
   const handleClick = (id: string) => {
     setOptimisticReadIds((prev) => new Set(prev).add(id));
     markNotificationRead(id).catch(() => {
@@ -64,6 +89,8 @@ export function NotificationList({
     <ul className="divide-y divide-border/60 rounded-xl border border-border/60 bg-card/40">
       {items.map((n) => {
         const unread = n.readAt === null && !optimisticReadIds.has(n.id);
+        const ratingMeta =
+          n.kind === "TECHNICAL_RATING_SIGNAL" ? asTechnicalRatingMeta(n.meta) : null;
         const href =
           n.kind === "USER_FOLLOWED" && n.actor
             ? `/u/${n.actor.id}`
@@ -80,7 +107,7 @@ export function NotificationList({
                       : n.kind === "CALENDAR_ACTUAL_SIGNAL"
                         ? "/calendar"
                         : n.kind === "TECHNICAL_RATING_SIGNAL"
-                          ? "/quotes"
+                          ? "/quotes/technical-rating"
                           : n.signal
                             ? `/signals/${n.signal.id}`
                             : "/notifications";
@@ -116,7 +143,14 @@ export function NotificationList({
                           : n.kind === "CALENDAR_ACTUAL_SIGNAL"
                             ? t("calendarActualSignal")
                             : n.kind === "TECHNICAL_RATING_SIGNAL"
-                              ? t("technicalRatingSignal")
+                              ? ratingMeta
+                                ? t(
+                                    ratingMeta.signal === "buy"
+                                      ? "technicalRatingSignalBuy"
+                                      : "technicalRatingSignalSell",
+                                    { symbol: ratingMeta.symbol },
+                                  )
+                                : t("technicalRatingSignal")
                               : n.signal
                                 ? t("signalNew", {
                                   symbol: n.signal.symbol,

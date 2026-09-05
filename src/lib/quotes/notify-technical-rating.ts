@@ -1,7 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import { sendLocalizedPushToUser } from "@/lib/push-i18n";
 import { fetchTechnicalRatings } from "@/lib/quotes/fetch-tv-ratings";
-import { computeConfidentSignal } from "@/lib/quotes/technical-rating";
+import { computeConfidentSignal, type SymbolScores } from "@/lib/quotes/technical-rating";
+
+function round2(n: number): number {
+  return Math.round(n * 100) / 100;
+}
 
 /** Khớp khung giờ tín hiệu chính (4H) — trong lúc tín hiệu "chắc chắn" còn giữ, user
  * nhận lại thông báo tối đa 1 lần / 4 tiếng thay vì mỗi giờ (cron chạy hàng giờ). */
@@ -17,7 +21,11 @@ export type TechnicalRatingCheckSummary = {
   signals: { symbol: string; signal: "buy" | "sell"; score4h: number; score1d: number; notifiedUsers: number }[];
 };
 
-async function notifySymbolSignal(symbol: string, signal: "buy" | "sell"): Promise<number> {
+async function notifySymbolSignal(
+  symbol: string,
+  signal: "buy" | "sell",
+  scores: SymbolScores,
+): Promise<number> {
   // Broadcast tới toàn bộ user đã đăng ký — không lọc theo favorite/vị thế mở (theo yêu cầu
   // user 2026-09-05: "không cần favorite nhận hết").
   const allUsers = await prisma.user.findMany({ select: { id: true } });
@@ -25,12 +33,18 @@ async function notifySymbolSignal(symbol: string, signal: "buy" | "sell"): Promi
   if (userIds.size === 0) return 0;
 
   const dedupeKey = `tv-rating:${symbol}:${signal}:${Math.floor(Date.now() / COOLDOWN_MS)}`;
+  const meta = {
+    symbol,
+    signal,
+    score4h: round2(scores.score4h),
+    score1d: round2(scores.score1d),
+  };
 
   await prisma.$transaction(
     [...userIds].map((userId) =>
       prisma.notification.upsert({
         where: { userId_dedupeKey: { userId, dedupeKey } },
-        create: { userId, kind: "TECHNICAL_RATING_SIGNAL", dedupeKey },
+        create: { userId, kind: "TECHNICAL_RATING_SIGNAL", dedupeKey, meta },
         update: {},
       }),
     ),
@@ -44,7 +58,7 @@ async function notifySymbolSignal(symbol: string, signal: "buy" | "sell"): Promi
             signal === "buy" ? "technicalRatingBuyTitle" : "technicalRatingSellTitle",
             { symbol },
           ),
-          body: t("technicalRatingBody", { symbol }),
+          body: t("technicalRatingBody", { score4h: meta.score4h, score1d: meta.score1d }),
           url: "/quotes",
         }));
       } catch {
@@ -75,7 +89,7 @@ export async function checkTechnicalRatingSignals(): Promise<TechnicalRatingChec
 
     let notifiedUsers = 0;
     try {
-      notifiedUsers = await notifySymbolSignal(symbol, signal);
+      notifiedUsers = await notifySymbolSignal(symbol, signal, scores);
       notified += notifiedUsers;
     } catch (e) {
       console.error("[tv-rating] notifySymbolSignal failed for", symbol, e);

@@ -16,6 +16,7 @@ import { runJournalDailyReview } from "@/lib/journal/daily-review-run";
 import { runAcademyAutoGenerate } from "@/lib/ai/academy-auto-generate";
 import { resolveCalendarEvents } from "@/lib/calendar/resolve-calendar";
 import { checkTechnicalRatingSignals } from "@/lib/quotes/notify-technical-rating";
+import { runDailyRatingSummary } from "@/lib/quotes/run-daily-rating-summary";
 import type { CronJobKey } from "./job-registry";
 
 async function requireAdmin() {
@@ -79,6 +80,9 @@ export async function runCronJob(jobKey: CronJobKey): Promise<RunCronJobResult> 
       }
       case "tv-rating-check":
         summary = await checkTechnicalRatingSignals();
+        break;
+      case "tv-rating-daily-summary":
+        summary = await runDailyRatingSummary();
         break;
       default:
         return { ok: false, jobKey, at, error: "unknown_job" };

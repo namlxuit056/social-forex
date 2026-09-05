@@ -9,7 +9,8 @@ export type CronJobKey =
   | "journal-daily-review"
   | "academy-auto-generate"
   | "calendar-sync"
-  | "tv-rating-check";
+  | "tv-rating-check"
+  | "tv-rating-daily-summary";
 
 export type CronJobMeta = {
   key: CronJobKey;
@@ -103,6 +104,13 @@ export const CRON_JOBS: CronJobMeta[] = [
     label: "Technical rating (TradingView): tín hiệu chắc chắn",
     description: "Quét điểm kỹ thuật tổng hợp 4H+1D từ TradingView cho các symbol app hỗ trợ, gửi thông báo khi có Strong Buy/Sell được 1D xác nhận cùng chiều.",
     schedule: "Hàng giờ (phút 0)",
+    risk: "normal",
+  },
+  {
+    key: "tv-rating-daily-summary",
+    label: "Technical rating: tổng kết cuối ngày",
+    description: "Đếm số tín hiệu chắc chắn đã fire trong ngày UTC, kiểm tra còn giữ chiều hay không, lưu 1 dòng tổng kết (tuần/tháng cộng dồn từ các dòng ngày khi hiển thị trên /quotes/technical-rating).",
+    schedule: "Hàng ngày 16:55 UTC (23:55 giờ VN)",
     risk: "normal",
   },
 ];
