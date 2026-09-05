@@ -12,23 +12,16 @@ export type TechnicalRatingCheckSummary = {
   checked: number;
   signaled: number;
   notified: number;
+  /** Chi tiết từng symbol đã fire — hữu ích để xem trên /admin/crons kể cả khi
+   * notified=0 (chưa ai favorite/có vị thế ở symbol đó). */
+  signals: { symbol: string; signal: "buy" | "sell"; score4h: number; score1d: number; notifiedUsers: number }[];
 };
 
 async function notifySymbolSignal(symbol: string, signal: "buy" | "sell"): Promise<number> {
-  const [favoriteRows, openTradeRows] = await Promise.all([
-    prisma.userFavoriteSymbol.findMany({
-      where: { symbol },
-      select: { userId: true },
-    }),
-    prisma.tradeJournal.findMany({
-      where: { symbol, closedAt: null },
-      select: { userId: true },
-    }),
-  ]);
-
-  const userIds = new Set<string>();
-  for (const row of favoriteRows) userIds.add(row.userId);
-  for (const row of openTradeRows) userIds.add(row.userId);
+  // Broadcast tới toàn bộ user đã đăng ký — không lọc theo favorite/vị thế mở (theo yêu cầu
+  // user 2026-09-05: "không cần favorite nhận hết").
+  const allUsers = await prisma.user.findMany({ select: { id: true } });
+  const userIds = new Set(allUsers.map((u) => u.id));
   if (userIds.size === 0) return 0;
 
   const dedupeKey = `tv-rating:${symbol}:${signal}:${Math.floor(Date.now() / COOLDOWN_MS)}`;
@@ -73,18 +66,22 @@ export async function checkTechnicalRatingSignals(): Promise<TechnicalRatingChec
 
   let signaled = 0;
   let notified = 0;
+  const signals: TechnicalRatingCheckSummary["signals"] = [];
 
   for (const [symbol, scores] of ratings) {
     const signal = computeConfidentSignal(scores);
     if (!signal) continue;
     signaled += 1;
 
+    let notifiedUsers = 0;
     try {
-      notified += await notifySymbolSignal(symbol, signal);
+      notifiedUsers = await notifySymbolSignal(symbol, signal);
+      notified += notifiedUsers;
     } catch (e) {
       console.error("[tv-rating] notifySymbolSignal failed for", symbol, e);
     }
+    signals.push({ symbol, signal, score4h: scores.score4h, score1d: scores.score1d, notifiedUsers });
   }
 
-  return { ok: true, checked: ratings.size, signaled, notified };
+  return { ok: true, checked: ratings.size, signaled, notified, signals };
 }
