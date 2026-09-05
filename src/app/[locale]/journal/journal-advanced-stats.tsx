@@ -38,6 +38,7 @@ import type { ChecklistComplianceStats } from "@/lib/journal/checklist-complianc
 import type { EmotionDiaryCorrelationStats } from "@/lib/journal/emotion-diary-correlation";
 import type { GuardOverrideStats } from "@/lib/journal/guard-overrides";
 import type { DisciplineScorecard, RuleId } from "@/lib/journal/discipline-scorecard";
+import type { AiReviewTrend } from "@/lib/journal/ai-review-trend";
 import type { MistakeStats } from "@/lib/journal/mistake-stats";
 import type { TiltDay, TiltDaysResult, TiltSignal } from "@/lib/journal/tilt-days";
 import type { GreenDay, GreenDaysResult, GreenSignal } from "@/lib/journal/green-days";
@@ -436,6 +437,84 @@ function DisciplineScorecardCard({ scorecard }: { scorecard: DisciplineScorecard
             </div>
           ))}
         </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function AiReviewTrendCard({ trend }: { trend: AiReviewTrend }) {
+  const t = useTranslations("journal");
+  if (trend.sampleSize < MIN_CLOSED_TRADES) return null;
+
+  const scoreColor = (score: number) =>
+    score >= 75 ? "text-emerald-500" : score >= 45 ? "text-amber-500" : "text-red-500";
+
+  const verdictRows: { key: keyof AiReviewTrend["overall"]; labelKey: string }[] = [
+    { key: "disciplined", labelKey: "tradeReviewVerdictDisciplined" },
+    { key: "acceptable", labelKey: "tradeReviewVerdictAcceptable" },
+    { key: "undisciplined", labelKey: "tradeReviewVerdictUndisciplined" },
+  ];
+
+  return (
+    <Card className="border-border/60">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-sm">{t("aiReviewTrendTitle")}</CardTitle>
+        <p className="text-xs text-muted-foreground">
+          {t("aiReviewTrendNote", { n: trend.sampleSize })}
+        </p>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {trend.avgScore !== null ? (
+          <div className="flex items-baseline gap-2">
+            <span
+              className={cn(
+                "font-mono text-3xl font-bold tabular-nums",
+                scoreColor(trend.avgScore),
+              )}
+            >
+              {trend.avgScore}
+            </span>
+            <span className="text-sm text-muted-foreground">/ 100</span>
+          </div>
+        ) : null}
+
+        <div className="flex flex-wrap gap-3 text-xs">
+          {verdictRows.map((row) => (
+            <span key={row.key} className="flex items-center gap-1.5">
+              <span className="text-muted-foreground">{t(row.labelKey)}</span>
+              <span className="font-mono font-medium text-foreground">
+                {trend.overall[row.key]}
+              </span>
+            </span>
+          ))}
+        </div>
+
+        {trend.scoreTrendDelta !== null &&
+        trend.recentAvgScore !== null &&
+        trend.earlierAvgScore !== null ? (
+          <p
+            className={cn(
+              "text-xs",
+              trend.scoreTrendDelta >= 0
+                ? "text-emerald-600 dark:text-emerald-500"
+                : "text-amber-600 dark:text-amber-500",
+            )}
+          >
+            {t("aiReviewTrendDelta", {
+              recent: trend.recentAvgScore,
+              earlier: trend.earlierAvgScore,
+              delta: `${trend.scoreTrendDelta >= 0 ? "+" : ""}${trend.scoreTrendDelta}`,
+            })}
+          </p>
+        ) : (
+          <p className="text-xs text-muted-foreground">{t("aiReviewTrendNoTrend")}</p>
+        )}
+
+        {trend.recentUndisciplinedRatePct !== null && trend.recentUndisciplinedRatePct > 0 ? (
+          <p className="text-xs text-amber-600 dark:text-amber-500">
+            {t("aiReviewTrendRecentUndisciplined", { pct: trend.recentUndisciplinedRatePct })}
+          </p>
+        ) : null}
       </CardContent>
     </Card>
   );
@@ -929,6 +1008,7 @@ export function JournalAdvancedStats({
   emotionCorrelation,
   guardOverrideStats,
   scorecard,
+  aiReviewTrend,
   mistakeStats,
   greenDays,
   tiltDays,
@@ -942,6 +1022,7 @@ export function JournalAdvancedStats({
   emotionCorrelation?: EmotionDiaryCorrelationStats;
   guardOverrideStats?: GuardOverrideStats;
   scorecard?: DisciplineScorecard;
+  aiReviewTrend?: AiReviewTrend;
   mistakeStats?: MistakeStats;
   greenDays?: GreenDaysResult;
   tiltDays?: TiltDaysResult;
@@ -1013,6 +1094,8 @@ export function JournalAdvancedStats({
       {goalTracker}
 
       {scorecard && <DisciplineScorecardCard scorecard={scorecard} />}
+
+      {aiReviewTrend && <AiReviewTrendCard trend={aiReviewTrend} />}
 
       {mistakeStats && <MistakeCostCard stats={mistakeStats} />}
 

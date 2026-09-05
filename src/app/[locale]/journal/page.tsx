@@ -28,13 +28,14 @@ import { computeChecklistCompliance } from "@/lib/journal/checklist-compliance";
 import { computeEmotionDiaryCorrelation } from "@/lib/journal/emotion-diary-correlation";
 import { computeGuardOverrideStats } from "@/lib/journal/guard-overrides";
 import { computeDisciplineScorecard } from "@/lib/journal/discipline-scorecard";
+import { computeAiReviewTrend } from "@/lib/journal/ai-review-trend";
 import { computeMistakeStats } from "@/lib/journal/mistake-stats";
 import { computeTiltDays } from "@/lib/journal/tilt-days";
 import { computeGreenDays } from "@/lib/journal/green-days";
 import { computeRStats } from "@/lib/journal/r-multiple";
 import { isVipActive } from "@/lib/vip";
 import { isMt5LiveRedisEnabled } from "@/lib/mt5/live-redis";
-import type { AiJournalAnalysis } from "@/lib/ai/types";
+import type { AiJournalAnalysis, AiTradeReviewResult } from "@/lib/ai/types";
 import { AlertTriangle } from "lucide-react";
 
 export async function generateMetadata({
@@ -134,6 +135,7 @@ export default async function JournalPage({
     tradingGoalRaw,
     moodCheckinsRaw,
     journalLessonsRaw,
+    aiTradeReviewsRaw,
   ] = await Promise.all([
       prisma.tradeJournal.findMany({
         where: { userId: session.user.id },
@@ -216,6 +218,14 @@ export default async function JournalPage({
             where: { userId: session.user.id },
             orderBy: { createdAt: "desc" },
             take: 200,
+          })
+        : Promise.resolve([]),
+      activeTab === "stats"
+        ? prisma.aiTradeReview.findMany({
+            where: { userId: session.user.id },
+            orderBy: { createdAt: "desc" },
+            take: 200,
+            select: { createdAt: true, review: true },
           })
         : Promise.resolve([]),
     ]);
@@ -372,6 +382,13 @@ export default async function JournalPage({
     diary: emotionEntries.map((e) => ({ date: e.date, note: e.note })),
     bestSetup: bestSetupRow?.key ?? null,
   });
+
+  const aiReviewTrend = computeAiReviewTrend(
+    aiTradeReviewsRaw.map((r) => {
+      const review = r.review as AiTradeReviewResult;
+      return { createdAt: r.createdAt, verdict: review.verdict, score: review.score };
+    }),
+  );
 
   const mistakeStats = computeMistakeStats(serialized);
 
@@ -530,6 +547,7 @@ export default async function JournalPage({
             emotionCorrelation={emotionCorrelation}
             guardOverrideStats={guardOverrideStats}
             scorecard={disciplineScorecard}
+            aiReviewTrend={aiReviewTrend}
             mistakeStats={mistakeStats}
             greenDays={greenDays}
             tiltDays={tiltDays}
