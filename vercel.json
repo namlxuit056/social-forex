@@ -35,6 +35,10 @@
     {
       "path": "/api/calendar/sync/run",
       "schedule": "*/15 * * * *"
+    },
+    {
+      "path": "/api/quotes/tv-rating-check",
+      "schedule": "0 * * * *"
     }
   ]
 }

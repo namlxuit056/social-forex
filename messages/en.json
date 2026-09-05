@@ -1330,7 +1330,8 @@
     "priceAlert": "Price alert triggered",
     "journalReview": "Weekly trading report is ready",
     "mt5AutoClose": "All positions were auto-closed before the market close",
-    "calendarActualSignal": "New economic calendar actual data — see the buy/sell signal"
+    "calendarActualSignal": "New economic calendar actual data — see the buy/sell signal",
+    "technicalRatingSignal": "A confident technical signal (TradingView) fired for a symbol you follow"
   },
   "auth": {
     "signInTitle": "Sign in",
@@ -2591,7 +2592,10 @@
     "calendarActualBodyForecast": "{event}: actual {actual} vs forecast {baseline}. {pairs}",
     "calendarActualBodyPrevious": "{event}: actual {actual} vs previous {baseline}. {pairs}",
     "calendarActualBuy": "BUY",
-    "calendarActualSell": "SELL"
+    "calendarActualSell": "SELL",
+    "technicalRatingBuyTitle": "{symbol}: strong technical BUY signal",
+    "technicalRatingSellTitle": "{symbol}: strong technical SELL signal",
+    "technicalRatingBody": "4H is Strong Buy/Sell and 1D agrees — check TradingView for details."
   },
   "missions": {
     "title": "Beginner mission board",

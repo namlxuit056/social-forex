@@ -19,7 +19,8 @@ export type NotificationRow = {
     | "JOURNAL_REVIEW"
     | "SCREENER_ALERT"
     | "MT5_AUTO_CLOSE"
-    | "CALENDAR_ACTUAL_SIGNAL";
+    | "CALENDAR_ACTUAL_SIGNAL"
+    | "TECHNICAL_RATING_SIGNAL";
   createdAt: string;
   readAt: string | null;
   signal: { id: string; symbol: string; direction: string } | null;
@@ -78,9 +79,11 @@ export function NotificationList({
                       ? "/positions"
                       : n.kind === "CALENDAR_ACTUAL_SIGNAL"
                         ? "/calendar"
-                        : n.signal
-                          ? `/signals/${n.signal.id}`
-                          : "/notifications";
+                        : n.kind === "TECHNICAL_RATING_SIGNAL"
+                          ? "/quotes"
+                          : n.signal
+                            ? `/signals/${n.signal.id}`
+                            : "/notifications";
 
         const title =
           n.kind === "USER_FOLLOWED" && n.actor
@@ -112,12 +115,14 @@ export function NotificationList({
                           ? t("mt5AutoClose")
                           : n.kind === "CALENDAR_ACTUAL_SIGNAL"
                             ? t("calendarActualSignal")
-                            : n.signal
-                              ? t("signalNew", {
-                                symbol: n.signal.symbol,
-                                direction: n.signal.direction,
-                              })
-                            : t("empty");
+                            : n.kind === "TECHNICAL_RATING_SIGNAL"
+                              ? t("technicalRatingSignal")
+                              : n.signal
+                                ? t("signalNew", {
+                                  symbol: n.signal.symbol,
+                                  direction: n.signal.direction,
+                                })
+                              : t("empty");
 
         const accentClass =
           n.kind === "SIGNAL_WIN"

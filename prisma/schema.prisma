@@ -294,6 +294,7 @@ enum NotificationKind {
   SCREENER_ALERT
   MT5_AUTO_CLOSE
   CALENDAR_ACTUAL_SIGNAL
+  TECHNICAL_RATING_SIGNAL
 }
 
 model Notification {

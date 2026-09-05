@@ -1330,7 +1330,8 @@
     "priceAlert": "Cảnh báo giá đã kích hoạt",
     "journalReview": "Báo cáo giao dịch tuần đã sẵn sàng",
     "mt5AutoClose": "Đã tự động đóng tất cả lệnh trước giờ thị trường đóng cửa",
-    "calendarActualSignal": "Có dữ liệu thực tế mới trên lịch kinh tế — xem tín hiệu buy/sell"
+    "calendarActualSignal": "Có dữ liệu thực tế mới trên lịch kinh tế — xem tín hiệu buy/sell",
+    "technicalRatingSignal": "Có tín hiệu kỹ thuật chắc chắn (TradingView) cho symbol bạn theo dõi"
   },
   "auth": {
     "signInTitle": "Đăng nhập",
@@ -2591,7 +2592,10 @@
     "calendarActualBodyForecast": "{event}: thực tế {actual} so với dự báo {baseline}. {pairs}",
     "calendarActualBodyPrevious": "{event}: thực tế {actual} so với kỳ trước {baseline}. {pairs}",
     "calendarActualBuy": "MUA",
-    "calendarActualSell": "BÁN"
+    "calendarActualSell": "BÁN",
+    "technicalRatingBuyTitle": "{symbol}: Tín hiệu kỹ thuật MUA mạnh",
+    "technicalRatingSellTitle": "{symbol}: Tín hiệu kỹ thuật BÁN mạnh",
+    "technicalRatingBody": "Khung 4H đang Strong Buy/Sell, khung 1D đồng thuận — xem chi tiết trên TradingView."
   },
   "missions": {
     "title": "Bảng nhiệm vụ người mới",
