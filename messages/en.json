@@ -429,7 +429,7 @@
     "impactHigh": "High",
     "zoneUtc": "UTC",
     "zoneVn": "Vietnam (UTC+7)",
-    "sourceInvesting": "Forex Factory (live)",
+    "sourceInvesting": "TradingView (live)",
     "sourceFmp": "FMP (DB cache)",
     "sourceStaleDb": "DB cache (API error)",
     "sourceSample": "Sample data",

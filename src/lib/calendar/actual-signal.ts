@@ -28,7 +28,7 @@ function isInverseIndicator(title: string) {
   return INVERSE_INDICATOR_KEYWORDS.some((kw) => lower.includes(kw));
 }
 
-/** Parse chuỗi số liệu lịch kinh tế ("3.5%", "199K", "(0.4%)", "1,234") thành number. */
+/** Parse chuỗi số liệu lịch kinh tế ("3.5%", "199K", "(0.4%)", "1,234", "$1.2B") thành number. */
 export function parseIndicatorValue(raw: string): number | null {
   let s = raw.trim();
   if (!s || s === "-") return null;
@@ -39,6 +39,8 @@ export function parseIndicatorValue(raw: string): number | null {
     s = s.slice(1, -1);
   }
   s = s.replace(/,/g, "");
+  // Bỏ ký hiệu tiền tệ đứng đầu (TradingView format: "$1.2B", "£4.5", "C$0.3").
+  s = s.replace(/^[^0-9+\-.]+/, "");
 
   let multiplier = 1;
   const suffixMatch = s.match(/([KMBT])%?$/i);

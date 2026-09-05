@@ -1,93 +1,107 @@
-import { describe, expect, it } from "vitest";
-import { extractDays } from "./investing";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  __resetInvestingCacheForTests,
+  fetchInvestingCalendar,
+  formatTvValue,
+} from "./investing";
 
-function htmlWithState(daysLiteral: string): string {
-  return `<html><body>
-    <script type="text/javascript">if (typeof window.calendarComponentStates === 'undefined') { window.calendarComponentStates = {} }
-    window.calendarComponentStates[1] = {
-    days: ${daysLiteral},
-    otherKey: {"nested": ["ignore", "this"]}
-    }
-    </script>
-  </body></html>`;
-}
+describe("formatTvValue", () => {
+  it("returns undefined for null/undefined", () => {
+    expect(formatTvValue(null)).toBeUndefined();
+    expect(formatTvValue(undefined)).toBeUndefined();
+  });
 
-describe("extractDays", () => {
-  it("parses a minimal days array with one event", () => {
-    const html = htmlWithState(
-      JSON.stringify([
-        {
-          date: "Sun <span>Aug 30</span>",
-          dateline: 1788022800,
-          events: [
-            {
-              id: 146583,
-              name: "ISM Manufacturing PMI",
-              dateline: 1788271200,
-              currency: "USD",
-              impactName: "high",
-              actual: "54.6",
-              previous: "55.6",
-              forecast: "55.2",
-            },
-          ],
-        },
-      ]),
-    );
+  it("formats a bare number with no unit/scale", () => {
+    expect(formatTvValue(54.6)).toBe("54.6");
+  });
 
-    const days = extractDays(html);
-    expect(days).toHaveLength(1);
-    expect(days[0].events).toHaveLength(1);
-    expect(days[0].events?.[0]).toMatchObject({
-      id: 146583,
-      name: "ISM Manufacturing PMI",
-      actual: "54.6",
+  it("formats a percentage unit", () => {
+    expect(formatTvValue(6.4, "%")).toBe("6.4%");
+  });
+
+  it("formats a percentage with a scale suffix", () => {
+    expect(formatTvValue(6.4, "%", "K")).toBe("6.4K%");
+  });
+
+  it("formats a scale suffix with no unit", () => {
+    expect(formatTvValue(7.271, undefined, "M")).toBe("7.271M");
+  });
+
+  it("prefixes a currency-symbol unit", () => {
+    expect(formatTvValue(1.2, "$", "B")).toBe("$1.2B");
+  });
+});
+
+describe("fetchInvestingCalendar", () => {
+  beforeEach(() => {
+    __resetInvestingCacheForTests();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("maps TradingView events to CalendarEvent, dropping ones with no currency", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        status: "ok",
+        result: [
+          {
+            id: "396677",
+            title: "ISM Manufacturing PMI",
+            currency: "usd",
+            actual: 54.6,
+            previous: 55.6,
+            forecast: 55.2,
+            importance: 1,
+            date: "2026-09-01T14:00:00.000Z",
+          },
+          {
+            id: "999999",
+            title: "G20 Meetings",
+            currency: undefined,
+            importance: 0,
+            date: "2026-08-30T12:00:00.000Z",
+          },
+        ],
+      }),
     });
-  });
+    vi.stubGlobal("fetch", fetchMock);
 
-  it("correctly balances brackets/braces/strings when values contain them", () => {
-    const html = htmlWithState(
-      JSON.stringify([
-        {
-          date: "Mon <span>Aug 31</span>",
-          dateline: 1788109200,
-          events: [
-            {
-              id: 1,
-              name: 'Event with "quotes" and [brackets] and {braces}',
-              dateline: 1788109200,
-              currency: "JPY",
-              impactName: "low",
-              actual: "",
-              previous: "",
-              forecast: "",
-            },
-            {
-              id: 2,
-              name: "Second event",
-              dateline: 1788112800,
-              currency: "EUR",
-              impactName: "medium",
-            },
-          ],
-        },
-      ]),
+    const events = await fetchInvestingCalendar();
+
+    expect(events).toHaveLength(1);
+    expect(events[0]).toMatchObject({
+      id: "tv-396677",
+      timeUtc: "2026-09-01T14:00:00.000Z",
+      currency: "USD",
+      title: "ISM Manufacturing PMI",
+      impact: "high",
+      actual: "54.6",
+      previous: "55.6",
+      forecast: "55.2",
+    });
+
+    const [, options] = fetchMock.mock.calls[0];
+    expect((options.headers as Record<string, string>).Origin).toBe(
+      "https://www.tradingview.com",
     );
+  });
 
-    const days = extractDays(html);
-    expect(days[0].events).toHaveLength(2);
-    expect(days[0].events?.[0].name).toBe(
-      'Event with "quotes" and [brackets] and {braces}',
+  it("throws on a non-ok HTTP response", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({ ok: false, status: 403 }),
     );
-    expect(days[0].events?.[1].currency).toBe("EUR");
+    await expect(fetchInvestingCalendar()).rejects.toThrow(/403/);
   });
 
-  it("throws when calendarComponentStates marker is missing", () => {
-    expect(() => extractDays("<html><body>no state here</body></html>")).toThrow();
-  });
-
-  it("throws when the days array is unterminated", () => {
-    const broken = `<script>window.calendarComponentStates[1] = { days: [ { "events": [ </script>`;
-    expect(() => extractDays(broken)).toThrow();
+  it("throws when the response body has an unexpected shape", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({ ok: true, json: async () => ({ status: "error" }) }),
+    );
+    await expect(fetchInvestingCalendar()).rejects.toThrow(/unexpected response format/);
   });
 });

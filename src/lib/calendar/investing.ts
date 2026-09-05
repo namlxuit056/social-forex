@@ -1,127 +1,99 @@
 import type { CalendarEvent, Impact } from "@/lib/calendar/types";
 
-const CALENDAR_URL = "https://www.forexfactory.com/calendar";
-const BROWSER_USER_AGENT =
-  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36";
+const CALENDAR_URL = "https://economic-calendar.tradingview.com/events";
+/** Endpoint chỉ chấp nhận request có Origin khớp domain của chính TradingView (không phải
+ * Cloudflare bot-check — chỉ so khớp header tĩnh, không cần giải JS challenge như FF/investing.com). */
+const ORIGIN_HEADER = "https://www.tradingview.com";
+
+/** Mã quốc gia 2 ký tự cho các đồng tiền app hỗ trợ (QUOTE_DEFINITIONS) + CNY vì
+ * dữ liệu Trung Quốc thường ảnh hưởng AUD/NZD. */
+const COUNTRIES = ["US", "EU", "GB", "JP", "AU", "CA", "NZ", "CH", "CN"];
 
 const CACHE_TTL_MS = 15 * 60 * 1000;
 let cachedEvents: CalendarEvent[] | null = null;
 let cachedAt = 0;
 
-type FfScrapedEvent = {
-  id: number;
-  name: string;
-  /** Unix seconds của chính sự kiện (khác `day.dateline` — đó chỉ là mốc đầu ngày). */
-  dateline: number;
-  currency: string;
-  impactName: string;
-  actual?: string;
-  forecast?: string;
-  previous?: string;
+/** Chỉ dùng trong test — xoá cache in-memory giữa các test case. */
+export function __resetInvestingCacheForTests(): void {
+  cachedEvents = null;
+  cachedAt = 0;
+}
+
+type TvEvent = {
+  id: string;
+  title?: string;
+  currency?: string;
+  actual?: number | null;
+  previous?: number | null;
+  forecast?: number | null;
+  unit?: string;
+  scale?: string;
+  importance?: number;
+  date: string;
 };
 
-type FfDay = { events?: FfScrapedEvent[] };
+function mapImpact(importance: number | undefined): Impact {
+  if (importance !== undefined && importance >= 1) return "high";
+  if (importance !== undefined && importance <= -1) return "low";
+  return "medium";
+}
 
-function mapImpact(raw: string): Impact | null {
-  const s = raw.toLowerCase();
-  if (s === "high") return "high";
-  if (s === "medium") return "medium";
-  if (s === "low") return "low";
-  return null; // "holiday" và giá trị lạ khác -> bỏ qua sự kiện
+/** "6.4" + unit "%" -> "6.4%"; "7.271" + scale "M" -> "7.271M"; "1.2" + unit "$" + scale "B" -> "$1.2B". */
+export function formatTvValue(
+  value: number | null | undefined,
+  unit?: string,
+  scale?: string,
+): string | undefined {
+  if (value === null || value === undefined) return undefined;
+  const scaleSuffix = scale ?? "";
+  if (!unit) return `${value}${scaleSuffix}`;
+  if (unit === "%") return `${value}${scaleSuffix}%`;
+  return `${unit}${value}${scaleSuffix}`;
 }
 
 /**
- * Trích mảng `days` nhúng trong `window.calendarComponentStates[1] = {days: [...], ...}`.
- * Đây là JS object literal (key không có ngoặc kép) nên không thể JSON.parse cả blob —
- * phải cân bằng ngoặc `[...]` thủ công để lấy đúng phần mảng `days` (bên trong mảng, mọi
- * key/string đều hợp lệ JSON nên JSON.parse riêng phần đó là được).
- */
-export function extractDays(html: string): FfDay[] {
-  const marker = "window.calendarComponentStates[1] = {";
-  const stateStart = html.indexOf(marker);
-  const daysIdx = stateStart === -1 ? -1 : html.indexOf("days:", stateStart);
-  const arrStart = daysIdx === -1 ? -1 : html.indexOf("[", daysIdx);
-  if (arrStart === -1) {
-    throw new Error("ForexFactory HTML: calendarComponentStates.days not found (page structure changed?)");
-  }
-
-  let depth = 0;
-  let inStr = false;
-  let esc = false;
-  let end = -1;
-  for (let i = arrStart; i < html.length; i++) {
-    const ch = html[i];
-    if (inStr) {
-      if (esc) esc = false;
-      else if (ch === "\\") esc = true;
-      else if (ch === '"') inStr = false;
-      continue;
-    }
-    if (ch === '"') {
-      inStr = true;
-      continue;
-    }
-    if (ch === "[") depth++;
-    else if (ch === "]") {
-      depth--;
-      if (depth === 0) {
-        end = i + 1;
-        break;
-      }
-    }
-  }
-  if (end === -1) {
-    throw new Error("ForexFactory HTML: unterminated days array");
-  }
-
-  return JSON.parse(html.slice(arrStart, end)) as FfDay[];
-}
-
-/**
- * Scrape lịch kinh tế đầy đủ từ forexfactory.com/calendar (không phải widget JSON free
- * `ff_calendar_thisweek.json` — widget đó không bao giờ trả `actual`, xem
- * project-calendar-actual-data-source trong memory). Trang HTML nhúng sẵn dữ liệu đầy đủ
- * (kể cả actual đã công bố) trong một thẻ <script>.
+ * Lấy lịch kinh tế (forecast/previous/actual) từ endpoint public đứng sau widget Economic
+ * Calendar của TradingView. Đây KHÔNG phải API chính thức có tài liệu, nhưng public, free,
+ * trả JSON có actual (không như widget FF), và không bị Cloudflare Managed Challenge chặn
+ * như forexfactory.com/investing.com — chỉ cần header Origin khớp domain TradingView.
+ * Xem project-calendar-actual-data-source trong memory.
  */
 export async function fetchInvestingCalendar(): Promise<CalendarEvent[]> {
   if (cachedEvents && Date.now() - cachedAt < CACHE_TTL_MS) {
     return cachedEvents;
   }
 
-  const res = await fetch(CALENDAR_URL, {
-    headers: {
-      "User-Agent": BROWSER_USER_AGENT,
-      Accept: "text/html,application/xhtml+xml",
-    },
+  const now = Date.now();
+  const from = new Date(now - 3 * 24 * 60 * 60 * 1000).toISOString();
+  const to = new Date(now + 7 * 24 * 60 * 60 * 1000).toISOString();
+  const url = `${CALENDAR_URL}?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&countries=${COUNTRIES.join(",")}`;
+
+  const res = await fetch(url, {
+    headers: { Origin: ORIGIN_HEADER, Accept: "application/json" },
     next: { revalidate: 0 },
   });
 
   if (!res.ok) {
-    throw new Error(`ForexFactory HTTP ${res.status}`);
+    throw new Error(`TradingView calendar HTTP ${res.status}`);
   }
 
-  const html = await res.text();
-  const days = extractDays(html);
-
-  const events: CalendarEvent[] = [];
-  for (const day of days) {
-    for (const ev of day.events ?? []) {
-      const impact = mapImpact(ev.impactName);
-      if (!impact) continue;
-      if (!ev.currency || ev.currency === "All") continue;
-
-      events.push({
-        id: `ff-${ev.id}`,
-        timeUtc: new Date(ev.dateline * 1000).toISOString(),
-        currency: ev.currency.toUpperCase(),
-        title: ev.name || "Event",
-        impact,
-        forecast: ev.forecast || undefined,
-        previous: ev.previous || undefined,
-        actual: ev.actual || undefined,
-      });
-    }
+  const data = (await res.json()) as { status?: string; result?: TvEvent[] };
+  if (data.status !== "ok" || !Array.isArray(data.result)) {
+    throw new Error("TradingView calendar: unexpected response format");
   }
+
+  const events: CalendarEvent[] = data.result
+    .filter((ev) => ev.currency)
+    .map((ev) => ({
+      id: `tv-${ev.id}`,
+      timeUtc: ev.date,
+      currency: ev.currency!.toUpperCase(),
+      title: ev.title || "Event",
+      impact: mapImpact(ev.importance),
+      forecast: formatTvValue(ev.forecast, ev.unit, ev.scale),
+      previous: formatTvValue(ev.previous, ev.unit, ev.scale),
+      actual: formatTvValue(ev.actual, ev.unit, ev.scale),
+    }));
 
   cachedEvents = events;
   cachedAt = Date.now();

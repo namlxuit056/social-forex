@@ -429,7 +429,7 @@
     "impactHigh": "Cao",
     "zoneUtc": "UTC",
     "zoneVn": "Việt Nam (UTC+7)",
-    "sourceInvesting": "Forex Factory (live)",
+    "sourceInvesting": "TradingView (live)",
     "sourceFmp": "FMP (cache DB)",
     "sourceStaleDb": "Cache DB (API lỗi)",
     "sourceSample": "Mẫu",

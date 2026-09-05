@@ -36,6 +36,12 @@ describe("parseIndicatorValue", () => {
     expect(parseIndicatorValue("1,234")).toBe(1234);
   });
 
+  it("strips a leading currency symbol (TradingView format)", () => {
+    expect(parseIndicatorValue("$1.2B")).toBe(1_200_000_000);
+    expect(parseIndicatorValue("C$0.3")).toBe(0.3);
+    expect(parseIndicatorValue("£4.5")).toBe(4.5);
+  });
+
   it("returns null for empty/dash/garbage", () => {
     expect(parseIndicatorValue("")).toBeNull();
     expect(parseIndicatorValue("-")).toBeNull();

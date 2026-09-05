@@ -7,7 +7,8 @@ export type CronJobKey =
   | "price-alerts-check"
   | "journal-weekly-review"
   | "journal-daily-review"
-  | "academy-auto-generate";
+  | "academy-auto-generate"
+  | "calendar-sync";
 
 export type CronJobMeta = {
   key: CronJobKey;
@@ -87,6 +88,13 @@ export const CRON_JOBS: CronJobMeta[] = [
     label: "Academy: tự sinh bài học",
     description: "Sinh và publish 3 bài học Academy AI mới.",
     schedule: "Hàng ngày 03:00 UTC",
+    risk: "normal",
+  },
+  {
+    key: "calendar-sync",
+    label: "Lịch kinh tế: đồng bộ",
+    description: "Lấy dữ liệu forecast/previous/actual từ TradingView, lưu DB + gửi tín hiệu buy/sell cho sự kiện vừa có actual.",
+    schedule: "Mỗi 15 phút",
     risk: "normal",
   },
 ];

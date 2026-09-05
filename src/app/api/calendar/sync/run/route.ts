@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
 import { resolveCalendarEvents } from "@/lib/calendar/resolve-calendar";
+import { isCronJobEnabled } from "@/lib/cron/job-enabled";
 
 export const dynamic = "force-dynamic";
 
@@ -14,6 +15,10 @@ function authorized(req: NextRequest) {
 }
 
 async function run() {
+  if (!(await isCronJobEnabled("calendar-sync"))) {
+    return Response.json({ ok: true, skipped: true, reason: "disabled_by_admin" });
+  }
+
   const result = await resolveCalendarEvents();
   return Response.json({
     ok: true,

@@ -14,6 +14,7 @@ import { checkPriceAlerts } from "@/lib/price-alerts/check";
 import { runJournalWeeklyReview } from "@/lib/journal/weekly-review-run";
 import { runJournalDailyReview } from "@/lib/journal/daily-review-run";
 import { runAcademyAutoGenerate } from "@/lib/ai/academy-auto-generate";
+import { resolveCalendarEvents } from "@/lib/calendar/resolve-calendar";
 import type { CronJobKey } from "./job-registry";
 
 async function requireAdmin() {
@@ -64,6 +65,17 @@ export async function runCronJob(jobKey: CronJobKey): Promise<RunCronJobResult> 
       case "academy-auto-generate":
         summary = await runAcademyAutoGenerate(3);
         break;
+      case "calendar-sync": {
+        const result = await resolveCalendarEvents();
+        summary = {
+          source: result.source,
+          syncedAt: result.syncedAt,
+          warning: result.warning,
+          count: result.events.length,
+          withActual: result.events.filter((e) => e.actual).length,
+        };
+        break;
+      }
       default:
         return { ok: false, jobKey, at, error: "unknown_job" };
     }
