@@ -16,8 +16,8 @@ async function scanMarket(market: TvMarket, tickers: string[]): Promise<Map<stri
     body: JSON.stringify({
       symbols: { tickers, query: { types: [] } },
       // Recommend.All: điểm tổng hợp kỹ thuật (-1..1) của TradingView. |240 = khung 4H,
-      // không hậu tố = khung mặc định 1D.
-      columns: ["Recommend.All|240", "Recommend.All"],
+      // không hậu tố = khung mặc định 1D. ATR/EMA20|240 dùng để tính vùng entry/SL/TP tham khảo.
+      columns: ["Recommend.All|240", "Recommend.All", "close", "ATR", "EMA20|240"],
     }),
     next: { revalidate: 0 },
   });
@@ -29,9 +29,15 @@ async function scanMarket(market: TvMarket, tickers: string[]): Promise<Map<stri
   const data = (await res.json()) as { data?: { s: string; d: unknown[] }[] };
   const map = new Map<string, SymbolScores>();
   for (const row of data.data ?? []) {
-    const [score4h, score1d] = row.d;
-    if (typeof score4h === "number" && typeof score1d === "number") {
-      map.set(row.s, { score4h, score1d });
+    const [score4h, score1d, close, atr4h, ema20_4h] = row.d;
+    if (
+      typeof score4h === "number" &&
+      typeof score1d === "number" &&
+      typeof close === "number" &&
+      typeof atr4h === "number" &&
+      typeof ema20_4h === "number"
+    ) {
+      map.set(row.s, { score4h, score1d, close, atr4h, ema20_4h });
     }
   }
   return map;

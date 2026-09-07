@@ -71,7 +71,16 @@ export default async function TechnicalRatingPage({
     id: n.id,
     createdAt: n.createdAt.toISOString(),
     readAt: n.readAt?.toISOString() ?? null,
-    meta: n.meta as { symbol?: string; signal?: string; score4h?: number; score1d?: number } | null,
+    meta: n.meta as {
+      symbol?: string;
+      signal?: string;
+      score4h?: number;
+      score1d?: number;
+      entryLow?: number;
+      entryHigh?: number;
+      stopLoss?: number;
+      takeProfit?: number;
+    } | null,
   }));
 
   const dailySummaries = dailySummaryRows.map((r) => ({

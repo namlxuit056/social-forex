@@ -39,6 +39,12 @@ export type SymbolScores = {
   score4h: number;
   /** Recommend.All khung 1 ngày — dùng để xác nhận cùng chiều, tăng độ tin cậy. */
   score1d: number;
+  /** Giá đóng cửa gần nhất — tham khảo, không phải giá lúc fire chính xác đến từng tick. */
+  close: number;
+  /** Average True Range khung 4H — đơn vị đo biến động, dùng để tính vùng entry/SL/TP. */
+  atr4h: number;
+  /** EMA20 khung 4H — điểm neo pullback cho vùng entry tham khảo. */
+  ema20_4h: number;
 };
 
 export type ConfidentSignal = "buy" | "sell";
@@ -53,4 +59,61 @@ export function computeConfidentSignal(scores: SymbolScores): ConfidentSignal | 
   if (rating4h === "strong_buy" && scores.score1d > 0) return "buy";
   if (rating4h === "strong_sell" && scores.score1d < 0) return "sell";
   return null;
+}
+
+/** Số chữ số thập phân hợp lý theo độ lớn giá — JPY/vàng/crypto ít số lẻ hơn major FX. */
+function decimalsForPrice(referencePrice: number): number {
+  const abs = Math.abs(referencePrice);
+  if (abs >= 1000) return 1;
+  if (abs >= 100) return 2;
+  if (abs >= 10) return 3;
+  if (abs >= 1) return 4;
+  return 5;
+}
+
+function roundPrice(value: number, referencePrice: number): number {
+  const decimals = decimalsForPrice(referencePrice);
+  const factor = 10 ** decimals;
+  return Math.round(value * factor) / factor;
+}
+
+export type PriceLevels = {
+  /** Vùng giá tham khảo để chờ pullback vào lệnh (không phải giá thị trường phải khớp ngay). */
+  entryLow: number;
+  entryHigh: number;
+  stopLoss: number;
+  takeProfit: number;
+};
+
+/**
+ * Vùng giá entry/SL/TP tham khảo — neo quanh EMA20(4H) (điểm pullback hợp lý thay vì đuổi
+ * giá tại đỉnh/đáy 4H), đơn vị đo bằng ATR(4H): entry = EMA20 ± 0.5×ATR, SL = 1×ATR ngoài
+ * entry, TP = 2×ATR (R:R ~1:2). Đây là công thức kỹ thuật đơn giản mang tính giáo dục,
+ * KHÔNG phải khuyến nghị đầu tư / entry chính xác.
+ */
+export function computePriceLevels(signal: ConfidentSignal, scores: SymbolScores): PriceLevels {
+  const half = scores.atr4h * 0.5;
+  const entryLow = scores.ema20_4h - half;
+  const entryHigh = scores.ema20_4h + half;
+  const raw =
+    signal === "buy"
+      ? {
+          entryLow,
+          entryHigh,
+          stopLoss: scores.ema20_4h - scores.atr4h,
+          takeProfit: scores.ema20_4h + scores.atr4h * 2,
+        }
+      : {
+          entryLow,
+          entryHigh,
+          stopLoss: scores.ema20_4h + scores.atr4h,
+          takeProfit: scores.ema20_4h - scores.atr4h * 2,
+        };
+
+  return {
+    entryLow: roundPrice(raw.entryLow, scores.close),
+    entryHigh: roundPrice(raw.entryHigh, scores.close),
+    stopLoss: roundPrice(raw.stopLoss, scores.close),
+    takeProfit: roundPrice(raw.takeProfit, scores.close),
+  };
 }

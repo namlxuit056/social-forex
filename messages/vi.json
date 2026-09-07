@@ -415,7 +415,11 @@
     "technicalRatingHeldSignals": "Còn giữ chiều",
     "technicalRatingHeldHint": "Số tín hiệu mà chiều hiện tại (lúc tổng kết) vẫn khớp — không phải đánh giá lời/lỗ thực tế.",
     "technicalRatingTopSymbols": "Symbol nổi bật",
-    "technicalRatingHistoryTitle": "Lịch sử từng tín hiệu"
+    "technicalRatingHistoryTitle": "Lịch sử từng tín hiệu",
+    "technicalRatingEntryZone": "Vùng vào",
+    "technicalRatingStopLoss": "SL",
+    "technicalRatingTakeProfit": "TP",
+    "technicalRatingLevelsHint": "Vùng entry/SL/TP tính từ EMA20 khung 4H ± ATR — tham khảo kỹ thuật đơn giản, không phải khuyến nghị đầu tư."
   },
   "advisor": {
     "metaTitle": "AI cố vấn Forex — Social Forex",
@@ -2619,7 +2623,7 @@
     "calendarActualSell": "BÁN",
     "technicalRatingBuyTitle": "{symbol}: Tín hiệu kỹ thuật MUA mạnh",
     "technicalRatingSellTitle": "{symbol}: Tín hiệu kỹ thuật BÁN mạnh",
-    "technicalRatingBody": "Điểm kỹ thuật: 4H {score4h} · 1D {score1d} (thang -1..1). Xem chi tiết trên TradingView."
+    "technicalRatingBody": "Vùng vào tham khảo: {entryLow}–{entryHigh} · SL {stopLoss} · TP {takeProfit}"
   },
   "missions": {
     "title": "Bảng nhiệm vụ người mới",

@@ -14,7 +14,16 @@ type HistoryItem = {
   id: string;
   createdAt: string;
   readAt: string | null;
-  meta: { symbol?: string; signal?: string; score4h?: number; score1d?: number } | null;
+  meta: {
+    symbol?: string;
+    signal?: string;
+    score4h?: number;
+    score1d?: number;
+    entryLow?: number;
+    entryHigh?: number;
+    stopLoss?: number;
+    takeProfit?: number;
+  } | null;
 };
 
 type Period = "day" | "week" | "month";
@@ -148,34 +157,51 @@ export function TechnicalRatingHistory({
                 const meta = n.meta;
                 if (!meta?.symbol || !meta.signal) return null;
                 const isBuy = meta.signal === "buy";
+                const hasLevels =
+                  meta.entryLow !== undefined &&
+                  meta.entryHigh !== undefined &&
+                  meta.stopLoss !== undefined &&
+                  meta.takeProfit !== undefined;
                 return (
-                  <li
-                    key={n.id}
-                    className="flex flex-wrap items-center justify-between gap-2 px-4 py-2.5 text-sm"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono font-medium text-foreground">
-                        {meta.symbol}
-                      </span>
-                      <Badge
-                        variant="outline"
-                        className={cn(
-                          isBuy
-                            ? "border-emerald-500/40 bg-emerald-500/12 text-emerald-700 dark:text-emerald-200"
-                            : "border-red-500/40 bg-red-500/12 text-red-700 dark:text-red-200",
-                        )}
-                      >
-                        {isBuy ? t("technicalRatingBuy") : t("technicalRatingSell")}
-                      </Badge>
-                    </div>
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                      {meta.score4h !== undefined && meta.score1d !== undefined ? (
-                        <span className="font-mono">
-                          4H {meta.score4h} · 1D {meta.score1d}
+                  <li key={n.id} className="flex flex-col gap-1.5 px-4 py-2.5 text-sm">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono font-medium text-foreground">
+                          {meta.symbol}
                         </span>
-                      ) : null}
-                      <span>{new Date(n.createdAt).toLocaleString(locale)}</span>
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            isBuy
+                              ? "border-emerald-500/40 bg-emerald-500/12 text-emerald-700 dark:text-emerald-200"
+                              : "border-red-500/40 bg-red-500/12 text-red-700 dark:text-red-200",
+                          )}
+                        >
+                          {isBuy ? t("technicalRatingBuy") : t("technicalRatingSell")}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                        {meta.score4h !== undefined && meta.score1d !== undefined ? (
+                          <span className="font-mono">
+                            4H {meta.score4h} · 1D {meta.score1d}
+                          </span>
+                        ) : null}
+                        <span>{new Date(n.createdAt).toLocaleString(locale)}</span>
+                      </div>
                     </div>
+                    {hasLevels ? (
+                      <div className="flex flex-wrap gap-x-4 gap-y-0.5 font-mono text-xs text-muted-foreground">
+                        <span>
+                          {t("technicalRatingEntryZone")}: {meta.entryLow}–{meta.entryHigh}
+                        </span>
+                        <span className="text-red-500">
+                          {t("technicalRatingStopLoss")}: {meta.stopLoss}
+                        </span>
+                        <span className="text-emerald-500">
+                          {t("technicalRatingTakeProfit")}: {meta.takeProfit}
+                        </span>
+                      </div>
+                    ) : null}
                   </li>
                 );
               })}
@@ -184,6 +210,7 @@ export function TechnicalRatingHistory({
         </CardContent>
       </Card>
       <p className="text-xs text-muted-foreground">{t("technicalRatingScoreHint")}</p>
+      <p className="text-xs text-muted-foreground">{t("technicalRatingLevelsHint")}</p>
     </div>
   );
 }

@@ -415,7 +415,11 @@
     "technicalRatingHeldSignals": "Still holding direction",
     "technicalRatingHeldHint": "Signals whose current direction (at summary time) still matches — not a real profit/loss evaluation.",
     "technicalRatingTopSymbols": "Top symbols",
-    "technicalRatingHistoryTitle": "Signal-by-signal history"
+    "technicalRatingHistoryTitle": "Signal-by-signal history",
+    "technicalRatingEntryZone": "Entry",
+    "technicalRatingStopLoss": "SL",
+    "technicalRatingTakeProfit": "TP",
+    "technicalRatingLevelsHint": "Entry/SL/TP computed from the 4H EMA20 ± ATR — a simple technical reference, not investment advice."
   },
   "advisor": {
     "metaTitle": "AI Forex Advisor — Social Forex",
@@ -2619,7 +2623,7 @@
     "calendarActualSell": "SELL",
     "technicalRatingBuyTitle": "{symbol}: strong technical BUY signal",
     "technicalRatingSellTitle": "{symbol}: strong technical SELL signal",
-    "technicalRatingBody": "Technical score: 4H {score4h} · 1D {score1d} (scale -1..1). See TradingView for details."
+    "technicalRatingBody": "Reference entry: {entryLow}–{entryHigh} · SL {stopLoss} · TP {takeProfit}"
   },
   "missions": {
     "title": "Beginner mission board",

@@ -1,7 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import { sendLocalizedPushToUser } from "@/lib/push-i18n";
 import { fetchTechnicalRatings } from "@/lib/quotes/fetch-tv-ratings";
-import { computeConfidentSignal, type SymbolScores } from "@/lib/quotes/technical-rating";
+import {
+  computeConfidentSignal,
+  computePriceLevels,
+  type SymbolScores,
+} from "@/lib/quotes/technical-rating";
 
 function round2(n: number): number {
   return Math.round(n * 100) / 100;
@@ -18,7 +22,17 @@ export type TechnicalRatingCheckSummary = {
   notified: number;
   /** Chi tiết từng symbol đã fire — hữu ích để xem trên /admin/crons kể cả khi
    * notified=0 (chưa ai favorite/có vị thế ở symbol đó). */
-  signals: { symbol: string; signal: "buy" | "sell"; score4h: number; score1d: number; notifiedUsers: number }[];
+  signals: {
+    symbol: string;
+    signal: "buy" | "sell";
+    score4h: number;
+    score1d: number;
+    entryLow: number;
+    entryHigh: number;
+    stopLoss: number;
+    takeProfit: number;
+    notifiedUsers: number;
+  }[];
 };
 
 async function notifySymbolSignal(
@@ -33,11 +47,13 @@ async function notifySymbolSignal(
   if (userIds.size === 0) return 0;
 
   const dedupeKey = `tv-rating:${symbol}:${signal}:${Math.floor(Date.now() / COOLDOWN_MS)}`;
+  const levels = computePriceLevels(signal, scores);
   const meta = {
     symbol,
     signal,
     score4h: round2(scores.score4h),
     score1d: round2(scores.score1d),
+    ...levels,
   };
 
   await prisma.$transaction(
@@ -58,8 +74,13 @@ async function notifySymbolSignal(
             signal === "buy" ? "technicalRatingBuyTitle" : "technicalRatingSellTitle",
             { symbol },
           ),
-          body: t("technicalRatingBody", { score4h: meta.score4h, score1d: meta.score1d }),
-          url: "/quotes",
+          body: t("technicalRatingBody", {
+            entryLow: meta.entryLow,
+            entryHigh: meta.entryHigh,
+            stopLoss: meta.stopLoss,
+            takeProfit: meta.takeProfit,
+          }),
+          url: "/quotes/technical-rating",
         }));
       } catch {
         // Non-blocking
@@ -94,7 +115,15 @@ export async function checkTechnicalRatingSignals(): Promise<TechnicalRatingChec
     } catch (e) {
       console.error("[tv-rating] notifySymbolSignal failed for", symbol, e);
     }
-    signals.push({ symbol, signal, score4h: scores.score4h, score1d: scores.score1d, notifiedUsers });
+    const levels = computePriceLevels(signal, scores);
+    signals.push({
+      symbol,
+      signal,
+      score4h: scores.score4h,
+      score1d: scores.score1d,
+      ...levels,
+      notifiedUsers,
+    });
   }
 
   return { ok: true, checked: ratings.size, signaled, notified, signals };
