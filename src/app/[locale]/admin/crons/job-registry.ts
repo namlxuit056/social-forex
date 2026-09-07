@@ -103,7 +103,7 @@ export const CRON_JOBS: CronJobMeta[] = [
     key: "tv-rating-check",
     label: "Technical rating (TradingView): tín hiệu chắc chắn",
     description: "Quét điểm kỹ thuật tổng hợp 4H+1D từ TradingView cho các symbol app hỗ trợ, gửi thông báo khi có Strong Buy/Sell được 1D xác nhận cùng chiều.",
-    schedule: "Hàng giờ (phút 0)",
+    schedule: "Mỗi 15 phút",
     risk: "normal",
   },
   {
