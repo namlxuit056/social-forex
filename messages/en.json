@@ -2666,5 +2666,32 @@
       "not_complete": "This mission isn't complete yet.",
       "already_claimed": "You've already claimed this mission."
     }
+  },
+  "signalSources": {
+    "tradingview": "TradingView",
+    "cot": "CFTC COT",
+    "oandaBook": "OANDA Order Book",
+    "myfxbook": "Myfxbook",
+    "igDailyfx": "IG Client Sentiment",
+    "tradingviewBlurb": "TradingView's aggregate 4H + 1D technical rating.",
+    "cotBlurb": "Large speculators' net positioning — the CFTC Commitments of Traders report, released weekly on Friday.",
+    "oandaBookBlurb": "OANDA retail traders' open long/short ratio. Contrarian signal when the crowd is at an extreme (≥ 65%).",
+    "myfxbookBlurb": "Myfxbook Community Outlook — long/short % from real accounts. Contrarian signal.",
+    "igDailyfxBlurb": "IG Client Sentiment (retail long/short %) published via DailyFX. Contrarian signal.",
+    "stanceTrend": "Follows the source",
+    "stanceContrarian": "Against the crowd",
+    "legendTitle": "Signal sources",
+    "legendHint": "Every notification states which source the signal came from.",
+    "sourceColumn": "Source",
+    "buy": "BUY",
+    "sell": "SELL",
+    "detailCrowd": "Crowd {longPct}% long · {shortPct}% short",
+    "detailBookZone": "heavy order cluster near {price}",
+    "detailCot": "Large specs net {netPct}% OI · {weekChange} contracts this week",
+    "tvAgree": "agrees with TradingView technicals",
+    "tvDisagree": "against TradingView technicals",
+    "pushTitle": "{symbol} · {source}: {dir, select, buy {BUY signal} sell {SELL signal} other {}}",
+    "externalSignalBuy": "{symbol}: BUY signal from {source}",
+    "externalSignalSell": "{symbol}: SELL signal from {source}"
   }
 }

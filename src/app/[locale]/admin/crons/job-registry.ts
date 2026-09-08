@@ -10,7 +10,9 @@ export type CronJobKey =
   | "academy-auto-generate"
   | "calendar-sync"
   | "tv-rating-check"
-  | "tv-rating-daily-summary";
+  | "tv-rating-daily-summary"
+  | "external-signals-check"
+  | "cot-check";
 
 export type CronJobMeta = {
   key: CronJobKey;
@@ -111,6 +113,22 @@ export const CRON_JOBS: CronJobMeta[] = [
     label: "Technical rating: tổng kết cuối ngày",
     description: "Đếm số tín hiệu chắc chắn đã fire trong ngày UTC, kiểm tra còn giữ chiều hay không, lưu 1 dòng tổng kết (tuần/tháng cộng dồn từ các dòng ngày khi hiển thị trên /quotes/technical-rating).",
     schedule: "Hàng ngày 16:55 UTC (23:55 giờ VN)",
+    risk: "normal",
+  },
+  {
+    key: "external-signals-check",
+    label: "Tín hiệu nguồn ngoài (sentiment khách lẻ)",
+    description:
+      "Quét OANDA order book, Myfxbook Community Outlook và IG Client Sentiment (qua DailyFX) — phát tín hiệu NGƯỢC đám đông khi tỷ lệ long/short lệch cực đoan (≥65%). Notification ghi rõ nguồn. Cần env OANDA_API_TOKEN / MYFXBOOK_EMAIL+PASSWORD / IG_SENTIMENT_URL — nguồn nào thiếu env thì tự bỏ qua.",
+    schedule: "Hàng ngày 08:00 UTC (15:00 giờ VN)",
+    risk: "normal",
+  },
+  {
+    key: "cot-check",
+    label: "Tín hiệu CFTC COT (vị thế quỹ lớn)",
+    description:
+      "Lấy báo cáo Commitments of Traders (CFTC, public, không cần key), tính vị thế ròng non-commercial theo % open interest, phát tín hiệu THEO chiều quỹ lớn khi vị thế đủ lớn và còn mở rộng. Notification ghi rõ nguồn.",
+    schedule: "Thứ 7 18:00 UTC (sau khi CFTC ra báo cáo chiều thứ 6)",
     risk: "normal",
   },
 ];

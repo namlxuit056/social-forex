@@ -2666,5 +2666,32 @@
       "not_complete": "Nhiệm vụ chưa hoàn thành.",
       "already_claimed": "Bạn đã nhận thưởng nhiệm vụ này rồi."
     }
+  },
+  "signalSources": {
+    "tradingview": "TradingView",
+    "cot": "CFTC COT",
+    "oandaBook": "OANDA Order Book",
+    "myfxbook": "Myfxbook",
+    "igDailyfx": "IG Client Sentiment",
+    "tradingviewBlurb": "Điểm kỹ thuật tổng hợp khung 4H + 1D của TradingView.",
+    "cotBlurb": "Vị thế ròng của quỹ đầu cơ lớn — báo cáo Commitments of Traders của CFTC (Mỹ), ra hàng tuần chiều thứ Sáu.",
+    "oandaBookBlurb": "Tỷ lệ lệnh long/short đang mở của khách lẻ OANDA. Tín hiệu đi ngược đám đông khi lệch cực đoan (≥ 65%).",
+    "myfxbookBlurb": "Community Outlook của Myfxbook — % long/short từ tài khoản thật. Tín hiệu ngược đám đông.",
+    "igDailyfxBlurb": "IG Client Sentiment (retail long/short %) công bố qua DailyFX. Tín hiệu ngược đám đông.",
+    "stanceTrend": "Theo chiều nguồn",
+    "stanceContrarian": "Ngược đám đông",
+    "legendTitle": "Nguồn tín hiệu",
+    "legendHint": "Mỗi thông báo đều ghi rõ tín hiệu đến từ nguồn nào.",
+    "sourceColumn": "Nguồn",
+    "buy": "MUA",
+    "sell": "BÁN",
+    "detailCrowd": "Đám đông {longPct}% MUA · {shortPct}% BÁN",
+    "detailBookZone": "vùng lệnh dày quanh {price}",
+    "detailCot": "Quỹ lớn ròng {netPct}% OI · {weekChange} HĐ tuần này",
+    "tvAgree": "khớp xu hướng kỹ thuật TradingView",
+    "tvDisagree": "ngược xu hướng kỹ thuật TradingView",
+    "pushTitle": "{symbol} · {source}: {dir, select, buy {tín hiệu MUA} sell {tín hiệu BÁN} other {}}",
+    "externalSignalBuy": "{symbol}: tín hiệu MUA từ {source}",
+    "externalSignalSell": "{symbol}: tín hiệu BÁN từ {source}"
   }
 }

@@ -59,6 +59,15 @@ AI Article enrichment (optional):
 - `TAVILY_API_KEY` — Web search for latest forex news/analysis (tavily.com, free 1000 req/month)
 - `CHART_IMG_API_KEY` — TradingView chart screenshots via chart-img.com (requires BLOB_READ_WRITE_TOKEN)
 
+External signal sources (optional — feed `/quotes/technical-rating`, see `src/lib/quotes/sources/`):
+- CFTC COT (`cot-check` cron) needs no key — public Socrata dataset.
+- `OANDA_API_TOKEN` — OANDA v20 personal access token (demo/practice account is enough). Enables the OANDA order-book contrarian source.
+- `OANDA_API_URL` — OANDA API base, default `https://api-fxpractice.oanda.com` (live: `https://api-fxtrade.oanda.com`)
+- `MYFXBOOK_EMAIL` / `MYFXBOOK_PASSWORD` — free Myfxbook account, enables the Community Outlook contrarian source
+- `IG_SENTIMENT_URL` — URL returning IG Client Sentiment as JSON (best-effort DailyFX scrape used if unset)
+
+Every notification these produce carries `meta.source` (`tradingview` | `cot` | `oandaBook` | `myfxbook` | `igDailyfx`); labels/blurbs live in the `signalSources` i18n namespace.
+
 ## Architecture
 
 ### Stack

@@ -9,6 +9,9 @@ function utcDayStart(d: Date): Date {
 function isSignalMeta(meta: unknown): meta is { symbol: string; signal: "buy" | "sell" } {
   if (!meta || typeof meta !== "object") return false;
   const m = meta as Record<string, unknown>;
+  // Tổng kết này chỉ tính tín hiệu TradingView (heldSignals dựa trên score4h TV). Tín hiệu
+  // từ nguồn ngoài (meta.source khác "tradingview") không nằm trong phạm vi tổng kết ngày.
+  if (m.source !== undefined && m.source !== "tradingview") return false;
   return typeof m.symbol === "string" && (m.signal === "buy" || m.signal === "sell");
 }
 

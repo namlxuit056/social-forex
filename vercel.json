@@ -43,6 +43,14 @@
     {
       "path": "/api/quotes/tv-rating-daily-summary",
       "schedule": "55 16 * * *"
+    },
+    {
+      "path": "/api/quotes/external-signals-check",
+      "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/quotes/cot-check",
+      "schedule": "0 18 * * 6"
     }
   ]
 }

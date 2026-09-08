@@ -74,12 +74,24 @@ export default async function TechnicalRatingPage({
     meta: n.meta as {
       symbol?: string;
       signal?: string;
+      source?: string;
+      stance?: string;
       score4h?: number;
       score1d?: number;
       entryLow?: number;
       entryHigh?: number;
       stopLoss?: number;
       takeProfit?: number;
+      tvAgree?: boolean | null;
+      detail?: {
+        kind?: string;
+        longPct?: number;
+        shortPct?: number;
+        heavyZone?: number | null;
+        netPct?: number;
+        weekChange?: number;
+        reportDate?: string;
+      };
     } | null,
   }));
 

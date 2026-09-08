@@ -53,6 +53,25 @@ function asTechnicalRatingMeta(meta: NotificationRow["meta"]): TechnicalRatingMe
   };
 }
 
+const EXTERNAL_SOURCES = ["cot", "oandaBook", "myfxbook", "igDailyfx"] as const;
+type ExternalSource = (typeof EXTERNAL_SOURCES)[number];
+
+/** Tín hiệu TECHNICAL_RATING_SIGNAL nhưng đến từ nguồn ngoài TradingView (COT, sentiment...). */
+function asExternalSignalMeta(
+  meta: NotificationRow["meta"],
+): { symbol: string; signal: "buy" | "sell"; source: ExternalSource } | null {
+  if (
+    !meta ||
+    typeof meta.symbol !== "string" ||
+    (meta.signal !== "buy" && meta.signal !== "sell") ||
+    typeof meta.source !== "string" ||
+    !EXTERNAL_SOURCES.includes(meta.source as ExternalSource)
+  ) {
+    return null;
+  }
+  return { symbol: meta.symbol, signal: meta.signal, source: meta.source as ExternalSource };
+}
+
 export function NotificationList({
   items,
   locale,
@@ -61,6 +80,7 @@ export function NotificationList({
   locale: string;
 }) {
   const t = useTranslations("notifications");
+  const ts = useTranslations("signalSources");
   // Optimistic: đánh dấu read ngay khi click, revert nếu server action fail
   const [optimisticReadIds, setOptimisticReadIds] = useState<ReadonlySet<string>>(
     () => new Set(),
@@ -91,6 +111,8 @@ export function NotificationList({
         const unread = n.readAt === null && !optimisticReadIds.has(n.id);
         const ratingMeta =
           n.kind === "TECHNICAL_RATING_SIGNAL" ? asTechnicalRatingMeta(n.meta) : null;
+        const externalMeta =
+          n.kind === "TECHNICAL_RATING_SIGNAL" ? asExternalSignalMeta(n.meta) : null;
         const href =
           n.kind === "USER_FOLLOWED" && n.actor
             ? `/u/${n.actor.id}`
@@ -143,14 +165,24 @@ export function NotificationList({
                           : n.kind === "CALENDAR_ACTUAL_SIGNAL"
                             ? t("calendarActualSignal")
                             : n.kind === "TECHNICAL_RATING_SIGNAL"
-                              ? ratingMeta
-                                ? t(
-                                    ratingMeta.signal === "buy"
-                                      ? "technicalRatingSignalBuy"
-                                      : "technicalRatingSignalSell",
-                                    { symbol: ratingMeta.symbol },
+                              ? externalMeta
+                                ? ts(
+                                    externalMeta.signal === "buy"
+                                      ? "externalSignalBuy"
+                                      : "externalSignalSell",
+                                    {
+                                      symbol: externalMeta.symbol,
+                                      source: ts(externalMeta.source),
+                                    },
                                   )
-                                : t("technicalRatingSignal")
+                                : ratingMeta
+                                  ? t(
+                                      ratingMeta.signal === "buy"
+                                        ? "technicalRatingSignalBuy"
+                                        : "technicalRatingSignalSell",
+                                      { symbol: ratingMeta.symbol },
+                                    )
+                                  : t("technicalRatingSignal")
                               : n.signal
                                 ? t("signalNew", {
                                   symbol: n.signal.symbol,

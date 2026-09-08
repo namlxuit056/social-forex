@@ -49,6 +49,10 @@ async function notifySymbolSignal(
   const dedupeKey = `tv-rating:${symbol}:${signal}:${Math.floor(Date.now() / COOLDOWN_MS)}`;
   const levels = computePriceLevels(signal, scores);
   const meta = {
+    // Ghi rõ nguồn: tín hiệu này đến từ điểm kỹ thuật tổng hợp của TradingView.
+    // Các nguồn khác (cot, oandaBook, myfxbook, igDailyfx) dùng chung kind này nhưng
+    // meta.source khác — xem run-external-signals.ts.
+    source: "tradingview" as const,
     symbol,
     signal,
     score4h: round2(scores.score4h),
