@@ -11,6 +11,7 @@ import {
 } from "@/lib/quotes/technical-rating-summary";
 import { describeDetail } from "@/lib/quotes/external-signal-format";
 import { SIGNAL_SOURCES, type SignalDetail } from "@/lib/quotes/signal-sources";
+import type { SourceScorecard } from "@/lib/quotes/signal-outcomes";
 
 type RawDetail = {
   kind?: string;
@@ -80,10 +81,12 @@ function toSignalDetail(d: RawDetail | undefined): SignalDetail | null {
 export function TechnicalRatingHistory({
   items,
   dailySummaries,
+  scorecards,
   locale,
 }: {
   items: HistoryItem[];
   dailySummaries: DailySummaryRow[];
+  scorecards: { d30: SourceScorecard; d90: SourceScorecard };
   locale: string;
 }) {
   const t = useTranslations("quotes");
@@ -91,6 +94,9 @@ export function TechnicalRatingHistory({
   const ts = (key: string, params?: Record<string, string | number>) =>
     tsRaw(key as Parameters<typeof tsRaw>[0], params as never);
   const [period, setPeriod] = useState<Period>("day");
+  const [scoreWindow, setScoreWindow] = useState<30 | 90>(90);
+  const scorecard = scoreWindow === 30 ? scorecards.d30 : scorecards.d90;
+  const scoreHasData = scorecard.sources.some((s) => s.evaluated > 0 || s.pending > 0);
 
   const summary = useMemo(() => {
     if (period === "day") {
@@ -186,6 +192,100 @@ export function TechnicalRatingHistory({
                 </div>
               ) : null}
             </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card className="border-border/60">
+        <CardHeader className="pb-2">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <CardTitle className="text-sm">{t("technicalRatingScorecardTitle")}</CardTitle>
+            <div className="inline-flex rounded-lg border border-border p-0.5">
+              {([30, 90] as const).map((w) => (
+                <button
+                  key={w}
+                  type="button"
+                  onClick={() => setScoreWindow(w)}
+                  className={cn(
+                    "rounded-md px-3 py-1 text-xs font-medium transition-colors",
+                    scoreWindow === w
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {t("technicalRatingScorecardWindow", { days: w })}
+                </button>
+              ))}
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <p className="text-xs text-muted-foreground">{t("technicalRatingScorecardHint")}</p>
+          {!scoreHasData ? (
+            <p className="text-sm text-muted-foreground">{t("technicalRatingScorecardEmpty")}</p>
+          ) : (
+            <ul className="divide-y divide-border/60">
+              {scorecard.sources.map((s) => {
+                const decided = s.wins + s.losses;
+                return (
+                  <li
+                    key={s.source}
+                    className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-2 text-sm"
+                  >
+                    <span className="font-medium text-foreground">{ts(s.source)}</span>
+                    {s.evaluated === 0 ? (
+                      <span className="text-xs text-muted-foreground">
+                        {s.pending > 0
+                          ? t("technicalRatingScorecardPendingOnly", { count: s.pending })
+                          : t("technicalRatingScorecardNoData")}
+                      </span>
+                    ) : (
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
+                        <span>
+                          <span className="text-muted-foreground">
+                            {t("technicalRatingScorecardWinRate")}:{" "}
+                          </span>
+                          <span
+                            className={cn(
+                              "font-mono font-semibold",
+                              s.winRate === null
+                                ? "text-muted-foreground"
+                                : s.winRate >= 0.5
+                                  ? "text-emerald-500"
+                                  : "text-red-500",
+                            )}
+                          >
+                            {s.winRate === null ? "—" : `${Math.round(s.winRate * 100)}%`}
+                          </span>
+                          <span className="text-muted-foreground"> ({decided})</span>
+                        </span>
+                        {s.avgFavorPct !== null ? (
+                          <span>
+                            <span className="text-muted-foreground">
+                              {t("technicalRatingScorecardAvgMove")}:{" "}
+                            </span>
+                            <span
+                              className={cn(
+                                "font-mono",
+                                s.avgFavorPct >= 0 ? "text-emerald-500" : "text-red-500",
+                              )}
+                            >
+                              {s.avgFavorPct >= 0 ? "+" : ""}
+                              {s.avgFavorPct.toFixed(2)}%
+                            </span>
+                          </span>
+                        ) : null}
+                        {s.pending > 0 ? (
+                          <span className="text-muted-foreground">
+                            {t("technicalRatingScorecardPending", { count: s.pending })}
+                          </span>
+                        ) : null}
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
           )}
         </CardContent>
       </Card>

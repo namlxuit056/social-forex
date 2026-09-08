@@ -1,5 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import { fetchTechnicalRatings } from "@/lib/quotes/fetch-tv-ratings";
+import {
+  evaluateSignalOutcomes,
+  type EvaluateOutcomesResult,
+} from "@/lib/quotes/signal-outcome-store";
 import { computeDailySummary, type SignalEvent } from "@/lib/quotes/technical-rating-summary";
 
 function utcDayStart(d: Date): Date {
@@ -22,6 +26,8 @@ export type DailyRatingSummaryResult = {
   buySignals: number;
   sellSignals: number;
   heldSignals: number;
+  /** Kết quả chấm các tín hiệu đã đủ horizon (bảng điểm độ chính xác theo nguồn). */
+  outcomes: EvaluateOutcomesResult;
 };
 
 /**
@@ -77,6 +83,8 @@ export async function runDailyRatingSummary(): Promise<DailyRatingSummaryResult>
     },
   });
 
+  const outcomes = await evaluateSignalOutcomes();
+
   return {
     ok: true,
     day: day.toISOString().slice(0, 10),
@@ -84,5 +92,6 @@ export async function runDailyRatingSummary(): Promise<DailyRatingSummaryResult>
     buySignals: summary.buySignals,
     sellSignals: summary.sellSignals,
     heldSignals: summary.heldSignals,
+    outcomes,
   };
 }

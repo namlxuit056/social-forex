@@ -3,6 +3,11 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { EmptyState } from "@/components/layout/empty-state";
 import { SignupPrompt } from "@/components/analytics/signup-prompt";
+import {
+  computeSourceScorecard,
+  type OutcomeResult,
+  type OutcomeRow,
+} from "@/lib/quotes/signal-outcomes";
 import { TechnicalRatingHistory } from "./technical-rating-history";
 
 export async function generateMetadata({
@@ -55,7 +60,8 @@ export default async function TechnicalRatingPage({
     );
   }
 
-  const [rows, dailySummaryRows] = await Promise.all([
+  const scorecardSince = new Date(new Date().getTime() - 90 * 24 * 60 * 60 * 1000);
+  const [rows, dailySummaryRows, outcomeRows] = await Promise.all([
     prisma.notification.findMany({
       where: { userId: session.user.id, kind: "TECHNICAL_RATING_SIGNAL" },
       orderBy: { createdAt: "desc" },
@@ -65,7 +71,24 @@ export default async function TechnicalRatingPage({
       orderBy: { day: "desc" },
       take: 31,
     }),
+    prisma.signalOutcome.findMany({
+      where: { firedAt: { gte: scorecardSince } },
+      select: { source: true, firedAt: true, result: true, favorPct: true },
+      orderBy: { firedAt: "desc" },
+      take: 3000,
+    }),
   ]);
+
+  const parsedOutcomes: OutcomeRow[] = outcomeRows.map((r) => ({
+    source: r.source,
+    firedAt: r.firedAt,
+    result: (r.result as OutcomeResult | null) ?? null,
+    favorPct: r.favorPct,
+  }));
+  const scorecards = {
+    d30: computeSourceScorecard(parsedOutcomes, { windowDays: 30 }),
+    d90: computeSourceScorecard(parsedOutcomes, { windowDays: 90 }),
+  };
 
   const items = rows.map((n) => ({
     id: n.id,
@@ -114,7 +137,12 @@ export default async function TechnicalRatingPage({
           {t("technicalRatingDescription")}
         </p>
       </div>
-      <TechnicalRatingHistory items={items} dailySummaries={dailySummaries} locale={locale} />
+      <TechnicalRatingHistory
+        items={items}
+        dailySummaries={dailySummaries}
+        scorecards={scorecards}
+        locale={locale}
+      />
     </div>
   );
 }

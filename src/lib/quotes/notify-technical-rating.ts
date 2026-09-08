@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { sendLocalizedPushToUser } from "@/lib/push-i18n";
+import { recordSignalOutcome } from "@/lib/quotes/signal-outcome-store";
 import { fetchTechnicalRatings } from "@/lib/quotes/fetch-tv-ratings";
 import {
   computeConfidentSignal,
@@ -69,6 +70,17 @@ async function notifySymbolSignal(
       }),
     ),
   );
+
+  // Theo dõi kết quả (bảng điểm độ chính xác theo nguồn) — giá tham chiếu = close 4H.
+  await recordSignalOutcome({
+    dedupeKey,
+    source: "tradingview",
+    symbol,
+    signal,
+    stance: "trend",
+    firedAt: new Date(),
+    entryPrice: scores.close,
+  });
 
   await Promise.all(
     [...userIds].map(async (userId) => {

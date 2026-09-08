@@ -419,7 +419,16 @@
     "technicalRatingEntryZone": "Vùng vào",
     "technicalRatingStopLoss": "SL",
     "technicalRatingTakeProfit": "TP",
-    "technicalRatingLevelsHint": "Vùng entry/SL/TP tính từ EMA20 khung 4H ± ATR — tham khảo kỹ thuật đơn giản, không phải khuyến nghị đầu tư."
+    "technicalRatingLevelsHint": "Vùng entry/SL/TP tính từ EMA20 khung 4H ± ATR — tham khảo kỹ thuật đơn giản, không phải khuyến nghị đầu tư.",
+    "technicalRatingScorecardTitle": "Độ chính xác theo nguồn",
+    "technicalRatingScorecardHint": "Với mỗi tín hiệu, so giá lúc phát với giá spot sau 72 giờ. \"Đúng hướng\" khi giá đi theo chiều tín hiệu quá 0,1%. Đây là thước đo hướng ngắn hạn mang tính tham khảo, KHÔNG phải lời/lỗ thực tế (không tính TP/SL chạm trước).",
+    "technicalRatingScorecardWindow": "{days} ngày",
+    "technicalRatingScorecardWinRate": "Đúng hướng",
+    "technicalRatingScorecardAvgMove": "Biến động TB theo chiều",
+    "technicalRatingScorecardPending": "{count} đang chờ chấm",
+    "technicalRatingScorecardPendingOnly": "{count} tín hiệu đang chờ đủ 72 giờ",
+    "technicalRatingScorecardNoData": "chưa có tín hiệu",
+    "technicalRatingScorecardEmpty": "Chưa có tín hiệu nào trong khoảng này để chấm."
   },
   "advisor": {
     "metaTitle": "AI cố vấn Forex — Social Forex",

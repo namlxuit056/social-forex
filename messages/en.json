@@ -419,7 +419,16 @@
     "technicalRatingEntryZone": "Entry",
     "technicalRatingStopLoss": "SL",
     "technicalRatingTakeProfit": "TP",
-    "technicalRatingLevelsHint": "Entry/SL/TP computed from the 4H EMA20 ± ATR — a simple technical reference, not investment advice."
+    "technicalRatingLevelsHint": "Entry/SL/TP computed from the 4H EMA20 ± ATR — a simple technical reference, not investment advice.",
+    "technicalRatingScorecardTitle": "Accuracy by source",
+    "technicalRatingScorecardHint": "For each signal, the price at firing is compared with the spot price 72 hours later. \"On-target\" means price moved in the signal's direction by more than 0.1%. This is a short-term directional gauge for reference only, NOT real profit/loss (no TP/SL hit-first logic).",
+    "technicalRatingScorecardWindow": "{days}d",
+    "technicalRatingScorecardWinRate": "On-target",
+    "technicalRatingScorecardAvgMove": "Avg move in direction",
+    "technicalRatingScorecardPending": "{count} pending",
+    "technicalRatingScorecardPendingOnly": "{count} signal(s) awaiting the 72h horizon",
+    "technicalRatingScorecardNoData": "no signals yet",
+    "technicalRatingScorecardEmpty": "No signals in this window to score yet."
   },
   "advisor": {
     "metaTitle": "AI Forex Advisor — Social Forex",

@@ -1337,6 +1337,37 @@ model TechnicalRatingDailySummary {
   createdAt    DateTime @default(now())
 }
 
+/// Theo dõi kết quả từng sự kiện tín hiệu (mọi nguồn) để chấm độ chính xác theo nguồn.
+/// 1 dòng / sự kiện (khóa theo Notification.dedupeKey, KHÔNG nhân theo user). Không có hạ
+/// tầng lưu giá lịch sử nên chỉ chấm 1 điểm: giá lúc phát vs giá spot sau `OUTCOME_HORIZON_HOURS`.
+/// Đây là thước đo "đúng hướng trong ngắn hạn" mang tính giáo dục, KHÔNG phải P/L thực tế.
+model SignalOutcome {
+  id          String    @id @default(cuid())
+  /// = Notification.dedupeKey của sự kiện tín hiệu.
+  dedupeKey   String    @unique
+  /// tradingview | cot | oandaBook | myfxbook | igDailyfx
+  source      String
+  symbol      String
+  /// buy | sell
+  signal      String
+  /// trend | contrarian
+  stance      String
+  firedAt     DateTime
+  /// Giá tham chiếu lúc phát (close 4H với TradingView, mid spot lúc cron chạy với nguồn khác).
+  entryPrice  Float
+  /// null = chưa đủ horizon để chấm.
+  evaluatedAt DateTime?
+  exitPrice   Float?
+  /// win | loss | flat (flat = |biến động| dưới ngưỡng nhiễu FLAT_BAND_PCT)
+  result      String?
+  /// % biến động THEO CHIỀU tín hiệu tại thời điểm chấm (âm = đi ngược).
+  favorPct    Float?
+  createdAt   DateTime  @default(now())
+
+  @@index([source, firedAt])
+  @@index([evaluatedAt])
+}
+
 model AcademyLesson {
   id            String    @id @default(cuid())
   slug          String

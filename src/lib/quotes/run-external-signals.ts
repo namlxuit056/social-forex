@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { isPushEnabled, sendPushToUser } from "@/lib/push";
 import { fetchTechnicalRatings } from "@/lib/quotes/fetch-tv-ratings";
 import { buildExternalPush } from "@/lib/quotes/external-signal-format";
+import { currentMidPrices, recordSignalOutcome } from "@/lib/quotes/signal-outcome-store";
 import { fetchCotSignals } from "@/lib/quotes/sources/cftc-cot";
 import { fetchOandaBookSignals } from "@/lib/quotes/sources/oanda-book";
 import { fetchMyfxbookSignals } from "@/lib/quotes/sources/myfxbook-outlook";
@@ -52,6 +53,7 @@ function localizedPush(locale: string | null | undefined, meta: ExternalSignalMe
 async function broadcast(
   sig: ExternalSignal,
   tvAgree: boolean | null,
+  entryPrice: number | undefined,
 ): Promise<{ notified: number; skipped: boolean }> {
   const key = dedupeKey(sig);
 
@@ -83,6 +85,18 @@ async function broadcast(
       }),
     ),
   );
+
+  if (entryPrice !== undefined) {
+    await recordSignalOutcome({
+      dedupeKey: key,
+      source: sig.source,
+      symbol: sig.symbol,
+      signal: sig.signal,
+      stance: sig.stance,
+      firedAt: new Date(),
+      entryPrice,
+    });
+  }
 
   if (isPushEnabled()) {
     // Build payload 1 lần / locale.
@@ -149,6 +163,9 @@ export async function runExternalSignals(
     // bỏ qua — tvAgree sẽ là null
   }
 
+  // Giá spot lúc phát — làm mốc chấm kết quả sau này (bảng điểm độ chính xác theo nguồn).
+  const midPrices = await currentMidPrices();
+
   const perSource: ExternalSignalsRunSummary["perSource"] = {};
   const fired: ExternalSignalsRunSummary["fired"] = [];
   let totalNotified = 0;
@@ -175,7 +192,7 @@ export async function runExternalSignals(
           : (score > 0) === (sig.signal === "buy");
 
       try {
-        const { notified, skipped } = await broadcast(sig, tvAgree);
+        const { notified, skipped } = await broadcast(sig, tvAgree, midPrices.get(sig.symbol));
         totalNotified += notified;
         fired.push({
           source: sig.source,
