@@ -35,6 +35,15 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: "Invalid subscription" }, { status: 404 });
   }
 
+  if (parsed.data.action === "OPENED") {
+    // Real copy activity — the follower's EA just opened a position from this
+    // subscription. Feeds the "last copied N days ago" social proof.
+    await prisma.copyTrade.update({
+      where: { id: copyTrade.id },
+      data: { lastCopiedAt: new Date() },
+    });
+  }
+
   if (parsed.data.action === "CLOSED" && parsed.data.status) {
     const pnl = parsed.data.profit ?? 0;
     const result = parsed.data.status === "WIN" ? "WIN" : parsed.data.status === "LOSS" ? "LOSS" : "BREAKEVEN";

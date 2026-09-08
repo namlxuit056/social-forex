@@ -44,6 +44,13 @@ export function NewOrderDialog() {
     maxTrades: number;
   } | null>(null);
   const [planWarning, setPlanWarning] = useState<{ symbol: string; hasPlan: boolean } | null>(null);
+  const [riskWarning, setRiskWarning] = useState<{
+    projectedPct: number;
+    maxRiskPercent: number;
+    riskUsedToday: number;
+    newRisk: number;
+    budget: number;
+  } | null>(null);
   const [marketPrice, setMarketPrice] = useState<{ bid: number; ask: number } | null>(null);
 
   const isPendingType = orderType !== "BUY" && orderType !== "SELL";
@@ -90,6 +97,7 @@ export function NewOrderDialog() {
     if (!confirmed) {
       setDailyLimitWarning(null);
       setPlanWarning(null);
+      setRiskWarning(null);
     }
     if (isPendingType && !price) {
       setError("price_required");
@@ -105,10 +113,12 @@ export function NewOrderDialog() {
         takeProfit: tp === "" ? null : Number(tp),
         confirmedOverLimit: confirmed,
         confirmedNoPlan: confirmed,
+        confirmedOverRisk: confirmed,
       });
-      if (result.dailyLimitWarning || result.planWarning) {
+      if (result.dailyLimitWarning || result.planWarning || result.dailyRiskWarning) {
         setDailyLimitWarning(result.dailyLimitWarning ?? null);
         setPlanWarning(result.planWarning ?? null);
+        setRiskWarning(result.dailyRiskWarning ?? null);
         return;
       }
       if (result.error) {
@@ -121,6 +131,7 @@ export function NewOrderDialog() {
       setTp("");
       setDailyLimitWarning(null);
       setPlanWarning(null);
+      setRiskWarning(null);
     });
   }
 
@@ -144,6 +155,7 @@ export function NewOrderDialog() {
                 setSymbol(value);
                 setPlanWarning(null);
                 setDailyLimitWarning(null);
+                setRiskWarning(null);
               }}
             >
               <SelectTrigger id="order-symbol" className="w-full">
@@ -245,6 +257,13 @@ export function NewOrderDialog() {
               today, hitting the daily limit from your trading plan. Place this one anyway?
             </p>
           )}
+          {riskWarning && (
+            <p className="text-sm text-amber-600 dark:text-amber-400">
+              This order pushes today&apos;s total risk to ~{riskWarning.projectedPct}% of your account
+              (~${Math.round(riskWarning.riskUsedToday)} used + ~${Math.round(riskWarning.newRisk)} here),
+              over your {riskWarning.maxRiskPercent}% daily plan limit. Place it anyway?
+            </p>
+          )}
           {error && <p className="text-sm text-destructive">{error}</p>}
           <p className="text-xs text-muted-foreground">
             Command queued — MT5 EA executes on next poll.
@@ -252,7 +271,7 @@ export function NewOrderDialog() {
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-          {dailyLimitWarning || planWarning ? (
+          {dailyLimitWarning || planWarning || riskWarning ? (
             <Button variant="outline" onClick={() => handleSubmit(true)} disabled={isPending}>
               {isPending ? "Queuing…" : "Place anyway"}
             </Button>

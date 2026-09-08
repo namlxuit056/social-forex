@@ -139,7 +139,7 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
     signalStats,
     existingCopyTrade,
     copierCount,
-    lastCopyRow,
+    copyRows,
     academyCompletedCount,
     closedWins,
     closedTotal,
@@ -201,10 +201,10 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
       prisma.copyTrade.count({
         where: { providerId: userId, isActive: true },
       }),
-      prisma.copyTrade.findFirst({
+      prisma.copyTrade.findMany({
         where: { providerId: userId, isActive: true },
-        orderBy: { createdAt: "desc" },
-        select: { createdAt: true },
+        select: { createdAt: true, lastCopiedAt: true },
+        take: 500,
       }),
       prisma.academyProgress.count({
         where: { userId, completed: true },
@@ -227,7 +227,13 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
   const providerWinRate =
     closedTotal > 0 ? Math.round((closedWins / closedTotal) * 1000) / 10 : null;
 
-  const lastCopyDaysAgo = lastCopyRow ? daysSince(lastCopyRow.createdAt) : null;
+  // Most recent real copy activity (EA opened a position), falling back to the
+  // sign-up time of the newest subscription when nobody has copied a trade yet.
+  const lastCopyActivityAt = copyRows.reduce<Date | null>((max, row) => {
+    const at = row.lastCopiedAt ?? row.createdAt;
+    return !max || at > max ? at : max;
+  }, null);
+  const lastCopyDaysAgo = lastCopyActivityAt ? daysSince(lastCopyActivityAt) : null;
   const avgRating = reviewAggregate._avg.rating;
   const reviewCount = reviewAggregate._count.rating;
 

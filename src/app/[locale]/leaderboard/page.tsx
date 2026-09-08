@@ -155,16 +155,19 @@ export default async function LeaderboardPage({
   // Copier social proof: count + most recent subscription per provider (public data)
   const copyTradeRows = await prisma.copyTrade.findMany({
     where: { providerId: { in: userIds }, isActive: true },
-    select: { providerId: true, createdAt: true },
+    select: { providerId: true, createdAt: true, lastCopiedAt: true },
   });
-  const copierStatsMap = new Map<string, { count: number; lastCreatedAt: Date }>();
+  const copierStatsMap = new Map<string, { count: number; lastActivityAt: Date }>();
   for (const row of copyTradeRows) {
+    // Real copy activity if the follower's EA has ever opened a position; fall
+    // back to sign-up time so a fresh subscription still shows something.
+    const activityAt = row.lastCopiedAt ?? row.createdAt;
     const cur = copierStatsMap.get(row.providerId);
     if (!cur) {
-      copierStatsMap.set(row.providerId, { count: 1, lastCreatedAt: row.createdAt });
+      copierStatsMap.set(row.providerId, { count: 1, lastActivityAt: activityAt });
     } else {
       cur.count += 1;
-      if (row.createdAt > cur.lastCreatedAt) cur.lastCreatedAt = row.createdAt;
+      if (activityAt > cur.lastActivityAt) cur.lastActivityAt = activityAt;
     }
   }
 
@@ -225,7 +228,7 @@ export default async function LeaderboardPage({
         streakSignal: streakSignalMap.get(userId) ?? 0,
         xp: xpMap.get(userId) ?? 0,
         copierCount: copierStats?.count ?? 0,
-        lastCopyDaysAgo: copierStats ? daysSince(copierStats.lastCreatedAt) : null,
+        lastCopyDaysAgo: copierStats ? daysSince(copierStats.lastActivityAt) : null,
       };
     })
     .filter((r) => r.total >= 3);

@@ -1007,6 +1007,7 @@ export function JournalAdvancedStats({
   checklistCompliance,
   emotionCorrelation,
   guardOverrideStats,
+  copyTradeGuardOverrides,
   scorecard,
   aiReviewTrend,
   mistakeStats,
@@ -1021,6 +1022,7 @@ export function JournalAdvancedStats({
   checklistCompliance?: ChecklistComplianceStats;
   emotionCorrelation?: EmotionDiaryCorrelationStats;
   guardOverrideStats?: GuardOverrideStats;
+  copyTradeGuardOverrides?: number;
   scorecard?: DisciplineScorecard;
   aiReviewTrend?: AiReviewTrend;
   mistakeStats?: MistakeStats;
@@ -1574,6 +1576,13 @@ export function JournalAdvancedStats({
               label={t("guardOverrideLossStreak")}
               value={String(guardOverrideStats.lossStreakOverrides)}
             />
+            {copyTradeGuardOverrides != null && copyTradeGuardOverrides > 0 && (
+              <StatCard
+                label={t("guardOverrideCopyTrade")}
+                value={String(copyTradeGuardOverrides)}
+                tone="negative"
+              />
+            )}
           </div>
         </div>
       )}

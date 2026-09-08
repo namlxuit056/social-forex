@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { subscribeCopyTrade, unsubscribeCopyTrade } from "@/actions/copy-trade";
+import { logGuardOverride } from "@/actions/guard-override";
 import { LossStreakGuard } from "@/components/journal/loss-streak-guard";
 import { ChecklistGuardHint } from "@/components/journal/checklist-guard-hint";
 
@@ -35,7 +36,7 @@ type Props = {
   providerClosedSignals?: number | null;
   /** Số người đang copy trade (isActive) provider này */
   providerCopierCount?: number | null;
-  /** Số ngày kể từ lượt copy gần nhất; null = chưa có ai copy */
+  /** Số ngày kể từ lượt copy lệnh thực tế gần nhất (fallback: lượt đăng ký mới nhất); null = chưa có ai copy */
   providerLastCopyDaysAgo?: number | null;
   /** Điểm đánh giá trung bình (1-5) từ CopyTradeReview; null = chưa có đánh giá */
   providerAvgRating?: number | null;
@@ -143,7 +144,10 @@ export function CopyTradeButton({
           {t("manage")}
         </DialogTrigger>
       ) : (
-        <LossStreakGuard compact>
+        <LossStreakGuard
+          compact
+          onOverride={() => void logGuardOverride("lossStreak", "copyTrade")}
+        >
           <DialogTrigger render={<Button variant="default" size="sm" className="gap-1.5" />}>
             <Copy className="size-3.5" />
             {t("copy")}

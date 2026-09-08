@@ -72,6 +72,7 @@ export function JournalFormCard({
   } | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const confirmOverLimitRef = useRef<HTMLInputElement>(null);
+  const confirmOverRiskRef = useRef<HTMLInputElement>(null);
   const [submitted, setSubmitted] = useState<{ symbol: string; direction: string }>({
     symbol: "",
     direction: "LONG",
@@ -97,6 +98,11 @@ export function JournalFormCard({
 
   function confirmOverDailyLimit() {
     if (confirmOverLimitRef.current) confirmOverLimitRef.current.value = "1";
+    formRef.current?.requestSubmit();
+  }
+
+  function confirmOverRisk() {
+    if (confirmOverRiskRef.current) confirmOverRiskRef.current.value = "1";
     formRef.current?.requestSubmit();
   }
 
@@ -214,6 +220,35 @@ export function JournalFormCard({
             </div>
           </div>
         )}
+        {state?.dailyRiskWarning && (
+          <div className="mb-4 flex items-start gap-3 rounded-lg border border-amber-500/30 bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-950/20 dark:text-amber-200">
+            <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+            <div className="min-w-0 flex-1 space-y-2">
+              <p className="font-medium">
+                {t("dailyRiskTitle", {
+                  projectedPct: state.dailyRiskWarning.projectedPct,
+                  maxPct: state.dailyRiskWarning.maxRiskPercent,
+                })}
+              </p>
+              <p className="text-xs">
+                {t("dailyRiskDetail", {
+                  used: Math.round(state.dailyRiskWarning.riskUsedToday),
+                  next: Math.round(state.dailyRiskWarning.newRisk),
+                  budget: Math.round(state.dailyRiskWarning.budget),
+                })}
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={confirmOverRisk}
+                disabled={isPending}
+              >
+                {t("dailyLimitConfirmAnyway")}
+              </Button>
+            </div>
+          </div>
+        )}
         <form
           ref={formRef}
           action={formAction}
@@ -227,6 +262,12 @@ export function JournalFormCard({
             ref={confirmOverLimitRef}
             type="hidden"
             name="confirmedOverLimit"
+            defaultValue=""
+          />
+          <input
+            ref={confirmOverRiskRef}
+            type="hidden"
+            name="confirmedOverRisk"
             defaultValue=""
           />
           {overrodeLossStreakGuard && (

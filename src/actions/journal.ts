@@ -9,6 +9,11 @@ import { updateStreak } from "@/lib/streak";
 import { addXp } from "@/lib/add-xp";
 import { countTrailingLosses, COOLDOWN_THRESHOLD_LOSSES } from "@/lib/journal/loss-streak";
 import { isOverDailyTradeLimit, utcDayRange } from "@/lib/journal/daily-limit";
+import {
+  checkDailyRiskBudget,
+  computeTradeRiskAmount,
+  type DailyRiskBudgetWarning,
+} from "@/lib/journal/risk-budget";
 import { parseTradeSetup } from "@/lib/journal/setups";
 import { parseMistakes } from "@/lib/journal/mistakes";
 import { parseJournalImageUrl, parseTradeEmotion } from "@/lib/journal/emotions";
@@ -44,10 +49,6 @@ async function maybeNotifyLossStreak(userId: string) {
 /**
  * So với DailyTradingPlan.maxTrades của ngày `openedAt`. Trả về thông tin vượt
  * ngưỡng (để hiện cảnh báo dạng confirm) hoặc null nếu không có plan/không giới hạn.
- *
- * TODO business: maxRiskPercent chưa enforce ở đây — TradeJournal không có field
- * risk% hay account equity đáng tin cậy (không phải lệnh nào cũng gắn MT5 connection),
- * nên không có cách tính risk% thực đã dùng trong ngày mà không đoán số liệu.
  */
 async function checkDailyTradeLimit(userId: string, openedAt: Date) {
   const { start, end } = utcDayRange(openedAt);
@@ -63,6 +64,46 @@ async function checkDailyTradeLimit(userId: string, openedAt: Date) {
   if (!isOverDailyTradeLimit(tradesLoggedToday, plan.maxTrades)) return null;
 
   return { tradesLoggedToday, maxTrades: plan.maxTrades };
+}
+
+/**
+ * So tổng risk $ đã log trong ngày `openedAt` + lệnh mới với DailyTradingPlan.maxRiskPercent.
+ * Equity lấy từ MT5 connection đang hoạt động (balance ưu tiên, fallback equity).
+ * Trả null khi không đủ dữ liệu để chấm (không plan/không equity/không tính được risk lệnh mới).
+ */
+async function checkDailyRiskBudgetForUser(
+  userId: string,
+  openedAt: Date,
+  newRisk: number | null,
+): Promise<DailyRiskBudgetWarning | null> {
+  const { start, end } = utcDayRange(openedAt);
+  const [plan, connection] = await Promise.all([
+    prisma.dailyTradingPlan.findUnique({
+      where: { userId_planDate: { userId, planDate: start } },
+      select: { maxRiskPercent: true },
+    }),
+    prisma.mt5Connection.findFirst({
+      where: { userId, revokedAt: null },
+      orderBy: { lastSeenAt: "desc" },
+      select: { balance: true, equity: true },
+    }),
+  ]);
+  if (!plan?.maxRiskPercent) return null;
+
+  const equity = connection?.balance ?? connection?.equity ?? null;
+  if (!equity || newRisk == null) return null;
+
+  const todays = await prisma.tradeJournal.aggregate({
+    where: { userId, openedAt: { gte: start, lt: end } },
+    _sum: { riskAmount: true },
+  });
+
+  return checkDailyRiskBudget({
+    riskUsedToday: todays._sum.riskAmount ?? 0,
+    newRisk,
+    maxRiskPercent: plan.maxRiskPercent,
+    equity,
+  });
 }
 
 const tradeSchema = z.object({
@@ -95,6 +136,7 @@ export async function createTrade(
         tradeId?: string;
         closed?: boolean;
         dailyLimitWarning?: { tradesLoggedToday: number; maxTrades: number };
+        dailyRiskWarning?: DailyRiskBudgetWarning;
       }
     | null,
   formData: FormData,
@@ -124,11 +166,31 @@ export async function createTrade(
   const d = parsed.data;
   const openedAt = d.openedAt ?? new Date();
 
-  const overrodeDailyLimit = formData.get("confirmedOverLimit") === "1";
-  if (!overrodeDailyLimit) {
+  const riskAmount = computeTradeRiskAmount({
+    symbol: d.symbol.toUpperCase(),
+    direction: d.direction,
+    entry: d.entry,
+    stopLoss: d.stopLoss,
+    lotSize: d.lotSize,
+  });
+
+  const confirmedOverLimit = formData.get("confirmedOverLimit") === "1";
+  const confirmedOverRisk = formData.get("confirmedOverRisk") === "1";
+  if (!confirmedOverLimit) {
     const limit = await checkDailyTradeLimit(session.user.id, openedAt);
     if (limit) return { dailyLimitWarning: limit };
   }
+  if (!confirmedOverRisk) {
+    const riskWarning = await checkDailyRiskBudgetForUser(
+      session.user.id,
+      openedAt,
+      riskAmount,
+    );
+    if (riskWarning) return { dailyRiskWarning: riskWarning };
+  }
+  // overrodeDailyLimit covers both daily-plan guards (trade count + risk budget) —
+  // there's no separate column and both are the same kind of discipline slip.
+  const overrodeDailyLimit = confirmedOverLimit || confirmedOverRisk;
   const overrodeLossStreakGuard = formData.get("overrodeLossStreakGuard") === "1";
 
   // Lệnh log với kết quả W/L/BE coi như đã đóng — cần closedAt cho loss-streak/edge stats
@@ -146,6 +208,7 @@ export async function createTrade(
       lotSize: d.lotSize,
       result: d.result,
       pnl: d.pnl,
+      riskAmount,
       notes: d.notes,
       openedAt,
       closedAt,
@@ -231,6 +294,13 @@ export async function updateTrade(
       lotSize: d.lotSize,
       result: d.result,
       pnl: d.pnl,
+      riskAmount: computeTradeRiskAmount({
+        symbol: d.symbol.toUpperCase(),
+        direction: d.direction,
+        entry: d.entry,
+        stopLoss: d.stopLoss,
+        lotSize: d.lotSize,
+      }),
       notes: d.notes,
       openedAt: d.openedAt,
       closedAt,

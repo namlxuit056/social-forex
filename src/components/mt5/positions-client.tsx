@@ -350,7 +350,7 @@ export function PositionsClient({
         stopLoss: null,
         takeProfit: null,
       });
-      if (result.dailyLimitWarning || result.planWarning) {
+      if (result.dailyLimitWarning || result.planWarning || result.dailyRiskWarning) {
         const lines: string[] = [];
         if (result.planWarning) {
           lines.push(
@@ -365,6 +365,12 @@ export function PositionsClient({
             `You've placed ${ordersPlacedToday}/${maxTrades} orders today, hitting your daily limit.`,
           );
         }
+        if (result.dailyRiskWarning) {
+          const { projectedPct, maxRiskPercent } = result.dailyRiskWarning;
+          lines.push(
+            `This pushes today's total risk to ~${projectedPct}% of your account, over your ${maxRiskPercent}% daily plan limit.`,
+          );
+        }
         const proceed = window.confirm(`${lines.join("\n")}\n\nPlace this order anyway?`);
         if (proceed) {
           await placeOrder({
@@ -376,6 +382,7 @@ export function PositionsClient({
             takeProfit: null,
             confirmedOverLimit: true,
             confirmedNoPlan: true,
+            confirmedOverRisk: true,
           });
         }
       }

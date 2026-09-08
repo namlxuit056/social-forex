@@ -136,6 +136,7 @@ export default async function JournalPage({
     moodCheckinsRaw,
     journalLessonsRaw,
     aiTradeReviewsRaw,
+    copyTradeGuardOverrides,
   ] = await Promise.all([
       prisma.tradeJournal.findMany({
         where: { userId: session.user.id },
@@ -228,6 +229,11 @@ export default async function JournalPage({
             select: { createdAt: true, review: true },
           })
         : Promise.resolve([]),
+      activeTab === "stats"
+        ? prisma.guardOverrideEvent.count({
+            where: { userId: session.user.id, surface: "copyTrade" },
+          })
+        : Promise.resolve(0),
     ]);
 
   const emotionEntries = emotionEntriesRaw.map((e) => ({
@@ -546,6 +552,7 @@ export default async function JournalPage({
             checklistCompliance={checklistCompliance}
             emotionCorrelation={emotionCorrelation}
             guardOverrideStats={guardOverrideStats}
+            copyTradeGuardOverrides={copyTradeGuardOverrides}
             scorecard={disciplineScorecard}
             aiReviewTrend={aiReviewTrend}
             mistakeStats={mistakeStats}

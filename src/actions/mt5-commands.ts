@@ -7,8 +7,9 @@ import { prisma } from "@/lib/prisma";
 import { commandExpiresAt } from "@/lib/mt5/command-ttl";
 import { queueCloseAll } from "@/lib/mt5/commands";
 import { resolveQuotes } from "@/lib/quotes/resolve-quotes";
-import { estimateStopLossForRisk, roundToSymbolPrecision } from "@/lib/calculators";
+import { estimateOrderRisk, estimateStopLossForRisk, roundToSymbolPrecision } from "@/lib/calculators";
 import { isOverDailyTradeLimit, utcDayRange } from "@/lib/journal/daily-limit";
+import { checkDailyRiskBudget, type DailyRiskBudgetWarning } from "@/lib/journal/risk-budget";
 
 // Orders placed with no explicit SL get one sized to risk 10% of account
 // equity, so a position is never left fully unprotected. Same pip-value
@@ -47,10 +48,6 @@ async function estimateDefaultStopLoss(params: {
 /**
  * So với DailyTradingPlan.maxTrades của user (ngày hiện tại, UTC). Đếm lệnh mới đã
  * đặt trong ngày qua Mt5Command (type PLACE_*) của connection đang active.
- *
- * TODO business: maxRiskPercent chưa enforce ở đây — market order (BUY/SELL) không
- * lưu giá vào lệnh (price chỉ lưu cho lệnh pending) nên không thể tính lại risk $ đã
- * dùng trong ngày từ Mt5Command một cách đáng tin cậy mà không đoán số liệu.
  */
 async function checkDailyOrderLimit(userId: string, connectionId: string) {
   const { start, end } = utcDayRange(new Date());
@@ -70,6 +67,41 @@ async function checkDailyOrderLimit(userId: string, connectionId: string) {
   if (!isOverDailyTradeLimit(ordersPlacedToday, plan.maxTrades)) return null;
 
   return { ordersPlacedToday, maxTrades: plan.maxTrades };
+}
+
+/**
+ * So tổng risk $ của các lệnh PLACE_* đã đặt hôm nay (UTC) + lệnh mới với
+ * DailyTradingPlan.maxRiskPercent, quy đổi qua equity của connection. Trả null khi
+ * không đủ dữ liệu (không plan/không equity/không tính được risk lệnh mới).
+ */
+async function checkDailyOrderRiskBudget(
+  userId: string,
+  connectionId: string,
+  equity: number | null,
+  newRisk: number | null,
+): Promise<DailyRiskBudgetWarning | null> {
+  const { start, end } = utcDayRange(new Date());
+  const plan = await prisma.dailyTradingPlan.findUnique({
+    where: { userId_planDate: { userId, planDate: start } },
+    select: { maxRiskPercent: true },
+  });
+  if (!plan?.maxRiskPercent || !equity || newRisk == null) return null;
+
+  const todays = await prisma.mt5Command.aggregate({
+    where: {
+      connectionId,
+      type: { startsWith: "PLACE_" },
+      createdAt: { gte: start, lt: end },
+    },
+    _sum: { riskAmount: true },
+  });
+
+  return checkDailyRiskBudget({
+    riskUsedToday: todays._sum.riskAmount ?? 0,
+    newRisk,
+    maxRiskPercent: plan.maxRiskPercent,
+    equity,
+  });
 }
 
 /**
@@ -248,9 +280,11 @@ export async function placeOrder(input: {
   takeProfit: number | null;
   confirmedOverLimit?: boolean;
   confirmedNoPlan?: boolean;
+  confirmedOverRisk?: boolean;
 }): Promise<{
   error?: string;
   dailyLimitWarning?: { ordersPlacedToday: number; maxTrades: number };
+  dailyRiskWarning?: DailyRiskBudgetWarning;
   planWarning?: { symbol: string; hasPlan: boolean };
 }> {
   const session = await auth();
@@ -267,33 +301,60 @@ export async function placeOrder(input: {
   const connection = await getActiveConnection(session.user.id);
   if (!connection) return { error: "no_connection" };
 
-  if (!input.confirmedOverLimit || !input.confirmedNoPlan) {
-    const [planWarning, limit] = await Promise.all([
-      input.confirmedNoPlan
-        ? Promise.resolve(null)
-        : checkSymbolPlanned(session.user.id, parsed.data.symbol),
-      input.confirmedOverLimit
-        ? Promise.resolve(null)
-        : checkDailyOrderLimit(session.user.id, connection.id),
-    ]);
-    if (planWarning || limit) {
-      return {
-        ...(planWarning ? { planWarning } : {}),
-        ...(limit ? { dailyLimitWarning: limit } : {}),
-      };
-    }
+  const isBuy = parsed.data.orderType.startsWith("BUY");
+
+  // Reference price for SL sizing + risk $ — the order price for pending orders,
+  // the live quote otherwise. resolveQuotes is 20s-cached so this is cheap.
+  let referencePrice: number | null = isPending ? (parsed.data.price ?? null) : null;
+  if (referencePrice == null) {
+    const { quotes } = await resolveQuotes();
+    const quote = quotes.find((q) => q.symbol === parsed.data.symbol);
+    referencePrice = quote ? (isBuy ? quote.ask : quote.bid) : null;
   }
 
-  const isBuy = parsed.data.orderType.startsWith("BUY");
   const stopLoss =
     parsed.data.stopLoss ??
     (await estimateDefaultStopLoss({
       symbol: parsed.data.symbol,
       isBuy,
       volume: parsed.data.volume,
-      entryPrice: isPending ? (parsed.data.price ?? null) : null,
+      entryPrice: referencePrice,
       equity: connection.equity,
     }));
+
+  const slAmount = estimateOrderRisk({
+    symbol: parsed.data.symbol,
+    isBuy,
+    entryPrice: referencePrice,
+    volume: parsed.data.volume,
+    stopLoss,
+    takeProfit: null,
+  }).slAmount;
+  const riskAmount =
+    slAmount != null && Number.isFinite(slAmount) && slAmount > 0
+      ? Number(slAmount.toFixed(2))
+      : null;
+
+  if (!input.confirmedOverLimit || !input.confirmedNoPlan || !input.confirmedOverRisk) {
+    const [planWarning, limit, riskWarning] = await Promise.all([
+      input.confirmedNoPlan
+        ? Promise.resolve(null)
+        : checkSymbolPlanned(session.user.id, parsed.data.symbol),
+      input.confirmedOverLimit
+        ? Promise.resolve(null)
+        : checkDailyOrderLimit(session.user.id, connection.id),
+      input.confirmedOverRisk
+        ? Promise.resolve(null)
+        : checkDailyOrderRiskBudget(session.user.id, connection.id, connection.equity, riskAmount),
+    ]);
+    if (planWarning || limit || riskWarning) {
+      return {
+        ...(planWarning ? { planWarning } : {}),
+        ...(limit ? { dailyLimitWarning: limit } : {}),
+        ...(riskWarning ? { dailyRiskWarning: riskWarning } : {}),
+      };
+    }
+  }
 
   const placeType = `PLACE_${parsed.data.orderType}`;
   await prisma.mt5Command.create({
@@ -305,6 +366,7 @@ export async function placeOrder(input: {
       price: isPending ? parsed.data.price : null,
       stopLoss,
       takeProfit: parsed.data.takeProfit ?? null,
+      riskAmount,
       expiresAt: commandExpiresAt(placeType),
     },
   });

@@ -138,6 +138,7 @@ model User {
   missionClaims        UserMissionClaim[]
   articleChatMessages  ArticleChatMessage[]
   journalChatMessages  JournalChatMessage[]
+  guardOverrideEvents  GuardOverrideEvent[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -393,6 +394,9 @@ model TradeJournal {
   lotSize    Float?
   result     TradeResult @default(PENDING)
   pnl        Float?
+  /// Risk $ (loss if SL hit) at log time, from entry/SL/lotSize. Null when not
+  /// all three are present. Powers the daily maxRiskPercent budget guard.
+  riskAmount Float?
   /// Max adverse / favorable excursion in account currency — the worst and best
   /// floating P/L the position ever showed while open, sampled from MT5 bridge
   /// heartbeats and finalised at close. Only populated for MT5-linked trades.
@@ -911,6 +915,9 @@ model Mt5Command {
   stopLoss          Float?
   takeProfit        Float?
   trailDistancePips Float?    // TRAIL_UPDATE only - EA recomputes SL from live price using this distance
+  // PLACE_* only: risk $ (loss if SL hit) at queue time, from reference price /
+  // resolved SL / volume — lets the daily maxRiskPercent budget be re-summed.
+  riskAmount        Float?
   status            String    @default("PENDING")
   // PENDING | SENT | DONE | ERROR | EXPIRED
   errorMsg          String?
@@ -1020,6 +1027,11 @@ model CopyTrade {
   // subscription (token, mode, lot settings) is preserved so unblocking resumes
   // copying without the follower having to resubscribe.
   blockedByProvider Boolean @default(false)
+  // Last time this follower's EA actually opened a position from this subscription
+  // (bridge -> POST /api/copy-trade/report with action=OPENED). Distinct from
+  // `createdAt` (sign-up time) — powers the "last copied N days ago" social proof
+  // so it reflects real copy activity.
+  lastCopiedAt DateTime?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -1272,6 +1284,24 @@ model MoodCheckin {
 
   @@unique([userId, day])
   @@index([userId, day])
+}
+
+/// Ghi lại mỗi lần user bấm "vẫn tiếp tục" để bỏ qua một guard rủi ro trên bề mặt
+/// KHÔNG có row lệnh riêng để đánh dấu (hiện tại: guard loss-streak ở modal Copy trade).
+/// Guard trong journal vẫn tự đánh dấu trên TradeJournal.overrode*.
+model GuardOverrideEvent {
+  id      String @id @default(cuid())
+  userId  String
+  /// "lossStreak" | "dailyLimit" | "checklist"
+  guard   String
+  /// "copyTrade" | "journal" | "mt5"
+  surface String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
 }
 
 /// Chấm điểm AI cho một lệnh journal ngay khi đóng — phản hồi tức thì thay vì đợi Weekly/Daily Review.
