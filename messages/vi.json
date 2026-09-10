@@ -1393,6 +1393,8 @@
     "journalReview": "Báo cáo giao dịch tuần đã sẵn sàng",
     "mt5AutoClose": "Đã tự động đóng tất cả lệnh trước giờ thị trường đóng cửa",
     "calendarActualSignal": "Có dữ liệu thực tế mới trên lịch kinh tế — xem tín hiệu buy/sell",
+    "calendarActualSignalBullish": "{event} ({currency}): có số liệu thực tế → {currency} mạnh lên, xem cặp buy/sell",
+    "calendarActualSignalBearish": "{event} ({currency}): có số liệu thực tế → {currency} yếu đi, xem cặp buy/sell",
     "technicalRatingSignal": "Có tín hiệu kỹ thuật chắc chắn (TradingView) cho symbol bạn theo dõi",
     "technicalRatingSignalBuy": "{symbol}: Tín hiệu kỹ thuật MUA mạnh",
     "technicalRatingSignalSell": "{symbol}: Tín hiệu kỹ thuật BÁN mạnh"

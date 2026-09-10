@@ -53,6 +53,31 @@ function asTechnicalRatingMeta(meta: NotificationRow["meta"]): TechnicalRatingMe
   };
 }
 
+type CalendarActualMeta = {
+  eventId: string;
+  title: string;
+  currency: string;
+  bias: "bullish" | "bearish";
+};
+
+function asCalendarActualMeta(meta: NotificationRow["meta"]): CalendarActualMeta | null {
+  if (
+    !meta ||
+    typeof meta.eventId !== "string" ||
+    typeof meta.title !== "string" ||
+    typeof meta.currency !== "string" ||
+    (meta.bias !== "bullish" && meta.bias !== "bearish")
+  ) {
+    return null;
+  }
+  return {
+    eventId: meta.eventId,
+    title: meta.title,
+    currency: meta.currency,
+    bias: meta.bias,
+  };
+}
+
 const EXTERNAL_SOURCES = ["cot", "oandaBook", "myfxbook", "igDailyfx"] as const;
 type ExternalSource = (typeof EXTERNAL_SOURCES)[number];
 
@@ -113,6 +138,8 @@ export function NotificationList({
           n.kind === "TECHNICAL_RATING_SIGNAL" ? asTechnicalRatingMeta(n.meta) : null;
         const externalMeta =
           n.kind === "TECHNICAL_RATING_SIGNAL" ? asExternalSignalMeta(n.meta) : null;
+        const calendarMeta =
+          n.kind === "CALENDAR_ACTUAL_SIGNAL" ? asCalendarActualMeta(n.meta) : null;
         const href =
           n.kind === "USER_FOLLOWED" && n.actor
             ? `/u/${n.actor.id}`
@@ -127,7 +154,9 @@ export function NotificationList({
                     : n.kind === "MT5_AUTO_CLOSE"
                       ? "/positions"
                       : n.kind === "CALENDAR_ACTUAL_SIGNAL"
-                        ? "/calendar"
+                        ? calendarMeta
+                          ? `/calendar?currencies=${encodeURIComponent(calendarMeta.currency)}&highlight=${encodeURIComponent(calendarMeta.eventId)}`
+                          : "/calendar"
                         : n.kind === "TECHNICAL_RATING_SIGNAL"
                           ? "/quotes/technical-rating"
                           : n.signal
@@ -163,7 +192,14 @@ export function NotificationList({
                         : n.kind === "MT5_AUTO_CLOSE"
                           ? t("mt5AutoClose")
                           : n.kind === "CALENDAR_ACTUAL_SIGNAL"
-                            ? t("calendarActualSignal")
+                            ? calendarMeta
+                              ? t(
+                                  calendarMeta.bias === "bullish"
+                                    ? "calendarActualSignalBullish"
+                                    : "calendarActualSignalBearish",
+                                  { event: calendarMeta.title, currency: calendarMeta.currency },
+                                )
+                              : t("calendarActualSignal")
                             : n.kind === "TECHNICAL_RATING_SIGNAL"
                               ? externalMeta
                                 ? ts(

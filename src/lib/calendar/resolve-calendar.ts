@@ -20,7 +20,7 @@ function ttlMs(): number {
 }
 
 function dbToEvent(row: {
-  id: string;
+  externalId: string;
   timeUtc: Date;
   currency: string;
   title: string;
@@ -30,7 +30,10 @@ function dbToEvent(row: {
   actual: string | null;
 }): CalendarEvent {
   return {
-    id: row.id,
+    // externalId (stable provider id) is the canonical id app-side: the DB row is
+    // wiped & recreated every sync, so the cuid PK changes and would break any
+    // ?highlight= deep-link from a notification.
+    id: row.externalId,
     timeUtc: row.timeUtc.toISOString(),
     currency: row.currency,
     title: row.title,

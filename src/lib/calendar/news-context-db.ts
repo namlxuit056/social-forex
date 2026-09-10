@@ -107,11 +107,12 @@ export async function getTodayHighImpactEvents(now: Date = new Date()): Promise<
       impact: { equals: "high", mode: "insensitive" },
     },
     orderBy: { timeUtc: "asc" },
-    select: { id: true, timeUtc: true, currency: true, title: true },
+    select: { externalId: true, timeUtc: true, currency: true, title: true },
   });
 
   return rows.map((r) => ({
-    id: r.id,
+    // externalId matches the calendar UI's event id (see dbToEvent) so ?highlight= resolves.
+    id: r.externalId,
     timeUtc: r.timeUtc.toISOString(),
     currency: r.currency,
     title: r.title,

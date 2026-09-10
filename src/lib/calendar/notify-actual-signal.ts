@@ -39,13 +39,19 @@ async function notifyOneEvent(event: CalendarEvent): Promise<void> {
   if (userIds.size === 0) return;
 
   const dedupeKey = `calendar-actual:${event.id}`;
+  const meta = {
+    eventId: event.id,
+    title: event.title,
+    currency: event.currency,
+    bias: signal.bias,
+  };
 
   await prisma.$transaction(
     [...userIds].map((userId) =>
       prisma.notification.upsert({
         where: { userId_dedupeKey: { userId, dedupeKey } },
-        create: { userId, kind: "CALENDAR_ACTUAL_SIGNAL", dedupeKey },
-        update: {},
+        create: { userId, kind: "CALENDAR_ACTUAL_SIGNAL", dedupeKey, meta },
+        update: { meta },
       }),
     ),
   );
@@ -74,7 +80,7 @@ async function notifyOneEvent(event: CalendarEvent): Promise<void> {
               pairs: pairsSummary(t("calendarActualBuy"), t("calendarActualSell")),
             },
           ),
-          url: `/calendar?currencies=${event.currency}`,
+          url: `/calendar?currencies=${event.currency}&highlight=${encodeURIComponent(event.id)}`,
         }));
       } catch {
         // Non-blocking

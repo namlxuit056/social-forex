@@ -1393,6 +1393,8 @@
     "journalReview": "Weekly trading report is ready",
     "mt5AutoClose": "All positions were auto-closed before the market close",
     "calendarActualSignal": "New economic calendar actual data — see the buy/sell signal",
+    "calendarActualSignalBullish": "{event} ({currency}): actual data is out → {currency} strengthens, see buy/sell pairs",
+    "calendarActualSignalBearish": "{event} ({currency}): actual data is out → {currency} weakens, see buy/sell pairs",
     "technicalRatingSignal": "A confident technical signal (TradingView) fired for a symbol you follow",
     "technicalRatingSignalBuy": "{symbol}: strong technical BUY signal",
     "technicalRatingSignalSell": "{symbol}: strong technical SELL signal"
