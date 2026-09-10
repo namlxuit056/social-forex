@@ -125,6 +125,7 @@ export async function createScreenerSignal(
     takeProfit: signal.takeProfit,
     tier: signal.tier,
     status: connection ? "PENDING" : "ACTIVE",
+    authorId: userId,
   });
 
   return { signalId: signal.id };

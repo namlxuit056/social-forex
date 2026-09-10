@@ -13,6 +13,7 @@ import {
   Cpu,
   Timer,
   Gauge,
+  Send,
 } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
@@ -117,6 +118,7 @@ export default async function AdminDashboardPage({
     { href: "/admin/ai-settings", label: t("aiModelSettings"), icon: Cpu },
     { href: "/admin/crons", label: t("manageCrons"), icon: Timer },
     { href: "/admin/scalping-calibration", label: t("scalpingCalibration"), icon: Gauge },
+    { href: "/admin/telegram-signals", label: t("telegramSignals"), icon: Send },
   ];
 
   return (

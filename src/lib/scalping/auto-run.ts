@@ -237,6 +237,7 @@ async function runAutoScalp(userId: string, config: {
     takeProfit: signal.takeProfit,
     tier: signal.tier,
     status: "ACTIVE",
+    authorId: userId,
   });
 
   return {

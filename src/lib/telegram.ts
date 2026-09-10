@@ -20,6 +20,45 @@ async function send(text: string): Promise<void> {
   }
 }
 
+// Allowlist gate — only signals authored by a user in TelegramSignalBroadcaster
+// are pushed to the channel. An empty allowlist means "broadcast everything", so
+// this feature is inert until an admin adds the first user at /admin/telegram-signals.
+const BROADCASTER_CACHE_TTL_MS = 60 * 1000;
+let cachedBroadcasters: { ids: Set<string>; at: number } | null = null;
+
+/** Call after writing TelegramSignalBroadcaster so this instance sees the change now. */
+export function invalidateTelegramBroadcasterCache(): void {
+  cachedBroadcasters = null;
+}
+
+async function getBroadcasterIds(): Promise<Set<string>> {
+  if (
+    cachedBroadcasters &&
+    Date.now() - cachedBroadcasters.at < BROADCASTER_CACHE_TTL_MS
+  ) {
+    return cachedBroadcasters.ids;
+  }
+  try {
+    // Lazy import keeps this module load-time side-effect-free (Prisma throws when
+    // DATABASE_URL is unset, e.g. in unit tests that never touch Telegram).
+    const { prisma } = await import("@/lib/prisma");
+    const rows = await prisma.telegramSignalBroadcaster.findMany({
+      select: { userId: true },
+    });
+    cachedBroadcasters = { ids: new Set(rows.map((r) => r.userId)), at: Date.now() };
+  } catch {
+    // DB unreachable — don't cache the miss, fall back to "broadcast everything".
+    return new Set();
+  }
+  return cachedBroadcasters.ids;
+}
+
+async function canBroadcastSignal(authorId?: string | null): Promise<boolean> {
+  const ids = await getBroadcasterIds();
+  if (ids.size === 0) return true;
+  return Boolean(authorId) && ids.has(authorId as string);
+}
+
 const FIELD_LABEL: Record<string, string> = {
   stopLoss: "SL",
   takeProfit: "TP1",
@@ -38,8 +77,10 @@ export async function notifyTelegramNewSignal(signal: {
   takeProfit3?: number | null;
   tier: string;
   status?: "PENDING" | "ACTIVE";
+  authorId?: string | null;
 }): Promise<void> {
   if (!BOT_TOKEN) return;
+  if (!(await canBroadcastSignal(signal.authorId))) return;
   const isPending = signal.status === "PENDING";
   const dir = signal.direction === "LONG" ? "BUY 📈" : "SELL 📉";
   const tier = signal.tier === "VIP" ? " 💎 VIP" : "";
@@ -70,8 +111,10 @@ export async function notifyTelegramUpdatedSignal(signal: {
   symbol: string;
   direction: string;
   changes: { field: string; oldValue: string | null; newValue: string | null }[];
+  authorId?: string | null;
 }): Promise<void> {
   if (!BOT_TOKEN) return;
+  if (!(await canBroadcastSignal(signal.authorId))) return;
   // Chỉ gửi khi có thay đổi SL/TP (bỏ qua notes)
   const relevant = signal.changes.filter((c) => c.field in FIELD_LABEL);
   if (relevant.length === 0) return;
@@ -102,8 +145,10 @@ export async function notifyTelegramClosedSignal(signal: {
   direction: string;
   status: "CLOSED_WIN" | "CLOSED_LOSS" | "CANCELLED";
   profit?: number | null;
+  authorId?: string | null;
 }): Promise<void> {
   if (!BOT_TOKEN) return;
+  if (!(await canBroadcastSignal(signal.authorId))) return;
   if (signal.status === "CANCELLED") return;
   const isWin = signal.status === "CLOSED_WIN";
   const icon = isWin ? "✅" : "❌";

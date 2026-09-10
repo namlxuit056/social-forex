@@ -55,7 +55,9 @@ export async function reconcileStaleMt5Signals(): Promise<{
     if (closedSignalIds.length > 0) {
       touchedUserIds.add(connection.userId);
       allClosedSignalIds.push(...closedSignalIds);
-      allClosedMt5Signals.push(...closedMt5Signals);
+      allClosedMt5Signals.push(
+        ...closedMt5Signals.map((s) => ({ ...s, authorId: connection.userId })),
+      );
     }
   }
 

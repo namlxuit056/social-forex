@@ -160,6 +160,7 @@ export async function POST(req: NextRequest) {
     takeProfit: signal.takeProfit,
     tier: signal.tier,
     status: "ACTIVE",
+    authorId: signal.authorId,
   });
 
   revalidatePath("/signals");

@@ -127,6 +127,7 @@ model User {
   hostedWebinars       Webinar[]
   webinarRegistrations WebinarRegistration[]
   aiTradeProposals     AiTradeProposal[]
+  telegramBroadcaster  TelegramSignalBroadcaster?
   academyProgress      AcademyProgress[]
   autoScalpConfig      AutoScalpConfig?
   priceAlerts          PriceAlert[]
@@ -695,6 +696,14 @@ model FunnelEvent {
   @@index([userId, createdAt])
   @@index([path, createdAt])
   @@index([createdAt])
+}
+
+/// Allowlist: chỉ tín hiệu do các user này tạo mới được bắn lên kênh Telegram.
+/// Bảng rỗng = bắn tất cả tín hiệu (giữ nguyên hành vi cũ). Quản lý ở /admin/telegram-signals.
+model TelegramSignalBroadcaster {
+  userId    String   @id
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 }
 
 /// Singleton row (id="default") — which AI provider/model powers all AI features app-wide.

@@ -158,6 +158,7 @@ export async function confirmAiTradeProposal(
     takeProfit: proposal.takeProfit,
     tier: "FREE",
     status: "PENDING",
+    authorId: userId,
   });
 
   revalidatePath("/mt5");

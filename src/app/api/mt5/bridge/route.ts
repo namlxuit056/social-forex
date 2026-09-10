@@ -513,8 +513,12 @@ export async function POST(request: NextRequest) {
 
   // Send Telegram notifications outside the DB transaction
   await Promise.allSettled([
-    ...newMt5Signals.map((s) => notifyTelegramNewSignal(s)),
-    ...closedMt5Signals.map((s) => notifyTelegramClosedSignal(s)),
+    ...newMt5Signals.map((s) =>
+      notifyTelegramNewSignal({ ...s, authorId: connection.userId }),
+    ),
+    ...closedMt5Signals.map((s) =>
+      notifyTelegramClosedSignal({ ...s, authorId: connection.userId }),
+    ),
   ]);
 
   revalidatePath("/mt5");

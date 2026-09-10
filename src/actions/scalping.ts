@@ -139,6 +139,7 @@ export async function confirmScalpingPick(
     takeProfit: signal.takeProfit,
     tier: signal.tier,
     status: connection ? "PENDING" : "ACTIVE",
+    authorId: userId,
   });
 
   revalidatePath("/signals");

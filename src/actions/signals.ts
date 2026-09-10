@@ -131,6 +131,7 @@ export async function createSignal(
     takeProfit3: signal.takeProfit3,
     tier: signal.tier,
     status: "ACTIVE",
+    authorId: signal.authorId,
   });
 
   revalidatePath("/signals");
@@ -213,6 +214,7 @@ export async function closeSignal(
     symbol: signal.symbol,
     direction: signal.direction,
     status,
+    authorId: signal.authorId,
   });
 
   if (status === "CLOSED_WIN" || status === "CLOSED_LOSS") {
@@ -375,6 +377,7 @@ export async function updateSignal(
     symbol: signal.symbol,
     direction: signal.direction,
     changes: logs,
+    authorId: signal.authorId,
   });
 
   revalidatePath("/signals");
