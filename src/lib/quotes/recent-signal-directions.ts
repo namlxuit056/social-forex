@@ -47,9 +47,9 @@ function parseTvMeta(meta: unknown): Omit<TvSignalRow, "at"> | null {
 }
 
 /**
- * Gộp các notification tín hiệu (đã sắp mới nhất trước, một dòng / dedupeKey) thành
- * bảng hướng vào lệnh theo cặp — chỉ nguồn TradingView, giữ tín hiệu mới nhất mỗi cặp,
- * sắp theo thời gian phát gần nhất.
+ * Gộp các notification tín hiệu (một dòng / dedupeKey, thứ tự bất kỳ) thành bảng hướng
+ * vào lệnh theo cặp — chỉ nguồn TradingView, giữ tín hiệu mới nhất mỗi cặp, kết quả
+ * sắp theo thời gian phát gần nhất trước.
  */
 export function latestTvSignals(rows: RawSignalNotif[]): TvSignalRow[] {
   const bySymbol = new Map<string, TvSignalRow>();
@@ -57,8 +57,8 @@ export function latestTvSignals(rows: RawSignalNotif[]): TvSignalRow[] {
   for (const row of rows) {
     const parsed = parseTvMeta(row.meta);
     if (!parsed) continue;
-    // rows mới nhất trước → lần đầu gặp mỗi symbol là tín hiệu mới nhất.
-    if (bySymbol.has(parsed.symbol)) continue;
+    const existing = bySymbol.get(parsed.symbol);
+    if (existing && existing.at.getTime() >= row.createdAt.getTime()) continue;
     bySymbol.set(parsed.symbol, { ...parsed, at: row.createdAt });
   }
 

@@ -95,20 +95,41 @@ describe("latestTvSignals", () => {
     expect(row.score4h).toBeNull();
   });
 
-  it("orders symbols by most recent signal first", () => {
+  it("orders symbols by most recent signal first regardless of input order", () => {
     const rows = [
-      notif("1", "2026-09-09T08:00:00Z", {
-        source: "tradingview",
-        symbol: "OLD",
-        signal: "buy",
-      }),
       notif("2", "2026-09-10T08:00:00Z", {
         source: "tradingview",
         symbol: "NEW",
         signal: "buy",
       }),
+      notif("1", "2026-09-09T08:00:00Z", {
+        source: "tradingview",
+        symbol: "OLD",
+        signal: "buy",
+      }),
     ];
     expect(latestTvSignals(rows).map((r) => r.symbol)).toEqual(["NEW", "OLD"]);
+    // Same rows, reversed — result order must not change.
+    expect(latestTvSignals([...rows].reverse()).map((r) => r.symbol)).toEqual([
+      "NEW",
+      "OLD",
+    ]);
+  });
+
+  it("keeps the newest signal per symbol when rows are not time-sorted", () => {
+    const rows = [
+      notif("old", "2026-09-08T00:00:00Z", {
+        source: "tradingview",
+        symbol: "GBPUSD",
+        signal: "sell",
+      }),
+      notif("new", "2026-09-10T00:00:00Z", {
+        source: "tradingview",
+        symbol: "GBPUSD",
+        signal: "buy",
+      }),
+    ];
+    expect(latestTvSignals(rows)[0].signal).toBe("buy");
   });
 });
 

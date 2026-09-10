@@ -40,15 +40,18 @@ export async function SignalDirectionsBoard({
 
   const now = new Date(nowIso).getTime();
   const since = new Date(now - WINDOW_DAYS * 24 * 60 * 60 * 1000);
+  // dedupeKey đứng đầu orderBy để Prisma đẩy `DISTINCT ON (dedupeKey)` xuống SQL —
+  // notification broadcast cho mọi user nên mỗi tín hiệu có rất nhiều dòng trùng key;
+  // `latestTvSignals` sắp lại theo thời gian sau.
   const rows = await prisma.notification.findMany({
     where: {
       kind: "TECHNICAL_RATING_SIGNAL",
       createdAt: { gte: since },
       meta: { path: ["source"], equals: "tradingview" },
     },
-    orderBy: { createdAt: "desc" },
+    orderBy: [{ dedupeKey: "asc" }, { createdAt: "desc" }],
     distinct: ["dedupeKey"],
-    take: 500,
+    take: 300,
     select: { dedupeKey: true, createdAt: true, meta: true },
   });
 
