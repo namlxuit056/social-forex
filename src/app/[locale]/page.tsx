@@ -12,6 +12,7 @@ import { Link } from "@/i18n/navigation";
 import { TrackedLink } from "@/components/analytics/tracked-link";
 import { HomeTopTraders } from "@/components/home/home-top-traders";
 import { NewcomerPathSection } from "@/components/home/newcomer-path";
+import { SignalDirectionsBoard } from "@/components/home/signal-directions-board";
 import { MarketVolatilityNote } from "@/components/market/market-volatility-note";
 import { BreadcrumbJsonLd } from "@/components/seo/breadcrumb-json-ld";
 import { FaqJsonLd } from "@/components/seo/faq-json-ld";
@@ -122,6 +123,7 @@ export default async function HomePage({
   const tChallenge = await getTranslations("challenge");
   const tf = await getTranslations("schemaFaqHome");
   const exnessAffiliateUrl = getExnessAffiliateUrl();
+  const nowIso = new Date().toISOString();
 
   const faqItems = [
     { question: tf("q1"), answer: tf("a1") },
@@ -204,7 +206,9 @@ export default async function HomePage({
         </div>
       </section>
 
-      <MarketVolatilityNote serverNowIso={new Date().toISOString()} locale={locale} />
+      <MarketVolatilityNote serverNowIso={nowIso} locale={locale} />
+
+      <SignalDirectionsBoard locale={locale} nowIso={nowIso} />
 
       <section
         aria-labelledby="challenge-preview-heading"
