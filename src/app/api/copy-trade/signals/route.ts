@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { copyActiveOpenSince, isCopySignalEligible } from "@/lib/copy-trade/copy-eligibility";
 import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
@@ -73,19 +74,25 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     });
   }
 
-  const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const now = new Date();
+  const since24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
   // ACTIVE/PENDING signals are only offered from the point the follower actually
-  // subscribed onward. Without this, a signal that's been open for days (provider
-  // just hasn't clicked "close" yet) gets served forever to every poll, and a
-  // follower whose EA loses its in-memory dedupe state (terminal/VPS restart) treats
-  // it as brand new and opens a fresh market trade at a stale, long-gone entry price.
+  // subscribed onward — and, for ACTIVE (market-filled) signals, only within a
+  // short grace window of the provider opening the trade. Without the window a
+  // signal that's been open for hours (provider just hasn't clicked "close" yet)
+  // gets served forever to every poll: a follower whose EA loses its dedupe state
+  // (terminal/VPS restart, re-subscribe, copy toggled off then on) then treats it
+  // as brand new and fires a market order at a price that has long since moved away
+  // from the signal's entry. PENDING signals stay eligible for the whole
+  // subscription — the EA mirrors them at the provider's exact entry price, so
+  // there's no wrong-price risk regardless of age. See @/lib/copy-trade/copy-eligibility.
   const signals = await prisma.signal.findMany({
     where: {
       authorId: copyTrade.providerId,
       excludedFromCopy: false,
       OR: [
-        { status: "ACTIVE", createdAt: { gte: copyTrade.createdAt } },
+        { status: "ACTIVE", createdAt: { gte: copyActiveOpenSince(copyTrade.createdAt, now) } },
         { status: "PENDING", createdAt: { gte: copyTrade.createdAt } },
         {
           status: { in: ["CLOSED_WIN", "CLOSED_LOSS", "CANCELLED"] },
@@ -106,6 +113,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       lotSize: true,
       status: true,
       createdAt: true,
+      closedAt: true,
     },
   });
 
@@ -124,7 +132,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     });
     unresolvedIds = new Set(unresolvedProposals.map((p) => p.signalId as string));
   }
-  const eligibleSignals = signals.filter((s) => !unresolvedIds.has(s.id));
+  const eligibleSignals = signals.filter(
+    (s) => !unresolvedIds.has(s.id) && isCopySignalEligible(s, copyTrade.createdAt, now),
+  );
 
   return NextResponse.json({
     subscriptionId: copyTrade.id,

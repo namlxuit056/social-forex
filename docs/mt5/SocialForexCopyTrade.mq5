@@ -3,7 +3,7 @@
 //| Auto copy trades from signal providers on Social Forex.          |
 //+------------------------------------------------------------------+
 #property copyright "Social Forex"
-#property version   "1.01"
+#property version   "1.02"
 #property strict
 
 input string ApiEndpoint = "https://www.toolforex.xyz/api/copy-trade/signals";
@@ -11,6 +11,11 @@ input string CopyToken = "";
 input int PollSeconds = 10;
 input bool AllowAutoTrade = true;
 input int MaxSlippage = 30;
+// Market copies only: skip a signal whose entry price has already moved this many
+// points away from the current price. Stops the follower opening mid-trade at a
+// stale price after an EA/terminal restart or copy being toggled off then on.
+// 0 disables the check.
+input int MaxEntryDriftPoints = 300;
 input int MagicNumber = 20260621;
 
 datetime last_poll_at = 0;
@@ -513,6 +518,24 @@ bool OpenMarketTrade(string symbol, string direction, double entry, double sl, d
       price = SymbolInfoDouble(symbol, SYMBOL_ASK);
    else
       price = SymbolInfoDouble(symbol, SYMBOL_BID);
+
+   // Don't chase price. If the signal's entry is already far from the current
+   // price the provider is mid-trade - copying now would fill at a materially
+   // worse level. Skip and wait for the next fresh signal instead. This is the
+   // client-side backstop for a stale ACTIVE signal slipping through after an
+   // EA/terminal restart or copy being toggled off then on.
+   double pointSz = SymbolInfoDouble(symbol, SYMBOL_POINT);
+   if(MaxEntryDriftPoints > 0 && entry > 0 && pointSz > 0)
+   {
+      double drift = MathAbs(price - entry) / pointSz;
+      if(drift > MaxEntryDriftPoints)
+      {
+         Print("SocialForexCopyTrade: entry ", entry, " is ", (int)drift,
+               " points from price ", price, " (limit ", MaxEntryDriftPoints,
+               ") - skipped stale signal ", signalId);
+         return false;
+      }
+   }
 
    // Clamp SL/TP to broker's minimum stop distance (prevents Retcode 10016)
    int    digits  = (int)SymbolInfoInteger(symbol, SYMBOL_DIGITS);
