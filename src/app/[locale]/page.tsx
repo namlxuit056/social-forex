@@ -12,6 +12,7 @@ import { Link } from "@/i18n/navigation";
 import { TrackedLink } from "@/components/analytics/tracked-link";
 import { HomeTopTraders } from "@/components/home/home-top-traders";
 import { NewcomerPathSection } from "@/components/home/newcomer-path";
+import { MarketVolatilityNote } from "@/components/market/market-volatility-note";
 import { BreadcrumbJsonLd } from "@/components/seo/breadcrumb-json-ld";
 import { FaqJsonLd } from "@/components/seo/faq-json-ld";
 import { WebsiteJsonLd } from "@/components/seo/website-json-ld";
@@ -202,6 +203,8 @@ export default async function HomePage({
           </TrackedLink>
         </div>
       </section>
+
+      <MarketVolatilityNote serverNowIso={new Date().toISOString()} locale={locale} />
 
       <section
         aria-labelledby="challenge-preview-heading"
