@@ -58,6 +58,9 @@ export async function SignalDirectionsBoard({
   const signals = latestTvSignals(rows);
   if (signals.length === 0) return null;
 
+  // Giờ hiển thị: GMT+7 cho vi, UTC cho en (theo quy ước market-volatility-note).
+  const displayTz = locale === "en" ? "UTC" : "Asia/Ho_Chi_Minh";
+
   // Tra lại điểm kỹ thuật 4H hiện tại trên TradingView để biết tín hiệu còn được ủng hộ không.
   const ratings = await getCachedTechnicalRatings();
 
@@ -162,6 +165,7 @@ export async function SignalDirectionsBoard({
                       month: "2-digit",
                       hour: "2-digit",
                       minute: "2-digit",
+                      timeZone: displayTz,
                     })}
                   </td>
                 </tr>
