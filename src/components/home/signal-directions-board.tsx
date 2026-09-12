@@ -8,9 +8,15 @@ import {
   type SignalValidity,
 } from "@/lib/quotes/recent-signal-directions";
 import { getCachedTechnicalRatings } from "@/lib/quotes/tv-ratings-cache";
+import {
+  computeSymbolScorecard,
+  type OutcomeResult,
+  type SymbolOutcomeRow,
+} from "@/lib/quotes/signal-outcomes";
 import { cn } from "@/lib/utils";
 
 const WINDOW_DAYS = 7;
+const TRACK_RECORD_WINDOW_DAYS = 30;
 
 function fmt(n: number | null): string {
   return n === null ? "—" : n.toLocaleString("en-US", { maximumFractionDigits: 5 });
@@ -64,6 +70,29 @@ export async function SignalDirectionsBoard({
   // Tra lại điểm kỹ thuật 4H hiện tại trên TradingView để biết tín hiệu còn được ủng hộ không.
   const ratings = await getCachedTechnicalRatings();
 
+  // Track record 30 ngày mỗi cặp — cùng dữ liệu SignalOutcome đã chấm cho scorecard trên
+  // /quotes/technical-rating (recordSignalOutcome ghi 1:1 với mọi notification hiển thị ở đây).
+  const trackRecordSince = new Date(now - TRACK_RECORD_WINDOW_DAYS * 24 * 60 * 60 * 1000);
+  const outcomeRows = await prisma.signalOutcome.findMany({
+    where: {
+      source: "tradingview",
+      symbol: { in: signals.map((s) => s.symbol) },
+      firedAt: { gte: trackRecordSince },
+    },
+    select: { symbol: true, firedAt: true, result: true, favorPct: true },
+  });
+  const symbolRows: SymbolOutcomeRow[] = outcomeRows.map((r) => ({
+    symbol: r.symbol,
+    source: "tradingview",
+    firedAt: r.firedAt,
+    result: r.result as OutcomeResult | null,
+    favorPct: r.favorPct,
+  }));
+  const trackRecord = computeSymbolScorecard(symbolRows, {
+    now: new Date(now),
+    windowDays: TRACK_RECORD_WINDOW_DAYS,
+  });
+
   return (
     <section
       aria-labelledby="signal-directions-heading"
@@ -91,7 +120,7 @@ export async function SignalDirectionsBoard({
       </div>
 
       <div className="mt-4 overflow-x-auto">
-        <table className="w-full min-w-175 border-collapse text-sm">
+        <table className="w-full min-w-200 border-collapse text-sm">
           <thead>
             <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
               <th className="py-2 pr-3 font-medium">{t("signalBoardColPair")}</th>
@@ -101,6 +130,9 @@ export async function SignalDirectionsBoard({
               <th className="py-2 pr-3 text-right font-medium">{t("signalBoardColStop")}</th>
               <th className="py-2 pr-3 text-right font-medium">{t("signalBoardColTarget")}</th>
               <th className="py-2 pr-3 font-medium">{t("signalBoardColValidity")}</th>
+              <th className="py-2 pr-3 font-medium">
+                {t("signalBoardColTrackRecord", { days: TRACK_RECORD_WINDOW_DAYS })}
+              </th>
               <th className="py-2 font-medium">{t("signalBoardColUpdated")}</th>
             </tr>
           </thead>
@@ -158,6 +190,36 @@ export async function SignalDirectionsBoard({
                     >
                       {t(VALIDITY_KEY[validity])}
                     </span>
+                  </td>
+                  <td className="py-2.5 pr-3 align-top">
+                    {(() => {
+                      const score = trackRecord.get(s.symbol);
+                      const decided = (score?.wins ?? 0) + (score?.losses ?? 0);
+                      if (!score || decided === 0) {
+                        return (
+                          <span className="text-xs text-muted-foreground">
+                            {score && score.pending > 0
+                              ? t("signalBoardTrackRecordPending", { count: score.pending })
+                              : t("signalBoardTrackRecordNoData")}
+                          </span>
+                        );
+                      }
+                      return (
+                        <span className="inline-flex items-baseline gap-1 text-xs">
+                          <span
+                            className={cn(
+                              "font-mono font-semibold",
+                              score.winRate! >= 0.5
+                                ? "text-emerald-600 dark:text-emerald-300"
+                                : "text-red-600 dark:text-red-300",
+                            )}
+                          >
+                            {Math.round(score.winRate! * 100)}%
+                          </span>
+                          <span className="text-muted-foreground">({decided})</span>
+                        </span>
+                      );
+                    })()}
                   </td>
                   <td className="py-2.5 align-top text-xs text-muted-foreground">
                     {s.at.toLocaleString(locale, {

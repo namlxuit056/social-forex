@@ -53,6 +53,71 @@ export type SourceScorecard = {
   sources: SourceScore[];
 };
 
+export type SymbolOutcomeRow = OutcomeRow & { symbol: string };
+
+export type SymbolScore = {
+  symbol: string;
+  /** Số tín hiệu đã chấm (win + loss + flat). */
+  evaluated: number;
+  wins: number;
+  losses: number;
+  flats: number;
+  /** wins / (wins + losses) — null khi chưa có tín hiệu đúng/sai hướng nào. */
+  winRate: number | null;
+  /** Số tín hiệu đã phát nhưng chưa đủ horizon để chấm. */
+  pending: number;
+};
+
+/**
+ * Gộp các dòng SignalOutcome thành bảng điểm theo CẶP (thay vì theo nguồn), chỉ tính tín
+ * hiệu phát trong `windowDays` ngày gần nhất — dùng cho track record trên bảng entry-bias
+ * trang chủ (mỗi hàng = 1 cặp). Không có universe cố định như `SIGNAL_SOURCES`: chỉ trả về
+ * các symbol thực sự xuất hiện trong `rows`.
+ */
+export function computeSymbolScorecard(
+  rows: SymbolOutcomeRow[],
+  opts: { now?: Date; windowDays: number },
+): Map<string, SymbolScore> {
+  const now = opts.now ?? new Date();
+  const cutoff = now.getTime() - opts.windowDays * 24 * 60 * 60 * 1000;
+
+  const bySymbol = new Map<string, SymbolOutcomeRow[]>();
+  for (const row of rows) {
+    if (row.firedAt.getTime() < cutoff) continue;
+    const list = bySymbol.get(row.symbol);
+    if (list) list.push(row);
+    else bySymbol.set(row.symbol, [row]);
+  }
+
+  const result = new Map<string, SymbolScore>();
+  for (const [symbol, list] of bySymbol) {
+    let wins = 0;
+    let losses = 0;
+    let flats = 0;
+    let pending = 0;
+    for (const row of list) {
+      if (row.result === null) {
+        pending += 1;
+        continue;
+      }
+      if (row.result === "win") wins += 1;
+      else if (row.result === "loss") losses += 1;
+      else flats += 1;
+    }
+    const decided = wins + losses;
+    result.set(symbol, {
+      symbol,
+      evaluated: wins + losses + flats,
+      wins,
+      losses,
+      flats,
+      winRate: decided > 0 ? wins / decided : null,
+      pending,
+    });
+  }
+  return result;
+}
+
 /**
  * Gộp các dòng SignalOutcome thành bảng điểm theo nguồn, chỉ tính tín hiệu phát trong
  * `windowDays` ngày gần nhất (tính theo `firedAt`). Luôn trả đủ 5 nguồn kể cả khi rỗng.

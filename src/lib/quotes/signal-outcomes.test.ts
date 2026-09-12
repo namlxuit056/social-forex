@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 import {
   classifyOutcome,
   computeSourceScorecard,
+  computeSymbolScorecard,
   FLAT_BAND_PCT,
   type OutcomeRow,
+  type SymbolOutcomeRow,
 } from "@/lib/quotes/signal-outcomes";
 
 describe("classifyOutcome", () => {
@@ -112,5 +114,64 @@ describe("computeSourceScorecard", () => {
     )!;
     expect(tv.winRate).toBeNull();
     expect(tv.avgFavorPct).toBeCloseTo(0.01);
+  });
+});
+
+function symbolRow(over: Partial<SymbolOutcomeRow>): SymbolOutcomeRow {
+  return {
+    symbol: "XAUUSD",
+    source: "tradingview",
+    firedAt: new Date("2026-09-01T00:00:00Z"),
+    result: "win",
+    favorPct: 1,
+    ...over,
+  };
+}
+
+describe("computeSymbolScorecard", () => {
+  const now = new Date("2026-09-10T00:00:00Z");
+
+  it("chỉ trả về các symbol thực sự xuất hiện trong rows", () => {
+    const card = computeSymbolScorecard([], { now, windowDays: 30 });
+    expect(card.size).toBe(0);
+  });
+
+  it("gộp theo symbol, winRate loại flat khỏi mẫu số", () => {
+    const rows: SymbolOutcomeRow[] = [
+      symbolRow({ symbol: "XAUUSD", result: "win" }),
+      symbolRow({ symbol: "XAUUSD", result: "loss" }),
+      symbolRow({ symbol: "XAUUSD", result: "flat" }),
+      symbolRow({ symbol: "EURUSD", result: "win" }),
+    ];
+    const card = computeSymbolScorecard(rows, { now, windowDays: 30 });
+    const xau = card.get("XAUUSD")!;
+    expect(xau.wins).toBe(1);
+    expect(xau.losses).toBe(1);
+    expect(xau.flats).toBe(1);
+    expect(xau.evaluated).toBe(3);
+    expect(xau.winRate).toBeCloseTo(0.5);
+
+    const eur = card.get("EURUSD")!;
+    expect(eur.winRate).toBe(1);
+  });
+
+  it("đếm pending riêng, không tính vào evaluated", () => {
+    const rows: SymbolOutcomeRow[] = [
+      symbolRow({ result: null, favorPct: null }),
+      symbolRow({ result: "win" }),
+    ];
+    const xau = computeSymbolScorecard(rows, { now, windowDays: 30 }).get("XAUUSD")!;
+    expect(xau.pending).toBe(1);
+    expect(xau.evaluated).toBe(1);
+  });
+
+  it("lọc theo firedAt trong windowDays", () => {
+    const rows: SymbolOutcomeRow[] = [
+      symbolRow({ firedAt: new Date("2026-09-09T00:00:00Z"), result: "win" }),
+      symbolRow({ firedAt: new Date("2026-07-01T00:00:00Z"), result: "loss" }),
+    ];
+    const card30 = computeSymbolScorecard(rows, { now, windowDays: 30 }).get("XAUUSD")!;
+    expect(card30.evaluated).toBe(1);
+    expect(card30.wins).toBe(1);
   });
 });
