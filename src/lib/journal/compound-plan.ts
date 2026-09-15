@@ -37,7 +37,11 @@ export type CompoundPlanProgress = {
   /** 0..100 for a progress bar */
   progressPercent: number;
   eta: CompoundPlanEta;
-  /** Lãi kép dailyTargetPercent qua 1 tuần/tháng giao dịch, áp trên currentCapital — "nếu giữ đúng nhịp thì tuần/tháng này nên đạt bao nhiêu". */
+  /**
+   * Lãi kép dailyTargetPercent qua 1 tuần/tháng giao dịch, áp trên vốn đầu
+   * tuần/đầu tháng (thứ 2 UTC / ngày 1 UTC) — cố định suốt tuần/tháng đó,
+   * không đổi khi xem lại giữa tuần như todayTargetAmount cố định trong ngày.
+   */
   weeklyTargetPercent: number;
   weeklyTargetAmount: number;
   monthlyTargetPercent: number;
@@ -47,6 +51,22 @@ export type CompoundPlanProgress = {
 /** Quy ước số ngày giao dịch mỗi tuần/tháng (Forex: Thứ 2–6, ~21 ngày/tháng). */
 const TRADING_DAYS_PER_WEEK = 5;
 const TRADING_DAYS_PER_MONTH = 21;
+
+/** Thứ 2 (00:00 UTC) của tuần chứa `date`. */
+function utcWeekStart(date: Date): Date {
+  const dayOfWeek = date.getUTCDay(); // 0 = CN, 1 = T2, ... 6 = T7
+  const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+  const start = new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
+  );
+  start.setUTCDate(start.getUTCDate() - daysSinceMonday);
+  return start;
+}
+
+/** Ngày 1 (00:00 UTC) của tháng chứa `date`. */
+function utcMonthStart(date: Date): Date {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1));
+}
 
 /** Lệnh đã đóng, closedAt >= startDate. Loại PENDING và trade chưa đóng. */
 export function tradesSincePlanStart<T extends CompoundPlanTrade>(
@@ -148,12 +168,24 @@ export function computeCompoundPlanProgress(
     eta = { kind: "stalled" };
   }
 
+  const weekStart = utcWeekStart(now);
+  const weekPnl = sinceStart
+    .filter((t) => new Date(t.closedAt as string | Date).getTime() >= weekStart.getTime())
+    .reduce((s, t) => s + (t.pnl ?? 0), 0);
+  const weekStartCapital = currentCapital - weekPnl;
+
+  const monthStart = utcMonthStart(now);
+  const monthPnl = sinceStart
+    .filter((t) => new Date(t.closedAt as string | Date).getTime() >= monthStart.getTime())
+    .reduce((s, t) => s + (t.pnl ?? 0), 0);
+  const monthStartCapital = currentCapital - monthPnl;
+
   const weeklyTargetPercent =
     (Math.pow(1 + plan.dailyTargetPercent / 100, TRADING_DAYS_PER_WEEK) - 1) * 100;
-  const weeklyTargetAmount = (currentCapital * weeklyTargetPercent) / 100;
+  const weeklyTargetAmount = (weekStartCapital * weeklyTargetPercent) / 100;
   const monthlyTargetPercent =
     (Math.pow(1 + plan.dailyTargetPercent / 100, TRADING_DAYS_PER_MONTH) - 1) * 100;
-  const monthlyTargetAmount = (currentCapital * monthlyTargetPercent) / 100;
+  const monthlyTargetAmount = (monthStartCapital * monthlyTargetPercent) / 100;
 
   return {
     currentCapital,

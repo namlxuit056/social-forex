@@ -182,12 +182,37 @@ describe("computeCompoundPlanProgress — mục tiêu tuần/tháng", () => {
     expect(result.monthlyTargetAmount).toBeCloseTo(860.3, 0);
   });
 
-  it("dùng currentCapital hiện tại (không phải vốn gốc) làm nền", () => {
-    const trades = [trade(100, "2026-09-01T05:00:00Z")];
-    const result = computeCompoundPlanProgress(basePlan, trades, new Date("2026-09-01T10:00:00Z"));
-    expect(result.currentCapital).toBe(1100);
-    expect(result.weeklyTargetAmount).toBeCloseTo(1100 * (result.weeklyTargetPercent / 100), 6);
-    expect(result.monthlyTargetAmount).toBeCloseTo(1100 * (result.monthlyTargetPercent / 100), 6);
+  it("neo theo vốn đầu tuần (thứ 2 UTC) / đầu tháng, loại PnL đã kiếm trong tuần/tháng này — không phải currentCapital", () => {
+    const plan: CompoundPlanConfig = { ...basePlan, startDate: "2026-08-01T00:00:00Z" };
+    const trades = [
+      trade(-50, "2026-08-25T00:00:00Z"), // tuần trước, tháng trước
+      trade(80, "2026-08-31T00:00:00Z"), // đúng thứ 2 đầu tuần này, nhưng vẫn tháng 8
+      trade(200, "2026-09-02T00:00:00Z"), // trong tuần này và tháng 9
+    ];
+    const now = new Date("2026-09-03T12:00:00Z"); // thứ 5, tuần 31/8–6/9, tháng 9
+    const result = computeCompoundPlanProgress(plan, trades, now);
+
+    expect(result.currentCapital).toBe(1230); // 1000 - 50 + 80 + 200
+    // weekStartCapital = currentCapital - (80 + 200) = 950
+    expect(result.weeklyTargetAmount).toBeCloseTo(950 * (result.weeklyTargetPercent / 100), 6);
+    // monthStartCapital = currentCapital - 200 = 1030 (trade 31/8 thuộc tháng 8, không tính)
+    expect(result.monthlyTargetAmount).toBeCloseTo(1030 * (result.monthlyTargetPercent / 100), 6);
+  });
+
+  it("giữ nguyên khi xem lại giữa tuần/tháng dù có thêm trade mới trong cùng kỳ (không đổi mỗi lần check)", () => {
+    const plan: CompoundPlanConfig = { ...basePlan, startDate: "2026-08-01T00:00:00Z" };
+    const beforeNewTrade = computeCompoundPlanProgress(
+      plan,
+      [trade(80, "2026-08-31T00:00:00Z")],
+      new Date("2026-09-01T06:00:00Z"),
+    );
+    const afterNewTrade = computeCompoundPlanProgress(
+      plan,
+      [trade(80, "2026-08-31T00:00:00Z"), trade(40, "2026-09-03T06:00:00Z")],
+      new Date("2026-09-03T12:00:00Z"),
+    );
+    // trade 31/8 thuộc tuần này ở cả 2 lần check (31/8–6/9) nên weekStartCapital không đổi
+    expect(afterNewTrade.weeklyTargetAmount).toBeCloseTo(beforeNewTrade.weeklyTargetAmount, 6);
   });
 });
 
