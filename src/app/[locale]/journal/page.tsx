@@ -133,6 +133,7 @@ export default async function JournalPage({
     emotionEntriesRaw,
     planLimitsRaw,
     tradingGoalRaw,
+    compoundGrowthPlanRaw,
     moodCheckinsRaw,
     journalLessonsRaw,
     aiTradeReviewsRaw,
@@ -207,6 +208,18 @@ export default async function JournalPage({
           })
         : Promise.resolve(null),
       activeTab === "stats"
+        ? prisma.compoundGrowthPlan.findUnique({
+            where: { userId: session.user.id },
+            select: {
+              startingCapital: true,
+              targetCapital: true,
+              dailyTargetPercent: true,
+              dailyStopPercent: true,
+              startDate: true,
+            },
+          })
+        : Promise.resolve(null),
+      activeTab === "stats"
         ? prisma.moodCheckin.findMany({
             where: { userId: session.user.id },
             orderBy: { day: "desc" },
@@ -241,6 +254,16 @@ export default async function JournalPage({
     date: e.date.toISOString().slice(0, 10),
     note: e.note,
   }));
+
+  const compoundPlan = compoundGrowthPlanRaw
+    ? {
+        startingCapital: compoundGrowthPlanRaw.startingCapital,
+        targetCapital: compoundGrowthPlanRaw.targetCapital,
+        dailyTargetPercent: compoundGrowthPlanRaw.dailyTargetPercent,
+        dailyStopPercent: compoundGrowthPlanRaw.dailyStopPercent,
+        startDate: compoundGrowthPlanRaw.startDate.toISOString(),
+      }
+    : null;
 
   const isVip = isVipActive(dbUser?.vipUntil);
 
@@ -559,6 +582,7 @@ export default async function JournalPage({
             greenDays={greenDays}
             tiltDays={tiltDays}
             tradingGoal={tradingGoalRaw}
+            compoundPlan={compoundPlan}
           />
         </div>
       ) : activeTab === "chat" ? (
