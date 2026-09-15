@@ -44,6 +44,7 @@ import type { TiltDay, TiltDaysResult, TiltSignal } from "@/lib/journal/tilt-day
 import type { GreenDay, GreenDaysResult, GreenSignal } from "@/lib/journal/green-days";
 import { useMistakeLabels, useSetupLabels } from "./use-setup-labels";
 import { JournalGoalTracker, type TradingGoalData } from "@/components/journal/journal-goal-tracker";
+import { JournalCompoundPlanCard, type CompoundPlanData } from "@/components/journal/journal-compound-plan-card";
 
 export type AdvancedStatsPageTrade = AdvancedStatsTrade &
   DisciplineTrade &
@@ -1014,6 +1015,7 @@ export function JournalAdvancedStats({
   greenDays,
   tiltDays,
   tradingGoal,
+  compoundPlan,
 }: {
   trades: AdvancedStatsPageTrade[];
   locale: string;
@@ -1029,6 +1031,7 @@ export function JournalAdvancedStats({
   greenDays?: GreenDaysResult;
   tiltDays?: TiltDaysResult;
   tradingGoal?: TradingGoalData | null;
+  compoundPlan?: CompoundPlanData | null;
 }) {
   const t = useTranslations("journal");
 
@@ -1060,10 +1063,15 @@ export function JournalAdvancedStats({
     <JournalGoalTracker goal={tradingGoal ?? null} trades={trades} locale={locale} />
   );
 
+  const compoundPlanCard = (
+    <JournalCompoundPlanCard plan={compoundPlan ?? null} trades={trades} locale={locale} />
+  );
+
   if (stats.closedTrades < MIN_CLOSED_TRADES) {
     return (
       <div className="space-y-6">
         {goalTracker}
+        {compoundPlanCard}
         <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border/60 bg-muted/20 px-6 py-12 text-center">
           <BarChart3 className="size-10 text-muted-foreground" aria-hidden />
           <p className="text-sm text-muted-foreground">
@@ -1094,6 +1102,7 @@ export function JournalAdvancedStats({
   return (
     <div className="space-y-6">
       {goalTracker}
+      {compoundPlanCard}
 
       {scorecard && <DisciplineScorecardCard scorecard={scorecard} />}
 
