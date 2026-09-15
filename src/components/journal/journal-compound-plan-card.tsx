@@ -190,6 +190,30 @@ export function JournalCompoundPlanCard({
               </div>
             </div>
 
+            <div className="space-y-1.5 rounded-lg bg-muted/30 p-2.5">
+              <p className="text-[11px] text-muted-foreground">{t("compoundPlanPeriodTargetHint")}</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-[11px] text-muted-foreground">{t("compoundPlanWeeklyTarget")}</p>
+                  <p className="font-mono text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                    {fmtMoney(progress.weeklyTargetAmount)}{" "}
+                    <span className="font-normal text-muted-foreground">
+                      ({progress.weeklyTargetPercent.toFixed(1)}%)
+                    </span>
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[11px] text-muted-foreground">{t("compoundPlanMonthlyTarget")}</p>
+                  <p className="font-mono text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                    {fmtMoney(progress.monthlyTargetAmount)}{" "}
+                    <span className="font-normal text-muted-foreground">
+                      ({progress.monthlyTargetPercent.toFixed(1)}%)
+                    </span>
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <div className="space-y-1">
               <div className="flex items-center justify-between text-xs">
                 <span className="font-medium">{t("compoundPlanProgress")}</span>

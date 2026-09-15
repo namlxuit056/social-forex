@@ -169,6 +169,28 @@ describe("computeCompoundPlanProgress — ETA", () => {
   });
 });
 
+describe("computeCompoundPlanProgress — mục tiêu tuần/tháng", () => {
+  it("weeklyTargetPercent/Amount = lãi kép dailyTargetPercent qua 5 ngày giao dịch", () => {
+    const result = computeCompoundPlanProgress(basePlan, [], new Date("2026-09-01T10:00:00Z"));
+    expect(result.weeklyTargetPercent).toBeCloseTo(15.927, 2);
+    expect(result.weeklyTargetAmount).toBeCloseTo(159.27, 1);
+  });
+
+  it("monthlyTargetPercent/Amount = lãi kép dailyTargetPercent qua 21 ngày giao dịch", () => {
+    const result = computeCompoundPlanProgress(basePlan, [], new Date("2026-09-01T10:00:00Z"));
+    expect(result.monthlyTargetPercent).toBeCloseTo(86.03, 1);
+    expect(result.monthlyTargetAmount).toBeCloseTo(860.3, 0);
+  });
+
+  it("dùng currentCapital hiện tại (không phải vốn gốc) làm nền", () => {
+    const trades = [trade(100, "2026-09-01T05:00:00Z")];
+    const result = computeCompoundPlanProgress(basePlan, trades, new Date("2026-09-01T10:00:00Z"));
+    expect(result.currentCapital).toBe(1100);
+    expect(result.weeklyTargetAmount).toBeCloseTo(1100 * (result.weeklyTargetPercent / 100), 6);
+    expect(result.monthlyTargetAmount).toBeCloseTo(1100 * (result.monthlyTargetPercent / 100), 6);
+  });
+});
+
 describe("computeCompoundPlanProgress — progressPercent", () => {
   it("clamp về [0, 100]", () => {
     const lossResult = computeCompoundPlanProgress(

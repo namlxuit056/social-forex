@@ -37,7 +37,16 @@ export type CompoundPlanProgress = {
   /** 0..100 for a progress bar */
   progressPercent: number;
   eta: CompoundPlanEta;
+  /** Lãi kép dailyTargetPercent qua 1 tuần/tháng giao dịch, áp trên currentCapital — "nếu giữ đúng nhịp thì tuần/tháng này nên đạt bao nhiêu". */
+  weeklyTargetPercent: number;
+  weeklyTargetAmount: number;
+  monthlyTargetPercent: number;
+  monthlyTargetAmount: number;
 };
+
+/** Quy ước số ngày giao dịch mỗi tuần/tháng (Forex: Thứ 2–6, ~21 ngày/tháng). */
+const TRADING_DAYS_PER_WEEK = 5;
+const TRADING_DAYS_PER_MONTH = 21;
 
 /** Lệnh đã đóng, closedAt >= startDate. Loại PENDING và trade chưa đóng. */
 export function tradesSincePlanStart<T extends CompoundPlanTrade>(
@@ -139,6 +148,13 @@ export function computeCompoundPlanProgress(
     eta = { kind: "stalled" };
   }
 
+  const weeklyTargetPercent =
+    (Math.pow(1 + plan.dailyTargetPercent / 100, TRADING_DAYS_PER_WEEK) - 1) * 100;
+  const weeklyTargetAmount = (currentCapital * weeklyTargetPercent) / 100;
+  const monthlyTargetPercent =
+    (Math.pow(1 + plan.dailyTargetPercent / 100, TRADING_DAYS_PER_MONTH) - 1) * 100;
+  const monthlyTargetAmount = (currentCapital * monthlyTargetPercent) / 100;
+
   return {
     currentCapital,
     todayStartCapital,
@@ -150,5 +166,9 @@ export function computeCompoundPlanProgress(
     realizedDailyRatePercent,
     progressPercent,
     eta,
+    weeklyTargetPercent,
+    weeklyTargetAmount,
+    monthlyTargetPercent,
+    monthlyTargetAmount,
   };
 }
