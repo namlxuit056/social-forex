@@ -136,6 +136,7 @@ model User {
   tradeReviews         AiTradeReview[]
   moodCheckins         MoodCheckin[]
   tradingGoals         TradingGoal[]
+  compoundGrowthPlan   CompoundGrowthPlan?
   missionClaims        UserMissionClaim[]
   articleChatMessages  ArticleChatMessage[]
   journalChatMessages  JournalChatMessage[]
@@ -1260,6 +1261,25 @@ model TradingGoal {
 
   @@unique([userId, month])
   @@index([userId, month])
+}
+
+/// Kế hoạch lãi kép: vốn gốc, % lãi/dừng lỗ mục tiêu mỗi ngày, mốc vốn cuối.
+/// 1 plan/user, ghi đè khi sửa (startDate reset mỗi lần lưu). Vốn hiện tại
+/// tính động từ TradeJournal.pnl kể từ startDate — không lưu số dư riêng.
+/// Xem src/lib/journal/compound-plan.ts.
+model CompoundGrowthPlan {
+  id                 String   @id @default(cuid())
+  userId             String   @unique
+  startingCapital    Float
+  targetCapital      Float
+  dailyTargetPercent Float
+  dailyStopPercent   Float
+  startDate          DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 /// Một nhiệm vụ khởi động ("Bảng nhiệm vụ người mới") mà user đã hoàn thành và nhận thưởng XP.
