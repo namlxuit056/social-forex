@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  computeCompoundPlanDailyBreakdown,
   computeCompoundPlanProgress,
   tradesSincePlanStart,
   type CompoundPlanConfig,
@@ -213,6 +214,58 @@ describe("computeCompoundPlanProgress — mục tiêu tuần/tháng", () => {
     );
     // trade 31/8 thuộc tuần này ở cả 2 lần check (31/8–6/9) nên weekStartCapital không đổi
     expect(afterNewTrade.weeklyTargetAmount).toBeCloseTo(beforeNewTrade.weeklyTargetAmount, 6);
+  });
+});
+
+describe("computeCompoundPlanDailyBreakdown", () => {
+  it("liệt kê từng ngày Thứ 2–6 từ startDate đến hôm nay, mới nhất trước", () => {
+    const result = computeCompoundPlanDailyBreakdown(
+      basePlan,
+      [],
+      new Date("2026-09-02T10:00:00Z"), // Thứ 4
+    );
+    expect(result.map((d) => d.date.toISOString().slice(0, 10))).toEqual([
+      "2026-09-02",
+      "2026-09-01",
+    ]);
+    expect(result[0]).toMatchObject({ startCapital: 1000, targetAmount: 30, stopAmount: 25, pnl: 0, endCapital: 1000, status: "no-trade" });
+  });
+
+  it("bỏ Thứ 7/CN", () => {
+    const result = computeCompoundPlanDailyBreakdown(
+      basePlan,
+      [],
+      new Date("2026-09-07T10:00:00Z"), // Thứ 2 tuần sau
+    );
+    expect(result.map((d) => d.date.toISOString().slice(0, 10))).toEqual([
+      "2026-09-07",
+      "2026-09-04",
+      "2026-09-03",
+      "2026-09-02",
+      "2026-09-01",
+    ]);
+  });
+
+  it("target/stop tính trên vốn đầu ngày đó (compound theo endCapital ngày trước)", () => {
+    const trades = [trade(30, "2026-09-01T05:00:00Z")]; // đúng target ngày 1/9 (1000*3%)
+    const result = computeCompoundPlanDailyBreakdown(basePlan, trades, new Date("2026-09-02T10:00:00Z"));
+    const day1 = result.find((d) => d.date.toISOString().slice(0, 10) === "2026-09-01")!;
+    const day2 = result.find((d) => d.date.toISOString().slice(0, 10) === "2026-09-02")!;
+    expect(day1).toMatchObject({ startCapital: 1000, pnl: 30, endCapital: 1030, status: "target-hit" });
+    expect(day2.startCapital).toBe(1030);
+    expect(day2.targetAmount).toBeCloseTo(30.9, 5);
+  });
+
+  it("status = stop-hit khi PnL ngày đó <= -dừng lỗ", () => {
+    const trades = [trade(-26, "2026-09-01T05:00:00Z")];
+    const result = computeCompoundPlanDailyBreakdown(basePlan, trades, new Date("2026-09-01T10:00:00Z"));
+    expect(result[0].status).toBe("stop-hit");
+  });
+
+  it("status = in-progress khi có PnL nhưng chưa chạm target/dừng lỗ", () => {
+    const trades = [trade(5, "2026-09-01T05:00:00Z")];
+    const result = computeCompoundPlanDailyBreakdown(basePlan, trades, new Date("2026-09-01T10:00:00Z"));
+    expect(result[0].status).toBe("in-progress");
   });
 });
 

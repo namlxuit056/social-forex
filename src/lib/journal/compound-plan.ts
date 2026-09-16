@@ -84,6 +84,72 @@ function projectDays(currentCapital: number, targetCapital: number, ratePercent:
   return Math.ceil(Math.log(targetCapital / currentCapital) / Math.log(1 + rate));
 }
 
+export type CompoundPlanDayStatus = "target-hit" | "stop-hit" | "no-trade" | "in-progress";
+
+export type CompoundPlanDay = {
+  date: Date;
+  startCapital: number;
+  targetAmount: number;
+  stopAmount: number;
+  pnl: number;
+  endCapital: number;
+  status: CompoundPlanDayStatus;
+};
+
+/**
+ * Chi tiết từng ngày giao dịch (Thứ 2–6 UTC) từ startDate đến hôm nay: vốn đầu
+ * ngày, target/dừng lỗ tính trên vốn đầu ngày đó, PnL thực, vốn cuối ngày.
+ * Ngày mới nhất đứng đầu mảng.
+ */
+export function computeCompoundPlanDailyBreakdown(
+  plan: CompoundPlanConfig,
+  trades: CompoundPlanTrade[],
+  now: Date = new Date(),
+): CompoundPlanDay[] {
+  const startDate = new Date(plan.startDate);
+  const sinceStart = tradesSincePlanStart(trades, startDate);
+
+  const pnlByDay = new Map<number, number>();
+  for (const t of sinceStart) {
+    const dayKey = utcDayRange(new Date(t.closedAt as string | Date)).start.getTime();
+    pnlByDay.set(dayKey, (pnlByDay.get(dayKey) ?? 0) + (t.pnl ?? 0));
+  }
+
+  const { start: planStartDay } = utcDayRange(startDate);
+  const { start: todayStart } = utcDayRange(now);
+
+  const days: CompoundPlanDay[] = [];
+  let capital = plan.startingCapital;
+  for (
+    let dayMs = planStartDay.getTime();
+    dayMs <= todayStart.getTime();
+    dayMs += 24 * 60 * 60 * 1000
+  ) {
+    const dayOfWeek = new Date(dayMs).getUTCDay();
+    if (dayOfWeek === 0 || dayOfWeek === 6) continue; // bỏ Thứ 7/CN — thị trường đóng cửa
+
+    const startCapital = capital;
+    const targetAmount = (startCapital * plan.dailyTargetPercent) / 100;
+    const stopAmount = (startCapital * plan.dailyStopPercent) / 100;
+    const pnl = pnlByDay.get(dayMs) ?? 0;
+    const endCapital = startCapital + pnl;
+
+    const status: CompoundPlanDayStatus =
+      targetAmount > 0 && pnl >= targetAmount
+        ? "target-hit"
+        : stopAmount > 0 && pnl <= -stopAmount
+          ? "stop-hit"
+          : pnl === 0
+            ? "no-trade"
+            : "in-progress";
+
+    days.push({ date: new Date(dayMs), startCapital, targetAmount, stopAmount, pnl, endCapital, status });
+    capital = endCapital;
+  }
+
+  return days.reverse();
+}
+
 export function computeCompoundPlanProgress(
   plan: CompoundPlanConfig,
   trades: CompoundPlanTrade[],

@@ -3,9 +3,21 @@
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useActionState } from "react";
 import { useTranslations } from "next-intl";
-import { TrendingUp, Pencil, X, PartyPopper, AlertTriangle } from "lucide-react";
+import {
+  TrendingUp,
+  Pencil,
+  X,
+  PartyPopper,
+  AlertTriangle,
+  CheckCircle2,
+  XCircle,
+  Minus,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 import { saveCompoundPlan } from "@/actions/compound-plan";
 import {
+  computeCompoundPlanDailyBreakdown,
   computeCompoundPlanProgress,
   type CompoundPlanConfig,
   type CompoundPlanTrade,
@@ -29,6 +41,18 @@ function fmtMoney(v: number) {
   return `${sign}$${Math.abs(v).toFixed(2)}`;
 }
 
+const DAILY_BREAKDOWN_COLLAPSED_COUNT = 10;
+
+function DailyStatusIcon({ status }: { status: "target-hit" | "stop-hit" | "no-trade" | "in-progress" }) {
+  if (status === "target-hit") {
+    return <CheckCircle2 className="size-4 text-emerald-600 dark:text-emerald-400" />;
+  }
+  if (status === "stop-hit") {
+    return <XCircle className="size-4 text-destructive" />;
+  }
+  return <Minus className="size-4 text-muted-foreground/50" />;
+}
+
 export function JournalCompoundPlanCard({
   plan,
   trades,
@@ -40,6 +64,7 @@ export function JournalCompoundPlanCard({
 }) {
   const t = useTranslations("journal");
   const [editing, setEditing] = useState(false);
+  const [showAllDays, setShowAllDays] = useState(false);
   const [state, formAction, isPending] = useActionState(saveCompoundPlan, null);
   const [, startTransition] = useTransition();
 
@@ -47,8 +72,8 @@ export function JournalCompoundPlanCard({
     if (state?.ok) startTransition(() => setEditing(false));
   }, [state?.ok]);
 
-  const progress = useMemo(() => {
-    if (!plan) return null;
+  const { progress, dailyBreakdown } = useMemo(() => {
+    if (!plan) return { progress: null, dailyBreakdown: [] };
     const config: CompoundPlanConfig = {
       startingCapital: plan.startingCapital,
       targetCapital: plan.targetCapital,
@@ -56,7 +81,10 @@ export function JournalCompoundPlanCard({
       dailyStopPercent: plan.dailyStopPercent,
       startDate: plan.startDate,
     };
-    return computeCompoundPlanProgress(config, trades);
+    return {
+      progress: computeCompoundPlanProgress(config, trades),
+      dailyBreakdown: computeCompoundPlanDailyBreakdown(config, trades),
+    };
   }, [plan, trades]);
 
   const badge = useMemo(() => {
@@ -253,6 +281,90 @@ export function JournalCompoundPlanCard({
                 {!progress.eta.basedOnActual && ` (${t("compoundPlanEtaEstimateOnly")})`}
               </p>
             )}
+
+            <div className="space-y-1.5 border-t pt-3">
+              <p className="text-xs font-medium">{t("compoundPlanDailyBreakdown")}</p>
+              {dailyBreakdown.length === 0 ? (
+                <p className="text-xs text-muted-foreground">{t("compoundPlanDailyBreakdownEmpty")}</p>
+              ) : (
+                <>
+                  <div className="overflow-x-auto rounded-lg border">
+                    <table className="w-full min-w-135 text-xs">
+                      <thead>
+                        <tr className="border-b bg-muted/30 text-left text-muted-foreground">
+                          <th className="w-8 px-2 py-1.5" />
+                          <th className="px-2 py-1.5">{t("compoundPlanDailyDate")}</th>
+                          <th className="px-2 py-1.5 text-right">{t("compoundPlanDailyStart")}</th>
+                          <th className="px-2 py-1.5 text-right">{t("compoundPlanDailyTargetCol")}</th>
+                          <th className="px-2 py-1.5 text-right">{t("compoundPlanDailyStopCol")}</th>
+                          <th className="px-2 py-1.5 text-right">{t("compoundPlanDailyPnl")}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(showAllDays ? dailyBreakdown : dailyBreakdown.slice(0, DAILY_BREAKDOWN_COLLAPSED_COUNT)).map(
+                          (day) => (
+                            <tr key={day.date.toISOString()} className="border-b last:border-0">
+                              <td className="px-2 py-1.5">
+                                <DailyStatusIcon status={day.status} />
+                              </td>
+                              <td className="whitespace-nowrap px-2 py-1.5 font-mono">
+                                {day.date.toLocaleDateString(locale, {
+                                  day: "2-digit",
+                                  month: "2-digit",
+                                  timeZone: "UTC",
+                                })}
+                              </td>
+                              <td className="px-2 py-1.5 text-right font-mono">${day.startCapital.toFixed(2)}</td>
+                              <td className="px-2 py-1.5 text-right font-mono text-emerald-600 dark:text-emerald-400">
+                                +${day.targetAmount.toFixed(2)}
+                              </td>
+                              <td className="px-2 py-1.5 text-right font-mono text-destructive">
+                                -${day.stopAmount.toFixed(2)}
+                              </td>
+                              <td
+                                className={cn(
+                                  "px-2 py-1.5 text-right font-mono font-medium",
+                                  day.pnl > 0
+                                    ? "text-emerald-600 dark:text-emerald-400"
+                                    : day.pnl < 0
+                                      ? "text-destructive"
+                                      : "text-muted-foreground",
+                                )}
+                              >
+                                {fmtMoney(day.pnl)}
+                              </td>
+                            </tr>
+                          ),
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                  {dailyBreakdown.length > DAILY_BREAKDOWN_COLLAPSED_COUNT && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-auto gap-1 px-1.5 py-1 text-xs text-muted-foreground"
+                      onClick={() => setShowAllDays((v) => !v)}
+                    >
+                      {showAllDays ? (
+                        <>
+                          <ChevronUp className="size-3.5" />
+                          {t("compoundPlanDailyShowLess")}
+                        </>
+                      ) : (
+                        <>
+                          <ChevronDown className="size-3.5" />
+                          {t("compoundPlanDailyShowMore", {
+                            count: dailyBreakdown.length - DAILY_BREAKDOWN_COLLAPSED_COUNT,
+                          })}
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </>
+              )}
+            </div>
           </div>
         )}
       </CardContent>
