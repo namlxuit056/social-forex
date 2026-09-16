@@ -2087,6 +2087,7 @@
     "compoundPlanEtaEstimateOnly": "estimate based on the configured target, not yet on real results",
     "compoundPlanDailyBreakdown": "Daily breakdown",
     "compoundPlanDailyBreakdownEmpty": "No trading days yet since the plan started.",
+    "compoundPlanDailySummary": "{targetHit}/{total} days hit target · {stopHit} days hit stop · Longest streak {streak} days",
     "compoundPlanDailyDate": "Date",
     "compoundPlanDailyStart": "Start capital",
     "compoundPlanDailyTargetCol": "Target",

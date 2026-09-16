@@ -18,6 +18,7 @@ import {
 import { saveCompoundPlan } from "@/actions/compound-plan";
 import {
   computeCompoundPlanDailyBreakdown,
+  computeCompoundPlanDailySummary,
   computeCompoundPlanProgress,
   type CompoundPlanConfig,
   type CompoundPlanTrade,
@@ -86,6 +87,11 @@ export function JournalCompoundPlanCard({
       dailyBreakdown: computeCompoundPlanDailyBreakdown(config, trades),
     };
   }, [plan, trades]);
+
+  const dailySummary = useMemo(
+    () => computeCompoundPlanDailySummary(dailyBreakdown),
+    [dailyBreakdown],
+  );
 
   const badge = useMemo(() => {
     if (!progress) return null;
@@ -288,6 +294,14 @@ export function JournalCompoundPlanCard({
                 <p className="text-xs text-muted-foreground">{t("compoundPlanDailyBreakdownEmpty")}</p>
               ) : (
                 <>
+                  <p className="text-[11px] text-muted-foreground">
+                    {t("compoundPlanDailySummary", {
+                      targetHit: dailySummary.targetHitDays,
+                      total: dailySummary.totalDays,
+                      stopHit: dailySummary.stopHitDays,
+                      streak: dailySummary.longestTargetStreak,
+                    })}
+                  </p>
                   <div className="overflow-x-auto rounded-lg border">
                     <table className="w-full min-w-135 text-xs">
                       <thead>

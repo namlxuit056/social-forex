@@ -2087,6 +2087,7 @@
     "compoundPlanEtaEstimateOnly": "ước tính theo mục tiêu, chưa có dữ liệu thực tế",
     "compoundPlanDailyBreakdown": "Chi tiết từng ngày",
     "compoundPlanDailyBreakdownEmpty": "Chưa có ngày giao dịch nào kể từ khi tạo kế hoạch.",
+    "compoundPlanDailySummary": "{targetHit}/{total} ngày đạt target · {stopHit} ngày dính dừng lỗ · Streak dài nhất {streak} ngày",
     "compoundPlanDailyDate": "Ngày",
     "compoundPlanDailyStart": "Vốn đầu ngày",
     "compoundPlanDailyTargetCol": "Target",

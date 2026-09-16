@@ -150,6 +150,34 @@ export function computeCompoundPlanDailyBreakdown(
   return days.reverse();
 }
 
+export type CompoundPlanDailySummary = {
+  totalDays: number;
+  targetHitDays: number;
+  stopHitDays: number;
+  /** Chuỗi ngày liên tiếp đạt target dài nhất (theo thứ tự thời gian). */
+  longestTargetStreak: number;
+};
+
+export function computeCompoundPlanDailySummary(days: CompoundPlanDay[]): CompoundPlanDailySummary {
+  const totalDays = days.length;
+  const targetHitDays = days.filter((d) => d.status === "target-hit").length;
+  const stopHitDays = days.filter((d) => d.status === "stop-hit").length;
+
+  const chronological = [...days].sort((a, b) => a.date.getTime() - b.date.getTime());
+  let longestTargetStreak = 0;
+  let currentStreak = 0;
+  for (const day of chronological) {
+    if (day.status === "target-hit") {
+      currentStreak += 1;
+      longestTargetStreak = Math.max(longestTargetStreak, currentStreak);
+    } else {
+      currentStreak = 0;
+    }
+  }
+
+  return { totalDays, targetHitDays, stopHitDays, longestTargetStreak };
+}
+
 export function computeCompoundPlanProgress(
   plan: CompoundPlanConfig,
   trades: CompoundPlanTrade[],

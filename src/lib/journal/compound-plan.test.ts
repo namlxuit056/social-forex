@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
   computeCompoundPlanDailyBreakdown,
+  computeCompoundPlanDailySummary,
   computeCompoundPlanProgress,
   tradesSincePlanStart,
   type CompoundPlanConfig,
+  type CompoundPlanDay,
   type CompoundPlanTrade,
 } from "./compound-plan";
 
@@ -266,6 +268,49 @@ describe("computeCompoundPlanDailyBreakdown", () => {
     const trades = [trade(5, "2026-09-01T05:00:00Z")];
     const result = computeCompoundPlanDailyBreakdown(basePlan, trades, new Date("2026-09-01T10:00:00Z"));
     expect(result[0].status).toBe("in-progress");
+  });
+});
+
+describe("computeCompoundPlanDailySummary", () => {
+  function day(status: CompoundPlanDay["status"], dateStr: string): CompoundPlanDay {
+    return {
+      date: new Date(dateStr),
+      startCapital: 1000,
+      targetAmount: 30,
+      stopAmount: 25,
+      pnl: 0,
+      endCapital: 1000,
+      status,
+    };
+  }
+
+  it("đếm số ngày đạt target / dính stop trên tổng số ngày", () => {
+    const days = [
+      day("target-hit", "2026-09-04"),
+      day("stop-hit", "2026-09-03"),
+      day("no-trade", "2026-09-02"),
+      day("target-hit", "2026-09-01"),
+    ];
+    const result = computeCompoundPlanDailySummary(days);
+    expect(result).toMatchObject({ totalDays: 4, targetHitDays: 2, stopHitDays: 1 });
+  });
+
+  it("longestTargetStreak = chuỗi ngày liên tiếp đạt target dài nhất theo thời gian, không phụ thuộc thứ tự mảng đầu vào", () => {
+    const days = [
+      day("stop-hit", "2026-09-08"),
+      day("target-hit", "2026-09-07"), // T2 — liền sau 4/9 (T6) vì T7/CN không nằm trong mảng
+      day("target-hit", "2026-09-04"),
+      day("target-hit", "2026-09-03"),
+      day("in-progress", "2026-09-02"), // chặn chuỗi trước đó
+      day("target-hit", "2026-09-01"),
+    ];
+    const result = computeCompoundPlanDailySummary(days);
+    expect(result.longestTargetStreak).toBe(3); // 3/9, 4/9, 7/9 liên tiếp; 1/9 đứng riêng
+  });
+
+  it("trả về 0 hết khi mảng rỗng", () => {
+    const result = computeCompoundPlanDailySummary([]);
+    expect(result).toEqual({ totalDays: 0, targetHitDays: 0, stopHitDays: 0, longestTargetStreak: 0 });
   });
 });
 
