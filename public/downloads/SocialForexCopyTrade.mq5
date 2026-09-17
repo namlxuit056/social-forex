@@ -3,7 +3,7 @@
 //| Auto copy trades from signal providers on Social Forex.          |
 //+------------------------------------------------------------------+
 #property copyright "Social Forex"
-#property version   "1.02"
+#property version   "1.03"
 #property strict
 
 input string ApiEndpoint = "https://www.toolforex.xyz/api/copy-trade/signals";
@@ -16,6 +16,11 @@ input int MaxSlippage = 30;
 // stale price after an EA/terminal restart or copy being toggled off then on.
 // 0 disables the check.
 input int MaxEntryDriftPoints = 300;
+// XAUUSD moves far more points per dollar than FX pairs (SYMBOL_POINT is usually
+// 0.01, so the default 300-point FX limit is only $3) - a normal fast gold move
+// within the 10-minute copy window blew through it and silently skipped the copy.
+// Wider override for gold specifically; 0 falls back to MaxEntryDriftPoints.
+input int MaxEntryDriftPointsXau = 3000;
 input int MagicNumber = 20260621;
 
 datetime last_poll_at = 0;
@@ -288,6 +293,12 @@ double ResolveFixedLot(string symbol, double fixedLot, double xauusdLot, double 
    return fixedLot;
 }
 
+int ResolveDriftLimit(string symbol, int baseLimit, int xauLimit)
+{
+   if(StringFind(symbol, "XAUUSD") == 0) return xauLimit > 0 ? xauLimit : baseLimit;
+   return baseLimit;
+}
+
 bool HasOpenPosition(string symbol, long posType)
 {
    int total = PositionsTotal();
@@ -525,13 +536,14 @@ bool OpenMarketTrade(string symbol, string direction, double entry, double sl, d
    // client-side backstop for a stale ACTIVE signal slipping through after an
    // EA/terminal restart or copy being toggled off then on.
    double pointSz = SymbolInfoDouble(symbol, SYMBOL_POINT);
-   if(MaxEntryDriftPoints > 0 && entry > 0 && pointSz > 0)
+   int driftLimit = ResolveDriftLimit(symbol, MaxEntryDriftPoints, MaxEntryDriftPointsXau);
+   if(driftLimit > 0 && entry > 0 && pointSz > 0)
    {
       double drift = MathAbs(price - entry) / pointSz;
-      if(drift > MaxEntryDriftPoints)
+      if(drift > driftLimit)
       {
          Print("SocialForexCopyTrade: entry ", entry, " is ", (int)drift,
-               " points from price ", price, " (limit ", MaxEntryDriftPoints,
+               " points from price ", price, " (limit ", driftLimit,
                ") - skipped stale signal ", signalId);
          return false;
       }
