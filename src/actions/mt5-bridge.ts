@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { auth } from "@/auth";
@@ -37,7 +37,7 @@ export async function createMt5Connection(
     },
   });
 
-  revalidatePath("/mt5");
+  revalidateLocalizedPath("/mt5");
   return { token };
 }
 
@@ -53,5 +53,5 @@ export async function revokeMt5Connection(formData: FormData) {
     data: { revokedAt: new Date() },
   });
 
-  revalidatePath("/mt5");
+  revalidateLocalizedPath("/mt5");
 }

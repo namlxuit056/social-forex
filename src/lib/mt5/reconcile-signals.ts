@@ -1,4 +1,3 @@
-import { revalidatePath } from "next/cache";
 import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 import { prisma } from "@/lib/prisma";
 import { notifyTelegramClosedSignal } from "@/lib/telegram";
@@ -64,14 +63,14 @@ export async function reconcileStaleMt5Signals(): Promise<{
   await Promise.allSettled(allClosedMt5Signals.map((s) => notifyTelegramClosedSignal(s)));
 
   if (allClosedSignalIds.length > 0) {
-    revalidatePath("/mt5");
-    revalidatePath("/signals");
+    revalidateLocalizedPath("/mt5");
+    revalidateLocalizedPath("/signals");
     revalidateLocalizedPath("/journal", "page");
     for (const userId of touchedUserIds) {
-      revalidatePath(`/u/${userId}`);
+      revalidateLocalizedPath(`/u/${userId}`);
     }
     for (const signalId of allClosedSignalIds) {
-      revalidatePath(`/signals/${signalId}`);
+      revalidateLocalizedPath(`/signals/${signalId}`);
     }
   }
 

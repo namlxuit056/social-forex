@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { auth } from "@/auth";
@@ -56,6 +56,6 @@ export async function updateAiModelSetting(
   });
   invalidateAiModelSettingCache();
 
-  revalidatePath("/admin/ai-settings");
+  revalidateLocalizedPath("/admin/ai-settings");
   return { ok: true };
 }

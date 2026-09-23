@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
@@ -71,7 +71,7 @@ export async function requestAiAnalysis(
     select: { id: true },
   });
 
-  revalidatePath("/mt5");
+  revalidateLocalizedPath("/mt5");
   return { ok: true, proposalId: proposal.id };
 }
 
@@ -161,8 +161,8 @@ export async function confirmAiTradeProposal(
     authorId: userId,
   });
 
-  revalidatePath("/mt5");
-  revalidatePath("/signals");
+  revalidateLocalizedPath("/mt5");
+  revalidateLocalizedPath("/signals");
 
   return { ok: true, signalId: signal.id };
 }
@@ -193,7 +193,7 @@ export async function rejectAiTradeProposal(
     },
   });
 
-  revalidatePath("/mt5");
+  revalidateLocalizedPath("/mt5");
 
   return { ok: true };
 }

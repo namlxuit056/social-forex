@@ -1,4 +1,4 @@
-import { revalidatePath } from "next/cache";
+import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import {
@@ -89,8 +89,8 @@ export async function POST(req: NextRequest) {
     data: { processedAt: new Date() },
   });
 
-  revalidatePath("/upgrade-vip");
-  revalidatePath("/profile");
+  revalidateLocalizedPath("/upgrade-vip");
+  revalidateLocalizedPath("/profile");
 
   return NextResponse.json({
     ok: true,

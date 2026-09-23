@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { auth } from "@/auth";
@@ -63,14 +63,14 @@ export async function updateAiArticleAutomation(formData: FormData) {
     },
   });
 
-  revalidatePath("/admin/articles");
+  revalidateLocalizedPath("/admin/articles");
 }
 
 export async function runAiArticleAutomationNow() {
   await requireAdmin();
   await runAiArticleAutomation();
-  revalidatePath("/admin/articles");
-  revalidatePath("/articles");
+  revalidateLocalizedPath("/admin/articles");
+  revalidateLocalizedPath("/articles");
 }
 
 export async function publishAiArticle(formData: FormData) {
@@ -81,8 +81,8 @@ export async function publishAiArticle(formData: FormData) {
     where: { id },
     data: { status: "PUBLISHED", publishedAt: new Date() },
   });
-  revalidatePath("/admin/articles");
-  revalidatePath("/articles");
+  revalidateLocalizedPath("/admin/articles");
+  revalidateLocalizedPath("/articles");
 }
 
 export async function archiveAiArticle(formData: FormData) {
@@ -93,8 +93,8 @@ export async function archiveAiArticle(formData: FormData) {
     where: { id },
     data: { status: "ARCHIVED" },
   });
-  revalidatePath("/admin/articles");
-  revalidatePath("/articles");
+  revalidateLocalizedPath("/admin/articles");
+  revalidateLocalizedPath("/articles");
 }
 
 export async function deleteAiArticle(formData: FormData) {
@@ -102,8 +102,8 @@ export async function deleteAiArticle(formData: FormData) {
   const id = formData.get("id");
   if (typeof id !== "string") return;
   await prisma.aiGeneratedArticle.delete({ where: { id } });
-  revalidatePath("/admin/articles");
-  revalidatePath("/articles");
+  revalidateLocalizedPath("/admin/articles");
+  revalidateLocalizedPath("/articles");
 }
 
 
@@ -124,8 +124,8 @@ export async function generateArticleForKeyword(formData: FormData) {
   if (!parsed.success) return;
 
   await generateArticleForCustomKeyword(parsed.data);
-  revalidatePath("/admin/articles");
-  revalidatePath("/articles");
+  revalidateLocalizedPath("/admin/articles");
+  revalidateLocalizedPath("/articles");
 }
 
 const updateArticleSchema = z.object({
@@ -172,8 +172,8 @@ export async function updateAiArticle(
   } catch {
     return { error: "Lỗi cơ sở dữ liệu. Vui lòng thử lại." };
   }
-  revalidatePath("/admin/articles");
-  revalidatePath("/articles");
-  revalidatePath(`/admin/articles/${id}`);
+  revalidateLocalizedPath("/admin/articles");
+  revalidateLocalizedPath("/articles");
+  revalidateLocalizedPath(`/admin/articles/${id}`);
   return { ok: true };
 }

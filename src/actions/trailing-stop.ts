@@ -2,7 +2,7 @@
 
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import { revalidatePath } from "next/cache";
+import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 
@@ -35,8 +35,8 @@ export async function enableTrailingStop(ticket: string, distancePips: number): 
     update: { distancePips: parsed.data.distancePips },
   });
 
-  revalidatePath("/mt5");
-  revalidatePath("/positions");
+  revalidateLocalizedPath("/mt5");
+  revalidateLocalizedPath("/positions");
 
   return {};
 }
@@ -52,8 +52,8 @@ export async function disableTrailingStop(ticket: string): Promise<{ error?: str
     where: { connectionId: connection.id, ticket },
   });
 
-  revalidatePath("/mt5");
-  revalidatePath("/positions");
+  revalidateLocalizedPath("/mt5");
+  revalidateLocalizedPath("/positions");
 
   return {};
 }

@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { auth } from "@/auth";
@@ -29,7 +29,7 @@ export async function startDemoChallenge() {
     update: {},
   });
 
-  revalidatePath("/challenge");
+  revalidateLocalizedPath("/challenge");
 }
 
 export async function completeDemoChallengeDay(formData: FormData) {
@@ -95,7 +95,7 @@ export async function completeDemoChallengeDay(formData: FormData) {
     });
   });
 
-  revalidatePath("/challenge");
-  revalidatePath("/dashboard");
-  revalidatePath("/profile");
+  revalidateLocalizedPath("/challenge");
+  revalidateLocalizedPath("/dashboard");
+  revalidateLocalizedPath("/profile");
 }

@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
@@ -57,10 +57,10 @@ export async function adminDeleteSignal(
 
   await deleteVercelBlobUrls(imageUrls);
 
-  revalidatePath("/signals");
-  revalidatePath(`/signals/${signalId}`);
-  revalidatePath("/leaderboard");
-  revalidatePath("/admin");
-  revalidatePath("/admin/signals");
+  revalidateLocalizedPath("/signals");
+  revalidateLocalizedPath(`/signals/${signalId}`);
+  revalidateLocalizedPath("/leaderboard");
+  revalidateLocalizedPath("/admin");
+  revalidateLocalizedPath("/admin/signals");
   return { ok: true };
 }

@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
@@ -134,9 +134,9 @@ export async function createSignal(
     authorId: signal.authorId,
   });
 
-  revalidatePath("/signals");
-  revalidatePath(`/signals/${signal.id}`);
-  revalidatePath("/leaderboard");
+  revalidateLocalizedPath("/signals");
+  revalidateLocalizedPath(`/signals/${signal.id}`);
+  revalidateLocalizedPath("/leaderboard");
 
   try {
     await updateStreak(userId, "signal");
@@ -229,9 +229,9 @@ export async function closeSignal(
     }
   }
 
-  revalidatePath("/signals");
-  revalidatePath(`/signals/${signalId}`);
-  revalidatePath("/leaderboard");
+  revalidateLocalizedPath("/signals");
+  revalidateLocalizedPath(`/signals/${signalId}`);
+  revalidateLocalizedPath("/leaderboard");
   return { ok: true };
 }
 
@@ -380,8 +380,8 @@ export async function updateSignal(
     authorId: signal.authorId,
   });
 
-  revalidatePath("/signals");
-  revalidatePath(`/signals/${signalId}`);
-  revalidatePath("/leaderboard");
+  revalidateLocalizedPath("/signals");
+  revalidateLocalizedPath(`/signals/${signalId}`);
+  revalidateLocalizedPath("/leaderboard");
   return { ok: true };
 }

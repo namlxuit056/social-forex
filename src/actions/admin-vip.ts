@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
@@ -60,7 +60,7 @@ export async function grantVip(
     },
   });
 
-  revalidatePath("/admin/vip");
+  revalidateLocalizedPath("/admin/vip");
   return { ok: true };
 }
 
@@ -87,5 +87,5 @@ export async function revokeVip(formData: FormData) {
     },
   });
 
-  revalidatePath("/admin/vip");
+  revalidateLocalizedPath("/admin/vip");
 }

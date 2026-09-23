@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { auth } from "@/auth";
@@ -46,7 +46,7 @@ export async function addTelegramBroadcaster(
   });
   invalidateTelegramBroadcasterCache();
 
-  revalidatePath("/admin/telegram-signals");
+  revalidateLocalizedPath("/admin/telegram-signals");
   return { ok: true };
 }
 
@@ -66,6 +66,6 @@ export async function removeTelegramBroadcaster(
     .catch(() => null);
   invalidateTelegramBroadcasterCache();
 
-  revalidatePath("/admin/telegram-signals");
+  revalidateLocalizedPath("/admin/telegram-signals");
   return { ok: true };
 }

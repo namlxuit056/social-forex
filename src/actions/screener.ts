@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
@@ -26,8 +26,8 @@ export async function confirmScreenerPick(
 
   const { signalId } = await createScreenerSignal(userId, data, "TV_MULTI");
 
-  revalidatePath("/signals");
-  revalidatePath("/mt5");
+  revalidateLocalizedPath("/signals");
+  revalidateLocalizedPath("/mt5");
 
   return { ok: true, signalId };
 }

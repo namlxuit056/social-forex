@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { auth } from "@/auth";
@@ -49,7 +49,7 @@ export async function upsertScreenerLot(
     select: { id: true, symbol: true, lotSize: true },
   });
 
-  revalidatePath("/admin/crons/lot-sizes");
+  revalidateLocalizedPath("/admin/crons/lot-sizes");
   return { ok: true, row };
 }
 
@@ -69,6 +69,6 @@ export async function deleteScreenerLot(id: string, symbol: string): Promise<Del
     return { ok: false, error: "Không tìm thấy dòng này (có thể đã bị xoá)." };
   }
 
-  revalidatePath("/admin/crons/lot-sizes");
+  revalidateLocalizedPath("/admin/crons/lot-sizes");
   return { ok: true };
 }

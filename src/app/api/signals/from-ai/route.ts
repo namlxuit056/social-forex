@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
@@ -163,9 +163,9 @@ export async function POST(req: NextRequest) {
     authorId: signal.authorId,
   });
 
-  revalidatePath("/signals");
-  revalidatePath(`/signals/${signal.id}`);
-  revalidatePath("/leaderboard");
+  revalidateLocalizedPath("/signals");
+  revalidateLocalizedPath(`/signals/${signal.id}`);
+  revalidateLocalizedPath("/leaderboard");
 
   return NextResponse.json({
     signalId: signal.id,

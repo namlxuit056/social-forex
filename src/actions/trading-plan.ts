@@ -1,12 +1,12 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { getPathname } from "@/i18n/navigation";
 import { prisma } from "@/lib/prisma";
+import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 import { parseAndValidateImageUrls } from "@/lib/signal-images";
 import { updateStreak } from "@/lib/streak";
 import { addXp } from "@/lib/add-xp";
@@ -233,7 +233,7 @@ export async function saveDailyTradingPlan(
     // Non-blocking
   }
 
-  revalidatePath(`/${parsed.data.locale}/plan`);
-  revalidatePath(`/${parsed.data.locale}/dashboard`);
+  revalidateLocalizedPath("/plan");
+  revalidateLocalizedPath("/dashboard");
   return { ok: true };
 }

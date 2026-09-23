@@ -1,11 +1,10 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidateNotificationSurfaces } from "@/lib/revalidate-notification-surfaces";
-import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 
 const FOLLOW_DEDUPE_PREFIX = "f:";
 
@@ -65,8 +64,8 @@ export async function toggleFollowUser(formData: FormData): Promise<void> {
     });
   }
 
-  revalidatePath(`/u/${targetId}`);
-  revalidatePath("/profile");
+  revalidateLocalizedPath(`/u/${targetId}`);
+  revalidateLocalizedPath("/profile");
   revalidateLocalizedPath("/signals", "page");
   revalidateNotificationSurfaces();
 }

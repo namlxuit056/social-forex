@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 import { createHash } from "crypto";
 import { z } from "zod";
 import { hashMt5BridgeToken, MT5_BRIDGE_TOKEN_PREFIX } from "@/lib/mt5-bridge";
-import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 import { prisma } from "@/lib/prisma";
 import {
   notifyTelegramNewSignal,
@@ -521,14 +520,14 @@ export async function POST(request: NextRequest) {
     ),
   ]);
 
-  revalidatePath("/mt5");
+  revalidateLocalizedPath("/mt5");
   const changedSignalIds = Array.from(new Set([...touchedSignalIds, ...closedSignalIds]));
   if (changedSignalIds.length > 0) {
-    revalidatePath("/signals");
+    revalidateLocalizedPath("/signals");
     revalidateLocalizedPath("/journal", "page");
-    revalidatePath(`/u/${connection.userId}`);
+    revalidateLocalizedPath(`/u/${connection.userId}`);
     for (const signalId of changedSignalIds) {
-      revalidatePath(`/signals/${signalId}`);
+      revalidateLocalizedPath(`/signals/${signalId}`);
     }
   }
 

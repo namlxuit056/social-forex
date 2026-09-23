@@ -1,12 +1,11 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { routing } from "@/i18n/routing";
+import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 
 const reportSchema = z.object({
   postId: z.string().min(1).optional(),
@@ -17,9 +16,7 @@ const reportSchema = z.object({
 });
 
 function revalidateSignalDetail(signalId: string) {
-  for (const l of routing.locales) {
-    revalidatePath(`/${l}/signals/${signalId}`);
-  }
+  revalidateLocalizedPath(`/signals/${signalId}`);
 }
 
 export async function reportPost(
@@ -112,7 +109,7 @@ export async function hidePost(formData: FormData) {
     data: { hidden: true },
   });
 
-  revalidatePath(`/forum/${post.thread.category.slug}/thread/${post.thread.slug}`);
+  revalidateLocalizedPath(`/forum/${post.thread.category.slug}/thread/${post.thread.slug}`);
 }
 
 export async function unhidePost(formData: FormData) {
@@ -134,7 +131,7 @@ export async function unhidePost(formData: FormData) {
     data: { hidden: false },
   });
 
-  revalidatePath(`/forum/${post.thread.category.slug}/thread/${post.thread.slug}`);
+  revalidateLocalizedPath(`/forum/${post.thread.category.slug}/thread/${post.thread.slug}`);
 }
 
 export async function hideSignalComment(formData: FormData) {
@@ -156,7 +153,7 @@ export async function hideSignalComment(formData: FormData) {
     data: { hidden: true },
   });
   revalidateSignalDetail(comment.signalId);
-  revalidatePath("/admin/reports");
+  revalidateLocalizedPath("/admin/reports");
 }
 
 export async function unhideSignalComment(formData: FormData) {
@@ -178,7 +175,7 @@ export async function unhideSignalComment(formData: FormData) {
     data: { hidden: false },
   });
   revalidateSignalDetail(comment.signalId);
-  revalidatePath("/admin/reports");
+  revalidateLocalizedPath("/admin/reports");
 }
 
 export async function deleteThread(formData: FormData) {
@@ -192,7 +189,7 @@ export async function deleteThread(formData: FormData) {
 
   await prisma.forumThread.delete({ where: { id: threadId } });
 
-  revalidatePath(`/forum/${categorySlug}`);
+  revalidateLocalizedPath(`/forum/${categorySlug}`);
   redirect(`/forum/${categorySlug}`);
 }
 
@@ -215,7 +212,7 @@ export async function reviewReport(formData: FormData) {
     },
   });
 
-  revalidatePath("/admin/reports");
+  revalidateLocalizedPath("/admin/reports");
 }
 
 export async function hideReview(formData: FormData) {
@@ -236,8 +233,8 @@ export async function hideReview(formData: FormData) {
     where: { id: reviewId },
     data: { hidden: true },
   });
-  revalidatePath(`/u/${review.providerId}`);
-  revalidatePath("/admin/reports");
+  revalidateLocalizedPath(`/u/${review.providerId}`);
+  revalidateLocalizedPath("/admin/reports");
 }
 
 export async function unhideReview(formData: FormData) {
@@ -258,8 +255,8 @@ export async function unhideReview(formData: FormData) {
     where: { id: reviewId },
     data: { hidden: false },
   });
-  revalidatePath(`/u/${review.providerId}`);
-  revalidatePath("/admin/reports");
+  revalidateLocalizedPath(`/u/${review.providerId}`);
+  revalidateLocalizedPath("/admin/reports");
 }
 
 export async function toggleThreadPin(formData: FormData) {
@@ -281,5 +278,5 @@ export async function toggleThreadPin(formData: FormData) {
     data: { isPinned: !thread.isPinned },
   });
 
-  revalidatePath(`/forum/${thread.category.slug}`);
+  revalidateLocalizedPath(`/forum/${thread.category.slug}`);
 }

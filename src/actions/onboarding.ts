@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
@@ -33,6 +33,6 @@ export async function claimOnboardingBonus(): Promise<{
 
   const { xpEarned } = await addXp(userId, "onboardingComplete");
 
-  revalidatePath("/start");
+  revalidateLocalizedPath("/start");
   return { ok: true, xpEarned };
 }

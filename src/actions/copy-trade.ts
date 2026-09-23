@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
@@ -84,7 +84,7 @@ export async function subscribeCopyTrade(
         isActive: true,
       },
     });
-    revalidatePath(`/u/${providerId}`);
+    revalidateLocalizedPath(`/u/${providerId}`);
     return { ok: true, token: existing.token };
   }
 
@@ -104,7 +104,7 @@ export async function subscribeCopyTrade(
     },
   });
 
-  revalidatePath(`/u/${providerId}`);
+  revalidateLocalizedPath(`/u/${providerId}`);
   return { ok: true, token };
 }
 
@@ -116,7 +116,7 @@ export async function unsubscribeCopyTrade(providerId: string): Promise<{ ok?: b
     where: { followerId: session.user.id, providerId },
   });
 
-  revalidatePath(`/u/${providerId}`);
+  revalidateLocalizedPath(`/u/${providerId}`);
   return { ok: true };
 }
 
@@ -148,7 +148,7 @@ export async function setCopierBlocked(
     data: { blockedByProvider: parsed.data.blocked },
   });
 
-  revalidatePath(`/u/${session.user.id}`);
+  revalidateLocalizedPath(`/u/${session.user.id}`);
   return { ok: true };
 }
 
@@ -199,7 +199,7 @@ export async function submitProviderReview(
     create: { reviewerId, providerId, rating, comment: comment || null },
   });
 
-  revalidatePath(`/u/${providerId}`);
+  revalidateLocalizedPath(`/u/${providerId}`);
   return { ok: true };
 }
 
@@ -217,6 +217,6 @@ export async function setCopyTradingPaused(paused: boolean): Promise<{ error?: s
     data: { copyTradingPaused: parsed.data.paused },
   });
 
-  revalidatePath("/positions");
+  revalidateLocalizedPath("/positions");
   return {};
 }

@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
@@ -44,6 +44,6 @@ export async function changeUserRole(
     data: { role: parsed.data.role },
   });
 
-  revalidatePath("/admin/users");
+  revalidateLocalizedPath("/admin/users");
   return { ok: true };
 }

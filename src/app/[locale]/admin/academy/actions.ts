@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { auth } from "@/auth";
@@ -39,7 +39,7 @@ export async function generateAcademyLessonAction(formData: FormData) {
   const { topic, level } = parsed.data;
   await saveLesson(topic, level as LessonLevel);
 
-  revalidatePath("/admin/academy");
+  revalidateLocalizedPath("/admin/academy");
 }
 
 /** Used by BulkGenerateForm — returns { error } so the real message reaches the client */
@@ -55,7 +55,7 @@ export async function generateAcademyLessonForBulkAction(
 
     await saveLesson(parsed.data.topic, parsed.data.level as LessonLevel);
 
-    revalidatePath("/admin/academy");
+    revalidateLocalizedPath("/admin/academy");
     return {};
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Lỗi không xác định" };
@@ -96,8 +96,8 @@ export async function publishAcademyLesson(formData: FormData) {
     where: { id },
     data: { status: "PUBLISHED", publishedAt: new Date() },
   });
-  revalidatePath("/admin/academy");
-  revalidatePath("/academy");
+  revalidateLocalizedPath("/admin/academy");
+  revalidateLocalizedPath("/academy");
 }
 
 export async function unpublishAcademyLesson(formData: FormData) {
@@ -108,8 +108,8 @@ export async function unpublishAcademyLesson(formData: FormData) {
     where: { id },
     data: { status: "DRAFT", publishedAt: null },
   });
-  revalidatePath("/admin/academy");
-  revalidatePath("/academy");
+  revalidateLocalizedPath("/admin/academy");
+  revalidateLocalizedPath("/academy");
 }
 
 export async function regenerateImageAction(formData: FormData) {
@@ -121,10 +121,9 @@ export async function regenerateImageAction(formData: FormData) {
     (await generateLessonImage(topic, slug)) ?? pollinationsImageUrl(topic, slug);
   // Update all locale variants for this slug
   await prisma.academyLesson.updateMany({ where: { slug }, data: { imageUrl } });
-  revalidatePath("/admin/academy");
-  revalidatePath("/academy");
-  revalidatePath(`/vi/academy/${slug}`);
-  revalidatePath(`/academy/${slug}`);
+  revalidateLocalizedPath("/admin/academy");
+  revalidateLocalizedPath("/academy");
+  revalidateLocalizedPath(`/academy/${slug}`);
 }
 
 export async function updateLessonAction(
@@ -151,10 +150,9 @@ export async function updateLessonAction(
       data: { title: title.trim(), summary: summary.trim(), body: body.trim() },
     });
 
-    revalidatePath("/admin/academy");
-    revalidatePath("/academy");
-    revalidatePath(`/vi/academy/${slug}`);
-    revalidatePath(`/academy/${slug}`);
+    revalidateLocalizedPath("/admin/academy");
+    revalidateLocalizedPath("/academy");
+    revalidateLocalizedPath(`/academy/${slug}`);
     return { ok: true };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Lỗi không xác định" };
@@ -171,10 +169,9 @@ export async function updateImageUrlAction(formData: FormData) {
     where: { slug },
     data: { imageUrl: url || null },
   });
-  revalidatePath("/admin/academy");
-  revalidatePath("/academy");
-  revalidatePath(`/vi/academy/${slug}`);
-  revalidatePath(`/academy/${slug}`);
+  revalidateLocalizedPath("/admin/academy");
+  revalidateLocalizedPath("/academy");
+  revalidateLocalizedPath(`/academy/${slug}`);
 }
 
 export async function deleteAcademyLesson(formData: FormData) {
@@ -182,6 +179,6 @@ export async function deleteAcademyLesson(formData: FormData) {
   const id = formData.get("id");
   if (typeof id !== "string") return;
   await prisma.academyLesson.delete({ where: { id } });
-  revalidatePath("/admin/academy");
-  revalidatePath("/academy");
+  revalidateLocalizedPath("/admin/academy");
+  revalidateLocalizedPath("/academy");
 }

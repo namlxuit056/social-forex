@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { isVipActive } from "@/lib/vip";
@@ -91,7 +91,7 @@ export async function saveAutoScalpConfig(
     update: parsed.data,
   });
 
-  revalidatePath("/scalping");
+  revalidateLocalizedPath("/scalping");
   return { ok: true };
 }
 
@@ -128,7 +128,7 @@ export async function addAutoScalpSymbol(
     update: { lotSize, enabled: true },
   });
 
-  revalidatePath("/scalping");
+  revalidateLocalizedPath("/scalping");
   return { ok: true };
 }
 
@@ -146,7 +146,7 @@ export async function removeAutoScalpSymbol(
     where: { id: symbolId, configId: config.id },
   });
 
-  revalidatePath("/scalping");
+  revalidateLocalizedPath("/scalping");
   return { ok: true };
 }
 
@@ -166,6 +166,6 @@ export async function toggleAutoScalpSymbol(
     data: { enabled },
   });
 
-  revalidatePath("/scalping");
+  revalidateLocalizedPath("/scalping");
   return { ok: true };
 }

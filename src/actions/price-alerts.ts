@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { auth } from "@/auth";
@@ -71,7 +71,7 @@ export async function createPriceAlert(
     },
   });
 
-  revalidatePath("/alerts");
+  revalidateLocalizedPath("/alerts");
   return { ok: true };
 }
 
@@ -85,6 +85,6 @@ export async function deletePriceAlert(
     where: { id, userId: session.user.id },
   });
 
-  revalidatePath("/alerts");
+  revalidateLocalizedPath("/alerts");
   return { ok: true };
 }

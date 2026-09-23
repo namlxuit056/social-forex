@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
@@ -8,7 +8,6 @@ import { rateLimit } from "@/lib/rate-limit";
 import { isVipActive } from "@/lib/vip";
 import { notifyTelegramNewSignal } from "@/lib/telegram";
 import { notifySignalSubscribers } from "@/lib/signals/notify-on-signal-create";
-import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 import { recheckAutoScalpPending, type AutoScalpRecheckResult } from "@/lib/scalping/auto-scalp-recheck";
 import { Prisma } from "@/generated/prisma/client";
 
@@ -142,8 +141,8 @@ export async function confirmScalpingPick(
     authorId: userId,
   });
 
-  revalidatePath("/signals");
-  revalidatePath("/mt5");
+  revalidateLocalizedPath("/signals");
+  revalidateLocalizedPath("/mt5");
 
   return { ok: true, signalId: signal.id };
 }

@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
@@ -69,8 +69,8 @@ export async function createForumThread(
     return t;
   });
 
-  revalidatePath("/forum");
-  revalidatePath(`/forum/${categorySlug}`);
+  revalidateLocalizedPath("/forum");
+  revalidateLocalizedPath(`/forum/${categorySlug}`);
   redirect(`/forum/${categorySlug}/thread/${thread.slug}`);
 }
 
@@ -120,6 +120,6 @@ export async function replyForumThread(
     },
   });
 
-  revalidatePath(`/forum/${categorySlug}/thread/${thread.slug}`);
+  revalidateLocalizedPath(`/forum/${categorySlug}/thread/${thread.slug}`);
   return { ok: true };
 }

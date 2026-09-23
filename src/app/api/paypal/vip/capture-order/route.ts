@@ -1,4 +1,4 @@
-import { revalidatePath } from "next/cache";
+import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import {
@@ -59,8 +59,8 @@ export async function POST(req: NextRequest) {
     rawPayload: captureData,
   });
 
-  revalidatePath("/upgrade-vip");
-  revalidatePath("/profile");
+  revalidateLocalizedPath("/upgrade-vip");
+  revalidateLocalizedPath("/profile");
 
   return NextResponse.json({
     ok: true,

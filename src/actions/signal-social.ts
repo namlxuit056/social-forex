@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { z } from "zod";
@@ -42,7 +42,7 @@ export async function addSignalComment(
     },
   });
 
-  revalidatePath(`/signals/${parsed.data.signalId}`);
+  revalidateLocalizedPath(`/signals/${parsed.data.signalId}`);
   return { ok: true };
 }
 
@@ -76,8 +76,8 @@ export async function toggleSignalReaction(formData: FormData) {
     });
   }
 
-  revalidatePath(`/signals/${signalId}`);
-  revalidatePath("/signals");
+  revalidateLocalizedPath(`/signals/${signalId}`);
+  revalidateLocalizedPath("/signals");
 }
 
 // --- Pin Signal ---
@@ -107,7 +107,7 @@ export async function togglePinSignal(
 
   if (existing) {
     await prisma.userPinnedSignal.delete({ where: { id: existing.id } });
-    revalidatePath(`/u/${userId}`);
+    revalidateLocalizedPath(`/u/${userId}`);
     return { ok: true, pinned: false };
   }
 
@@ -125,6 +125,6 @@ export async function togglePinSignal(
     throw e;
   }
 
-  revalidatePath(`/u/${userId}`);
+  revalidateLocalizedPath(`/u/${userId}`);
   return { ok: true, pinned: true };
 }
