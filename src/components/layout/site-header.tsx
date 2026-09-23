@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { Bell, Shield } from "lucide-react";
+import { Shield } from "lucide-react";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
@@ -9,6 +9,7 @@ import { MobileNav } from "@/components/layout/mobile-nav";
 import { SiteNavLink } from "@/components/layout/site-nav-link";
 import { SiteLogo } from "@/components/layout/site-logo";
 import { NavMegaMenu } from "@/components/layout/nav-mega-menu";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { prisma } from "@/lib/prisma";
@@ -94,18 +95,7 @@ export async function SiteHeader() {
 
           {session?.user ? (
             <>
-              <Link
-                href="/notifications"
-                className="relative inline-flex size-8 items-center justify-center rounded-md text-muted-foreground transition hover:bg-muted hover:text-foreground"
-                aria-label={tc("notificationsBellAria")}
-              >
-                <Bell className="size-4.5" aria-hidden />
-                {unreadNotifications > 0 ? (
-                  <span className="absolute -right-0.5 -top-0.5 flex min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[0.6rem] font-semibold leading-none text-primary-foreground">
-                    {unreadNotifications > 99 ? "99+" : unreadNotifications}
-                  </span>
-                ) : null}
-              </Link>
+              <NotificationBell initialCount={unreadNotifications} />
               <Link
                 href="/profile"
                 className="hidden rounded-md px-2 py-1 text-sm text-foreground/80 transition hover:bg-muted hover:text-foreground sm:inline-flex"
