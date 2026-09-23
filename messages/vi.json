@@ -2074,7 +2074,7 @@
     "compoundPlanTodayTarget": "Target hôm nay",
     "compoundPlanTodayStop": "Dừng lỗ hôm nay",
     "compoundPlanTodayPnl": "Lãi/lỗ hôm nay",
-    "compoundPlanPeriodTargetHint": "Nếu giữ đúng nhịp %/ngày:",
+    "compoundPlanPeriodTargetHint": "Hiện tại / Mục tiêu (nếu giữ đúng nhịp %/ngày):",
     "compoundPlanWeeklyTarget": "Mục tiêu tuần",
     "compoundPlanMonthlyTarget": "Mục tiêu tháng",
     "compoundPlanProgress": "Tiến độ tới mục tiêu",

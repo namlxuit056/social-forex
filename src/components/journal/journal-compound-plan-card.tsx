@@ -227,18 +227,32 @@ export function JournalCompoundPlanCard({
             <div className="space-y-1.5 rounded-lg bg-muted/30 p-2.5">
               <p className="text-[11px] text-muted-foreground">{t("compoundPlanPeriodTargetHint")}</p>
               <div className="grid grid-cols-2 gap-3">
-                <div>
+                <div className="space-y-0.5">
                   <p className="text-[11px] text-muted-foreground">{t("compoundPlanWeeklyTarget")}</p>
-                  <p className="font-mono text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                  <p
+                    className={cn(
+                      "font-mono text-sm font-medium",
+                      progress.weeklyPnl >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-destructive",
+                    )}
+                  >
+                    {fmtMoney(progress.weeklyPnl)}
+                    <span className="font-normal text-muted-foreground"> / </span>
                     {fmtMoney(progress.weeklyTargetAmount)}{" "}
                     <span className="font-normal text-muted-foreground">
                       ({progress.weeklyTargetPercent.toFixed(1)}%)
                     </span>
                   </p>
                 </div>
-                <div>
+                <div className="space-y-0.5">
                   <p className="text-[11px] text-muted-foreground">{t("compoundPlanMonthlyTarget")}</p>
-                  <p className="font-mono text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                  <p
+                    className={cn(
+                      "font-mono text-sm font-medium",
+                      progress.monthlyPnl >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-destructive",
+                    )}
+                  >
+                    {fmtMoney(progress.monthlyPnl)}
+                    <span className="font-normal text-muted-foreground"> / </span>
                     {fmtMoney(progress.monthlyTargetAmount)}{" "}
                     <span className="font-normal text-muted-foreground">
                       ({progress.monthlyTargetPercent.toFixed(1)}%)

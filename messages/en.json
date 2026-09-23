@@ -2074,7 +2074,7 @@
     "compoundPlanTodayTarget": "Today's target",
     "compoundPlanTodayStop": "Today's stop",
     "compoundPlanTodayPnl": "Today's P/L",
-    "compoundPlanPeriodTargetHint": "If you keep the daily pace:",
+    "compoundPlanPeriodTargetHint": "Current / target (if you keep the daily pace):",
     "compoundPlanWeeklyTarget": "Weekly target",
     "compoundPlanMonthlyTarget": "Monthly target",
     "compoundPlanProgress": "Progress to target",

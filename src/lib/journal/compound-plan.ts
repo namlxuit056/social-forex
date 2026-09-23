@@ -46,6 +46,9 @@ export type CompoundPlanProgress = {
   weeklyTargetAmount: number;
   monthlyTargetPercent: number;
   monthlyTargetAmount: number;
+  /** PnL thực tế từ đầu tuần/tháng (thứ 2 UTC / ngày 1 UTC) đến giờ. */
+  weeklyPnl: number;
+  monthlyPnl: number;
 };
 
 /** Quy ước số ngày giao dịch mỗi tuần/tháng (Forex: Thứ 2–6, ~21 ngày/tháng). */
@@ -296,5 +299,7 @@ export function computeCompoundPlanProgress(
     weeklyTargetAmount,
     monthlyTargetPercent,
     monthlyTargetAmount,
+    weeklyPnl: weekPnl,
+    monthlyPnl: monthPnl,
   };
 }
