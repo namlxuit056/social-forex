@@ -330,4 +330,16 @@ describe("computeCompoundPlanProgress — progressPercent", () => {
     );
     expect(overResult.progressPercent).toBe(100);
   });
+
+  it("thang log: lãi nhỏ so với mục tiêu lớn vẫn > 0%", () => {
+    const plan = { ...basePlan, startingCapital: 1000, targetCapital: 1_000_000 };
+    const result = computeCompoundPlanProgress(
+      plan,
+      [trade(554.35, "2026-09-01T05:00:00Z")],
+      new Date("2026-09-01T10:00:00Z"),
+    );
+    // ln(1.55435)/ln(1000) ≈ 6.4%
+    expect(result.progressPercent).toBeGreaterThan(6);
+    expect(result.progressPercent).toBeLessThan(7);
+  });
 });

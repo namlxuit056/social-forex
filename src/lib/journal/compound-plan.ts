@@ -221,14 +221,16 @@ export function computeCompoundPlanProgress(
       ? (Math.pow(currentCapital / plan.startingCapital, 1 / tradingDaysElapsed) - 1) * 100
       : null;
 
+  // Kế hoạch lãi kép: tiến độ đo theo thang log (số lần nhân vốn), không tuyến tính —
+  // tuyến tính làm mục tiêu lớn luôn hiện ~0% dù đã có lãi.
   const progressPercent =
-    plan.targetCapital > plan.startingCapital
+    plan.targetCapital > plan.startingCapital && plan.startingCapital > 0 && currentCapital > 0
       ? Math.max(
           0,
           Math.min(
             100,
-            ((currentCapital - plan.startingCapital) /
-              (plan.targetCapital - plan.startingCapital)) *
+            (Math.log(currentCapital / plan.startingCapital) /
+              Math.log(plan.targetCapital / plan.startingCapital)) *
               100,
           ),
         )

@@ -80,7 +80,7 @@ type CompoundPlanProgress = {
   todayStatus: "target-hit" | "stop-hit" | "in-progress";
   tradingDaysElapsed: number;
   realizedDailyRatePercent: number | null;
-  progressPercent: number; // (currentCapital - startingCapital) / (targetCapital - startingCapital), clamp [0,100]
+  progressPercent: number; // ln(currentCapital / startingCapital) / ln(targetCapital / startingCapital), clamp [0,100] (thang log — lãi kép)
   eta:
     | { kind: "reached" }
     | { kind: "projected"; daysRemaining: number; estimatedDate: Date; basedOnActual: boolean }
