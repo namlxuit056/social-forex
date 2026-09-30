@@ -11,6 +11,9 @@ cd "$(dirname "$0")/../.."
 TUNNEL=social-forex
 HOSTS=(toolforex.xyz www.toolforex.xyz)
 
+FROM_DNS=0; [[ "${1:-}" == "--from-dns" ]] && FROM_DNS=1
+
+if (( ! FROM_DNS )); then
 echo "== 1/4 Tạm dừng project Vercel"
 AUTH="$HOME/Library/Application Support/com.vercel.cli/auth.json"
 TOKEN="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["token"])' "$AUTH")"
@@ -28,8 +31,12 @@ echo "  ✓ Vercel đã dừng"
 
 echo "== 2/4 Copy Neon → DB local"
 bash scripts/selfhost/pull-neon-db.sh
+fi
+
 
 echo "== 3/4 Trỏ DNS về tunnel"
+# --overwrite-dns only replaces CNAMEs; imported A/AAAA records must be deleted in the
+# Cloudflare dashboard first, then resume with: npm run selfhost:cutover -- --from-dns
 for h in "${HOSTS[@]}"; do cloudflared tunnel route dns --overwrite-dns "$TUNNEL" "$h"; done
 pm2 restart sf-tunnel >/dev/null
 
