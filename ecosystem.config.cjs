@@ -33,6 +33,15 @@ module.exports = {
       restart_delay: 5000,
     },
     {
+      // Postgres lives in Docker; make sure Docker Desktop is up after a reboot
+      // (the container itself has restart: unless-stopped).
+      name: "sf-docker",
+      script: "/usr/bin/open",
+      args: "-g -a Docker",
+      interpreter: "none",
+      autorestart: false,
+    },
+    {
       // Keep the Mac from idle-sleeping while the server runs.
       name: "sf-awake",
       script: "/usr/bin/caffeinate",
