@@ -22,7 +22,8 @@
     "selfhost:restart": "pm2 reload sf-web",
     "selfhost:deploy": "bash scripts/selfhost/deploy.sh",
     "selfhost:cron": "node scripts/selfhost/cron-runner.mjs",
-    "selfhost:pull-db": "bash scripts/selfhost/pull-neon-db.sh"
+    "selfhost:pull-db": "bash scripts/selfhost/pull-neon-db.sh",
+    "selfhost:cutover": "bash scripts/selfhost/cutover.sh"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
