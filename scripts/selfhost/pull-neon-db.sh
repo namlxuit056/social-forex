@@ -54,12 +54,14 @@ done
 if (( SWITCH )); then
   echo "→ Chuyển .env sang DB local (giữ URL Neon ở NEON_DATABASE_URL)…"
   cp .env ".env.bak.$(date +%Y%m%d%H%M%S)"
+  # Appending to a file without a trailing newline would glue onto the last variable.
+  [[ -n "$(tail -c1 .env)" ]] && echo >> .env
   grep -q '^NEON_DATABASE_URL=' .env || echo "NEON_DATABASE_URL=\"$NEON\"" >> .env
   sed -i '' '/^DATABASE_URL=/d' .env
   echo "DATABASE_URL=\"$LOCAL_URL\"" >> .env
   npx prisma migrate deploy
   if command -v pm2 >/dev/null && pm2 describe sf-web >/dev/null 2>&1; then
-    pm2 reload sf-web sf-cron --update-env
+    for app in sf-web sf-cron; do pm2 reload "$app" --update-env; done
   fi
 fi
 echo "✓ Xong."
