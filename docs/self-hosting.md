@@ -54,6 +54,13 @@ npm run selfhost:cron -- run /api/calendar/sync/run    # chạy tay 1 job
 
 - `@vercel/analytics` / Speed Insights chỉ render khi `process.env.VERCEL` có — self-host sẽ không có số liệu Vercel Analytics.
 - `@vercel/blob` vẫn dùng được ngoài Vercel (chỉ cần `BLOB_READ_WRITE_TOKEN`). TODO: nếu huỷ hẳn tài khoản Vercel thì phải chuyển storage ảnh (S3/R2 hoặc lưu local).
-- DB vẫn là Neon (us-east-1) → mỗi query ~200ms từ VN, trang tải chậm. Có thể chuyển sang Postgres local
-  (`npm run docker:up`, `pg_dump` từ Neon → `pg_restore` vào local, đổi `DATABASE_URL`) — TODO: quyết định có migrate dữ liệu không.
+- **Chuyển DB Neon → Postgres local**: `npm run selfhost:pull-db`
+  (dump Neon bằng pg_dump 17 trong Docker → restore vào container `postgres:17-alpine` →
+  đổi `DATABASE_URL` sang local, giữ URL Neon ở `NEON_DATABASE_URL`, backup `.env.bak.*`, reload pm2).
+  Chạy lại lúc nào cũng được — mỗi lần là snapshot mới, **ghi đè** DB local.
+  Chạy lần cuối ngay lúc tắt Vercel để không mất dữ liệu ghi vào Neon trong lúc chuyển.
+  Quay lại Neon: đổi `DATABASE_URL` về giá trị `NEON_DATABASE_URL` → `pm2 reload sf-web sf-cron --update-env`.
+- Migration history không dựng được DB trống từ đầu (TODO: một migration tham chiếu `TradeJournal` trước khi tạo) —
+  DB local luôn phải được tạo bằng restore từ dump, không bằng `migrate deploy` trên DB rỗng.
+- `docker compose` phải chạy với `--env-file /dev/null` (dòng 48 của `.env` không parse được theo cú pháp compose).
 - Không bind `-H 127.0.0.1`: next-intl rewrite sang `localhost` bị Next coi là external → redirect loop.

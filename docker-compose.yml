@@ -1,15 +1,16 @@
 services:
   postgres:
-    image: postgres:16-alpine
+    # Must be >= Neon's major version so a pg_dump from Neon restores cleanly.
+    image: postgres:17-alpine
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: socialforex
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
-      - social_forex_pg:/var/lib/postgresql/data
+      - social_forex_pg17:/var/lib/postgresql/data
 
 volumes:
-  social_forex_pg:
+  social_forex_pg17:
