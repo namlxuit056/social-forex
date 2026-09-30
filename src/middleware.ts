@@ -15,6 +15,8 @@ export default function middleware(request: NextRequest) {
   if (host.startsWith("www.")) {
     const url = request.nextUrl.clone();
     url.host = host.slice(4);
+    // Self-hosted behind a tunnel, nextUrl carries the internal port (3000).
+    url.port = "";
     return NextResponse.redirect(url, 308);
   }
   return intlMiddleware(request);
