@@ -54,8 +54,9 @@ export default function RootLayout({
       <body className="min-h-full font-sans antialiased">
         <ThemeProvider>
           {children}
-          <AnalyticsProvider />
-          <SpeedInsights />
+          {/* Vercel-only: the /_vercel/* script endpoints 404 when self-hosted. */}
+          {process.env.VERCEL && <AnalyticsProvider />}
+          {process.env.VERCEL && <SpeedInsights />}
           <SwRegister />
         </ThemeProvider>
       </body>

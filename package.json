@@ -16,7 +16,12 @@
     "db:studio": "prisma studio",
     "db:deploy": "prisma migrate deploy",
     "docker:up": "docker compose up -d",
-    "docker:down": "docker compose down"
+    "docker:down": "docker compose down",
+    "selfhost:build": "npm ci && npm run build",
+    "selfhost:start": "pm2 start ecosystem.config.cjs && pm2 save",
+    "selfhost:restart": "pm2 reload sf-web",
+    "selfhost:deploy": "bash scripts/selfhost/deploy.sh",
+    "selfhost:cron": "node scripts/selfhost/cron-runner.mjs"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
