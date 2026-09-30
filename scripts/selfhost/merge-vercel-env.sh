@@ -32,7 +32,8 @@ added, changed, skipped_empty = [], [], []
 for k, v in remote.items():
     if k in KEEP_LOCAL or k.startswith(SKIP_PREFIX):
         continue
-    if v in ('""', ""):  # "Sensitive" vars come back empty — keep whatever is local
+    # "Sensitive" vars come back empty or as the literal "[SENSITIVE]" — keep whatever is local.
+    if v in ('""', "") or "[SENSITIVE]" in v:
         skipped_empty.append(k)
         continue
     if k not in local:
@@ -46,7 +47,7 @@ open(".env", "w").write("\n".join(lines) + "\n")
 print("  thêm mới :", ", ".join(added) or "—")
 print("  cập nhật :", ", ".join(changed) or "—")
 if skipped_empty:
-    print("  ⚠ Vercel trả về rỗng (biến Sensitive) — cần tự điền nếu thiếu:", ", ".join(skipped_empty))
+    print("  ⚠ Vercel không trả giá trị (biến Sensitive) — cần tự điền nếu thiếu:", ", ".join(skipped_empty))
 EOF
 
 echo "→ Build lại + reload"
