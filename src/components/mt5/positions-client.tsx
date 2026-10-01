@@ -47,6 +47,8 @@ import {
   setMt5ScheduledClose,
 } from "@/actions/mt5-commands";
 import { setCopyTradingPaused } from "@/actions/copy-trade";
+import { logGuardOverride } from "@/actions/guard-override";
+import { edgeFacetLabelEn } from "@/lib/journal/edge-check";
 import { PositionsTable } from "./positions-table";
 import { PendingOrdersTable } from "./pending-orders-table";
 import { HistoryTable, type ClosedTrade } from "./history-table";
@@ -350,7 +352,12 @@ export function PositionsClient({
         stopLoss: null,
         takeProfit: null,
       });
-      if (result.dailyLimitWarning || result.planWarning || result.dailyRiskWarning) {
+      if (
+        result.dailyLimitWarning ||
+        result.planWarning ||
+        result.dailyRiskWarning ||
+        result.edgeWarning
+      ) {
         const lines: string[] = [];
         if (result.planWarning) {
           lines.push(
@@ -371,8 +378,15 @@ export function PositionsClient({
             `This pushes today's total risk to ~${projectedPct}% of your account, over your ${maxRiskPercent}% daily plan limit.`,
           );
         }
+        if (result.edgeWarning) {
+          const { winRate, total, baselineWinRate } = result.edgeWarning;
+          lines.push(
+            `Your win rate on ${edgeFacetLabelEn(result.edgeWarning)} is ${winRate}% over ${total} trades, below your overall ${baselineWinRate}%.`,
+          );
+        }
         const proceed = window.confirm(`${lines.join("\n")}\n\nPlace this order anyway?`);
         if (proceed) {
+          if (result.edgeWarning) void logGuardOverride("weakEdge", "mt5");
           await placeOrder({
             symbol: quickOrderConfig.symbol,
             orderType,
@@ -383,6 +397,7 @@ export function PositionsClient({
             confirmedOverLimit: true,
             confirmedNoPlan: true,
             confirmedOverRisk: true,
+            confirmedWeakEdge: true,
           });
         }
       }

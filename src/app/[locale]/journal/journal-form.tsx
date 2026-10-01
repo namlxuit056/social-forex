@@ -15,6 +15,7 @@ import {
 } from "./use-setup-labels";
 import type { BestSetupInfo } from "@/lib/journal/setups";
 import { ChecklistGuardHint } from "@/components/journal/checklist-guard-hint";
+import { EdgeCheckHint } from "@/components/journal/edge-check-hint";
 import { JournalImageField } from "./journal-image-field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -65,6 +66,7 @@ export function JournalFormCard({
   const [, startTransition] = useTransition();
   const [state, formAction, isPending] = useActionState(createTrade, null);
   const [symbol, setSymbol] = useState(prefill?.symbol ?? "");
+  const [direction, setDirection] = useState(prefill?.direction === "SHORT" ? "SHORT" : "LONG");
   const [setup, setSetup] = useState("");
   const [newsGuard, setNewsGuard] = useState<{
     hours: number;
@@ -170,6 +172,7 @@ export function JournalFormCard({
         ) : (
           <>
         <ChecklistGuardHint />
+        <EdgeCheckHint symbol={symbol} direction={direction} timeFacets={false} />
         {newsGuard && (
           <div className="mb-4 flex items-start gap-3 rounded-lg border border-amber-500/30 bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-950/20 dark:text-amber-200">
             <AlertTriangle className="mt-0.5 size-4 shrink-0" />
@@ -288,7 +291,8 @@ export function JournalFormCard({
             <Label>{t("direction")}</Label>
             <select
               name="direction"
-              defaultValue={prefill?.direction}
+              value={direction}
+              onChange={(e) => setDirection(e.target.value)}
               className={`mt-1.5 ${SELECT_CLASS}`}
             >
               <option value="LONG">LONG</option>

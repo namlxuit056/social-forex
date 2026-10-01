@@ -16,7 +16,10 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { QUOTE_DEFINITIONS } from "@/lib/quotes/definitions";
 import type { QuotesApiResponse } from "@/lib/quotes/types";
-import { placeOrder, type PlaceOrderType } from "@/actions/mt5-commands";
+import { placeOrder, type EdgeWarning, type PlaceOrderType } from "@/actions/mt5-commands";
+import { logGuardOverride } from "@/actions/guard-override";
+import { edgeFacetLabelEn } from "@/lib/journal/edge-check";
+import { EdgeCheckHint } from "@/components/journal/edge-check-hint";
 import { estimateOrderRisk } from "@/lib/calculators";
 import { SlAmountHint, TpAmountHint, RiskRewardPreview } from "./risk-reward-preview";
 
@@ -51,6 +54,7 @@ export function NewOrderDialog() {
     newRisk: number;
     budget: number;
   } | null>(null);
+  const [edgeWarning, setEdgeWarning] = useState<EdgeWarning | null>(null);
   const [marketPrice, setMarketPrice] = useState<{ bid: number; ask: number } | null>(null);
 
   const isPendingType = orderType !== "BUY" && orderType !== "SELL";
@@ -98,6 +102,9 @@ export function NewOrderDialog() {
       setDailyLimitWarning(null);
       setPlanWarning(null);
       setRiskWarning(null);
+      setEdgeWarning(null);
+    } else if (edgeWarning) {
+      void logGuardOverride("weakEdge", "mt5");
     }
     if (isPendingType && !price) {
       setError("price_required");
@@ -114,11 +121,18 @@ export function NewOrderDialog() {
         confirmedOverLimit: confirmed,
         confirmedNoPlan: confirmed,
         confirmedOverRisk: confirmed,
+        confirmedWeakEdge: confirmed,
       });
-      if (result.dailyLimitWarning || result.planWarning || result.dailyRiskWarning) {
+      if (
+        result.dailyLimitWarning ||
+        result.planWarning ||
+        result.dailyRiskWarning ||
+        result.edgeWarning
+      ) {
         setDailyLimitWarning(result.dailyLimitWarning ?? null);
         setPlanWarning(result.planWarning ?? null);
         setRiskWarning(result.dailyRiskWarning ?? null);
+        setEdgeWarning(result.edgeWarning ?? null);
         return;
       }
       if (result.error) {
@@ -132,6 +146,7 @@ export function NewOrderDialog() {
       setDailyLimitWarning(null);
       setPlanWarning(null);
       setRiskWarning(null);
+      setEdgeWarning(null);
     });
   }
 
@@ -156,6 +171,7 @@ export function NewOrderDialog() {
                 setPlanWarning(null);
                 setDailyLimitWarning(null);
                 setRiskWarning(null);
+                setEdgeWarning(null);
               }}
             >
               <SelectTrigger id="order-symbol" className="w-full">
@@ -173,7 +189,13 @@ export function NewOrderDialog() {
 
           <div className="grid gap-1.5">
             <Label htmlFor="order-type">Order type</Label>
-            <Select value={orderType} onValueChange={(v) => setOrderType(v as PlaceOrderType)}>
+            <Select
+              value={orderType}
+              onValueChange={(v) => {
+                setOrderType(v as PlaceOrderType);
+                setEdgeWarning(null);
+              }}
+            >
               <SelectTrigger id="order-type" className="w-full">
                 <SelectValue />
               </SelectTrigger>
@@ -243,6 +265,10 @@ export function NewOrderDialog() {
 
           <RiskRewardPreview riskReward={risk.riskReward} />
 
+          {open && !edgeWarning && (
+            <EdgeCheckHint symbol={symbol} direction={orderType} className="" />
+          )}
+
           {planWarning && (
             <p className="text-sm text-amber-600 dark:text-amber-400">
               {planWarning.hasPlan
@@ -264,6 +290,13 @@ export function NewOrderDialog() {
               over your {riskWarning.maxRiskPercent}% daily plan limit. Place it anyway?
             </p>
           )}
+          {edgeWarning && (
+            <p className="text-sm text-amber-600 dark:text-amber-400">
+              Your win rate on {edgeFacetLabelEn(edgeWarning)} is {edgeWarning.winRate}% over{" "}
+              {edgeWarning.total} trades, below your overall {edgeWarning.baselineWinRate}%. Place this
+              order anyway?
+            </p>
+          )}
           {error && <p className="text-sm text-destructive">{error}</p>}
           <p className="text-xs text-muted-foreground">
             Command queued — MT5 EA executes on next poll.
@@ -271,7 +304,7 @@ export function NewOrderDialog() {
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-          {dailyLimitWarning || planWarning || riskWarning ? (
+          {dailyLimitWarning || planWarning || riskWarning || edgeWarning ? (
             <Button variant="outline" onClick={() => handleSubmit(true)} disabled={isPending}>
               {isPending ? "Queuing…" : "Place anyway"}
             </Button>

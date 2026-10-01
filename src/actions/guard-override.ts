@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 
 const schema = z.object({
-  guard: z.enum(["lossStreak", "dailyLimit", "checklist"]),
+  guard: z.enum(["lossStreak", "dailyLimit", "checklist", "weakEdge"]),
   surface: z.enum(["copyTrade", "journal", "mt5"]),
 });
 
@@ -16,7 +16,7 @@ const schema = z.object({
  * nuốt mọi lỗi để không chặn hành động chính.
  */
 export async function logGuardOverride(
-  guard: "lossStreak" | "dailyLimit" | "checklist",
+  guard: "lossStreak" | "dailyLimit" | "checklist" | "weakEdge",
   surface: "copyTrade" | "journal" | "mt5",
 ): Promise<void> {
   try {

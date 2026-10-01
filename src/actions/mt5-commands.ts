@@ -10,6 +10,8 @@ import { resolveQuotes } from "@/lib/quotes/resolve-quotes";
 import { estimateOrderRisk, estimateStopLossForRisk, roundToSymbolPrecision } from "@/lib/calculators";
 import { isOverDailyTradeLimit, utcDayRange } from "@/lib/journal/daily-limit";
 import { checkDailyRiskBudget, type DailyRiskBudgetWarning } from "@/lib/journal/risk-budget";
+import { getEdgeCheck } from "@/lib/journal/edge-check-query";
+import type { EdgeCheckFacet } from "@/lib/journal/edge-check";
 
 // Orders placed with no explicit SL get one sized to risk 10% of account
 // equity, so a position is never left fully unprotected. Same pip-value
@@ -271,6 +273,19 @@ export async function modifyOrder(
   return {};
 }
 
+export type EdgeWarning = EdgeCheckFacet & { baselineWinRate: number };
+
+/** Chỉ trả cảnh báo khi bối cảnh lệnh là vùng yếu trong lịch sử journal của trader. */
+async function checkWeakEdge(
+  userId: string,
+  symbol: string,
+  orderType: PlaceOrderType,
+): Promise<EdgeWarning | null> {
+  const check = await getEdgeCheck(userId, { symbol, direction: orderType, at: new Date() });
+  if (!check || check.verdict !== "weak" || !check.headline) return null;
+  return { ...check.headline, baselineWinRate: check.baselineWinRate };
+}
+
 export async function placeOrder(input: {
   symbol: string;
   orderType: PlaceOrderType;
@@ -281,8 +296,10 @@ export async function placeOrder(input: {
   confirmedOverLimit?: boolean;
   confirmedNoPlan?: boolean;
   confirmedOverRisk?: boolean;
+  confirmedWeakEdge?: boolean;
 }): Promise<{
   error?: string;
+  edgeWarning?: EdgeWarning;
   dailyLimitWarning?: { ordersPlacedToday: number; maxTrades: number };
   dailyRiskWarning?: DailyRiskBudgetWarning;
   planWarning?: { symbol: string; hasPlan: boolean };
@@ -335,8 +352,13 @@ export async function placeOrder(input: {
       ? Number(slAmount.toFixed(2))
       : null;
 
-  if (!input.confirmedOverLimit || !input.confirmedNoPlan || !input.confirmedOverRisk) {
-    const [planWarning, limit, riskWarning] = await Promise.all([
+  if (
+    !input.confirmedOverLimit ||
+    !input.confirmedNoPlan ||
+    !input.confirmedOverRisk ||
+    !input.confirmedWeakEdge
+  ) {
+    const [planWarning, limit, riskWarning, edgeWarning] = await Promise.all([
       input.confirmedNoPlan
         ? Promise.resolve(null)
         : checkSymbolPlanned(session.user.id, parsed.data.symbol),
@@ -346,12 +368,16 @@ export async function placeOrder(input: {
       input.confirmedOverRisk
         ? Promise.resolve(null)
         : checkDailyOrderRiskBudget(session.user.id, connection.id, connection.equity, riskAmount),
+      input.confirmedWeakEdge
+        ? Promise.resolve(null)
+        : checkWeakEdge(session.user.id, parsed.data.symbol, parsed.data.orderType),
     ]);
-    if (planWarning || limit || riskWarning) {
+    if (planWarning || limit || riskWarning || edgeWarning) {
       return {
         ...(planWarning ? { planWarning } : {}),
         ...(limit ? { dailyLimitWarning: limit } : {}),
         ...(riskWarning ? { dailyRiskWarning: riskWarning } : {}),
+        ...(edgeWarning ? { edgeWarning } : {}),
       };
     }
   }
