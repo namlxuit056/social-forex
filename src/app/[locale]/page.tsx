@@ -7,6 +7,8 @@ import {
   NotebookPen,
   Shield,
 } from "lucide-react";
+import { notFound } from "next/navigation";
+import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { TrackedLink } from "@/components/analytics/tracked-link";
@@ -117,6 +119,9 @@ export default async function HomePage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  // Layout already 404s unknown locales, but the page renders in parallel —
+  // without this a junk path (/wp-login.php) crashes toLocaleString below.
+  if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
 
   const tHome = await getTranslations("home");

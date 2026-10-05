@@ -4,7 +4,9 @@
 set -euo pipefail
 CF="$(command -v cloudflared || echo /opt/homebrew/bin/cloudflared)"
 if [[ -f "$HOME/.cloudflared/config.yml" ]]; then
-  exec "$CF" tunnel --no-autoupdate run
+  # QUIC (UDP 7844) gets blocked/timed out on some networks → 530 for the whole
+  # site; http2 runs over TCP 443 and always gets through.
+  exec "$CF" tunnel --no-autoupdate --protocol http2 run
 fi
 echo "[tunnel] no ~/.cloudflared/config.yml — starting temporary quick tunnel"
 exec "$CF" tunnel --no-autoupdate --url http://127.0.0.1:3000
