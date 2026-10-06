@@ -1,4 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { localeAlternates } from "@/lib/site-url";
 import { TradingCalculators } from "@/components/tools/trading-calculators";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
 import { pageCtaItems } from "@/lib/page-cta-i18n";
@@ -11,7 +12,7 @@ export async function generateMetadata({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("tools");
-  return { title: t("title"), description: t("description") };
+  return { title: t("title"), description: t("description"), alternates: localeAlternates("/tools", locale) };
 }
 
 export default async function ToolsPage({

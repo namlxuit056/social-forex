@@ -1,4 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { localeAlternates } from "@/lib/site-url";
 import { DemoBacktest } from "@/components/backtest/demo-backtest";
 import { Disclaimer } from "@/components/layout/disclaimer";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
@@ -12,7 +13,7 @@ export async function generateMetadata({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("backtest");
-  return { title: t("title"), description: t("description") };
+  return { title: t("title"), description: t("description"), alternates: localeAlternates("/backtest", locale) };
 }
 
 export default async function BacktestPage({

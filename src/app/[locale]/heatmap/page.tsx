@@ -1,4 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { localeAlternates } from "@/lib/site-url";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
 import { pageCtaItems } from "@/lib/page-cta-i18n";
 import { resolveQuotes } from "@/lib/quotes/resolve-quotes";
@@ -11,7 +12,7 @@ export async function generateMetadata({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("heatmap");
-  return { title: t("title") };
+  return { title: t("title"), alternates: localeAlternates("/heatmap", locale) };
 }
 
 export const dynamic = "force-dynamic";

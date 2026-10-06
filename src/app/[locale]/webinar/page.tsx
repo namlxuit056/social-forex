@@ -1,5 +1,6 @@
 import { Video } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { localeAlternates } from "@/lib/site-url";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { WebinarList } from "@/components/webinar/webinar-list";
@@ -12,7 +13,7 @@ export async function generateMetadata({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("webinar");
-  return { title: t("title"), description: t("description") };
+  return { title: t("title"), description: t("description"), alternates: localeAlternates("/webinar", locale) };
 }
 
 export const dynamic = "force-dynamic";

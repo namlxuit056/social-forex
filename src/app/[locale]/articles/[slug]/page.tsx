@@ -50,14 +50,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     select: { slug: true },
   });
 
-  const languages: Record<string, string> = {
-    vi: absoluteUrl(`/articles/${slug}`, "vi"),
-    en: absoluteUrl(`/articles/${slug}`, "en"),
-    "x-default": absoluteUrl(`/articles/${slug}`, routing.defaultLocale),
-  };
-  if (!alternateArticle) {
-    delete languages[alternateLocale];
-  }
+  // Bài chỉ có 1 ngôn ngữ: x-default phải trỏ về chính nó — URL của locale kia không tồn tại
+  // (redirect/404), hreflang trỏ vào đó bị Google bỏ qua và báo "Trang có chuyển hướng".
+  const languages: Record<string, string> = alternateArticle
+    ? {
+        vi: absoluteUrl(`/articles/${slug}`, "vi"),
+        en: absoluteUrl(`/articles/${slug}`, "en"),
+        "x-default": absoluteUrl(`/articles/${slug}`, routing.defaultLocale),
+      }
+    : { [locale]: canonicalUrl, "x-default": canonicalUrl };
 
   return {
     title: article.title,

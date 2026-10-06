@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { localeAlternates } from "@/lib/site-url";
 import { Link } from "@/i18n/navigation";
 import { ChartContainer } from "@/components/charts/chart-container";
 import { EconomicCalendar } from "@/components/calendar/economic-calendar";
@@ -28,7 +29,7 @@ export async function generateMetadata({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("desk");
-  return { title: t("metaTitle"), description: t("metaDescription") };
+  return { title: t("metaTitle"), description: t("metaDescription"), alternates: localeAlternates("/desk", locale) };
 }
 
 export default async function DeskPage({

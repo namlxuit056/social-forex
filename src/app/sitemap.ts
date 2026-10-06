@@ -28,15 +28,9 @@ const staticPaths = [
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const now = new Date();
-  const entries: MetadataRoute.Sitemap = [
-    {
-      url: `${BASE}/llms.txt`,
-      lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.65,
-    },
-  ];
+  // Trang tĩnh/bài hardcode không có ngày sửa thật → bỏ lastModified. Gửi `now` cho mọi URL
+  // khiến Google coi lastmod là không đáng tin và bỏ qua cả lastmod của bài viết thật.
+  const entries: MetadataRoute.Sitemap = [];
 
   // Fetch DB content in parallel
   const [articles, dbAcademyLessons] = await Promise.all([
@@ -45,16 +39,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       select: { slug: true, locale: true, publishedAt: true, updatedAt: true },
       orderBy: { publishedAt: "desc" },
     }),
+    // Không dùng distinct theo slug: mỗi bài có bản vi + en, cả hai đều phải vào sitemap.
     prisma.academyLesson.findMany({
       where: { status: "PUBLISHED" },
       select: { slug: true, locale: true, updatedAt: true },
-      distinct: ["slug"],
       orderBy: { updatedAt: "desc" },
     }),
   ]);
 
-  const dbAcademySlugs = new Set(dbAcademyLessons.map((l) => l.slug));
-  const dbAcademyBySlug = new Map(dbAcademyLessons.map((l) => [l.slug, l]));
+  // Bài hardcode được ưu tiên khi render (getAcademyLesson trước getDbLesson) — bỏ bản DB trùng slug.
+  const hardcodedSlugs = new Set(academyLessons.map((l) => l.slug));
 
   for (const locale of routing.locales) {
     const prefix = locale === routing.defaultLocale ? "" : `/${locale}`;
@@ -62,18 +56,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     for (const route of staticPaths) {
       entries.push({
         url: `${BASE}${prefix}${route.path}`,
-        lastModified: now,
         changeFrequency: route.changeFrequency,
         priority: route.priority,
       });
     }
 
-    // Hardcoded lessons (exclude those now in DB to avoid duplicates)
     for (const lesson of academyLessons) {
-      if (dbAcademySlugs.has(lesson.slug)) continue;
       entries.push({
         url: `${BASE}${prefix}/academy/${lesson.slug}`,
-        lastModified: now,
         changeFrequency: "monthly",
         priority: 0.7,
       });
@@ -81,10 +71,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // DB-generated academy lessons
     for (const lesson of dbAcademyLessons) {
-      if (lesson.locale !== locale) continue;
+      if (lesson.locale !== locale || hardcodedSlugs.has(lesson.slug)) continue;
       entries.push({
         url: `${BASE}${prefix}/academy/${lesson.slug}`,
-        lastModified: dbAcademyBySlug.get(lesson.slug)?.updatedAt ?? now,
+        lastModified: lesson.updatedAt,
         changeFrequency: "monthly",
         priority: 0.7,
       });

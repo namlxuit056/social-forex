@@ -1,5 +1,6 @@
 import { ShieldCheck, Trophy, Users } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { localeAlternates } from "@/lib/site-url";
 import { Link } from "@/i18n/navigation";
 import { EmptyState } from "@/components/layout/empty-state";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
@@ -19,7 +20,7 @@ export async function generateMetadata({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("leaderboard");
-  return { title: t("title") };
+  return { title: t("title"), alternates: localeAlternates("/leaderboard", locale) };
 }
 
 export const dynamic = "force-dynamic";

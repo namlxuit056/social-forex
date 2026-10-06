@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { localeAlternates } from "@/lib/site-url";
 import { ChartContainer } from "@/components/charts/chart-container";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
 import { pageCtaItems } from "@/lib/page-cta-i18n";
@@ -12,7 +13,7 @@ export async function generateMetadata({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("chart");
-  return { title: t("title"), description: t("description") };
+  return { title: t("title"), description: t("description"), alternates: localeAlternates("/chart", locale) };
 }
 
 export default async function ChartPage({
