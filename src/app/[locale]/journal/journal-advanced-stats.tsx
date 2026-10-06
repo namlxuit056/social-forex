@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { BarChart3, FileText } from "lucide-react";
+import { BarChart3, ChevronDown, FileText, ListChecks } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -42,6 +42,7 @@ import type { AiReviewTrend } from "@/lib/journal/ai-review-trend";
 import type { MistakeStats } from "@/lib/journal/mistake-stats";
 import type { TiltDay, TiltDaysResult, TiltSignal } from "@/lib/journal/tilt-days";
 import type { GreenDay, GreenDaysResult, GreenSignal } from "@/lib/journal/green-days";
+import { selectStatsActions, type StatsRange } from "@/lib/journal/stats-range";
 import { useMistakeLabels, useSetupLabels } from "./use-setup-labels";
 import { JournalGoalTracker, type TradingGoalData } from "@/components/journal/journal-goal-tracker";
 import { JournalCompoundPlanCard, type CompoundPlanData } from "@/components/journal/journal-compound-plan-card";
@@ -72,11 +73,14 @@ function StatCard({
   value,
   sub,
   tone = "neutral",
+  delta,
 }: {
   label: string;
   value: string;
   sub?: string | null;
   tone?: "positive" | "negative" | "neutral";
+  /** chênh lệch so với kỳ trước — good=null khi không đổi / không phân tốt-xấu */
+  delta?: Delta | null;
 }) {
   return (
     <div
@@ -101,7 +105,77 @@ function StatCard({
         {value}
       </p>
       {sub && <p className="mt-0.5 text-[10px] text-muted-foreground/70">{sub}</p>}
+      {delta && (
+        <p
+          className={cn(
+            "mt-0.5 font-mono text-[10px] tabular-nums",
+            delta.good === true && "text-emerald-600 dark:text-emerald-500",
+            delta.good === false && "text-red-600 dark:text-red-500",
+            delta.good === null && "text-muted-foreground",
+          )}
+        >
+          {delta.text}
+        </p>
+      )}
     </div>
+  );
+}
+
+type Delta = { text: string; good: boolean | null };
+
+function signed(n: number, digits = 0): string {
+  const v = Number(n.toFixed(digits));
+  return `${v > 0 ? "+" : v < 0 ? "-" : "±"}${Math.abs(v).toFixed(digits)}`;
+}
+
+/** Chênh lệch cur − prev; null khi thiếu một phía hoặc giá trị vô hạn (PF = ∞). */
+function deltaOf(
+  cur: number | null,
+  prev: number | null,
+  fmt: (d: number) => string,
+  higherIsBetter: boolean | null = true,
+): Delta | null {
+  if (cur === null || prev === null || !Number.isFinite(cur) || !Number.isFinite(prev)) {
+    return null;
+  }
+  const d = cur - prev;
+  return {
+    text: fmt(d),
+    good: higherIsBetter === null || Math.abs(d) < 1e-9 ? null : d > 0 === higherIsBetter,
+  };
+}
+
+function StatsSection({
+  title,
+  desc,
+  defaultOpen = false,
+  children,
+}: {
+  title: string;
+  desc: string;
+  defaultOpen?: boolean;
+  children: React.ReactNode;
+}) {
+  const t = useTranslations("journal");
+  return (
+    <details open={defaultOpen} className="group rounded-xl border border-border/60">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 [&::-webkit-details-marker]:hidden">
+        <div>
+          <h3 className="font-heading text-lg font-semibold">{title}</h3>
+          <p className="text-sm text-muted-foreground">{desc}</p>
+        </div>
+        <ChevronDown
+          className="size-5 shrink-0 text-muted-foreground transition-transform group-open:rotate-180"
+          aria-hidden
+        />
+      </summary>
+      <div className="border-t border-border/60 p-4">
+        <div className="peer space-y-6 empty:hidden">{children}</div>
+        <p className="hidden text-sm text-muted-foreground peer-empty:block">
+          {t("statsSectionEmpty")}
+        </p>
+      </div>
+    </details>
   );
 }
 
@@ -745,26 +819,126 @@ function GreenDaysCard({
   );
 }
 
+function tiltSignalLabel(
+  t: ReturnType<typeof useTranslations>,
+  sig: TiltSignal,
+  day: TiltDay,
+): string {
+  switch (sig) {
+    case "lossStreak":
+      return t("tiltSignalLossStreak", { count: day.lossStreak });
+    case "sizeEscalation":
+      return t("tiltSignalSizeEscalation");
+    case "overtrading":
+      return t("tiltSignalOvertrading", { count: day.tradeCount });
+    case "guardOverride":
+      return t("tiltSignalGuardOverride");
+    case "revenge":
+      return t("tiltSignalRevenge");
+    case "deepLoss":
+      return t("tiltSignalDeepLoss", { r: day.netR ?? 0 });
+  }
+}
+
+const RANGE_LABEL_KEY: Record<StatsRange, string> = {
+  "7d": "statsRange7d",
+  "30d": "statsRange30d",
+  "90d": "statsRange90d",
+  all: "statsRangeAll",
+};
+
+function StatsActionsCard({
+  scorecard,
+  mistakeStats,
+  tiltDays,
+  range,
+  locale,
+}: {
+  scorecard?: DisciplineScorecard;
+  mistakeStats?: MistakeStats;
+  tiltDays?: TiltDaysResult;
+  range: StatsRange;
+  locale: string;
+}) {
+  const t = useTranslations("journal");
+  const mistakeLabels = useMistakeLabels();
+  // Chỉ dùng kết quả đã đủ mẫu như các card bên dưới, để gợi ý không mâu thuẫn với chúng.
+  const actions = selectStatsActions({
+    scorecard:
+      scorecard && scorecard.sampleSize >= MIN_CLOSED_TRADES ? scorecard : null,
+    mistakeStats:
+      mistakeStats && mistakeStats.taggedTrades + mistakeStats.untaggedClosed >= MIN_CLOSED_TRADES_MISTAKES
+        ? mistakeStats
+        : null,
+    tiltDays,
+  });
+
+  return (
+    <Card className="border-primary/30 bg-primary/5">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-2 text-sm">
+          <ListChecks className="size-4 text-primary" aria-hidden />
+          {t("statsActionsTitle")}
+        </CardTitle>
+        <p className="text-xs text-muted-foreground">
+          {t("statsActionsNote", { period: t(RANGE_LABEL_KEY[range]) })}
+        </p>
+      </CardHeader>
+      <CardContent>
+        {actions.length === 0 ? (
+          <p className="text-sm text-muted-foreground">{t("statsActionsNone")}</p>
+        ) : (
+          <ol className="space-y-2">
+            {actions.map((a, i) => (
+              <li key={a.kind} className="flex gap-3 text-sm">
+                <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/15 font-mono text-[11px] font-semibold text-primary">
+                  {i + 1}
+                </span>
+                <span className="text-foreground">
+                  {a.kind === "lever"
+                    ? t("statsActionLever", {
+                        rule: t(SCORECARD_RULE_KEY[a.rule]),
+                        followed: a.followedWinRate,
+                        violated: a.violatedWinRate,
+                        gap: a.gap,
+                      })
+                    : a.kind === "lowCompliance"
+                      ? t("statsActionLowCompliance", {
+                          rule: t(SCORECARD_RULE_KEY[a.rule]),
+                          pct: Math.round(a.followedPct),
+                        })
+                      : a.kind === "mistake"
+                        ? t("statsActionMistake", {
+                            mistake: mistakeLabels[a.tag],
+                            count: a.count,
+                            pnl: fmtMoney(a.totalPnl),
+                          })
+                        : t("statsActionTilt", {
+                            date: new Date(`${a.day.day}T00:00:00Z`).toLocaleDateString(locale, {
+                              day: "2-digit",
+                              month: "2-digit",
+                              timeZone: "UTC",
+                            }),
+                            signals: a.day.signals
+                              .map((sig) => tiltSignalLabel(t, sig, a.day))
+                              .join(", "),
+                            pnl: fmtMoney(a.day.netPnl),
+                          })}
+                </span>
+              </li>
+            ))}
+          </ol>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 function TiltDaysCard({ result, locale }: { result: TiltDaysResult; locale: string }) {
   const t = useTranslations("journal");
   if (result.tiltDays.length === 0 || result.tradingDays < MIN_TILT_TRADING_DAYS) return null;
+  const signalLabel = (sig: TiltSignal, day: TiltDay) => tiltSignalLabel(t, sig, day);
 
-  function signalLabel(sig: TiltSignal, day: TiltDay): string {
-    switch (sig) {
-      case "lossStreak":
-        return t("tiltSignalLossStreak", { count: day.lossStreak });
-      case "sizeEscalation":
-        return t("tiltSignalSizeEscalation");
-      case "overtrading":
-        return t("tiltSignalOvertrading", { count: day.tradeCount });
-      case "guardOverride":
-        return t("tiltSignalGuardOverride");
-      case "revenge":
-        return t("tiltSignalRevenge");
-      case "deepLoss":
-        return t("tiltSignalDeepLoss", { r: day.netR ?? 0 });
-    }
-  }
 
   return (
     <Card className="border-border/60">
@@ -1001,7 +1175,10 @@ function MonthlyViolationsChart({
 }
 
 export function JournalAdvancedStats({
+  calendar,
   trades,
+  prevTrades,
+  range,
   locale,
   accountBalance,
   planCompliance,
@@ -1017,7 +1194,12 @@ export function JournalAdvancedStats({
   tradingGoal,
   compoundPlan,
 }: {
+  /** lịch heatmap (server render) — đặt trong nhóm Hiệu suất */
+  calendar?: React.ReactNode;
   trades: AdvancedStatsPageTrade[];
+  /** lệnh của kỳ liền trước cùng độ dài — null khi range = all */
+  prevTrades?: AdvancedStatsPageTrade[] | null;
+  range: StatsRange;
   locale: string;
   accountBalance: number | null;
   planCompliance?: PlanComplianceStats;
@@ -1038,6 +1220,10 @@ export function JournalAdvancedStats({
   const stats = useMemo(
     () => computeAdvancedStats(trades, accountBalance),
     [trades, accountBalance],
+  );
+  const prevStats = useMemo(
+    () => (prevTrades ? computeAdvancedStats(prevTrades, accountBalance) : null),
+    [prevTrades, accountBalance],
   );
   const discipline = useMemo(() => computeRiskDiscipline(trades), [trades]);
   const monthlyViolations = useMemo(
@@ -1070,6 +1256,7 @@ export function JournalAdvancedStats({
   if (stats.closedTrades < MIN_CLOSED_TRADES) {
     return (
       <div className="space-y-6">
+        {calendar}
         {goalTracker}
         {compoundPlanCard}
         <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border/60 bg-muted/20 px-6 py-12 text-center">
@@ -1099,20 +1286,26 @@ export function JournalAdvancedStats({
   const bestSymbol = symbolStats[0]?.symbol;
   const dayOfWeekRows = dayOfWeekStats.map((s) => ({ key: s.key, stat: s }));
 
+  // So sánh với kỳ trước chỉ khi kỳ trước có lệnh đã đóng
+  const cmp = (
+    cur: number | null,
+    prev: number | null,
+    fmt: (d: number) => string,
+    higherIsBetter: boolean | null = true,
+  ) =>
+    prevStats && prevStats.closedTrades > 0
+      ? deltaOf(cur, prev, (x) => t("statsDeltaVsPrev", { delta: fmt(x) }), higherIsBetter)
+      : null;
+
   return (
     <div className="space-y-6">
-      {goalTracker}
-      {compoundPlanCard}
-
-      {scorecard && <DisciplineScorecardCard scorecard={scorecard} />}
-
-      {aiReviewTrend && <AiReviewTrendCard trend={aiReviewTrend} />}
-
-      {mistakeStats && <MistakeCostCard stats={mistakeStats} />}
-
-      {greenDays && <GreenDaysCard result={greenDays} locale={locale} />}
-
-      {tiltDays && <TiltDaysCard result={tiltDays} locale={locale} />}
+      <StatsActionsCard
+        scorecard={scorecard}
+        mistakeStats={mistakeStats}
+        tiltDays={tiltDays}
+        range={range}
+        locale={locale}
+      />
 
       <div className="flex items-start justify-between gap-3">
         <div>
@@ -1128,473 +1321,509 @@ export function JournalAdvancedStats({
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <StatCard label={t("totalTrades")} value={String(stats.totalTrades)} />
-        <StatCard
-          label={t("winRate")}
-          value={stats.winRate !== null ? `${stats.winRate}%` : "—"}
-          tone={stats.winRate === null ? "neutral" : stats.winRate >= 50 ? "positive" : "negative"}
-        />
-        <StatCard
-          label={t("statProfitFactor")}
-          value={
-            stats.profitFactor === Infinity
-              ? "∞"
-              : stats.profitFactor !== null
-                ? stats.profitFactor.toFixed(2)
-                : "—"
-          }
-          tone={
-            stats.profitFactor === null
-              ? "neutral"
-              : stats.profitFactor === Infinity || stats.profitFactor >= 1
-                ? "positive"
-                : "negative"
-          }
-        />
-        <StatCard
-          label={t("expectancyR")}
-          value={stats.avgRR !== null ? `${stats.avgRR >= 0 ? "+" : ""}${stats.avgRR}R` : "—"}
-          tone={stats.avgRR === null ? "neutral" : stats.avgRR >= 0 ? "positive" : "negative"}
-        />
-        <StatCard
-          label={t("statAvgWin")}
-          value={stats.avgWin !== null ? fmtMoney(stats.avgWin) : "—"}
-          tone="positive"
-        />
-        <StatCard
-          label={t("statAvgLoss")}
-          value={stats.avgLoss !== null ? `-$${stats.avgLoss.toFixed(2)}` : "—"}
-          tone="negative"
-        />
-
-        <StatCard
-          label={t("statExpectancy")}
-          value={stats.expectancy !== null ? fmtMoney(stats.expectancy) : "—"}
-          tone={stats.expectancy === null ? "neutral" : stats.expectancy >= 0 ? "positive" : "negative"}
-        />
-        <StatCard
-          label={t("totalPnl")}
-          value={fmtMoney(stats.netProfit)}
-          tone={stats.netProfit >= 0 ? "positive" : "negative"}
-        />
-        <StatCard label={t("statWins")} value={String(stats.wins)} tone="positive" />
-        <StatCard label={t("statLosses")} value={String(stats.losses)} tone="negative" />
-        <StatCard label={t("statBreakevens")} value={String(stats.breakevens)} />
-        <StatCard label={t("statCurrentStreak")} value={streakLabel} tone={stats.currentStreak.type === "WIN" ? "positive" : stats.currentStreak.type === "LOSS" ? "negative" : "neutral"} />
-
-        <StatCard label={t("statLongestWinStreak")} value={String(stats.longestWinStreak)} tone="positive" />
-        <StatCard label={t("statLongestLossStreak")} value={String(stats.longestLossStreak)} tone="negative" />
-        <StatCard
-          label={t("statMaxDrawdown")}
-          value={stats.maxDrawdown < 0 ? fmtMoney(stats.maxDrawdown) : "—"}
-          tone={stats.maxDrawdown < 0 ? "negative" : "neutral"}
-        />
-        <StatCard
-          label={t("statRecoveryFactor")}
-          value={stats.recoveryFactor !== null ? stats.recoveryFactor.toFixed(2) : "—"}
-          tone={stats.recoveryFactor === null ? "neutral" : stats.recoveryFactor >= 1 ? "positive" : "negative"}
-        />
-        <StatCard
-          label={t("statSharpeRatio")}
-          value={stats.sharpeRatio !== null ? stats.sharpeRatio.toFixed(2) : "—"}
-          tone={stats.sharpeRatio === null ? "neutral" : stats.sharpeRatio >= 0 ? "positive" : "negative"}
-        />
-        <StatCard
-          label={t("statAvgHoldingTime")}
-          value={stats.avgHoldingMinutes !== null ? fmtDuration(stats.avgHoldingMinutes) : "—"}
-        />
-
-        <StatCard
-          label={t("statLargestWin")}
-          value={stats.largestWin !== null ? fmtMoney(stats.largestWin) : "—"}
-          tone="positive"
-        />
-        <StatCard
-          label={t("statLargestLoss")}
-          value={stats.largestLoss !== null ? fmtMoney(stats.largestLoss) : "—"}
-          tone="negative"
-        />
-        <StatCard label={t("statGrossProfit")} value={fmtMoney(stats.grossProfit)} tone="positive" />
-        <StatCard label={t("statGrossLoss")} value={`-$${stats.grossLoss.toFixed(2)}`} tone="negative" />
-        <StatCard
-          label={t("statRoi")}
-          value={stats.roi !== null ? `${stats.roi >= 0 ? "+" : ""}${stats.roi}%` : "—"}
-          tone={stats.roi === null ? "neutral" : stats.roi >= 0 ? "positive" : "negative"}
-        />
-        <StatCard
-          label={t("statAvgRisk")}
-          value={stats.avgRisk !== null ? `$${stats.avgRisk.toFixed(2)}` : "—"}
-        />
-
-        <StatCard
-          label={t("statRiskOfRuin")}
-          value={stats.riskOfRuin !== null ? `${(stats.riskOfRuin * 100).toFixed(1)}%` : "—"}
-          tone={stats.riskOfRuin === null ? "neutral" : stats.riskOfRuin < 0.05 ? "positive" : "negative"}
-        />
-      </div>
-
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card className="border-border/60">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">{t("rDistTitle")}</CardTitle>
-            <p className="text-xs text-muted-foreground">{t("rDistNote")}</p>
-          </CardHeader>
-          <CardContent>
-            <RDistributionChart dist={rDistribution} />
-          </CardContent>
-        </Card>
-        <Card className="border-border/60">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">{t("drawdownTitle")}</CardTitle>
-            <p className="text-xs text-muted-foreground">{t("drawdownNote")}</p>
-          </CardHeader>
-          <CardContent>
-            <DrawdownChart points={drawdownSeries} locale={locale} />
-          </CardContent>
-        </Card>
-      </div>
-
-      {excursion.sampleSize >= 3 && (
-        <Card className="border-border/60">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm">{t("excursionTitle")}</CardTitle>
+      <StatsSection
+        title={t("statsGroupPerformance")}
+        desc={t("statsGroupPerformanceDesc")}
+        defaultOpen
+      >
+          {prevTrades && (
             <p className="text-xs text-muted-foreground">
-              {t("excursionNote", { n: excursion.sampleSize })}
+              {prevStats && prevStats.closedTrades > 0
+                ? t("statsCompareNote", { n: prevStats.closedTrades })
+                : t("statsCompareNone")}
             </p>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              <StatCard
-                label={t("excursionCapture")}
-                value={
-                  excursion.avgMfeCapturePct !== null
-                    ? `${Math.round(excursion.avgMfeCapturePct * 100)}%`
+          )}
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+            <StatCard
+              label={t("totalTrades")}
+              value={String(stats.totalTrades)}
+              delta={cmp(stats.totalTrades, prevStats?.totalTrades ?? null, (x) => signed(x), null)}
+            />
+            <StatCard
+              label={t("winRate")}
+              value={stats.winRate !== null ? `${stats.winRate}%` : "—"}
+              tone={stats.winRate === null ? "neutral" : stats.winRate >= 50 ? "positive" : "negative"}
+              delta={cmp(stats.winRate, prevStats?.winRate ?? null, (x) => `${signed(x)}%`)}
+            />
+            <StatCard
+              label={t("statProfitFactor")}
+              value={
+                stats.profitFactor === Infinity
+                  ? "∞"
+                  : stats.profitFactor !== null
+                    ? stats.profitFactor.toFixed(2)
                     : "—"
-                }
-                sub={t("excursionCaptureHint")}
-                tone={
-                  excursion.avgMfeCapturePct === null
-                    ? "neutral"
-                    : excursion.avgMfeCapturePct >= 0.6
-                      ? "positive"
-                      : excursion.avgMfeCapturePct < 0.4
-                        ? "negative"
-                        : "neutral"
-                }
-              />
-              <StatCard
-                label={t("excursionHeat")}
-                value={
-                  excursion.avgHeatOnWinners !== null
-                    ? fmtMoney(excursion.avgHeatOnWinners)
-                    : "—"
-                }
-              />
-              <StatCard
-                label={t("excursionGiveBack")}
-                value={
-                  excursion.avgGiveBackOnLosers !== null
-                    ? t("excursionGiveBackValue", {
-                        count: excursion.giveBackCount,
-                        amount: fmtMoney(excursion.avgGiveBackOnLosers),
-                      })
-                    : "—"
-                }
-                tone={excursion.giveBackCount > 0 ? "negative" : "neutral"}
-              />
-            </div>
-            {excursion.avgMfeCapturePct !== null && excursion.avgMfeCapturePct < 0.5 && (
-              <p className="text-xs text-amber-600 dark:text-amber-500">
-                {t("excursionInsightEarly", {
-                  pct: Math.round(excursion.avgMfeCapturePct * 100),
-                })}
-              </p>
-            )}
-            {excursion.giveBackCount >= 2 && excursion.avgGiveBackOnLosers !== null && (
-              <p className="text-xs text-amber-600 dark:text-amber-500">
-                {t("excursionInsightGiveBack", {
-                  count: excursion.giveBackCount,
-                  amount: fmtMoney(excursion.avgGiveBackOnLosers),
-                })}
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-      <GroupStatsTable
-        title={t("statsBySessionTitle")}
-        rows={sessionRows}
-        labelOf={sessionLabel}
-        emptyLabel={t("edgeEmpty", { min: MIN_CLOSED_TRADES })}
-      />
-
-      <GroupStatsTable
-        title={t("statsByTimeTitle")}
-        rows={timeRows}
-        labelOf={(k) => `${k} ${timeWindowTz === "vn" ? t("tzVietnamShort") : "UTC"}`}
-        emptyLabel={t("statsByTimeEmpty")}
-        headerAction={
-          <div className="flex rounded-md border border-border/60 p-0.5">
-            {(["vn", "utc"] as const).map((tz) => (
-              <button
-                key={tz}
-                type="button"
-                onClick={() => setTimeWindowTz(tz)}
-                className={cn(
-                  "inline-flex h-6 items-center rounded-sm px-2 text-[11px] font-medium transition-colors",
-                  timeWindowTz === tz
-                    ? "bg-foreground text-background"
-                    : "text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {tz === "vn" ? t("tzVietnam") : t("tzUtc")}
-              </button>
-            ))}
-          </div>
-        }
-      />
-
-      <GroupStatsTable
-        title={t("statsByPairTitle")}
-        rows={symbolRows}
-        labelOf={(k) => k}
-        emptyLabel={t("statsByPairEmpty", { min: 3 })}
-        bestKey={bestSymbol}
-      />
-
-      <GroupStatsTable
-        title={t("statsByDayOfWeekTitle")}
-        rows={dayOfWeekRows}
-        labelOf={(k) => t(`calWeekday${k}`)}
-        emptyLabel={t("edgeEmpty", { min: MIN_CLOSED_TRADES })}
-      />
-
-      <div>
-        <h3 className="font-heading text-lg font-semibold">{t("riskDisciplineTitle")}</h3>
-        <p className="mb-3 text-sm text-muted-foreground">{t("riskDisciplineNote")}</p>
-
-        <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
-          <StatCard label={t("riskEvaluable")} value={String(discipline.evaluable)} />
-          <StatCard label={t("riskCompliant")} value={String(discipline.compliant)} tone="positive" />
-          <StatCard label={t("riskViolations")} value={String(discipline.violations)} tone="negative" />
-          <StatCard
-            label={t("riskComplianceRate")}
-            value={discipline.complianceRate !== null ? `${discipline.complianceRate}%` : "—"}
-            tone={
-              discipline.complianceRate === null
-                ? "neutral"
-                : discipline.complianceRate >= 80
-                  ? "positive"
-                  : "negative"
-            }
-          />
-          <StatCard label={t("riskInsufficientData")} value={String(discipline.insufficientData)} />
-        </div>
-
-        <div className="grid gap-4 lg:grid-cols-2">
-          <Card className="border-border/60">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm">{t("riskComplianceChartTitle")}</CardTitle>
-            </CardHeader>
-            <CardContent className="flex justify-center py-4">
-              <ComplianceDonut
-                compliant={discipline.compliant}
-                violations={discipline.violations}
-                insufficient={discipline.insufficientData}
-              />
-            </CardContent>
-          </Card>
-          <Card className="border-border/60">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm">{t("riskMonthlyChartTitle")}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <MonthlyViolationsChart data={monthlyViolations} />
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      {planCompliance && planCompliance.evaluableDays > 0 && (
-        <div>
-          <h3 className="font-heading text-lg font-semibold">{t("planComplianceTitle")}</h3>
-          <p className="mb-3 text-sm text-muted-foreground">{t("planComplianceNote")}</p>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            <StatCard
-              label={t("planComplianceDays")}
-              value={`${planCompliance.compliantDays}/${planCompliance.evaluableDays}`}
-            />
-            <StatCard
-              label={t("riskComplianceRate")}
-              value={
-                planCompliance.complianceRate !== null
-                  ? `${planCompliance.complianceRate}%`
-                  : "—"
               }
               tone={
-                planCompliance.complianceRate === null
+                stats.profitFactor === null
                   ? "neutral"
-                  : planCompliance.complianceRate >= 80
+                  : stats.profitFactor === Infinity || stats.profitFactor >= 1
                     ? "positive"
                     : "negative"
               }
-            />
-          </div>
-        </div>
-      )}
-
-      {checklistCompliance && checklistCompliance.evaluableDays > 0 && (
-        <div>
-          <h3 className="font-heading text-lg font-semibold">{t("checklistComplianceTitle")}</h3>
-          <p className="mb-3 text-sm text-muted-foreground">{t("checklistComplianceNote")}</p>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <StatCard
-              label={t("checklistComplianceDays")}
-              value={`${checklistCompliance.completeDays}/${checklistCompliance.evaluableDays}`}
+              delta={cmp(stats.profitFactor, prevStats?.profitFactor ?? null, (x) => signed(x, 2))}
             />
             <StatCard
-              label={t("riskComplianceRate")}
-              value={
-                checklistCompliance.completionRate !== null
-                  ? `${checklistCompliance.completionRate}%`
-                  : "—"
-              }
-              tone={
-                checklistCompliance.completionRate === null
-                  ? "neutral"
-                  : checklistCompliance.completionRate >= 80
-                    ? "positive"
-                    : "negative"
-              }
+              label={t("expectancyR")}
+              value={stats.avgRR !== null ? `${stats.avgRR >= 0 ? "+" : ""}${stats.avgRR}R` : "—"}
+              tone={stats.avgRR === null ? "neutral" : stats.avgRR >= 0 ? "positive" : "negative"}
+              delta={cmp(stats.avgRR, prevStats?.avgRR ?? null, (x) => `${signed(x, 2)}R`)}
             />
             <StatCard
-              label={t("checklistWinRateComplete")}
-              value={
-                checklistCompliance.complete.winRate !== null
-                  ? `${checklistCompliance.complete.winRate}%`
-                  : "—"
-              }
-              sub={
-                checklistCompliance.complete.winRate !== null
-                  ? `${checklistCompliance.complete.wins}W / ${checklistCompliance.complete.losses}L`
-                  : null
-              }
-              tone={
-                checklistCompliance.complete.winRate === null
-                  ? "neutral"
-                  : checklistCompliance.complete.winRate >= 50
-                    ? "positive"
-                    : "negative"
-              }
+              label={t("statAvgWin")}
+              value={stats.avgWin !== null ? fmtMoney(stats.avgWin) : "—"}
+              tone="positive"
             />
             <StatCard
-              label={t("checklistWinRateIncomplete")}
-              value={
-                checklistCompliance.incomplete.winRate !== null
-                  ? `${checklistCompliance.incomplete.winRate}%`
-                  : "—"
-              }
-              sub={
-                checklistCompliance.incomplete.winRate !== null
-                  ? `${checklistCompliance.incomplete.wins}W / ${checklistCompliance.incomplete.losses}L`
-                  : null
-              }
-              tone={
-                checklistCompliance.incomplete.winRate === null
-                  ? "neutral"
-                  : checklistCompliance.incomplete.winRate >= 50
-                    ? "positive"
-                    : "negative"
-              }
-            />
-          </div>
-        </div>
-      )}
-
-      {emotionCorrelation && emotionCorrelation.negativeDays > 0 && (
-        <div>
-          <h3 className="font-heading text-lg font-semibold">{t("emotionCorrelationTitle")}</h3>
-          <p className="mb-3 text-sm text-muted-foreground">{t("emotionCorrelationNote")}</p>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            <StatCard
-              label={t("emotionCorrelationNegativeDays")}
-              value={String(emotionCorrelation.negativeDays)}
+              label={t("statAvgLoss")}
+              value={stats.avgLoss !== null ? `-$${stats.avgLoss.toFixed(2)}` : "—"}
               tone="negative"
             />
-            <StatCard
-              label={t("emotionCorrelationWinRateNegative")}
-              value={
-                emotionCorrelation.negative.winRate !== null
-                  ? `${emotionCorrelation.negative.winRate}%`
-                  : "—"
-              }
-              sub={
-                emotionCorrelation.negative.winRate !== null
-                  ? `${emotionCorrelation.negative.wins}W / ${emotionCorrelation.negative.losses}L`
-                  : null
-              }
-              tone={
-                emotionCorrelation.negative.winRate === null
-                  ? "neutral"
-                  : emotionCorrelation.negative.winRate >= 50
-                    ? "positive"
-                    : "negative"
-              }
-            />
-            <StatCard
-              label={t("emotionCorrelationWinRateOther")}
-              value={
-                emotionCorrelation.nonNegative.winRate !== null
-                  ? `${emotionCorrelation.nonNegative.winRate}%`
-                  : "—"
-              }
-              sub={
-                emotionCorrelation.nonNegative.winRate !== null
-                  ? `${emotionCorrelation.nonNegative.wins}W / ${emotionCorrelation.nonNegative.losses}L`
-                  : null
-              }
-              tone={
-                emotionCorrelation.nonNegative.winRate === null
-                  ? "neutral"
-                  : emotionCorrelation.nonNegative.winRate >= 50
-                    ? "positive"
-                    : "negative"
-              }
-            />
-          </div>
-        </div>
-      )}
 
-      {guardOverrideStats && (
-        <div>
-          <h3 className="font-heading text-lg font-semibold">{t("guardOverrideTitle")}</h3>
-          <p className="mb-3 text-sm text-muted-foreground">{t("guardOverrideNote")}</p>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             <StatCard
-              label={t("guardOverrideTotal")}
-              value={String(guardOverrideStats.totalOverrides)}
-              tone={guardOverrideStats.totalOverrides > 0 ? "negative" : "positive"}
+              label={t("statExpectancy")}
+              value={stats.expectancy !== null ? fmtMoney(stats.expectancy) : "—"}
+              tone={stats.expectancy === null ? "neutral" : stats.expectancy >= 0 ? "positive" : "negative"}
+              delta={cmp(stats.expectancy, prevStats?.expectancy ?? null, (x) => fmtMoney(x))}
             />
             <StatCard
-              label={t("guardOverrideDailyLimit")}
-              value={String(guardOverrideStats.dailyLimitOverrides)}
+              label={t("totalPnl")}
+              value={fmtMoney(stats.netProfit)}
+              tone={stats.netProfit >= 0 ? "positive" : "negative"}
+              delta={cmp(stats.netProfit, prevStats?.netProfit ?? null, (x) => fmtMoney(x))}
+            />
+            <StatCard label={t("statWins")} value={String(stats.wins)} tone="positive" />
+            <StatCard label={t("statLosses")} value={String(stats.losses)} tone="negative" />
+            <StatCard label={t("statBreakevens")} value={String(stats.breakevens)} />
+            <StatCard label={t("statCurrentStreak")} value={streakLabel} tone={stats.currentStreak.type === "WIN" ? "positive" : stats.currentStreak.type === "LOSS" ? "negative" : "neutral"} />
+
+            <StatCard label={t("statLongestWinStreak")} value={String(stats.longestWinStreak)} tone="positive" />
+            <StatCard label={t("statLongestLossStreak")} value={String(stats.longestLossStreak)} tone="negative" />
+            <StatCard
+              label={t("statMaxDrawdown")}
+              value={stats.maxDrawdown < 0 ? fmtMoney(stats.maxDrawdown) : "—"}
+              tone={stats.maxDrawdown < 0 ? "negative" : "neutral"}
             />
             <StatCard
-              label={t("guardOverrideLossStreak")}
-              value={String(guardOverrideStats.lossStreakOverrides)}
+              label={t("statRecoveryFactor")}
+              value={stats.recoveryFactor !== null ? stats.recoveryFactor.toFixed(2) : "—"}
+              tone={stats.recoveryFactor === null ? "neutral" : stats.recoveryFactor >= 1 ? "positive" : "negative"}
             />
-            {copyTradeGuardOverrides != null && copyTradeGuardOverrides > 0 && (
-              <StatCard
-                label={t("guardOverrideCopyTrade")}
-                value={String(copyTradeGuardOverrides)}
-                tone="negative"
-              />
-            )}
+            <StatCard
+              label={t("statSharpeRatio")}
+              value={stats.sharpeRatio !== null ? stats.sharpeRatio.toFixed(2) : "—"}
+              tone={stats.sharpeRatio === null ? "neutral" : stats.sharpeRatio >= 0 ? "positive" : "negative"}
+            />
+            <StatCard
+              label={t("statAvgHoldingTime")}
+              value={stats.avgHoldingMinutes !== null ? fmtDuration(stats.avgHoldingMinutes) : "—"}
+            />
+
+            <StatCard
+              label={t("statLargestWin")}
+              value={stats.largestWin !== null ? fmtMoney(stats.largestWin) : "—"}
+              tone="positive"
+            />
+            <StatCard
+              label={t("statLargestLoss")}
+              value={stats.largestLoss !== null ? fmtMoney(stats.largestLoss) : "—"}
+              tone="negative"
+            />
+            <StatCard label={t("statGrossProfit")} value={fmtMoney(stats.grossProfit)} tone="positive" />
+            <StatCard label={t("statGrossLoss")} value={`-$${stats.grossLoss.toFixed(2)}`} tone="negative" />
+            <StatCard
+              label={t("statRoi")}
+              value={stats.roi !== null ? `${stats.roi >= 0 ? "+" : ""}${stats.roi}%` : "—"}
+              tone={stats.roi === null ? "neutral" : stats.roi >= 0 ? "positive" : "negative"}
+            />
+            <StatCard
+              label={t("statAvgRisk")}
+              value={stats.avgRisk !== null ? `$${stats.avgRisk.toFixed(2)}` : "—"}
+            />
+
+            <StatCard
+              label={t("statRiskOfRuin")}
+              value={stats.riskOfRuin !== null ? `${(stats.riskOfRuin * 100).toFixed(1)}%` : "—"}
+              tone={stats.riskOfRuin === null ? "neutral" : stats.riskOfRuin < 0.05 ? "positive" : "negative"}
+            />
           </div>
-        </div>
-      )}
+
+          {calendar}
+          {goalTracker}
+          {compoundPlanCard}
+          <div className="grid gap-4 lg:grid-cols-2">
+            <Card className="border-border/60">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">{t("rDistTitle")}</CardTitle>
+                <p className="text-xs text-muted-foreground">{t("rDistNote")}</p>
+              </CardHeader>
+              <CardContent>
+                <RDistributionChart dist={rDistribution} />
+              </CardContent>
+            </Card>
+            <Card className="border-border/60">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">{t("drawdownTitle")}</CardTitle>
+                <p className="text-xs text-muted-foreground">{t("drawdownNote")}</p>
+              </CardHeader>
+              <CardContent>
+                <DrawdownChart points={drawdownSeries} locale={locale} />
+              </CardContent>
+            </Card>
+          </div>
+
+          {excursion.sampleSize >= 3 && (
+            <Card className="border-border/60">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm">{t("excursionTitle")}</CardTitle>
+                <p className="text-xs text-muted-foreground">
+                  {t("excursionNote", { n: excursion.sampleSize })}
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  <StatCard
+                    label={t("excursionCapture")}
+                    value={
+                      excursion.avgMfeCapturePct !== null
+                        ? `${Math.round(excursion.avgMfeCapturePct * 100)}%`
+                        : "—"
+                    }
+                    sub={t("excursionCaptureHint")}
+                    tone={
+                      excursion.avgMfeCapturePct === null
+                        ? "neutral"
+                        : excursion.avgMfeCapturePct >= 0.6
+                          ? "positive"
+                          : excursion.avgMfeCapturePct < 0.4
+                            ? "negative"
+                            : "neutral"
+                    }
+                  />
+                  <StatCard
+                    label={t("excursionHeat")}
+                    value={
+                      excursion.avgHeatOnWinners !== null
+                        ? fmtMoney(excursion.avgHeatOnWinners)
+                        : "—"
+                    }
+                  />
+                  <StatCard
+                    label={t("excursionGiveBack")}
+                    value={
+                      excursion.avgGiveBackOnLosers !== null
+                        ? t("excursionGiveBackValue", {
+                            count: excursion.giveBackCount,
+                            amount: fmtMoney(excursion.avgGiveBackOnLosers),
+                          })
+                        : "—"
+                    }
+                    tone={excursion.giveBackCount > 0 ? "negative" : "neutral"}
+                  />
+                </div>
+                {excursion.avgMfeCapturePct !== null && excursion.avgMfeCapturePct < 0.5 && (
+                  <p className="text-xs text-amber-600 dark:text-amber-500">
+                    {t("excursionInsightEarly", {
+                      pct: Math.round(excursion.avgMfeCapturePct * 100),
+                    })}
+                  </p>
+                )}
+                {excursion.giveBackCount >= 2 && excursion.avgGiveBackOnLosers !== null && (
+                  <p className="text-xs text-amber-600 dark:text-amber-500">
+                    {t("excursionInsightGiveBack", {
+                      count: excursion.giveBackCount,
+                      amount: fmtMoney(excursion.avgGiveBackOnLosers),
+                    })}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          <GroupStatsTable
+            title={t("statsBySessionTitle")}
+            rows={sessionRows}
+            labelOf={sessionLabel}
+            emptyLabel={t("edgeEmpty", { min: MIN_CLOSED_TRADES })}
+          />
+
+          <GroupStatsTable
+            title={t("statsByTimeTitle")}
+            rows={timeRows}
+            labelOf={(k) => `${k} ${timeWindowTz === "vn" ? t("tzVietnamShort") : "UTC"}`}
+            emptyLabel={t("statsByTimeEmpty")}
+            headerAction={
+              <div className="flex rounded-md border border-border/60 p-0.5">
+                {(["vn", "utc"] as const).map((tz) => (
+                  <button
+                    key={tz}
+                    type="button"
+                    onClick={() => setTimeWindowTz(tz)}
+                    className={cn(
+                      "inline-flex h-6 items-center rounded-sm px-2 text-[11px] font-medium transition-colors",
+                      timeWindowTz === tz
+                        ? "bg-foreground text-background"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    {tz === "vn" ? t("tzVietnam") : t("tzUtc")}
+                  </button>
+                ))}
+              </div>
+            }
+          />
+
+          <GroupStatsTable
+            title={t("statsByPairTitle")}
+            rows={symbolRows}
+            labelOf={(k) => k}
+            emptyLabel={t("statsByPairEmpty", { min: 3 })}
+            bestKey={bestSymbol}
+          />
+
+          <GroupStatsTable
+            title={t("statsByDayOfWeekTitle")}
+            rows={dayOfWeekRows}
+            labelOf={(k) => t(`calWeekday${k}`)}
+            emptyLabel={t("edgeEmpty", { min: MIN_CLOSED_TRADES })}
+          />
+      </StatsSection>
+
+      <StatsSection title={t("statsGroupDiscipline")} desc={t("statsGroupDisciplineDesc")}>
+          {scorecard && <DisciplineScorecardCard scorecard={scorecard} />}
+          {aiReviewTrend && <AiReviewTrendCard trend={aiReviewTrend} />}
+          {mistakeStats && <MistakeCostCard stats={mistakeStats} />}
+          {planCompliance && planCompliance.evaluableDays > 0 && (
+            <div>
+              <h3 className="font-heading text-lg font-semibold">{t("planComplianceTitle")}</h3>
+              <p className="mb-3 text-sm text-muted-foreground">{t("planComplianceNote")}</p>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                <StatCard
+                  label={t("planComplianceDays")}
+                  value={`${planCompliance.compliantDays}/${planCompliance.evaluableDays}`}
+                />
+                <StatCard
+                  label={t("riskComplianceRate")}
+                  value={
+                    planCompliance.complianceRate !== null
+                      ? `${planCompliance.complianceRate}%`
+                      : "—"
+                  }
+                  tone={
+                    planCompliance.complianceRate === null
+                      ? "neutral"
+                      : planCompliance.complianceRate >= 80
+                        ? "positive"
+                        : "negative"
+                  }
+                />
+              </div>
+            </div>
+          )}
+
+          {checklistCompliance && checklistCompliance.evaluableDays > 0 && (
+            <div>
+              <h3 className="font-heading text-lg font-semibold">{t("checklistComplianceTitle")}</h3>
+              <p className="mb-3 text-sm text-muted-foreground">{t("checklistComplianceNote")}</p>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <StatCard
+                  label={t("checklistComplianceDays")}
+                  value={`${checklistCompliance.completeDays}/${checklistCompliance.evaluableDays}`}
+                />
+                <StatCard
+                  label={t("riskComplianceRate")}
+                  value={
+                    checklistCompliance.completionRate !== null
+                      ? `${checklistCompliance.completionRate}%`
+                      : "—"
+                  }
+                  tone={
+                    checklistCompliance.completionRate === null
+                      ? "neutral"
+                      : checklistCompliance.completionRate >= 80
+                        ? "positive"
+                        : "negative"
+                  }
+                />
+                <StatCard
+                  label={t("checklistWinRateComplete")}
+                  value={
+                    checklistCompliance.complete.winRate !== null
+                      ? `${checklistCompliance.complete.winRate}%`
+                      : "—"
+                  }
+                  sub={
+                    checklistCompliance.complete.winRate !== null
+                      ? `${checklistCompliance.complete.wins}W / ${checklistCompliance.complete.losses}L`
+                      : null
+                  }
+                  tone={
+                    checklistCompliance.complete.winRate === null
+                      ? "neutral"
+                      : checklistCompliance.complete.winRate >= 50
+                        ? "positive"
+                        : "negative"
+                  }
+                />
+                <StatCard
+                  label={t("checklistWinRateIncomplete")}
+                  value={
+                    checklistCompliance.incomplete.winRate !== null
+                      ? `${checklistCompliance.incomplete.winRate}%`
+                      : "—"
+                  }
+                  sub={
+                    checklistCompliance.incomplete.winRate !== null
+                      ? `${checklistCompliance.incomplete.wins}W / ${checklistCompliance.incomplete.losses}L`
+                      : null
+                  }
+                  tone={
+                    checklistCompliance.incomplete.winRate === null
+                      ? "neutral"
+                      : checklistCompliance.incomplete.winRate >= 50
+                        ? "positive"
+                        : "negative"
+                  }
+                />
+              </div>
+            </div>
+          )}
+      </StatsSection>
+
+      <StatsSection title={t("statsGroupRisk")} desc={t("statsGroupRiskDesc")}>
+          <div>
+            <h3 className="font-heading text-lg font-semibold">{t("riskDisciplineTitle")}</h3>
+            <p className="mb-3 text-sm text-muted-foreground">{t("riskDisciplineNote")}</p>
+
+            <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
+              <StatCard label={t("riskEvaluable")} value={String(discipline.evaluable)} />
+              <StatCard label={t("riskCompliant")} value={String(discipline.compliant)} tone="positive" />
+              <StatCard label={t("riskViolations")} value={String(discipline.violations)} tone="negative" />
+              <StatCard
+                label={t("riskComplianceRate")}
+                value={discipline.complianceRate !== null ? `${discipline.complianceRate}%` : "—"}
+                tone={
+                  discipline.complianceRate === null
+                    ? "neutral"
+                    : discipline.complianceRate >= 80
+                      ? "positive"
+                      : "negative"
+                }
+              />
+              <StatCard label={t("riskInsufficientData")} value={String(discipline.insufficientData)} />
+            </div>
+
+            <div className="grid gap-4 lg:grid-cols-2">
+              <Card className="border-border/60">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm">{t("riskComplianceChartTitle")}</CardTitle>
+                </CardHeader>
+                <CardContent className="flex justify-center py-4">
+                  <ComplianceDonut
+                    compliant={discipline.compliant}
+                    violations={discipline.violations}
+                    insufficient={discipline.insufficientData}
+                  />
+                </CardContent>
+              </Card>
+              <Card className="border-border/60">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm">{t("riskMonthlyChartTitle")}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <MonthlyViolationsChart data={monthlyViolations} />
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+
+          {guardOverrideStats && (
+            <div>
+              <h3 className="font-heading text-lg font-semibold">{t("guardOverrideTitle")}</h3>
+              <p className="mb-3 text-sm text-muted-foreground">{t("guardOverrideNote")}</p>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                <StatCard
+                  label={t("guardOverrideTotal")}
+                  value={String(guardOverrideStats.totalOverrides)}
+                  tone={guardOverrideStats.totalOverrides > 0 ? "negative" : "positive"}
+                />
+                <StatCard
+                  label={t("guardOverrideDailyLimit")}
+                  value={String(guardOverrideStats.dailyLimitOverrides)}
+                />
+                <StatCard
+                  label={t("guardOverrideLossStreak")}
+                  value={String(guardOverrideStats.lossStreakOverrides)}
+                />
+                {copyTradeGuardOverrides != null && copyTradeGuardOverrides > 0 && (
+                  <StatCard
+                    label={t("guardOverrideCopyTrade")}
+                    value={String(copyTradeGuardOverrides)}
+                    tone="negative"
+                  />
+                )}
+              </div>
+            </div>
+          )}
+      </StatsSection>
+
+      <StatsSection title={t("statsGroupPsychology")} desc={t("statsGroupPsychologyDesc")}>
+          {greenDays && <GreenDaysCard result={greenDays} locale={locale} />}
+          {tiltDays && <TiltDaysCard result={tiltDays} locale={locale} />}
+          {emotionCorrelation && emotionCorrelation.negativeDays > 0 && (
+            <div>
+              <h3 className="font-heading text-lg font-semibold">{t("emotionCorrelationTitle")}</h3>
+              <p className="mb-3 text-sm text-muted-foreground">{t("emotionCorrelationNote")}</p>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                <StatCard
+                  label={t("emotionCorrelationNegativeDays")}
+                  value={String(emotionCorrelation.negativeDays)}
+                  tone="negative"
+                />
+                <StatCard
+                  label={t("emotionCorrelationWinRateNegative")}
+                  value={
+                    emotionCorrelation.negative.winRate !== null
+                      ? `${emotionCorrelation.negative.winRate}%`
+                      : "—"
+                  }
+                  sub={
+                    emotionCorrelation.negative.winRate !== null
+                      ? `${emotionCorrelation.negative.wins}W / ${emotionCorrelation.negative.losses}L`
+                      : null
+                  }
+                  tone={
+                    emotionCorrelation.negative.winRate === null
+                      ? "neutral"
+                      : emotionCorrelation.negative.winRate >= 50
+                        ? "positive"
+                        : "negative"
+                  }
+                />
+                <StatCard
+                  label={t("emotionCorrelationWinRateOther")}
+                  value={
+                    emotionCorrelation.nonNegative.winRate !== null
+                      ? `${emotionCorrelation.nonNegative.winRate}%`
+                      : "—"
+                  }
+                  sub={
+                    emotionCorrelation.nonNegative.winRate !== null
+                      ? `${emotionCorrelation.nonNegative.wins}W / ${emotionCorrelation.nonNegative.losses}L`
+                      : null
+                  }
+                  tone={
+                    emotionCorrelation.nonNegative.winRate === null
+                      ? "neutral"
+                      : emotionCorrelation.nonNegative.winRate >= 50
+                        ? "positive"
+                        : "negative"
+                  }
+                />
+              </div>
+            </div>
+          )}
+      </StatsSection>
     </div>
   );
 }

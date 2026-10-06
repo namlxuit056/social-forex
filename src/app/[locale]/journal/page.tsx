@@ -33,6 +33,14 @@ import { computeMistakeStats } from "@/lib/journal/mistake-stats";
 import { computeTiltDays } from "@/lib/journal/tilt-days";
 import { computeGreenDays } from "@/lib/journal/green-days";
 import { computeRStats } from "@/lib/journal/r-multiple";
+import {
+  listTradedPairs,
+  parseStatsPair,
+  parseStatsRange,
+  splitTradesByRange,
+  statsWindow,
+} from "@/lib/journal/stats-range";
+import { JournalStatsFilter } from "./journal-stats-filter";
 import { isVipActive } from "@/lib/vip";
 import { isMt5LiveRedisEnabled } from "@/lib/mt5/live-redis";
 import type { AiJournalAnalysis, AiTradeReviewResult } from "@/lib/ai/types";
@@ -74,6 +82,8 @@ export default async function JournalPage({
     takeProfit?: string;
     from?: string;
     tab?: string;
+    range?: string;
+    pair?: string;
   }>;
 }) {
   const { locale } = await params;
@@ -123,6 +133,12 @@ export default async function JournalPage({
                 : query?.tab === "lessons"
                   ? "lessons"
                   : "trades";
+
+  // Bộ lọc tab Thống kê: ?range=7d|30d|90d|all + ?pair=XAUUSD
+  const nowMs = new Date().getTime();
+  const statsRange = parseStatsRange(query?.range);
+  const statsPair = parseStatsPair(query?.pair);
+  const statsStart = statsWindow(statsRange, nowMs).start;
 
   const [
     tradesRaw,
@@ -244,7 +260,11 @@ export default async function JournalPage({
         : Promise.resolve([]),
       activeTab === "stats"
         ? prisma.guardOverrideEvent.count({
-            where: { userId: session.user.id, surface: "copyTrade" },
+            where: {
+              userId: session.user.id,
+              surface: "copyTrade",
+              ...(statsStart !== null ? { createdAt: { gte: new Date(statsStart) } } : {}),
+            },
           })
         : Promise.resolve(0),
     ]);
@@ -391,21 +411,27 @@ export default async function JournalPage({
         }
       : null;
 
+  // Tab Thống kê chỉ tính trên kỳ/cặp đã chọn; statsPrevTrades = kỳ liền trước để so sánh.
+  const { current: statsTrades, previous: statsPrevTrades } =
+    activeTab === "stats"
+      ? splitTradesByRange(serialized, statsRange, statsPair, nowMs)
+      : { current: serialized, previous: [] as typeof serialized };
+
   const planCompliance = computePlanCompliance(
     planLimitsRaw
       .filter((p) => p.maxTrades != null)
       .map((p) => ({ planDate: p.planDate, maxTrades: p.maxTrades as number })),
-    serialized,
+    statsTrades,
   );
 
-  const checklistCompliance = computeChecklistCompliance(planLimitsRaw, serialized);
+  const checklistCompliance = computeChecklistCompliance(planLimitsRaw, statsTrades);
 
-  const emotionCorrelation = computeEmotionDiaryCorrelation(emotionEntries, serialized);
+  const emotionCorrelation = computeEmotionDiaryCorrelation(emotionEntries, statsTrades);
 
-  const guardOverrideStats = computeGuardOverrideStats(serialized);
+  const guardOverrideStats = computeGuardOverrideStats(statsTrades);
 
   const disciplineScorecard = computeDisciplineScorecard({
-    trades: serialized,
+    trades: statsTrades,
     plans: planLimitsRaw,
     moods: moodCheckinsRaw.map((m) => ({ day: m.day, mood: m.mood })),
     diary: emotionEntries.map((e) => ({ date: e.date, note: e.note })),
@@ -413,21 +439,23 @@ export default async function JournalPage({
   });
 
   const aiReviewTrend = computeAiReviewTrend(
-    aiTradeReviewsRaw.map((r) => {
-      const review = r.review as AiTradeReviewResult;
-      return { createdAt: r.createdAt, verdict: review.verdict, score: review.score };
-    }),
+    aiTradeReviewsRaw
+      .filter((r) => statsStart === null || r.createdAt.getTime() >= statsStart)
+      .map((r) => {
+        const review = r.review as AiTradeReviewResult;
+        return { createdAt: r.createdAt, verdict: review.verdict, score: review.score };
+      }),
   );
 
-  const mistakeStats = computeMistakeStats(serialized);
+  const mistakeStats = computeMistakeStats(statsTrades);
 
   const tiltDays = computeTiltDays(
-    serialized,
+    statsTrades,
     planLimitsRaw.map((p) => ({ planDate: p.planDate, maxTrades: p.maxTrades })),
   );
 
   const greenDays = computeGreenDays(
-    serialized,
+    statsTrades,
     planLimitsRaw,
     moodCheckinsRaw.map((m) => ({ day: m.day, mood: m.mood })),
     bestSetupRow?.key ?? null,
@@ -566,9 +594,16 @@ export default async function JournalPage({
         <JournalEdgeAnalytics trades={serialized} />
       ) : activeTab === "stats" ? (
         <div className="space-y-6">
-          <JournalCalendar trades={serialized} locale={locale} />
+          <JournalStatsFilter
+            range={statsRange}
+            pair={statsPair}
+            pairs={listTradedPairs(serialized)}
+          />
           <JournalAdvancedStats
-            trades={serialized}
+            calendar={<JournalCalendar trades={statsTrades} locale={locale} />}
+            trades={statsTrades}
+            prevTrades={statsRange === "all" ? null : statsPrevTrades}
+            range={statsRange}
             locale={locale}
             accountBalance={mt5Connection?.balance ?? mt5Connection?.equity ?? null}
             planCompliance={planCompliance}
