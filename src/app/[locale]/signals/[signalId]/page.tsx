@@ -35,6 +35,7 @@ import { SignalReactions } from "./signal-reactions";
 import { SignalComments } from "./signal-comments";
 import { PinSignalButton } from "@/components/signals/pin-signal-button";
 import { CopyToJournalButton } from "@/components/signals/copy-to-journal-button";
+import { SignalMt5OrderCard } from "@/components/signals/signal-mt5-order-card";
 import { isAtPinLimit } from "@/lib/signals/pin-signal-limit";
 import { cn } from "@/lib/utils";
 
@@ -507,6 +508,18 @@ export default async function SignalDetailPage({
                   </p>
                 </section>
               )}
+
+              {userId && signal.status === "ACTIVE" ? (
+                <SignalMt5OrderCard
+                  symbol={signal.symbol}
+                  direction={signal.direction}
+                  entry={signal.entry}
+                  stopLoss={signal.stopLoss}
+                  takeProfit={signal.takeProfit}
+                  connected={!!mt5Connection}
+                  balance={mt5Connection?.balance ?? null}
+                />
+              ) : null}
 
               <RiskCalculator
                 defaultSymbol={signal.symbol}
