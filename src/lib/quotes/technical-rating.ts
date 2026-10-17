@@ -37,8 +37,12 @@ export function classifyRating(score: number): Rating {
 export type SymbolScores = {
   /** Recommend.All khung 4 giờ — dùng làm tín hiệu chính. */
   score4h: number;
-  /** Recommend.All khung 1 ngày — dùng để xác nhận cùng chiều, tăng độ tin cậy. */
+  /** Recommend.All khung 1 ngày — chỉ để hiển thị, không còn dùng trong quy tắc tín hiệu. */
   score1d: number;
+  /** Recommend.All khung 1 giờ — xác nhận cùng chiều. */
+  score1h: number;
+  /** Recommend.All khung 15 phút — xác nhận cùng chiều. */
+  score15m: number;
   /** Giá đóng cửa gần nhất — tham khảo, không phải giá lúc fire chính xác đến từng tick. */
   close: number;
   /** Average True Range khung 4H — đơn vị đo biến động, dùng để tính vùng entry/SL/TP. */
@@ -50,14 +54,14 @@ export type SymbolScores = {
 export type ConfidentSignal = "buy" | "sell";
 
 /**
- * "Tín hiệu chắc chắn" = khung 4H đạt Strong Buy/Sell VÀ khung 1D đồng thuận chiều
- * (không nhất thiết strong, chỉ cần cùng dấu) — để lọc bớt tín hiệu 4H bị nhiễu ngắn hạn
- * ngược xu hướng lớn hơn.
+ * "Tín hiệu chắc chắn" = khung 4H đạt Strong Buy/Sell VÀ cả H1 lẫn M15 cùng chiều
+ * (chỉ cần cùng dấu, không cần strong). Đổi từ "4H strong + 1D cùng chiều" theo yêu cầu
+ * user 2026-10-18 — báo sát nhịp giao dịch trong ngày hơn; 4H strong vẫn là bộ lọc nhiễu.
  */
 export function computeConfidentSignal(scores: SymbolScores): ConfidentSignal | null {
   const rating4h = classifyRating(scores.score4h);
-  if (rating4h === "strong_buy" && scores.score1d > 0) return "buy";
-  if (rating4h === "strong_sell" && scores.score1d < 0) return "sell";
+  if (rating4h === "strong_buy" && scores.score1h > 0 && scores.score15m > 0) return "buy";
+  if (rating4h === "strong_sell" && scores.score1h < 0 && scores.score15m < 0) return "sell";
   return null;
 }
 
@@ -116,4 +120,22 @@ export function computePriceLevels(signal: ConfidentSignal, scores: SymbolScores
     stopLoss: roundPrice(raw.stopLoss, scores.close),
     takeProfit: roundPrice(raw.takeProfit, scores.close),
   };
+}
+
+/**
+ * Score line shown next to a signal. Signals since 2026-10-18 carry M15/H1/H4
+ * (the timeframes the rule uses); older ones only have 4H/1D.
+ */
+export function formatSignalScores(m: {
+  score4h?: number | null;
+  score1d?: number | null;
+  score1h?: number | null;
+  score15m?: number | null;
+}): string | null {
+  const ok = (v: number | null | undefined): v is number => typeof v === "number";
+  if (ok(m.score15m) && ok(m.score1h) && ok(m.score4h)) {
+    return `M15 ${m.score15m} · H1 ${m.score1h} · H4 ${m.score4h}`;
+  }
+  if (ok(m.score4h) && ok(m.score1d)) return `4H ${m.score4h} · 1D ${m.score1d}`;
+  return null;
 }

@@ -1,4 +1,5 @@
 import { ArrowRight, TrendingDown, TrendingUp } from "lucide-react";
+import { formatSignalScores } from "@/lib/quotes/technical-rating";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { prisma } from "@/lib/prisma";
@@ -144,9 +145,9 @@ export async function SignalDirectionsBoard({
                 <tr key={s.symbol} className="border-b border-border last:border-0">
                   <td className="py-2.5 pr-3 align-top">
                     <span className="font-mono font-medium text-foreground">{s.symbol}</span>
-                    {s.score4h !== null && s.score1d !== null ? (
+                    {formatSignalScores(s) ? (
                       <span className="ml-2 font-mono text-xs text-muted-foreground">
-                        4H {s.score4h} · 1D {s.score1d}
+                        {formatSignalScores(s)}
                       </span>
                     ) : null}
                   </td>

@@ -15,7 +15,8 @@ function round2(n: number): number {
 
 /** Khớp khung giờ tín hiệu chính (4H) — trong lúc tín hiệu "chắc chắn" còn giữ, user
  * nhận lại thông báo tối đa 1 lần / 4 tiếng thay vì mỗi giờ (cron chạy hàng giờ). */
-const COOLDOWN_MS = 4 * 60 * 60 * 1000;
+// 1 giờ (trước đây 4 giờ): hợp với tín hiệu xác nhận bằng M15/H1 — user chọn 2026-10-18.
+const COOLDOWN_MS = 60 * 60 * 1000;
 
 export type TechnicalRatingCheckSummary = {
   ok: true;
@@ -29,6 +30,8 @@ export type TechnicalRatingCheckSummary = {
     signal: "buy" | "sell";
     score4h: number;
     score1d: number;
+    score1h: number;
+    score15m: number;
     entryLow: number;
     entryHigh: number;
     stopLoss: number;
@@ -59,6 +62,8 @@ async function notifySymbolSignal(
     signal,
     score4h: round2(scores.score4h),
     score1d: round2(scores.score1d),
+    score1h: round2(scores.score1h),
+    score15m: round2(scores.score15m),
     ...levels,
   };
 
@@ -138,6 +143,8 @@ export async function checkTechnicalRatingSignals(): Promise<TechnicalRatingChec
       signal,
       score4h: scores.score4h,
       score1d: scores.score1d,
+      score1h: scores.score1h,
+      score15m: scores.score15m,
       ...levels,
       notifiedUsers,
     });

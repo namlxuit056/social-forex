@@ -106,6 +106,8 @@ export default async function TechnicalRatingPage({
       stance?: string;
       score4h?: number;
       score1d?: number;
+      score1h?: number;
+      score15m?: number;
       entryLow?: number;
       entryHigh?: number;
       stopLoss?: number;

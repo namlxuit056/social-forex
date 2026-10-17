@@ -10,6 +10,8 @@ export type TvSignalRow = {
   signal: "buy" | "sell";
   score4h: number | null;
   score1d: number | null;
+  score1h: number | null;
+  score15m: number | null;
   entryLow: number | null;
   entryHigh: number | null;
   /** Giá vào "tốt" — mép thuận lợi của vùng vào: mua ở đáy vùng, bán ở đỉnh vùng. */
@@ -38,6 +40,8 @@ function parseTvMeta(meta: unknown): Omit<TvSignalRow, "at"> | null {
     signal,
     score4h: num(m.score4h),
     score1d: num(m.score1d),
+    score1h: num(m.score1h),
+    score15m: num(m.score15m),
     entryLow,
     entryHigh,
     bestEntry: signal === "buy" ? entryLow : entryHigh,

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   classifyRating,
   computeConfidentSignal,
+  formatSignalScores,
   computePriceLevels,
   TV_TICKER_MAP,
   type SymbolScores,
@@ -12,6 +13,8 @@ function scores(overrides: Partial<SymbolScores>): SymbolScores {
   return {
     score4h: 0,
     score1d: 0,
+    score1h: 0,
+    score15m: 0,
     close: 1.1,
     atr4h: 0.001,
     ema20_4h: 1.1,
@@ -42,30 +45,35 @@ describe("classifyRating", () => {
 });
 
 describe("computeConfidentSignal", () => {
-  it("returns buy when 4H is strong buy and 1D agrees (positive)", () => {
-    expect(computeConfidentSignal(scores({ score4h: 0.56, score1d: 0.2 }))).toBe("buy");
+  it("returns buy when 4H is strong buy and H1 + M15 agree", () => {
+    expect(computeConfidentSignal(scores({ score4h: 0.56, score1h: 0.2, score15m: 0.1 }))).toBe("buy");
   });
 
-  it("returns sell when 4H is strong sell and 1D agrees (negative)", () => {
-    expect(computeConfidentSignal(scores({ score4h: -0.56, score1d: -0.2 }))).toBe("sell");
+  it("returns sell when 4H is strong sell and H1 + M15 agree", () => {
+    expect(computeConfidentSignal(scores({ score4h: -0.56, score1h: -0.2, score15m: -0.1 }))).toBe("sell");
   });
 
-  it("returns null when 4H is strong buy but 1D disagrees (negative)", () => {
-    expect(computeConfidentSignal(scores({ score4h: 0.56, score1d: -0.1 }))).toBeNull();
+  it("ignores 1D now: disagreeing 1D does not block the signal", () => {
+    expect(
+      computeConfidentSignal(scores({ score4h: 0.6, score1h: 0.3, score15m: 0.2, score1d: -0.5 })),
+    ).toBe("buy");
   });
 
-  it("returns null when 4H is strong sell but 1D disagrees (positive)", () => {
-    expect(computeConfidentSignal(scores({ score4h: -0.56, score1d: 0.1 }))).toBeNull();
+  it("returns null when H1 or M15 disagrees", () => {
+    expect(computeConfidentSignal(scores({ score4h: 0.6, score1h: -0.1, score15m: 0.2 }))).toBeNull();
+    expect(computeConfidentSignal(scores({ score4h: 0.6, score1h: 0.2, score15m: -0.1 }))).toBeNull();
+    expect(computeConfidentSignal(scores({ score4h: -0.6, score1h: 0.1, score15m: -0.2 }))).toBeNull();
+    expect(computeConfidentSignal(scores({ score4h: -0.6, score1h: -0.2, score15m: 0.1 }))).toBeNull();
   });
 
   it("returns null when 4H is only buy/sell, not strong", () => {
-    expect(computeConfidentSignal(scores({ score4h: 0.3, score1d: 0.3 }))).toBeNull();
-    expect(computeConfidentSignal(scores({ score4h: -0.3, score1d: -0.3 }))).toBeNull();
+    expect(computeConfidentSignal(scores({ score4h: 0.3, score1h: 0.3, score15m: 0.3 }))).toBeNull();
+    expect(computeConfidentSignal(scores({ score4h: -0.3, score1h: -0.3, score15m: -0.3 }))).toBeNull();
   });
 
-  it("returns null when 1D is exactly zero (no confirmation either way)", () => {
-    expect(computeConfidentSignal(scores({ score4h: 0.6, score1d: 0 }))).toBeNull();
-    expect(computeConfidentSignal(scores({ score4h: -0.6, score1d: 0 }))).toBeNull();
+  it("returns null when H1 or M15 is exactly zero (no confirmation)", () => {
+    expect(computeConfidentSignal(scores({ score4h: 0.6, score1h: 0, score15m: 0.2 }))).toBeNull();
+    expect(computeConfidentSignal(scores({ score4h: -0.6, score1h: -0.2, score15m: 0 }))).toBeNull();
   });
 });
 
@@ -105,5 +113,19 @@ describe("TV_TICKER_MAP", () => {
     for (const def of QUOTE_DEFINITIONS) {
       expect(TV_TICKER_MAP[def.symbol], `missing mapping for ${def.symbol}`).toBeDefined();
     }
+  });
+});
+
+describe("formatSignalScores", () => {
+  it("shows the M15/H1/H4 scores the rule uses", () => {
+    expect(formatSignalScores({ score15m: 0.2, score1h: 0.3, score4h: 0.6, score1d: -0.1 })).toBe(
+      "M15 0.2 · H1 0.3 · H4 0.6",
+    );
+  });
+  it("falls back to 4H/1D for signals recorded before the change", () => {
+    expect(formatSignalScores({ score4h: 0.6, score1d: 0.1 })).toBe("4H 0.6 · 1D 0.1");
+  });
+  it("returns null without scores", () => {
+    expect(formatSignalScores({})).toBeNull();
   });
 });

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { formatSignalScores } from "@/lib/quotes/technical-rating";
 import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -35,6 +36,8 @@ type HistoryItem = {
     stance?: string;
     score4h?: number;
     score1d?: number;
+    score1h?: number;
+    score15m?: number;
     entryLow?: number;
     entryHigh?: number;
     stopLoss?: number;
@@ -360,12 +363,8 @@ export function TechnicalRatingHistory({
                         ) : null}
                       </div>
                       <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                        {!isExternal &&
-                        meta.score4h !== undefined &&
-                        meta.score1d !== undefined ? (
-                          <span className="font-mono">
-                            4H {meta.score4h} · 1D {meta.score1d}
-                          </span>
+                        {!isExternal && formatSignalScores(meta) ? (
+                          <span className="font-mono">{formatSignalScores(meta)}</span>
                         ) : null}
                         <span>{new Date(n.createdAt).toLocaleString(locale)}</span>
                       </div>

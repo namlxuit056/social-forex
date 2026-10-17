@@ -15,9 +15,17 @@ async function scanMarket(market: TvMarket, tickers: string[]): Promise<Map<stri
     headers: { "Content-Type": "application/json", Origin: ORIGIN_HEADER },
     body: JSON.stringify({
       symbols: { tickers, query: { types: [] } },
-      // Recommend.All: điểm tổng hợp kỹ thuật (-1..1) của TradingView. |240 = khung 4H,
-      // không hậu tố = khung mặc định 1D. ATR/EMA20|240 dùng để tính vùng entry/SL/TP tham khảo.
-      columns: ["Recommend.All|240", "Recommend.All", "close", "ATR", "EMA20|240"],
+      // Recommend.All: điểm tổng hợp kỹ thuật (-1..1) của TradingView. |240 = 4H, |60 = 1H,
+      // |15 = 15 phút, không hậu tố = 1D. ATR/EMA20|240 dùng để tính vùng entry/SL/TP tham khảo.
+      columns: [
+        "Recommend.All|240",
+        "Recommend.All",
+        "close",
+        "ATR",
+        "EMA20|240",
+        "Recommend.All|60",
+        "Recommend.All|15",
+      ],
     }),
     next: { revalidate: 0 },
   });
@@ -29,22 +37,24 @@ async function scanMarket(market: TvMarket, tickers: string[]): Promise<Map<stri
   const data = (await res.json()) as { data?: { s: string; d: unknown[] }[] };
   const map = new Map<string, SymbolScores>();
   for (const row of data.data ?? []) {
-    const [score4h, score1d, close, atr4h, ema20_4h] = row.d;
+    const [score4h, score1d, close, atr4h, ema20_4h, score1h, score15m] = row.d;
     if (
       typeof score4h === "number" &&
       typeof score1d === "number" &&
       typeof close === "number" &&
       typeof atr4h === "number" &&
-      typeof ema20_4h === "number"
+      typeof ema20_4h === "number" &&
+      typeof score1h === "number" &&
+      typeof score15m === "number"
     ) {
-      map.set(row.s, { score4h, score1d, close, atr4h, ema20_4h });
+      map.set(row.s, { score4h, score1d, close, atr4h, ema20_4h, score1h, score15m });
     }
   }
   return map;
 }
 
 /**
- * Lấy điểm Recommend.All (4H + 1D) cho toàn bộ symbol app hỗ trợ, từ endpoint public
+ * Lấy điểm Recommend.All (M15, H1, 4H, 1D) cho toàn bộ symbol app hỗ trợ, từ endpoint public
  * đứng sau widget "Technical Analysis" của TradingView. Không phải API chính thức có
  * tài liệu, nhưng public/free, không bị Cloudflare chặn (chỉ cần header Origin) — cùng
  * dạng với economic-calendar.tradingview.com đã dùng cho lịch kinh tế.

@@ -38,7 +38,7 @@
     },
     {
       "path": "/api/quotes/tv-rating-check",
-      "schedule": "*/5 * * * *"
+      "schedule": "*/15 * * * *"
     },
     {
       "path": "/api/quotes/tv-rating-daily-summary",
