@@ -2,7 +2,6 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { SignupPrompt } from "@/components/analytics/signup-prompt";
-import { EmptyState } from "@/components/layout/empty-state";
 import { JournalStats } from "./journal-stats";
 import { JournalTable } from "./journal-table";
 import { JournalHeader } from "./journal-header";
@@ -45,6 +44,7 @@ import { isMt5LiveRedisEnabled } from "@/lib/mt5/live-redis";
 import type { AiJournalAnalysis, AiTradeReviewResult } from "@/lib/ai/types";
 import { AlertTriangle } from "lucide-react";
 import { ScrollTabs } from "@/components/ui/scroll-tabs";
+import { PageHeader } from "@/components/layout/page-header";
 
 const JOURNAL_TABS = [
   { key: "trades", labelKey: "tabTrades" },
@@ -105,19 +105,10 @@ export default async function JournalPage({
   if (!session?.user?.id) {
     return (
       <div className="space-y-6">
-        <div>
-          <h1 className="font-heading text-xl font-semibold text-foreground">
-            {t("title")}
-          </h1>
-          <p className="mt-2 text-muted-foreground">{t("description")}</p>
-        </div>
-        <EmptyState
-          title={t("loginRequired")}
-          description={t("loginHint")}
-          primary={{ href: "/auth/signin?callbackUrl=/journal", label: t("loginRequired") }}
-        />
+        <PageHeader title={t("title")} description={t("description")} />
         <SignupPrompt
           surface="journal"
+          signInHref="/auth/signin?callbackUrl=/journal"
           title={t("signupPromptTitle")}
           description={t("signupPromptDesc")}
           ctaLabel={t("signupPromptCta")}

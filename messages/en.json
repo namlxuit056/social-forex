@@ -1152,6 +1152,8 @@
     "simTrades": "Simulated trades",
     "winRate": "Win rate %",
     "rrOnWin": "R:R on win",
+    "maxDrawdown": "Max drawdown",
+    "baselineNote": "Dashed line marks the starting balance of {equity} USD.",
     "finalEquity": "Final equity (simulated):",
     "approxReturn": "Approx. return:"
   },

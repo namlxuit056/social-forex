@@ -61,7 +61,7 @@ export function MoodTodayPicker() {
                   ? isNegativeMood(m)
                     ? "border-amber-500 bg-amber-500/10 text-amber-700 dark:text-amber-300"
                     : "border-primary bg-primary/10 text-foreground"
-                  : "border-border/60 text-muted-foreground hover:border-border hover:text-foreground",
+                  : "border-border text-muted-foreground hover:border-border hover:text-foreground",
               )}
             >
               <span className="text-base leading-none">{MOOD_EMOJI[m]}</span>

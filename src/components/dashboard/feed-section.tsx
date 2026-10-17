@@ -171,7 +171,7 @@ export function FeedSection() {
         </div>
       ) : items.length === 0 ? (
         <div className="space-y-5">
-          <div className="rounded-lg border border-dashed border-border/80 bg-muted/15 px-4 py-6 text-center">
+          <div className="rounded-lg border border-dashed border-border bg-muted/15 px-4 py-6 text-center">
             <p className="text-sm text-muted-foreground">{t("feedEmpty")}</p>
             <Link
               href="/leaderboard"
@@ -193,7 +193,7 @@ export function FeedSection() {
                   return (
                     <li
                       key={trader.id}
-                      className="flex items-center justify-between gap-3 rounded-lg border border-border/70 bg-card/50 px-3 py-2.5"
+                      className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card px-3 py-2.5"
                     >
                       <div className="min-w-0">
                         <Link
@@ -238,7 +238,7 @@ export function FeedSection() {
           )}
         </div>
       ) : (
-        <div className="divide-y divide-border/60 overflow-hidden rounded-lg border border-border/70 bg-card/45">
+        <div className="divide-y divide-border overflow-hidden rounded-lg border border-border bg-card">
           {items.map((item) => {
             const config = typeConfig[item.type];
             const Icon = config.icon;
@@ -302,7 +302,7 @@ function FeedItemContent({ item }: { item: FeedItem }) {
     return (
       <Link
         href={`/signals/${d.signalId}`}
-        className="mt-1 block rounded-md border border-border/50 bg-muted/20 px-3 py-2 hover:bg-muted/30"
+        className="mt-1 block rounded-md border border-border bg-muted/20 px-3 py-2 hover:bg-muted/30"
       >
         <div className="flex flex-wrap items-center gap-2">
           <span className="font-mono text-sm font-semibold text-foreground">

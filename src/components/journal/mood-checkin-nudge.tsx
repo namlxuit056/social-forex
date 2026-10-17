@@ -86,7 +86,7 @@ export function MoodCheckinNudge() {
           "rounded-xl border p-3 shadow-lg backdrop-blur",
           showReminder
             ? "border-amber-500/40 bg-amber-50/95 text-amber-900 dark:bg-amber-950/90 dark:text-amber-100"
-            : "border-border bg-card/95",
+            : "border-border bg-card",
         )}
       >
         <div className="flex items-start justify-between gap-2">
@@ -114,7 +114,7 @@ export function MoodCheckinNudge() {
                 type="button"
                 disabled={isPending}
                 onClick={() => choose(m)}
-                className="flex flex-1 flex-col items-center gap-0.5 rounded-lg border border-border/60 py-1.5 text-xs transition-colors hover:border-primary hover:bg-primary/5 disabled:opacity-50"
+                className="flex flex-1 flex-col items-center gap-0.5 rounded-lg border border-border py-1.5 text-xs transition-colors hover:border-primary hover:bg-primary/5 disabled:opacity-50"
               >
                 <span className="text-lg leading-none">{MOOD_EMOJI[m]}</span>
                 {t(

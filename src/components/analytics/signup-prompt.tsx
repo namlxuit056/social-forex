@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import type { ComponentProps } from "react";
 import { track } from "@vercel/analytics";
 import { TrackedLink } from "@/components/analytics/tracked-link";
@@ -18,6 +20,8 @@ type Props = {
   description: string;
   ctaLabel: string;
   href?: ComponentPropsHref;
+  /** When set, adds "Already have an account? Sign in" so one card covers both paths. */
+  signInHref?: string;
   className?: string;
 };
 
@@ -29,8 +33,11 @@ export function SignupPrompt({
   description,
   ctaLabel,
   href = "/auth/register",
+  signInHref,
   className,
 }: Props) {
+  const tAuth = useTranslations("auth");
+  const tc = useTranslations("common");
   const eventProperties: AnalyticsProperties = useMemo(
     () => ({ surface }),
     [surface],
@@ -44,7 +51,7 @@ export function SignupPrompt({
   return (
     <div
       className={cn(
-        "rounded-xl border border-primary/25 bg-primary/8 p-4 ring-1 ring-primary/10",
+        "rounded-xl border border-border bg-card p-4",
         className,
       )}
     >
@@ -56,6 +63,17 @@ export function SignupPrompt({
           <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
             {description}
           </p>
+          {signInHref ? (
+            <p className="mt-2 text-sm text-muted-foreground">
+              {tAuth("hasAccount")}{" "}
+              <Link
+                href={signInHref}
+                className="font-medium text-foreground underline underline-offset-4"
+              >
+                {tc("signIn")}
+              </Link>
+            </p>
+          ) : null}
         </div>
         <TrackedLink
           href={href}

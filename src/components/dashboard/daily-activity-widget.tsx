@@ -111,7 +111,7 @@ export function DailyActivityWidget() {
                   "flex flex-col items-center gap-1.5 rounded-lg border p-3 text-center transition-colors",
                   a.done
                     ? "border-green-500/30 bg-green-500/5"
-                    : "border-border/60 bg-muted/20",
+                    : "border-border bg-muted/20",
                 )}
               >
                 <Icon

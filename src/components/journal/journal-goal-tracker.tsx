@@ -76,7 +76,7 @@ export function JournalGoalTracker({
   };
 
   return (
-    <Card className="border-border/60">
+    <Card className="border-border">
       <CardHeader className="flex-row items-center justify-between gap-3 pb-2">
         <CardTitle className="flex items-center gap-1.5 text-sm">
           <Target className="size-4 text-primary" />

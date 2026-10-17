@@ -1,11 +1,10 @@
 import { CalendarDays, ChartCandlestick, ClipboardCheck, ChevronLeft, ChevronRight, Flame, NotebookPen, ShieldCheck, Wrench } from "lucide-react";
+import { PageHeader } from "@/components/layout/page-header";
 import { formatInTimeZone } from "date-fns-tz";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { auth } from "@/auth";
 import { Link, getPathname } from "@/i18n/navigation";
-import { EmptyState } from "@/components/layout/empty-state";
 import { SignupPrompt } from "@/components/analytics/signup-prompt";
-import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
@@ -158,25 +157,10 @@ export default async function TradingPlanPage({
   if (!session?.user?.id) {
     return (
       <div className="space-y-6">
-        <header className="space-y-2">
-          <Badge variant="outline" className="border-primary/30 text-primary">
-            {t("eyebrow")}
-          </Badge>
-          <h1 className="font-heading text-xl font-semibold tracking-tight text-foreground md:text-3xl">
-            {t("title")}
-          </h1>
-          <p className="max-w-3xl text-muted-foreground">{t("description")}</p>
-        </header>
-        <EmptyState
-          title={t("loginRequired")}
-          description={t("loginHint")}
-          primary={{
-            href: `/auth/signin?callbackUrl=${encodeURIComponent(planPath)}`,
-            label: t("loginRequired"),
-          }}
-        />
+        <PageHeader title={t("title")} description={t("description")} />
         <SignupPrompt
           surface="trading-plan"
+          signInHref={`/auth/signin?callbackUrl=${encodeURIComponent(planPath)}`}
           title={t("signupPromptTitle")}
           description={t("signupPromptDesc")}
           ctaLabel={t("signupPromptCta")}
@@ -295,15 +279,12 @@ export default async function TradingPlanPage({
 
   return (
     <div className="space-y-8">
-      <header className="grid gap-5 border-b border-border pb-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
-        <div className="space-y-2">
-          <Badge variant="outline" className="border-primary/30 text-primary">
-            {t("eyebrow")}
-          </Badge>
-          <h1 className="font-heading text-xl font-semibold tracking-tight text-foreground md:text-3xl">
+      <header className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+        <div className="space-y-1">
+          <h1 className="font-heading text-xl font-semibold tracking-tight text-foreground">
             {t("title")}
           </h1>
-          <p className="max-w-3xl text-muted-foreground">{t("description")}</p>
+          <p className="max-w-3xl text-sm text-muted-foreground">{t("description")}</p>
         </div>
         <div className="flex flex-wrap gap-2 lg:justify-end">
           {supportLinks.map((item) => (

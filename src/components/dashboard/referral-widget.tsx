@@ -54,7 +54,7 @@ export function ReferralWidget() {
         <p className="text-sm text-muted-foreground">{t("rewardHint")}</p>
 
         <div className="flex items-center gap-2">
-          <div className="flex-1 truncate rounded-lg border border-border/60 bg-muted/30 px-3 py-2 font-mono text-sm">
+          <div className="flex-1 truncate rounded-lg border border-border bg-muted/30 px-3 py-2 font-mono text-sm">
             {referralLink}
           </div>
           <Button

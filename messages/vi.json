@@ -1152,6 +1152,8 @@
     "simTrades": "Số lệnh mô phỏng",
     "winRate": "Tỷ lệ thắng %",
     "rrOnWin": "R:R khi thắng",
+    "maxDrawdown": "Sụt giảm tối đa",
+    "baselineNote": "Đường nét đứt là vốn ban đầu {equity} USD.",
     "finalEquity": "Equity cuối (mô phỏng):",
     "approxReturn": "Lợi nhuận gần đúng:"
   },
