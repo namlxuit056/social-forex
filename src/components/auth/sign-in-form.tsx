@@ -50,7 +50,7 @@ export function SignInForm() {
   }
 
   return (
-    <Card className="border-border/80 bg-card/80 shadow-lg ring-1 ring-primary/10 backdrop-blur-sm">
+    <Card className="border border-border bg-card">
       <CardHeader className="space-y-1">
         <CardTitle className="font-heading text-xl tracking-tight">
           {t("signInCardTitle")}

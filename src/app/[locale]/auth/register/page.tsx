@@ -1,5 +1,5 @@
-import { UserPlus } from "lucide-react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { SiteLogo } from "@/components/layout/site-logo";
 import { Link } from "@/i18n/navigation";
 import { RegisterForm } from "@/components/auth/register-form";
 import { safeLocalizedCallbackPath } from "@/lib/safe-redirect";
@@ -33,11 +33,9 @@ export default async function RegisterPage({
   const ref = typeof query?.ref === "string" ? query.ref : undefined;
 
   return (
-    <div className="mx-auto max-w-md space-y-8">
+    <div className="mx-auto max-w-md space-y-6">
       <div className="text-center">
-        <div className="mx-auto flex size-12 items-center justify-center rounded-xl bg-primary/15 ring-1 ring-primary/25">
-          <UserPlus className="size-6 text-primary" aria-hidden />
-        </div>
+        <SiteLogo className="mx-auto size-10" />
         <h1 className="mt-4 font-heading text-xl font-semibold tracking-tight text-foreground">
           {t("registerTitle")}
         </h1>

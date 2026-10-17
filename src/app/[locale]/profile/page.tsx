@@ -94,7 +94,7 @@ export default async function ProfilePage({
       <h1 className="font-heading text-xl font-semibold text-foreground">
         {t("title")}
       </h1>
-      <div className="rounded-xl border border-border bg-card/50 p-6 ring-1 ring-foreground/5">
+      <div className="rounded-xl border border-border bg-card p-6">
         <h2 className="font-medium text-foreground">{t("account")}</h2>
         <dl className="mt-4 space-y-2 text-sm">
           <div className="flex gap-4">
@@ -177,7 +177,7 @@ export default async function ProfilePage({
         )}
       </div>
 
-      <div className="rounded-xl border border-border bg-card/50 p-6 ring-1 ring-foreground/5">
+      <div className="rounded-xl border border-border bg-card p-6">
         <h2 className="font-medium text-foreground">{t("notificationPrefsTitle")}</h2>
         <p className="mt-1 text-sm text-muted-foreground">{t("notificationPrefsHint")}</p>
         <form action={updateNotificationSettings} className="mt-4 space-y-4">
@@ -240,7 +240,7 @@ export default async function ProfilePage({
         </form>
       </div>
 
-      <div className="rounded-xl border border-border bg-card/50 p-6 ring-1 ring-foreground/5">
+      <div className="rounded-xl border border-border bg-card p-6">
         <h2 className="font-medium text-foreground">{t("changePasswordTitle")}</h2>
         <p className="mt-1 text-sm text-muted-foreground">{t("changePasswordHint")}</p>
         <ChangePasswordForm />

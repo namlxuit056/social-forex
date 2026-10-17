@@ -68,7 +68,7 @@ export async function ProfileAcademySection({
         {completedLessons.map((lesson) => (
           <li
             key={lesson.slug}
-            className="rounded-xl border border-primary/30 bg-primary/5 p-4 ring-1 ring-primary/10"
+            className="rounded-xl border border-primary/30 bg-primary/5 p-4"
           >
             <div className="flex items-start justify-between gap-2">
               <span className="text-xs font-medium uppercase tracking-wide text-primary">

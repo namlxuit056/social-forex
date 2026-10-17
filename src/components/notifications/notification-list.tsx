@@ -123,7 +123,7 @@ export function NotificationList({
 
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border/60 bg-muted/20 px-6 py-12 text-center">
+      <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border bg-muted/20 px-6 py-12 text-center">
         <Bell className="size-10 text-muted-foreground" aria-hidden />
         <p className="text-sm text-muted-foreground">{t("empty")}</p>
       </div>
@@ -131,7 +131,7 @@ export function NotificationList({
   }
 
   return (
-    <ul className="divide-y divide-border/60 rounded-xl border border-border/60 bg-card/40">
+    <ul className="divide-y divide-border rounded-xl border border-border bg-card">
       {items.map((n) => {
         const unread = n.readAt === null && !optimisticReadIds.has(n.id);
         const ratingMeta =

@@ -92,7 +92,7 @@ export default async function UpgradeVipPage({
       </div>
 
       {/* Current status */}
-      <div className="rounded-xl border border-border bg-card/50 px-5 py-4">
+      <div className="rounded-xl border border-border bg-card px-5 py-4">
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">
             {t("currentStatus")}
@@ -127,7 +127,7 @@ export default async function UpgradeVipPage({
       />
 
       {/* Features */}
-      <div className="rounded-xl border border-border bg-card/50 p-6">
+      <div className="rounded-xl border border-border bg-card p-6">
         <h2 className="flex items-center gap-2 text-lg font-semibold text-foreground">
           <Sparkles className="size-5 text-yellow-500" />
           {t("features")}
@@ -150,7 +150,7 @@ export default async function UpgradeVipPage({
         </ul>
       </div>
 
-      <div className="space-y-4 rounded-xl border border-border bg-card/50 p-6">
+      <div className="space-y-4 rounded-xl border border-border bg-card p-6">
         <h2 className="text-lg font-semibold text-foreground">
           {t("howToPay")}
         </h2>

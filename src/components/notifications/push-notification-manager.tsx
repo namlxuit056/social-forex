@@ -105,7 +105,7 @@ export function PushNotificationManager() {
   if (!supported || !vapid?.enabled) return null;
 
   return (
-    <div className="flex items-center justify-between rounded-lg border border-border/60 bg-muted/20 px-4 py-3">
+    <div className="flex items-center justify-between rounded-lg border border-border bg-muted/20 px-4 py-3">
       <div className="flex items-center gap-3">
         {subscribed ? (
           <Bell className="size-4 text-primary" />

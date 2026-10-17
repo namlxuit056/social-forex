@@ -125,7 +125,7 @@ export function PayPalVipCheckout({
   }, [canRenderPayPal, planKey, router]);
 
   return (
-    <section className="space-y-5 rounded-xl border border-border bg-card/50 p-6">
+    <section className="space-y-5 rounded-xl border border-border bg-card p-6">
       {clientId ? (
         <Script
           id="paypal-sdk"

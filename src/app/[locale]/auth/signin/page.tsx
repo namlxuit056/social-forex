@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { LineChart, Shield } from "lucide-react";
+import { SiteLogo } from "@/components/layout/site-logo";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { SignInForm } from "@/components/auth/sign-in-form";
@@ -29,18 +29,12 @@ export default async function SignInPage({
   const t = await getTranslations("auth");
 
   return (
-    <div className="mx-auto max-w-md space-y-8">
+    <div className="mx-auto max-w-md space-y-6">
       <div className="text-center">
-        <div className="mx-auto flex size-12 items-center justify-center rounded-xl bg-primary/15 ring-1 ring-primary/25">
-          <LineChart className="size-6 text-primary" aria-hidden />
-        </div>
+        <SiteLogo className="mx-auto size-10" />
         <h1 className="mt-4 font-heading text-xl font-semibold tracking-tight text-foreground">
           {t("signInTitle")} Social Forex
         </h1>
-        <p className="mt-2 flex items-center justify-center gap-2 text-sm text-muted-foreground">
-          <Shield className="size-3.5 shrink-0" aria-hidden />
-          Social Forex
-        </p>
       </div>
       <Suspense fallback={<SignInFormFallback />}>
         <SignInForm />

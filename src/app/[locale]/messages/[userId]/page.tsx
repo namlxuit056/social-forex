@@ -71,7 +71,7 @@ export default async function MessageThreadPage({ params }: Props) {
         </Link>
       </div>
 
-      <div className="space-y-3 rounded-xl border border-border bg-card/50 p-4">
+      <div className="space-y-3 rounded-xl border border-border bg-card p-4">
         {thread.length === 0 && (
           <p className="py-2 text-center text-sm text-muted-foreground">
             {t("threadEmpty")}

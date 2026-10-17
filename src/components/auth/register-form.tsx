@@ -154,7 +154,7 @@ export function RegisterForm({
   }
 
   return (
-    <Card className="border-border/80 bg-card/80 shadow-lg ring-1 ring-primary/10 backdrop-blur-sm">
+    <Card className="border border-border bg-card">
       <CardHeader className="space-y-1">
         <CardTitle className="font-heading text-xl tracking-tight">
           {awaitingVerification ? t("verificationTitle") : t("registerTitle")}
@@ -168,7 +168,7 @@ export function RegisterForm({
       <CardContent>
         {awaitingVerification ? (
           <form onSubmit={onVerify} className="space-y-4">
-            <div className="rounded-lg border border-border/70 bg-muted/25 p-3 text-sm text-muted-foreground">
+            <div className="rounded-lg border border-border bg-muted/25 p-3 text-sm text-muted-foreground">
               {t("verificationEmailHint", { email })}
             </div>
             <div className="space-y-2">
@@ -213,7 +213,7 @@ export function RegisterForm({
           </form>
         ) : (
           <>
-            <ul className="mb-5 grid gap-2 rounded-lg border border-border/70 bg-muted/25 p-3 text-sm text-muted-foreground">
+            <ul className="mb-5 grid gap-2 rounded-lg border border-border bg-muted/25 p-3 text-sm text-muted-foreground">
               <li>{t("registerBenefitWatchlist")}</li>
               <li>{t("registerBenefitProgress")}</li>
               <li>{t("registerBenefitJournal")}</li>
