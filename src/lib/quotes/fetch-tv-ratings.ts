@@ -16,13 +16,14 @@ async function scanMarket(market: TvMarket, tickers: string[]): Promise<Map<stri
     body: JSON.stringify({
       symbols: { tickers, query: { types: [] } },
       // Recommend.All: điểm tổng hợp kỹ thuật (-1..1) của TradingView. |240 = 4H, |60 = 1H,
-      // |15 = 15 phút, không hậu tố = 1D. ATR/EMA20|240 dùng để tính vùng entry/SL/TP tham khảo.
+      // |15 = 15 phút, không hậu tố = 1D. ATR|60/EMA20|60 (khung H1)
+      // dùng để tính vùng entry/SL/TP tham khảo. Lưu ý: "ATR" không hậu tố là khung NGÀY.
       columns: [
         "Recommend.All|240",
         "Recommend.All",
         "close",
-        "ATR",
-        "EMA20|240",
+        "ATR|60",
+        "EMA20|60",
         "Recommend.All|60",
         "Recommend.All|15",
       ],
@@ -37,17 +38,17 @@ async function scanMarket(market: TvMarket, tickers: string[]): Promise<Map<stri
   const data = (await res.json()) as { data?: { s: string; d: unknown[] }[] };
   const map = new Map<string, SymbolScores>();
   for (const row of data.data ?? []) {
-    const [score4h, score1d, close, atr4h, ema20_4h, score1h, score15m] = row.d;
+    const [score4h, score1d, close, atr1h, ema20_1h, score1h, score15m] = row.d;
     if (
       typeof score4h === "number" &&
       typeof score1d === "number" &&
       typeof close === "number" &&
-      typeof atr4h === "number" &&
-      typeof ema20_4h === "number" &&
+      typeof atr1h === "number" &&
+      typeof ema20_1h === "number" &&
       typeof score1h === "number" &&
       typeof score15m === "number"
     ) {
-      map.set(row.s, { score4h, score1d, close, atr4h, ema20_4h, score1h, score15m });
+      map.set(row.s, { score4h, score1d, close, atr1h, ema20_1h, score1h, score15m });
     }
   }
   return map;

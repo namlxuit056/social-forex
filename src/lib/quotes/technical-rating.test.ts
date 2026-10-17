@@ -16,8 +16,8 @@ function scores(overrides: Partial<SymbolScores>): SymbolScores {
     score1h: 0,
     score15m: 0,
     close: 1.1,
-    atr4h: 0.001,
-    ema20_4h: 1.1,
+    atr1h: 0.001,
+    ema20_1h: 1.1,
     ...overrides,
   };
 }
@@ -81,7 +81,7 @@ describe("computePriceLevels", () => {
   it("buy: entry brackets EMA20, SL below by 1x ATR, TP above by 2x ATR", () => {
     const levels = computePriceLevels(
       "buy",
-      scores({ ema20_4h: 1.1, atr4h: 0.01, close: 1.105 }),
+      scores({ ema20_1h: 1.1, atr1h: 0.01, close: 1.105 }),
     );
     expect(levels.entryLow).toBeCloseTo(1.095, 4);
     expect(levels.entryHigh).toBeCloseTo(1.105, 4);
@@ -92,7 +92,7 @@ describe("computePriceLevels", () => {
   it("sell: SL above EMA20 by 1x ATR, TP below by 2x ATR", () => {
     const levels = computePriceLevels(
       "sell",
-      scores({ ema20_4h: 1.1, atr4h: 0.01, close: 1.095 }),
+      scores({ ema20_1h: 1.1, atr1h: 0.01, close: 1.095 }),
     );
     expect(levels.stopLoss).toBeCloseTo(1.11, 4);
     expect(levels.takeProfit).toBeCloseTo(1.08, 4);
@@ -101,7 +101,7 @@ describe("computePriceLevels", () => {
   it("rounds to fewer decimals for larger-magnitude prices (JPY/gold/crypto-like)", () => {
     const levels = computePriceLevels(
       "buy",
-      scores({ ema20_4h: 79500.123456, atr4h: 2000.456, close: 79500 }),
+      scores({ ema20_1h: 79500.123456, atr1h: 2000.456, close: 79500 }),
     );
     // close >= 1000 -> 1 decimal
     expect(levels.entryLow.toString().split(".")[1]?.length ?? 0).toBeLessThanOrEqual(1);

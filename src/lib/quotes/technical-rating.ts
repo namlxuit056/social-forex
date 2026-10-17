@@ -45,10 +45,10 @@ export type SymbolScores = {
   score15m: number;
   /** Giá đóng cửa gần nhất — tham khảo, không phải giá lúc fire chính xác đến từng tick. */
   close: number;
-  /** Average True Range khung 4H — đơn vị đo biến động, dùng để tính vùng entry/SL/TP. */
-  atr4h: number;
-  /** EMA20 khung 4H — điểm neo pullback cho vùng entry tham khảo. */
-  ema20_4h: number;
+  /** Average True Range khung H1 (cột "ATR|60") — đơn vị đo biến động cho entry/SL/TP. */
+  atr1h: number;
+  /** EMA20 khung H1 — điểm neo pullback cho vùng entry tham khảo. */
+  ema20_1h: number;
 };
 
 export type ConfidentSignal = "buy" | "sell";
@@ -90,28 +90,29 @@ export type PriceLevels = {
 };
 
 /**
- * Vùng giá entry/SL/TP tham khảo — neo quanh EMA20(4H) (điểm pullback hợp lý thay vì đuổi
- * giá tại đỉnh/đáy 4H), đơn vị đo bằng ATR(4H): entry = EMA20 ± 0.5×ATR, SL = 1×ATR ngoài
- * entry, TP = 2×ATR (R:R ~1:2). Đây là công thức kỹ thuật đơn giản mang tính giáo dục,
+ * Vùng giá entry/SL/TP tham khảo — neo quanh EMA20(H1) (điểm pullback hợp lý thay vì đuổi
+ * giá), đơn vị đo bằng ATR(H1): entry = EMA20 ± 0.5×ATR, SL = 1×ATR ngoài entry,
+ * TP = 2×ATR (R:R ~1:2). Đổi sang H1 theo yêu cầu user 2026-10-18 (trước đó dùng EMA20 4H
+ * và cột "ATR" — thực ra là ATR khung ngày). Đây là công thức kỹ thuật đơn giản mang tính giáo dục,
  * KHÔNG phải khuyến nghị đầu tư / entry chính xác.
  */
 export function computePriceLevels(signal: ConfidentSignal, scores: SymbolScores): PriceLevels {
-  const half = scores.atr4h * 0.5;
-  const entryLow = scores.ema20_4h - half;
-  const entryHigh = scores.ema20_4h + half;
+  const half = scores.atr1h * 0.5;
+  const entryLow = scores.ema20_1h - half;
+  const entryHigh = scores.ema20_1h + half;
   const raw =
     signal === "buy"
       ? {
           entryLow,
           entryHigh,
-          stopLoss: scores.ema20_4h - scores.atr4h,
-          takeProfit: scores.ema20_4h + scores.atr4h * 2,
+          stopLoss: scores.ema20_1h - scores.atr1h,
+          takeProfit: scores.ema20_1h + scores.atr1h * 2,
         }
       : {
           entryLow,
           entryHigh,
-          stopLoss: scores.ema20_4h + scores.atr4h,
-          takeProfit: scores.ema20_4h - scores.atr4h * 2,
+          stopLoss: scores.ema20_1h + scores.atr1h,
+          takeProfit: scores.ema20_1h - scores.atr1h * 2,
         };
 
   return {
