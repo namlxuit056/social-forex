@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Badge } from "@/components/ui/badge";
-import { RunningTigerAnimation } from "@/components/profile/profile-creature-animations";
 import { cn } from "@/lib/utils";
 
 type Mt5SignalItem = {
@@ -119,7 +118,7 @@ function SignalCard({
   return (
     <Link
       href={`/signals/${item.id}`}
-      className="group relative overflow-hidden rounded-lg border border-border/70 bg-card/55 p-4 ring-1 ring-foreground/5 transition hover:border-primary/35 hover:bg-card"
+      className="group relative overflow-hidden rounded-lg border border-border bg-card p-4 transition hover:border-primary/35 hover:bg-card"
     >
       <span className={cn("absolute inset-y-0 left-0 w-1", tone.rail)} aria-hidden />
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
@@ -128,7 +127,7 @@ function SignalCard({
             <span className="font-heading text-base font-semibold text-foreground">
               {item.symbol}
             </span>
-            <Badge variant="outline" className="border-border/70 bg-muted/30">
+            <Badge variant="outline" className="border-border bg-muted/30">
               {item.direction}
             </Badge>
             <Badge variant="outline">{kindLabel}</Badge>
@@ -268,7 +267,6 @@ export function Mt5SyncedSignalsList({
         <div className="space-y-2">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2">
-              <RunningTigerAnimation />
               <h3 className="whitespace-nowrap text-xs font-semibold uppercase text-emerald-700 dark:text-emerald-300">
                 {t("mt5RunningNowTitle")}
               </h3>
@@ -319,7 +317,7 @@ export function Mt5SyncedSignalsList({
       ) : null}
 
       {filtered.length === 0 ? (
-        <p className="rounded-lg border border-dashed border-border/70 px-3 py-6 text-center text-sm text-muted-foreground">
+        <p className="rounded-lg border border-dashed border-border px-3 py-6 text-center text-sm text-muted-foreground">
           {t("mt5NoStatusFilter")}
         </p>
       ) : null}

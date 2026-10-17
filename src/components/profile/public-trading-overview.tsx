@@ -68,7 +68,7 @@ export async function PublicTradingOverview({
         <p className="mt-1 text-sm text-muted-foreground">{t("tradingOverviewHint")}</p>
       </div>
 
-      <Card className="border-border/60 bg-card/55">
+      <Card className="border-border bg-card">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-base">
             <CircleDollarSign className="size-4 text-chart-4" />
@@ -96,7 +96,7 @@ export async function PublicTradingOverview({
 
       <PublicPerformanceChart trades={serializedTrades} locale={locale} />
 
-      <Card className="border-border/60 bg-card/55">
+      <Card className="border-border bg-card">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-base">
             <History className="size-4 text-muted-foreground" />

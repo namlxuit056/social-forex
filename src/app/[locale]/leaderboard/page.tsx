@@ -280,10 +280,11 @@ export default async function LeaderboardPage({
               <Link
                 key={f.key}
                 href={`/leaderboard?timeframe=${f.key}${sortBy !== "pf" ? `&sortBy=${sortBy}` : ""}`}
-                className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors ${
+                aria-current={isActive ? "true" : undefined}
+                className={`inline-flex h-8 items-center gap-1.5 rounded-lg border px-3 text-sm font-medium transition-colors ${
                   isActive
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
+                    ? "border-border-strong bg-muted text-foreground"
+                    : "border-border bg-card text-muted-foreground hover:bg-muted/60 hover:text-foreground"
                 }`}
               >
                 {f.label}
@@ -302,10 +303,11 @@ export default async function LeaderboardPage({
               <Link
                 key={s.key}
                 href={`/leaderboard?timeframe=${tf}${s.key !== "pf" ? `&sortBy=${s.key}` : ""}`}
-                className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors ${
+                aria-current={isActive ? "true" : undefined}
+                className={`inline-flex h-8 items-center gap-1.5 rounded-lg border px-3 text-sm font-medium transition-colors ${
                   isActive
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground"
+                    ? "border-border-strong bg-muted text-foreground"
+                    : "border-border bg-card text-muted-foreground hover:bg-muted/60 hover:text-foreground"
                 }`}
               >
                 {s.label}
@@ -348,7 +350,7 @@ export default async function LeaderboardPage({
                   <tr key={r.userId} className="hover:bg-muted/30">
                     <td className="px-4 py-3 font-mono text-muted-foreground">{i + 1}</td>
                     <td className="px-4 py-3 text-foreground">
-                      <Link href={`/u/${r.userId}`} className="font-medium text-primary hover:underline">
+                      <Link href={`/u/${r.userId}`} className="font-medium text-foreground underline-offset-4 hover:underline">
                         {r.name}
                       </Link>
                       {r.copierCount > 0 && (
@@ -358,23 +360,23 @@ export default async function LeaderboardPage({
                         </p>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-primary">{r.wins}</td>
-                    <td className="px-4 py-3 text-destructive">{r.losses}</td>
+                    <td className="px-4 py-3 font-mono tabular-nums">{r.wins}</td>
+                    <td className="px-4 py-3 font-mono tabular-nums">{r.losses}</td>
                     <td className="px-4 py-3 font-mono">{r.winRate !== null ? `${r.winRate}%` : "—"}</td>
                     <td
                       className={`px-4 py-3 font-mono ${
                         r.profitFactor === null
                           ? "text-muted-foreground"
                           : r.profitFactor >= 1
-                            ? "text-emerald-400"
-                            : "text-red-400"
+                            ? "text-success"
+                            : "text-danger"
                       }`}
                     >
                       {r.profitFactor !== null ? r.profitFactor.toFixed(2) : "—"}
                     </td>
                     <td className="px-4 py-3">
                       {r.hasMt5 ? (
-                        <ShieldCheck className="size-4 text-emerald-400" />
+                        <ShieldCheck className="size-4 text-success" />
                       ) : (
                         <span className="text-muted-foreground">—</span>
                       )}
@@ -388,7 +390,7 @@ export default async function LeaderboardPage({
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1.5">
-                        <span className="font-mono text-primary">{r.xp}</span>
+                        <span className="font-mono tabular-nums">{r.xp}</span>
                         <span className="text-xs text-muted-foreground">Lv.{getLevel(r.xp)}</span>
                       </div>
                     </td>
@@ -431,7 +433,7 @@ export default async function LeaderboardPage({
               <Link
                 href={loadMoreHref}
                 scroll={false}
-                className="inline-flex items-center rounded-md border border-border px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"
+                className="inline-flex h-9 items-center rounded-lg border border-border bg-card px-4 text-sm font-medium text-foreground transition-colors hover:bg-muted"
               >
                 {t("loadMore")}
               </Link>

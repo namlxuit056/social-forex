@@ -339,7 +339,7 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
       />
 
       {(user.streakJournal > 0 || user.streakPlan > 0 || user.streakSignal > 0 || user.xp > 0) && (
-        <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border/60 bg-gradient-to-r from-primary/5 via-card to-primary/5 px-5 py-3.5 ring-1 ring-foreground/5">
+        <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-gradient-to-r from-primary/5 via-card to-primary/5 px-5 py-3.5">
           {user.xp > 0 && (
             <div className="flex items-center gap-2.5 rounded-lg bg-primary/10 px-3.5 py-2 ring-1 ring-primary/20">
               <Award className="size-4.5 text-primary" />
@@ -375,7 +375,7 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
 
       <nav
         aria-label={t("profileTabsLabel")}
-        className="sticky top-0 z-20 -mx-4 overflow-x-auto border-y border-border/60 bg-background/90 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/70 sm:static sm:mx-0 sm:rounded-lg sm:border sm:bg-card/35"
+        className="sticky top-0 z-20 -mx-4 overflow-x-auto border-y border-border bg-background/90 px-4 py-2 backdrop-blur supports-[backdrop-filter]:bg-background/70 sm:static sm:mx-0 sm:rounded-lg sm:border sm:bg-card"
       >
         <div className="flex min-w-max gap-2">
           {tabs.map((item) => {
@@ -453,7 +453,7 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
       ) : null}
 
       {activeTab === "followers" && followerCount === 0 ? (
-        <section className="rounded-lg border border-dashed border-border/70 p-6 text-center text-sm text-muted-foreground">
+        <section className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
           {t("profileNoFollowers")}
         </section>
       ) : null}

@@ -41,7 +41,7 @@ export async function TraderPerformanceCard({
   const activeDays = Math.round((consistencyScore / 100) * 30);
 
   return (
-    <Card className="border-border bg-card/50 ring-1 ring-foreground/5">
+    <Card className="border-border bg-card">
       <CardHeader className="flex items-center justify-between pb-2">
         <div className="flex flex-col gap-1">
           <CardTitle className="flex items-center gap-2 font-heading text-base font-semibold text-foreground">

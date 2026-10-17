@@ -35,7 +35,7 @@ export function ReviewForm({
   return (
     <form
       action={formAction}
-      className="space-y-3 rounded-lg border border-border/60 bg-muted/20 p-4"
+      className="space-y-3 rounded-lg border border-border bg-muted/20 p-4"
     >
       <input type="hidden" name="providerId" value={providerId} />
       <input type="hidden" name="rating" value={rating} />

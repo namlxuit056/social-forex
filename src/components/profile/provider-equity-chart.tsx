@@ -120,7 +120,7 @@ export function ProviderEquityChart({
     view === "monthly" && hovered !== null && bars ? monthly[hovered] : null;
 
   return (
-    <Card className="border-border bg-card/50 ring-1 ring-foreground/5">
+    <Card className="border-border bg-card">
       <CardHeader className="flex flex-wrap items-center justify-between gap-2 pb-2">
         <CardTitle className="flex items-center gap-2 font-heading text-base font-semibold text-foreground">
           <LineChart className="size-4 shrink-0 text-muted-foreground" aria-hidden />

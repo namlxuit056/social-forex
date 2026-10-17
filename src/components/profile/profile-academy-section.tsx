@@ -42,7 +42,7 @@ export async function ProfileAcademySection({
 
   if (completedLessons.length === 0) {
     return (
-      <section className="rounded-lg border border-dashed border-border/70 p-6 text-center text-sm text-muted-foreground">
+      <section className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
         {t("academyNoProgress")}
       </section>
     );

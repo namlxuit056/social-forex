@@ -47,7 +47,7 @@ export function PublicProfileHero({
 
   return (
     <section
-      className="overflow-hidden rounded-xl border border-border/70 bg-card/60 ring-1 ring-foreground/5"
+      className="overflow-hidden rounded-xl border border-border bg-card"
       aria-labelledby="public-profile-heading"
     >
       <div className="relative h-24 bg-gradient-to-br from-emerald-600/25 via-primary/10 to-red-500/20 sm:h-28">
@@ -149,7 +149,7 @@ export function PublicProfileHero({
           </div>
         )}
 
-        <dl className="mt-4 grid grid-cols-3 gap-2 border-t border-border/50 pt-4 sm:max-w-sm">
+        <dl className="mt-4 grid grid-cols-3 gap-2 border-t border-border pt-4 sm:max-w-sm">
           <div className="rounded-lg bg-muted/20 px-3 py-2">
             <dd className="text-lg font-semibold text-foreground">{followerCount}</dd>
             <dt className="text-xs text-muted-foreground">{followersLabel}</dt>

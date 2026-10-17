@@ -93,7 +93,7 @@ export async function ProfileTradingSummary({
   ];
 
   return (
-    <section className="rounded-xl border border-border bg-card/50 p-4 ring-1 ring-foreground/5">
+    <section className="rounded-xl border border-border bg-card p-4">
       <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="font-heading text-base font-semibold text-foreground">
@@ -120,7 +120,7 @@ export async function ProfileTradingSummary({
           return (
             <div
               key={item.label}
-              className="rounded-lg border border-border/60 bg-muted/20 px-3 py-3"
+              className="rounded-lg border border-border bg-muted/20 px-3 py-3"
             >
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Icon className="size-3.5" aria-hidden />

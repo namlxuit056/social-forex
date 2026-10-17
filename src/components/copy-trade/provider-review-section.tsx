@@ -74,7 +74,7 @@ export async function ProviderReviewSection({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-4 rounded-lg border border-border/60 bg-card/40 p-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 rounded-lg border border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <p className="font-mono text-3xl font-bold text-foreground">
             {reviewCount > 0 ? avgRating.toFixed(1) : "—"}
@@ -113,14 +113,14 @@ export async function ProviderReviewSection({
             existingComment={myReview?.comment}
           />
         ) : (
-          <p className="rounded-lg border border-dashed border-border/70 p-3 text-xs text-muted-foreground">
+          <p className="rounded-lg border border-dashed border-border p-3 text-xs text-muted-foreground">
             {t("reviewNotEligibleHint", { days: REVIEW_ELIGIBILITY_DAYS })}
           </p>
         )
       )}
 
       {reviews.length === 0 ? (
-        <section className="rounded-lg border border-dashed border-border/70 p-6 text-center text-sm text-muted-foreground">
+        <section className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
           {t("reviewEmpty")}
         </section>
       ) : (
@@ -129,7 +129,7 @@ export async function ProviderReviewSection({
             const label = getPublicDisplayLabel(review.reviewer.name, review.reviewer.email);
             const isAuthor = viewerId === review.reviewer.id;
             return (
-              <div key={review.id} className="rounded-lg border border-border/40 bg-muted/20 p-3">
+              <div key={review.id} className="rounded-lg border border-border bg-muted/20 p-3">
                 <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                   <Link href={`/u/${review.reviewer.id}`} className="font-medium text-foreground hover:underline">
                     {label}

@@ -49,7 +49,7 @@ export async function SignalNewsContext({
   });
 
   return (
-    <Card className="border-border/60 bg-muted/10">
+    <Card className="border-border bg-muted/10">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 font-heading text-base font-semibold">
           <Calendar className="size-4 shrink-0 text-muted-foreground" aria-hidden />
@@ -71,7 +71,7 @@ export async function SignalNewsContext({
               return (
                 <li
                   key={ev.id}
-                  className="flex flex-col gap-1 border-b border-border/40 pb-2.5 last:border-0 last:pb-0 sm:flex-row sm:items-start sm:justify-between sm:gap-3"
+                  className="flex flex-col gap-1 border-b border-border pb-2.5 last:border-0 last:pb-0 sm:flex-row sm:items-start sm:justify-between sm:gap-3"
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">

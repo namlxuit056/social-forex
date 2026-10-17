@@ -30,7 +30,8 @@ import { signalStatusLabel, signalTierLabel } from "@/lib/signals/signal-detail-
 import { getVipTierWinRateStats } from "@/lib/signals/vip-win-rate";
 import { VipSignalTeaser } from "@/components/signals/vip-signal-teaser";
 import { absoluteUrl } from "@/lib/site-url";
-import { signalLevelDetail } from "@/components/signals/signal-level-classes";
+import { PriceLevels } from "@/components/signals/price-levels";
+import { HistoryBackLink } from "@/components/layout/history-back-link";
 import { SignalShareCopy } from "@/components/signals/signal-share-copy";
 import { SignalCloseForm } from "@/components/signals/signal-close-form";
 import { SignalEditForm } from "@/components/signals/signal-edit-form";
@@ -305,16 +306,11 @@ export default async function SignalDetailPage({
         authorName={authorName}
         imageUrl={signal.images[0]?.url ?? null}
       />
-      <Link
-        href="/signals"
-        className="inline-block text-sm text-muted-foreground hover:text-foreground"
-      >
-        {t("back")}
-      </Link>
+      <HistoryBackLink href="/signals" listKey="signals">{t("back")}</HistoryBackLink>
 
-      <Card className="border-border/60">
+      <Card className="border-border">
         <CardContent className="space-y-5 pt-6">
-          <div className="flex flex-col gap-4 border-b border-border/40 pb-5 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex flex-col gap-4 border-b border-border pb-5 lg:flex-row lg:items-start lg:justify-between">
             <div className="min-w-0 space-y-2">
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="font-mono text-xl font-semibold tracking-tight text-foreground">
@@ -439,52 +435,27 @@ export default async function SignalDetailPage({
                 >
                   {t("detailLevelsTitle")}
                 </h2>
-                <dl className="grid gap-3 font-mono text-sm sm:grid-cols-2">
-                  <div className={signalLevelDetail.entry.box}>
-                    <dt className={signalLevelDetail.entry.label}>
-                      {t("entryField")}
-                    </dt>
-                    <dd className={signalLevelDetail.entry.value}>
-                      {signal.entry}
-                    </dd>
-                  </div>
-                  <div className={signalLevelDetail.sl.box}>
-                    <dt className={signalLevelDetail.sl.label}>{t("slField")}</dt>
-                    <dd className={signalLevelDetail.sl.value}>
-                      {signal.stopLoss ?? "—"}
-                    </dd>
-                  </div>
-                </dl>
-                <dl className="grid gap-3 font-mono text-sm sm:grid-cols-3">
-                  <div className={signalLevelDetail.tp1.box}>
-                    <dt className={signalLevelDetail.tp1.label}>
-                      {t("tp1Field")}
-                    </dt>
-                    <dd className={signalLevelDetail.tp1.value}>
-                      {signal.takeProfit ?? "—"}
-                    </dd>
-                  </div>
-                  <div className={signalLevelDetail.tp2.box}>
-                    <dt className={signalLevelDetail.tp2.label}>
-                      {t("tp2Field")}
-                    </dt>
-                    <dd className={signalLevelDetail.tp2.value}>
-                      {signal.takeProfit2 ?? "—"}
-                    </dd>
-                  </div>
-                  <div className={signalLevelDetail.tp3.box}>
-                    <dt className={signalLevelDetail.tp3.label}>
-                      {t("tp3Field")}
-                    </dt>
-                    <dd className={signalLevelDetail.tp3.value}>
-                      {signal.takeProfit3 ?? "—"}
-                    </dd>
-                  </div>
-                </dl>
+                <PriceLevels
+                  size="lg"
+                  values={{
+                    entry: signal.entry,
+                    sl: signal.stopLoss,
+                    tp1: signal.takeProfit,
+                    tp2: signal.takeProfit2,
+                    tp3: signal.takeProfit3,
+                  }}
+                  labels={{
+                    entry: t("entryField"),
+                    sl: t("slField"),
+                    tp1: t("tp1Field"),
+                    tp2: t("tp2Field"),
+                    tp3: t("tp3Field"),
+                  }}
+                />
               </section>
               {signal.notes && (
                 <section
-                  className="rounded-lg border border-border/60 bg-muted/15 p-4"
+                  className="rounded-lg border border-border p-4"
                   aria-labelledby="signal-analysis-heading"
                 >
                   <h2
@@ -521,7 +492,7 @@ export default async function SignalDetailPage({
           )}
 
           {isAuthor && !masked && signal.status === "ACTIVE" ? (
-            <details className="group rounded-lg border border-border/60 bg-muted/10">
+            <details className="group rounded-lg border border-border bg-muted/10">
               <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 text-sm font-medium text-foreground outline-none transition-colors hover:bg-muted/20 focus-visible:ring-3 focus-visible:ring-ring/50 [&::-webkit-details-marker]:hidden">
                 <span>{t("editSectionTitle")}</span>
                 <ChevronDown
@@ -529,7 +500,7 @@ export default async function SignalDetailPage({
                   aria-hidden
                 />
               </summary>
-              <div className="border-t border-border/40 p-4">
+              <div className="border-t border-border p-4">
                 <SignalEditForm
                   signalId={signalId}
                   stopLoss={signal.stopLoss}
@@ -545,7 +516,7 @@ export default async function SignalDetailPage({
           ) : null}
 
           {editLogs.length > 0 ? (
-            <div className="space-y-2 border-t border-border/40 pt-4">
+            <div className="space-y-2 border-t border-border pt-4">
               <h3 className="text-sm font-medium text-foreground">
                 {t("editAuditTitle")}
               </h3>
@@ -563,7 +534,7 @@ export default async function SignalDetailPage({
 
           {isAuthor && signal.status === "ACTIVE" ? (
             <section
-              className="flex flex-col gap-3 rounded-lg border border-border/60 bg-muted/10 p-4"
+              className="flex flex-col gap-3 rounded-lg border border-border bg-muted/10 p-4"
               aria-labelledby="signal-manage-heading"
             >
               <h2

@@ -174,7 +174,7 @@ export function SignalMt5OrderCard({
 
   if (!connected) {
     return (
-      <section className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-dashed border-border/60 bg-muted/10 p-4">
+      <section className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-dashed border-border bg-muted/10 p-4">
         <div className="flex items-start gap-3">
           <MonitorSmartphone className="mt-0.5 size-5 shrink-0 text-muted-foreground" aria-hidden />
           <div>
@@ -206,7 +206,7 @@ export function SignalMt5OrderCard({
         </span>
       </div>
 
-      <div className="flex rounded-md border border-border/60 bg-background p-0.5 text-xs">
+      <div className="flex rounded-md border border-border bg-background p-0.5 text-xs">
         {(["pending", "market"] as const).map((m) => (
           <button
             key={m}
@@ -250,7 +250,7 @@ export function SignalMt5OrderCard({
                 key={pct}
                 type="button"
                 onClick={() => applyRiskPreset(pct)}
-                className="rounded-md border border-border/60 bg-background px-2 py-1 font-mono text-xs text-foreground transition-colors hover:border-primary"
+                className="rounded-md border border-border bg-background px-2 py-1 font-mono text-xs text-foreground transition-colors hover:border-primary"
               >
                 {pct}%
               </button>

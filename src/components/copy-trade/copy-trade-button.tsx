@@ -197,7 +197,7 @@ export function CopyTradeButton({
           )}
 
           {providerClosedSignals !== undefined && (
-            <div className="flex items-center gap-4 rounded-lg border border-border/60 bg-muted/30 px-3 py-2.5">
+            <div className="flex items-center gap-4 rounded-lg border border-border bg-muted/30 px-3 py-2.5">
               {providerClosedSignals && providerWinRate != null ? (
                 <>
                   <div>
@@ -342,7 +342,7 @@ export function CopyTradeButton({
           {showToken && token && (
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">{t("setupInstructions")}</p>
-              <div className="rounded-lg border border-border/60 bg-muted/30 p-3">
+              <div className="rounded-lg border border-border bg-muted/30 p-3">
                 <Label className="text-xs">{t("yourToken")}</Label>
                 <div className="mt-1 flex items-center gap-2">
                   <code className="min-w-0 flex-1 break-all font-mono text-sm text-foreground">

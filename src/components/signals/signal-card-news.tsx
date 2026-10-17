@@ -48,10 +48,10 @@ export function SignalCardNews({
 
   return (
     <aside
-      className="flex shrink-0 flex-col border-t border-border/50 bg-muted/20 lg:w-[min(100%,20rem)] lg:border-l lg:border-t-0 lg:border-border/50"
+      className="flex shrink-0 flex-col border-t border-border bg-muted/20 lg:w-[min(100%,20rem)] lg:border-l lg:border-t-0 lg:border-border"
       aria-label={t("newsContext.cardAria", { symbol })}
     >
-      <div className="border-b border-border/40 bg-muted/30 px-3 py-2.5 sm:px-4">
+      <div className="border-b border-border bg-muted/30 px-3 py-2.5 sm:px-4">
         <h3 className="flex items-center gap-2 font-heading text-xs font-semibold uppercase tracking-wide text-foreground">
           <Calendar className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
           {t("newsContext.cardTitle")}
@@ -60,7 +60,7 @@ export function SignalCardNews({
           {t("newsContext.cardSubtitle", { hours: windowHours })}
         </p>
       </div>
-      <ul className="flex flex-1 flex-col gap-0 divide-y divide-border/40 px-3 py-2 sm:px-4">
+      <ul className="flex flex-1 flex-col gap-0 divide-y divide-border px-3 py-2 sm:px-4">
         {events.map((ev) => {
           const imp = normalizeImpact(ev.impact);
           const d = new Date(ev.timeUtc);
@@ -84,7 +84,7 @@ export function SignalCardNews({
           );
         })}
       </ul>
-      <div className="mt-auto border-t border-border/40 p-3 sm:p-4">
+      <div className="mt-auto border-t border-border p-3 sm:p-4">
         <Link
           href="/calendar"
           className={cn(

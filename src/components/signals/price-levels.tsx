@@ -16,23 +16,30 @@ export function PriceLevels({
   className?: string;
 }) {
   const styles = size === "lg" ? signalLevelDetail : signalLevel;
-  const cell = (level: Level) => (
-    <div key={level} data-level={level} className={cn("min-w-0", styles[level].box)}>
-      <div className={styles[level].label}>{labels[level]}</div>
-      <div className={styles[level].value}>{values[level] ?? "—"}</div>
-    </div>
-  );
+  const cell = (level: Level) => {
+    const value = values[level];
+    const missing = value == null || value === "";
+    return (
+      <div key={level} data-level={level} className={cn("min-w-0", styles[level].box)}>
+        <dt className={styles[level].label}>{labels[level]}</dt>
+        {/* A missing level is "not set", not a red stop or green target. */}
+        <dd className={cn(styles[level].value, missing && "text-muted-foreground")}>
+          {missing ? "—" : value}
+        </dd>
+      </div>
+    );
+  };
   return (
     <div className={cn("space-y-2", className)}>
-      <div className="grid grid-cols-2 gap-2 sm:gap-3">
+      <dl className="grid grid-cols-2 gap-2 sm:gap-3">
         {cell("entry")}
         {cell("sl")}
-      </div>
-      <div className="grid grid-cols-3 gap-2 sm:gap-3">
+      </dl>
+      <dl className="grid grid-cols-3 gap-2 sm:gap-3">
         {cell("tp1")}
         {cell("tp2")}
         {cell("tp3")}
-      </div>
+      </dl>
     </div>
   );
 }

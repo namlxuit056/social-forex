@@ -68,8 +68,8 @@ export function TrackRecordTable({
   }
 
   return (
-    <div className="rounded-lg border border-border/60 bg-card/50">
-      <div className="flex flex-wrap items-center gap-2 border-b border-border/40 p-3">
+    <div className="rounded-lg border border-border bg-card">
+      <div className="flex flex-wrap items-center gap-2 border-b border-border p-3">
         <select
           value={symbol}
           onChange={(e) => {
@@ -108,7 +108,7 @@ export function TrackRecordTable({
         <>
           <div className="space-y-2 p-3 sm:hidden">
             {pageRows.map((row) => (
-              <div key={row.id} className="rounded-lg border border-border/60 bg-muted/15 p-3">
+              <div key={row.id} className="rounded-lg border border-border bg-muted/15 p-3">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="font-mono text-sm font-semibold text-foreground">{row.symbol}</p>
@@ -161,7 +161,7 @@ export function TrackRecordTable({
                   <th className="px-4 py-2.5">{t("trackRecord.colClosed")}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border/40">
+              <tbody className="divide-y divide-border">
                 {pageRows.map((row) => (
                   <tr key={row.id}>
                     <td className="px-4 py-2.5 font-mono font-medium text-foreground">{row.symbol}</td>
@@ -198,7 +198,7 @@ export function TrackRecordTable({
           </div>
 
           {totalPages > 1 && (
-            <div className="flex items-center justify-between border-t border-border/40 px-4 py-3">
+            <div className="flex items-center justify-between border-t border-border px-4 py-3">
               <p className="text-xs text-muted-foreground">
                 {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, filtered.length)} / {filtered.length}
               </p>

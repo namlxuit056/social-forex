@@ -132,7 +132,7 @@ export function SignalImageGallery({
             type="button"
             onClick={() => setLightboxUrl(url)}
             className={cn(
-              "block overflow-hidden rounded-md border border-border/60 ring-offset-background transition hover:ring-2 hover:ring-primary/30",
+              "block overflow-hidden rounded-md border border-border ring-offset-background transition hover:ring-2 hover:ring-primary/30",
               "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
             )}
           >

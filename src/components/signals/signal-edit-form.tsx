@@ -50,7 +50,7 @@ export function SignalEditForm({
   }
 
   return (
-    <form action={formAction} className="space-y-4 rounded-lg border border-border/60 bg-muted/15 p-4">
+    <form action={formAction} className="space-y-4 rounded-lg border border-border bg-muted/15 p-4">
       <input type="hidden" name="signalId" value={signalId} />
       <p className="text-xs text-muted-foreground">
         {t("editWindowHint", {

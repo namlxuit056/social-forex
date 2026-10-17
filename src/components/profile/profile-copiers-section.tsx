@@ -76,7 +76,7 @@ export async function ProfileCopiersSection({
 
   if (copiers.length === 0) {
     return (
-      <section className="rounded-lg border border-dashed border-border/70 p-6 text-center text-sm text-muted-foreground">
+      <section className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
         {t("profileCopiersEmpty")}
       </section>
     );
@@ -103,7 +103,7 @@ export async function ProfileCopiersSection({
         return (
           <div
             key={copier.id}
-            className="space-y-3 rounded-lg border border-border/60 bg-card/55 p-3"
+            className="space-y-3 rounded-lg border border-border bg-card p-3"
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <Link

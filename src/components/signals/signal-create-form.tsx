@@ -286,7 +286,7 @@ export function SignalCreateForm({
               {uploadedUrls.map((url) => (
                 <li
                   key={url}
-                  className="relative inline-block rounded-md border border-border/60"
+                  className="relative inline-block rounded-md border border-border"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img

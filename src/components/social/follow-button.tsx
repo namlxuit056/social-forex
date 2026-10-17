@@ -22,7 +22,7 @@ export function FollowButton({
       <Button
         type="submit"
         size="sm"
-        variant={isFollowing ? "outline" : "default"}
+        variant={isFollowing ? "secondary" : "outline"}
         className={cn("h-8 min-w-[5.5rem] px-2 text-xs", className)}
       >
         {isFollowing ? t("following") : t("follow")}

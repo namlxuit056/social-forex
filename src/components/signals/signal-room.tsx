@@ -15,6 +15,7 @@ import { EmptyState } from "@/components/layout/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { FieldSelect } from "@/components/ui/field-select";
 import { FilterBar } from "@/components/ui/filter-bar";
+import { useRememberListUrl } from "@/components/layout/history-back-link";
 import { PriceLevels } from "@/components/signals/price-levels";
 import {
   DirectionBadge,
@@ -177,6 +178,7 @@ export function SignalRoom({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  useRememberListUrl("signals");
 
   const tierFilter = initialTierFilter;
   const statusFilter = initialStatusFilter;
@@ -387,7 +389,7 @@ export function SignalRoom({
                     "rounded-full border px-2.5 py-1 font-mono text-xs font-medium transition-colors",
                     active
                       ? "border-primary bg-primary/15 text-primary"
-                      : "border-border/70 bg-muted/40 text-muted-foreground hover:border-primary/50 hover:text-foreground",
+                      : "border-border bg-muted/40 text-muted-foreground hover:border-primary/50 hover:text-foreground",
                   )}
                 >
                   {sym}
@@ -408,7 +410,7 @@ export function SignalRoom({
                   page: 1,
                 })}
                 scroll={false}
-                className="rounded-full border border-border/70 bg-muted/40 px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"
+                className="rounded-full border border-border bg-muted/40 px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:text-foreground"
               >
                 {t("quickSymbolAll")}
               </Link>
@@ -589,7 +591,7 @@ export function SignalRoom({
         )}
 
         {totalUnfiltered > 0 && totalMatching === 0 && (
-          <p className="mt-6 rounded-lg border border-border/60 bg-muted/20 px-4 py-6 text-center text-sm text-muted-foreground">
+          <p className="mt-6 rounded-lg border border-border bg-muted/20 px-4 py-6 text-center text-sm text-muted-foreground">
             {t("listFilteredEmpty")}
           </p>
         )}
@@ -598,7 +600,7 @@ export function SignalRoom({
           <ul className="mt-4 space-y-4">
             {signals.map((s) => (
               <li key={s.id}>
-                <Card className="overflow-hidden border-border/60">
+                <Card className="overflow-hidden border-border">
                   <CardContent className="p-0">
                     <div className="flex flex-col lg:flex-row lg:items-stretch">
                       <div className="min-w-0 flex-1 space-y-3 p-4 sm:p-5">
@@ -738,7 +740,7 @@ export function SignalRoom({
                       />
                     </div>
 
-                    <div className="flex flex-col gap-3 border-t border-border/40 bg-muted/5 px-4 py-3 sm:px-5">
+                    <div className="flex flex-col gap-3 border-t border-border bg-muted/5 px-4 py-3 sm:px-5">
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
                           <span className="inline-flex items-center gap-1">
@@ -794,7 +796,7 @@ export function SignalRoom({
         )}
 
         {totalMatching > 0 && (page > 1 || hasMore) ? (
-          <div className="mt-6 flex flex-col gap-3 border-t border-border/40 pt-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+          <div className="mt-6 flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">
                 {t("paginationRange", {

@@ -18,7 +18,7 @@ function fmtR(v: number) {
 
 function Tile({ label, value, tone }: { label: string; value: string; tone: "pos" | "neg" | "neutral" }) {
   return (
-    <div className="rounded-lg border border-border/60 p-2.5">
+    <div className="rounded-lg border border-border p-2.5">
       <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
       <p
         className={cn(
@@ -65,7 +65,7 @@ export async function TrackRecordSection({
 
   if (signals.length === 0) {
     return (
-      <section className="rounded-lg border border-dashed border-border/70 p-6 text-center text-sm text-muted-foreground">
+      <section className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
         {t("trackRecord.empty")}
       </section>
     );

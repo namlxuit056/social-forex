@@ -34,7 +34,7 @@ export function ProfileReferralSection({
   }
 
   return (
-    <div className="rounded-xl border border-border bg-card/50 p-6 ring-1 ring-foreground/5">
+    <div className="rounded-xl border border-border bg-card p-6">
       <h2 className="flex items-center gap-2 font-medium text-foreground">
         <Gift className="size-4 text-primary" />
         {t("title")}
@@ -49,7 +49,7 @@ export function ProfileReferralSection({
             {t("linkLabel")}
           </label>
           <div className="flex items-center gap-2">
-            <div className="flex-1 truncate rounded-lg border border-border/60 bg-muted/30 px-3 py-2 font-mono text-sm">
+            <div className="flex-1 truncate rounded-lg border border-border bg-muted/30 px-3 py-2 font-mono text-sm">
               {referralLink}
             </div>
             <Button

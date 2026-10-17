@@ -4,7 +4,6 @@ import { useMemo, useState, useRef, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { TrendingUp, Flame, TrendingDown } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FlyingDragonAnimation } from "@/components/profile/profile-creature-animations";
 import { cn } from "@/lib/utils";
 
 export interface PublicChartTrade {
@@ -261,8 +260,7 @@ export function PublicPerformanceChart({
   }
 
   return (
-    <Card className="relative overflow-hidden border-border/60 bg-card/55">
-      <FlyingDragonAnimation />
+    <Card className="relative overflow-hidden border-border bg-card">
       <CardHeader className="relative pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
           <TrendingUp className="size-4 text-chart-3" />
@@ -273,7 +271,7 @@ export function PublicPerformanceChart({
         {/* Stats row */}
         <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
           {/* Net P&L */}
-          <div className="rounded-lg border border-border/60 p-2.5">
+          <div className="rounded-lg border border-border p-2.5">
             <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
               {t("overviewNetPnl")}
             </p>
@@ -283,7 +281,7 @@ export function PublicPerformanceChart({
           </div>
 
           {/* Trades */}
-          <div className="rounded-lg border border-border/60 p-2.5">
+          <div className="rounded-lg border border-border p-2.5">
             <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
               {t("overviewTrades")}
             </p>
@@ -293,7 +291,7 @@ export function PublicPerformanceChart({
           </div>
 
           {/* Win rate */}
-          <div className="rounded-lg border border-border/60 p-2.5">
+          <div className="rounded-lg border border-border p-2.5">
             <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
               {t("overviewWinRate")}
             </p>
@@ -310,7 +308,7 @@ export function PublicPerformanceChart({
             "rounded-lg border p-2.5 transition-colors",
             isWinStreak ? "border-emerald-500/30 bg-emerald-500/5"
               : isLossStreak ? "border-red-500/30 bg-red-500/5"
-              : "border-border/60",
+              : "border-border",
           )}>
             <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
               {t("overviewStreak")}
@@ -330,7 +328,7 @@ export function PublicPerformanceChart({
           </div>
 
           {/* Profit factor */}
-          <div className="rounded-lg border border-border/60 p-2.5">
+          <div className="rounded-lg border border-border p-2.5">
             <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
               {t("overviewProfitFactor")}
             </p>
@@ -340,7 +338,7 @@ export function PublicPerformanceChart({
           </div>
 
           {/* Max Drawdown */}
-          <div className="rounded-lg border border-border/60 p-2.5">
+          <div className="rounded-lg border border-border p-2.5">
             <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
               {t("overviewMaxDrawdown")}
             </p>
@@ -367,11 +365,11 @@ export function PublicPerformanceChart({
 
         {/* Chart */}
         {equityPoints.length === 0 || !chart ? (
-          <p className="rounded-md border border-dashed border-border/70 px-3 py-6 text-sm text-muted-foreground">
+          <p className="rounded-md border border-dashed border-border px-3 py-6 text-sm text-muted-foreground">
             {t("profilePerformanceEmpty")}
           </p>
         ) : (
-          <div className="overflow-x-auto rounded-lg border border-border/60 bg-muted/20 p-2">
+          <div className="overflow-x-auto rounded-lg border border-border bg-muted/20 p-2">
             <svg
               ref={svgRef}
               viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}

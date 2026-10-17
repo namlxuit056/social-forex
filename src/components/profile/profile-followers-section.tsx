@@ -51,7 +51,7 @@ export function ProfileFollowersSection({ items, totalCount }: Props) {
             <li key={row.id}>
               <Link
                 href={`/u/${row.userId}`}
-                className="flex min-h-11 items-center gap-3 rounded-lg border border-border/60 bg-muted/15 px-3 py-2 transition-colors hover:bg-muted/40"
+                className="flex min-h-11 items-center gap-3 rounded-lg border border-border bg-muted/15 px-3 py-2 transition-colors hover:bg-muted/40"
               >
                 <span className="inline-flex size-9 shrink-0 overflow-hidden rounded-full bg-muted ring-1 ring-border">
                   {row.image ? (

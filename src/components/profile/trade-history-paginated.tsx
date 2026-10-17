@@ -66,7 +66,7 @@ export function TradeHistoryPaginated({
     <>
       <div className="space-y-2 px-4 pb-4 sm:hidden">
         {pageTrades.map((trade) => (
-          <div key={trade.id} className="rounded-lg border border-border/60 bg-muted/15 p-3">
+          <div key={trade.id} className="rounded-lg border border-border bg-muted/15 p-3">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="font-mono text-sm font-semibold text-foreground">{trade.symbol}</p>
@@ -108,7 +108,7 @@ export function TradeHistoryPaginated({
               <th className="px-4 py-2.5">{labels.opened}</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border/40">
+          <tbody className="divide-y divide-border">
             {pageTrades.map((trade) => (
               <tr key={trade.id}>
                 <td className="px-4 py-2.5 font-mono font-medium text-foreground">{trade.symbol}</td>
@@ -140,7 +140,7 @@ export function TradeHistoryPaginated({
       </div>
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-between border-t border-border/40 px-4 py-3">
+        <div className="flex items-center justify-between border-t border-border px-4 py-3">
           <p className="text-xs text-muted-foreground">
             {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, trades.length)} / {trades.length}
           </p>

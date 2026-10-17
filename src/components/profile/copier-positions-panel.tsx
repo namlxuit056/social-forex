@@ -65,7 +65,7 @@ function StatusTable({
               <tr
                 key={row.ticket}
                 className={cn(
-                  "border-t border-border/60",
+                  "border-t border-border",
                   showLiveColumns && (isProfit ? "bg-emerald-500/5" : "bg-red-500/5"),
                 )}
               >

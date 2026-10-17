@@ -176,7 +176,7 @@ export default async function CopyTradePage({
       </div>
 
       {/* Requirements */}
-      <Card className="border-border/60 bg-card/50">
+      <Card className="border-border bg-card">
         <CardHeader className="pb-3">
           <CardTitle className="text-base">{t("requirementsTitle")}</CardTitle>
         </CardHeader>
@@ -232,7 +232,7 @@ export default async function CopyTradePage({
                     {step.codeLines.map((line, i) => (
                       <div
                         key={i}
-                        className="rounded-md border border-border/60 bg-muted/50 px-3 py-2 font-mono text-xs text-foreground"
+                        className="rounded-md border border-border bg-muted/50 px-3 py-2 font-mono text-xs text-foreground"
                       >
                         {line}
                       </div>
@@ -271,10 +271,10 @@ export default async function CopyTradePage({
         <h2 className="mb-4 text-base font-semibold text-foreground">
           {t("eaParamsTitle")}
         </h2>
-        <div className="overflow-x-auto rounded-lg border border-border/60">
+        <div className="overflow-x-auto rounded-lg border border-border">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-border/60 bg-muted/40">
+              <tr className="border-b border-border bg-muted/40">
                 <th className="px-4 py-2.5 text-left font-medium text-foreground">
                   {t("paramName")}
                 </th>
@@ -290,7 +290,7 @@ export default async function CopyTradePage({
               {eaParams.map((p, i) => (
                 <tr
                   key={i}
-                  className="border-b border-border/40 last:border-0 hover:bg-muted/20"
+                  className="border-b border-border last:border-0 hover:bg-muted/20"
                 >
                   <td className="px-4 py-2.5 font-mono text-xs text-primary">
                     {p.name}
@@ -315,7 +315,7 @@ export default async function CopyTradePage({
         </h2>
         <div className="space-y-3">
           {troubleshoot.map((item, i) => (
-            <Card key={i} className="border-border/60 bg-card/50">
+            <Card key={i} className="border-border bg-card">
               <CardContent className="pt-4">
                 <p className="text-sm font-medium text-foreground">{item.q}</p>
                 <p className="mt-1 text-sm text-muted-foreground">{item.a}</p>
