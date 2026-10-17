@@ -238,8 +238,8 @@ export function LiveQuotesTable({
             className={cn(
               "inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium",
               isUp
-                ? "bg-primary/12 text-primary"
-                : "bg-destructive/12 text-destructive",
+                ? "bg-success-bg text-success"
+                : "bg-danger-bg text-danger",
             )}
           >
             <Icon className="size-3.5" aria-hidden />
@@ -311,34 +311,31 @@ export function LiveQuotesTable({
     if (state.status === "idle") {
       return (
         <div className={cn("space-y-1", compact ? "w-full" : "max-w-64")}>
-          <Button
-            type="button"
-            variant="outline"
-            size="xs"
-            onClick={() => requestTrend(symbol)}
-            disabled={sessionStatus === "loading" || isGuest}
-          >
-            {isGuest ? (
-              <Lock className="size-3.5" aria-hidden />
-            ) : (
-              <Sparkles className="size-3.5" aria-hidden />
-            )}
-            {isGuest ? t("aiTrendLoginButton") : t("aiTrendButton")}
-          </Button>
           {isGuest ? (
-            <p className="text-xs leading-relaxed text-muted-foreground">
-              {t("aiTrendLoginRequired")}{" "}
-              <Link
-                href={{
-                  pathname: "/auth/signin",
-                  query: { callbackUrl: "/quotes" },
-                }}
-                className="font-medium text-primary underline-offset-4 hover:underline"
-              >
-                {tc("signIn")}
-              </Link>
-            </p>
-          ) : null}
+            // One short link per row; the "why" is explained once above the table.
+            <Link
+              href={{
+                pathname: "/auth/signin",
+                query: { callbackUrl: "/quotes" },
+              }}
+              title={t("aiTrendLoginRequired")}
+              className={cn(buttonVariants({ variant: "outline", size: "xs" }))}
+            >
+              <Lock className="size-3.5" aria-hidden />
+              {t("aiTrendLoginButton")}
+            </Link>
+          ) : (
+            <Button
+              type="button"
+              variant="outline"
+              size="xs"
+              onClick={() => requestTrend(symbol)}
+              disabled={sessionStatus === "loading"}
+            >
+              <Sparkles className="size-3.5" aria-hidden />
+              {t("aiTrendButton")}
+            </Button>
+          )}
         </div>
       );
     }
@@ -401,8 +398,11 @@ export function LiveQuotesTable({
           title={t("signupPromptWatchlistTitle")}
           description={t("signupPromptWatchlistDesc")}
           ctaLabel={t("signupPromptWatchlistCta")}
-          className="bg-card/55"
         />
+      ) : null}
+
+      {isGuest ? (
+        <p className="text-xs text-muted-foreground">{t("aiTrendLoginRequired")}</p>
       ) : null}
 
       <div className="space-y-6">
@@ -424,14 +424,13 @@ export function LiveQuotesTable({
                     : t("groupCrypto");
           return (
             <section key={g}>
-              <h3 className="mb-2 text-sm font-medium text-primary">{label}</h3>
+              <h3 className="mb-2 text-sm font-medium text-foreground">{label}</h3>
               <div className="grid gap-2 md:hidden">
                 {subset.map((r) => (
                   <article
                     key={r.symbol}
                     className={cn(
-                      "rounded-lg border border-border bg-card/60 p-3 shadow-xs",
-                      isFavorite(r.symbol) && "border-primary/30 bg-primary/7",
+                      "rounded-lg border border-border bg-card p-3",
                     )}
                   >
                     <div className="flex items-start justify-between gap-3">
@@ -456,8 +455,8 @@ export function LiveQuotesTable({
                         className={cn(
                           "rounded-md px-2 py-1 font-mono text-xs font-medium",
                           r.changePct >= 0
-                            ? "bg-primary/12 text-primary"
-                            : "bg-destructive/12 text-destructive",
+                            ? "bg-success-bg text-success"
+                            : "bg-danger-bg text-danger",
                         )}
                       >
                         {r.changePct >= 0 ? "+" : ""}
@@ -470,7 +469,7 @@ export function LiveQuotesTable({
                         <p className="text-[10px] uppercase text-muted-foreground">
                           {t("colBid")}
                         </p>
-                        <p className="mt-0.5 font-mono text-sm font-medium text-primary">
+                        <p className="mt-0.5 font-mono text-sm font-medium tabular-nums text-foreground">
                           {r.bid}
                         </p>
                       </div>
@@ -478,7 +477,7 @@ export function LiveQuotesTable({
                         <p className="text-[10px] uppercase text-muted-foreground">
                           {t("colAsk")}
                         </p>
-                        <p className="mt-0.5 font-mono text-sm font-medium text-chart-3">
+                        <p className="mt-0.5 font-mono text-sm font-medium tabular-nums text-foreground">
                           {r.ask}
                         </p>
                       </div>
@@ -555,10 +554,7 @@ export function LiveQuotesTable({
                     {subset.map((r) => (
                       <tr
                         key={r.symbol}
-                        className={cn(
-                          "hover:bg-muted/40",
-                          isFavorite(r.symbol) && "bg-primary/5",
-                        )}
+                        className="hover:bg-muted/40"
                       >
                         <td className="px-3 py-2">
                           <span className="font-mono font-medium text-foreground">
@@ -568,16 +564,16 @@ export function LiveQuotesTable({
                             {r.name}
                           </span>
                         </td>
-                        <td className="px-3 py-2 font-mono text-primary">
+                        <td className="px-3 py-2 font-mono tabular-nums text-foreground">
                           {r.bid}
                         </td>
-                        <td className="px-3 py-2 font-mono text-chart-3">
+                        <td className="px-3 py-2 font-mono tabular-nums text-foreground">
                           {r.ask}
                         </td>
                         <td
                           className={cn(
                             "px-3 py-2 font-mono",
-                            r.changePct >= 0 ? "text-primary" : "text-destructive",
+                            r.changePct >= 0 ? "text-success" : "text-danger",
                           )}
                         >
                           {r.changePct >= 0 ? "+" : ""}

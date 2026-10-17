@@ -103,7 +103,7 @@ export function PortfolioReviewPanel({ positionCount }: { positionCount: number 
       </div>
 
       {positionCount === 0 && (
-        <div className="rounded-lg border border-border/60 bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
+        <div className="rounded-lg border border-border bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
           No open positions to review yet.
         </div>
       )}
@@ -129,7 +129,7 @@ export function PortfolioReviewPanel({ positionCount }: { positionCount: number 
                 ~{data.review.totalExposurePct.toFixed(1)}% of equity at risk
               </p>
             </div>
-            <div className="rounded-lg border border-border/60 bg-background/70 p-4">
+            <div className="rounded-lg border border-border bg-background/70 p-4">
               <p className="text-xs font-medium uppercase text-muted-foreground">Summary</p>
               <p className="mt-2 text-sm leading-relaxed text-foreground">{data.review.summary}</p>
             </div>
@@ -149,7 +149,7 @@ export function PortfolioReviewPanel({ positionCount }: { positionCount: number 
             </div>
           )}
 
-          <div className="rounded-lg border border-border/60 bg-background/70 p-4">
+          <div className="rounded-lg border border-border bg-background/70 p-4">
             <h3 className="text-sm font-semibold text-foreground">Per-Position Advice</h3>
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
               {data.review.positionAdvice.map((item) => {
@@ -157,7 +157,7 @@ export function PortfolioReviewPanel({ positionCount }: { positionCount: number 
                 return (
                   <div
                     key={item.ticket}
-                    className="flex items-start gap-3 rounded-lg border border-border/60 p-3"
+                    className="flex items-start gap-3 rounded-lg border border-border p-3"
                   >
                     <span className={cn("flex size-7 shrink-0 items-center justify-center rounded-full border", className)}>
                       <Icon className="size-3.5" aria-hidden />

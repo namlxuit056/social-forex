@@ -2,6 +2,7 @@
 
 import { type ReactNode, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { useRouter, useSearchParams } from "next/navigation";
 import { getPathname } from "@/i18n/navigation";
 import {
   AlertTriangle,
@@ -78,7 +79,17 @@ export function PreTradeDesk({
   const tCal = useTranslations("calendar");
   const locale = useLocale();
 
-  const [symbol, setSymbol] = useState(quoteForSymbol(quotes, "XAUUSD")?.symbol ?? quotes[0]?.symbol ?? "EURUSD");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  // The chart beside this panel reads and writes ?symbol=, so the URL is the
+  // shared source of truth for which market both are looking at.
+  const urlSymbol = searchParams.get("symbol")?.toUpperCase() ?? null;
+  const knownUrlSymbol =
+    urlSymbol && quotes.some((quote) => quote.symbol === urlSymbol) ? urlSymbol : null;
+
+  const [symbol, setSymbol] = useState(
+    knownUrlSymbol ?? quoteForSymbol(quotes, "XAUUSD")?.symbol ?? quotes[0]?.symbol ?? "EURUSD",
+  );
   const selectedQuote = quoteForSymbol(quotes, symbol);
   const selectedMid = midPrice(selectedQuote);
 
@@ -86,6 +97,28 @@ export function PreTradeDesk({
   const [riskPct, setRiskPct] = useState("1");
   const [entry, setEntry] = useState(String(selectedMid));
   const [stopLoss, setStopLoss] = useState(String(selectedMid));
+
+  const switchSymbol = (next: string) => {
+    const nextMid = midPrice(quoteForSymbol(quotes, next));
+    setSymbol(next);
+    setEntry(String(nextMid));
+    setStopLoss(String(nextMid));
+  };
+
+  // Follow symbol changes made from the chart watchlist (state adjusted
+  // during render rather than in an effect, per React guidance).
+  const [syncedUrlSymbol, setSyncedUrlSymbol] = useState(knownUrlSymbol);
+  if (knownUrlSymbol !== syncedUrlSymbol) {
+    setSyncedUrlSymbol(knownUrlSymbol);
+    if (knownUrlSymbol && knownUrlSymbol !== symbol) switchSymbol(knownUrlSymbol);
+  }
+
+  const selectSymbol = (next: string) => {
+    switchSymbol(next);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("symbol", next);
+    router.replace(`?${params.toString()}`, { scroll: false });
+  };
   const [checked, setChecked] = useState<Record<ChecklistKey, boolean>>({
     news: false,
     levels: false,
@@ -200,13 +233,7 @@ export function PreTradeDesk({
                   id="desk-symbol"
                   label={t("symbolLabel")}
                   value={symbol}
-                  onValueChange={(next) => {
-                    const quote = quoteForSymbol(quotes, next);
-                    const nextMid = midPrice(quote);
-                    setSymbol(next);
-                    setEntry(String(nextMid));
-                    setStopLoss(String(nextMid));
-                  }}
+                  onValueChange={selectSymbol}
                   options={quotes.map((quote) => ({
                     value: quote.symbol,
                     label: `${quote.symbol} - ${quote.name}`,

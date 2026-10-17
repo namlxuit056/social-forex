@@ -62,7 +62,7 @@ export function ChartWatchlist({ activeSymbol, onSelect }: Props) {
   const list = (
     <div className="flex min-h-0 flex-1 flex-col">
       {/* Tabs */}
-      <div className="shrink-0 border-b border-border/60">
+      <div className="shrink-0 border-b border-border">
         <button
           onClick={() => setTab("favorites")}
           className={cn(
@@ -101,7 +101,7 @@ export function ChartWatchlist({ activeSymbol, onSelect }: Props) {
               {t("noFavorites")}
             </p>
           ) : (
-            <ul className="divide-y divide-border/40">
+            <ul className="divide-y divide-border">
               {favDefs.map((d) => (
                 <PairRow
                   key={d.symbol}
@@ -125,7 +125,7 @@ export function ChartWatchlist({ activeSymbol, onSelect }: Props) {
                   <div className="sticky top-0 z-10 bg-muted/50 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground backdrop-blur-sm">
                     {t(group)}
                   </div>
-                  <ul className="divide-y divide-border/40">
+                  <ul className="divide-y divide-border">
                     {items.map((d) => (
                       <PairRow
                         key={d.symbol}

@@ -107,7 +107,7 @@ function ProposalCard({
   const checklist = proposal.checklist as ChecklistItem[] | null;
 
   return (
-    <Card className="border-border/70 bg-card/70">
+    <Card className="border-border bg-card">
       <CardHeader className="pb-3">
         <div className="flex flex-wrap items-center gap-2">
           <span className="font-heading text-base font-semibold text-foreground">
@@ -223,7 +223,7 @@ function ProposalCard({
 export function AiProposalsPanel({ proposals, locale }: Props) {
   if (proposals.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-border/80 bg-muted/15 px-4 py-6 text-sm text-muted-foreground">
+      <div className="rounded-xl border border-dashed border-border bg-muted/15 px-4 py-6 text-sm text-muted-foreground">
         No pending AI proposals
       </div>
     );

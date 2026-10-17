@@ -21,7 +21,7 @@ export function TpAmountHint({ amount }: { amount: number | null }) {
 export function RiskRewardPreview({ riskReward }: { riskReward: number | null }) {
   if (riskReward == null) return null;
   return (
-    <div className="flex items-center justify-between rounded-lg border border-border/60 bg-muted/20 px-3 py-2">
+    <div className="flex items-center justify-between rounded-lg border border-border bg-muted/20 px-3 py-2">
       <span className="text-xs text-muted-foreground">Risk : Reward</span>
       <span
         className={cn(

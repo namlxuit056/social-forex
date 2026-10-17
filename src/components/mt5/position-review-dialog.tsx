@@ -98,7 +98,7 @@ export function PositionReviewDialog({ open, onOpenChange, ticket, symbol }: Pro
                 </div>
               </div>
 
-              <div className="rounded-lg border border-border/60 bg-muted/20 p-3">
+              <div className="rounded-lg border border-border bg-muted/20 p-3">
                 <p className="text-sm leading-relaxed text-foreground">{review.summary}</p>
               </div>
 

@@ -160,10 +160,10 @@ export default async function Mt5Page({
   return (
     <div className="space-y-8">
       <section className="border-b border-border pb-7">
-        <p className="text-sm font-medium uppercase tracking-widest text-primary">
+        <p className="text-sm font-medium text-primary">
           {t("eyebrow")}
         </p>
-        <h1 className="mt-3 font-heading text-3xl font-semibold tracking-tight text-foreground">
+        <h1 className="mt-2 font-heading text-xl font-semibold tracking-tight text-foreground">
           {t("title")}
         </h1>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
@@ -204,7 +204,7 @@ export default async function Mt5Page({
           </CardHeader>
           <CardContent className="space-y-5 text-sm">
             {/* Download */}
-            <div className="flex flex-col gap-2 rounded-lg border border-border/70 bg-muted/20 p-4">
+            <div className="flex flex-col gap-2 rounded-lg border border-border bg-muted/20 p-4">
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 {t("downloadLabel")}
               </p>
@@ -287,7 +287,7 @@ export default async function Mt5Page({
         </div>
 
         {connections.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-border/80 bg-muted/15 px-4 py-6 text-sm text-muted-foreground">
+          <div className="rounded-xl border border-dashed border-border bg-muted/15 px-4 py-6 text-sm text-muted-foreground">
             {t("empty")}
           </div>
         ) : (
@@ -297,7 +297,7 @@ export default async function Mt5Page({
               const positions = snapshotPositions(latest?.positions);
               const active = Boolean(connection.lastSeenAt && !connection.revokedAt);
               return (
-                <Card key={connection.id} className="border-border/70 bg-card/70">
+                <Card key={connection.id} className="border-border bg-card">
                   <CardHeader className="space-y-3">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div>
@@ -356,7 +356,7 @@ export default async function Mt5Page({
 
                     {latest ? (
                       <div className="space-y-3">
-                        <div className="rounded-lg border border-border/70 bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
+                        <div className="rounded-lg border border-border bg-muted/20 px-3 py-2 text-xs text-muted-foreground">
                           {t("snapshotReceived", {
                             date: latest.receivedAt.toLocaleString(locale),
                           })}
@@ -366,7 +366,7 @@ export default async function Mt5Page({
                             {t("openPositionsTitle")}
                           </h3>
                           {positions.length > 0 ? (
-                            <div className="overflow-x-auto rounded-lg border border-border/70">
+                            <div className="overflow-x-auto rounded-lg border border-border">
                               <table className="w-full min-w-190 text-left text-xs">
                                 <thead className="bg-muted/40 text-muted-foreground">
                                   <tr>
@@ -381,9 +381,9 @@ export default async function Mt5Page({
                                     <th className="px-3 py-2 text-right font-medium">{t("colProfit")}</th>
                                   </tr>
                                 </thead>
-                                <tbody className="divide-y divide-border/60">
+                                <tbody className="divide-y divide-border">
                                   {positions.map((position) => (
-                                    <tr key={position.ticket} className="bg-card/40">
+                                    <tr key={position.ticket} className="bg-card">
                                       <td className="px-3 py-2 font-mono text-muted-foreground">
                                         {position.ticket}
                                       </td>
@@ -429,7 +429,7 @@ export default async function Mt5Page({
                               </table>
                             </div>
                           ) : (
-                            <div className="rounded-lg border border-dashed border-border/80 bg-muted/15 px-3 py-3 text-sm text-muted-foreground">
+                            <div className="rounded-lg border border-dashed border-border bg-muted/15 px-3 py-3 text-sm text-muted-foreground">
                               {t("openPositionsEmpty")}
                             </div>
                           )}
@@ -474,7 +474,7 @@ function Metric({
   value: string;
 }) {
   return (
-    <div className="rounded-lg border border-border/60 bg-muted/20 px-3 py-2">
+    <div className="rounded-lg border border-border bg-muted/20 px-3 py-2">
       <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
         <Icon className="size-3.5" aria-hidden />
         {label}

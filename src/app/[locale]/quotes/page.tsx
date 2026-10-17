@@ -1,4 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { PageHeader } from "@/components/layout/page-header";
 import { localeAlternates } from "@/lib/site-url";
 import { LiveQuotesTable } from "@/components/quotes/live-quotes-table";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
@@ -38,14 +39,7 @@ export default async function QuotesPage({
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="font-heading text-xl font-semibold text-foreground">
-          {t("title")}
-        </h1>
-        <p className="mt-2 max-w-2xl text-muted-foreground">
-          {t("description")}
-        </p>
-      </div>
+      <PageHeader title={t("title")} description={t("description")} />
       <LiveQuotesTable
         initial={initial.quotes}
         initialSource={initial.source}

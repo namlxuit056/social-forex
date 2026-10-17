@@ -1,4 +1,5 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { PageHeader } from "@/components/layout/page-header";
 import { auth } from "@/auth";
 import { SignupPrompt } from "@/components/analytics/signup-prompt";
 import { EconomicCalendar } from "@/components/calendar/economic-calendar";
@@ -55,12 +56,7 @@ export default async function CalendarPage({
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="font-heading text-xl font-semibold text-foreground">
-          {t("title")}
-        </h1>
-        <p className="mt-2 text-muted-foreground">{t("description")}</p>
-      </div>
+      <PageHeader title={t("title")} description={t("description")} />
       <EconomicCalendar
         key={calendarFilterKey}
         events={cal.events}

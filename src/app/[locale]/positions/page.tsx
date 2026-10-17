@@ -39,13 +39,13 @@ export default async function PositionsPage({
           <Activity className="size-6" />
         </div>
         <div>
-          <h1 className="text-xl font-bold tracking-tight sm:text-3xl">Positions</h1>
+          <h1 className="font-heading text-xl font-semibold tracking-tight">Positions</h1>
           <p className="text-sm text-muted-foreground">Live MT5 positions &amp; pending orders</p>
         </div>
       </div>
 
       {!snapshot ? (
-        <div className="rounded-lg border border-dashed border-border/60 py-16 text-center">
+        <div className="rounded-lg border border-dashed border-border py-16 text-center">
           <p className="text-muted-foreground">No MT5 connection found.</p>
           <p className="mt-1 text-sm text-muted-foreground">
             Set up a bridge token in the{" "}

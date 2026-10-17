@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { PageHeader } from "@/components/layout/page-header";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { localeAlternates } from "@/lib/site-url";
 import { ChartContainer } from "@/components/charts/chart-container";
@@ -29,14 +30,7 @@ export default async function ChartPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-heading text-xl font-semibold text-foreground">
-          {t("title")}
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {t("description")}
-        </p>
-      </div>
+      <PageHeader title={t("title")} description={t("description")} />
       <Suspense>
         <ChartContainer locale={locale} />
       </Suspense>

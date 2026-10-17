@@ -23,7 +23,7 @@ Quy ước test: `npm run test:e2e` (Playwright, `baseURL` = `E2E_BASE_URL` ho�
 
 ### Giai đoạn 1–7 — Làm lại theo nhóm màn (dùng bộ ở GĐ 0)
 
-- [ ] **UI-1 Bàn giao dịch** — `/chart`, `/quotes`, `/calendar`, `/positions`, `/mt5`; desk: đồng bộ cặp tiền chart ↔ ô Market (URL `?symbol=`). Test: `e2e/trading-desk.spec.ts` (đổi Market → chart symbol đổi; lọc lịch theo tiền tệ đổi URL; mobile không cuộn ngang).
+- [x] **UI-1 Bàn giao dịch** — `/chart`, `/quotes`, `/calendar`, `/positions`, `/mt5`; desk: đồng bộ cặp tiền chart ↔ ô Market (URL `?symbol=`). Test: `e2e/trading-desk.spec.ts` (đổi Market → chart symbol đổi; lọc lịch theo tiền tệ đổi URL; mobile không cuộn ngang).
 - [ ] **UI-2 Tín hiệu & copy** — chi tiết signal, `/copy-trade`, `/leaderboard`, `/ai-trade-proposals`, `/u/[id]`. Test: `e2e/signals-flow.spec.ts` (list → detail → quay lại giữ bộ lọc; leaderboard sắp xếp).
 - [ ] **UI-3 Nhật ký & kỷ luật** — các tab journal còn lại, `/plan`, `/dashboard`, `/backtest`. Test (cần login): `e2e/journal.spec.ts` (chuyển 8 tab qua URL, tab hiện `aria-current`).
 - [ ] **UI-4 Công cụ thị trường** — `/screener`, `/scalping`, `/heatmap`, `/sentiment`, `/alerts`, `/tools`. Test: `e2e/market-tools.spec.ts`.

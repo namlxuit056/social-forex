@@ -4,8 +4,8 @@ import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { formatInTimeZone } from "date-fns-tz";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { ImpactBadge } from "@/components/ui/status-badge";
+import { Segmented, ToggleChip } from "@/components/ui/toggle-chip";
 import {
   CalendarEventAiAnalysis,
   actionClass,
@@ -199,17 +199,14 @@ export function EconomicCalendar({
         {
           value: "high" as const,
           label: t("impactHigh"),
-          color: "bg-destructive/20 text-destructive border-destructive/30",
         },
         {
           value: "medium" as const,
           label: t("impactMedShort"),
-          color: "bg-amber-500/15 text-amber-700 dark:text-amber-200/95 border-amber-500/30",
         },
         {
           value: "low" as const,
           label: t("impactLow"),
-          color: "bg-muted text-muted-foreground border-border",
         },
       ] as const,
     [t],
@@ -221,17 +218,14 @@ export function EconomicCalendar({
         {
           value: "live" as const,
           label: t("statusLive"),
-          color: "border-primary/30 bg-primary/15 text-primary",
         },
         {
           value: "upcoming" as const,
           label: t("statusUpcoming"),
-          color: "border-sky-400/30 bg-sky-400/10 text-sky-700 dark:text-sky-200",
         },
         {
           value: "finished" as const,
           label: t("statusDone"),
-          color: "border-border bg-muted text-muted-foreground",
         },
       ] as const,
     [t],
@@ -373,32 +367,21 @@ export function EconomicCalendar({
       ) : null}
 
       {/* Filters bar */}
-      <div className="flex flex-col gap-3 rounded-xl border border-border/60 bg-muted/20 p-3 sm:flex-row sm:flex-wrap sm:items-center">
+      <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-4">
         {/* Date range */}
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-muted-foreground">
             {t("labelDate")}
           </span>
-          <div className="inline-flex rounded-lg border border-border p-0.5">
-            <Button
-              type="button"
-              variant={dateRange === "today" ? "default" : "ghost"}
-              size="sm"
-              className="rounded-md px-3 text-xs"
-              onClick={() => setDateRange("today")}
-            >
-              {t("filterToday")}
-            </Button>
-            <Button
-              type="button"
-              variant={dateRange === "week" ? "default" : "ghost"}
-              size="sm"
-              className="rounded-md px-3 text-xs"
-              onClick={() => setDateRange("week")}
-            >
-              {t("filterWeek")}
-            </Button>
-          </div>
+          <Segmented
+            ariaLabel={t("labelDate")}
+            value={dateRange}
+            onValueChange={setDateRange}
+            options={[
+              { value: "today", label: t("filterToday") },
+              { value: "week", label: t("filterWeek") },
+            ]}
+          />
         </div>
 
         {/* Divider */}
@@ -411,19 +394,13 @@ export function EconomicCalendar({
           </span>
           <div className="flex flex-wrap gap-1">
             {statusOptions.map((opt) => (
-              <button
+              <ToggleChip
                 key={opt.value}
-                type="button"
+                pressed={selectedStatuses.has(opt.value)}
                 onClick={() => toggleStatus(opt.value)}
-                className={cn(
-                  "min-h-9 rounded-md border px-2.5 py-1.5 text-xs font-medium transition-all",
-                  selectedStatuses.has(opt.value)
-                    ? opt.color
-                    : "border-transparent bg-muted/40 text-muted-foreground/50",
-                )}
               >
                 {opt.label}
-              </button>
+              </ToggleChip>
             ))}
           </div>
         </div>
@@ -438,19 +415,13 @@ export function EconomicCalendar({
           </span>
           <div className="flex gap-1">
             {impactOptions.map((opt) => (
-              <button
+              <ToggleChip
                 key={opt.value}
-                type="button"
+                pressed={selectedImpacts.has(opt.value)}
                 onClick={() => toggleImpact(opt.value)}
-                className={cn(
-                  "min-h-9 rounded-md border px-2.5 py-1.5 text-xs font-medium transition-all",
-                  selectedImpacts.has(opt.value)
-                    ? opt.color
-                    : "border-transparent bg-muted/40 text-muted-foreground/50",
-                )}
               >
                 {opt.label}
-              </button>
+              </ToggleChip>
             ))}
           </div>
         </div>
@@ -465,25 +436,20 @@ export function EconomicCalendar({
           </span>
           <div className="flex flex-wrap gap-1">
             {currencies.map((c) => (
-              <button
+              <ToggleChip
                 key={c}
-                type="button"
+                pressed={selectedCurrencies.has(c)}
                 onClick={() => toggleCurrency(c)}
-                className={cn(
-                  "min-h-8 rounded-md border px-2.5 py-1 text-xs font-medium transition-all",
-                  selectedCurrencies.size === 0 || selectedCurrencies.has(c)
-                    ? "border-primary/30 bg-primary/10 text-primary"
-                    : "border-transparent bg-muted/40 text-muted-foreground/50",
-                )}
+                className="font-mono"
               >
                 {c}
-              </button>
+              </ToggleChip>
             ))}
             {selectedCurrencies.size > 0 && (
               <button
                 type="button"
                 onClick={() => setSelectedCurrencies(new Set())}
-                className="min-h-8 rounded-md px-2.5 py-1 text-xs text-muted-foreground/60 underline-offset-2 hover:text-foreground hover:underline"
+                className="inline-flex h-8 items-center rounded-lg px-2.5 text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
               >
                 {t("allCurrencies")}
               </button>
@@ -499,32 +465,17 @@ export function EconomicCalendar({
           <span className="text-xs font-medium text-muted-foreground">
             {t("labelTime")}
           </span>
-          <div
-            className={cn(
-              "inline-flex rounded-lg border border-border p-0.5 transition-opacity",
-              isPending && "opacity-70",
-            )}
-          >
-            <Button
-              type="button"
-              variant={zone === "vn" ? "default" : "ghost"}
-              size="sm"
-              className="rounded-md px-2.5 text-xs"
-              onClick={() => startTransition(() => setZone("vn"))}
-            >
-              VN
-            </Button>
-            <Button
-              type="button"
-              variant={zone === "utc" ? "default" : "ghost"}
-              size="sm"
-              className="rounded-md px-2.5 text-xs"
-              onClick={() => startTransition(() => setZone("utc"))}
-            >
-              UTC
-            </Button>
-          </div>
-          <span className="text-[10px] text-muted-foreground/60">{zoneLabel}</span>
+          <Segmented
+            ariaLabel={t("labelTime")}
+            value={zone}
+            onValueChange={(next) => startTransition(() => setZone(next))}
+            className={cn(isPending && "opacity-70")}
+            options={[
+              { value: "vn", label: "VN" },
+              { value: "utc", label: "UTC" },
+            ]}
+          />
+          <span className="text-xs text-muted-foreground">{zoneLabel}</span>
         </div>
       </div>
 
@@ -541,7 +492,7 @@ export function EconomicCalendar({
       {/* Mobile cards */}
       <div className="grid gap-2 md:hidden">
         {rows.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-border/80 bg-muted/15 px-4 py-8 text-center text-sm text-muted-foreground">
+          <div className="rounded-xl border border-dashed border-border bg-muted/15 px-4 py-8 text-center text-sm text-muted-foreground">
             {t("emptyFilter")}
           </div>
         ) : (
@@ -552,7 +503,7 @@ export function EconomicCalendar({
                 key={ev.id}
                 ref={(el) => setHighlightRef(ev.id, el)}
                 className={cn(
-                  "rounded-xl border border-border bg-card/60 p-3",
+                  "rounded-xl border border-border bg-card p-3",
                   status === "live" && "border-primary/35 bg-primary/7",
                   isHighlighted && "border-amber-500/60 bg-amber-500/10 ring-1 ring-amber-500/40",
                 )}
