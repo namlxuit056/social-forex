@@ -49,7 +49,7 @@ export default async function EditAiArticlePage({ params }: Props) {
       </div>
 
       <div>
-        <h1 className="font-heading text-2xl font-semibold text-foreground">
+        <h1 className="font-heading text-xl font-semibold text-foreground">
           <Bot className="mr-2 inline-block size-5" aria-hidden />
           {t("aiArticlesEdit")}
         </h1>

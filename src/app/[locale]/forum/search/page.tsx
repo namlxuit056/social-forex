@@ -82,7 +82,7 @@ export default async function ForumSearchPage({ params, searchParams }: Props) {
   return (
     <div className="space-y-6">
       <BackLink href="/forum">{t("backToForum")}</BackLink>
-      <h1 className="font-heading text-2xl font-semibold text-foreground">
+      <h1 className="font-heading text-xl font-semibold text-foreground">
         {t("searchThreads")}
       </h1>
       <form method="get" className="flex flex-wrap gap-2">

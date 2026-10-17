@@ -4,6 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { SignalRoom } from "@/components/signals/signal-room";
+import { PageHeader } from "@/components/layout/page-header";
 import { Disclaimer } from "@/components/layout/disclaimer";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -231,12 +232,7 @@ export default async function SignalsPage({
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="font-heading text-2xl font-semibold text-foreground">
-          {t("title")}
-        </h1>
-        <p className="mt-2 text-muted-foreground">{t("description")}</p>
-      </div>
+      <PageHeader title={t("title")} description={t("description")} />
 
       {!session?.user && (
         <Card>

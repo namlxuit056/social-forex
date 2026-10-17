@@ -60,7 +60,7 @@ export default async function ForumCategoryPage({ params, searchParams }: Props)
       <BackLink href="/forum">{t("backToForum")}</BackLink>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="font-heading text-2xl font-semibold text-foreground">
+          <h1 className="font-heading text-xl font-semibold text-foreground">
             {category.name}
           </h1>
           {category.description && (

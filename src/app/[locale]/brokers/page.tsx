@@ -273,7 +273,7 @@ export default async function BrokersPage({
           {copy.eyebrow}
         </Badge>
         <div className="max-w-3xl">
-          <h1 className="font-heading text-2xl font-semibold text-foreground md:text-3xl">
+          <h1 className="font-heading text-xl font-semibold text-foreground md:text-3xl">
             {copy.title}
           </h1>
           <p className="mt-3 text-sm leading-6 text-muted-foreground md:text-base">

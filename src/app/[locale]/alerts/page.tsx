@@ -63,7 +63,7 @@ export default async function AlertsPage({
       <div className="flex items-start gap-3">
         <Bell className="mt-1 h-5 w-5 text-primary shrink-0" />
         <div>
-          <h1 className="font-heading text-2xl font-semibold text-foreground">{t("title")}</h1>
+          <h1 className="font-heading text-xl font-semibold text-foreground">{t("title")}</h1>
           <p className="mt-1 text-muted-foreground">{t("description")}</p>
         </div>
       </div>

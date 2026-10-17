@@ -33,7 +33,7 @@ export default async function NewThreadPage({ params }: Props) {
     <div className="mx-auto max-w-2xl space-y-8">
       <BackLink href={`/forum/${slug}`}>{category.name}</BackLink>
       <div>
-        <h1 className="font-heading text-2xl font-semibold text-foreground">
+        <h1 className="font-heading text-xl font-semibold text-foreground">
           {t("newThreadPageTitle")}
         </h1>
         <p className="mt-2 text-muted-foreground">{t("newThreadSubtitle")}</p>

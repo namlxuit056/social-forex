@@ -71,7 +71,7 @@ export default async function ForumThreadPage({ params }: Props) {
       </div>
 
       <header>
-        <h1 className="font-heading text-2xl font-semibold text-foreground">
+        <h1 className="font-heading text-xl font-semibold text-foreground">
           {thread.title}
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">

@@ -313,7 +313,7 @@ export default async function SignalDetailPage({
           <div className="flex flex-col gap-4 border-b border-border/40 pb-5 lg:flex-row lg:items-start lg:justify-between">
             <div className="min-w-0 space-y-2">
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="font-mono text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                <h1 className="font-mono text-xl font-bold tracking-tight text-foreground sm:text-3xl">
                   {signal.symbol}
                 </h1>
                 <Badge

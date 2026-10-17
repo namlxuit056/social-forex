@@ -5,6 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { ChartContainer } from "@/components/charts/chart-container";
 import { EconomicCalendar } from "@/components/calendar/economic-calendar";
 import { PreTradeDesk } from "@/components/desk/pre-trade-desk";
+import { PageHeader } from "@/components/layout/page-header";
 import { Disclaimer } from "@/components/layout/disclaimer";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
 import { LiveQuotesTable } from "@/components/quotes/live-quotes-table";
@@ -97,32 +98,28 @@ export default async function DeskPage({
 
   return (
     <div className="space-y-10">
-      <header className="space-y-3">
-        <h1 className="font-heading text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
-          {t("title")}
-        </h1>
-        <p className="max-w-3xl text-muted-foreground">{t("subtitle")}</p>
+      <PageHeader title={t("title")} description={t("subtitle")}>
         <nav
           className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-primary"
           aria-label={t("jumpNavAria")}
         >
           <a
             href="#pre-trade-desk-title"
-            className="underline-offset-4 hover:underline"
+            className="inline-flex min-h-6 items-center underline-offset-4 hover:underline"
           >
             {t("jumpPreTrade")}
           </a>
-          <a href="#desk-quotes" className="underline-offset-4 hover:underline">
+          <a href="#desk-quotes" className="inline-flex min-h-6 items-center underline-offset-4 hover:underline">
             {t("jumpQuotes")}
           </a>
           <a
             href="#desk-calendar"
-            className="underline-offset-4 hover:underline"
+            className="inline-flex min-h-6 items-center underline-offset-4 hover:underline"
           >
             {t("jumpCalendar")}
           </a>
         </nav>
-      </header>
+      </PageHeader>
 
       <PreTradeDesk
         quotes={initialQuotes.quotes}

@@ -162,7 +162,7 @@ export default async function TradingPlanPage({
           <Badge variant="outline" className="border-primary/30 text-primary">
             {t("eyebrow")}
           </Badge>
-          <h1 className="font-heading text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
+          <h1 className="font-heading text-xl font-semibold tracking-tight text-foreground md:text-3xl">
             {t("title")}
           </h1>
           <p className="max-w-3xl text-muted-foreground">{t("description")}</p>
@@ -300,7 +300,7 @@ export default async function TradingPlanPage({
           <Badge variant="outline" className="border-primary/30 text-primary">
             {t("eyebrow")}
           </Badge>
-          <h1 className="font-heading text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
+          <h1 className="font-heading text-xl font-semibold tracking-tight text-foreground md:text-3xl">
             {t("title")}
           </h1>
           <p className="max-w-3xl text-muted-foreground">{t("description")}</p>

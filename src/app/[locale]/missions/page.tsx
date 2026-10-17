@@ -43,7 +43,7 @@ export default async function MissionsPage({ params }: { params: Promise<{ local
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="font-heading text-2xl font-semibold text-foreground">{t("title")}</h1>
+          <h1 className="font-heading text-xl font-semibold text-foreground">{t("title")}</h1>
           <p className="mt-2 text-muted-foreground">{t("subtitle")}</p>
         </div>
         <EmptyState
@@ -72,7 +72,7 @@ export default async function MissionsPage({ params }: { params: Promise<{ local
   return (
     <div className="space-y-8">
       <header className="space-y-3">
-        <h1 className="font-heading text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
+        <h1 className="font-heading text-xl font-semibold tracking-tight text-foreground md:text-3xl">
           {t("title")}
         </h1>
         <p className="max-w-2xl text-muted-foreground">{t("subtitle")}</p>

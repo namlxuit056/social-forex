@@ -91,7 +91,7 @@ export default async function ProfilePage({
 
   return (
     <div className="space-y-8">
-      <h1 className="font-heading text-2xl font-semibold text-foreground">
+      <h1 className="font-heading text-xl font-semibold text-foreground">
         {t("title")}
       </h1>
       <div className="rounded-xl border border-border bg-card/50 p-6 ring-1 ring-foreground/5">

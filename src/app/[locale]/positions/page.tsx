@@ -39,7 +39,7 @@ export default async function PositionsPage({
           <Activity className="size-6" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Positions</h1>
+          <h1 className="text-xl font-bold tracking-tight sm:text-3xl">Positions</h1>
           <p className="text-sm text-muted-foreground">Live MT5 positions &amp; pending orders</p>
         </div>
       </div>

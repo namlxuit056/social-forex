@@ -199,7 +199,7 @@ export default async function ArticlePage({ params }: Props) {
                 {formatDate(article.publishedAt ?? article.generatedAt, locale)}
               </span>
             </div>
-            <h1 className="font-heading text-2xl font-semibold text-foreground">
+            <h1 className="font-heading text-xl font-semibold text-foreground">
               {article.title}
             </h1>
             <p className="mt-2 text-muted-foreground">{article.summary}</p>

@@ -55,7 +55,7 @@ export default async function AdminDashboardPage({
   if (admin?.role !== "ADMIN" && admin?.role !== "MOD") {
     return (
       <div className="space-y-4">
-        <h1 className="font-heading text-2xl font-semibold">{t("noAccess")}</h1>
+        <h1 className="font-heading text-xl font-semibold">{t("noAccess")}</h1>
         <p className="text-muted-foreground">{t("noAccessHint")}</p>
       </div>
     );
@@ -124,7 +124,7 @@ export default async function AdminDashboardPage({
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="font-heading text-2xl font-semibold text-foreground">
+        <h1 className="font-heading text-xl font-semibold text-foreground">
           {t("dashboard")}
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">

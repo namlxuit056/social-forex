@@ -170,7 +170,7 @@ export default async function AcademyLessonPage({ params }: Props) {
           <Badge variant="outline" className="mb-3 text-xs">
             {levelLabel[lesson.level] ?? lesson.level}
           </Badge>
-          <h1 className="font-heading text-2xl font-semibold text-foreground">
+          <h1 className="font-heading text-xl font-semibold text-foreground">
             {lesson.title}
           </h1>
           <p className="mt-2 text-muted-foreground">{lesson.summary}</p>

@@ -38,7 +38,7 @@ export default async function RegisterPage({
         <div className="mx-auto flex size-12 items-center justify-center rounded-xl bg-primary/15 ring-1 ring-primary/25">
           <UserPlus className="size-6 text-primary" aria-hidden />
         </div>
-        <h1 className="mt-4 font-heading text-2xl font-semibold tracking-tight text-foreground">
+        <h1 className="mt-4 font-heading text-xl font-semibold tracking-tight text-foreground">
           {t("registerTitle")}
         </h1>
       </div>

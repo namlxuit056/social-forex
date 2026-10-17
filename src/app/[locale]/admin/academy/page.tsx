@@ -37,7 +37,7 @@ export default async function AdminAcademyPage() {
   if (admin?.role !== "ADMIN") {
     return (
       <div className="space-y-4">
-        <h1 className="font-heading text-2xl font-semibold">Không có quyền truy cập</h1>
+        <h1 className="font-heading text-xl font-semibold">Không có quyền truy cập</h1>
         <p className="text-muted-foreground">Trang này yêu cầu quyền ADMIN.</p>
       </div>
     );
@@ -61,7 +61,7 @@ export default async function AdminAcademyPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-heading text-2xl font-semibold text-foreground">
+        <h1 className="font-heading text-xl font-semibold text-foreground">
           <BookOpen className="mr-2 inline-block size-5" aria-hidden />
           Bài học Academy AI
         </h1>

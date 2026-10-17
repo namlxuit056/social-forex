@@ -46,7 +46,7 @@ export default async function AdminAiModelSettingsPage({
   if (admin?.role !== "ADMIN") {
     return (
       <div className="space-y-4">
-        <h1 className="font-heading text-2xl font-semibold">{t("noAccess")}</h1>
+        <h1 className="font-heading text-xl font-semibold">{t("noAccess")}</h1>
         <p className="text-muted-foreground">{t("noAccessHint")}</p>
       </div>
     );
@@ -76,7 +76,7 @@ export default async function AdminAiModelSettingsPage({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-heading text-2xl font-semibold text-foreground">
+        <h1 className="font-heading text-xl font-semibold text-foreground">
           <Bot className="mr-2 inline-block size-5" aria-hidden />
           {t("aiModelSettings")}
         </h1>

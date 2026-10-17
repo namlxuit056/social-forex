@@ -62,7 +62,7 @@ export default async function ArticlesPage({
         ]}
       />
       <div>
-        <h1 className="font-heading text-2xl font-semibold text-foreground">
+        <h1 className="font-heading text-xl font-semibold text-foreground">
           {t("title")}
         </h1>
         <p className="mt-2 max-w-3xl text-muted-foreground">

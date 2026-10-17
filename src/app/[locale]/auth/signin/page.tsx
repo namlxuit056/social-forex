@@ -34,7 +34,7 @@ export default async function SignInPage({
         <div className="mx-auto flex size-12 items-center justify-center rounded-xl bg-primary/15 ring-1 ring-primary/25">
           <LineChart className="size-6 text-primary" aria-hidden />
         </div>
-        <h1 className="mt-4 font-heading text-2xl font-semibold tracking-tight text-foreground">
+        <h1 className="mt-4 font-heading text-xl font-semibold tracking-tight text-foreground">
           {t("signInTitle")} Social Forex
         </h1>
         <p className="mt-2 flex items-center justify-center gap-2 text-sm text-muted-foreground">
