@@ -13,6 +13,11 @@ import { SignalCreateForm } from "@/components/signals/signal-create-form";
 import { SignalImageGallery } from "@/components/signals/signal-image-gallery";
 import { EmptyState } from "@/components/layout/empty-state";
 import { Badge } from "@/components/ui/badge";
+import {
+  DirectionBadge,
+  SignalStatusBadge,
+  TierBadge,
+} from "@/components/ui/status-badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -79,23 +84,6 @@ function statusLabel(
       return t("statusCancelled");
     default:
       return status;
-  }
-}
-
-function statusBadgeClass(status: SignalRow["status"]): string {
-  switch (status) {
-    case "PENDING":
-      return "border-amber-500/45 bg-amber-500/15 text-amber-700 dark:text-amber-200";
-    case "ACTIVE":
-      return "border-emerald-500/40 bg-emerald-500/15 text-emerald-700 dark:text-emerald-200";
-    case "CLOSED_WIN":
-      return "border-sky-500/40 bg-sky-500/15 text-sky-700 dark:text-sky-200";
-    case "CLOSED_LOSS":
-      return "border-destructive/40 bg-destructive/15 text-red-700 dark:text-red-300";
-    case "CANCELLED":
-      return "border-muted-foreground/35 bg-muted/40 text-muted-foreground";
-    default:
-      return "";
   }
 }
 
@@ -703,20 +691,8 @@ export function SignalRoom({
                             <span className="font-mono text-lg font-semibold tracking-tight text-foreground">
                               {s.symbol}
                             </span>
-                            <Badge
-                              variant={
-                                s.direction === "LONG" ? "default" : "destructive"
-                              }
-                              className="text-xs"
-                            >
-                              {s.direction}
-                            </Badge>
-                            <Badge
-                              variant={s.tier === "VIP" ? "secondary" : "outline"}
-                              className="text-xs"
-                            >
-                              {s.tier}
-                            </Badge>
+                            <DirectionBadge direction={s.direction} />
+                            <TierBadge tier={s.tier} />
                             <RewardRiskLabel
                               entry={s.entry}
                               stopLoss={s.stopLoss}
@@ -859,15 +835,10 @@ export function SignalRoom({
                           <span className="text-xs text-muted-foreground">
                             {t("status")}
                           </span>
-                          <Badge
-                            variant="outline"
-                            className={cn(
-                              "text-xs font-medium",
-                              statusBadgeClass(s.status),
-                            )}
-                          >
-                            {statusLabel(s.status, t)}
-                          </Badge>
+                          <SignalStatusBadge
+                            status={s.status}
+                            label={statusLabel(s.status, t)}
+                          />
                           {s.isAuthor && s.status === "ACTIVE" ? (
                             <SignalCloseForm signalId={s.id} />
                           ) : null}

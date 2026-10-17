@@ -8,7 +8,11 @@ import { Disclaimer } from "@/components/layout/disclaimer";
 import { prisma } from "@/lib/prisma";
 import { isVipActive } from "@/lib/vip";
 import { routing } from "@/i18n/routing";
-import { Badge } from "@/components/ui/badge";
+import {
+  DirectionBadge,
+  SignalStatusBadge,
+  TierBadge,
+} from "@/components/ui/status-badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { SignalArticleJsonLd } from "@/components/seo/signal-article-json-ld";
@@ -313,26 +317,12 @@ export default async function SignalDetailPage({
           <div className="flex flex-col gap-4 border-b border-border/40 pb-5 lg:flex-row lg:items-start lg:justify-between">
             <div className="min-w-0 space-y-2">
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="font-mono text-xl font-bold tracking-tight text-foreground sm:text-3xl">
+                <h1 className="font-mono text-xl font-semibold tracking-tight text-foreground">
                   {signal.symbol}
                 </h1>
-                <Badge
-                  variant={
-                    signal.direction === "LONG" ? "default" : "destructive"
-                  }
-                  className="h-6 px-2.5 text-xs"
-                >
-                  {signal.direction}
-                </Badge>
-                <Badge
-                  variant={signal.tier === "VIP" ? "secondary" : "outline"}
-                  className="h-6 px-2.5 text-xs"
-                >
-                  {tierText}
-                </Badge>
-                <Badge variant="outline" className="h-6 px-2.5 text-xs">
-                  {statusText}
-                </Badge>
+                <DirectionBadge direction={signal.direction} />
+                <TierBadge tier={signal.tier} label={tierText} />
+                <SignalStatusBadge status={signal.status} label={statusText} />
               </div>
               <p className="text-sm text-muted-foreground">
                 {authorName} · {createdAtText}

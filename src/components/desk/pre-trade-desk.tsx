@@ -18,6 +18,7 @@ import type { QuoteRow } from "@/lib/quotes/types";
 import type { SignalCardNewsEvent } from "@/lib/signals/signal-list-news";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ImpactBadge } from "@/components/ui/status-badge";
 import {
   Card,
   CardContent,
@@ -58,12 +59,6 @@ function midPrice(quote: QuoteRow | undefined) {
 function numberValue(value: string) {
   const n = Number(value);
   return Number.isFinite(n) ? n : 0;
-}
-
-function impactClass(impact: "high" | "medium" | "low") {
-  if (impact === "high") return "border-destructive/30 bg-destructive/10 text-destructive";
-  if (impact === "medium") return "border-amber-500/35 bg-amber-500/10 text-amber-600 dark:text-amber-300";
-  return "border-border bg-muted text-muted-foreground";
 }
 
 export function PreTradeDesk({
@@ -320,9 +315,10 @@ export function PreTradeDesk({
                           {fmt.format(new Date(event.timeUtc))}
                         </time>
                         <span className="font-mono text-foreground">{event.currency}</span>
-                        <Badge variant="outline" className={cn("h-5 rounded px-1.5 text-[0.65rem]", impactClass(impact))}>
-                          {impact === "high" ? tCal("impactHigh") : impact === "medium" ? tCal("impactMedShort") : tCal("impactLow")}
-                        </Badge>
+                        <ImpactBadge
+                          impact={impact}
+                          label={impact === "high" ? tCal("impactHigh") : impact === "medium" ? tCal("impactMedShort") : tCal("impactLow")}
+                        />
                       </div>
                       <p className="mt-1 text-sm leading-snug text-foreground">{event.title}</p>
                     </li>

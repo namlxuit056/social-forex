@@ -5,23 +5,10 @@ import { useLocale, useTranslations } from "next-intl";
 import { Calendar } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
+import { ImpactBadge } from "@/components/ui/status-badge";
+import { type Impact, normalizeImpact } from "@/lib/ui/status-map";
 import { buttonVariants } from "@/components/ui/button";
 import type { SignalCardNewsEvent } from "@/lib/signals/signal-list-news";
-
-type Impact = "high" | "medium" | "low";
-
-function toImpact(s: string): Impact {
-  const x = s.toLowerCase();
-  if (x === "high" || x.includes("high")) return "high";
-  if (x === "low" || x.includes("low")) return "low";
-  return "medium";
-}
-
-const impactClass: Record<Impact, string> = {
-  low: "bg-muted text-muted-foreground",
-  medium: "bg-amber-500/20 text-amber-800 dark:text-amber-100 ring-1 ring-amber-500/35",
-  high: "bg-destructive/25 text-destructive-foreground ring-2 ring-destructive/45",
-};
 
 export function SignalCardNews({
   symbol,
@@ -75,7 +62,7 @@ export function SignalCardNews({
       </div>
       <ul className="flex flex-1 flex-col gap-0 divide-y divide-border/40 px-3 py-2 sm:px-4">
         {events.map((ev) => {
-          const imp = toImpact(ev.impact);
+          const imp = normalizeImpact(ev.impact);
           const d = new Date(ev.timeUtc);
           return (
             <li key={ev.id} className="py-2.5 first:pt-0 last:pb-0">
@@ -91,14 +78,7 @@ export function SignalCardNews({
                     {ev.title}
                   </p>
                 </div>
-                <span
-                  className={cn(
-                    "shrink-0 rounded px-1.5 py-0.5 text-[0.6rem] font-semibold uppercase",
-                    impactClass[imp],
-                  )}
-                >
-                  {impactLabel(imp)}
-                </span>
+                <ImpactBadge impact={imp} label={impactLabel(imp)} />
               </div>
             </li>
           );

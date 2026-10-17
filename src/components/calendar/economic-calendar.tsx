@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { formatInTimeZone } from "date-fns-tz";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ImpactBadge } from "@/components/ui/status-badge";
 import {
   CalendarEventAiAnalysis,
   actionClass,
@@ -113,22 +114,13 @@ export function EconomicCalendar({
         : t("statusDone");
 
   const impactBadge = (impact: Impact) => {
-    const map = {
-      low: "bg-muted text-muted-foreground",
-      medium: "bg-amber-500/15 text-amber-700 dark:text-amber-200/95",
-      high: "bg-destructive/20 text-destructive",
-    };
     const label =
       impact === "low"
         ? t("impactLow")
         : impact === "medium"
           ? t("impactMedShort")
           : t("impactHigh");
-    return (
-      <span className={`rounded px-2 py-0.5 text-xs font-medium ${map[impact]}`}>
-        {label}
-      </span>
-    );
+    return <ImpactBadge impact={impact} label={label} />;
   };
 
   const statusBadgeRow = (s: CalendarEventStatus) => {
