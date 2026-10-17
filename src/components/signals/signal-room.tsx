@@ -14,6 +14,8 @@ import { SignalImageGallery } from "@/components/signals/signal-image-gallery";
 import { EmptyState } from "@/components/layout/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { FieldSelect } from "@/components/ui/field-select";
+import { FilterBar } from "@/components/ui/filter-bar";
+import { PriceLevels } from "@/components/signals/price-levels";
 import {
   DirectionBadge,
   SignalStatusBadge,
@@ -31,7 +33,6 @@ import {
   type SignalListTz,
 } from "@/lib/signals/signal-list-query";
 import type { SignalCardNewsEvent } from "@/lib/signals/signal-list-news";
-import { signalLevel } from "@/components/signals/signal-level-classes";
 import { FollowButton } from "@/components/social/follow-button";
 import { VipSignalTeaser } from "@/components/signals/vip-signal-teaser";
 import { cn } from "@/lib/utils";
@@ -416,154 +417,151 @@ export function SignalRoom({
         ) : null}
 
         {totalUnfiltered > 0 ? (
-          <div className="space-y-2 rounded-xl border border-border bg-card p-3 sm:p-4">
-            <div className="flex flex-wrap items-end gap-3">
-              <div className="min-w-0 flex-1 basis-44">
-                <Label htmlFor="signal-filter-symbol" className="text-xs">
-                  {t("filterSymbol")}
-                </Label>
-                <Input
-                  id="signal-filter-symbol"
-                  value={symbolQuery}
-                  onChange={(e) => setSymbolQuery(e.target.value)}
-                  placeholder={t("filterSymbolPlaceholder")}
-                  className="mt-1 h-9 font-mono uppercase"
-                  autoComplete="off"
-                />
-              </div>
-              <div className="min-w-0 flex-1 basis-44">
-                <Label htmlFor="signal-filter-author" className="text-xs">
-                  {t("filterAuthor")}
-                </Label>
-                <Input
-                  id="signal-filter-author"
-                  value={authorQuery}
-                  onChange={(e) => setAuthorQuery(e.target.value)}
-                  placeholder={t("filterAuthorPlaceholder")}
-                  className="mt-1 h-9"
-                  autoComplete="off"
-                  spellCheck={false}
-                />
-              </div>
-              <FieldSelect
-                id="signal-filter-period"
-                label={t("filterPeriod")}
-                className="w-[calc(50%-0.375rem)] sm:w-36"
-                value={periodFilter}
-                onValueChange={(period) => applyFilters({ period })}
-                options={[
-                  { value: "today", label: t("filterPeriodToday") },
-                  { value: "week", label: t("filterPeriodWeek") },
-                  { value: "all", label: t("filterPeriodAll") },
-                ]}
+          <FilterBar
+            footnote={t("filterPeriodHint", {
+              zone:
+                tzFilter === "utc"
+                  ? t("filterTzUtcLong")
+                  : t("filterTzVnLong"),
+            })}
+          >
+            <div className="min-w-0 flex-1 basis-44">
+              <Label htmlFor="signal-filter-symbol" className="text-xs">
+                {t("filterSymbol")}
+              </Label>
+              <Input
+                id="signal-filter-symbol"
+                value={symbolQuery}
+                onChange={(e) => setSymbolQuery(e.target.value)}
+                placeholder={t("filterSymbolPlaceholder")}
+                className="mt-1 h-9 font-mono uppercase"
+                autoComplete="off"
               />
-              <FieldSelect
-                id="signal-filter-status"
-                label={t("filterStatus")}
-                className="w-[calc(50%-0.375rem)] sm:w-36"
-                value={statusFilter}
-                onValueChange={(status) => applyFilters({ status })}
-                options={[
-                  { value: "all", label: t("filterStatusAll") },
-                  { value: "PENDING", label: t("filterStatusPending") },
-                  { value: "ACTIVE", label: t("filterStatusActive") },
-                  { value: "CLOSED_WIN", label: t("filterStatusClosedWin") },
-                  { value: "CLOSED_LOSS", label: t("filterStatusClosedLoss") },
-                  { value: "CANCELLED", label: t("filterStatusCancelled") },
-                ]}
+            </div>
+            <div className="min-w-0 flex-1 basis-44">
+              <Label htmlFor="signal-filter-author" className="text-xs">
+                {t("filterAuthor")}
+              </Label>
+              <Input
+                id="signal-filter-author"
+                value={authorQuery}
+                onChange={(e) => setAuthorQuery(e.target.value)}
+                placeholder={t("filterAuthorPlaceholder")}
+                className="mt-1 h-9"
+                autoComplete="off"
+                spellCheck={false}
               />
-              <FieldSelect
-                id="signal-filter-tier"
-                label={t("filterTier")}
-                className="w-[calc(50%-0.375rem)] sm:w-36"
-                value={tierFilter}
-                onValueChange={(tier) => applyFilters({ tier })}
-                options={[
-                  { value: "all", label: t("filterTierAll") },
-                  { value: "FREE", label: t("filterTierFree") },
-                  { value: "VIP", label: t("filterTierVip") },
-                ]}
-              />
-              <FieldSelect
-                id="signal-sort"
-                label={t("sortLabel")}
-                className="w-[calc(50%-0.375rem)] sm:w-36"
-                value={sort}
-                onValueChange={(nextSort) => applyFilters({ sort: nextSort })}
-                options={[
-                  { value: "newest", label: t("sortNewest") },
-                  { value: "symbol", label: t("sortSymbol") },
-                  { value: "tier", label: t("sortTier") },
-                ]}
-              />
-              <div className="flex flex-col gap-1">
-                <span className="text-xs font-medium">
-                  {t("filterTimezone")}
-                </span>
-                <div
-                  className="inline-flex h-9 w-fit items-center rounded-lg border border-border bg-muted/40 p-0.5"
-                  role="group"
-                  aria-label={t("filterTimezone")}
+            </div>
+            <FieldSelect
+              id="signal-filter-period"
+              label={t("filterPeriod")}
+              className="w-[calc(50%-0.375rem)] sm:w-36"
+              value={periodFilter}
+              onValueChange={(period) => applyFilters({ period })}
+              options={[
+                { value: "today", label: t("filterPeriodToday") },
+                { value: "week", label: t("filterPeriodWeek") },
+                { value: "all", label: t("filterPeriodAll") },
+              ]}
+            />
+            <FieldSelect
+              id="signal-filter-status"
+              label={t("filterStatus")}
+              className="w-[calc(50%-0.375rem)] sm:w-36"
+              value={statusFilter}
+              onValueChange={(status) => applyFilters({ status })}
+              options={[
+                { value: "all", label: t("filterStatusAll") },
+                { value: "PENDING", label: t("filterStatusPending") },
+                { value: "ACTIVE", label: t("filterStatusActive") },
+                { value: "CLOSED_WIN", label: t("filterStatusClosedWin") },
+                { value: "CLOSED_LOSS", label: t("filterStatusClosedLoss") },
+                { value: "CANCELLED", label: t("filterStatusCancelled") },
+              ]}
+            />
+            <FieldSelect
+              id="signal-filter-tier"
+              label={t("filterTier")}
+              className="w-[calc(50%-0.375rem)] sm:w-36"
+              value={tierFilter}
+              onValueChange={(tier) => applyFilters({ tier })}
+              options={[
+                { value: "all", label: t("filterTierAll") },
+                { value: "FREE", label: t("filterTierFree") },
+                { value: "VIP", label: t("filterTierVip") },
+              ]}
+            />
+            <FieldSelect
+              id="signal-sort"
+              label={t("sortLabel")}
+              className="w-[calc(50%-0.375rem)] sm:w-36"
+              value={sort}
+              onValueChange={(nextSort) => applyFilters({ sort: nextSort })}
+              options={[
+                { value: "newest", label: t("sortNewest") },
+                { value: "symbol", label: t("sortSymbol") },
+                { value: "tier", label: t("sortTier") },
+              ]}
+            />
+            <div className="flex flex-col gap-1">
+              <span className="text-xs font-medium">
+                {t("filterTimezone")}
+              </span>
+              <div
+                className="inline-flex h-9 w-fit items-center rounded-lg border border-border bg-muted/40 p-0.5"
+                role="group"
+                aria-label={t("filterTimezone")}
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (tzFilter === "vn") return;
+                    applyFilters({ tz: "vn" });
+                  }}
+                  className={cn(
+                    "h-full rounded-md px-3 text-xs font-medium transition-colors",
+                    tzFilter === "vn"
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
                 >
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (tzFilter === "vn") return;
-                      applyFilters({ tz: "vn" });
-                    }}
-                    className={cn(
-                      "h-full rounded-md px-3 text-xs font-medium transition-colors",
-                      tzFilter === "vn"
-                        ? "bg-background text-foreground shadow-sm"
-                        : "text-muted-foreground hover:text-foreground",
-                    )}
-                  >
-                    {t("filterTzVn")}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (tzFilter === "utc") return;
-                      applyFilters({ tz: "utc" });
-                    }}
-                    className={cn(
-                      "h-full rounded-md px-3 text-xs font-medium transition-colors",
-                      tzFilter === "utc"
-                        ? "bg-background text-foreground shadow-sm"
-                        : "text-muted-foreground hover:text-foreground",
-                    )}
-                  >
-                    {t("filterTzUtc")}
-                  </button>
-                </div>
-              </div>
-              <div className="flex items-end">
-                {filtersActive ? (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="h-9"
-                    onClick={() => {
-                      setSymbolQuery("");
-                      setAuthorQuery("");
-                      router.replace(pathname, { scroll: false });
-                    }}
-                  >
-                    {t("filterReset")}
-                  </Button>
-                ) : null}
+                  {t("filterTzVn")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (tzFilter === "utc") return;
+                    applyFilters({ tz: "utc" });
+                  }}
+                  className={cn(
+                    "h-full rounded-md px-3 text-xs font-medium transition-colors",
+                    tzFilter === "utc"
+                      ? "bg-background text-foreground shadow-sm"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {t("filterTzUtc")}
+                </button>
               </div>
             </div>
-            <p className="text-xs text-muted-foreground">
-              {t("filterPeriodHint", {
-                zone:
-                  tzFilter === "utc"
-                    ? t("filterTzUtcLong")
-                    : t("filterTzVnLong"),
-              })}
-            </p>
-          </div>
+            <div className="flex items-end">
+              {filtersActive ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-9"
+                  onClick={() => {
+                    setSymbolQuery("");
+                    setAuthorQuery("");
+                    router.replace(pathname, { scroll: false });
+                  }}
+                >
+                  {t("filterReset")}
+                </Button>
+              ) : null}
+            </div>
+          </FilterBar>
         ) : null}
 
         {totalUnfiltered === 0 && (
@@ -697,52 +695,22 @@ export function SignalRoom({
                             winRateLabel={vipWinRateLabel}
                           />
                         ) : (
-                          <div className="space-y-2">
-                            <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                              <div className={cn("min-w-0", signalLevel.entry.box)}>
-                                <div className={signalLevel.entry.label}>
-                                  {t("entryField")}
-                                </div>
-                                <div className={signalLevel.entry.value}>
-                                  {s.entry}
-                                </div>
-                              </div>
-                              <div className={cn("min-w-0", signalLevel.sl.box)}>
-                                <div className={signalLevel.sl.label}>
-                                  {t("slField")}
-                                </div>
-                                <div className={signalLevel.sl.value}>
-                                  {s.stopLoss ?? "—"}
-                                </div>
-                              </div>
-                            </div>
-                            <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                              <div className={cn("min-w-0", signalLevel.tp1.box)}>
-                                <div className={signalLevel.tp1.label}>
-                                  {t("tp1Field")}
-                                </div>
-                                <div className={signalLevel.tp1.value}>
-                                  {s.takeProfit ?? "—"}
-                                </div>
-                              </div>
-                              <div className={cn("min-w-0", signalLevel.tp2.box)}>
-                                <div className={signalLevel.tp2.label}>
-                                  {t("tp2Field")}
-                                </div>
-                                <div className={signalLevel.tp2.value}>
-                                  {s.takeProfit2 ?? "—"}
-                                </div>
-                              </div>
-                              <div className={cn("min-w-0", signalLevel.tp3.box)}>
-                                <div className={signalLevel.tp3.label}>
-                                  {t("tp3Field")}
-                                </div>
-                                <div className={signalLevel.tp3.value}>
-                                  {s.takeProfit3 ?? "—"}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
+                          <PriceLevels
+                            values={{
+                              entry: s.entry,
+                              sl: s.stopLoss,
+                              tp1: s.takeProfit,
+                              tp2: s.takeProfit2,
+                              tp3: s.takeProfit3,
+                            }}
+                            labels={{
+                              entry: t("entryField"),
+                              sl: t("slField"),
+                              tp1: t("tp1Field"),
+                              tp2: t("tp2Field"),
+                              tp3: t("tp3Field"),
+                            }}
+                          />
                         )}
 
                         {s.notes && !s.masked ? (

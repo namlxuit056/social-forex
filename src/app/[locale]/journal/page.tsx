@@ -1,5 +1,4 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { SignupPrompt } from "@/components/analytics/signup-prompt";
@@ -45,6 +44,7 @@ import { isVipActive } from "@/lib/vip";
 import { isMt5LiveRedisEnabled } from "@/lib/mt5/live-redis";
 import type { AiJournalAnalysis, AiTradeReviewResult } from "@/lib/ai/types";
 import { AlertTriangle } from "lucide-react";
+import { ScrollTabs } from "@/components/ui/scroll-tabs";
 
 const JOURNAL_TABS = [
   { key: "trades", labelKey: "tabTrades" },
@@ -513,25 +513,15 @@ export default async function JournalPage({
       )}
 
       {/* Tab navigation */}
-      <nav
-        aria-label={t("tabsAria")}
-        className="scrollbar-clean -mx-4 flex gap-1 overflow-x-auto border-b px-4 sm:mx-0 sm:px-0"
-      >
-        {JOURNAL_TABS.map((tab) => (
-          <Link
-            key={tab.key}
-            href={tab.key === "trades" ? "/journal" : `/journal?tab=${tab.key}`}
-            aria-current={activeTab === tab.key ? "page" : undefined}
-            className={`-mb-px shrink-0 whitespace-nowrap border-b-2 px-3 py-2 text-sm font-medium transition-colors ${
-              activeTab === tab.key
-                ? "border-primary text-foreground"
-                : "border-transparent text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {t(tab.labelKey)}
-          </Link>
-        ))}
-      </nav>
+      <ScrollTabs
+        ariaLabel={t("tabsAria")}
+        activeKey={activeTab}
+        tabs={JOURNAL_TABS.map((tab) => ({
+          key: tab.key,
+          href: tab.key === "trades" ? "/journal" : `/journal?tab=${tab.key}`,
+          label: t(tab.labelKey),
+        }))}
+      />
 
       {activeTab === "weekly" ? (
         <JournalWeeklyReview reviews={weeklyReviews} />
