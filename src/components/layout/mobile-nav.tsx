@@ -51,7 +51,7 @@ export function MobileNav({
       </Button>
 
       {open && (
-        <div className="absolute inset-x-0 top-full z-50 max-h-[80dvh] overflow-y-auto border-b border-border bg-background/95 backdrop-blur-lg">
+        <div className="absolute inset-x-0 top-full z-50 max-h-[80dvh] overflow-y-auto border-b border-border bg-background">
           <div className="mx-auto max-w-7xl px-4 py-3">
 
             {/* Nav sections */}
@@ -62,7 +62,7 @@ export function MobileNav({
                     <group.icon className="size-3.5" aria-hidden />
                     {tn(group.labelKey)}
                   </div>
-                  <div className="grid grid-cols-2 gap-0.5">
+                  <div className="grid grid-cols-2 gap-1">
                     {group.items.map((item) => (
                       <Link
                         key={item.href}

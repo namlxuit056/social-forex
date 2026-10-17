@@ -25,7 +25,7 @@ export function BottomAppNav({ userId }: Props) {
   return (
     <nav
       aria-label={tn("mobileAppMenuAria")}
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-border/70 bg-background/95 px-3 pb-[calc(0.5rem+env(safe-area-inset-bottom))] pt-2 shadow-[0_-12px_30px_rgba(15,23,42,0.08)] backdrop-blur-xl lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background px-3 pb-[calc(0.5rem+env(safe-area-inset-bottom))] pt-2 lg:hidden"
     >
       <div className="mx-auto grid max-w-md grid-cols-4 gap-1">
         {items.map((item) => {
@@ -37,8 +37,8 @@ export function BottomAppNav({ userId }: Props) {
               href={item.href}
               aria-current={isActive ? "page" : undefined}
               className={cn(
-                "flex min-h-14 flex-col items-center justify-center gap-1 rounded-md px-2 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
-                isActive && "bg-primary/10 text-primary ring-1 ring-primary/20",
+                "flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl px-2 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+                isActive && "text-primary",
               )}
             >
               <item.icon className="size-5" aria-hidden />

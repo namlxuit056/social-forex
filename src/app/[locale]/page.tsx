@@ -139,45 +139,41 @@ export default async function HomePage({
   ];
 
   return (
-    <div className="space-y-16">
+    <div className="space-y-10">
       <WebsiteJsonLd locale={locale} />
       <BreadcrumbJsonLd
         items={[{ name: tHome("metaTitle"), path: "/" }]}
         locale={locale}
       />
       <FaqJsonLd items={faqItems} />
-      <section className="text-center">
-        <p className="text-sm font-medium uppercase tracking-widest text-primary">
+      <section className="max-w-3xl">
+        <p className="text-sm font-medium text-primary">
           {tHome("badge")}
         </p>
-        <h1 className="mt-4 font-heading text-4xl font-semibold tracking-tight text-foreground md:text-5xl">
+        <h1 className="mt-3 font-heading text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
           {tHome.rich("headline", {
             tools: (chunks) => (
               <span className="text-primary">{chunks}</span>
             ),
-            data: (chunks) => (
-              <span className="text-chart-3">{chunks}</span>
-            ),
-            people: (chunks) => (
-              <span className="text-chart-4">{chunks}</span>
-            ),
+            data: (chunks) => chunks,
+            people: (chunks) => chunks,
           })}
         </h1>
-        <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
+        <p className="mt-4 max-w-2xl text-base text-muted-foreground md:text-lg">
           {tHome("subtitle")}
         </p>
-        <div className="mx-auto mt-8 grid max-w-3xl gap-2 text-left sm:grid-cols-3">
+        <ul className="mt-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-x-5">
           {(["heroTrust1", "heroTrust2", "heroTrust3"] as const).map((key) => (
-            <div
+            <li
               key={key}
-              className="flex items-center gap-2 rounded-lg border border-border/70 bg-card/45 px-3 py-2 text-sm text-muted-foreground"
+              className="flex items-center gap-2 text-sm text-muted-foreground"
             >
               <CheckCircle2 className="size-4 shrink-0 text-primary" aria-hidden />
               <span>{tHome(key)}</span>
-            </div>
+            </li>
           ))}
-        </div>
-        <div className="mx-auto mt-10 flex w-full max-w-xl flex-col gap-3 sm:flex-row sm:justify-center">
+        </ul>
+        <div className="mt-6 flex w-full flex-col gap-3 sm:flex-row">
           <TrackedLink
             href="/challenge"
             eventName={ANALYTICS_EVENTS.homepageCtaClick}
@@ -188,7 +184,7 @@ export default async function HomePage({
             }}
             className={cn(
               buttonVariants({ size: "lg" }),
-              "w-full justify-center sm:w-auto sm:min-w-56",
+              "w-full justify-center sm:w-auto sm:min-w-48",
             )}
           >
             {tHome("cta_challenge")}
@@ -203,7 +199,7 @@ export default async function HomePage({
             }}
             className={cn(
               buttonVariants({ variant: "outline", size: "lg" }),
-              "w-full justify-center border-border sm:w-auto sm:min-w-56",
+              "w-full justify-center sm:w-auto sm:min-w-48",
             )}
           >
             {tHome("cta_start")}
@@ -217,7 +213,7 @@ export default async function HomePage({
 
       <section
         aria-labelledby="challenge-preview-heading"
-        className="rounded-2xl border border-border bg-card/45 p-5 ring-1 ring-foreground/5 sm:p-6"
+        className="rounded-xl border border-border bg-card p-5 sm:p-6"
       >
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -240,7 +236,7 @@ export default async function HomePage({
               surface: "challenge_preview",
             }}
             className={cn(
-              buttonVariants({ variant: "secondary", size: "sm" }),
+              buttonVariants({ variant: "outline", size: "sm" }),
               "w-full justify-center sm:w-auto",
             )}
           >
@@ -260,15 +256,15 @@ export default async function HomePage({
                     destination: day.href,
                     surface: "challenge_preview",
                   }}
-                  className="group flex h-full min-h-32 flex-col rounded-lg border border-border/70 bg-muted/20 p-3 transition hover:border-primary/30 hover:bg-muted/35"
+                  className="group flex h-full min-h-28 flex-col rounded-lg border border-border p-3 transition-colors hover:bg-muted"
                 >
                   <div className="mb-3 flex items-center justify-between gap-2">
-                    <span className="inline-flex size-7 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary ring-1 ring-primary/25">
+                    <span className="inline-flex size-7 items-center justify-center rounded-full bg-muted text-xs font-semibold text-foreground">
                       {index + 1}
                     </span>
-                    <Icon className="size-4 text-muted-foreground group-hover:text-primary" aria-hidden />
+                    <Icon className="size-4 text-muted-foreground" aria-hidden />
                   </div>
-                  <h3 className="text-sm font-medium leading-snug text-foreground group-hover:text-primary">
+                  <h3 className="text-sm font-medium leading-snug text-foreground">
                     {tChallenge(day.titleKey)}
                   </h3>
                 </TrackedLink>
@@ -282,7 +278,7 @@ export default async function HomePage({
 
       <HomeTopTraders />
 
-      <section className="rounded-xl border border-border/70 bg-card/45 px-4 py-4 ring-1 ring-foreground/5 sm:flex sm:items-center sm:justify-between sm:gap-4">
+      <section className="rounded-xl border border-border bg-card p-4 sm:flex sm:items-center sm:justify-between sm:gap-4 sm:p-5">
         <div>
           <h2 className="font-heading text-base font-medium text-foreground">
             {tHome("demoPathTitle")}
@@ -297,7 +293,7 @@ export default async function HomePage({
           rel="noopener noreferrer sponsored nofollow"
           className={cn(
             buttonVariants({ variant: "outline", size: "sm" }),
-            "mt-4 w-full justify-center border-primary/30 text-primary hover:bg-primary/10 sm:mt-0 sm:w-auto",
+            "mt-4 w-full justify-center sm:mt-0 sm:w-auto",
           )}
         >
           <ExternalLink className="size-4 shrink-0" aria-hidden />
@@ -305,17 +301,17 @@ export default async function HomePage({
         </a>
       </section>
 
-      <section className="grid gap-6 md:grid-cols-3">
+      <section className="grid gap-4 md:grid-cols-3">
         {blocks.map((b) => (
           <Link
             key={b.href}
             href={b.href}
-            className="group rounded-2xl border border-border bg-card/50 p-6 ring-1 ring-foreground/5 transition hover:border-primary/30 hover:bg-card"
+            className="group rounded-xl border border-border bg-card p-5 transition-colors hover:bg-muted/50"
           >
-            <div className="mb-3 flex size-10 items-center justify-center rounded-lg bg-muted ring-1 ring-border">
-              <b.icon className="size-5 text-primary" />
+            <div className="mb-3 flex size-8 items-center justify-center rounded-lg bg-muted">
+              <b.icon className="size-4 text-muted-foreground" aria-hidden />
             </div>
-            <h2 className="font-heading text-lg font-medium text-foreground group-hover:text-primary">
+            <h2 className="font-heading text-base font-medium text-foreground">
               {tHome(b.titleKey)}
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">

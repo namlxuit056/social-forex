@@ -99,6 +99,31 @@ function statusBadgeClass(status: SignalRow["status"]): string {
   }
 }
 
+/** Reward-to-risk to TP1, shown next to the direction so signals compare at a glance. */
+function RewardRiskLabel({
+  entry,
+  stopLoss,
+  takeProfit,
+}: {
+  entry: number | null;
+  stopLoss: number | null;
+  takeProfit: number | null;
+}) {
+  const t = useTranslations("signals");
+  if (entry == null || stopLoss == null || takeProfit == null) return null;
+  const risk = Math.abs(entry - stopLoss);
+  if (risk === 0) return null;
+  const value = (Math.abs(takeProfit - entry) / risk).toFixed(1);
+  return (
+    <span
+      className="font-mono text-sm font-medium tabular-nums text-foreground"
+      title={t("rrBadgeAria")}
+    >
+      {t("rrBadge", { value })}
+    </span>
+  );
+}
+
 function authorInitials(label: string): string {
   const raw = label.trim();
   if (!raw || raw === "—") return "?";
@@ -114,7 +139,7 @@ function authorInitials(label: string): string {
 const DEFAULT_QUICK_SYMBOLS = ["XAUUSD", "EURUSD", "GBPUSD"];
 
 const toolbarSelectClass =
-  "mt-1 h-9 w-full min-w-[10rem] rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:w-auto";
+  "mt-1 h-9 w-full rounded-lg border border-input bg-card px-2.5 text-sm transition-colors focus-visible:border-ring focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50";
 
 export function SignalRoom({
   signals,
@@ -385,17 +410,173 @@ export function SignalRoom({
         ) : null}
 
         {totalUnfiltered > 0 ? (
-          <Card className="border-border/60 bg-muted/10">
-            <CardContent className="space-y-4 p-4 sm:p-5">
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-12 lg:items-end lg:gap-4">
-                <div className="sm:col-span-1 lg:col-span-2">
-                  <Label htmlFor="signal-sort" className="text-xs">
-                    {t("sortLabel")}
-                  </Label>
-                  <select
-                    id="signal-sort"
-                    value={sort}
-                    onChange={(e) => {
+          <div className="space-y-2 rounded-xl border border-border bg-card p-3 sm:p-4">
+            <div className="flex flex-wrap items-end gap-3">
+              <div className="min-w-0 flex-1 basis-44">
+                <Label htmlFor="signal-filter-symbol" className="text-xs">
+                  {t("filterSymbol")}
+                </Label>
+                <Input
+                  id="signal-filter-symbol"
+                  value={symbolQuery}
+                  onChange={(e) => setSymbolQuery(e.target.value)}
+                  placeholder={t("filterSymbolPlaceholder")}
+                  className="mt-1 h-9 font-mono uppercase"
+                  autoComplete="off"
+                />
+              </div>
+              <div className="min-w-0 flex-1 basis-44">
+                <Label htmlFor="signal-filter-author" className="text-xs">
+                  {t("filterAuthor")}
+                </Label>
+                <Input
+                  id="signal-filter-author"
+                  value={authorQuery}
+                  onChange={(e) => setAuthorQuery(e.target.value)}
+                  placeholder={t("filterAuthorPlaceholder")}
+                  className="mt-1 h-9"
+                  autoComplete="off"
+                  spellCheck={false}
+                />
+              </div>
+              <div className="w-[calc(50%-0.375rem)] sm:w-36">
+                <Label htmlFor="signal-filter-period" className="text-xs">
+                  {t("filterPeriod")}
+                </Label>
+                <select
+                  id="signal-filter-period"
+                  value={periodFilter}
+                  onChange={(e) => {
+                    router.replace(
+                      buildSignalsListHref({
+                        pathname,
+                        symbol: symbolQuery,
+                        author: authorQuery,
+                        tier: tierFilter,
+                        status: statusFilter,
+                        period: e.target.value as SignalDatePeriod,
+                        tz: tzFilter,
+                        sort,
+                        page: 1,
+                      }),
+                      { scroll: false },
+                    );
+                  }}
+                  className={toolbarSelectClass}
+                >
+                  <option value="today">{t("filterPeriodToday")}</option>
+                  <option value="week">{t("filterPeriodWeek")}</option>
+                  <option value="all">{t("filterPeriodAll")}</option>
+                </select>
+              </div>
+              <div className="w-[calc(50%-0.375rem)] sm:w-36">
+                <Label htmlFor="signal-filter-status" className="text-xs">
+                  {t("filterStatus")}
+                </Label>
+                <select
+                  id="signal-filter-status"
+                  value={statusFilter}
+                  onChange={(e) => {
+                    router.replace(
+                      buildSignalsListHref({
+                        pathname,
+                        symbol: symbolQuery,
+                        author: authorQuery,
+                        tier: tierFilter,
+                        status: e.target.value as SignalStatusFilter,
+                        period: periodFilter,
+                        tz: tzFilter,
+                        sort,
+                        page: 1,
+                      }),
+                      { scroll: false },
+                    );
+                  }}
+                  className={toolbarSelectClass}
+                >
+                  <option value="all">{t("filterStatusAll")}</option>
+                  <option value="PENDING">{t("filterStatusPending")}</option>
+                  <option value="ACTIVE">{t("filterStatusActive")}</option>
+                  <option value="CLOSED_WIN">{t("filterStatusClosedWin")}</option>
+                  <option value="CLOSED_LOSS">
+                    {t("filterStatusClosedLoss")}
+                  </option>
+                  <option value="CANCELLED">{t("filterStatusCancelled")}</option>
+                </select>
+              </div>
+              <div className="w-[calc(50%-0.375rem)] sm:w-36">
+                <Label htmlFor="signal-filter-tier" className="text-xs">
+                  {t("filterTier")}
+                </Label>
+                <select
+                  id="signal-filter-tier"
+                  value={tierFilter}
+                  onChange={(e) => {
+                    router.replace(
+                      buildSignalsListHref({
+                        pathname,
+                        symbol: symbolQuery,
+                        author: authorQuery,
+                        tier: e.target.value as "all" | "FREE" | "VIP",
+                        status: statusFilter,
+                        period: periodFilter,
+                        tz: tzFilter,
+                        sort,
+                        page: 1,
+                      }),
+                      { scroll: false },
+                    );
+                  }}
+                  className={toolbarSelectClass}
+                >
+                  <option value="all">{t("filterTierAll")}</option>
+                  <option value="FREE">{t("filterTierFree")}</option>
+                  <option value="VIP">{t("filterTierVip")}</option>
+                </select>
+              </div>
+              <div className="w-[calc(50%-0.375rem)] sm:w-36">
+                <Label htmlFor="signal-sort" className="text-xs">
+                  {t("sortLabel")}
+                </Label>
+                <select
+                  id="signal-sort"
+                  value={sort}
+                  onChange={(e) => {
+                    router.replace(
+                      buildSignalsListHref({
+                        pathname,
+                        symbol: symbolQuery,
+                        author: authorQuery,
+                        tier: tierFilter,
+                        status: statusFilter,
+                        period: periodFilter,
+                        tz: tzFilter,
+                        sort: e.target.value as SignalListSort,
+                        page: 1,
+                      }),
+                      { scroll: false },
+                    );
+                  }}
+                  className={toolbarSelectClass}
+                >
+                  <option value="newest">{t("sortNewest")}</option>
+                  <option value="symbol">{t("sortSymbol")}</option>
+                  <option value="tier">{t("sortTier")}</option>
+                </select>
+              </div>
+              <div className="flex flex-col gap-1">
+                <span className="text-xs font-medium">
+                  {t("filterTimezone")}
+                </span>
+                <div
+                  className="inline-flex h-9 w-fit items-center rounded-lg border border-border bg-muted/40 p-0.5"
+                  role="group"
+                  aria-label={t("filterTimezone")}
+                >
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (tzFilter === "vn") return;
                       router.replace(
                         buildSignalsListHref({
                           pathname,
@@ -404,240 +585,79 @@ export function SignalRoom({
                           tier: tierFilter,
                           status: statusFilter,
                           period: periodFilter,
-                          tz: tzFilter,
-                          sort: e.target.value as SignalListSort,
-                          page: 1,
-                        }),
-                        { scroll: false },
-                      );
-                    }}
-                    className={toolbarSelectClass}
-                  >
-                    <option value="newest">{t("sortNewest")}</option>
-                    <option value="symbol">{t("sortSymbol")}</option>
-                    <option value="tier">{t("sortTier")}</option>
-                  </select>
-                </div>
-                <div className="sm:col-span-1 lg:col-span-2">
-                  <Label htmlFor="signal-filter-tier" className="text-xs">
-                    {t("filterTier")}
-                  </Label>
-                  <select
-                    id="signal-filter-tier"
-                    value={tierFilter}
-                    onChange={(e) => {
-                      router.replace(
-                        buildSignalsListHref({
-                          pathname,
-                          symbol: symbolQuery,
-                          author: authorQuery,
-                          tier: e.target.value as "all" | "FREE" | "VIP",
-                          status: statusFilter,
-                          period: periodFilter,
-                          tz: tzFilter,
+                          tz: "vn",
                           sort,
                           page: 1,
                         }),
                         { scroll: false },
                       );
                     }}
-                    className={toolbarSelectClass}
+                    className={cn(
+                      "h-full rounded-md px-3 text-xs font-medium transition-colors",
+                      tzFilter === "vn"
+                        ? "bg-background text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
                   >
-                    <option value="all">{t("filterTierAll")}</option>
-                    <option value="FREE">{t("filterTierFree")}</option>
-                    <option value="VIP">{t("filterTierVip")}</option>
-                  </select>
-                </div>
-                <div className="sm:col-span-2 lg:col-span-4">
-                  <Label htmlFor="signal-filter-symbol" className="text-xs">
-                    {t("filterSymbol")}
-                  </Label>
-                  <Input
-                    id="signal-filter-symbol"
-                    value={symbolQuery}
-                    onChange={(e) => setSymbolQuery(e.target.value)}
-                    placeholder={t("filterSymbolPlaceholder")}
-                    className="mt-1 font-mono uppercase"
-                    autoComplete="off"
-                  />
-                </div>
-                <div className="sm:col-span-2 lg:col-span-4">
-                  <Label htmlFor="signal-filter-author" className="text-xs">
-                    {t("filterAuthor")}
-                  </Label>
-                  <Input
-                    id="signal-filter-author"
-                    value={authorQuery}
-                    onChange={(e) => setAuthorQuery(e.target.value)}
-                    placeholder={t("filterAuthorPlaceholder")}
-                    className="mt-1"
-                    autoComplete="off"
-                    spellCheck={false}
-                  />
-                </div>
-                <div className="flex items-end sm:col-span-2 lg:col-span-12 lg:justify-end">
-                  {filtersActive ? (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="h-9 w-full sm:w-auto"
-                      onClick={() => {
-                        setSymbolQuery("");
-                        setAuthorQuery("");
-                        router.replace(pathname, { scroll: false });
-                      }}
-                    >
-                      {t("filterReset")}
-                    </Button>
-                  ) : null}
+                    {t("filterTzVn")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (tzFilter === "utc") return;
+                      router.replace(
+                        buildSignalsListHref({
+                          pathname,
+                          symbol: symbolQuery,
+                          author: authorQuery,
+                          tier: tierFilter,
+                          status: statusFilter,
+                          period: periodFilter,
+                          tz: "utc",
+                          sort,
+                          page: 1,
+                        }),
+                        { scroll: false },
+                      );
+                    }}
+                    className={cn(
+                      "h-full rounded-md px-3 text-xs font-medium transition-colors",
+                      tzFilter === "utc"
+                        ? "bg-background text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    {t("filterTzUtc")}
+                  </button>
                 </div>
               </div>
-
-              <div className="grid gap-3 border-t border-border/40 pt-4 sm:grid-cols-2 lg:grid-cols-12 lg:items-end lg:gap-4">
-                <div className="lg:col-span-3">
-                  <Label htmlFor="signal-filter-period" className="text-xs">
-                    {t("filterPeriod")}
-                  </Label>
-                  <select
-                    id="signal-filter-period"
-                    value={periodFilter}
-                    onChange={(e) => {
-                      router.replace(
-                        buildSignalsListHref({
-                          pathname,
-                          symbol: symbolQuery,
-                          author: authorQuery,
-                          tier: tierFilter,
-                          status: statusFilter,
-                          period: e.target.value as SignalDatePeriod,
-                          tz: tzFilter,
-                          sort,
-                          page: 1,
-                        }),
-                        { scroll: false },
-                      );
+              <div className="flex items-end">
+                {filtersActive ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-9"
+                    onClick={() => {
+                      setSymbolQuery("");
+                      setAuthorQuery("");
+                      router.replace(pathname, { scroll: false });
                     }}
-                    className={toolbarSelectClass}
                   >
-                    <option value="today">{t("filterPeriodToday")}</option>
-                    <option value="week">{t("filterPeriodWeek")}</option>
-                    <option value="all">{t("filterPeriodAll")}</option>
-                  </select>
-                </div>
-                <div className="lg:col-span-3">
-                  <Label htmlFor="signal-filter-status" className="text-xs">
-                    {t("filterStatus")}
-                  </Label>
-                  <select
-                    id="signal-filter-status"
-                    value={statusFilter}
-                    onChange={(e) => {
-                      router.replace(
-                        buildSignalsListHref({
-                          pathname,
-                          symbol: symbolQuery,
-                          author: authorQuery,
-                          tier: tierFilter,
-                          status: e.target.value as SignalStatusFilter,
-                          period: periodFilter,
-                          tz: tzFilter,
-                          sort,
-                          page: 1,
-                        }),
-                        { scroll: false },
-                      );
-                    }}
-                    className={toolbarSelectClass}
-                  >
-                    <option value="all">{t("filterStatusAll")}</option>
-                    <option value="PENDING">{t("filterStatusPending")}</option>
-                    <option value="ACTIVE">{t("filterStatusActive")}</option>
-                    <option value="CLOSED_WIN">{t("filterStatusClosedWin")}</option>
-                    <option value="CLOSED_LOSS">
-                      {t("filterStatusClosedLoss")}
-                    </option>
-                    <option value="CANCELLED">{t("filterStatusCancelled")}</option>
-                  </select>
-                </div>
-                <div className="flex flex-col gap-2 lg:col-span-6">
-                  <span className="text-xs font-medium text-muted-foreground">
-                    {t("filterTimezone")}
-                  </span>
-                  <div
-                    className="inline-flex w-fit rounded-lg border border-border bg-muted/30 p-0.5"
-                    role="group"
-                    aria-label={t("filterTimezone")}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (tzFilter === "vn") return;
-                        router.replace(
-                          buildSignalsListHref({
-                            pathname,
-                            symbol: symbolQuery,
-                            author: authorQuery,
-                            tier: tierFilter,
-                            status: statusFilter,
-                            period: periodFilter,
-                            tz: "vn",
-                            sort,
-                            page: 1,
-                          }),
-                          { scroll: false },
-                        );
-                      }}
-                      className={cn(
-                        "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
-                        tzFilter === "vn"
-                          ? "bg-background text-foreground shadow-sm"
-                          : "text-muted-foreground hover:text-foreground",
-                      )}
-                    >
-                      {t("filterTzVn")}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (tzFilter === "utc") return;
-                        router.replace(
-                          buildSignalsListHref({
-                            pathname,
-                            symbol: symbolQuery,
-                            author: authorQuery,
-                            tier: tierFilter,
-                            status: statusFilter,
-                            period: periodFilter,
-                            tz: "utc",
-                            sort,
-                            page: 1,
-                          }),
-                          { scroll: false },
-                        );
-                      }}
-                      className={cn(
-                        "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
-                        tzFilter === "utc"
-                          ? "bg-background text-foreground shadow-sm"
-                          : "text-muted-foreground hover:text-foreground",
-                      )}
-                    >
-                      {t("filterTzUtc")}
-                    </button>
-                  </div>
-                  <p className="text-[0.65rem] leading-snug text-muted-foreground">
-                    {t("filterPeriodHint", {
-                      zone:
-                        tzFilter === "utc"
-                          ? t("filterTzUtcLong")
-                          : t("filterTzVnLong"),
-                    })}
-                  </p>
-                </div>
+                    {t("filterReset")}
+                  </Button>
+                ) : null}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {t("filterPeriodHint", {
+                zone:
+                  tzFilter === "utc"
+                    ? t("filterTzUtcLong")
+                    : t("filterTzVnLong"),
+              })}
+            </p>
+          </div>
         ) : null}
 
         {totalUnfiltered === 0 && (
@@ -697,6 +717,11 @@ export function SignalRoom({
                             >
                               {s.tier}
                             </Badge>
+                            <RewardRiskLabel
+                              entry={s.entry}
+                              stopLoss={s.stopLoss}
+                              takeProfit={s.takeProfit}
+                            />
                           </div>
                           <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:max-w-[min(100%,22rem)] sm:justify-end sm:text-right">
                             <Link
@@ -778,7 +803,7 @@ export function SignalRoom({
                             winRateLabel={vipWinRateLabel}
                           />
                         ) : (
-                          <div className="space-y-2 rounded-lg border border-border/60 bg-muted/20 p-3">
+                          <div className="space-y-2">
                             <div className="grid grid-cols-2 gap-2 sm:gap-3">
                               <div className={cn("min-w-0", signalLevel.entry.box)}>
                                 <div className={signalLevel.entry.label}>

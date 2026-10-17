@@ -34,7 +34,7 @@ export async function NewcomerPathSection() {
   return (
     <section
       aria-labelledby="newcomer-path-heading"
-      className="rounded-2xl border border-border bg-muted/20 p-5 ring-1 ring-foreground/5 sm:p-6"
+      className="rounded-xl border border-border bg-card p-5 sm:p-6"
     >
       <div className="text-center sm:text-left">
         <h2
@@ -51,10 +51,10 @@ export async function NewcomerPathSection() {
           return (
             <li
               key={step.href}
-              className="flex flex-col rounded-xl border border-border/80 bg-card/60 p-4 text-left shadow-sm"
+              className="flex flex-col rounded-lg border border-border p-4 text-left"
             >
               <div className="mb-3 flex items-center gap-2">
-                <span className="flex size-8 shrink-0 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-xs font-semibold text-primary">
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-foreground">
                   {i + 1}
                 </span>
                 <Icon className="size-4 text-muted-foreground" aria-hidden />

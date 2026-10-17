@@ -149,12 +149,7 @@ export function MarketVolatilityNote({ serverNowIso, locale }: Props) {
   return (
     <section
       aria-labelledby="market-volatility-heading"
-      className={cn(
-        "rounded-2xl border p-5 ring-1 sm:p-6",
-        highActive
-          ? "border-red-500/40 bg-red-500/5 ring-red-500/10"
-          : "border-amber-500/40 bg-amber-500/5 ring-amber-500/10",
-      )}
+      className="rounded-xl border border-border bg-card p-5 sm:p-6"
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 space-y-1.5">
@@ -174,14 +169,7 @@ export function MarketVolatilityNote({ serverNowIso, locale }: Props) {
         </div>
 
         {countdownTarget && countdownLabelKey && (
-          <div
-            className={cn(
-              "shrink-0 rounded-xl border px-4 py-3 text-center",
-              highActive
-                ? "border-red-500/30 bg-red-500/10"
-                : "border-amber-500/30 bg-amber-500/10",
-            )}
-          >
+          <div className="shrink-0 rounded-xl bg-muted px-4 py-3 text-center">
             <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
               {t(countdownLabelKey)}
             </p>
@@ -202,7 +190,7 @@ export function MarketVolatilityNote({ serverNowIso, locale }: Props) {
           {state.activeSessions.map((s) => (
             <span
               key={s}
-              className="rounded-full bg-muted px-2 py-0.5 font-medium text-foreground ring-1 ring-border"
+              className="rounded-full bg-muted px-2 py-0.5 font-medium text-foreground"
             >
               {t(`session_${s}`)}
             </span>
@@ -217,7 +205,7 @@ export function MarketVolatilityNote({ serverNowIso, locale }: Props) {
             return (
               <li
                 key={`${o.key}-${o.start.getTime()}`}
-                className="flex items-center justify-between gap-3 bg-card/40 px-3 py-2 text-sm"
+                className="flex items-center justify-between gap-3 px-3 py-2 text-sm"
               >
                 <span className="flex min-w-0 items-center gap-2">
                   <span

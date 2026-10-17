@@ -29,14 +29,14 @@ export async function SiteFooter() {
               <Link
                 key={l.href}
                 href={l.href}
-                className="text-muted-foreground transition hover:text-foreground"
+                className="inline-flex min-h-6 items-center text-muted-foreground transition hover:text-foreground"
               >
                 {tn(l.key)}
               </Link>
             ))}
             <a
               href="/llms.txt"
-              className="text-muted-foreground transition hover:text-foreground"
+              className="inline-flex min-h-6 items-center text-muted-foreground transition hover:text-foreground"
             >
               {tf("llmsLink")}
             </a>
@@ -59,7 +59,7 @@ export async function SiteFooter() {
               href="https://t.me/toolforex"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs text-blue-400 hover:text-blue-300 transition"
+              className="text-xs text-blue-700 hover:text-blue-800 transition dark:text-blue-300 dark:hover:text-blue-200"
             >
               t.me/toolforex
             </a>
@@ -68,7 +68,7 @@ export async function SiteFooter() {
             href="https://t.me/toolforex"
             target="_blank"
             rel="noopener noreferrer"
-            className="shrink-0 rounded-md bg-blue-500 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-blue-400"
+            className="shrink-0 rounded-md bg-blue-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-blue-700"
           >
             {tf("telegramCta")}
           </a>
@@ -84,7 +84,7 @@ export async function SiteFooter() {
           />
         </div>
 
-        <p className="text-center text-xs text-muted-foreground/60">
+        <p className="text-center text-xs text-muted-foreground">
           {tc("copyright", { year: new Date().getFullYear() })}
         </p>
       </div>

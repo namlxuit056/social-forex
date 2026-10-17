@@ -96,7 +96,7 @@ export default async function DeskPage({
   const ctaRow = await pageCtaItems("explore", "community");
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-10">
       <header className="space-y-3">
         <h1 className="font-heading text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
           {t("title")}
@@ -121,9 +121,6 @@ export default async function DeskPage({
           >
             {t("jumpCalendar")}
           </a>
-          <a href="#desk-chart" className="underline-offset-4 hover:underline">
-            {t("jumpChart")}
-          </a>
         </nav>
       </header>
 
@@ -131,10 +128,15 @@ export default async function DeskPage({
         quotes={initialQuotes.quotes}
         newsEvents={deskNewsEvents}
         newsContextHours={newsContextHours}
+        chart={
+          <Suspense>
+            <ChartContainer locale={locale} showAiPanel={false} />
+          </Suspense>
+        }
       />
 
       <section id="desk-quotes" className="scroll-mt-24 space-y-4">
-        <div className="flex flex-col gap-1 border-b border-border/60 pb-2 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex flex-col gap-1 border-b border-border pb-2 sm:flex-row sm:items-end sm:justify-between">
           <h2 className="font-heading text-lg font-medium text-foreground">
             {t("sectionQuotes")}
           </h2>
@@ -154,7 +156,7 @@ export default async function DeskPage({
       </section>
 
       <section id="desk-calendar" className="scroll-mt-24 space-y-4">
-        <div className="flex flex-col gap-1 border-b border-border/60 pb-2 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex flex-col gap-1 border-b border-border pb-2 sm:flex-row sm:items-end sm:justify-between">
           <h2 className="font-heading text-lg font-medium text-foreground">
             {t("sectionCalendar")}
           </h2>
@@ -176,22 +178,6 @@ export default async function DeskPage({
         />
       </section>
 
-      <section id="desk-chart" className="scroll-mt-24 space-y-4">
-        <div className="flex flex-col gap-1 border-b border-border/60 pb-2 sm:flex-row sm:items-end sm:justify-between">
-          <h2 className="font-heading text-lg font-medium text-foreground">
-            {t("sectionChart")}
-          </h2>
-          <Link
-            href="/chart"
-            className="text-xs font-medium text-muted-foreground underline-offset-4 hover:text-primary hover:underline"
-          >
-            {t("openFullPage")}
-          </Link>
-        </div>
-        <Suspense>
-          <ChartContainer locale={locale} showAiPanel={false} />
-        </Suspense>
-      </section>
 
       <Disclaimer variant="compact" />
       <PageCtaRow heading={tCommon("ctaDiscovery")} items={ctaRow} />

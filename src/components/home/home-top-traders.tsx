@@ -92,7 +92,6 @@ export async function HomeTopTraders() {
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {traders.map((trader, i) => {
           const initials = trader.label.slice(0, 2).toUpperCase();
-          const isTop3 = i < 3;
           const ringClass = RANK_RING[i] ?? "ring-border/50";
           const numClass = RANK_NUM_CLASS[i] ?? "bg-muted text-muted-foreground";
 
@@ -101,10 +100,7 @@ export async function HomeTopTraders() {
               key={trader.userId}
               href={`/u/${trader.userId}`}
               className={cn(
-                "group relative flex flex-col items-center rounded-xl border px-3 py-4 text-center transition-all hover:border-primary/40 hover:bg-card",
-                isTop3
-                  ? "border-border bg-card/70 ring-1 ring-foreground/5"
-                  : "border-border/60 bg-card/40",
+                "group relative flex flex-col items-center rounded-xl border border-border bg-card px-3 py-4 text-center transition-colors hover:bg-muted/50",
               )}
             >
               {/* Rank + Trophy */}

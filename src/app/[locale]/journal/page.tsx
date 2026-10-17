@@ -46,6 +46,16 @@ import { isMt5LiveRedisEnabled } from "@/lib/mt5/live-redis";
 import type { AiJournalAnalysis, AiTradeReviewResult } from "@/lib/ai/types";
 import { AlertTriangle } from "lucide-react";
 
+const JOURNAL_TABS = [
+  { key: "trades", labelKey: "tabTrades" },
+  { key: "weekly", labelKey: "tabWeekly" },
+  { key: "daily", labelKey: "tabDaily" },
+  { key: "edge", labelKey: "tabEdge" },
+  { key: "stats", labelKey: "tabStats" },
+  { key: "chat", labelKey: "tabChat" },
+  { key: "emotion", labelKey: "tabEmotion" },
+  { key: "lessons", labelKey: "tabLessons" },
+] as const;
 export async function generateMetadata({
   params,
 }: {
@@ -477,7 +487,7 @@ export default async function JournalPage({
       <JournalHeader prefill={prefill} bestSetup={bestSetup} />
 
       {lossStreak >= 2 && (
-        <div className="flex items-start gap-3 rounded-lg border border-red-500/30 bg-red-50 p-4 text-sm text-red-800 dark:bg-red-950/20 dark:text-red-200">
+        <div className="flex items-start gap-3 rounded-xl border border-red-500/30 bg-red-50 p-4 text-sm text-red-800 dark:bg-red-950/20 dark:text-red-200">
           <AlertTriangle className="mt-0.5 size-4 shrink-0" />
           <p>{t("lossStreakBanner", { count: lossStreak })}</p>
         </div>
@@ -503,87 +513,24 @@ export default async function JournalPage({
       )}
 
       {/* Tab navigation */}
-      <nav className="flex gap-1 border-b">
-        <Link
-          href="/journal"
-          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
-            activeTab === "trades"
-              ? "border-primary text-foreground"
-              : "border-transparent text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          {t("tabTrades")}
-        </Link>
-        <Link
-          href="/journal?tab=weekly"
-          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
-            activeTab === "weekly"
-              ? "border-primary text-foreground"
-              : "border-transparent text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          {t("tabWeekly")}
-        </Link>
-        <Link
-          href="/journal?tab=daily"
-          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
-            activeTab === "daily"
-              ? "border-primary text-foreground"
-              : "border-transparent text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          {t("tabDaily")}
-        </Link>
-        <Link
-          href="/journal?tab=edge"
-          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
-            activeTab === "edge"
-              ? "border-primary text-foreground"
-              : "border-transparent text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          {t("tabEdge")}
-        </Link>
-        <Link
-          href="/journal?tab=stats"
-          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
-            activeTab === "stats"
-              ? "border-primary text-foreground"
-              : "border-transparent text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          {t("tabStats")}
-        </Link>
-        <Link
-          href="/journal?tab=chat"
-          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
-            activeTab === "chat"
-              ? "border-primary text-foreground"
-              : "border-transparent text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          {t("tabChat")}
-        </Link>
-        <Link
-          href="/journal?tab=emotion"
-          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
-            activeTab === "emotion"
-              ? "border-primary text-foreground"
-              : "border-transparent text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          {t("tabEmotion")}
-        </Link>
-        <Link
-          href="/journal?tab=lessons"
-          className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
-            activeTab === "lessons"
-              ? "border-primary text-foreground"
-              : "border-transparent text-muted-foreground hover:text-foreground"
-          }`}
-        >
-          {t("tabLessons")}
-        </Link>
+      <nav
+        aria-label={t("tabsAria")}
+        className="scrollbar-clean -mx-4 flex gap-1 overflow-x-auto border-b px-4 sm:mx-0 sm:px-0"
+      >
+        {JOURNAL_TABS.map((tab) => (
+          <Link
+            key={tab.key}
+            href={tab.key === "trades" ? "/journal" : `/journal?tab=${tab.key}`}
+            aria-current={activeTab === tab.key ? "page" : undefined}
+            className={`-mb-px shrink-0 whitespace-nowrap border-b-2 px-3 py-2 text-sm font-medium transition-colors ${
+              activeTab === tab.key
+                ? "border-primary text-foreground"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {t(tab.labelKey)}
+          </Link>
+        ))}
       </nav>
 
       {activeTab === "weekly" ? (
@@ -636,16 +583,6 @@ export default async function JournalPage({
         />
       ) : (
         <>
-          <RiskCalculator defaultBalance={mt5Account?.balance ?? null} />
-
-          <JournalAiPanel tradeCount={trades.length} />
-
-          <JournalPerformanceChart
-            trades={serialized}
-            locale={locale}
-            accountBalance={mt5Connection?.balance ?? mt5Connection?.equity ?? null}
-          />
-
           <JournalLivePanel
             account={mt5Account}
             positions={livePositions}
@@ -653,11 +590,21 @@ export default async function JournalPage({
             liveEnabled={isMt5LiveRedisEnabled()}
           />
 
+          <JournalPerformanceChart
+            trades={serialized}
+            locale={locale}
+            accountBalance={mt5Connection?.balance ?? mt5Connection?.equity ?? null}
+          />
+
           {trades.length === 0 ? (
             <JournalMt5Prompt />
           ) : (
             <JournalTable trades={serialized} locale={locale} />
           )}
+
+          <JournalAiPanel tradeCount={trades.length} />
+
+          <RiskCalculator defaultBalance={mt5Account?.balance ?? null} />
         </>
       )}
     </div>

@@ -82,7 +82,8 @@ body {
 }
 
 :root {
-  --background: oklch(1 0 0);
+  /* Page sits on a faint grey so white cards read as surfaces without shadows. */
+  --background: oklch(0.985 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -523,3 +524,24 @@ body {
     animation: none;
   }
 }
+
+/* ── Scrollbars: hidden at rest, 4px thumb on hover/scroll ──
+   Thumb colour goes through --scrollbar-thumb on the scroller itself; Chrome
+   doesn't repaint `*:hover::-webkit-scrollbar-thumb`. Don't add `transition`
+   to the `*` rule: unlayered CSS beats every Tailwind `transition-*` utility. */
+* { --scrollbar-thumb: transparent; }
+*:hover { --scrollbar-thumb: color-mix(in srgb, var(--foreground) 16%, transparent); }
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--foreground) 40%, transparent); }
+
+/* Firefox only — Chrome 121+ ignores ::-webkit-scrollbar once scrollbar-* is set. */
+@supports not selector(::-webkit-scrollbar) {
+  * { scrollbar-width: thin; scrollbar-color: transparent transparent; }
+  *:hover { scrollbar-color: color-mix(in srgb, var(--foreground) 18%, transparent) transparent; }
+}
+
+/* Horizontal chip/tab rails: never show a bar under the row. */
+.scrollbar-clean { scrollbar-width: none; }
+.scrollbar-clean::-webkit-scrollbar { display: none; }

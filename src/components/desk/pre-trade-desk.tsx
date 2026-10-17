@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { type ReactNode, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { getPathname } from "@/i18n/navigation";
 import {
@@ -70,10 +70,13 @@ export function PreTradeDesk({
   quotes,
   newsEvents,
   newsContextHours,
+  chart,
 }: {
   quotes: QuoteRow[];
   newsEvents: SignalCardNewsEvent[];
   newsContextHours: number;
+  /** Rendered beside the sizing panel so price and lot size are read together. */
+  chart?: ReactNode;
 }) {
   const t = useTranslations("desk");
   const tCal = useTranslations("calendar");
@@ -155,7 +158,7 @@ export function PreTradeDesk({
 
   return (
     <section className="space-y-4" aria-labelledby="pre-trade-desk-title">
-      <div className="flex flex-col gap-1 border-b border-border/60 pb-2 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-1 border-b border-border pb-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 id="pre-trade-desk-title" className="font-heading text-lg font-medium text-foreground">
             {t("preTradeTitle")}
@@ -173,113 +176,127 @@ export function PreTradeDesk({
         </Badge>
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(20rem,0.9fr)]">
-        <Card className="rounded-lg border-border/70 bg-card/70">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ShieldCheck className="size-4 text-primary" aria-hidden />
-              {t("setupTitle")}
-            </CardTitle>
-            <CardDescription>{t("setupDesc")}</CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4 lg:grid-cols-2">
-            <div className="space-y-3">
-              <Label htmlFor="desk-symbol">{t("symbolLabel")}</Label>
-              <select
-                id="desk-symbol"
-                value={symbol}
-                onChange={(event) => {
-                  const next = event.target.value;
-                  const quote = quoteForSymbol(quotes, next);
-                  const nextMid = midPrice(quote);
-                  setSymbol(next);
-                  setEntry(String(nextMid));
-                  setStopLoss(String(nextMid));
-                }}
-                className="h-9 w-full rounded-lg border border-input bg-background px-2.5 text-sm outline-none transition focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-              >
-                {quotes.map((quote) => (
-                  <option key={quote.symbol} value={quote.symbol}>
-                    {quote.symbol} - {quote.name}
-                  </option>
-                ))}
-              </select>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-md border border-border/60 bg-muted/20 p-3">
-                  <p className="text-xs text-muted-foreground">{t("midPrice")}</p>
-                  <p className="mt-1 font-mono text-lg tabular-nums text-foreground">{selectedMid}</p>
+      <div
+        className={cn(
+          "grid gap-4",
+          chart
+            ? "xl:grid-cols-[minmax(0,1fr)_22rem]"
+            : "xl:grid-cols-[minmax(0,1.1fr)_minmax(20rem,0.9fr)]",
+        )}
+      >
+        {chart ? <div className="min-w-0">{chart}</div> : null}
+        <div
+          className={cn(
+            chart ? "space-y-4 xl:sticky xl:top-20 xl:self-start" : "contents",
+          )}
+        >
+          <Card className="rounded-xl">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ShieldCheck className="size-4 text-primary" aria-hidden />
+                {t("setupTitle")}
+              </CardTitle>
+              <CardDescription>{t("setupDesc")}</CardDescription>
+            </CardHeader>
+            <CardContent className={cn("grid gap-4", !chart && "lg:grid-cols-2")}>
+              <div className="space-y-3">
+                <Label htmlFor="desk-symbol">{t("symbolLabel")}</Label>
+                <select
+                  id="desk-symbol"
+                  value={symbol}
+                  onChange={(event) => {
+                    const next = event.target.value;
+                    const quote = quoteForSymbol(quotes, next);
+                    const nextMid = midPrice(quote);
+                    setSymbol(next);
+                    setEntry(String(nextMid));
+                    setStopLoss(String(nextMid));
+                  }}
+                  className="h-9 w-full rounded-lg border border-input bg-card px-2.5 text-sm outline-none transition focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                >
+                  {quotes.map((quote) => (
+                    <option key={quote.symbol} value={quote.symbol}>
+                      {quote.symbol} - {quote.name}
+                    </option>
+                  ))}
+                </select>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-md border border-border/60 bg-muted/20 p-3">
+                    <p className="text-xs text-muted-foreground">{t("midPrice")}</p>
+                    <p className="mt-1 font-mono text-lg tabular-nums text-foreground">{selectedMid}</p>
+                  </div>
+                  <div className="rounded-md border border-border/60 bg-muted/20 p-3">
+                    <p className="text-xs text-muted-foreground">{t("spread")}</p>
+                    <p className="mt-1 font-mono text-lg tabular-nums text-foreground">
+                      {selectedQuote ? Number((selectedQuote.ask - selectedQuote.bid).toFixed(5)) : "0"}
+                    </p>
+                  </div>
                 </div>
-                <div className="rounded-md border border-border/60 bg-muted/20 p-3">
-                  <p className="text-xs text-muted-foreground">{t("spread")}</p>
-                  <p className="mt-1 font-mono text-lg tabular-nums text-foreground">
-                    {selectedQuote ? Number((selectedQuote.ask - selectedQuote.bid).toFixed(5)) : "0"}
-                  </p>
+                <p className="text-xs leading-relaxed text-muted-foreground">{t("riskHint")}</p>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="space-y-1.5">
+                  <span className="text-sm font-medium">{t("balance")}</span>
+                  <Input inputMode="decimal" value={balance} onChange={(event) => setBalance(event.target.value)} />
+                </label>
+                <label className="space-y-1.5">
+                  <span className="text-sm font-medium">{t("riskPct")}</span>
+                  <Input inputMode="decimal" value={riskPct} onChange={(event) => setRiskPct(event.target.value)} />
+                </label>
+                <label className="space-y-1.5">
+                  <span className="text-sm font-medium">{t("entry")}</span>
+                  <Input inputMode="decimal" value={entry} onChange={(event) => setEntry(event.target.value)} />
+                </label>
+                <label className="space-y-1.5">
+                  <span className="text-sm font-medium">{t("stopLoss")}</span>
+                  <Input inputMode="decimal" value={stopLoss} onChange={(event) => setStopLoss(event.target.value)} />
+                </label>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-xl">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calculator className="size-4 text-primary" aria-hidden />
+                {t("riskResultTitle")}
+              </CardTitle>
+              <CardDescription>{t("riskResultDesc")}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <dl className="grid gap-2 rounded-md border border-border/60 bg-muted/20 p-3 font-mono text-sm">
+                <div className="flex items-center justify-between gap-3">
+                  <dt className="text-muted-foreground">{t("slPips")}</dt>
+                  <dd className="tabular-nums text-foreground">{slPips}</dd>
                 </div>
-              </div>
-              <p className="text-xs leading-relaxed text-muted-foreground">{t("riskHint")}</p>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-2">
-              <label className="space-y-1.5">
-                <span className="text-sm font-medium">{t("balance")}</span>
-                <Input inputMode="decimal" value={balance} onChange={(event) => setBalance(event.target.value)} />
-              </label>
-              <label className="space-y-1.5">
-                <span className="text-sm font-medium">{t("riskPct")}</span>
-                <Input inputMode="decimal" value={riskPct} onChange={(event) => setRiskPct(event.target.value)} />
-              </label>
-              <label className="space-y-1.5">
-                <span className="text-sm font-medium">{t("entry")}</span>
-                <Input inputMode="decimal" value={entry} onChange={(event) => setEntry(event.target.value)} />
-              </label>
-              <label className="space-y-1.5">
-                <span className="text-sm font-medium">{t("stopLoss")}</span>
-                <Input inputMode="decimal" value={stopLoss} onChange={(event) => setStopLoss(event.target.value)} />
-              </label>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="rounded-lg border-border/70 bg-card/70">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calculator className="size-4 text-primary" aria-hidden />
-              {t("riskResultTitle")}
-            </CardTitle>
-            <CardDescription>{t("riskResultDesc")}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <dl className="grid gap-2 rounded-md border border-border/60 bg-muted/20 p-3 font-mono text-sm">
-              <div className="flex items-center justify-between gap-3">
-                <dt className="text-muted-foreground">{t("slPips")}</dt>
-                <dd className="tabular-nums text-foreground">{slPips}</dd>
-              </div>
-              <div className="flex items-center justify-between gap-3">
-                <dt className="text-muted-foreground">{t("riskMoney")}</dt>
-                <dd className="tabular-nums text-foreground">${riskPlan.riskAmount}</dd>
-              </div>
-              <div className="flex items-center justify-between gap-3">
-                <dt className="text-muted-foreground">{t("pipValue")}</dt>
-                <dd className="tabular-nums text-foreground">${riskPlan.pipValuePerLot}</dd>
-              </div>
-              <div className="flex items-center justify-between gap-3 border-t border-border/60 pt-2 text-primary">
-                <dt>{t("suggestedLots")}</dt>
-                <dd className="text-xl tabular-nums">{riskPlan.lots}</dd>
-              </div>
-            </dl>
-            <a href={planHref} className="mt-4 block">
-              <Button className="w-full" size="sm">
-                <ClipboardCheck className="size-4" aria-hidden />
-                {t("useInPlan")}
-                <ExternalLink className="size-3.5" aria-hidden />
-              </Button>
-            </a>
-          </CardContent>
-        </Card>
+                <div className="flex items-center justify-between gap-3">
+                  <dt className="text-muted-foreground">{t("riskMoney")}</dt>
+                  <dd className="tabular-nums text-foreground">${riskPlan.riskAmount}</dd>
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <dt className="text-muted-foreground">{t("pipValue")}</dt>
+                  <dd className="tabular-nums text-foreground">${riskPlan.pipValuePerLot}</dd>
+                </div>
+                <div className="flex items-center justify-between gap-3 border-t border-border/60 pt-2 text-primary">
+                  <dt>{t("suggestedLots")}</dt>
+                  <dd className="text-xl tabular-nums">{riskPlan.lots}</dd>
+                </div>
+              </dl>
+              <a href={planHref} className="mt-4 block">
+                <Button className="w-full" size="sm">
+                  <ClipboardCheck className="size-4" aria-hidden />
+                  {t("useInPlan")}
+                  <ExternalLink className="size-3.5" aria-hidden />
+                </Button>
+              </a>
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
-        <Card className="rounded-lg border-border/70 bg-card/70">
+        <Card className="rounded-xl">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CalendarClock className="size-4 text-primary" aria-hidden />
@@ -322,7 +339,7 @@ export function PreTradeDesk({
           </CardContent>
         </Card>
 
-        <Card className="rounded-lg border-border/70 bg-card/70">
+        <Card className="rounded-xl">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CheckCircle2 className="size-4 text-primary" aria-hidden />

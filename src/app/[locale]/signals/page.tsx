@@ -239,7 +239,7 @@ export default async function SignalsPage({
       </div>
 
       {!session?.user && (
-        <Card className="border-primary/20 bg-card/80">
+        <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base">{t("loginToPost")}</CardTitle>
             <CardDescription>{t("loginHint")}</CardDescription>
