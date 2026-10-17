@@ -125,7 +125,7 @@ function PickCard({ pick, t }: { pick: AiPickResult; t: ReturnType<typeof useTra
 
   return (
     <div className={cn(
-      "rounded-lg border border-border/70 bg-card flex flex-col gap-2.5 p-3.5 border-l-[3px]",
+      "rounded-lg border border-border bg-card flex flex-col gap-2.5 p-3.5 border-l-[3px]",
       isLong ? "border-l-emerald-500" : "border-l-red-500",
     )}>
       {/* Header */}
@@ -162,7 +162,7 @@ function PickCard({ pick, t }: { pick: AiPickResult; t: ReturnType<typeof useTra
                 ? isLong
                   ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
                   : "bg-red-500/10 text-red-500"
-                : "bg-muted/30 text-muted-foreground/40",
+                : "bg-muted/30 text-muted-foreground",
             )}>
               {tf} {aligned ? "✓" : "–"}
             </span>
@@ -233,7 +233,7 @@ function PickCard({ pick, t }: { pick: AiPickResult; t: ReturnType<typeof useTra
             </button>
           </div>
         ) : view === "form" || view === "submitting" ? (
-          <div className="flex items-center gap-2 rounded-md border border-border/60 bg-muted/20 px-2.5 py-2">
+          <div className="flex items-center gap-2 rounded-md border border-border bg-muted/20 px-2.5 py-2">
             <span className="text-xs text-muted-foreground shrink-0">{t("aiPicksLot")}</span>
             <input
               type="number"
@@ -340,7 +340,7 @@ export function AiPicksPanel({ isLoggedIn, isVip }: Props) {
   // --- Render: not logged in ---
   if (!isLoggedIn) {
     return (
-      <div className="flex items-center justify-between gap-4 rounded-lg border border-border/60 bg-muted/10 p-4">
+      <div className="flex items-center justify-between gap-4 rounded-lg border border-border bg-muted/10 p-4">
         <div className="flex items-center gap-2.5">
           <Sparkles className="size-4 text-primary/60 shrink-0" />
           <div>
@@ -403,14 +403,14 @@ export function AiPicksPanel({ isLoggedIn, isVip }: Props) {
   // --- Render: loading ---
   if (state.status === "loading") {
     return (
-      <div className="rounded-lg border border-border/60 bg-muted/10 p-4 space-y-3">
+      <div className="rounded-lg border border-border bg-muted/10 p-4 space-y-3">
         <div className="flex items-center gap-2">
           <Loader2 className="size-4 text-primary animate-spin" />
           <span className="text-sm font-medium text-muted-foreground">{t("aiPicksLoading")}</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="rounded-lg border border-border/40 bg-muted/20 h-52 animate-pulse" />
+            <div key={i} className="rounded-lg border border-border bg-muted/20 h-52 animate-pulse" />
           ))}
         </div>
       </div>
@@ -420,7 +420,7 @@ export function AiPicksPanel({ isLoggedIn, isVip }: Props) {
   // --- Render: unavailable ---
   if (state.status === "unavailable") {
     return (
-      <div className="flex items-center justify-between gap-4 rounded-lg border border-border/60 bg-muted/10 p-4">
+      <div className="flex items-center justify-between gap-4 rounded-lg border border-border bg-muted/10 p-4">
         <p className="text-xs text-muted-foreground">{t("aiPicksUnavailable")}</p>
       </div>
     );
@@ -429,7 +429,7 @@ export function AiPicksPanel({ isLoggedIn, isVip }: Props) {
   // --- Render: error ---
   if (state.status === "error") {
     return (
-      <div className="flex items-center justify-between gap-4 rounded-lg border border-border/60 bg-muted/10 p-4">
+      <div className="flex items-center justify-between gap-4 rounded-lg border border-border bg-muted/10 p-4">
         <p className="text-xs text-muted-foreground">{t("aiPicksError")}</p>
         <button
           onClick={handleAnalyze}
@@ -446,9 +446,9 @@ export function AiPicksPanel({ isLoggedIn, isVip }: Props) {
 
   if (picks.length === 0) {
     return (
-      <div className="flex items-center justify-between gap-4 rounded-lg border border-border/60 bg-muted/10 p-4">
+      <div className="flex items-center justify-between gap-4 rounded-lg border border-border bg-muted/10 p-4">
         <div className="flex items-center gap-2.5">
-          <Sparkles className="size-4 text-muted-foreground/40 shrink-0" />
+          <Sparkles className="size-4 text-muted-foreground shrink-0" />
           <p className="text-xs text-muted-foreground">{t("aiPicksNone")}</p>
         </div>
         <button
@@ -474,7 +474,7 @@ export function AiPicksPanel({ isLoggedIn, isVip }: Props) {
           disabled={!canRefresh}
           className={canRefresh
             ? "text-xs text-primary hover:underline transition"
-            : "text-xs text-muted-foreground/50 cursor-not-allowed"}
+            : "text-xs text-muted-foreground cursor-not-allowed"}
         >
           {canRefresh
             ? t("aiPicksRefresh")
@@ -488,7 +488,7 @@ export function AiPicksPanel({ isLoggedIn, isVip }: Props) {
         ))}
       </div>
 
-      <p className="text-xs text-muted-foreground/50">{t("aiPicksDisclaimer")}</p>
+      <p className="text-xs text-muted-foreground">{t("aiPicksDisclaimer")}</p>
     </div>
   );
 }

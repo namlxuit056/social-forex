@@ -105,7 +105,7 @@ export function RiskCalculator({
   }, [takeProfit, entry, stopLoss]);
 
   return (
-    <Card className="border-border/60">
+    <Card className="border-border">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
           <Calculator className="size-4 text-primary" aria-hidden />
@@ -123,7 +123,7 @@ export function RiskCalculator({
                 "rounded-md border px-2.5 py-0.5 font-mono text-xs transition-colors",
                 symbol.toUpperCase() === s
                   ? "border-primary bg-primary/10 text-primary"
-                  : "border-border/60 text-muted-foreground hover:border-primary/50 hover:text-foreground",
+                  : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground",
               )}
             >
               {s}
@@ -212,7 +212,7 @@ export function RiskCalculator({
           <div className="space-y-1.5">
             <Label htmlFor="rc-tp" className="text-xs text-muted-foreground">
               {t("takeProfit")}{" "}
-              <span className="text-muted-foreground/50">{t("tpOptional")}</span>
+              <span className="text-muted-foreground">{t("tpOptional")}</span>
             </Label>
             <Input
               id="rc-tp"
@@ -227,7 +227,7 @@ export function RiskCalculator({
         </div>
 
         {result ? (
-          <div className="grid grid-cols-2 gap-3 rounded-lg border border-border/60 bg-muted/20 p-3 sm:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 rounded-lg border border-border bg-muted/20 p-3 sm:grid-cols-4">
             <div>
               <p className="text-[11px] text-muted-foreground">{t("dollarRisk")}</p>
               <p className="mt-0.5 font-mono text-sm font-semibold text-foreground">
@@ -253,7 +253,7 @@ export function RiskCalculator({
               </p>
             </div>
             {rrRatio !== null && (
-              <div className="col-span-2 sm:col-span-4 border-t border-border/40 pt-3">
+              <div className="col-span-2 sm:col-span-4 border-t border-border pt-3">
                 <p className="text-[11px] text-muted-foreground">{t("riskReward")}</p>
                 <p
                   className={cn(
@@ -273,7 +273,7 @@ export function RiskCalculator({
             )}
           </div>
         ) : (
-          <div className="rounded-lg border border-dashed border-border/60 bg-muted/10 px-4 py-3 text-center text-xs text-muted-foreground">
+          <div className="rounded-lg border border-dashed border-border bg-muted/10 px-4 py-3 text-center text-xs text-muted-foreground">
             {t("fillHint")}
           </div>
         )}

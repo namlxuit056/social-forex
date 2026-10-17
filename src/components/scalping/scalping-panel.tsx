@@ -100,7 +100,7 @@ function AnalysisCard({
   return (
     <div
       className={cn(
-        "rounded-lg border border-border/70 bg-card flex flex-col gap-3 p-4 border-l-[3px]",
+        "rounded-lg border border-border bg-card flex flex-col gap-3 p-4 border-l-[3px]",
         isLong ? "border-l-emerald-500" : "border-l-red-500",
       )}
     >
@@ -158,7 +158,7 @@ function AnalysisCard({
                   ? isLong
                     ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
                     : "bg-red-500/10 text-red-500"
-                  : "bg-muted/30 text-muted-foreground/40",
+                  : "bg-muted/30 text-muted-foreground",
               )}
             >
               {tf} {aligned ? "✓" : "–"}
@@ -231,7 +231,7 @@ function AnalysisCard({
       <p className="text-xs text-muted-foreground leading-relaxed">{result.reasoning}</p>
 
       {/* Timestamp */}
-      <p className="text-[10px] text-muted-foreground/40">
+      <p className="text-[10px] text-muted-foreground">
         {new Date(result.generatedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
       </p>
 
@@ -270,7 +270,7 @@ function AnalysisCard({
             </button>
           </div>
         ) : view === "form" || view === "submitting" ? (
-          <div className="flex items-center gap-2 rounded-md border border-border/60 bg-muted/20 px-2.5 py-2">
+          <div className="flex items-center gap-2 rounded-md border border-border bg-muted/20 px-2.5 py-2">
             <span className="text-xs text-muted-foreground shrink-0">{t("lot")}</span>
             <input
               type="number"
@@ -383,7 +383,7 @@ export function ScalpingPanel({ isLoggedIn, isVip }: Props) {
   // --- Not logged in ---
   if (!isLoggedIn) {
     return (
-      <div className="flex items-center justify-between gap-4 rounded-lg border border-border/60 bg-muted/10 p-4">
+      <div className="flex items-center justify-between gap-4 rounded-lg border border-border bg-muted/10 p-4">
         <div className="flex items-center gap-2.5">
           <Zap className="size-4 text-primary/60 shrink-0" />
           <div>
@@ -482,19 +482,19 @@ export function ScalpingPanel({ isLoggedIn, isVip }: Props) {
 
       {/* Loading skeleton */}
       {state.status === "loading" && (
-        <div className="rounded-lg border border-border/40 bg-muted/20 h-72 animate-pulse" />
+        <div className="rounded-lg border border-border bg-muted/20 h-72 animate-pulse" />
       )}
 
       {/* Unavailable */}
       {state.status === "unavailable" && (
-        <div className="rounded-lg border border-border/60 bg-muted/10 p-4">
+        <div className="rounded-lg border border-border bg-muted/10 p-4">
           <p className="text-xs text-muted-foreground">{t("unavailable")}</p>
         </div>
       )}
 
       {/* Error */}
       {state.status === "error" && (
-        <div className="flex items-center justify-between rounded-lg border border-border/60 bg-muted/10 p-4">
+        <div className="flex items-center justify-between rounded-lg border border-border bg-muted/10 p-4">
           <p className="text-xs text-muted-foreground">{t("errorMsg")}</p>
           <button onClick={handleAnalyze} className="text-xs text-primary hover:underline">
             {t("retry")}
@@ -507,7 +507,7 @@ export function ScalpingPanel({ isLoggedIn, isVip }: Props) {
         <AnalysisCard result={state.data} t={t} />
       )}
 
-      <p className="text-xs text-muted-foreground/50">{t("disclaimer")}</p>
+      <p className="text-xs text-muted-foreground">{t("disclaimer")}</p>
     </div>
   );
 }

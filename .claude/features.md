@@ -26,7 +26,7 @@ Quy ước test: `npm run test:e2e` (Playwright, `baseURL` = `E2E_BASE_URL` ho�
 - [x] **UI-1 Bàn giao dịch** — `/chart`, `/quotes`, `/calendar`, `/positions`, `/mt5`; desk: đồng bộ cặp tiền chart ↔ ô Market (URL `?symbol=`). Test: `e2e/trading-desk.spec.ts` (đổi Market → chart symbol đổi; lọc lịch theo tiền tệ đổi URL; mobile không cuộn ngang).
 - [x] **UI-2 Tín hiệu & copy** — chi tiết signal, `/copy-trade`, `/leaderboard`, `/ai-trade-proposals`, `/u/[id]`. Test: `e2e/signals-flow.spec.ts` (list → detail → quay lại giữ bộ lọc; leaderboard sắp xếp).
 - [x] **UI-3 Nhật ký & kỷ luật** — các tab journal còn lại, `/plan`, `/dashboard`, `/backtest`. Test (cần login): `e2e/journal.spec.ts` (chuyển 8 tab qua URL, tab hiện `aria-current`).
-- [ ] **UI-4 Công cụ thị trường** — `/screener`, `/scalping`, `/heatmap`, `/sentiment`, `/alerts`, `/tools`. Test: `e2e/market-tools.spec.ts`.
+- [x] **UI-4 Công cụ thị trường** — `/screener`, `/scalping`, `/heatmap`, `/sentiment`, `/alerts`, `/tools`. Test: `e2e/market-tools.spec.ts`.
 - [ ] **UI-5 Cộng đồng & học** — `/forum/*`, `/academy`, `/articles`, `/challenge`, `/missions`, `/start`, `/webinar`, `/resources`, `/brokers`, `/partners`. Test: `e2e/community.spec.ts`.
 - [ ] **UI-6 Tài khoản** — `/auth/*`, `/profile`, `/notifications`, `/messages`, `/upgrade-vip`. Test: `e2e/auth.spec.ts` (lỗi validate form đăng nhập hiện đúng chỗ, đăng nhập thành công về trang trước).
 - [ ] **UI-7 Admin** — một khuôn CRUD chung cho 15 màn `/admin/*`. Test: `e2e/admin.spec.ts` (cần `E2E_ADMIN_*`).

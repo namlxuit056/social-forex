@@ -39,7 +39,7 @@ function SymbolCard({
   return (
     <div className={cn(
       "flex items-center justify-between gap-3 rounded-lg border px-3 py-2",
-      sym.enabled ? "border-primary/20 bg-primary/5" : "border-border/60 opacity-60",
+      sym.enabled ? "border-primary/20 bg-primary/5" : "border-border opacity-60",
     )}>
       <div className="flex items-center gap-2 min-w-0">
         <span className="text-xs font-mono font-semibold">{sym.symbol}</span>
@@ -156,7 +156,7 @@ export function AutoScalpSettings({ initial, isVip }: Props) {
   return (
     <div className={cn(
       "rounded-lg border p-4 space-y-4",
-      enabled ? "border-primary/30 bg-primary/5" : "border-border/60 bg-muted/10",
+      enabled ? "border-primary/30 bg-primary/5" : "border-border bg-muted/10",
     )}>
       {/* Header + master toggle */}
       <div className="flex items-center justify-between gap-3">
@@ -293,7 +293,7 @@ export function AutoScalpSettings({ initial, isVip }: Props) {
         )}
       </div>
 
-      <p className="text-xs text-muted-foreground/60">{t("autoWarning")}</p>
+      <p className="text-xs text-muted-foreground">{t("autoWarning")}</p>
     </div>
   );
 }

@@ -550,11 +550,11 @@ export function ScreenerAlerts({ className }: Props) {
       {/* Alert list */}
       {!loading && alerts.length === 0 && !showCreate && (
         <div className="rounded-lg border border-dashed py-6 text-center">
-          <BellOff className="mx-auto size-6 text-muted-foreground/40" />
+          <BellOff className="mx-auto size-6 text-muted-foreground" />
           <p className="mt-2 text-xs text-muted-foreground">
             {t("noAlerts")}
           </p>
-          <p className="text-[10px] text-muted-foreground/60">
+          <p className="text-[10px] text-muted-foreground">
             {t("noAlertsHint")}
           </p>
         </div>

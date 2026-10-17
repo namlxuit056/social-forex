@@ -149,7 +149,7 @@ function RangeFilter({
                 onChange={(e) =>
                   onChange({ ...condition, value: Number(e.target.value) })
                 }
-                className="w-20 rounded border border-border/60 bg-background px-2 py-1 text-xs font-mono"
+                className="w-20 rounded border border-border bg-background px-2 py-1 text-xs font-mono"
               />
               <span className="text-xs text-muted-foreground">—</span>
               <input
@@ -161,7 +161,7 @@ function RangeFilter({
                 onChange={(e) =>
                   onChange({ ...condition, max: Number(e.target.value) })
                 }
-                className="w-20 rounded border border-border/60 bg-background px-2 py-1 text-xs font-mono"
+                className="w-20 rounded border border-border bg-background px-2 py-1 text-xs font-mono"
               />
             </>
           ) : (
@@ -174,7 +174,7 @@ function RangeFilter({
               onChange={(e) =>
                 onChange({ ...condition, value: Number(e.target.value) })
               }
-              className="w-20 rounded border border-border/60 bg-background px-2 py-1 text-xs font-mono"
+              className="w-20 rounded border border-border bg-background px-2 py-1 text-xs font-mono"
             />
           )}
           <input
@@ -383,7 +383,7 @@ export function ScreenerFilterBuilder({
   );
 
   return (
-    <div className="rounded-lg border border-border/70 bg-muted/10">
+    <div className="rounded-lg border border-border bg-muted/10">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2.5">
         <button
@@ -421,7 +421,7 @@ export function ScreenerFilterBuilder({
                 <button
                   type="button"
                   onClick={() => handleDeletePreset(p.id)}
-                  className="text-muted-foreground/40 hover:text-destructive transition"
+                  className="text-muted-foreground hover:text-destructive transition"
                 >
                   <X className="size-2.5" />
                 </button>
@@ -433,7 +433,7 @@ export function ScreenerFilterBuilder({
 
       {/* Expanded body */}
       {expanded && (
-        <div className="border-t border-border/50 px-4 py-3 space-y-4">
+        <div className="border-t border-border px-4 py-3 space-y-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {/* RSI */}
             <RangeFilter
@@ -481,7 +481,7 @@ export function ScreenerFilterBuilder({
           </div>
 
           {/* Recommendations per TF */}
-          <div className="border-t border-border/30 pt-3">
+          <div className="border-t border-border pt-3">
             <p className="mb-2 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               {t("recommendation")}
             </p>
@@ -514,7 +514,7 @@ export function ScreenerFilterBuilder({
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-2 border-t border-border/30 pt-3">
+          <div className="flex items-center gap-2 border-t border-border pt-3">
             <button
               type="button"
               onClick={handleApply}
@@ -539,7 +539,7 @@ export function ScreenerFilterBuilder({
                     onChange={(e) => setPresetName(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleSavePreset()}
                     placeholder={t("presetNamePlaceholder")}
-                    className="w-32 rounded border border-border/60 bg-background px-2 py-1 text-xs"
+                    className="w-32 rounded border border-border bg-background px-2 py-1 text-xs"
                     autoFocus
                   />
                   <button

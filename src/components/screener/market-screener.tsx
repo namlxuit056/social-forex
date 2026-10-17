@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import { Filter, ChevronUp, ChevronDown, ChevronsUpDown, Star, Columns3 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
+import { ToneBadge } from "@/components/ui/status-badge";
+import type { Tone } from "@/lib/ui/status-map";
 import { AiPicksPanel } from "@/components/screener/ai-picks-panel";
 import { ScreenerFilterBuilder } from "@/components/screener/screener-filter-builder";
 import type { CustomFilters } from "@/components/screener/screener-filter-builder";
@@ -81,28 +83,30 @@ function toRecLabel(v: number | null): RecLabel | null {
   return "STRONG SELL";
 }
 
+const REC_TONE: Record<RecLabel, Tone> = {
+  "STRONG BUY": "success",
+  BUY: "success",
+  NEUTRAL: "neutral",
+  SELL: "danger",
+  "STRONG SELL": "danger",
+};
+
 function RecBadge({ value }: { value: number | null }) {
   const label = toRecLabel(value);
   if (label === null)
-    return <span className="text-xs text-muted-foreground/40">—</span>;
-
-  const cls: Record<RecLabel, string> = {
-    "STRONG BUY": "bg-emerald-600 text-white",
-    BUY: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
-    NEUTRAL: "bg-muted/50 text-muted-foreground",
-    SELL: "bg-red-500/15 text-red-500",
-    "STRONG SELL": "bg-red-600 text-white",
-  };
-
+    return <span className="text-xs text-muted-foreground">—</span>;
+  const strong = label.startsWith("STRONG");
   return (
-    <span
+    <ToneBadge
+      tone={REC_TONE[label]}
+      // Strong ratings are the same hue, filled, so they stand out without a new colour.
       className={cn(
-        "inline-block rounded px-1.5 py-0.5 text-[10px] font-semibold leading-tight whitespace-nowrap",
-        cls[label],
+        "text-[10px] font-semibold",
+        strong && (label === "STRONG BUY" ? "bg-success text-background" : "bg-danger text-background"),
       )}
     >
       {label}
-    </span>
+    </ToneBadge>
   );
 }
 
@@ -127,7 +131,7 @@ function cmpStr(a: string, b: string, dir: number): number {
 
 function BBPositionBadge({ position }: { position: "above" | "below" | "within" | "unknown" }) {
   if (position === "unknown")
-    return <span className="text-xs text-muted-foreground/40">—</span>;
+    return <span className="text-xs text-muted-foreground">—</span>;
   const cfg = {
     above: { label: "Above", cls: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" },
     below: { label: "Below", cls: "bg-red-500/15 text-red-500" },
@@ -143,7 +147,7 @@ function BBPositionBadge({ position }: { position: "above" | "below" | "within" 
 
 function StochBadge({ value, state }: { value: number | null; state: "overbought" | "oversold" | "neutral" }) {
   if (value === null)
-    return <span className="text-xs text-muted-foreground/40">—</span>;
+    return <span className="text-xs text-muted-foreground">—</span>;
   const cls =
     state === "overbought"
       ? "bg-red-500/15 text-red-500"
@@ -159,7 +163,7 @@ function StochBadge({ value, state }: { value: number | null; state: "overbought
 
 function MACDCell({ value, signal }: { value: number | null; signal: number | null }) {
   if (value === null)
-    return <span className="text-xs text-muted-foreground/40">—</span>;
+    return <span className="text-xs text-muted-foreground">—</span>;
   const bullish = signal !== null ? value > signal : value > 0;
   return (
     <span className={cn("text-xs tabular-nums font-medium", bullish ? "text-emerald-600 dark:text-emerald-400" : "text-red-500")}>
@@ -450,7 +454,7 @@ export function MarketScreener({ pairs, isLoggedIn, isVip, initialFavorites = []
           {showColMenu && (
             <>
               <div className="fixed inset-0 z-40" onClick={() => setShowColMenu(false)} />
-              <div className="absolute right-0 top-full z-50 mt-1 w-48 rounded-lg border border-border/70 bg-popover p-1.5 shadow-lg">
+              <div className="absolute right-0 top-full z-50 mt-1 w-48 rounded-lg border border-border bg-popover p-1.5 shadow-lg">
               {([
                 { key: "macd" as const, label: "MACD" },
                 { key: "bb" as const, label: t("colBB") },
@@ -476,7 +480,7 @@ export function MarketScreener({ pairs, isLoggedIn, isVip, initialFavorites = []
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-lg border border-border/70">
+      <div className="overflow-x-auto rounded-lg border border-border">
         <table className="w-full min-w-205 text-left text-sm">
           <thead className="bg-muted/50 text-muted-foreground">
             <tr>
@@ -574,7 +578,7 @@ export function MarketScreener({ pairs, isLoggedIn, isVip, initialFavorites = []
               <th className="px-3 py-2.5"></th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-border/50">
+          <tbody className="divide-y divide-border">
             {filtered.map((pair) => {
               const isFav = favorites.has(pair.symbol);
               return (
@@ -590,7 +594,7 @@ export function MarketScreener({ pairs, isLoggedIn, isVip, initialFavorites = []
                         "size-4 transition-colors",
                         isFav
                           ? "fill-amber-400 text-amber-500"
-                          : "text-muted-foreground/30 group-hover/star:text-amber-400",
+                          : "text-muted-foreground group-hover/star:text-amber-400",
                       )}
                     />
                   </button>
@@ -634,7 +638,7 @@ export function MarketScreener({ pairs, isLoggedIn, isVip, initialFavorites = []
                       {pair.rsi.toFixed(1)}
                     </span>
                   ) : (
-                    <span className="text-xs text-muted-foreground/40">—</span>
+                    <span className="text-xs text-muted-foreground">—</span>
                   )}
                 </td>
                 <td className="px-3 py-2.5 text-center">
@@ -650,7 +654,7 @@ export function MarketScreener({ pairs, isLoggedIn, isVip, initialFavorites = []
                       {pair.adx.toFixed(1)}
                     </span>
                   ) : (
-                    <span className="text-xs text-muted-foreground/40">—</span>
+                    <span className="text-xs text-muted-foreground">—</span>
                   )}
                 </td>
                 {visibleCols.has("macd") && (
@@ -675,7 +679,7 @@ export function MarketScreener({ pairs, isLoggedIn, isVip, initialFavorites = []
                         {pair.atr.toFixed(4)}
                       </span>
                     ) : (
-                      <span className="text-xs text-muted-foreground/40">—</span>
+                      <span className="text-xs text-muted-foreground">—</span>
                     )}
                   </td>
                 )}
@@ -707,13 +711,13 @@ export function MarketScreener({ pairs, isLoggedIn, isVip, initialFavorites = []
       </div>
 
       {filtered.length === 0 && (
-        <div className="rounded-lg border border-dashed border-border/80 bg-muted/15 px-4 py-8 text-center">
-          <Filter className="mx-auto mb-2 size-8 text-muted-foreground/40" />
+        <div className="rounded-lg border border-dashed border-border bg-muted/15 px-4 py-8 text-center">
+          <Filter className="mx-auto mb-2 size-8 text-muted-foreground" />
           <p className="text-sm text-muted-foreground">{t("noResults")}</p>
         </div>
       )}
 
-      <p className="text-xs text-muted-foreground/60">
+      <p className="text-xs text-muted-foreground">
         {t("dataSource")}
       </p>
     </div>

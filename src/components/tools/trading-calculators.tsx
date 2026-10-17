@@ -107,19 +107,19 @@ function PivotCalculator() {
       </div>
 
       {pivots ? (
-        <div className="rounded-lg border border-border/60 bg-muted/10 p-2">
+        <div className="rounded-lg border border-border bg-muted/10 p-2">
           <PivotRow label="R3" value={pivots.r3} color="text-sky-600 dark:text-sky-400" id="r3" copied={copied} onCopy={copy} />
           <PivotRow label="R2" value={pivots.r2} color="text-sky-600 dark:text-sky-400" id="r2" copied={copied} onCopy={copy} />
           <PivotRow label="R1" value={pivots.r1} color="text-sky-600 dark:text-sky-400" id="r1" copied={copied} onCopy={copy} />
-          <div className="my-1 border-t border-border/40" />
+          <div className="my-1 border-t border-border" />
           <PivotRow label="P" value={pivots.pivot} color="text-foreground font-bold" id="p" copied={copied} onCopy={copy} />
-          <div className="my-1 border-t border-border/40" />
+          <div className="my-1 border-t border-border" />
           <PivotRow label="S1" value={pivots.s1} color="text-amber-600 dark:text-amber-400" id="s1" copied={copied} onCopy={copy} />
           <PivotRow label="S2" value={pivots.s2} color="text-amber-600 dark:text-amber-400" id="s2" copied={copied} onCopy={copy} />
           <PivotRow label="S3" value={pivots.s3} color="text-amber-600 dark:text-amber-400" id="s3" copied={copied} onCopy={copy} />
         </div>
       ) : (
-        <div className="rounded-lg border border-dashed border-border/60 bg-muted/10 px-4 py-3 text-center text-xs text-muted-foreground">
+        <div className="rounded-lg border border-dashed border-border bg-muted/10 px-4 py-3 text-center text-xs text-muted-foreground">
           {t("pivotEmptyHint")}
         </div>
       )}
@@ -165,7 +165,7 @@ function MarginCalculator() {
               "rounded-md border px-2.5 py-0.5 font-mono text-xs transition-colors",
               symbol.toUpperCase() === s
                 ? "border-primary bg-primary/10 text-primary"
-                : "border-border/60 text-muted-foreground hover:border-primary/50 hover:text-foreground",
+                : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground",
             )}
           >
             {s}
@@ -227,7 +227,7 @@ function MarginCalculator() {
       </div>
 
       {result ? (
-        <div className="grid grid-cols-3 gap-3 rounded-lg border border-border/60 bg-muted/20 p-3">
+        <div className="grid grid-cols-3 gap-3 rounded-lg border border-border bg-muted/20 p-3">
           <div>
             <p className="text-[11px] text-muted-foreground">Contract size</p>
             <p className="mt-0.5 font-mono text-sm font-semibold text-foreground">
@@ -248,7 +248,7 @@ function MarginCalculator() {
           </div>
         </div>
       ) : (
-        <div className="rounded-lg border border-dashed border-border/60 bg-muted/10 px-4 py-3 text-center text-xs text-muted-foreground">
+        <div className="rounded-lg border border-dashed border-border bg-muted/10 px-4 py-3 text-center text-xs text-muted-foreground">
           {t("marginEmptyHint")}
         </div>
       )}

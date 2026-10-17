@@ -53,13 +53,15 @@ export default async function SentimentPage({
   const rows: SentimentRow[] = [...map.entries()]
     .map(([symbol, v]) => {
       const total = v.long + v.short;
+      const longPct = total > 0 ? Math.round((v.long / total) * 100) : 0;
       return {
         symbol,
         long: v.long,
         short: v.short,
         total,
-        longPct: total > 0 ? Math.round((v.long / total) * 100) : 0,
-        shortPct: total > 0 ? Math.round((v.short / total) * 100) : 0,
+        longPct,
+        // Derive from longPct so the two always add up to 100.
+        shortPct: total > 0 ? 100 - longPct : 0,
       };
     })
     .sort((a, b) => b.total - a.total);
@@ -87,7 +89,7 @@ export default async function SentimentPage({
           {rows.map((p) => (
             <div
               key={p.symbol}
-              className="rounded-xl border border-border bg-card/50 p-5 ring-1 ring-foreground/5"
+              className="rounded-xl border border-border bg-card p-5"
             >
               <div className="flex justify-between font-mono text-sm">
                 <span className="font-semibold text-foreground">{p.symbol}</span>
@@ -97,15 +99,15 @@ export default async function SentimentPage({
               </div>
               <div className="mt-4 flex h-3 overflow-hidden rounded-full bg-muted">
                 {p.longPct > 0 && (
-                  <div className="bg-primary transition-all" style={{ width: `${p.longPct}%` }} />
+                  <div className="bg-success transition-all" style={{ width: `${p.longPct}%` }} />
                 )}
                 {p.shortPct > 0 && (
-                  <div className="bg-destructive/80 transition-all" style={{ width: `${p.shortPct}%` }} />
+                  <div className="bg-danger transition-all" style={{ width: `${p.shortPct}%` }} />
                 )}
               </div>
               <div className="mt-2 flex justify-between text-xs text-muted-foreground">
-                <span className="text-primary">Long {p.longPct}%</span>
-                <span className="text-destructive">Short {p.shortPct}%</span>
+                <span className="text-success">Long {p.longPct}%</span>
+                <span className="text-danger">Short {p.shortPct}%</span>
               </div>
             </div>
           ))}
