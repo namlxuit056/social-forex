@@ -26,14 +26,14 @@ export function BreadcrumbNav({
           return (
             <li key={index} className="flex items-center gap-1">
               {index > 0 && (
-                <ChevronRight className="size-3.5 shrink-0 text-muted-foreground/50" aria-hidden />
+                <ChevronRight className="size-3.5 shrink-0 text-muted-foreground" aria-hidden />
               )}
               {isLast || !item.href ? (
                 <span className="font-medium text-foreground">{item.label}</span>
               ) : (
                 <Link
                   href={item.href}
-                  className="transition hover:text-foreground hover:underline"
+                  className="inline-flex min-h-6 items-center transition hover:text-foreground hover:underline"
                 >
                   {item.label}
                 </Link>

@@ -31,7 +31,7 @@ export function NavMegaMenu({
     <div className="group relative">
       <button
         className={cn(
-          "inline-flex min-h-9 items-center gap-1 whitespace-nowrap rounded-md px-2.5 py-1.5 text-[13px] font-medium transition-colors hover:bg-muted hover:text-foreground",
+          "inline-flex min-h-9 items-center gap-1 whitespace-nowrap rounded-md px-2.5 py-1.5 text-[13px] font-medium transition-colors hover:bg-item-hover hover:text-foreground",
           isAnyActive ? "text-foreground" : "text-muted-foreground"
         )}
       >
@@ -48,7 +48,7 @@ export function NavMegaMenu({
               <SiteNavLink
                 key={item.href}
                 href={item.href}
-                className="rounded-md px-2.5 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                className="rounded-md px-2.5 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-item-hover hover:text-foreground"
                 activeClassName="bg-muted text-foreground font-medium"
               >
                 {t(item.key)}

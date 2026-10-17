@@ -31,6 +31,8 @@ Quy ước test: `npm run test:e2e` (Playwright, `baseURL` = `E2E_BASE_URL` ho�
 - [x] **UI-6 Tài khoản** — `/auth/*`, `/profile`, `/notifications`, `/messages`, `/upgrade-vip`. Test: `e2e/auth.spec.ts` (lỗi validate form đăng nhập hiện đúng chỗ, đăng nhập thành công về trang trước).
 - [ ] **UI-7 Admin** — một khuôn CRUD chung cho 15 màn `/admin/*`. Test: `e2e/admin.spec.ts` (cần `E2E_ADMIN_*`). _Đã làm (2026-10-17): chuẩn hoá class/tiêu đề 22 file admin, `e2e/admin.spec.ts` (chặn ẩn danh + 13 trang render không cuộn ngang khi đăng nhập admin). TODO: khuôn CRUD chung (danh sách + lọc + sửa trong panel) chưa làm — cần duyệt từng màn admin._
 
+- [ ] **UI-10 Khối tóm tắt đầu bài viết AI** — đưa Bias / mức tin cậy / vùng vào lệnh / mức vô hiệu lên ngay dưới sapo trang `/articles/[slug]` (hiện nằm giữa mục 4). TODO: cần lưu các trường này có cấu trúc khi sinh bài (`src/lib/ai/article-writer.ts`) thay vì chỉ trong markdown — chưa làm, cần duyệt schema. (Từ lượt soi 2026-10-17, dòng 7.)
+
 ### Giai đoạn cuối
 
 - [ ] **UI-8 IA điều hướng** — gom 4 + 27 mục về ~5 mục chính + "Thêm", chỉ sửa `nav-config.ts`. Test: cập nhật `e2e/smoke.spec.ts`. _TODO (2026-10-17, chưa làm): `FunnelEvent` không có sự kiện page_view (60 ngày chỉ có signup/CTA) nên không biết mục nào dùng nhiều — cần quyết của user hoặc thêm tracking page_view trước. Đã làm phần liên quan: header đăng nhập gom vào AccountMenu, nav đầy đủ từ `xl`._

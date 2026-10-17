@@ -20,13 +20,17 @@ import { auth } from "@/auth";
 import { isVipActive } from "@/lib/vip";
 import { SITE_AUTHOR } from "@/lib/site-author";
 
+/** Older AI articles copied the prompt's "(REQUIRED)" label into a heading. */
+const PROMPT_LABEL_IN_HEADING =
+  /(<h[1-6][^>]*>[^<]*?)\s*\((?:BẮT BUỘC|bắt buộc|REQUIRED|Required|MANDATORY)\)/g;
+
 function ensureHtml(body: string): string {
   const trimmed = body.trimStart();
-  // Already HTML if starts with a tag
-  if (trimmed.startsWith("<")) return body;
-  // Looks like markdown — convert
-  const html = marked.parse(trimmed, { async: false }) as string;
-  return html;
+  // Already HTML if starts with a tag; otherwise it looks like markdown
+  const html = trimmed.startsWith("<")
+    ? body
+    : (marked.parse(trimmed, { async: false }) as string);
+  return html.replace(PROMPT_LABEL_IN_HEADING, "$1");
 }
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
@@ -166,7 +170,9 @@ export default async function ArticlePage({ params }: Props) {
   const isVip = isVipActive(chatUser?.vipUntil);
 
   return (
-    <div className="space-y-8">
+    // Article column (42rem) + AI panel (20rem) + gap, centred so wide screens
+    // don't leave an empty band on the right.
+    <div className="mx-auto max-w-[64rem] space-y-8">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -199,7 +205,7 @@ export default async function ArticlePage({ params }: Props) {
                 {formatDate(article.publishedAt ?? article.generatedAt, locale)}
               </span>
             </div>
-            <h1 className="font-heading text-xl font-semibold text-foreground">
+            <h1 className="font-heading text-2xl font-semibold tracking-tight text-foreground">
               {article.title}
             </h1>
             <p className="mt-2 text-muted-foreground">{article.summary}</p>

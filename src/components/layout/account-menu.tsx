@@ -29,7 +29,7 @@ export function AccountMenu({ label, isStaff }: { label: string; isStaff: boolea
     <DropdownMenu>
       <DropdownMenuTrigger
         aria-label={label}
-        className="inline-flex h-9 items-center gap-2 rounded-lg px-1.5 text-sm text-foreground transition-colors hover:bg-muted"
+        className="inline-flex h-9 items-center gap-2 rounded-lg px-1.5 text-sm text-foreground transition-colors hover:bg-item-hover"
       >
         <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted text-[11px] font-semibold text-muted-foreground">
           {initials(label)}

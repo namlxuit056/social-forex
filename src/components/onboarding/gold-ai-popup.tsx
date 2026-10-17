@@ -26,7 +26,8 @@ export function GoldAiPopup() {
   }, []);
 
   useEffect(() => {
-    if (pathname.includes("/u/")) return;
+    // Not on profiles or while someone is reading an article.
+    if (pathname.includes("/u/") || pathname.includes("/articles/")) return;
 
     try {
       if (window.localStorage.getItem(STORAGE_KEY)) return;
@@ -81,7 +82,7 @@ export function GoldAiPopup() {
               <Sparkles className="size-5" aria-hidden />
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-semibold uppercase text-yellow-600 dark:text-yellow-300">
+              <p className="text-xs font-semibold uppercase text-amber-700 dark:text-amber-300">
                 {t("eyebrow")}
               </p>
               <h2

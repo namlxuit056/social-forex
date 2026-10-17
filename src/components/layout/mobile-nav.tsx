@@ -68,7 +68,7 @@ export function MobileNav({
                         key={item.href}
                         href={item.href}
                         onClick={() => setOpen(false)}
-                        className="rounded-md px-2 py-2 text-sm text-foreground transition hover:bg-muted"
+                        className="rounded-md px-2 py-2 text-sm text-foreground transition hover:bg-item-hover"
                       >
                         {tn(item.key)}
                       </Link>
@@ -85,7 +85,7 @@ export function MobileNav({
                   <Link
                     href="/notifications"
                     onClick={() => setOpen(false)}
-                    className="flex items-center gap-2 rounded-md px-2 py-2 text-sm font-medium text-foreground transition hover:bg-muted"
+                    className="flex items-center gap-2 rounded-md px-2 py-2 text-sm font-medium text-foreground transition hover:bg-item-hover"
                   >
                     <Bell className="size-4 shrink-0 text-muted-foreground" aria-hidden />
                     {tn("notifications")}
@@ -93,14 +93,14 @@ export function MobileNav({
                   <Link
                     href="/profile"
                     onClick={() => setOpen(false)}
-                    className="rounded-md px-2 py-2 text-sm font-medium text-foreground transition hover:bg-muted"
+                    className="rounded-md px-2 py-2 text-sm font-medium text-foreground transition hover:bg-item-hover"
                   >
                     {tc("profile")}
                   </Link>
                   <Link
                     href="/dashboard"
                     onClick={() => setOpen(false)}
-                    className="rounded-md px-2 py-2 text-sm font-medium text-foreground transition hover:bg-muted"
+                    className="rounded-md px-2 py-2 text-sm font-medium text-foreground transition hover:bg-item-hover"
                   >
                     {tc("dashboard")}
                   </Link>
@@ -132,7 +132,7 @@ export function MobileNav({
                   <Link
                     href="/auth/signin"
                     onClick={() => setOpen(false)}
-                    className="flex-1 rounded-md px-3 py-2 text-center text-sm font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                    className="flex-1 rounded-md px-3 py-2 text-center text-sm font-medium text-muted-foreground transition hover:bg-item-hover hover:text-foreground"
                   >
                     {tc("signIn")}
                   </Link>

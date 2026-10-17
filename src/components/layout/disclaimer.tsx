@@ -10,7 +10,7 @@ export async function Disclaimer({
 
   if (variant === "compact") {
     return (
-      <p className="text-xs leading-relaxed text-muted-foreground/70">
+      <p className="text-xs leading-relaxed text-muted-foreground">
         <TriangleAlert className="mr-1 inline-block size-3 align-text-top" />
         {t("compact")}
       </p>

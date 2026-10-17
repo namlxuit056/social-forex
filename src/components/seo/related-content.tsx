@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { Badge } from "@/components/ui/badge";
 import type { Lesson } from "@/lib/content/academy";
@@ -9,13 +10,14 @@ type ArticleSummary = {
   summary: string;
 };
 
-export function RelatedLessons({
+export async function RelatedLessons({
   lessons,
   label,
 }: {
   lessons: Lesson[];
   label: string;
 }) {
+  const tAcademy = await getTranslations("academy");
   if (lessons.length === 0) return null;
 
   return (
@@ -31,7 +33,7 @@ export function RelatedLessons({
             className="group rounded-xl border border-border bg-card p-4 transition hover:border-primary/30 hover:bg-card"
           >
             <Badge variant="outline" className="mb-2 text-[10px]">
-              {lesson.level}
+              {tAcademy(lesson.level)}
             </Badge>
             <h3 className="text-sm font-medium text-foreground group-hover:text-primary">
               {lesson.title}

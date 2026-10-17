@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { marked } from "marked";
-import { Bot, Lock, Loader2, Send, Sparkles, UserRound } from "lucide-react";
+import { Bot, Lock, Loader2, Send, Sparkles } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -36,8 +36,27 @@ export function ArticleChat({ articleId, isLoggedIn, isVip }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const listRef = useRef<HTMLDivElement | null>(null);
+  const [moreBelow, setMoreBelow] = useState(false);
+
+  const updateMoreBelow = () => {
+    const el = listRef.current;
+    if (!el) return;
+    setMoreBelow(el.scrollHeight - el.scrollTop - el.clientHeight > 4);
+  };
 
   const quickPrompts = [t("quickCrossed"), t("quickStillValid"), t("quickWhatNow")];
+
+  useEffect(() => {
+    const el = listRef.current;
+    if (!el) return;
+    const check = () =>
+      setMoreBelow(el.scrollHeight - el.scrollTop - el.clientHeight > 4);
+    check();
+    const observer = new ResizeObserver(check);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [messages, loading]);
 
   useEffect(() => {
     if (!isVip) return;
@@ -136,37 +155,32 @@ export function ArticleChat({ articleId, isLoggedIn, isVip }: Props) {
           {t("loadingHistory")}
         </div>
       ) : messages.length > 0 ? (
-        <div className="mt-4 max-h-112 space-y-3 overflow-y-auto pr-1">
-          {messages.map((message) => {
-            const isUser = message.role === "user";
-            return (
-              <div key={message.id} className={cn("flex items-start gap-2", isUser && "flex-row-reverse")}>
-                <span
-                  className={cn(
-                    "inline-flex size-7 shrink-0 items-center justify-center rounded-md",
-                    isUser ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground",
-                  )}
-                >
-                  {isUser ? (
-                    <UserRound className="size-3.5" aria-hidden />
-                  ) : (
-                    <Bot className="size-3.5" aria-hidden />
-                  )}
-                </span>
-                {isUser ? (
-                  <div className="max-w-[85%] whitespace-pre-wrap rounded-lg bg-primary px-3 py-2 text-sm leading-relaxed text-primary-foreground">
-                    {message.content}
-                  </div>
-                ) : (
-                  <div
-                    className="chat-message-body max-w-[85%] rounded-lg border border-border bg-muted/35 px-3 py-2 text-sm leading-relaxed text-foreground"
-                    // AI-authored markdown, converted to HTML purely for formatting (bold, lists, etc.)
-                    dangerouslySetInnerHTML={{ __html: renderAiMarkdown(message.content) }}
-                  />
-                )}
-              </div>
-            );
-          })}
+        <div
+          ref={listRef}
+          onScroll={updateMoreBelow}
+          className={cn(
+            "mt-4 max-h-112 space-y-4 overflow-y-auto",
+            // Fade the last lines while part of the answer is still below the fold.
+            moreBelow && "[mask-image:linear-gradient(to_bottom,black_calc(100%-2.5rem),transparent)]",
+          )}
+        >
+          {messages.map((message) =>
+            message.role === "user" ? (
+              <p
+                key={message.id}
+                className="ml-auto w-fit max-w-[85%] whitespace-pre-wrap rounded-2xl bg-muted px-3 py-2 text-sm leading-relaxed text-foreground [overflow-wrap:anywhere]"
+              >
+                {message.content}
+              </p>
+            ) : (
+              <div
+                key={message.id}
+                className="chat-message-body text-sm leading-relaxed text-foreground"
+                // AI-authored markdown, converted to HTML purely for formatting (bold, lists, etc.)
+                dangerouslySetInnerHTML={{ __html: renderAiMarkdown(message.content) }}
+              />
+            ),
+          )}
           {loading ? (
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Loader2 className="size-3.5 animate-spin" aria-hidden />
@@ -185,7 +199,7 @@ export function ArticleChat({ articleId, isLoggedIn, isVip }: Props) {
       {isVip ? (
         <form onSubmit={onSubmit} className="mt-4">
           {historyLoaded && messages.length === 0 ? (
-            <div className="mb-3 grid gap-1.5 sm:grid-cols-3">
+            <div className="mb-3 flex flex-col gap-1.5">
               {quickPrompts.map((prompt) => (
                 <Button
                   key={prompt}
@@ -231,7 +245,7 @@ export function ArticleChat({ articleId, isLoggedIn, isVip }: Props) {
               )}
             </Button>
           </div>
-          <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">{t("disclaimer")}</p>
+          <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{t("disclaimer")}</p>
         </form>
       ) : null}
     </section>

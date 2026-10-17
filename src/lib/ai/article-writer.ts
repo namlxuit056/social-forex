@@ -296,14 +296,14 @@ Return valid JSON only with these keys: title, summary, metaDescription, body.
   1. What is happening RIGHT NOW (cite specific price levels, indicators, news from the context above)
   2. Why this matters for traders (concrete impact on price action or sentiment)
   3. Technical analysis breakdown (reference specific RSI, EMA, key levels from the live data above if available)
-  4. Technical bias & probability (REQUIRED, see rules below)
+  4. Technical bias & probability (see rules below)
   5. Practical checklist (what to watch, what indicators/levels to track)
   6. Common mistakes traders make with this topic
   7. Risk management (stop-loss sizing, position sizing, capital rules)
   8. Risk disclaimer (final section — educational only, not financial advice)
 
 ## Technical bias & probability section — hard requirements
-This section is mandatory in every article and must contain, in bold or a short table:
+This section is mandatory in every article. Write the heading as a normal reader-facing title — never add words like "required", "mandatory" or "bắt buộc" to it. It must contain, in bold or a short table:
 - A single explicit bias: BUY / SELL / NEUTRAL (translate the label naturally into the article language, e.g. "MUA" / "BÁN" / "TRUNG LẬP" in Vietnamese).
 - A confidence percentage between 55% and 85% (never round numbers like exactly 50% or 100%) derived from how many of the cited technical signals (RSI, EMA/MA cross, trend structure, momentum, S/R levels) agree with each other — more agreeing signals = higher percentage, conflicting signals = lower percentage.
 - 1-2 sentences explaining which specific signals from the technical analysis section above drove that bias and percentage.

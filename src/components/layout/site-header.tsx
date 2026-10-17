@@ -64,7 +64,7 @@ export async function SiteHeader() {
             <SiteNavLink
               key={item.href}
               href={item.href}
-              className="inline-flex min-h-9 items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 py-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              className="inline-flex min-h-9 items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 py-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:bg-item-hover hover:text-foreground"
               activeClassName="bg-muted text-foreground"
             >
               <item.icon className="size-3.5" aria-hidden />
@@ -114,7 +114,7 @@ export async function SiteHeader() {
             <>
               <Link
                 href="/auth/signin"
-                className="hidden shrink-0 whitespace-nowrap rounded-md px-2 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-muted hover:text-foreground sm:inline-flex sm:px-2.5 sm:text-sm"
+                className="hidden shrink-0 whitespace-nowrap rounded-md px-2 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-item-hover hover:text-foreground sm:inline-flex sm:px-2.5 sm:text-sm"
               >
                 {tc("signIn")}
               </Link>
@@ -144,7 +144,7 @@ export async function SiteHeader() {
             <SiteNavLink
               key={item.href}
               href={item.href}
-              className="inline-flex h-8 shrink-0 items-center rounded-lg px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              className="inline-flex h-8 shrink-0 items-center rounded-lg px-3 text-xs font-medium text-muted-foreground transition-colors hover:bg-item-hover hover:text-foreground"
               activeClassName="bg-muted text-foreground"
             >
               {t(item.key)}
