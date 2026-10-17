@@ -90,7 +90,7 @@ export function ScalpingPromptInspector({ symbols }: { symbols: string[] }) {
 
       {data && (
         <div className="space-y-4">
-          <div className="flex flex-wrap gap-x-4 gap-y-1 rounded-md border border-border/60 bg-muted/30 px-3 py-2 text-xs">
+          <div className="flex flex-wrap gap-x-4 gap-y-1 rounded-md border border-border bg-muted/30 px-3 py-2 text-xs">
             <span>
               Provider: <span className="font-mono font-medium">{data.provider?.provider ?? "—"}</span> /{" "}
               <span className="font-mono">{data.provider?.model ?? "—"}</span>
@@ -109,7 +109,7 @@ export function ScalpingPromptInspector({ symbols }: { symbols: string[] }) {
               </p>
               <CopyButton text={data.systemPrompt} />
             </div>
-            <pre className="max-h-80 overflow-auto whitespace-pre-wrap rounded-md border border-border/60 bg-background p-3 text-[11px] leading-relaxed">
+            <pre className="max-h-80 overflow-auto whitespace-pre-wrap rounded-md border border-border bg-background p-3 text-[11px] leading-relaxed">
               {data.systemPrompt}
             </pre>
           </div>
@@ -121,7 +121,7 @@ export function ScalpingPromptInspector({ symbols }: { symbols: string[] }) {
               </p>
               <CopyButton text={data.userPrompt} />
             </div>
-            <pre className="max-h-[32rem] overflow-auto whitespace-pre-wrap rounded-md border border-border/60 bg-background p-3 text-[11px] leading-relaxed">
+            <pre className="max-h-[32rem] overflow-auto whitespace-pre-wrap rounded-md border border-border bg-background p-3 text-[11px] leading-relaxed">
               {data.userPrompt}
             </pre>
           </div>

@@ -29,7 +29,7 @@ Quy ước test: `npm run test:e2e` (Playwright, `baseURL` = `E2E_BASE_URL` ho�
 - [x] **UI-4 Công cụ thị trường** — `/screener`, `/scalping`, `/heatmap`, `/sentiment`, `/alerts`, `/tools`. Test: `e2e/market-tools.spec.ts`.
 - [x] **UI-5 Cộng đồng & học** — `/forum/*`, `/academy`, `/articles`, `/challenge`, `/missions`, `/start`, `/webinar`, `/resources`, `/brokers`, `/partners`. Test: `e2e/community.spec.ts`.
 - [x] **UI-6 Tài khoản** — `/auth/*`, `/profile`, `/notifications`, `/messages`, `/upgrade-vip`. Test: `e2e/auth.spec.ts` (lỗi validate form đăng nhập hiện đúng chỗ, đăng nhập thành công về trang trước).
-- [ ] **UI-7 Admin** — một khuôn CRUD chung cho 15 màn `/admin/*`. Test: `e2e/admin.spec.ts` (cần `E2E_ADMIN_*`).
+- [ ] **UI-7 Admin** — một khuôn CRUD chung cho 15 màn `/admin/*`. Test: `e2e/admin.spec.ts` (cần `E2E_ADMIN_*`). _Đã làm (2026-10-17): chuẩn hoá class/tiêu đề 22 file admin, `e2e/admin.spec.ts` (chặn ẩn danh + 13 trang render không cuộn ngang khi đăng nhập admin). TODO: khuôn CRUD chung (danh sách + lọc + sửa trong panel) chưa làm — cần duyệt từng màn admin._
 
 ### Giai đoạn cuối
 

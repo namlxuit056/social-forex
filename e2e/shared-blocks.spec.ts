@@ -23,9 +23,11 @@ test.describe("shared blocks", () => {
     await expect(tabs.locator('[aria-current="page"]')).toHaveCount(1);
     await expect(page.locator('[data-slot="stat-card"]')).toHaveCount(6);
 
-    await tabs.getByRole("link", { name: /stats/i }).click();
+    const stats = tabs.locator('a[href*="tab=stats"]');
+    const statsLabel = (await stats.textContent())?.trim() ?? "";
+    await stats.click();
     await expect(page).toHaveURL(/tab=stats/);
-    await expect(tabs.locator('[aria-current="page"]')).toHaveText(/stats/i);
+    await expect(tabs.locator('[aria-current="page"]')).toHaveText(statsLabel);
     await expectNoHorizontalScroll(page);
   });
 });

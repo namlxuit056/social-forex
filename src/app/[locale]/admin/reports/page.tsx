@@ -135,7 +135,7 @@ export default async function AdminReportsPage({
               : null;
 
             return (
-              <Card key={r.id} className="border-border/60">
+              <Card key={r.id} className="border-border">
                 <CardContent className="space-y-3 p-4">
                   <div className="flex flex-wrap items-center gap-2 text-xs">
                     <span

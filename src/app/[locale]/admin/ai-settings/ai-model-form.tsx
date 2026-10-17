@@ -52,7 +52,7 @@ export function AiModelForm({ providers, currentProvider, currentModel }: Props)
               className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 text-sm transition-colors ${
                 provider === p.id
                   ? "border-primary bg-primary/5"
-                  : "border-border/60 bg-muted/15 hover:bg-muted/25"
+                  : "border-border bg-muted/15 hover:bg-muted/25"
               } ${!p.hasKey ? "opacity-60" : ""}`}
             >
               <input

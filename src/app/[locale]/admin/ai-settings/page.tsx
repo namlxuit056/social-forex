@@ -83,7 +83,7 @@ export default async function AdminAiModelSettingsPage({
         <p className="mt-1 text-sm text-muted-foreground">{t("aiModelSettingsDesc")}</p>
       </div>
 
-      <Card className="border-border/70 max-w-2xl">
+      <Card className="border-border max-w-2xl">
         <CardHeader>
           <CardTitle className="text-base">{t("aiModelSettingsChoose")}</CardTitle>
         </CardHeader>

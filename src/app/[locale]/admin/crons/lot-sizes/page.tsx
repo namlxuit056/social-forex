@@ -64,7 +64,7 @@ export default async function ScreenerLotSizesPage({
         </p>
       </div>
 
-      <Card className="border-border/70 max-w-2xl">
+      <Card className="border-border max-w-2xl">
         <CardHeader>
           <CardTitle className="text-base">Danh sách lot</CardTitle>
         </CardHeader>

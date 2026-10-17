@@ -54,7 +54,7 @@ export function AutoScalpRecheckButton({ proposalId }: { proposalId: string }) {
       )}
 
       {result && result.ok && (
-        <div className="max-w-xs space-y-1 rounded-md border border-border/60 bg-muted/30 p-2">
+        <div className="max-w-xs space-y-1 rounded-md border border-border bg-muted/30 p-2">
           <p className="text-xs font-semibold">
             <span
               className={cn(

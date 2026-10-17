@@ -76,7 +76,7 @@ export function BulkGenerateForm() {
   const currentIdx = rows.findIndex((r) => r.status.state === "generating");
 
   return (
-    <Card className="border-border/70">
+    <Card className="border-border">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
           <Wand2 className="size-4 text-primary" aria-hidden />
@@ -125,7 +125,7 @@ export function BulkGenerateForm() {
             {rows.map((row, i) => (
               <div
                 key={i}
-                className="flex items-start gap-2.5 rounded-md border border-border/50 bg-muted/20 px-3 py-2.5"
+                className="flex items-start gap-2.5 rounded-md border border-border bg-muted/20 px-3 py-2.5"
               >
                 <span className="mt-0.5 shrink-0">
                   {row.status.state === "waiting" && (

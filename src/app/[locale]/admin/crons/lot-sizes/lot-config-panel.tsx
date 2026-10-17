@@ -130,7 +130,7 @@ function AddSymbolForm({ onAdded }: { onAdded: (row: ScreenerLotRow) => void }) 
   }
 
   return (
-    <div className="border-border/60 mt-4 border-t pt-4">
+    <div className="border-border mt-4 border-t pt-4">
       <p className="mb-2 text-xs font-medium text-muted-foreground">Thêm symbol mới</p>
       <div className="flex flex-wrap items-end gap-3">
         <div className="w-28 shrink-0">
@@ -182,7 +182,7 @@ export function LotConfigPanel({
 
   return (
     <div className="space-y-6">
-      <div className="rounded-lg border border-border/70 p-4">
+      <div className="rounded-lg border border-border p-4">
         <p className="mb-3 text-sm font-medium text-foreground">
           Lot mặc định (áp dụng cho symbol chưa cấu hình riêng)
         </p>
@@ -194,7 +194,7 @@ export function LotConfigPanel({
         />
       </div>
 
-      <div className="rounded-lg border border-border/70 p-4">
+      <div className="rounded-lg border border-border p-4">
         <p className="mb-3 text-sm font-medium text-foreground">Lot riêng theo symbol</p>
         <div className="space-y-4">
           {rows.length === 0 && (

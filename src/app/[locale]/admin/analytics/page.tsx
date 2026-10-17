@@ -272,7 +272,7 @@ export default async function AdminAnalyticsPage({
 
       <div className="grid gap-4 md:grid-cols-4">
         {stats.map((stat) => (
-          <Card key={stat.label} className="border-border/60">
+          <Card key={stat.label} className="border-border">
             <CardContent className="flex items-center gap-4 p-5">
               <div
                 className={`flex size-10 items-center justify-center rounded-lg ${stat.className}`}
@@ -291,7 +291,7 @@ export default async function AdminAnalyticsPage({
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
-        <Card className="border-border/60">
+        <Card className="border-border">
           <CardHeader>
             <CardTitle>{t("analyticsSignupFunnel")}</CardTitle>
           </CardHeader>
@@ -299,7 +299,7 @@ export default async function AdminAnalyticsPage({
             {signupFunnel.map((event) => (
               <div
                 key={event.eventName}
-                className="flex items-center justify-between gap-3 rounded-lg border border-border/60 px-3 py-2"
+                className="flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2"
               >
                 <span className="truncate font-mono text-xs text-foreground">
                   {event.eventName}
@@ -312,7 +312,7 @@ export default async function AdminAnalyticsPage({
           </CardContent>
         </Card>
 
-        <Card className="border-border/60">
+        <Card className="border-border">
           <CardHeader>
             <CardTitle>{t("analyticsRecentFunnelEvents")}</CardTitle>
           </CardHeader>
@@ -331,7 +331,7 @@ export default async function AdminAnalyticsPage({
                     <th className="px-4 py-2.5">{t("analyticsContext")}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border/40">
+                <tbody className="divide-y divide-border">
                   {recentFunnelEvents.map((event) => (
                     <tr key={event.id} className="align-top">
                       <td className="whitespace-nowrap px-4 py-3 text-xs text-muted-foreground">
@@ -372,7 +372,7 @@ export default async function AdminAnalyticsPage({
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
-        <Card className="border-border/60">
+        <Card className="border-border">
           <CardHeader>
             <CardTitle>{t("analyticsUsers")}</CardTitle>
           </CardHeader>
@@ -387,7 +387,7 @@ export default async function AdminAnalyticsPage({
                   key={row.userId}
                   href={`/admin/analytics?userId=${encodeURIComponent(row.userId)}`}
                   className={cn(
-                    "flex items-center justify-between gap-3 rounded-lg border border-border/60 px-3 py-2 transition-colors hover:bg-muted/50",
+                    "flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2 transition-colors hover:bg-muted/50",
                     selectedUserId === row.userId && "border-primary/50 bg-primary/10",
                   )}
                 >
@@ -418,9 +418,9 @@ export default async function AdminAnalyticsPage({
 
         <div className="space-y-6">
           {!selectedUserId ? (
-            <Card className="border-dashed border-border/60">
+            <Card className="border-dashed border-border">
               <CardContent className="flex min-h-48 flex-col items-center justify-center gap-2 p-6 text-center">
-                <User className="size-8 text-muted-foreground/50" />
+                <User className="size-8 text-muted-foreground" />
                 <p className="text-sm font-medium text-foreground">
                   {t("analyticsSelectUser")}
                 </p>
@@ -431,7 +431,7 @@ export default async function AdminAnalyticsPage({
             </Card>
           ) : (
             <>
-              <Card className="border-border/60">
+              <Card className="border-border">
                 <CardHeader>
                   <CardTitle>
                     {t("analyticsUserDetail")}:{" "}
@@ -449,7 +449,7 @@ export default async function AdminAnalyticsPage({
                     selectedTopPages.map((page) => (
                       <div
                         key={page.path}
-                        className="flex items-center justify-between gap-3 rounded-lg border border-border/60 px-3 py-2"
+                        className="flex items-center justify-between gap-3 rounded-lg border border-border px-3 py-2"
                       >
                         <span className="truncate font-mono text-xs text-foreground">
                           {page.path}
@@ -463,7 +463,7 @@ export default async function AdminAnalyticsPage({
                 </CardContent>
               </Card>
 
-              <Card className="border-border/60">
+              <Card className="border-border">
                 <CardHeader>
                   <CardTitle>{t("analyticsRecentVisits")}</CardTitle>
                 </CardHeader>
@@ -480,7 +480,7 @@ export default async function AdminAnalyticsPage({
                           <th className="px-4 py-2.5">{t("analyticsPage")}</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-border/40">
+                      <tbody className="divide-y divide-border">
                         {selectedVisits.map((visit) => (
                           <tr key={visit.id}>
                             <td className="whitespace-nowrap px-4 py-3 text-xs text-muted-foreground">
@@ -505,7 +505,7 @@ export default async function AdminAnalyticsPage({
                 </CardContent>
               </Card>
 
-              <Card className="border-border/60">
+              <Card className="border-border">
                 <CardHeader>
                   <CardTitle>{t("analyticsRecentErrors")}</CardTitle>
                 </CardHeader>
@@ -523,7 +523,7 @@ export default async function AdminAnalyticsPage({
                           <th className="px-4 py-2.5">{t("analyticsError")}</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-border/40">
+                      <tbody className="divide-y divide-border">
                         {selectedErrors.map((error) => (
                           <tr key={error.id} className="align-top">
                             <td className="whitespace-nowrap px-4 py-3 text-xs text-muted-foreground">
@@ -557,7 +557,7 @@ export default async function AdminAnalyticsPage({
 
       {/* Global error view */}
       <div className="grid gap-6 lg:grid-cols-[1fr_1.5fr]">
-        <Card className="border-border/60">
+        <Card className="border-border">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <AlertTriangle className="size-4 text-red-500" />
@@ -569,7 +569,7 @@ export default async function AdminAnalyticsPage({
               <p className="text-sm text-muted-foreground">Không có lỗi nào.</p>
             ) : (
               topErrors.map((err, i) => (
-                <div key={i} className="rounded-lg border border-border/60 px-3 py-2 space-y-1">
+                <div key={i} className="rounded-lg border border-border px-3 py-2 space-y-1">
                   <div className="flex items-center justify-between gap-2">
                     <Badge variant="destructive" className="shrink-0">{err.kind}</Badge>
                     <Badge variant="secondary" className="shrink-0 ml-auto">{err._count._all}×</Badge>
@@ -582,7 +582,7 @@ export default async function AdminAnalyticsPage({
           </CardContent>
         </Card>
 
-        <Card className="border-border/60">
+        <Card className="border-border">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <AlertTriangle className="size-4 text-red-500" />
@@ -602,7 +602,7 @@ export default async function AdminAnalyticsPage({
                     <th className="px-4 py-2.5">{t("analyticsError")}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border/40">
+                <tbody className="divide-y divide-border">
                   {recentErrors.map((error) => (
                     <tr key={error.id} className="align-top">
                       <td className="whitespace-nowrap px-4 py-3 text-xs text-muted-foreground">
@@ -622,7 +622,7 @@ export default async function AdminAnalyticsPage({
                         </p>
                         {error.stack && (
                           <details className="mt-1">
-                            <summary className="cursor-pointer text-[11px] text-muted-foreground/60 hover:text-muted-foreground">stack trace</summary>
+                            <summary className="cursor-pointer text-[11px] text-muted-foreground hover:text-muted-foreground">stack trace</summary>
                             <pre className="mt-1 max-h-32 overflow-auto rounded bg-muted/40 p-2 text-[10px] text-muted-foreground">
                               {error.stack}
                             </pre>

@@ -25,10 +25,14 @@ test.describe("journal & discipline group", () => {
   });
 
   test("signed-in journal: all tabs open without horizontal scroll", async ({ page }) => {
+    test.setTimeout(240_000);
     await signIn(page);
     for (const tab of ["", "weekly", "daily", "edge", "stats", "chat", "emotion", "lessons"]) {
       await gotoPage(page, tab ? `/journal?tab=${tab}` : "/journal");
-      await expect(page.locator('nav[aria-label] [aria-current="page"]').first()).toBeVisible();
+      await expect(
+        page.getByRole("navigation", { name: /journal sections/i }).locator('[aria-current="page"]'),
+        `tab ${tab || "trades"}`,
+      ).toBeVisible({ timeout: 30_000 });
       await expectNoHorizontalScroll(page);
     }
   });

@@ -72,7 +72,7 @@ export default async function AdminTelegramSignalsPage({
         </p>
       </div>
 
-      <Card className="border-border/70 max-w-2xl">
+      <Card className="border-border max-w-2xl">
         <CardHeader>
           <CardTitle className="text-base">
             {t("telegramSignalsListTitle")}

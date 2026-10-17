@@ -137,7 +137,7 @@ export default async function AdminDashboardPage({
       {/* Stats grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((s) => (
-          <Card key={s.label} className="border-border/60">
+          <Card key={s.label} className="border-border">
             <CardContent className="flex items-center gap-4 p-5">
               <div
                 className={cn(

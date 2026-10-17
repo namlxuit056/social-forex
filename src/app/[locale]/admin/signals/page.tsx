@@ -73,7 +73,7 @@ export default async function AdminSignalsPage({
       {signals.length === 0 ? (
         <p className="text-muted-foreground">{t("noSignals")}</p>
       ) : (
-        <Card className="border-border/60">
+        <Card className="border-border">
           <CardContent className="overflow-x-auto p-0">
             <table className="w-full text-sm">
               <thead>
@@ -87,7 +87,7 @@ export default async function AdminSignalsPage({
                   <th className="px-4 py-2.5">{t("colActions")}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border/40">
+              <tbody className="divide-y divide-border">
                 {signals.map((s) => (
                   <tr key={s.id} className="align-middle">
                     <td className="px-4 py-2.5 font-medium tabular-nums">

@@ -42,7 +42,7 @@ export function EditImageForm({
         <img
           src={currentImageUrl}
           alt="Current lesson image"
-          className="h-24 w-full rounded border border-border/50 object-cover"
+          className="h-24 w-full rounded border border-border object-cover"
         />
       )}
       <Input

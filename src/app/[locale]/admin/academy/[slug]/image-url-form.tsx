@@ -32,14 +32,14 @@ export function ImageUrlForm({ slug, currentImageUrl }: Props) {
   }
 
   return (
-    <div className="rounded-lg border border-border/70 bg-card p-4">
+    <div className="rounded-lg border border-border bg-card p-4">
       <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
         <ImageIcon className="size-4" />
         Ảnh bìa (dùng chung VI + EN)
       </h2>
 
       {preview && (
-        <div className="mb-3 overflow-hidden rounded-md border border-border/50">
+        <div className="mb-3 overflow-hidden rounded-md border border-border">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={preview}

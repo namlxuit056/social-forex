@@ -43,7 +43,7 @@ export function ReferralWidget() {
   }
 
   return (
-    <Card className="border-primary/20 bg-gradient-to-br from-primary/5 via-card to-primary/5">
+    <Card className="border border-border bg-card">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
           <Gift className="size-4 text-primary" />

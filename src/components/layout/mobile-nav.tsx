@@ -39,7 +39,7 @@ export function MobileNav({
   const tn = useTranslations("nav");
 
   return (
-    <div className="lg:hidden">
+    <div className="xl:hidden">
       <Button
         variant="ghost"
         size="icon"

@@ -121,7 +121,7 @@ export default async function AdminVipPage({
                   {vipUsers.map((u) => {
                     const active = isVipActive(u.vipUntil);
                     return (
-                      <tr key={u.id} className="border-b border-border/50">
+                      <tr key={u.id} className="border-b border-border">
                         <td className="py-2 pr-4 font-mono text-xs">{u.email}</td>
                         <td className="py-2 pr-4 text-xs">{u.name ?? "—"}</td>
                         <td className="py-2 pr-4 text-xs">
@@ -167,7 +167,7 @@ export default async function AdminVipPage({
                 </thead>
                 <tbody>
                   {auditLogs.map((log) => (
-                    <tr key={log.id} className="border-b border-border/50">
+                    <tr key={log.id} className="border-b border-border">
                       <td className="py-2 pr-4 text-xs">
                         {new Date(log.createdAt).toLocaleString(locale)}
                       </td>

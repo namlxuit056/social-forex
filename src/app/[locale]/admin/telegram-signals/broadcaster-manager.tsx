@@ -73,7 +73,7 @@ export function BroadcasterManager({
           {t("telegramSignalsEmpty")}
         </p>
       ) : (
-        <ul className="divide-y divide-border/40 rounded-md border border-border/60">
+        <ul className="divide-y divide-border rounded-md border border-border">
           {broadcasters.map((b) => (
             <BroadcasterRow key={b.userId} broadcaster={b} locale={locale} />
           ))}

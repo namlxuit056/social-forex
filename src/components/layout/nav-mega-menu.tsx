@@ -31,7 +31,7 @@ export function NavMegaMenu({
     <div className="group relative">
       <button
         className={cn(
-          "inline-flex min-h-9 items-center gap-1 rounded-md px-2.5 py-1.5 text-[13px] font-medium transition-colors hover:bg-muted hover:text-foreground",
+          "inline-flex min-h-9 items-center gap-1 whitespace-nowrap rounded-md px-2.5 py-1.5 text-[13px] font-medium transition-colors hover:bg-muted hover:text-foreground",
           isAnyActive ? "text-foreground" : "text-muted-foreground"
         )}
       >

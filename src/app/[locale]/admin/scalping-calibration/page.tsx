@@ -81,7 +81,7 @@ function HistoryTable({ rows }: { rows: AutoScalpHistoryRow[] }) {
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-border/60 text-left text-xs text-muted-foreground">
+          <tr className="border-b border-border text-left text-xs text-muted-foreground">
             <th className="py-2 pr-4">Thời gian</th>
             <th className="py-2 pr-4">User</th>
             <th className="py-2 pr-4">Symbol</th>
@@ -96,7 +96,7 @@ function HistoryTable({ rows }: { rows: AutoScalpHistoryRow[] }) {
         </thead>
         <tbody>
           {rows.map((row) => (
-            <tr key={row.id} className="border-b border-border/30 align-top last:border-0">
+            <tr key={row.id} className="border-b border-border align-top last:border-0">
               <td className="py-2 pr-4 whitespace-nowrap text-xs text-muted-foreground">
                 {formatDateTime(row.createdAt)}
               </td>
@@ -168,7 +168,7 @@ function rColor(r: number) {
 
 function BucketTable({ title, rows, keyLabel }: { title: string; rows: CalibrationBucket[]; keyLabel: string }) {
   return (
-    <Card className="border-border/70">
+    <Card className="border-border">
       <CardHeader>
         <CardTitle className="text-base">{title}</CardTitle>
       </CardHeader>
@@ -179,7 +179,7 @@ function BucketTable({ title, rows, keyLabel }: { title: string; rows: Calibrati
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-border/60 text-left text-xs text-muted-foreground">
+                <tr className="border-b border-border text-left text-xs text-muted-foreground">
                   <th className="py-2 pr-4">{keyLabel}</th>
                   <th className="py-2 pr-4">Số lệnh</th>
                   <th className="py-2 pr-4">Thắng</th>
@@ -192,7 +192,7 @@ function BucketTable({ title, rows, keyLabel }: { title: string; rows: Calibrati
               </thead>
               <tbody>
                 {rows.map((row) => (
-                  <tr key={row.key} className="border-b border-border/30 last:border-0">
+                  <tr key={row.key} className="border-b border-border last:border-0">
                     <td className="py-2 pr-4 font-mono">{row.key}</td>
                     <td className="py-2 pr-4">{row.count}</td>
                     <td className="py-2 pr-4">{row.wins}</td>
@@ -236,7 +236,7 @@ function ThresholdSimTable({
     configured.some((c) => c.minScore === r.minScore && c.minConfidence === r.minConfidence);
 
   return (
-    <Card className="border-border/70">
+    <Card className="border-border">
       <CardHeader>
         <CardTitle className="text-base">Mô phỏng ngưỡng lọc (nếu siết chặt hơn)</CardTitle>
       </CardHeader>
@@ -253,7 +253,7 @@ function ThresholdSimTable({
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-border/60 text-left text-xs text-muted-foreground">
+                <tr className="border-b border-border text-left text-xs text-muted-foreground">
                   <th className="py-2 pr-4">Ngưỡng</th>
                   <th className="py-2 pr-4">Giữ lại</th>
                   <th className="py-2 pr-4">Loại bỏ</th>
@@ -270,7 +270,7 @@ function ThresholdSimTable({
                     <tr
                       key={`${row.minScore}/${row.minConfidence}`}
                       className={cn(
-                        "border-b border-border/30 last:border-0",
+                        "border-b border-border last:border-0",
                         active && "bg-primary/5 font-medium",
                       )}
                     >
@@ -360,7 +360,7 @@ export default async function ScalpingCalibrationPage({
         <p className="mt-1 text-sm text-muted-foreground">{t("scalpingCalibrationDesc")}</p>
       </div>
 
-      <Card className="border-border/70">
+      <Card className="border-border">
         <CardContent className="flex flex-wrap items-center gap-6 pt-6">
           <div>
             <p className="text-2xl font-bold tabular-nums text-foreground">{calibration.totalClosed}</p>
@@ -433,7 +433,7 @@ export default async function ScalpingCalibrationPage({
 
       <ThresholdSimTable rows={calibration.thresholdSim} configured={calibration.configuredThresholds} />
 
-      <Card className="border-border/70">
+      <Card className="border-border">
         <CardHeader>
           <CardTitle className="text-base">Prompt gửi lên AI (Auto-Scalp)</CardTitle>
         </CardHeader>
@@ -442,7 +442,7 @@ export default async function ScalpingCalibrationPage({
         </CardContent>
       </Card>
 
-      <Card className="border-border/70">
+      <Card className="border-border">
         <CardHeader>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <CardTitle className="text-base">Lịch sử lệnh Auto-Scalp (gần nhất 50)</CardTitle>

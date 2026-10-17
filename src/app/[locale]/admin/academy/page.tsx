@@ -72,7 +72,7 @@ export default async function AdminAcademyPage() {
 
       <div className="grid gap-5 lg:grid-cols-[0.42fr_0.58fr]">
         <div className="flex flex-col gap-5">
-          <Card className="border-border/70">
+          <Card className="border-border">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <Plus className="size-4 text-primary" aria-hidden />
@@ -118,7 +118,7 @@ export default async function AdminAcademyPage() {
           <BulkGenerateForm />
         </div>
 
-        <Card className="border-border/70">
+        <Card className="border-border">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <BookOpen className="size-4 text-primary" aria-hidden />
@@ -138,7 +138,7 @@ export default async function AdminAcademyPage() {
                 return (
                   <div
                     key={lesson.id}
-                    className="rounded-lg border border-border/60 bg-card/45 p-4 space-y-2"
+                    className="rounded-lg border border-border bg-card p-4 space-y-2"
                   >
                     <div className="flex flex-wrap items-center gap-2">
                       <Badge variant={lesson.status === "PUBLISHED" ? "default" : "outline"}>

@@ -1,4 +1,8 @@
+import { existsSync } from "node:fs";
 import { defineConfig, devices } from "@playwright/test";
+
+// Local test credentials (E2E_USER_*, E2E_ADMIN_*) live in the gitignored .env.e2e.
+if (existsSync(".env.e2e")) process.loadEnvFile(".env.e2e");
 
 const baseURL = process.env.E2E_BASE_URL ?? "http://localhost:3000";
 

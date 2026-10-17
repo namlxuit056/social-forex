@@ -104,7 +104,7 @@ export default async function AdminUsersPage({
       {users.length === 0 ? (
         <p className="text-muted-foreground">{t("noUsers")}</p>
       ) : (
-        <Card className="border-border/60">
+        <Card className="border-border">
           <CardContent className="overflow-x-auto p-0">
             <table className="w-full text-sm">
               <thead>
@@ -117,7 +117,7 @@ export default async function AdminUsersPage({
                   <th className="px-4 py-2.5">{t("changeRole")}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border/40">
+              <tbody className="divide-y divide-border">
                 {users.map((u) => (
                   <UserRow
                     key={u.id}

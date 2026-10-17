@@ -53,7 +53,7 @@ export async function expectNoHorizontalScroll(page: Page) {
 }
 
 export function isMobile(page: Page) {
-  return (page.viewportSize()?.width ?? 1280) < 1024;
+  return (page.viewportSize()?.width ?? 1280) < 1280;
 }
 
 /** Sign in with E2E_USER_* creds, skipping the test when they aren't configured. */

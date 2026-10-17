@@ -1,8 +1,7 @@
 import { auth } from "@/auth";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { Shield } from "lucide-react";
-import { SignOutButton } from "@/components/auth/sign-out-button";
+import { AccountMenu } from "@/components/layout/account-menu";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { MobileNav } from "@/components/layout/mobile-nav";
@@ -30,7 +29,6 @@ export async function SiteHeader() {
   const session = await auth();
   const t = await getTranslations("nav");
   const tc = await getTranslations("common");
-  const ta = await getTranslations("admin");
 
   let isStaff = false;
   let unreadNotifications = 0;
@@ -61,12 +59,12 @@ export async function SiteHeader() {
         </Link>
 
         {/* Desktop primary nav */}
-        <nav className="ml-2 hidden items-center gap-1 lg:flex">
+        <nav className="ml-2 hidden items-center gap-1 xl:flex">
           {primaryNavKeys.map((item) => (
             <SiteNavLink
               key={item.href}
               href={item.href}
-              className="inline-flex min-h-9 items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              className="inline-flex min-h-9 items-center gap-1.5 whitespace-nowrap rounded-md px-2.5 py-1.5 text-[13px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               activeClassName="bg-muted text-foreground"
             >
               <item.icon className="size-3.5" aria-hidden />
@@ -97,31 +95,19 @@ export async function SiteHeader() {
             <>
               <NotificationBell initialCount={unreadNotifications} />
               <Link
-                href="/profile"
-                className="hidden rounded-md px-2 py-1 text-sm text-foreground/80 transition hover:bg-muted hover:text-foreground sm:inline-flex"
-              >
-                {session.user.name ?? session.user.email}
-              </Link>
-              <Link
                 href="/dashboard"
                 className={cn(
                   buttonVariants({ size: "sm" }),
-                  "text-xs",
+                  "hidden text-xs sm:inline-flex",
                 )}
               >
                 {tc("dashboard")}
               </Link>
-              {isStaff && (
-                <Link
-                  href="/admin"
-                  className="hidden items-center gap-1 rounded-md px-2 py-1 text-xs text-yellow-600 transition hover:bg-yellow-500/10 dark:text-yellow-500 sm:inline-flex"
-                >
-                  <Shield className="size-3" />
-                  {ta("dashboard")}
-                </Link>
-              )}
-              <span className="hidden lg:inline-flex">
-                <SignOutButton />
+              <span className="hidden xl:inline-flex">
+                <AccountMenu
+                  label={session.user.name ?? session.user.email ?? ""}
+                  isStaff={isStaff}
+                />
               </span>
             </>
           ) : (
@@ -149,7 +135,7 @@ export async function SiteHeader() {
       </div>
 
       {/* Mobile & tablet: one compact rail for the high-frequency routes. */}
-      <div className="border-t border-border lg:hidden">
+      <div className="border-t border-border xl:hidden">
         <nav
           aria-label={t("scrollPrimaryAria")}
           className="scrollbar-clean flex gap-1 overflow-x-auto px-4 py-1.5"

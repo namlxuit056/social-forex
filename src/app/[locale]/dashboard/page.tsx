@@ -243,10 +243,8 @@ export default async function DashboardPage({
     <div className="space-y-9">
       <div className="grid gap-6 border-b border-border pb-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
         <div>
-          <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-            {t("title")}
-          </p>
-          <h1 className="mt-2 font-heading text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
+          <p className="text-sm text-muted-foreground">{t("title")}</p>
+          <h1 className="mt-1 font-heading text-xl font-semibold tracking-tight text-foreground">
             {t("greeting", { name: displayName })}
           </h1>
           <p className="mt-2 max-w-2xl text-muted-foreground">

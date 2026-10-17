@@ -73,7 +73,7 @@ function JobCard({
   }
 
   return (
-    <Card className={cn("border-border/70", !enabled && "opacity-70")}>
+    <Card className={cn("border-border", !enabled && "opacity-70")}>
       <CardHeader>
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div>

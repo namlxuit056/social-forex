@@ -117,7 +117,7 @@ export default async function AdminAiArticlesPage({
         ).map(([key, count]) => (
           <div
             key={key}
-            className="rounded-lg border border-border/60 bg-card/40 p-3 text-center"
+            className="rounded-lg border border-border bg-card p-3 text-center"
           >
             <div className="text-2xl font-bold text-foreground">{count}</div>
             <div className="mt-0.5 text-xs text-muted-foreground">{t(key)}</div>
@@ -128,7 +128,7 @@ export default async function AdminAiArticlesPage({
       <div className="grid gap-5 lg:grid-cols-[0.42fr_0.58fr]">
         {/* Left column: settings + generate */}
         <div className="space-y-4">
-          <Card className="border-border/70">
+          <Card className="border-border">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <Settings className="size-4 text-primary" aria-hidden />
@@ -137,7 +137,7 @@ export default async function AdminAiArticlesPage({
             </CardHeader>
             <CardContent>
               <form action={updateAiArticleAutomation} className="space-y-4">
-                <label className="flex items-start gap-3 rounded-lg border border-border/60 bg-muted/15 p-3 text-sm">
+                <label className="flex items-start gap-3 rounded-lg border border-border bg-muted/15 p-3 text-sm">
                   <input
                     type="checkbox"
                     name="enabled"
@@ -237,7 +237,7 @@ export default async function AdminAiArticlesPage({
           </Card>
 
           {/* Trending keywords preview */}
-          <Card className="border-border/70">
+          <Card className="border-border">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <TrendingUp className="size-4 text-primary" aria-hidden />
@@ -275,7 +275,7 @@ export default async function AdminAiArticlesPage({
           </Card>
 
           {/* Manual keyword generation */}
-          <Card className="border-border/70">
+          <Card className="border-border">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 <Plus className="size-4 text-primary" aria-hidden />
@@ -330,7 +330,7 @@ export default async function AdminAiArticlesPage({
         </div>
 
         {/* Right column: article list */}
-        <Card className="border-border/70">
+        <Card className="border-border">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <FileText className="size-4 text-primary" aria-hidden />
@@ -346,7 +346,7 @@ export default async function AdminAiArticlesPage({
               articles.map((article) => (
                 <article
                   key={article.id}
-                  className="rounded-lg border border-border/60 bg-card/45 p-4"
+                  className="rounded-lg border border-border bg-card p-4"
                 >
                   <div className="flex flex-wrap items-center gap-2">
                     <Badge

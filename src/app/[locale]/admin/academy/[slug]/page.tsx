@@ -82,7 +82,7 @@ export default async function EditAcademyLessonPage({
 
       <div className="grid gap-6 lg:grid-cols-2">
         {vi && (
-          <Card className="border-border/70">
+          <Card className="border-border">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 🇻🇳 Tiếng Việt
@@ -102,7 +102,7 @@ export default async function EditAcademyLessonPage({
         )}
 
         {en && (
-          <Card className="border-border/70">
+          <Card className="border-border">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
                 🇬🇧 English
