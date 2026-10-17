@@ -187,7 +187,7 @@ export default async function AcademyLessonPage({ params }: Props) {
                 slug={slug}
               />
             ) : (
-              <div className="mt-4 w-full rounded-xl border border-border/60 bg-card/50 p-4">
+              <div className="mt-4 w-full rounded-xl border border-border bg-card p-4">
                 <PatternDiagram slug={slug} />
               </div>
             )
@@ -207,7 +207,7 @@ export default async function AcademyLessonPage({ params }: Props) {
                 const DiagramComponent = diagramRegistry[name];
                 if (!DiagramComponent) return null;
                 return (
-                  <div key={i} className="my-6 rounded-lg border border-border bg-card/50 p-4">
+                  <div key={i} className="my-6 rounded-lg border border-border bg-card p-4">
                     <DiagramComponent />
                   </div>
                 );

@@ -62,7 +62,7 @@ export function OnboardingChecklist() {
   }
 
   return (
-    <section className="rounded-xl border border-border bg-card/40 p-5 ring-1 ring-foreground/5">
+    <section className="rounded-xl border border-border bg-card p-5">
       <div className="flex items-center justify-between gap-3">
         <h2 className="font-heading text-base font-medium text-foreground">
           {t("onboardingTitle")}

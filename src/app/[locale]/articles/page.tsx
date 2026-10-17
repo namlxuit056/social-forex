@@ -71,7 +71,7 @@ export default async function ArticlesPage({
       </div>
 
       {articles.length === 0 ? (
-        <section className="rounded-lg border border-dashed border-border/70 p-6 text-sm text-muted-foreground">
+        <section className="rounded-lg border border-dashed border-border p-6 text-sm text-muted-foreground">
           {t("empty")}
         </section>
       ) : (
@@ -79,7 +79,7 @@ export default async function ArticlesPage({
           {articles.map((article) => (
             <li
               key={article.id}
-              className="overflow-hidden rounded-xl border border-border bg-card/50 ring-1 ring-foreground/5"
+              className="overflow-hidden rounded-xl border border-border bg-card"
             >
               {article.imageUrl && (
                 <Link href={`/articles/${article.slug}`} tabIndex={-1} aria-hidden>

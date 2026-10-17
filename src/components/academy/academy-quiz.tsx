@@ -67,7 +67,7 @@ export function AcademyQuiz({
   const alreadyPassed = submitted && score === 100;
 
   return (
-    <div className="rounded-xl border border-border bg-card/50 p-5 space-y-4">
+    <div className="rounded-xl border border-border bg-card p-5 space-y-4">
       <h3 className="font-heading text-base font-semibold text-foreground">
         {t("quizTitle")}
       </h3>

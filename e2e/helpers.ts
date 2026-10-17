@@ -22,7 +22,8 @@ export function localized(path: string) {
 
 export async function gotoPage(page: Page, path: string) {
   await dismissPopups(page);
-  await page.goto(localized(path), { waitUntil: "load" });
+  // Not "load": pages with many remote images (academy) can stall it for 30s+.
+  await page.goto(localized(path), { waitUntil: "domcontentloaded" });
   await waitForHydration(page);
 }
 

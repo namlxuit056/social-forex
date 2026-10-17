@@ -32,7 +32,7 @@ export function AiAssistantPromptCard({
 
   return (
     <section
-      className="rounded-xl border border-border bg-muted/15 p-5 ring-1 ring-foreground/5 md:p-6"
+      className="rounded-xl border border-border bg-muted/15 p-5 md:p-6"
       aria-labelledby="ai-assistant-prompt-heading"
     >
       <h2

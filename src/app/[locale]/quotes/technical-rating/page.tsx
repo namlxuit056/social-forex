@@ -1,7 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { EmptyState } from "@/components/layout/empty-state";
 import { SignupPrompt } from "@/components/analytics/signup-prompt";
 import {
   computeSourceScorecard,
@@ -42,16 +41,10 @@ export default async function TechnicalRatingPage({
           </h1>
           <p className="mt-2 text-muted-foreground">{t("technicalRatingDescription")}</p>
         </div>
-        <EmptyState
-          title={t("technicalRatingTitle")}
-          description={t("technicalRatingDescription")}
-          primary={{
-            href: "/auth/signin?callbackUrl=/quotes/technical-rating",
-            label: t("technicalRatingTitle"),
-          }}
-        />
         <SignupPrompt
           surface="technical_rating"
+          signInHref="/auth/signin?callbackUrl=/quotes/technical-rating"
+          href="/auth/register?callbackUrl=/quotes/technical-rating"
           title={t("technicalRatingTitle")}
           description={t("technicalRatingDescription")}
           ctaLabel={t("technicalRatingTitle")}

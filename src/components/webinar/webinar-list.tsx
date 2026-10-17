@@ -69,8 +69,8 @@ export function WebinarList({ webinars, userId }: Props) {
 
   if (webinars.length === 0) {
     return (
-      <div className="rounded-lg border border-dashed border-border/80 bg-muted/15 px-4 py-12 text-center">
-        <Video className="mx-auto mb-3 size-10 text-muted-foreground/40" />
+      <div className="rounded-lg border border-dashed border-border bg-muted/15 px-4 py-12 text-center">
+        <Video className="mx-auto mb-3 size-10 text-muted-foreground" />
         <p className="text-sm text-muted-foreground">{t("noWebinars")}</p>
       </div>
     );
@@ -89,7 +89,7 @@ export function WebinarList({ webinars, userId }: Props) {
           <Card
             key={webinar.id}
             className={cn(
-              "border-border/60 bg-card/50 transition hover:border-primary/30",
+              "border-border bg-card transition hover:border-primary/30",
               isLive && "border-red-500/30 bg-red-500/5",
             )}
           >

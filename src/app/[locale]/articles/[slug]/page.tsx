@@ -211,7 +211,7 @@ export default async function ArticlePage({ params }: Props) {
           </div>
 
           {article.imageUrl && (
-            <div className="overflow-hidden rounded-xl border border-border/60">
+            <div className="overflow-hidden rounded-xl border border-border">
               <Image
                 src={article.imageUrl}
                 alt={article.imageAlt ?? article.keyword}

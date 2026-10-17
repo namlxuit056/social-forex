@@ -77,7 +77,7 @@ export function AcademyAiQuiz({ lessonSlug, quizzes, initialScore }: Props) {
     const correct = Math.round((score / 100) * quizzes.length);
     const passed = score >= 75;
     return (
-      <div className="rounded-xl border border-border bg-card/50 p-5 space-y-4">
+      <div className="rounded-xl border border-border bg-card p-5 space-y-4">
         <h3 className="font-heading text-base font-semibold text-foreground">
           {t("quizTitle")}
         </h3>
@@ -99,7 +99,7 @@ export function AcademyAiQuiz({ lessonSlug, quizzes, initialScore }: Props) {
           return (
             <div
               key={i}
-              className="space-y-1 rounded-lg border border-border/50 bg-muted/20 p-3"
+              className="space-y-1 rounded-lg border border-border bg-muted/20 p-3"
             >
               <p className="text-xs font-medium text-foreground/80">
                 {i + 1}. {q.question}
@@ -134,7 +134,7 @@ export function AcademyAiQuiz({ lessonSlug, quizzes, initialScore }: Props) {
   }
 
   return (
-    <div className="rounded-xl border border-border bg-card/50 p-5 space-y-4">
+    <div className="rounded-xl border border-border bg-card p-5 space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="font-heading text-base font-semibold text-foreground">
           {t("quizTitle")}

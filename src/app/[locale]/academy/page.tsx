@@ -94,8 +94,8 @@ export default async function AcademyPage({
       <li
         key={lesson.slug}
         className={cn(
-          "rounded-xl border border-border bg-card/50 p-5 ring-1 ring-foreground/5",
-          done && "border-primary/30 bg-primary/5 ring-primary/10",
+          "rounded-xl border border-border bg-card p-5",
+          done && "border-border-strong",
         )}
       >
         <div className="flex items-start justify-between gap-2">
@@ -120,7 +120,7 @@ export default async function AcademyPage({
               imgClassName="mt-3 h-32 w-full rounded-lg object-cover opacity-80"
             />
           ) : (
-            <div className="mt-3 h-32 w-full overflow-hidden rounded-lg border border-border/50 bg-card/40 p-2">
+            <div className="mt-3 h-32 w-full overflow-hidden rounded-lg border border-border bg-card p-2">
               <PatternDiagram slug={lesson.slug} />
             </div>
           ))}
@@ -178,7 +178,7 @@ export default async function AcademyPage({
       </div>
 
       {priceActionLessons.length > 0 && (
-        <section className="rounded-2xl border border-primary/20 bg-primary/3 p-5">
+        <section className="rounded-xl border border-border bg-card p-5">
           <h2 className="font-heading text-xl font-semibold text-foreground">
             {t("priceActionSectionTitle")}
           </h2>

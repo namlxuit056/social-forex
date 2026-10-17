@@ -96,7 +96,7 @@ export async function SignalDirectionsBoard({
   return (
     <section
       aria-labelledby="signal-directions-heading"
-      className="rounded-2xl border border-border bg-card/45 p-5 ring-1 ring-foreground/5 sm:p-6"
+      className="rounded-2xl border border-border bg-card p-5 sm:p-6"
     >
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div>
@@ -141,7 +141,7 @@ export async function SignalDirectionsBoard({
               const isBuy = s.signal === "buy";
               const validity = signalValidity(s.signal, ratings.get(s.symbol)?.score4h);
               return (
-                <tr key={s.symbol} className="border-b border-border/50 last:border-0">
+                <tr key={s.symbol} className="border-b border-border last:border-0">
                   <td className="py-2.5 pr-3 align-top">
                     <span className="font-mono font-medium text-foreground">{s.symbol}</span>
                     {s.score4h !== null && s.score1d !== null ? (

@@ -94,7 +94,7 @@ export default async function ForumThreadPage({ params }: Props) {
           <article
             key={p.id}
             className={cn(
-              "rounded-xl border border-border bg-card/50 p-5 ring-1 ring-foreground/5",
+              "rounded-xl border border-border bg-card p-5",
               p.hidden && "opacity-50",
             )}
           >

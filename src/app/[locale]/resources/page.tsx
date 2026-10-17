@@ -40,7 +40,7 @@ export default async function ResourcesPage({
         {ebookResources.map((r) => (
           <li
             key={r.title}
-            className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-card/50 px-4 py-3 ring-1 ring-foreground/5"
+            className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-card px-4 py-3"
           >
             <div>
               <span className="font-medium text-foreground">{r.title}</span>

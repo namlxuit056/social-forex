@@ -80,7 +80,7 @@ export default async function ChallengePage({
       <section className="border-b border-border pb-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
-            <p className="text-sm font-medium uppercase tracking-widest text-primary">
+            <p className="text-sm font-medium text-primary">
               {t("eyebrow")}
             </p>
             <h1 className="mt-4 font-heading text-3xl font-semibold tracking-tight text-foreground md:text-5xl">
@@ -90,7 +90,7 @@ export default async function ChallengePage({
               {t("subtitle")}
             </p>
           </div>
-          <div className="grid gap-2 rounded-xl border border-primary/25 bg-primary/8 px-4 py-3 text-sm ring-1 ring-primary/10 sm:min-w-72">
+          <div className="grid gap-2 rounded-xl border border-border bg-card px-4 py-3 text-sm sm:min-w-72">
             <div className="flex items-center justify-between gap-3">
               <span className="text-muted-foreground">{t("progressLabel")}</span>
               <span className="font-mono font-semibold text-foreground">
@@ -155,7 +155,7 @@ export default async function ChallengePage({
       </section>
 
       <section className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-xl border border-border/70 bg-card/45 p-4 ring-1 ring-foreground/5">
+        <div className="rounded-xl border border-border bg-card p-4">
           <ClipboardList className="size-5 text-primary" aria-hidden />
           <h2 className="mt-3 font-heading text-base font-medium text-foreground">
             {t("benefitProcessTitle")}
@@ -164,7 +164,7 @@ export default async function ChallengePage({
             {t("benefitProcessDesc")}
           </p>
         </div>
-        <div className="rounded-xl border border-border/70 bg-card/45 p-4 ring-1 ring-foreground/5">
+        <div className="rounded-xl border border-border bg-card p-4">
           <BadgeCheck className="size-5 text-chart-3" aria-hidden />
           <h2 className="mt-3 font-heading text-base font-medium text-foreground">
             {t("benefitHabitTitle")}
@@ -173,7 +173,7 @@ export default async function ChallengePage({
             {t("benefitHabitDesc")}
           </p>
         </div>
-        <div className="rounded-xl border border-border/70 bg-card/45 p-4 ring-1 ring-foreground/5">
+        <div className="rounded-xl border border-border bg-card p-4">
           <Award className="size-5 text-chart-4" aria-hidden />
           <h2 className="mt-3 font-heading text-base font-medium text-foreground">
             {t("benefitRewardTitle")}
@@ -203,7 +203,7 @@ export default async function ChallengePage({
               <Card
                 key={day}
                 className={cn(
-                  "border-border/70 bg-card/70",
+                  "border-border bg-card",
                   complete && "border-primary/35 bg-primary/5",
                 )}
               >
@@ -269,7 +269,7 @@ export default async function ChallengePage({
       </section>
 
       {rewardGranted ? (
-        <section className="rounded-xl border border-primary/30 bg-primary/8 p-5 ring-1 ring-primary/10">
+        <section className="rounded-xl border border-border bg-card p-5">
           <h2 className="font-heading text-lg font-semibold text-foreground">
             {t("rewardTitle")}
           </h2>

@@ -5,7 +5,6 @@ import { prisma } from "@/lib/prisma";
 import { Link } from "@/i18n/navigation";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { EmptyState } from "@/components/layout/empty-state";
 import { SignupPrompt } from "@/components/analytics/signup-prompt";
 import { Disclaimer } from "@/components/layout/disclaimer";
 import { MissionClaimButton } from "@/components/missions/mission-claim-button";
@@ -46,13 +45,9 @@ export default async function MissionsPage({ params }: { params: Promise<{ local
           <h1 className="font-heading text-xl font-semibold text-foreground">{t("title")}</h1>
           <p className="mt-2 text-muted-foreground">{t("subtitle")}</p>
         </div>
-        <EmptyState
-          title={t("loginRequired")}
-          description={t("loginHint")}
-          primary={{ href: "/auth/signin?callbackUrl=/missions", label: t("loginRequired") }}
-        />
         <SignupPrompt
           surface="missions"
+          signInHref="/auth/signin?callbackUrl=/missions"
           title={t("signupPromptTitle")}
           description={t("signupPromptDesc")}
           ctaLabel={t("signupPromptCta")}
@@ -79,7 +74,7 @@ export default async function MissionsPage({ params }: { params: Promise<{ local
         <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground/90">{t("intro")}</p>
       </header>
 
-      <Card className="border-border/70">
+      <Card className="border-border">
         <CardContent className="flex flex-wrap items-center gap-6 pt-6">
           <div>
             <p className="text-2xl font-bold tabular-nums text-foreground">
@@ -143,7 +138,7 @@ export default async function MissionsPage({ params }: { params: Promise<{ local
                   <Card
                     key={def.id}
                     className={cn(
-                      "border-border/70",
+                      "border-border",
                       st.claimed && "border-emerald-500/30 bg-emerald-500/5",
                       st.complete && !st.claimed && "border-primary/40 bg-primary/5",
                     )}

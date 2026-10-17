@@ -96,7 +96,7 @@ export default async function StartPage({
 
       <OnboardingChecklist />
 
-      <div className="flex flex-col gap-3 rounded-xl border border-primary/25 bg-primary/5 p-5 ring-1 ring-primary/10 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 rounded-xl border border-primary/25 bg-primary/5 p-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="font-heading text-base font-medium text-foreground">
             {tMissions("title")}
@@ -117,7 +117,7 @@ export default async function StartPage({
       </div>
 
       <ol className="space-y-6">
-        <li className="relative rounded-xl border border-border bg-card/40 p-5 pl-6 ring-1 ring-foreground/5 md:p-6 md:pl-8">
+        <li className="relative rounded-xl border border-border bg-card p-5 pl-6 md:p-6 md:pl-8">
           <span
             className="absolute left-0 top-5 flex size-8 -translate-x-1/2 items-center justify-center rounded-full border border-primary/40 bg-primary/10 text-xs font-semibold text-primary md:top-6"
             aria-hidden
@@ -150,7 +150,7 @@ export default async function StartPage({
           </div>
         </li>
 
-        <li className="relative rounded-xl border border-border bg-card/40 p-5 pl-6 ring-1 ring-foreground/5 md:p-6 md:pl-8">
+        <li className="relative rounded-xl border border-border bg-card p-5 pl-6 md:p-6 md:pl-8">
           <span
             className="absolute left-0 top-5 flex size-8 -translate-x-1/2 items-center justify-center rounded-full border border-primary/40 bg-primary/10 text-xs font-semibold text-primary md:top-6"
             aria-hidden
@@ -199,7 +199,7 @@ export default async function StartPage({
           </div>
         </li>
 
-        <li className="relative rounded-xl border border-border bg-card/40 p-5 pl-6 ring-1 ring-foreground/5 md:p-6 md:pl-8">
+        <li className="relative rounded-xl border border-border bg-card p-5 pl-6 md:p-6 md:pl-8">
           <span
             className="absolute left-0 top-5 flex size-8 -translate-x-1/2 items-center justify-center rounded-full border border-primary/40 bg-primary/10 text-xs font-semibold text-primary md:top-6"
             aria-hidden
@@ -214,7 +214,7 @@ export default async function StartPage({
           </p>
         </li>
 
-        <li className="relative rounded-xl border border-border bg-card/40 p-5 pl-6 ring-1 ring-foreground/5 md:p-6 md:pl-8">
+        <li className="relative rounded-xl border border-border bg-card p-5 pl-6 md:p-6 md:pl-8">
           <span
             className="absolute left-0 top-5 flex size-8 -translate-x-1/2 items-center justify-center rounded-full border border-primary/40 bg-primary/10 text-xs font-semibold text-primary md:top-6"
             aria-hidden
@@ -229,7 +229,7 @@ export default async function StartPage({
           </p>
         </li>
 
-        <li className="relative rounded-xl border border-border bg-card/40 p-5 pl-6 ring-1 ring-foreground/5 md:p-6 md:pl-8">
+        <li className="relative rounded-xl border border-border bg-card p-5 pl-6 md:p-6 md:pl-8">
           <span
             className="absolute left-0 top-5 flex size-8 -translate-x-1/2 items-center justify-center rounded-full border border-primary/40 bg-primary/10 text-xs font-semibold text-primary md:top-6"
             aria-hidden
@@ -269,7 +269,7 @@ export default async function StartPage({
         copiedLabel={t("aiAssistantCopied")}
       />
 
-      <div className="rounded-xl border border-dashed border-border/80 bg-muted/20 p-5 text-center">
+      <div className="rounded-xl border border-dashed border-border bg-muted/20 p-5 text-center">
         <p className="text-sm text-muted-foreground">{t("closingHint")}</p>
         <TrackedLink
           href="/academy"

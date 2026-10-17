@@ -287,7 +287,7 @@ export default async function BrokersPage({
 
       <section className="grid gap-3 md:grid-cols-3">
         {copy.quickPicks.map((item) => (
-          <div key={item.title} className="rounded-lg border border-border/70 bg-card/45 p-4">
+          <div key={item.title} className="rounded-lg border border-border bg-card p-4">
             <p className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
               <Sparkles className="size-3.5 text-primary" aria-hidden />
               {item.title}
@@ -351,8 +351,8 @@ export default async function BrokersPage({
             <article
               key={broker.name}
               className={cn(
-                "rounded-xl border bg-card/45 p-5",
-                broker.featured ? "border-primary/50 ring-1 ring-primary/20" : "border-border/70",
+                "rounded-xl border bg-card p-5",
+                broker.featured ? "border-primary/50 ring-1 ring-primary/20" : "border-border",
               )}
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
@@ -377,7 +377,7 @@ export default async function BrokersPage({
                   [copy.labels.platforms, broker.platforms],
                   [copy.labels.bestFor, broker.bestFor],
                 ].map(([label, value]) => (
-                  <div key={label} className="rounded-lg border border-border/50 bg-background/35 p-3">
+                  <div key={label} className="rounded-lg border border-border bg-background/35 p-3">
                     <dt className="text-xs text-muted-foreground">{label}</dt>
                     <dd className="mt-1 text-foreground">{value}</dd>
                   </div>
@@ -430,7 +430,7 @@ export default async function BrokersPage({
         </div>
       </section>
 
-      <section className="rounded-xl border border-border/70 bg-muted/15 p-5">
+      <section className="rounded-xl border border-border bg-muted/15 p-5">
         <h2 className="font-heading text-base font-semibold text-foreground">
           {copy.sourcesTitle}
         </h2>

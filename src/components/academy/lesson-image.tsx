@@ -16,7 +16,7 @@ export function LessonImage({ src, alt, slug, imgClassName }: Props) {
 
   if (failed) {
     return (
-      <div className="mt-4 w-full rounded-xl border border-border/60 bg-card/50 p-4">
+      <div className="mt-4 w-full rounded-xl border border-border bg-card p-4">
         <PatternDiagram slug={slug} />
       </div>
     );

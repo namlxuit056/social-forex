@@ -72,19 +72,20 @@ export default async function ForumPage({
       ) : (
         <ul className="grid gap-4 md:grid-cols-2">
           {categories.map((c) => (
-            <li
-              key={c.id}
-              className="rounded-xl border border-border bg-card/50 p-5 ring-1 ring-foreground/5"
-            >
+            <li key={c.id}>
               <Link
                 href={`/forum/${c.slug}`}
-                className="font-heading text-lg font-medium text-primary hover:underline"
+                className="block h-full rounded-xl border border-border bg-card p-5 transition-colors hover:bg-muted/50"
               >
-                {c.name}
+                <span className="font-heading text-base font-medium text-foreground">
+                  {c.name}
+                </span>
+                {c.description && (
+                  <span className="mt-1 block text-sm text-muted-foreground">
+                    {c.description}
+                  </span>
+                )}
               </Link>
-              {c.description && (
-                <p className="mt-2 text-sm text-muted-foreground">{c.description}</p>
-              )}
             </li>
           ))}
         </ul>

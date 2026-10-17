@@ -84,7 +84,7 @@ export async function NewcomerPathSection() {
           );
         })}
       </ol>
-      <div className="mt-6 flex justify-center border-t border-border/60 pt-5">
+      <div className="mt-6 flex justify-center border-t border-border pt-5">
         <TrackedLink
           href="/start"
           eventName={ANALYTICS_EVENTS.homepageCtaClick}
