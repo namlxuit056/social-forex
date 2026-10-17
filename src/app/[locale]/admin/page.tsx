@@ -14,6 +14,7 @@ import {
   Timer,
   Gauge,
   Send,
+  Palette,
 } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
@@ -119,6 +120,7 @@ export default async function AdminDashboardPage({
     { href: "/admin/crons", label: t("manageCrons"), icon: Timer },
     { href: "/admin/scalping-calibration", label: t("scalpingCalibration"), icon: Gauge },
     { href: "/admin/telegram-signals", label: t("telegramSignals"), icon: Send },
+    { href: "/admin/design-system", label: t("designSystem"), icon: Palette },
   ];
 
   return (

@@ -28,13 +28,18 @@ export async function gotoPage(page: Page, path: string) {
 
 /**
  * Next streams the HTML before React hydrates; asserting during that window
- * can see half-swapped trees. Client components mark the body once mounted.
+ * can see half-swapped trees or click buttons that have no handlers yet.
  */
 export async function waitForHydration(page: Page) {
   await page
     .waitForFunction(() => {
-      const root = document.querySelector("main") ?? document.body;
-      return Object.keys(root).some((key) => key.startsWith("__reactFiber"));
+      // Suspense boundaries hydrate separately, so check every control in
+      // <main>, not just the root: React tags hydrated nodes with __reactFiber*.
+      const hydrated = (el: Element) =>
+        Object.keys(el).some((key) => key.startsWith("__reactFiber"));
+      const root = document.querySelector("main");
+      if (!root || !hydrated(root)) return false;
+      return [...root.querySelectorAll("button, [role=combobox], input")].every(hydrated);
     }, null, { timeout: 15_000 })
     .catch(() => {});
 }

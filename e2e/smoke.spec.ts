@@ -28,7 +28,6 @@ test.describe("app shell", () => {
     test(`${path} renders one h1 without horizontal scroll`, async ({ page }) => {
       await gotoPage(page, path);
       await expect(page.locator("h1")).toHaveCount(1);
-      await page.waitForLoadState("networkidle").catch(() => {});
       await expectNoHorizontalScroll(page);
     });
   }
