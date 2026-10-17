@@ -18,6 +18,8 @@ import type { QuoteRow } from "@/lib/quotes/types";
 import type { SignalCardNewsEvent } from "@/lib/signals/signal-list-news";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { FieldSelect } from "@/components/ui/field-select";
 import { ImpactBadge } from "@/components/ui/status-badge";
 import {
   Card,
@@ -27,7 +29,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
 type ChecklistKey = "news" | "levels" | "risk" | "mindset" | "journal";
@@ -195,26 +196,22 @@ export function PreTradeDesk({
             </CardHeader>
             <CardContent className={cn("grid gap-4", !chart && "lg:grid-cols-2")}>
               <div className="space-y-3">
-                <Label htmlFor="desk-symbol">{t("symbolLabel")}</Label>
-                <select
+                <FieldSelect
                   id="desk-symbol"
+                  label={t("symbolLabel")}
                   value={symbol}
-                  onChange={(event) => {
-                    const next = event.target.value;
+                  onValueChange={(next) => {
                     const quote = quoteForSymbol(quotes, next);
                     const nextMid = midPrice(quote);
                     setSymbol(next);
                     setEntry(String(nextMid));
                     setStopLoss(String(nextMid));
                   }}
-                  className="h-9 w-full rounded-lg border border-input bg-card px-2.5 text-sm outline-none transition focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                >
-                  {quotes.map((quote) => (
-                    <option key={quote.symbol} value={quote.symbol}>
-                      {quote.symbol} - {quote.name}
-                    </option>
-                  ))}
-                </select>
+                  options={quotes.map((quote) => ({
+                    value: quote.symbol,
+                    label: `${quote.symbol} - ${quote.name}`,
+                  }))}
+                />
                 <div className="grid grid-cols-2 gap-3">
                   <div className="rounded-md border border-border/60 bg-muted/20 p-3">
                     <p className="text-xs text-muted-foreground">{t("midPrice")}</p>
@@ -347,13 +344,12 @@ export function PreTradeDesk({
             {CHECKLIST_KEYS.map((key) => (
               <label
                 key={key}
-                className="flex min-h-11 cursor-pointer items-start gap-3 rounded-md border border-border/60 bg-muted/15 p-3 transition hover:bg-muted/30"
+                className="flex min-h-11 cursor-pointer items-start gap-3 rounded-lg border border-border p-3 transition-colors hover:bg-muted/50"
               >
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={checked[key]}
-                  onChange={(event) => setChecked((prev) => ({ ...prev, [key]: event.target.checked }))}
-                  className="mt-1 size-4 accent-primary"
+                  onCheckedChange={(value) => setChecked((prev) => ({ ...prev, [key]: value }))}
+                  className="mt-0.5"
                 />
                 <span>
                   <span className="block text-sm font-medium text-foreground">{t(`checklist.${key}.title`)}</span>

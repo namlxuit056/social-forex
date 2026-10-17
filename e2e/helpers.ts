@@ -22,7 +22,21 @@ export function localized(path: string) {
 
 export async function gotoPage(page: Page, path: string) {
   await dismissPopups(page);
-  await page.goto(localized(path), { waitUntil: "domcontentloaded" });
+  await page.goto(localized(path), { waitUntil: "load" });
+  await waitForHydration(page);
+}
+
+/**
+ * Next streams the HTML before React hydrates; asserting during that window
+ * can see half-swapped trees. Client components mark the body once mounted.
+ */
+export async function waitForHydration(page: Page) {
+  await page
+    .waitForFunction(() => {
+      const root = document.querySelector("main") ?? document.body;
+      return Object.keys(root).some((key) => key.startsWith("__reactFiber"));
+    }, null, { timeout: 15_000 })
+    .catch(() => {});
 }
 
 export async function expectNoHorizontalScroll(page: Page) {
