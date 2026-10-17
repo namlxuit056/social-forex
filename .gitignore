@@ -48,3 +48,8 @@ next-env.d.ts
 *.db-journal
 .claude/worktrees/
 .superpowers/
+
+# playwright
+/test-results/
+/playwright-report/
+/blob-report/

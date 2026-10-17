@@ -24,7 +24,8 @@
     "selfhost:cron": "node scripts/selfhost/cron-runner.mjs",
     "selfhost:pull-db": "bash scripts/selfhost/pull-neon-db.sh",
     "selfhost:cutover": "bash scripts/selfhost/cutover.sh",
-    "selfhost:env": "bash scripts/selfhost/merge-vercel-env.sh"
+    "selfhost:env": "bash scripts/selfhost/merge-vercel-env.sh",
+    "test:e2e": "playwright test"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -70,6 +71,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.1",
     "@tailwindcss/postcss": "^4",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20",

@@ -6,6 +6,36 @@ Mỗi dòng là một feature/improvement độc lập.
 
 ---
 
+## High Priority — Sprint UI: Redesign theo evon ui-ux (2026-10-17)
+
+Goal: một bộ component + token chung (flat, giữ màu xanh `--primary`, có dark mode), rồi làm lại từng nhóm màn trên bộ đó. Mỗi feature xong phải: lint + build sạch, e2e Playwright ở `e2e/` chạy xanh (desktop 1280 + mobile 375, không cuộn ngang), commit + push. Đợt đầu (khung app, home, desk, signals list, journal tabs) đã xong ở commit 1309ab3.
+
+Quy ước test: `npm run test:e2e` (Playwright, `baseURL` = `E2E_BASE_URL` hoặc http://localhost:3000). Test cần đăng nhập đọc `E2E_USER_EMAIL` / `E2E_USER_PASSWORD`, thiếu thì `test.skip`. Helper chung `e2e/helpers.ts`: tắt popup gold-ai, `expectNoHorizontalScroll(page)`.
+
+### Giai đoạn 0 — Design system
+
+- [x] **UI-0.1 Hạ tầng e2e Playwright** — `@playwright/test`, `playwright.config.ts` (2 project: desktop 1280, mobile 375 Pixel-like), `e2e/helpers.ts`, script `test:e2e`, loại `e2e/` khỏi vitest. Test khói: header + nav hiện, chuyển trang qua nav, không cuộn ngang ở home/desk/signals. File: `e2e/smoke.spec.ts`.
+- [ ] **UI-0.2 Token trạng thái + thang chữ** — trong `globals.css`: `--success/--danger/--warning/--info` (+ `-bg`) cho sáng/tối, `--border-strong`; map vào `@theme inline`. Tên trang chuẩn `text-xl` (luật đã chốt: `2xl` chỉ cho hero) qua component `PageHeader` (`src/components/layout/page-header.tsx`: title, description, actions). Thay h1 ở các trang đã làm. Test: `e2e/page-header.spec.ts` (h1 duy nhất, cỡ 20px ở desktop).
+- [ ] **UI-0.3 Bảng ánh xạ trạng thái** — `src/lib/ui/status-map.ts` (pure, có unit test): signal status, direction LONG/SHORT/BUY/SELL, impact high/medium/low, tier FREE/VIP → `{ tone, labelKey }`. Component `StatusBadge` + `DirectionBadge` + `ImpactBadge` (`src/components/ui/status-badge.tsx`). Thay chỗ tự tô màu ở signals list/detail, desk news, calendar. Test: unit `status-map.test.ts` + `e2e/status-badge.spec.ts` (badge trên /signals có `data-tone`).
+- [ ] **UI-0.4 Control tự dựng thay control gốc** — `NativeSelect` thay bằng `Select` shadcn đã có (`components/ui/select.tsx`) qua wrapper `FilterSelect` (label + select, cao 36px); `Checkbox` (`components/ui/checkbox.tsx`, base-ui/radix theo dự án). Thay ở signals filter, desk market select, desk checklist. Test: `e2e/controls.spec.ts` (mở select bằng chuột + bàn phím, chọn giá trị đổi URL `/signals?status=...`; tick checklist desk tăng bộ đếm).
+- [ ] **UI-0.5 Khối dùng chung** — `FilterBar` (hàng lọc gọn), `ScrollTabs` (tab link cuộn ngang, `aria-current`), `StatCard` (KPI: nhãn, số, delta), `PriceLevels` (Entry/SL/TP). Chuyển signals list, journal tabs, journal KPI sang dùng chúng. Test: `e2e/shared-blocks.spec.ts`.
+- [ ] **UI-0.6 Trang /design-system (chỉ ADMIN)** — bày token màu (cả hai theme), thang chữ, mọi component ở mỗi trạng thái cạnh nhau. Non-admin → 404. Test: `e2e/design-system.spec.ts` (ẩn danh 404; admin thấy các mục nếu có `E2E_ADMIN_*`).
+
+### Giai đoạn 1–7 — Làm lại theo nhóm màn (dùng bộ ở GĐ 0)
+
+- [ ] **UI-1 Bàn giao dịch** — `/chart`, `/quotes`, `/calendar`, `/positions`, `/mt5`; desk: đồng bộ cặp tiền chart ↔ ô Market (URL `?symbol=`). Test: `e2e/trading-desk.spec.ts` (đổi Market → chart symbol đổi; lọc lịch theo tiền tệ đổi URL; mobile không cuộn ngang).
+- [ ] **UI-2 Tín hiệu & copy** — chi tiết signal, `/copy-trade`, `/leaderboard`, `/ai-trade-proposals`, `/u/[id]`. Test: `e2e/signals-flow.spec.ts` (list → detail → quay lại giữ bộ lọc; leaderboard sắp xếp).
+- [ ] **UI-3 Nhật ký & kỷ luật** — các tab journal còn lại, `/plan`, `/dashboard`, `/backtest`. Test (cần login): `e2e/journal.spec.ts` (chuyển 8 tab qua URL, tab hiện `aria-current`).
+- [ ] **UI-4 Công cụ thị trường** — `/screener`, `/scalping`, `/heatmap`, `/sentiment`, `/alerts`, `/tools`. Test: `e2e/market-tools.spec.ts`.
+- [ ] **UI-5 Cộng đồng & học** — `/forum/*`, `/academy`, `/articles`, `/challenge`, `/missions`, `/start`, `/webinar`, `/resources`, `/brokers`, `/partners`. Test: `e2e/community.spec.ts`.
+- [ ] **UI-6 Tài khoản** — `/auth/*`, `/profile`, `/notifications`, `/messages`, `/upgrade-vip`. Test: `e2e/auth.spec.ts` (lỗi validate form đăng nhập hiện đúng chỗ, đăng nhập thành công về trang trước).
+- [ ] **UI-7 Admin** — một khuôn CRUD chung cho 15 màn `/admin/*`. Test: `e2e/admin.spec.ts` (cần `E2E_ADMIN_*`).
+
+### Giai đoạn cuối
+
+- [ ] **UI-8 IA điều hướng** — gom 4 + 27 mục về ~5 mục chính + "Thêm", chỉ sửa `nav-config.ts`. Test: cập nhật `e2e/smoke.spec.ts`.
+- [ ] **UI-9 Quét tổng** — probe mọi route 1280/375/dark, xoá class trang trí còn lại (`bg-card/NN`, `ring-foreground/5`, blur/gradient ngoài lớp nổi). Test: `e2e/no-hscroll.spec.ts` lặp qua mọi route công khai.
+
 ## High Priority — Sprint 2: Nâng win rate
 
 _(hoàn thành 2026-07-18 — xem Completed)_
