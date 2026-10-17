@@ -411,7 +411,7 @@ export function AiSuggestionCard({
               className="mt-1 h-8 w-full rounded-md border border-input bg-transparent px-2.5 font-mono text-xs outline-none transition focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
             />
           </label>
-          <dl className="grid grid-cols-3 gap-2 rounded-md border border-border/70 bg-muted/20 px-3 py-2 text-[10px]">
+          <dl className="grid grid-cols-3 gap-2 rounded-md border border-border bg-muted/20 px-3 py-2 text-[10px]">
             <div>
               <dt className="text-muted-foreground">{t("slDistance")}</dt>
               <dd className="mt-0.5 font-mono font-semibold text-foreground">

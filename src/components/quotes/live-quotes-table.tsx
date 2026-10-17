@@ -490,7 +490,7 @@ export function LiveQuotesTable({
                       {renderTrend(r.symbol, true)}
                     </div>
 
-                    <div className="mt-3 flex items-center justify-between gap-2 border-t border-border/50 pt-2">
+                    <div className="mt-3 flex items-center justify-between gap-2 border-t border-border pt-2">
                       <div className="flex items-center gap-0.5">
                         <Link
                           href={`/chart?symbol=${encodeURIComponent(r.symbol)}`}

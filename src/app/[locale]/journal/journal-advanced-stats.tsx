@@ -85,7 +85,7 @@ function StatCard({
   return (
     <div
       className={cn(
-        "rounded-lg border-l-2 border-y border-r border-border/60 p-3",
+        "rounded-lg border-l-2 border-y border-r border-border p-3",
         tone === "positive" && "border-l-emerald-500",
         tone === "negative" && "border-l-red-500",
         tone === "neutral" && "border-l-border",
@@ -158,7 +158,7 @@ function StatsSection({
 }) {
   const t = useTranslations("journal");
   return (
-    <details open={defaultOpen} className="group rounded-xl border border-border/60">
+    <details open={defaultOpen} className="group rounded-xl border border-border">
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3 [&::-webkit-details-marker]:hidden">
         <div>
           <h3 className="font-heading text-lg font-semibold">{title}</h3>
@@ -169,7 +169,7 @@ function StatsSection({
           aria-hidden
         />
       </summary>
-      <div className="border-t border-border/60 p-4">
+      <div className="border-t border-border p-4">
         <div className="peer space-y-6 empty:hidden">{children}</div>
         <p className="hidden text-sm text-muted-foreground peer-empty:block">
           {t("statsSectionEmpty")}
@@ -197,7 +197,7 @@ function GroupStatsTable({
   const t = useTranslations("journal");
   const hasAny = rows.some((r) => r.stat !== null);
   return (
-    <Card className="border-border/60">
+    <Card className="border-border">
       <CardHeader className="flex-row items-center justify-between gap-3 pb-2">
         <CardTitle className="text-sm">{title}</CardTitle>
         {headerAction}
@@ -436,7 +436,7 @@ function DisciplineScorecardCard({ scorecard }: { scorecard: DisciplineScorecard
   });
 
   return (
-    <Card className="border-border/60">
+    <Card className="border-border">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm">{t("scorecardTitle")}</CardTitle>
         <p className="text-xs text-muted-foreground">
@@ -531,7 +531,7 @@ function AiReviewTrendCard({ trend }: { trend: AiReviewTrend }) {
   ];
 
   return (
-    <Card className="border-border/60">
+    <Card className="border-border">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm">{t("aiReviewTrendTitle")}</CardTitle>
         <p className="text-xs text-muted-foreground">
@@ -604,7 +604,7 @@ function MistakeCostCard({ stats }: { stats: MistakeStats }) {
   const maxAbs = Math.max(1, ...stats.rows.map((r) => Math.abs(r.totalPnl)));
 
   return (
-    <Card className="border-border/60">
+    <Card className="border-border">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm">{t("mistakeCostTitle")}</CardTitle>
         <p className="text-xs text-muted-foreground">
@@ -728,7 +728,7 @@ function GreenDaysCard({
   }
 
   return (
-    <Card className="border-border/60">
+    <Card className="border-border">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm">{t("greenTitle")}</CardTitle>
         <p className="text-xs text-muted-foreground">
@@ -755,7 +755,7 @@ function GreenDaysCard({
 
         <div className="space-y-2">
           {result.greenDays.slice(0, 10).map((day) => (
-            <details key={day.day} className="rounded-lg border border-border/60 px-3 py-2">
+            <details key={day.day} className="rounded-lg border border-border px-3 py-2">
               <summary className="flex cursor-pointer flex-wrap items-center gap-x-3 gap-y-1 text-xs">
                 <span className="font-medium text-foreground">
                   {new Date(`${day.day}T00:00:00Z`).toLocaleDateString(locale, {
@@ -786,7 +786,7 @@ function GreenDaysCard({
                   ))}
                 </span>
               </summary>
-              <div className="mt-2 space-y-1 border-t border-border/40 pt-2">
+              <div className="mt-2 space-y-1 border-t border-border pt-2">
                 {day.trades.map((tr, i) => (
                   <div
                     key={i}
@@ -941,7 +941,7 @@ function TiltDaysCard({ result, locale }: { result: TiltDaysResult; locale: stri
 
 
   return (
-    <Card className="border-border/60">
+    <Card className="border-border">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm">{t("tiltTitle")}</CardTitle>
         <p className="text-xs text-muted-foreground">
@@ -962,7 +962,7 @@ function TiltDaysCard({ result, locale }: { result: TiltDaysResult; locale: stri
 
         <div className="space-y-2">
           {result.tiltDays.slice(0, 10).map((day) => (
-            <details key={day.day} className="rounded-lg border border-border/60 px-3 py-2">
+            <details key={day.day} className="rounded-lg border border-border px-3 py-2">
               <summary className="flex cursor-pointer flex-wrap items-center gap-x-3 gap-y-1 text-xs">
                 <span className="font-medium text-foreground">
                   {new Date(`${day.day}T00:00:00Z`).toLocaleDateString(locale, {
@@ -993,7 +993,7 @@ function TiltDaysCard({ result, locale }: { result: TiltDaysResult; locale: stri
                   ))}
                 </span>
               </summary>
-              <div className="mt-2 space-y-1 border-t border-border/40 pt-2">
+              <div className="mt-2 space-y-1 border-t border-border pt-2">
                 {day.trades.map((tr, i) => (
                   <div
                     key={i}
@@ -1259,7 +1259,7 @@ export function JournalAdvancedStats({
         {calendar}
         {goalTracker}
         {compoundPlanCard}
-        <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border/60 bg-muted/20 px-6 py-12 text-center">
+        <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border bg-muted/20 px-6 py-12 text-center">
           <BarChart3 className="size-10 text-muted-foreground" aria-hidden />
           <p className="text-sm text-muted-foreground">
             {t("edgeEmpty", { min: MIN_CLOSED_TRADES })}
@@ -1452,7 +1452,7 @@ export function JournalAdvancedStats({
           {goalTracker}
           {compoundPlanCard}
           <div className="grid gap-4 lg:grid-cols-2">
-            <Card className="border-border/60">
+            <Card className="border-border">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm">{t("rDistTitle")}</CardTitle>
                 <p className="text-xs text-muted-foreground">{t("rDistNote")}</p>
@@ -1461,7 +1461,7 @@ export function JournalAdvancedStats({
                 <RDistributionChart dist={rDistribution} />
               </CardContent>
             </Card>
-            <Card className="border-border/60">
+            <Card className="border-border">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm">{t("drawdownTitle")}</CardTitle>
                 <p className="text-xs text-muted-foreground">{t("drawdownNote")}</p>
@@ -1473,7 +1473,7 @@ export function JournalAdvancedStats({
           </div>
 
           {excursion.sampleSize >= 3 && (
-            <Card className="border-border/60">
+            <Card className="border-border">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm">{t("excursionTitle")}</CardTitle>
                 <p className="text-xs text-muted-foreground">
@@ -1553,7 +1553,7 @@ export function JournalAdvancedStats({
             labelOf={(k) => `${k} ${timeWindowTz === "vn" ? t("tzVietnamShort") : "UTC"}`}
             emptyLabel={t("statsByTimeEmpty")}
             headerAction={
-              <div className="flex rounded-md border border-border/60 p-0.5">
+              <div className="flex rounded-md border border-border p-0.5">
                 {(["vn", "utc"] as const).map((tz) => (
                   <button
                     key={tz}
@@ -1714,7 +1714,7 @@ export function JournalAdvancedStats({
             </div>
 
             <div className="grid gap-4 lg:grid-cols-2">
-              <Card className="border-border/60">
+              <Card className="border-border">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm">{t("riskComplianceChartTitle")}</CardTitle>
                 </CardHeader>
@@ -1726,7 +1726,7 @@ export function JournalAdvancedStats({
                   />
                 </CardContent>
               </Card>
-              <Card className="border-border/60">
+              <Card className="border-border">
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm">{t("riskMonthlyChartTitle")}</CardTitle>
                 </CardHeader>

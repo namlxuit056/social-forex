@@ -111,7 +111,7 @@ export function JournalLessons({
                       <img
                         src={lesson.imageUrl}
                         alt=""
-                        className="h-24 w-36 rounded-md border border-border/60 object-cover"
+                        className="h-24 w-36 rounded-md border border-border object-cover"
                       />
                     </a>
                   )}

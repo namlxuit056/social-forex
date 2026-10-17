@@ -394,7 +394,7 @@ export function JournalPerformanceChart({
   const isLossStreak = streak.type === "LOSS";
 
   return (
-    <Card className="border-border/60">
+    <Card className="border-border">
       <CardHeader className="gap-4 pb-3">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <CardTitle className="flex items-center gap-2 text-base">
@@ -404,7 +404,7 @@ export function JournalPerformanceChart({
 
           <div className="flex flex-wrap items-center gap-2">
             {/* Chart type toggle */}
-            <div className="flex rounded-lg border border-border/60 p-0.5">
+            <div className="flex rounded-lg border border-border p-0.5">
               {chartTypes.map(({ key, label, Icon }) => (
                 <button
                   key={key}
@@ -437,7 +437,7 @@ export function JournalPerformanceChart({
                     "inline-flex h-8 items-center rounded-md border px-3 text-xs font-medium transition-colors",
                     mode === item.key
                       ? "border-primary bg-primary text-primary-foreground"
-                      : "border-border/60 bg-background text-muted-foreground hover:border-border hover:text-foreground",
+                      : "border-border bg-background text-muted-foreground hover:border-border hover:text-foreground",
                   )}
                 >
                   {item.label}
@@ -446,7 +446,7 @@ export function JournalPerformanceChart({
             </div>
 
             {/* Money / % toggle */}
-            <div className="flex rounded-md border border-border/60 p-0.5">
+            <div className="flex rounded-md border border-border p-0.5">
               {(["money", "percent"] as const).map((item) => (
                 <button
                   key={item}
@@ -509,7 +509,7 @@ export function JournalPerformanceChart({
         {/* Stats row — 7 cards: Net P&L / Trades / Win Rate / Streak / Profit Factor / Max DD / Best-Worst */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-7">
           {/* Net P&L */}
-          <div className="rounded-lg border border-border/60 p-3">
+          <div className="rounded-lg border border-border p-3">
             <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
               {t("chartNetPnl")}
             </p>
@@ -534,7 +534,7 @@ export function JournalPerformanceChart({
           </div>
 
           {/* Trades */}
-          <div className="rounded-lg border border-border/60 p-3">
+          <div className="rounded-lg border border-border p-3">
             <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
               {t("chartTrades")}
             </p>
@@ -549,7 +549,7 @@ export function JournalPerformanceChart({
           </div>
 
           {/* Win rate */}
-          <div className="rounded-lg border border-border/60 p-3">
+          <div className="rounded-lg border border-border p-3">
             <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
               {t("chartWinRate")}
             </p>
@@ -577,7 +577,7 @@ export function JournalPerformanceChart({
                 ? "border-emerald-500/30 bg-emerald-500/5"
                 : isLossStreak
                   ? "border-red-500/30 bg-red-500/5"
-                  : "border-border/60",
+                  : "border-border",
             )}
           >
             <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
@@ -613,7 +613,7 @@ export function JournalPerformanceChart({
           </div>
 
           {/* Profit factor */}
-          <div className="rounded-lg border border-border/60 p-3">
+          <div className="rounded-lg border border-border p-3">
             <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
               {t("chartProfitFactor")}
             </p>
@@ -632,7 +632,7 @@ export function JournalPerformanceChart({
           </div>
 
           {/* Max Drawdown */}
-          <div className="rounded-lg border border-border/60 p-3">
+          <div className="rounded-lg border border-border p-3">
             <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
               {t("chartMaxDrawdown")}
             </p>
@@ -653,7 +653,7 @@ export function JournalPerformanceChart({
           </div>
 
           {/* Best / Worst */}
-          <div className="col-span-2 rounded-lg border border-border/60 p-3 sm:col-span-3 lg:col-span-1">
+          <div className="col-span-2 rounded-lg border border-border p-3 sm:col-span-3 lg:col-span-1">
             <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
               {t("chartBestWorst")}
             </p>
@@ -704,7 +704,7 @@ export function JournalPerformanceChart({
         )}
 
         {/* Chart */}
-        <div className="overflow-x-auto rounded-lg border border-border/60 bg-muted/20 p-2">
+        <div className="overflow-x-auto rounded-lg border border-border bg-muted/20 p-2">
           <svg
             ref={svgRef}
             viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
@@ -890,7 +890,7 @@ export function JournalPerformanceChart({
         </div>
 
         {summary.tradeCount === 0 && (
-          <div className="flex items-center gap-2 rounded-md border border-dashed border-border/70 px-3 py-2 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2 rounded-md border border-dashed border-border px-3 py-2 text-sm text-muted-foreground">
             <CalendarRange className="size-4" />
             {t("chartEmpty")}
           </div>

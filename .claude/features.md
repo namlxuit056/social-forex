@@ -33,8 +33,8 @@ Quy ước test: `npm run test:e2e` (Playwright, `baseURL` = `E2E_BASE_URL` ho�
 
 ### Giai đoạn cuối
 
-- [ ] **UI-8 IA điều hướng** — gom 4 + 27 mục về ~5 mục chính + "Thêm", chỉ sửa `nav-config.ts`. Test: cập nhật `e2e/smoke.spec.ts`.
-- [ ] **UI-9 Quét tổng** — probe mọi route 1280/375/dark, xoá class trang trí còn lại (`bg-card/NN`, `ring-foreground/5`, blur/gradient ngoài lớp nổi). Test: `e2e/no-hscroll.spec.ts` lặp qua mọi route công khai.
+- [ ] **UI-8 IA điều hướng** — gom 4 + 27 mục về ~5 mục chính + "Thêm", chỉ sửa `nav-config.ts`. Test: cập nhật `e2e/smoke.spec.ts`. _TODO (2026-10-17, chưa làm): `FunnelEvent` không có sự kiện page_view (60 ngày chỉ có signup/CTA) nên không biết mục nào dùng nhiều — cần quyết của user hoặc thêm tracking page_view trước. Đã làm phần liên quan: header đăng nhập gom vào AccountMenu, nav đầy đủ từ `xl`._
+- [x] **UI-9 Quét tổng** — probe mọi route 1280/375/dark, xoá class trang trí còn lại (`bg-card/NN`, `ring-foreground/5`, blur/gradient ngoài lớp nổi). Test: `e2e/no-hscroll.spec.ts` lặp qua mọi route công khai.
 
 ## High Priority — Sprint 2: Nâng win rate
 

@@ -37,9 +37,9 @@ export function JournalStatsFilter({
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border/60 bg-muted/20 p-3">
+    <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-muted/20 p-3">
       <span className="text-xs font-medium text-muted-foreground">{t("statsFilterPeriod")}</span>
-      <div className="flex rounded-md border border-border/60 bg-background p-0.5">
+      <div className="flex rounded-md border border-border bg-background p-0.5">
         {STATS_RANGES.map((r) => (
           <button
             key={r}
@@ -63,7 +63,7 @@ export function JournalStatsFilter({
         <select
           value={pair ?? ""}
           onChange={(e) => go({ range, pair: e.target.value || null })}
-          className="h-8 rounded-md border border-border/60 bg-background px-2 text-xs text-foreground"
+          className="h-8 rounded-md border border-border bg-background px-2 text-xs text-foreground"
         >
           <option value="">{t("statsFilterAllPairs")}</option>
           {pair && !pairs.includes(pair) && <option value={pair}>{pair}</option>}

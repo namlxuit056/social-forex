@@ -79,7 +79,7 @@ export function MobileNav({
             </div>
 
             {/* Account section */}
-            <div className="mt-4 border-t border-border/50 pt-3">
+            <div className="mt-4 border-t border-border pt-3">
               {isAuthenticated ? (
                 <div className="flex flex-col gap-1">
                   <Link

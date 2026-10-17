@@ -31,7 +31,7 @@ export function EmptyState({
   return (
     <Card
       className={cn(
-        "border-dashed border-border bg-card/60 ring-1 ring-foreground/5",
+        "border-dashed border-border bg-card",
         className,
       )}
     >
@@ -47,7 +47,7 @@ export function EmptyState({
         ) : null}
       </CardHeader>
       {(primary || (secondary && secondary.length > 0)) && (
-        <CardFooter className="flex flex-wrap gap-2 border-t border-border/60 pt-4">
+        <CardFooter className="flex flex-wrap gap-2 border-t border-border pt-4">
           {primary ? (
             <Link
               href={primary.href}

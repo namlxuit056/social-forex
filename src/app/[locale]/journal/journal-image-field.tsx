@@ -70,7 +70,7 @@ export function JournalImageField({
           <img
             src={url}
             alt={t("chartImage")}
-            className="h-14 w-20 rounded-md border border-border/60 object-cover"
+            className="h-14 w-20 rounded-md border border-border object-cover"
           />
           <Button
             type="button"

@@ -360,7 +360,7 @@ function TradeRow({
               <img
                 src={trade.imageUrl}
                 alt=""
-                className="h-8 w-12 rounded border border-border/60 object-cover"
+                className="h-8 w-12 rounded border border-border object-cover"
               />
             </a>
           )}
@@ -473,7 +473,7 @@ export function JournalTable({ trades, locale }: { trades: Trade[]; locale: stri
         />
       )}
 
-      <Card className="border-border/60">
+      <Card className="border-border">
         <CardHeader className="flex flex-col gap-3 pb-3 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle className="text-base">{t("history")}</CardTitle>
           <div className="flex flex-wrap items-center gap-2">
@@ -486,7 +486,7 @@ export function JournalTable({ trades, locale }: { trades: Trade[]; locale: stri
                     "inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors",
                     filter === key
                       ? "border-primary bg-primary text-primary-foreground"
-                      : "border-border/60 bg-transparent text-muted-foreground hover:border-border hover:text-foreground",
+                      : "border-border bg-transparent text-muted-foreground hover:border-border hover:text-foreground",
                   )}
                 >
                   <span className={filter === key ? undefined : color}>{label}</span>
@@ -531,7 +531,7 @@ export function JournalTable({ trades, locale }: { trades: Trade[]; locale: stri
                   <th className="px-4 py-2.5" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border/40">
+              <tbody className="divide-y divide-border">
                 {visible.map((tr) => (
                   <TradeRow
                     key={tr.id}
@@ -550,7 +550,7 @@ export function JournalTable({ trades, locale }: { trades: Trade[]; locale: stri
             </table>
           )}
           {hasMoreRows && (
-            <div className="flex flex-col items-center gap-1 border-t border-border/40 px-4 py-3">
+            <div className="flex flex-col items-center gap-1 border-t border-border px-4 py-3">
               <p className="text-xs text-muted-foreground">
                 {t("tableShowingRows", { shown: visible.length, total: filtered.length })}
               </p>

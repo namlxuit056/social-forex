@@ -199,7 +199,7 @@ export function MarketVolatilityNote({ serverNowIso, locale }: Props) {
       )}
 
       {state.upcomingOverlaps.length > 0 && (
-        <ul className="mt-4 divide-y divide-border/60 overflow-hidden rounded-lg border border-border/60">
+        <ul className="mt-4 divide-y divide-border overflow-hidden rounded-lg border border-border">
           {state.upcomingOverlaps.map((o) => {
             const live = o.start.getTime() <= nowMs && nowMs < o.end.getTime();
             return (

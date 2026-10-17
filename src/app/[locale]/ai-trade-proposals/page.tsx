@@ -42,7 +42,7 @@ export default async function AiTradeProposalsPage({
           </h1>
           <p className="mt-2 text-muted-foreground">{t("description")}</p>
         </div>
-        <Card className="border-border/60 bg-card/50">
+        <Card className="border-border bg-card">
           <CardContent className="flex flex-col items-center gap-4 py-12 text-center">
             <Brain className="size-12 text-primary/40" />
             <div>
@@ -79,7 +79,7 @@ export default async function AiTradeProposalsPage({
           </h1>
           <p className="mt-2 text-muted-foreground">{t("description")}</p>
         </div>
-        <Card className="border-border/60 bg-card/50">
+        <Card className="border-border bg-card">
           <CardContent className="flex flex-col items-center gap-4 py-12 text-center">
             <Sparkles className="size-12 text-primary/40" />
             <div>
@@ -117,7 +117,7 @@ export default async function AiTradeProposalsPage({
           </h1>
           <p className="mt-2 text-muted-foreground">{t("description")}</p>
         </div>
-        <Card className="border-border/60 bg-card/50">
+        <Card className="border-border bg-card">
           <CardContent className="flex flex-col items-center gap-4 py-12 text-center">
             <Sparkles className="size-12 text-primary/40" />
             <div>
@@ -190,7 +190,7 @@ export default async function AiTradeProposalsPage({
           <CardDescription>{t("setupDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-5 text-sm">
-          <div className="flex flex-col gap-2 rounded-lg border border-border/70 bg-muted/20 p-4">
+          <div className="flex flex-col gap-2 rounded-lg border border-border bg-muted/20 p-4">
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
               {t("downloadLabel")}
             </p>

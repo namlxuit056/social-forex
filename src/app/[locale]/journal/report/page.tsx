@@ -256,7 +256,7 @@ export default async function JournalReportPage({
           {/* Stats grid */}
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             {statItems.map((s) => (
-              <div key={s.label} className="rounded-lg border border-border/60 p-3">
+              <div key={s.label} className="rounded-lg border border-border p-3">
                 <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
                   {s.label}
                 </p>
@@ -278,7 +278,7 @@ export default async function JournalReportPage({
           {/* Equity curve */}
           <section>
             <h2 className="mb-2 text-sm font-semibold">{t("reportEquityTitle")}</h2>
-            <div className="rounded-lg border border-border/60 p-3">
+            <div className="rounded-lg border border-border p-3">
               <svg viewBox={`0 0 ${W} ${H}`} className="h-40 w-full" preserveAspectRatio="none">
                 <line x1={0} x2={W} y1={zeroY} y2={zeroY} className="stroke-border" strokeWidth="1" />
                 {eqPath && (
@@ -306,7 +306,7 @@ export default async function JournalReportPage({
                 })}{" "}
                 · {t("goalMetCount", { met: goalProgress.metCount, total: goalProgress.totalCount })}
               </h2>
-              <div className="space-y-2 rounded-lg border border-border/60 p-3">
+              <div className="space-y-2 rounded-lg border border-border p-3">
                 {goalProgress.items.map((it) => (
                   <div key={it.metric} className="flex items-center justify-between text-xs">
                     <span>{metricLabel[it.metric]}</span>
@@ -326,7 +326,7 @@ export default async function JournalReportPage({
           {dist.total > 0 && (
             <section>
               <h2 className="mb-2 text-sm font-semibold">{t("rDistTitle")}</h2>
-              <div className="grid grid-cols-6 gap-2 rounded-lg border border-border/60 p-3 text-center">
+              <div className="grid grid-cols-6 gap-2 rounded-lg border border-border p-3 text-center">
                 {dist.buckets.map((b) => (
                   <div key={b.key}>
                     <p
@@ -351,7 +351,7 @@ export default async function JournalReportPage({
                 <table className="w-full text-xs">
                   <tbody>
                     {topSetups.map((r) => (
-                      <tr key={r.key} className="border-b border-border/40">
+                      <tr key={r.key} className="border-b border-border">
                         <td className="py-1">{r.key}</td>
                         <td className="py-1 text-right font-mono">{r.winRate ?? "—"}%</td>
                         <td className="py-1 text-right font-mono text-muted-foreground">
@@ -369,7 +369,7 @@ export default async function JournalReportPage({
                 <table className="w-full text-xs">
                   <tbody>
                     {sessionRows.map((r) => (
-                      <tr key={r.key} className="border-b border-border/40">
+                      <tr key={r.key} className="border-b border-border">
                         <td className="py-1">{sessionName(r.key)}</td>
                         <td className="py-1 text-right font-mono">{r.winRate ?? "—"}%</td>
                         <td className="py-1 text-right font-mono text-muted-foreground">

@@ -240,11 +240,11 @@ export function PreTradeDesk({
                   }))}
                 />
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="rounded-md border border-border/60 bg-muted/20 p-3">
+                  <div className="rounded-md border border-border bg-muted/20 p-3">
                     <p className="text-xs text-muted-foreground">{t("midPrice")}</p>
                     <p className="mt-1 font-mono text-lg tabular-nums text-foreground">{selectedMid}</p>
                   </div>
-                  <div className="rounded-md border border-border/60 bg-muted/20 p-3">
+                  <div className="rounded-md border border-border bg-muted/20 p-3">
                     <p className="text-xs text-muted-foreground">{t("spread")}</p>
                     <p className="mt-1 font-mono text-lg tabular-nums text-foreground">
                       {selectedQuote ? Number((selectedQuote.ask - selectedQuote.bid).toFixed(5)) : "0"}
@@ -284,7 +284,7 @@ export function PreTradeDesk({
               <CardDescription>{t("riskResultDesc")}</CardDescription>
             </CardHeader>
             <CardContent>
-              <dl className="grid gap-2 rounded-md border border-border/60 bg-muted/20 p-3 font-mono text-sm">
+              <dl className="grid gap-2 rounded-md border border-border bg-muted/20 p-3 font-mono text-sm">
                 <div className="flex items-center justify-between gap-3">
                   <dt className="text-muted-foreground">{t("slPips")}</dt>
                   <dd className="tabular-nums text-foreground">{slPips}</dd>
@@ -297,7 +297,7 @@ export function PreTradeDesk({
                   <dt className="text-muted-foreground">{t("pipValue")}</dt>
                   <dd className="tabular-nums text-foreground">${riskPlan.pipValuePerLot}</dd>
                 </div>
-                <div className="flex items-center justify-between gap-3 border-t border-border/60 pt-2 text-primary">
+                <div className="flex items-center justify-between gap-3 border-t border-border pt-2 text-primary">
                   <dt>{t("suggestedLots")}</dt>
                   <dd className="text-xl tabular-nums">{riskPlan.lots}</dd>
                 </div>
@@ -325,7 +325,7 @@ export function PreTradeDesk({
           </CardHeader>
           <CardContent>
             {relatedEvents.length === 0 ? (
-              <p className="rounded-md border border-border/60 bg-muted/20 p-3 text-sm text-muted-foreground">
+              <p className="rounded-md border border-border bg-muted/20 p-3 text-sm text-muted-foreground">
                 {t("newsEmpty")}
               </p>
             ) : (
@@ -333,7 +333,7 @@ export function PreTradeDesk({
                 {relatedEvents.map((event) => {
                   const impact = toImpact(event.impact);
                   return (
-                    <li key={event.id} className="rounded-md border border-border/60 bg-muted/15 p-3">
+                    <li key={event.id} className="rounded-md border border-border bg-muted/15 p-3">
                       <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                         <time dateTime={event.timeUtc} className="font-mono tabular-nums">
                           {fmt.format(new Date(event.timeUtc))}

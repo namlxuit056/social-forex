@@ -69,7 +69,7 @@ export function ArticleEditForm({
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
       {/* Left: editor */}
-      <Card className="border-border/70">
+      <Card className="border-border">
         <CardHeader>
           <CardTitle className="text-base">Nội dung bài viết</CardTitle>
         </CardHeader>
@@ -199,7 +199,7 @@ export function ArticleEditForm({
       {/* Right: SEO panel */}
       <aside className="space-y-3">
         <div className="sticky top-4">
-          <Card className="border-border/70">
+          <Card className="border-border">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm">SEO Check</CardTitle>
               <p className="text-xs text-muted-foreground">
@@ -212,7 +212,7 @@ export function ArticleEditForm({
             </CardContent>
           </Card>
 
-          <Card className="border-border/70 mt-3">
+          <Card className="border-border mt-3">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm">AI Content Review</CardTitle>
               <p className="text-xs text-muted-foreground">

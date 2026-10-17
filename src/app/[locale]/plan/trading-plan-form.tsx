@@ -561,7 +561,7 @@ export function TradingPlanForm({ plan, locale, hasPrefill = false }: Props) {
       <div className="space-y-5">
         {state?.ok ? <p className="text-sm text-primary">{t("saved")}</p> : null}
 
-        <Card className="border-border/70 bg-card/65">
+        <Card className="border-border bg-card">
           <CardHeader className="gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <CardTitle className="flex items-center gap-2 text-base">
@@ -584,25 +584,25 @@ export function TradingPlanForm({ plan, locale, hasPrefill = false }: Props) {
           </CardHeader>
           <CardContent className="space-y-5">
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <div className="rounded-lg border border-border/60 bg-background/45 p-3">
+              <div className="rounded-lg border border-border bg-background/45 p-3">
                 <p className="text-xs text-muted-foreground">{t("planDate")}</p>
                 <p className="mt-1 font-mono text-sm font-medium text-foreground">
                   {readPlan.planDate}
                 </p>
               </div>
-              <div className="rounded-lg border border-border/60 bg-background/45 p-3">
+              <div className="rounded-lg border border-border bg-background/45 p-3">
                 <p className="text-xs text-muted-foreground">{t("bias")}</p>
                 <p className="mt-1 text-sm font-medium text-foreground">
                   {biasLabel[readPlan.bias]}
                 </p>
               </div>
-              <div className="rounded-lg border border-border/60 bg-background/45 p-3">
+              <div className="rounded-lg border border-border bg-background/45 p-3">
                 <p className="text-xs text-muted-foreground">{t("maxRiskPercent")}</p>
                 <p className="mt-1 font-mono text-sm font-medium text-foreground">
                   {readPlan.maxRiskPercent === null ? "—" : `${readPlan.maxRiskPercent}%`}
                 </p>
               </div>
-              <div className="rounded-lg border border-border/60 bg-background/45 p-3">
+              <div className="rounded-lg border border-border bg-background/45 p-3">
                 <p className="text-xs text-muted-foreground">{t("maxTrades")}</p>
                 <p className="mt-1 font-mono text-sm font-medium text-foreground">
                   {valueOrDash(readPlan.maxTrades)}
@@ -624,7 +624,7 @@ export function TradingPlanForm({ plan, locale, hasPrefill = false }: Props) {
                   {readPlan.symbolPlans.map((item) => (
                     <article
                       key={item.id}
-                      className="rounded-lg border border-border/60 bg-background/35 p-4"
+                      className="rounded-lg border border-border bg-background/35 p-4"
                     >
                       <div className="flex flex-wrap items-center gap-2">
                         <h4 className="font-mono text-base font-semibold text-foreground">
@@ -661,7 +661,7 @@ export function TradingPlanForm({ plan, locale, hasPrefill = false }: Props) {
                     </article>
                   ))}
                 </section>
-                <section className="rounded-lg border border-border/60 bg-background/35 p-4">
+                <section className="rounded-lg border border-border bg-background/35 p-4">
                   <h3 className="text-sm font-medium text-foreground">
                     {t("sessionFocus")}
                   </h3>
@@ -670,7 +670,7 @@ export function TradingPlanForm({ plan, locale, hasPrefill = false }: Props) {
                   </p>
                 </section>
                 {readPlan.notes ? (
-                  <section className="rounded-lg border border-border/60 bg-background/35 p-4">
+                  <section className="rounded-lg border border-border bg-background/35 p-4">
                     <h3 className="text-sm font-medium text-foreground">
                       {t("notes")}
                     </h3>
@@ -682,7 +682,7 @@ export function TradingPlanForm({ plan, locale, hasPrefill = false }: Props) {
               </div>
 
               <aside className="space-y-4">
-                <section className="rounded-lg border border-border/70 bg-muted/15 p-4">
+                <section className="rounded-lg border border-border bg-muted/15 p-4">
                   <div className="flex items-center justify-between gap-3">
                     <h3 className="text-sm font-medium text-foreground">
                       {t("checklistTitle")}
@@ -745,7 +745,7 @@ export function TradingPlanForm({ plan, locale, hasPrefill = false }: Props) {
                       {readPlan.chartImageUrls.map((url) => (
                         <li
                           key={url}
-                          className="overflow-hidden rounded-md border border-border/60"
+                          className="overflow-hidden rounded-md border border-border"
                         >
                           <button
                             type="button"
@@ -801,7 +801,7 @@ export function TradingPlanForm({ plan, locale, hasPrefill = false }: Props) {
         value={symbolPlans.find((item) => normalizeSymbol(item.symbol))?.bias ?? readPlan.bias}
       />
 
-      <Card className="border-border/70 bg-card/65">
+      <Card className="border-border bg-card">
         <CardHeader className="gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <CardTitle className="flex items-center gap-2 text-base">
@@ -880,7 +880,7 @@ export function TradingPlanForm({ plan, locale, hasPrefill = false }: Props) {
         </CardContent>
       </Card>
 
-      <Card className="border-border/70 bg-card/60">
+      <Card className="border-border bg-card">
         <CardHeader className="gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <CardTitle className="text-base">{t("symbolPlansTitle")}</CardTitle>
@@ -914,7 +914,7 @@ export function TradingPlanForm({ plan, locale, hasPrefill = false }: Props) {
           {symbolPlans.map((item, index) => (
             <div
               key={item.id}
-              className="rounded-lg border border-border/60 bg-background/35 p-4"
+              className="rounded-lg border border-border bg-background/35 p-4"
             >
               <div className="grid gap-3 md:grid-cols-[minmax(120px,0.5fr)_minmax(140px,0.5fr)_auto] md:items-end">
                 <div>
@@ -1009,7 +1009,7 @@ export function TradingPlanForm({ plan, locale, hasPrefill = false }: Props) {
       </Card>
 
       <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.42fr)]">
-        <Card className="border-border/70 bg-card/55">
+        <Card className="border-border bg-card">
           <CardHeader>
             <CardTitle className="text-base">{t("contextTitle")}</CardTitle>
             <CardDescription>{t("contextDesc")}</CardDescription>
@@ -1059,7 +1059,7 @@ export function TradingPlanForm({ plan, locale, hasPrefill = false }: Props) {
                   {uploadedUrls.map((url) => (
                     <li
                       key={url}
-                      className="relative inline-block rounded-md border border-border/60"
+                      className="relative inline-block rounded-md border border-border"
                     >
                       <button
                         type="button"
@@ -1151,7 +1151,7 @@ export function TradingPlanForm({ plan, locale, hasPrefill = false }: Props) {
           </CardContent>
         </Card>
 
-        <Card className="border-border/70 bg-muted/15">
+        <Card className="border-border bg-muted/15">
           <CardHeader>
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -1182,7 +1182,7 @@ export function TradingPlanForm({ plan, locale, hasPrefill = false }: Props) {
               <label
                 key={key}
                 className={cn(
-                  "flex gap-3 rounded-md border border-border/70 bg-background/55 px-3 py-3 text-sm transition hover:border-primary/30",
+                  "flex gap-3 rounded-md border border-border bg-background/55 px-3 py-3 text-sm transition hover:border-primary/30",
                   checklist[key] && "border-primary/25 bg-primary/8",
                 )}
               >

@@ -9,22 +9,22 @@ export const signalLevel = {
   sl: {
     box: "rounded-lg bg-muted px-2.5 py-2",
     label: "text-xs font-medium text-muted-foreground",
-    value: "truncate font-mono text-sm font-semibold tabular-nums text-rose-700 dark:text-rose-300",
+    value: "truncate font-mono text-sm font-semibold tabular-nums text-danger",
   },
   tp1: {
     box: "rounded-lg bg-muted px-2.5 py-2",
     label: "text-xs font-medium text-muted-foreground",
-    value: "truncate font-mono text-sm font-semibold tabular-nums text-emerald-700 dark:text-emerald-300",
+    value: "truncate font-mono text-sm font-semibold tabular-nums text-success",
   },
   tp2: {
     box: "rounded-lg bg-muted px-2.5 py-2",
     label: "text-xs font-medium text-muted-foreground",
-    value: "truncate font-mono text-sm font-semibold tabular-nums text-emerald-700 dark:text-emerald-300",
+    value: "truncate font-mono text-sm font-semibold tabular-nums text-success",
   },
   tp3: {
     box: "rounded-lg bg-muted px-2.5 py-2",
     label: "text-xs font-medium text-muted-foreground",
-    value: "truncate font-mono text-sm font-semibold tabular-nums text-emerald-700 dark:text-emerald-300",
+    value: "truncate font-mono text-sm font-semibold tabular-nums text-success",
   },
 } as const;
 
@@ -38,21 +38,21 @@ export const signalLevelDetail = {
   sl: {
     box: "rounded-lg bg-muted px-3 py-3",
     label: "text-xs font-medium text-muted-foreground",
-    value: "font-mono text-lg font-bold tabular-nums text-rose-700 dark:text-rose-300",
+    value: "font-mono text-lg font-bold tabular-nums text-danger",
   },
   tp1: {
     box: "rounded-lg bg-muted px-3 py-3",
     label: "text-xs font-medium text-muted-foreground",
-    value: "font-mono text-lg font-bold tabular-nums text-emerald-700 dark:text-emerald-300",
+    value: "font-mono text-lg font-bold tabular-nums text-success",
   },
   tp2: {
     box: "rounded-lg bg-muted px-3 py-3",
     label: "text-xs font-medium text-muted-foreground",
-    value: "font-mono text-lg font-bold tabular-nums text-emerald-700 dark:text-emerald-300",
+    value: "font-mono text-lg font-bold tabular-nums text-success",
   },
   tp3: {
     box: "rounded-lg bg-muted px-3 py-3",
     label: "text-xs font-medium text-muted-foreground",
-    value: "font-mono text-lg font-bold tabular-nums text-emerald-700 dark:text-emerald-300",
+    value: "font-mono text-lg font-bold tabular-nums text-success",
   },
 } as const;

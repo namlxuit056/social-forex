@@ -35,7 +35,7 @@ function EdgeGroupCard({
 }) {
   if (rows.length === 0) return null;
   return (
-    <Card className="border-border/60">
+    <Card className="border-border">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm">{title}</CardTitle>
       </CardHeader>
@@ -96,7 +96,7 @@ export function JournalEdgeAnalytics({ trades }: { trades: EdgeTrade[] }) {
 
   if (closedCount < MIN_CLOSED_TRADES) {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border/60 bg-muted/20 px-6 py-12 text-center">
+      <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border bg-muted/20 px-6 py-12 text-center">
         <BarChart3 className="size-10 text-muted-foreground" aria-hidden />
         <p className="text-sm text-muted-foreground">
           {t("edgeEmpty", { min: MIN_CLOSED_TRADES })}
@@ -207,7 +207,7 @@ export function JournalEdgeAnalytics({ trades }: { trades: EdgeTrade[] }) {
       {playbookAdherence &&
         playbookAdherence.onPlaybook.lossRate !== null &&
         playbookAdherence.offPlaybook.lossRate !== null && (
-          <div className="flex items-start gap-3 rounded-lg border border-border/60 bg-muted/20 p-4 text-sm">
+          <div className="flex items-start gap-3 rounded-lg border border-border bg-muted/20 p-4 text-sm">
             <BarChart3 className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
             <p>
               {t("playbookAdherenceHint", {

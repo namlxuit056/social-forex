@@ -58,7 +58,7 @@ export function SignalComments({
   );
 
   return (
-    <Card className="border-border/60">
+    <Card className="border-border">
       <CardHeader>
         <CardTitle className="text-base">
           {t("comments")} ({comments.length})
@@ -66,7 +66,7 @@ export function SignalComments({
       </CardHeader>
       <CardContent className="space-y-4">
         {comments.length === 0 && (
-          <div className="rounded-lg border border-dashed border-border/70 bg-muted/15 p-4">
+          <div className="rounded-lg border border-dashed border-border bg-muted/15 p-4">
             <div className="flex gap-3">
               <MessageCircle
                 className="mt-0.5 size-4 shrink-0 text-muted-foreground"
@@ -97,7 +97,7 @@ export function SignalComments({
           return (
             <div
               key={c.id}
-              className="rounded-lg border border-border/40 bg-muted/30 p-3"
+              className="rounded-lg border border-border bg-muted/30 p-3"
             >
               <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                 <Link

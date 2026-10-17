@@ -28,6 +28,19 @@ test.describe("signals and copy group", () => {
       return c;
     });
     expect(color).toBe(muted);
+
+    // Same in dark mode, where coloured variants used to leak through.
+    await page.evaluate(() => document.documentElement.classList.add("dark"));
+    const darkColor = await empty.evaluate((el) => getComputedStyle(el).color);
+    const darkMuted = await page.evaluate(() => {
+      const probe = document.createElement("span");
+      probe.className = "text-muted-foreground";
+      document.body.append(probe);
+      const c = getComputedStyle(probe).color;
+      probe.remove();
+      return c;
+    });
+    expect(darkColor).toBe(darkMuted);
   });
 
   test("leaderboard: one current timeframe, Follow is secondary to Copy", async ({ page }) => {

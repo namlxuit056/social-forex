@@ -128,7 +128,7 @@ export function ArticleContentAnalyzer({ keyword, title, locale, getBody, editor
       {error && <p className="text-xs text-destructive">{error}</p>}
 
       {result && (
-        <div className="rounded-lg border border-border/60 bg-muted/10">
+        <div className="rounded-lg border border-border bg-muted/10">
           {/* Header */}
           <button
             type="button"
@@ -150,7 +150,7 @@ export function ArticleContentAnalyzer({ keyword, title, locale, getBody, editor
           </button>
 
           {expanded && (
-            <div className="space-y-4 border-t border-border/40 px-3 pb-4 pt-3">
+            <div className="space-y-4 border-t border-border px-3 pb-4 pt-3">
               {/* Overall */}
               <p className="text-xs leading-relaxed text-muted-foreground">{result.overall}</p>
 
@@ -219,7 +219,7 @@ export function ArticleContentAnalyzer({ keyword, title, locale, getBody, editor
                     return (
                       <div
                         key={i}
-                        className="rounded-md border border-border/50 bg-background/50 p-2.5 text-xs"
+                        className="rounded-md border border-border bg-background/50 p-2.5 text-xs"
                       >
                         <p className="font-medium text-foreground">{suggestion.location}</p>
                         <p className="mt-0.5 text-muted-foreground">
@@ -228,7 +228,7 @@ export function ArticleContentAnalyzer({ keyword, title, locale, getBody, editor
 
                         {/* Image preview */}
                         {imgResult && (
-                          <div className="mt-2 overflow-hidden rounded border border-border/40">
+                          <div className="mt-2 overflow-hidden rounded border border-border">
                             <Image
                               src={imgResult.url}
                               alt={imgResult.alt}

@@ -78,7 +78,7 @@ export default async function StartPage({
     <div className="space-y-10">
       <FaqJsonLd items={faqItems} />
       <header className="space-y-3">
-        <h1 className="font-heading text-xl font-semibold tracking-tight text-foreground md:text-3xl">
+        <h1 className="font-heading text-xl font-semibold tracking-tight text-foreground">
           {t("title")}
         </h1>
         <p className="max-w-2xl text-muted-foreground">{t("subtitle")}</p>

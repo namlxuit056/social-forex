@@ -111,7 +111,7 @@ export function AiAdvisorChat() {
     <div className="fixed bottom-4 right-4 z-50 hidden sm:bottom-5 sm:right-5 md:block">
       {open ? (
         <section className="flex h-[min(42rem,calc(100vh-2rem))] w-[calc(100vw-2rem)] max-w-[25rem] flex-col overflow-hidden rounded-xl border border-border bg-background shadow-2xl shadow-black/25 sm:h-[38rem]">
-          <div className="flex items-center justify-between gap-3 border-b border-border/70 bg-muted/35 px-4 py-3">
+          <div className="flex items-center justify-between gap-3 border-b border-border bg-muted/35 px-4 py-3">
             <div className="flex min-w-0 items-center gap-2">
               <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 <Bot className="size-4.5" aria-hidden />
@@ -174,7 +174,7 @@ export function AiAdvisorChat() {
                         "max-w-[min(42rem,82%)] whitespace-pre-wrap rounded-lg px-3 py-2 text-sm leading-relaxed",
                         isUser
                           ? "bg-primary text-primary-foreground"
-                          : "border border-border/70 bg-muted/35 text-foreground",
+                          : "border border-border bg-muted/35 text-foreground",
                       )}
                     >
                       {message.content}
@@ -192,7 +192,7 @@ export function AiAdvisorChat() {
 
             <form
               onSubmit={onSubmit}
-              className="border-t border-border/70 bg-card/45 p-3"
+              className="border-t border-border bg-card p-3"
             >
               {messages.length === 1 ? (
                 <div className="mb-3 grid gap-1.5">

@@ -185,7 +185,7 @@ export function ArticleSeoPanel({ fields, locale, onApplyFix }: Props) {
         </ul>
       </div>
 
-      <div className="border-t border-border/60" />
+      <div className="border-t border-border" />
 
       {/* AI check */}
       <Button
@@ -227,7 +227,7 @@ export function ArticleSeoPanel({ fields, locale, onApplyFix }: Props) {
               {result.issues.map((issue, i) => (
                 <li
                   key={i}
-                  className="rounded-md border border-border/60 bg-muted/20 p-2.5 text-xs"
+                  className="rounded-md border border-border bg-muted/20 p-2.5 text-xs"
                 >
                   <div className="flex items-start gap-2">
                     {severityIcon(issue.severity)}
@@ -246,7 +246,7 @@ export function ArticleSeoPanel({ fields, locale, onApplyFix }: Props) {
                       <p className="leading-relaxed text-foreground/80">{issue.message}</p>
 
                       {issue.fix && issue.field !== "body" && (
-                        <div className="mt-1.5 rounded border border-border/40 bg-background/60 px-2 py-1.5">
+                        <div className="mt-1.5 rounded border border-border bg-background/60 px-2 py-1.5">
                           <p className="mb-1 text-[10px] text-muted-foreground">Gợi ý:</p>
                           <p className="leading-relaxed text-foreground/90 italic">
                             &ldquo;{issue.fix}&rdquo;

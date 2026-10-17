@@ -104,7 +104,7 @@ export function GoldAiPopup() {
             <FeatureItem icon={<Bot />} label={t("featureSignal")} />
           </div>
 
-          <div className="rounded-lg border border-border/70 bg-background/60 px-3 py-2.5">
+          <div className="rounded-lg border border-border bg-background/60 px-3 py-2.5">
             <p className="text-xs leading-relaxed text-muted-foreground">
               {t("disclaimer")}
             </p>
@@ -139,7 +139,7 @@ function FeatureItem({
   label: string;
 }) {
   return (
-    <div className="flex min-h-20 flex-col justify-between rounded-lg border border-border/70 bg-background/50 p-3">
+    <div className="flex min-h-20 flex-col justify-between rounded-lg border border-border bg-background/50 p-3">
       <span className="text-primary [&_svg]:size-4" aria-hidden>
         {icon}
       </span>

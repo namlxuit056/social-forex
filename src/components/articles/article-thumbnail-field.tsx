@@ -73,7 +73,7 @@ export function ArticleThumbnailField({
             <img
               src={url}
               alt={alt || "Article thumbnail"}
-              className="h-20 w-32 rounded-md border border-border/60 object-cover"
+              className="h-20 w-32 rounded-md border border-border object-cover"
             />
             <div className="flex flex-col gap-1.5">
               <Button

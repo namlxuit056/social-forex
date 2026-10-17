@@ -74,7 +74,7 @@ export async function SiteFooter() {
           </a>
         </div>
 
-        <div className="rounded-lg border border-border/60 bg-muted/20 px-4 py-3 text-xs leading-relaxed text-muted-foreground/80">
+        <div className="rounded-lg border border-border bg-muted/20 px-4 py-3 text-xs leading-relaxed text-muted-foreground/80">
           <p className="font-medium text-muted-foreground">
             {tf("disclaimerTitle")}
           </p>

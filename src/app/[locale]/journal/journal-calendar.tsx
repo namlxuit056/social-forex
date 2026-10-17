@@ -58,7 +58,7 @@ export function JournalCalendar({
   );
 
   return (
-    <Card className="border-border/60">
+    <Card className="border-border">
       <CardHeader className="flex-row items-center justify-between gap-4 pb-3">
         <div>
           <CardTitle className="flex items-center gap-2 text-base">
@@ -108,7 +108,7 @@ export function JournalCalendar({
                 key={i}
                 className={cn(
                   "flex aspect-square flex-col justify-between rounded-lg border p-1.5 sm:p-2",
-                  isToday ? "border-amber-500" : "border-border/60",
+                  isToday ? "border-amber-500" : "border-border",
                   !hasTrades && "bg-muted/10",
                 )}
                 style={
@@ -142,7 +142,7 @@ export function JournalCalendar({
             );
           })}
         </div>
-        <div className="flex items-center justify-between border-t border-border/60 pt-2 text-xs">
+        <div className="flex items-center justify-between border-t border-border pt-2 text-xs">
           <span className="text-muted-foreground">{t("calMonthTotal")}</span>
           <span
             className={cn(

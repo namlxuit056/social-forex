@@ -319,7 +319,7 @@ export default async function DashboardPage({
                   >
                     <Card
                       className={cn(
-                        "h-full rounded-lg border-border/60 bg-card/70 transition hover:bg-card hover:ring-1 hover:ring-primary/30",
+                        "h-full rounded-lg border-border bg-card transition hover:bg-card hover:ring-1 hover:ring-primary/30",
                         item.tone === "primary" && "border-primary/25 bg-primary/8",
                       )}
                     >
@@ -369,7 +369,7 @@ export default async function DashboardPage({
                   >
                     <Card
                       className={cn(
-                        "h-full rounded-lg border-border/60 bg-card/55 transition hover:bg-card hover:ring-1 hover:ring-primary/30",
+                        "h-full rounded-lg border-border bg-card transition hover:bg-card hover:ring-1 hover:ring-primary/30",
                         item.tone === "primary" && "border-primary/25 bg-primary/8",
                       )}
                     >
@@ -402,7 +402,7 @@ export default async function DashboardPage({
             </div>
           </div>
 
-          <aside className="rounded-lg border border-border/70 bg-muted/15 p-4 ring-1 ring-foreground/5">
+          <aside className="rounded-lg border border-border bg-muted/15 p-4">
             <div className="flex items-start gap-3">
               <div className="rounded-md bg-primary/15 p-2 text-primary ring-1 ring-primary/20">
                 <Cable className="size-4" aria-hidden />
@@ -443,7 +443,7 @@ export default async function DashboardPage({
             <Card
               key={stat.title}
               className={cn(
-                "rounded-lg border-border/60 bg-card/65",
+                "rounded-lg border-border bg-card",
                 stat.tone === "primary" && "border-primary/25 bg-primary/8",
                 stat.tone === "alert" && "border-chart-2/35 bg-chart-2/8",
               )}
@@ -482,7 +482,7 @@ export default async function DashboardPage({
 
       {activeSignals === 0 && totalClosed === 0 ? (
         <section
-          className="rounded-lg border border-dashed border-border/80 bg-muted/15 px-4 py-5 sm:px-6"
+          className="rounded-lg border border-dashed border-border bg-muted/15 px-4 py-5 sm:px-6"
           aria-labelledby="dashboard-empty-signals-heading"
         >
           <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.55fr)] lg:items-center">
@@ -531,7 +531,7 @@ export default async function DashboardPage({
                 <Link
                   key={step.href}
                   href={step.href}
-                  className="group flex items-center gap-3 rounded-md border border-border/60 bg-background/60 px-3 py-2 text-sm transition hover:border-primary/35 hover:bg-background"
+                  className="group flex items-center gap-3 rounded-md border border-border bg-background/60 px-3 py-2 text-sm transition hover:border-primary/35 hover:bg-background"
                 >
                   <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted text-xs font-medium text-muted-foreground ring-1 ring-border">
                     {index + 1}
@@ -579,7 +579,7 @@ export default async function DashboardPage({
             <Link
               key={item.symbol}
               href={`/chart?symbol=${item.symbol}`}
-              className="group rounded-lg border border-border/70 bg-card/55 px-4 py-3 transition hover:border-primary/35 hover:bg-card focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              className="group rounded-lg border border-border bg-card px-4 py-3 transition hover:border-primary/35 hover:bg-card focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
             >
               <div className="flex items-center justify-between gap-3">
                 <div>

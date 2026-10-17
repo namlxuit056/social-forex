@@ -301,7 +301,7 @@ export default async function TradingPlanPage({
       </header>
 
       <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="rounded-lg border-border/60 bg-card/60">
+        <Card className="rounded-lg border-border bg-card">
           <CardHeader className="pb-2">
             <CardDescription>{t("statChecklist")}</CardDescription>
             <CardTitle className="font-mono text-2xl tabular-nums text-primary">
@@ -312,7 +312,7 @@ export default async function TradingPlanPage({
             {t("statChecklistDesc")}
           </CardContent>
         </Card>
-        <Card className="rounded-lg border-border/60 bg-card/60">
+        <Card className="rounded-lg border-border bg-card">
           <CardHeader className="pb-2">
             <CardDescription>{t("statPlanned")}</CardDescription>
             <CardTitle className="font-mono text-2xl tabular-nums text-foreground">
@@ -323,7 +323,7 @@ export default async function TradingPlanPage({
             {t("statPlannedDesc")}
           </CardContent>
         </Card>
-        <Card className="rounded-lg border-border/60 bg-card/60">
+        <Card className="rounded-lg border-border bg-card">
           <CardHeader className="pb-2">
             <CardDescription>{t("statCompleted")}</CardDescription>
             <CardTitle className="font-mono text-2xl tabular-nums text-chart-1">
@@ -335,7 +335,7 @@ export default async function TradingPlanPage({
             {t("statCompletedDesc")}
           </CardContent>
         </Card>
-        <Card className="rounded-lg border-border/60 bg-card/60">
+        <Card className="rounded-lg border-border bg-card">
           <CardHeader className="pb-2">
             <CardDescription>{t("statStreak")}</CardDescription>
             <CardTitle className="flex items-center gap-2 font-mono text-2xl tabular-nums text-orange-500">
@@ -407,7 +407,7 @@ export default async function TradingPlanPage({
                     "inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm transition hover:border-primary/35 hover:bg-muted/40",
                     item.completedAt
                       ? "border-primary/25 bg-primary/8 text-primary"
-                      : "border-border bg-card/50 text-muted-foreground",
+                      : "border-border bg-card text-muted-foreground",
                   )}
                 >
                   <ClipboardCheck className="size-4" aria-hidden />

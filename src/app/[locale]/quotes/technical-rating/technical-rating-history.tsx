@@ -116,7 +116,7 @@ export function TechnicalRatingHistory({
 
   return (
     <div className="space-y-6">
-      <Card className="border-border/60">
+      <Card className="border-border">
         <CardHeader className="pb-2">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <CardTitle className="text-sm">{t("technicalRatingTitle")}</CardTitle>
@@ -145,23 +145,23 @@ export function TechnicalRatingHistory({
           ) : (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <div className="rounded-lg border border-border/60 bg-muted/20 p-3">
+                <div className="rounded-lg border border-border bg-muted/20 p-3">
                   <p className="text-xs text-muted-foreground">{t("technicalRatingTotalSignals")}</p>
                   <p className="mt-1 font-mono text-xl font-bold">{summary.totalSignals}</p>
                 </div>
-                <div className="rounded-lg border border-border/60 bg-muted/20 p-3">
+                <div className="rounded-lg border border-border bg-muted/20 p-3">
                   <p className="text-xs text-muted-foreground">{t("technicalRatingBuySignals")}</p>
                   <p className="mt-1 font-mono text-xl font-bold text-emerald-500">
                     {summary.buySignals}
                   </p>
                 </div>
-                <div className="rounded-lg border border-border/60 bg-muted/20 p-3">
+                <div className="rounded-lg border border-border bg-muted/20 p-3">
                   <p className="text-xs text-muted-foreground">{t("technicalRatingSellSignals")}</p>
                   <p className="mt-1 font-mono text-xl font-bold text-red-500">
                     {summary.sellSignals}
                   </p>
                 </div>
-                <div className="rounded-lg border border-border/60 bg-muted/20 p-3">
+                <div className="rounded-lg border border-border bg-muted/20 p-3">
                   <p className="text-xs text-muted-foreground" title={t("technicalRatingHeldHint")}>
                     {t("technicalRatingHeldSignals")}
                   </p>
@@ -196,7 +196,7 @@ export function TechnicalRatingHistory({
         </CardContent>
       </Card>
 
-      <Card className="border-border/60">
+      <Card className="border-border">
         <CardHeader className="pb-2">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <CardTitle className="text-sm">{t("technicalRatingScorecardTitle")}</CardTitle>
@@ -224,7 +224,7 @@ export function TechnicalRatingHistory({
           {!scoreHasData ? (
             <p className="text-sm text-muted-foreground">{t("technicalRatingScorecardEmpty")}</p>
           ) : (
-            <ul className="divide-y divide-border/60">
+            <ul className="divide-y divide-border">
               {scorecard.sources.map((s) => {
                 const decided = s.wins + s.losses;
                 return (
@@ -290,7 +290,7 @@ export function TechnicalRatingHistory({
         </CardContent>
       </Card>
 
-      <Card className="border-border/60">
+      <Card className="border-border">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm">{t("technicalRatingHistoryTitle")}</CardTitle>
         </CardHeader>
@@ -300,7 +300,7 @@ export function TechnicalRatingHistory({
               {t("technicalRatingEmpty")}
             </p>
           ) : (
-            <ul className="divide-y divide-border/60">
+            <ul className="divide-y divide-border">
               {items.map((n) => {
                 const meta = n.meta;
                 if (!meta?.symbol || !meta.signal) return null;
@@ -330,7 +330,7 @@ export function TechnicalRatingHistory({
                           {isBuy ? t("technicalRatingBuy") : t("technicalRatingSell")}
                         </Badge>
                         {isExternal ? (
-                          <Badge variant="outline" className="border-border/60 text-muted-foreground">
+                          <Badge variant="outline" className="border-border text-muted-foreground">
                             {ts(meta.source as string)}
                           </Badge>
                         ) : null}
@@ -385,7 +385,7 @@ export function TechnicalRatingHistory({
         </CardContent>
       </Card>
 
-      <Card className="border-border/60">
+      <Card className="border-border">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm">{ts("legendTitle")}</CardTitle>
         </CardHeader>

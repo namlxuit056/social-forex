@@ -73,7 +73,7 @@ export function JournalAiPanel({ tradeCount }: { tradeCount: number }) {
   const disabled = loading || cooldown > 0 || tradeCount === 0;
 
   return (
-    <section className="space-y-4 rounded-lg border border-border/70 bg-card/45 p-4">
+    <section className="space-y-4 rounded-lg border border-border bg-card p-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-3">
           <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -106,7 +106,7 @@ export function JournalAiPanel({ tradeCount }: { tradeCount: number }) {
       </div>
 
       {tradeCount === 0 && (
-        <div className="rounded-lg border border-border/60 bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
+        <div className="rounded-lg border border-border bg-muted/20 px-4 py-3 text-sm text-muted-foreground">
           {t("aiEmptyHint")}
         </div>
       )}
@@ -120,7 +120,7 @@ export function JournalAiPanel({ tradeCount }: { tradeCount: number }) {
       {data && (
         <div className="space-y-4">
           <div className="grid gap-3 md:grid-cols-[160px_1fr]">
-            <div className="rounded-lg border border-border/60 bg-background/70 p-4">
+            <div className="rounded-lg border border-border bg-background/70 p-4">
               <p className="text-xs font-medium uppercase text-muted-foreground">
                 {t("aiScore")}
               </p>
@@ -137,7 +137,7 @@ export function JournalAiPanel({ tradeCount }: { tradeCount: number }) {
                 })}
               </p>
             </div>
-            <div className="rounded-lg border border-border/60 bg-background/70 p-4">
+            <div className="rounded-lg border border-border bg-background/70 p-4">
               <p className="text-xs font-medium uppercase text-muted-foreground">
                 {t("aiSummary")}
               </p>
@@ -148,7 +148,7 @@ export function JournalAiPanel({ tradeCount }: { tradeCount: number }) {
           </div>
 
           <div className="grid gap-4 lg:grid-cols-2">
-            <div className="rounded-lg border border-border/60 bg-background/70 p-4">
+            <div className="rounded-lg border border-border bg-background/70 p-4">
               <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
                 <CheckCircle2 className="size-4 text-emerald-600" aria-hidden />
                 {t("aiStrengths")}
@@ -161,7 +161,7 @@ export function JournalAiPanel({ tradeCount }: { tradeCount: number }) {
                 ))}
               </ul>
             </div>
-            <div className="rounded-lg border border-border/60 bg-background/70 p-4">
+            <div className="rounded-lg border border-border bg-background/70 p-4">
               <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
                 <AlertTriangle className="size-4 text-amber-600" aria-hidden />
                 {t("aiRiskFlags")}
@@ -176,14 +176,14 @@ export function JournalAiPanel({ tradeCount }: { tradeCount: number }) {
             </div>
           </div>
 
-          <div className="rounded-lg border border-border/60 bg-background/70 p-4">
+          <div className="rounded-lg border border-border bg-background/70 p-4">
             <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
               <Target className="size-4 text-primary" aria-hidden />
               {t("aiImprovements")}
             </h3>
             <div className="mt-3 grid gap-3 md:grid-cols-2">
               {data.analysis.improvementAreas.map((item) => (
-                <div key={`${item.priority}-${item.title}`} className="rounded-lg border border-border/60 p-3">
+                <div key={`${item.priority}-${item.title}`} className="rounded-lg border border-border p-3">
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-sm font-medium text-foreground">{item.title}</p>
                     <Badge variant={priorityVariant(item.priority)}>
@@ -202,7 +202,7 @@ export function JournalAiPanel({ tradeCount }: { tradeCount: number }) {
           </div>
 
           <div className="grid gap-4 lg:grid-cols-2">
-            <div className="rounded-lg border border-border/60 bg-background/70 p-4">
+            <div className="rounded-lg border border-border bg-background/70 p-4">
               <h3 className="text-sm font-semibold text-foreground">
                 {t("aiPatterns")}
               </h3>
@@ -214,7 +214,7 @@ export function JournalAiPanel({ tradeCount }: { tradeCount: number }) {
                 ))}
               </ul>
             </div>
-            <div className="rounded-lg border border-border/60 bg-background/70 p-4">
+            <div className="rounded-lg border border-border bg-background/70 p-4">
               <h3 className="text-sm font-semibold text-foreground">
                 {t("aiReviewPlan")}
               </h3>

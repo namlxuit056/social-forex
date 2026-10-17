@@ -168,7 +168,7 @@ export function CalendarEventAiAnalysis({ event, compact = false }: Props) {
                   {driver.pairScenarios.map((scenario) => (
                     <div
                       key={scenario.pair}
-                      className="rounded-md border border-border/60 bg-card/40 px-2.5 py-2"
+                      className="rounded-md border border-border bg-card px-2.5 py-2"
                     >
                       <div className="flex flex-wrap items-center gap-1.5">
                         <span className="font-mono text-xs font-semibold text-foreground">

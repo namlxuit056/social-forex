@@ -102,7 +102,7 @@ export function ArticleChat({ articleId, isLoggedIn, isVip }: Props) {
   const inputDisabled = loading || !historyLoaded;
 
   return (
-    <section className="rounded-xl border border-border bg-card/50 p-4 ring-1 ring-foreground/5 sm:p-5">
+    <section className="rounded-xl border border-border bg-card p-4 sm:p-5">
       <div className="flex items-center gap-2">
         <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
           <Bot className="size-4" aria-hidden />
@@ -114,7 +114,7 @@ export function ArticleChat({ articleId, isLoggedIn, isVip }: Props) {
       </div>
 
       {!isVip ? (
-        <div className="mt-4 flex flex-col items-start gap-2 rounded-lg border border-border/70 bg-muted/35 px-4 py-3">
+        <div className="mt-4 flex flex-col items-start gap-2 rounded-lg border border-border bg-muted/35 px-4 py-3">
           <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Lock className="size-3.5 shrink-0" aria-hidden />
             {isLoggedIn ? t("vipRequiredHint") : t("loginRequiredHint")}
@@ -159,7 +159,7 @@ export function ArticleChat({ articleId, isLoggedIn, isVip }: Props) {
                   </div>
                 ) : (
                   <div
-                    className="chat-message-body max-w-[85%] rounded-lg border border-border/70 bg-muted/35 px-3 py-2 text-sm leading-relaxed text-foreground"
+                    className="chat-message-body max-w-[85%] rounded-lg border border-border bg-muted/35 px-3 py-2 text-sm leading-relaxed text-foreground"
                     // AI-authored markdown, converted to HTML purely for formatting (bold, lists, etc.)
                     dangerouslySetInnerHTML={{ __html: renderAiMarkdown(message.content) }}
                   />

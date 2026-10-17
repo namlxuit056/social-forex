@@ -9,7 +9,7 @@ for (const path of APP_PAGES) {
     await gotoPage(page, path);
     const h1 = page.locator("h1");
     await expect(h1).toHaveCount(1);
-    await expect(h1).toHaveCSS("font-size", "20px");
+    await expect(h1.first()).toHaveCSS("font-size", "20px");
   });
 }
 

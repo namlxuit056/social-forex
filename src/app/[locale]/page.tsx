@@ -150,7 +150,7 @@ export default async function HomePage({
         <p className="text-sm font-medium text-primary">
           {tHome("badge")}
         </p>
-        <h1 className="mt-3 font-heading text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
+        <h1 className="mt-3 font-heading text-3xl font-semibold tracking-tight text-foreground">
           {tHome.rich("headline", {
             tools: (chunks) => (
               <span className="text-primary">{chunks}</span>

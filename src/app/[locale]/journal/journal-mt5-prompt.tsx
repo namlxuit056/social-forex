@@ -15,7 +15,7 @@ export async function JournalMt5Prompt() {
   const t = await getTranslations("journal");
 
   return (
-    <Card className="border-border/60 bg-card/50">
+    <Card className="border-border bg-card">
       <CardHeader className="pb-4">
         <div className="mb-3 flex size-11 items-center justify-center rounded-lg bg-primary/10 ring-1 ring-primary/20">
           <Cable className="size-5 text-primary" aria-hidden />
@@ -31,7 +31,7 @@ export async function JournalMt5Prompt() {
           {steps.map(({ Icon, titleKey, descKey }, i) => (
             <div
               key={titleKey}
-              className="relative rounded-lg border border-border/60 bg-muted/20 p-4"
+              className="relative rounded-lg border border-border bg-muted/20 p-4"
             >
               {/* Step connector line (sm+) */}
               {i < steps.length - 1 && (
@@ -53,7 +53,7 @@ export async function JournalMt5Prompt() {
         </div>
       </CardContent>
 
-      <CardFooter className="flex flex-wrap gap-2 border-t border-border/60 pt-4">
+      <CardFooter className="flex flex-wrap gap-2 border-t border-border pt-4">
         <Link
           href="/mt5"
           className={cn(buttonVariants({ size: "sm" }))}

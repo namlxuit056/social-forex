@@ -28,7 +28,7 @@ export function RelatedLessons({
           <Link
             key={lesson.slug}
             href={`/academy/${lesson.slug}`}
-            className="group rounded-xl border border-border/70 bg-card/40 p-4 transition hover:border-primary/30 hover:bg-card/70"
+            className="group rounded-xl border border-border bg-card p-4 transition hover:border-primary/30 hover:bg-card"
           >
             <Badge variant="outline" className="mb-2 text-[10px]">
               {lesson.level}
@@ -65,7 +65,7 @@ export function RelatedArticles({
           <Link
             key={article.slug}
             href={`/articles/${article.slug}`}
-            className="group rounded-xl border border-border/70 bg-card/40 p-4 transition hover:border-primary/30 hover:bg-card/70"
+            className="group rounded-xl border border-border bg-card p-4 transition hover:border-primary/30 hover:bg-card"
           >
             <Badge variant="outline" className="mb-2 text-[10px]">
               {article.keyword}

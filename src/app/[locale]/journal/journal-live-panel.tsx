@@ -175,7 +175,7 @@ export function JournalLivePanel({
 
   if (!account) {
     return (
-      <Card className="border-dashed border-border/60">
+      <Card className="border-dashed border-border">
         <CardContent className="flex flex-col items-center gap-3 py-6 text-center">
           <Activity className="size-8 text-muted-foreground/40" />
           <div>
@@ -245,7 +245,7 @@ export function JournalLivePanel({
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((s) => (
-          <Card key={s.label} className="border-border/60">
+          <Card key={s.label} className="border-border">
             <CardContent className="flex items-center gap-3 p-4">
               <div className={cn("flex size-9 items-center justify-center rounded-lg", s.bg)}>
                 <s.icon className={cn("size-4", s.color)} />
@@ -259,7 +259,7 @@ export function JournalLivePanel({
         ))}
       </div>
 
-      <Card className="border-border/60">
+      <Card className="border-border">
         <CardHeader className="flex flex-row items-center justify-between pb-3">
           <CardTitle className="text-base">
             {t("livePositions")}
@@ -300,7 +300,7 @@ export function JournalLivePanel({
                     <th className="px-4 py-2.5 text-right">{t("colProfit")}</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border/40">
+                <tbody className="divide-y divide-border">
                   {positions.map((pos) => {
                     const isBuy = pos.type.toUpperCase().startsWith("BUY");
                     return (
@@ -350,7 +350,7 @@ export function JournalLivePanel({
             </div>
           )}
           {account.lastSeenAt && (
-            <p className="border-t border-border/40 px-4 py-2 text-[11px] text-muted-foreground/60">
+            <p className="border-t border-border px-4 py-2 text-[11px] text-muted-foreground/60">
               {t("lastSync")}:{" "}
               {new Date(account.lastSeenAt).toLocaleString(locale)}
             </p>

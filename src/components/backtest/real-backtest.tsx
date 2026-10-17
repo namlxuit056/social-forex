@@ -79,7 +79,7 @@ export function RealBacktest({ initialResult }: Props) {
       {result && (
         <div className="space-y-4">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <Card className="border-border/60 bg-card/50">
+            <Card className="border-border bg-card">
               <CardContent className="pt-4">
                 <p className="text-xs text-muted-foreground">{t("winRate")}</p>
                 <p className={cn("mt-1 font-mono text-2xl font-bold", result.winRate >= 50 ? "text-green-500" : "text-red-500")}>
@@ -88,7 +88,7 @@ export function RealBacktest({ initialResult }: Props) {
                 <p className="text-xs text-muted-foreground">{result.wins}W / {result.losses}L</p>
               </CardContent>
             </Card>
-            <Card className="border-border/60 bg-card/50">
+            <Card className="border-border bg-card">
               <CardContent className="pt-4">
                 <p className="text-xs text-muted-foreground">{t("totalPnl")}</p>
                 <p className={cn("mt-1 font-mono text-2xl font-bold", result.totalPnl >= 0 ? "text-green-500" : "text-red-500")}>
@@ -96,7 +96,7 @@ export function RealBacktest({ initialResult }: Props) {
                 </p>
               </CardContent>
             </Card>
-            <Card className="border-border/60 bg-card/50">
+            <Card className="border-border bg-card">
               <CardContent className="pt-4">
                 <p className="text-xs text-muted-foreground">{t("profitFactor")}</p>
                 <p className={cn("mt-1 font-mono text-2xl font-bold", result.profitFactor >= 1 ? "text-green-500" : "text-red-500")}>
@@ -104,7 +104,7 @@ export function RealBacktest({ initialResult }: Props) {
                 </p>
               </CardContent>
             </Card>
-            <Card className="border-border/60 bg-card/50">
+            <Card className="border-border bg-card">
               <CardContent className="pt-4">
                 <p className="text-xs text-muted-foreground">{t("maxDrawdown")}</p>
                 <p className="mt-1 font-mono text-2xl font-bold text-red-500">
@@ -115,7 +115,7 @@ export function RealBacktest({ initialResult }: Props) {
           </div>
 
           {result.equityCurve.length > 0 && (
-            <Card className="border-border/60 bg-card/50">
+            <Card className="border-border bg-card">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm">{t("equityCurve")}</CardTitle>
               </CardHeader>
