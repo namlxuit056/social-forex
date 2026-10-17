@@ -15,6 +15,7 @@ import type {
 } from "@/lib/quotes/signal-sources";
 import viMessages from "../../../messages/vi.json";
 import enMessages from "../../../messages/en.json";
+import { technicalRatingSignalHref } from "@/lib/quotes/technical-rating-link";
 
 type SourceKey = ExternalSignal["source"];
 
@@ -107,7 +108,7 @@ async function broadcast(
         let payload = payloadByLocale.get(loc);
         if (!payload) {
           const built = localizedPush(loc, meta);
-          payload = { ...built, url: "/quotes/technical-rating" };
+          payload = { ...built, url: technicalRatingSignalHref(key) };
           payloadByLocale.set(loc, payload);
         }
         try {

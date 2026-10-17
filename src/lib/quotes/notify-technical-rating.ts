@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { sendLocalizedPushToUser } from "@/lib/push-i18n";
 import { recordSignalOutcome } from "@/lib/quotes/signal-outcome-store";
+import { technicalRatingSignalHref } from "@/lib/quotes/technical-rating-link";
 import { fetchTechnicalRatings } from "@/lib/quotes/fetch-tv-ratings";
 import {
   computeConfidentSignal,
@@ -96,7 +97,7 @@ async function notifySymbolSignal(
             stopLoss: meta.stopLoss,
             takeProfit: meta.takeProfit,
           }),
-          url: "/quotes/technical-rating",
+          url: technicalRatingSignalHref(dedupeKey),
         }));
       } catch {
         // Non-blocking

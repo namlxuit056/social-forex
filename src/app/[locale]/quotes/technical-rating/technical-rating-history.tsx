@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +25,7 @@ type RawDetail = {
 
 type HistoryItem = {
   id: string;
+  dedupeKey: string;
   createdAt: string;
   readAt: string | null;
   meta: {
@@ -83,12 +84,26 @@ export function TechnicalRatingHistory({
   dailySummaries,
   scorecards,
   locale,
+  highlightKey = null,
 }: {
   items: HistoryItem[];
   dailySummaries: DailySummaryRow[];
   scorecards: { d30: SourceScorecard; d90: SourceScorecard };
   locale: string;
+  /** dedupeKey from a push link: scroll to that signal and mark it. */
+  highlightKey?: string | null;
 }) {
+  const highlighted = highlightKey
+    ? items.find((n) => n.dedupeKey === highlightKey) ?? null
+    : null;
+
+  useEffect(() => {
+    if (!highlighted) return;
+    document
+      .getElementById(`signal-${highlighted.id}`)
+      ?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [highlighted]);
+
   const t = useTranslations("quotes");
   const tsRaw = useTranslations("signalSources");
   const ts = (key: string, params?: Record<string, string | number>) =>
@@ -313,7 +328,16 @@ export function TechnicalRatingHistory({
                   meta.takeProfit !== undefined;
                 const detail = toSignalDetail(meta.detail);
                 return (
-                  <li key={n.id} className="flex flex-col gap-1.5 px-4 py-2.5 text-sm">
+                  <li
+                    key={n.id}
+                    id={`signal-${n.id}`}
+                    data-signal-key={n.dedupeKey}
+                    aria-current={highlighted?.id === n.id ? "true" : undefined}
+                    className={cn(
+                      "flex scroll-mt-24 flex-col gap-1.5 px-4 py-2.5 text-sm",
+                      highlighted?.id === n.id && "bg-info-bg ring-1 ring-inset ring-info/40",
+                    )}
+                  >
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="font-mono font-medium text-foreground">

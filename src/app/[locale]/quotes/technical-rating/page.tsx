@@ -7,6 +7,10 @@ import {
   type OutcomeResult,
   type OutcomeRow,
 } from "@/lib/quotes/signal-outcomes";
+import {
+  SIGNAL_LINK_PARAM,
+  technicalRatingSignalHref,
+} from "@/lib/quotes/technical-rating-link";
 import { TechnicalRatingHistory } from "./technical-rating-history";
 
 export async function generateMetadata({
@@ -24,10 +28,15 @@ export const dynamic = "force-dynamic";
 
 export default async function TechnicalRatingPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { locale } = await params;
+  const rawSignal = (await searchParams)[SIGNAL_LINK_PARAM];
+  // Set when the visitor arrives from a push notification for one signal.
+  const highlightKey = typeof rawSignal === "string" ? rawSignal : null;
   setRequestLocale(locale);
   const t = await getTranslations("quotes");
   const session = await auth();
@@ -43,7 +52,9 @@ export default async function TechnicalRatingPage({
         </div>
         <SignupPrompt
           surface="technical_rating"
-          signInHref="/auth/signin?callbackUrl=/quotes/technical-rating"
+          signInHref={`/auth/signin?callbackUrl=${encodeURIComponent(
+            highlightKey ? technicalRatingSignalHref(highlightKey) : "/quotes/technical-rating",
+          )}`}
           href="/auth/register?callbackUrl=/quotes/technical-rating"
           title={t("technicalRatingTitle")}
           description={t("technicalRatingDescription")}
@@ -85,6 +96,7 @@ export default async function TechnicalRatingPage({
 
   const items = rows.map((n) => ({
     id: n.id,
+    dedupeKey: n.dedupeKey,
     createdAt: n.createdAt.toISOString(),
     readAt: n.readAt?.toISOString() ?? null,
     meta: n.meta as {
@@ -135,6 +147,7 @@ export default async function TechnicalRatingPage({
         dailySummaries={dailySummaries}
         scorecards={scorecards}
         locale={locale}
+        highlightKey={highlightKey}
       />
     </div>
   );
