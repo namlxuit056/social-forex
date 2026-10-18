@@ -65,7 +65,8 @@
     "mobileAppMenuAria": "Mobile app menu",
     "scrollPrimaryAria": "Primary sections",
     "scrollSecondaryAria": "More links and tools",
-    "missions": "Missions"
+    "missions": "Missions",
+    "support": "Support us"
   },
   "footer": {
     "tagline": "Forex tools, calendar, and lessons for new traders — plus community when you are ready.",
@@ -2901,5 +2902,26 @@
     "empty": "Empty",
     "emptyTitle": "No signals yet",
     "emptyDesc": "Signals will appear here once someone posts one."
+  },
+  "support": {
+    "title": "Support SocialForex",
+    "description": "SocialForex is free and open source, built and run by one developer. A small contribution keeps it online and growing.",
+    "usesTitle": "Your support pays for",
+    "useHosting": "Servers, database and market-data feeds that keep quotes, the calendar and signals live 24/7.",
+    "useAi": "AI costs for trade reviews, journal coaching, market analysis and daily articles.",
+    "useFree": "Keeping core tools free for beginners — no paywall on learning risk management.",
+    "openSource": "All code is public on <link>GitHub</link> under the AGPL-3.0 license.",
+    "chooseAmount": "Choose an amount (USD)",
+    "customAmount": "Or enter your own amount",
+    "invalidAmount": "Enter an amount between $1 and $1000 with up to 2 decimals.",
+    "loading": "Loading PayPal…",
+    "missingConfig": "PayPal is not configured on this server.",
+    "success": "Thank you! Your {amount} support was received. ❤️",
+    "error": "Payment did not go through. You have not been charged — please try again.",
+    "waysTitle": "Other ways to help",
+    "waysStar": "Star the repo on GitHub",
+    "waysSponsors": "Sponsor monthly on GitHub",
+    "waysShare": "Share in the Telegram group",
+    "note": "Support is a voluntary one-off payment. It does not unlock VIP or any other feature and is non-refundable. Pay with a PayPal balance or card via PayPal."
   }
 }

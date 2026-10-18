@@ -65,7 +65,8 @@
     "mobileAppMenuAria": "Menu app di động",
     "scrollPrimaryAria": "Mục chính",
     "scrollSecondaryAria": "Liên kết và công cụ thêm",
-    "missions": "Nhiệm vụ"
+    "missions": "Nhiệm vụ",
+    "support": "Ủng hộ dự án"
   },
   "footer": {
     "tagline": "Công cụ, lịch kinh tế và bài học cho người mới — kèm cộng đồng khi bạn sẵn sàng.",
@@ -2901,5 +2902,26 @@
     "empty": "Rỗng",
     "emptyTitle": "Chưa có tín hiệu",
     "emptyDesc": "Khi có người đăng tín hiệu, chúng sẽ hiện ở đây."
+  },
+  "support": {
+    "title": "Ủng hộ SocialForex",
+    "description": "SocialForex miễn phí và mã nguồn mở, do một lập trình viên xây dựng và vận hành. Một khoản ủng hộ nhỏ giúp trang luôn hoạt động và phát triển.",
+    "usesTitle": "Khoản ủng hộ của bạn dùng để",
+    "useHosting": "Duy trì server, database và nguồn dữ liệu thị trường để giá, lịch kinh tế và tín hiệu chạy 24/7.",
+    "useAi": "Chi phí AI cho chấm điểm lệnh, coach nhật ký, phân tích thị trường và bài viết hằng ngày.",
+    "useFree": "Giữ các công cụ cốt lõi miễn phí cho người mới — không thu phí việc học quản lý rủi ro.",
+    "openSource": "Toàn bộ mã nguồn công khai trên <link>GitHub</link> theo giấy phép AGPL-3.0.",
+    "chooseAmount": "Chọn số tiền (USD)",
+    "customAmount": "Hoặc nhập số tiền khác",
+    "invalidAmount": "Nhập số tiền từ $1 đến $1000, tối đa 2 chữ số thập phân.",
+    "loading": "Đang tải PayPal…",
+    "missingConfig": "Server chưa cấu hình PayPal.",
+    "success": "Cảm ơn bạn! Đã nhận khoản ủng hộ {amount}. ❤️",
+    "error": "Thanh toán chưa thành công, bạn chưa bị trừ tiền — vui lòng thử lại.",
+    "waysTitle": "Cách ủng hộ khác",
+    "waysStar": "Star repo trên GitHub",
+    "waysSponsors": "Tài trợ hằng tháng trên GitHub",
+    "waysShare": "Chia sẻ vào nhóm Telegram",
+    "note": "Ủng hộ là khoản thanh toán tự nguyện một lần, không mở khoá VIP hay tính năng nào và không hoàn tiền. Thanh toán bằng số dư PayPal hoặc thẻ qua PayPal."
   }
 }

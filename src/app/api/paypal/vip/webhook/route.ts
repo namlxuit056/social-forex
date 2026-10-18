@@ -6,6 +6,7 @@ import {
   getPayPalWebhookId,
   getSuccessfulWebhookCapture,
   parsePayPalCustomId,
+  SUPPORT_ORDER_CUSTOM_ID,
   type PayPalWebhookEvent,
   verifyPayPalWebhookSignature,
 } from "@/lib/paypal-vip";
@@ -71,7 +72,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, ignored: true });
   }
 
-  const custom = parsePayPalCustomId(getWebhookCustomId(event));
+  const customId = getWebhookCustomId(event);
+  // /support payments grant nothing; acknowledge so PayPal stops retrying.
+  if (customId === SUPPORT_ORDER_CUSTOM_ID) {
+    await prisma.vipWebhookEvent.update({
+      where: { providerEventId: event.id },
+      data: { processedAt: new Date() },
+    });
+    return NextResponse.json({ ok: true, ignored: true });
+  }
+
+  const custom = parsePayPalCustomId(customId);
   const amount = capture.amount ?? event.resource?.amount;
   const result = await fulfillVipPayment({
     providerOrderId: orderId,

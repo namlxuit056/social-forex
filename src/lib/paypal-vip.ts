@@ -155,6 +155,49 @@ export async function createPayPalVipOrder({
   return { id: data.id };
 }
 
+/** custom_id on /support orders, so the VIP webhook can skip them. */
+export const SUPPORT_ORDER_CUSTOM_ID = "support";
+
+/** One-off "support the project" payment from /support — no account needed. */
+export async function createPayPalSupportOrder(amount: string): Promise<{ id: string }> {
+  const accessToken = await getPayPalAccessToken();
+  const res = await fetch(`${PAYPAL_API_BASE}/v2/checkout/orders`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      intent: "CAPTURE",
+      purchase_units: [
+        {
+          reference_id: "support",
+          custom_id: SUPPORT_ORDER_CUSTOM_ID,
+          description: "Support Social Forex open-source project (toolforex.xyz)",
+          amount: { currency_code: "USD", value: amount },
+        },
+      ],
+      payment_source: {
+        paypal: {
+          experience_context: {
+            brand_name: "Social Forex",
+            shipping_preference: "NO_SHIPPING",
+            user_action: "PAY_NOW",
+          },
+        },
+      },
+    }),
+    cache: "no-store",
+  });
+
+  const data = (await res.json()) as PayPalOrderResponse;
+  if (!res.ok || !data.id) {
+    throw new Error(`PayPal create support order failed: ${res.status}`);
+  }
+
+  return { id: data.id };
+}
+
 export async function capturePayPalVipOrder(orderId: string): Promise<PayPalCaptureResponse> {
   const accessToken = await getPayPalAccessToken();
   const res = await fetch(`${PAYPAL_API_BASE}/v2/checkout/orders/${orderId}/capture`, {

@@ -30,6 +30,7 @@ export const communityNavKeys = [
   { href: "/backtest", key: "backtest" },
   { href: "/messages", key: "messages" },
   { href: "/forum/search", key: "searchTopics" },
+  { href: "/support", key: "support" },
 ] as const;
 
 export const learningNavKeys = [

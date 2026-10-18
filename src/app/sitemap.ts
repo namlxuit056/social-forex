@@ -25,6 +25,7 @@ const staticPaths = [
   { path: "/heatmap", changeFrequency: "daily" as const, priority: 0.5 },
   { path: "/backtest", changeFrequency: "monthly" as const, priority: 0.4 },
   { path: "/articles", changeFrequency: "daily" as const, priority: 0.75 },
+  { path: "/support", changeFrequency: "monthly" as const, priority: 0.4 },
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

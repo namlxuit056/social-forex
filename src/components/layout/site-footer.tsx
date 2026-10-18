@@ -9,6 +9,7 @@ const footerNavKeys = [
   { href: "/signals", key: "signals" },
   { href: "/academy", key: "academy" },
   { href: "/tools", key: "tools" },
+  { href: "/support", key: "support" },
 ] as const;
 
 export async function SiteFooter() {
