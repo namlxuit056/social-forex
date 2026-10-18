@@ -2,6 +2,14 @@
   "name": "social-forex",
   "version": "0.1.0",
   "private": true,
+  "description": "Open-source forex tools, signals, MT5 copy-trading, trading journal and community",
+  "license": "AGPL-3.0-only",
+  "homepage": "https://toolforex.xyz",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/namlxuit056/social-forex.git"
+  },
+  "funding": "https://github.com/sponsors/namlxuit056",
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && prisma migrate deploy && next build",
