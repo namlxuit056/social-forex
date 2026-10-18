@@ -46,7 +46,7 @@ npm run selfhost:cron -- run /api/calendar/sync/run    # chạy tay 1 job
 4. **Cutover cron** (tránh chạy trùng → đăng signal 2 lần):
    1. Tắt/xoá project trên Vercel (hoặc xoá mảng `crons` ở Vercel dashboard).
    2. Thêm `SELFHOST_CRON_ENABLED=1` vào `.env` → `pm2 restart sf-cron`.
-   3. Đặt `NEXT_PUBLIC_SITE_URL=https://toolforex.xyz` trong `.env` → `npm run selfhost:deploy`.
+   3. Đặt `NEXT_PUBLIC_SITE_URL=https://toolforex.xyz` trong `.env` → `npm run selfhost:deploy`. pm2 (`ecosystem.config.cjs`) dùng giá trị này làm `AUTH_URL` cho Auth.js — thiếu nó thì đăng xuất/đăng nhập sẽ redirect về `localhost:3000`.
 5. **Telegram webhook**: gọi lại `/api/telegram/set-webhook` sau khi domain trỏ về máy.
 6. **PayPal webhook**: URL giữ nguyên nếu domain giữ nguyên.
 

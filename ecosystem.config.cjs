@@ -4,6 +4,11 @@
 const path = require("node:path"); // eslint-disable-line @typescript-eslint/no-require-imports
 
 const cwd = __dirname;
+const dotenv = require("dotenv").config({ path: path.join(cwd, ".env"), quiet: true }).parsed ?? {}; // eslint-disable-line @typescript-eslint/no-require-imports
+
+// Auth.js otherwise derives its base URL from the bound address (localhost:3000),
+// so sign-out / sign-in redirects would leave the public domain.
+const authUrl = dotenv.AUTH_URL || dotenv.NEXT_PUBLIC_SITE_URL;
 
 module.exports = {
   apps: [
@@ -13,7 +18,7 @@ module.exports = {
       script: path.join(cwd, "node_modules/next/dist/bin/next"),
       // No -H: binding to 127.0.0.1 makes next-intl's localhost rewrite look external → proxy loop.
       args: "start -p 3000",
-      env: { NODE_ENV: "production" },
+      env: { NODE_ENV: "production", ...(authUrl ? { AUTH_URL: authUrl } : {}) },
       max_memory_restart: "1500M",
       restart_delay: 3000,
     },
