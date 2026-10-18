@@ -7,7 +7,6 @@
 [![Live site](https://img.shields.io/badge/live-toolforex.xyz-0b7a3e?style=for-the-badge)](https://toolforex.xyz)
 [![License: AGPL v3](https://img.shields.io/badge/license-AGPL--3.0-blue?style=for-the-badge)](LICENSE)
 [![Sponsor](https://img.shields.io/badge/sponsor-%E2%9D%A4-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/namlxuit056)
-[![Donate with PayPal](https://img.shields.io/badge/donate-PayPal-003087?style=for-the-badge&logo=paypal&logoColor=white)](https://www.paypal.com/donate/?business=namlxuit%40gmail.com&currency_code=USD&item_name=Support+SocialForex+%28toolforex.xyz%29)
 
 ### 👉 Try it live: **[toolforex.xyz](https://toolforex.xyz)**
 
@@ -104,7 +103,6 @@ Issues and pull requests are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 SocialForex is built and run by one developer and hosted at [toolforex.xyz](https://toolforex.xyz). If it helps your trading, you can support hosting, data and AI costs:
 
-- ☕ [Donate with PayPal](https://www.paypal.com/donate/?business=namlxuit%40gmail.com&currency_code=USD&item_name=Support+SocialForex+%28toolforex.xyz%29) — one-off, any amount
 - ❤️ [Sponsor on GitHub](https://github.com/sponsors/namlxuit056) — monthly
 - ⭐ Star this repository and share [toolforex.xyz](https://toolforex.xyz) with other traders
 - 💬 Join the Telegram group: [t.me/toolforex](https://t.me/toolforex)
@@ -121,7 +119,7 @@ SocialForex is built and run by one developer and hosted at [toolforex.xyz](http
 
 - 🌐 Dùng thử ngay: **[toolforex.xyz](https://toolforex.xyz)**
 - 🛠️ Tự cài đặt: xem mục [Getting started](#getting-started)
-- ❤️ Ủng hộ dự án: [PayPal](https://www.paypal.com/donate/?business=namlxuit%40gmail.com&currency_code=USD&item_name=Support+SocialForex+%28toolforex.xyz%29) hoặc [GitHub Sponsors](https://github.com/sponsors/namlxuit056) — giúp trang trải chi phí server, dữ liệu và AI
+- ❤️ Ủng hộ dự án: [GitHub Sponsors](https://github.com/sponsors/namlxuit056) — giúp trang trải chi phí server, dữ liệu và AI
 - 💬 Nhóm Telegram: [t.me/toolforex](https://t.me/toolforex)
 
 Mọi nội dung chỉ mang tính giáo dục, **không phải lời khuyên đầu tư**.
