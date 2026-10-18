@@ -1,5 +1,6 @@
 "use server";
 
+import { randomBytes } from "node:crypto";
 import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -7,7 +8,6 @@ import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
-import { generateReferralCode } from "@/lib/referral";
 
 const copyTradeSchema = z.object({
   providerId: z.string().min(1),
@@ -88,7 +88,7 @@ export async function subscribeCopyTrade(
     return { ok: true, token: existing.token };
   }
 
-  const token = `ct_${generateReferralCode().toLowerCase()}`;
+  const token = `ct_${randomBytes(24).toString("base64url")}`;
 
   await prisma.copyTrade.create({
     data: {

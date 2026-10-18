@@ -5,7 +5,9 @@ import { getScalpingTechnicalContext } from "@/lib/ai/scalping-tradingview-conte
 import { getScalpingAiSuggestion } from "@/lib/ai/scalping-suggest";
 import { AiUnavailableError } from "@/lib/ai/suggest";
 import { getAiNewsContext } from "@/lib/ai/news-context";
-import type { AppLocale } from "@/lib/api-locale";
+import { parseLocaleParam } from "@/lib/api-locale";
+import { clientIp } from "@/lib/client-ip";
+import { rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -52,7 +54,11 @@ function getAlignedTimeframes(
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const symbol = request.nextUrl.searchParams.get("symbol")?.toUpperCase();
-  const locale = (request.nextUrl.searchParams.get("locale") ?? "vi") as AppLocale;
+  const locale = parseLocaleParam(request.nextUrl.searchParams.get("locale"));
+
+  if (!rateLimit(`scalping-analyze:${clientIp(request.headers)}`, 20, 10 * 60_000).ok) {
+    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
+  }
 
   if (!symbol) {
     return NextResponse.json(

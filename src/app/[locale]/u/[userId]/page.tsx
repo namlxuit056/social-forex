@@ -240,7 +240,7 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
   const followerItems = followerRows.map((row) => ({
     id: row.id,
     userId: row.follower.id,
-    label: row.follower.name ?? row.follower.email ?? "—",
+    label: row.follower.name ?? "—",
     image: row.follower.image,
   }));
 

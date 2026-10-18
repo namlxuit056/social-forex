@@ -1,3 +1,5 @@
+import { jsonLdHtml } from "@/lib/json-ld";
+import { sanitizeContentHtml } from "@/lib/safe-html";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
@@ -148,7 +150,7 @@ export default async function AcademyLessonPage({ params }: Props) {
       <script
         type="application/ld+json"
         // eslint-disable-next-line react/no-danger -- JSON-LD requires inline script
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(courseJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdHtml(courseJsonLd) }}
       />
       <BreadcrumbJsonLd
         items={[
@@ -197,7 +199,7 @@ export default async function AcademyLessonPage({ params }: Props) {
         {lesson.body.trimStart().startsWith("<") ? (
           <div
             className="prose prose-invert max-w-none text-sm leading-relaxed text-foreground/90"
-            dangerouslySetInnerHTML={{ __html: lesson.body }}
+            dangerouslySetInnerHTML={{ __html: sanitizeContentHtml(lesson.body) }}
           />
         ) : (
           <div className="prose prose-invert max-w-none text-sm leading-relaxed text-foreground/90">

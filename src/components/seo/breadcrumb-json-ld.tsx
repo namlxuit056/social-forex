@@ -1,3 +1,4 @@
+import { jsonLdHtml } from "@/lib/json-ld";
 import { absoluteUrl } from "@/lib/site-url";
 
 type BreadcrumbItem = { name: string; path: string };
@@ -27,7 +28,7 @@ export function BreadcrumbJsonLd({
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      dangerouslySetInnerHTML={{ __html: jsonLdHtml(jsonLd) }}
     />
   );
 }

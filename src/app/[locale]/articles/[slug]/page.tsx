@@ -1,3 +1,5 @@
+import { jsonLdHtml } from "@/lib/json-ld";
+import { sanitizeContentHtml } from "@/lib/safe-html";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -30,7 +32,7 @@ function ensureHtml(body: string): string {
   const html = trimmed.startsWith("<")
     ? body
     : (marked.parse(trimmed, { async: false }) as string);
-  return html.replace(PROMPT_LABEL_IN_HEADING, "$1");
+  return sanitizeContentHtml(html.replace(PROMPT_LABEL_IN_HEADING, "$1"));
 }
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
@@ -175,7 +177,7 @@ export default async function ArticlePage({ params }: Props) {
     <div className="mx-auto max-w-[64rem] space-y-8">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdHtml(jsonLd) }}
       />
       <BreadcrumbJsonLd
         items={[

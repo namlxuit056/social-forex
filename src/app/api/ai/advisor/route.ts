@@ -14,6 +14,7 @@ import { localeFromRequest } from "@/lib/api-locale";
 import { pickAi } from "@/lib/messages-pick";
 import { prisma } from "@/lib/prisma";
 import { resolveQuotes } from "@/lib/quotes/resolve-quotes";
+import { clientIp } from "@/lib/client-ip";
 import { rateLimit } from "@/lib/rate-limit";
 import { isVipActive } from "@/lib/vip";
 
@@ -54,7 +55,7 @@ export async function POST(req: NextRequest) {
 
   const rateLimitKey = userId
     ? `ai-advisor:${userId}`
-    : `ai-advisor:anon:${req.headers.get("x-forwarded-for") ?? "unknown"}`;
+    : `ai-advisor:anon:${clientIp(req.headers)}`;
   const maxReq = isVip ? 12 : 4;
   const windowMs = 5 * 60_000;
   const { ok, remaining } = rateLimit(rateLimitKey, maxReq, windowMs);

@@ -112,7 +112,7 @@ export async function generateMetadata({
     symbol: signal.symbol,
     direction: signal.direction,
   });
-  const authorName = signal.author.name ?? signal.author.email ?? "Social Forex";
+  const authorName = signal.author.name ?? "Social Forex";
   return {
     title,
     description,
@@ -269,7 +269,7 @@ export default async function SignalDetailPage({
   const comments = signal.comments.map((c) => ({
     id: c.id,
     body: c.body,
-    authorLabel: c.author.name ?? c.author.email ?? "—",
+    authorLabel: c.author.name ?? "—",
     authorId: c.author.id,
     createdAt: c.createdAt.toISOString(),
     hidden: c.hidden,
@@ -288,7 +288,7 @@ export default async function SignalDetailPage({
       : [];
 
   const authorName =
-    signal.author.name ?? signal.author.email ?? t("authorFallback");
+    signal.author.name ?? t("authorFallback");
   const statusText = signalStatusLabel(t, signal.status);
   const tierText = signalTierLabel(t, signal.tier);
   const createdAtText = new Date(signal.createdAt).toLocaleString(locale);

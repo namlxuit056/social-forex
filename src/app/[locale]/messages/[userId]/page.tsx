@@ -67,7 +67,7 @@ export default async function MessageThreadPage({ params }: Props) {
           href={`/u/${otherId}`}
           className="text-lg font-medium text-foreground hover:text-primary"
         >
-          {other.name ?? other.email ?? "Trader"}
+          {other.name ?? "Trader"}
         </Link>
       </div>
 

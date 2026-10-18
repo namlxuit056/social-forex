@@ -1,3 +1,4 @@
+import { jsonLdHtml } from "@/lib/json-ld";
 type Props = {
   url: string;
   headline: string;
@@ -38,7 +39,7 @@ export function SignalArticleJsonLd({
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+      dangerouslySetInnerHTML={{ __html: jsonLdHtml(data) }}
     />
   );
 }

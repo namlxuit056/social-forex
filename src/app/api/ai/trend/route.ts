@@ -11,6 +11,7 @@ import { getTradingViewTechnicalContext } from "@/lib/ai/tradingview-context";
 import { pickAi } from "@/lib/messages-pick";
 import { QUOTE_BY_SYMBOL } from "@/lib/quotes/definitions";
 import { resolveQuotes } from "@/lib/quotes/resolve-quotes";
+import { clientIp } from "@/lib/client-ip";
 import { rateLimit } from "@/lib/rate-limit";
 
 function errorJson(error: string, status: number, retryAfterMs?: number) {
@@ -52,7 +53,7 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  const rateLimitKey = `ai-trend:${req.headers.get("x-forwarded-for") ?? "unknown"}`;
+  const rateLimitKey = `ai-trend:${clientIp(req.headers)}`;
   const windowMs = 5 * 60_000;
   const { ok, remaining } = rateLimit(rateLimitKey, 60, windowMs);
   if (!ok) {

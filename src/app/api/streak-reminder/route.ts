@@ -11,7 +11,7 @@ function todayUTC(): Date {
 export async function POST(request: Request): Promise<NextResponse> {
   const authHeader = request.headers.get("authorization");
   const secret = process.env.CRON_SECRET;
-  if (secret && authHeader !== `Bearer ${secret}`) {
+  if (!secret || authHeader !== `Bearer ${secret}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

@@ -1,6 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getScreenerAiPicks, AiUnavailableError } from "@/lib/ai/screener-picks";
-import type { AppLocale } from "@/lib/api-locale";
+import { parseLocaleParam } from "@/lib/api-locale";
+import { clientIp } from "@/lib/client-ip";
+import { rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -11,7 +13,11 @@ export type AiPicksError = {
 };
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
-  const locale = (request.nextUrl.searchParams.get("locale") ?? "vi") as AppLocale;
+  const locale = parseLocaleParam(request.nextUrl.searchParams.get("locale"));
+
+  if (!rateLimit(`screener-ai-picks:${clientIp(request.headers)}`, 20, 10 * 60_000).ok) {
+    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
+  }
 
   try {
     const result = await getScreenerAiPicks(locale);

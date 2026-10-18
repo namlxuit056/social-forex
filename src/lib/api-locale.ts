@@ -15,3 +15,8 @@ export function localeFromRequest(req: NextRequest): AppLocale {
   if (al.startsWith("en")) return "en";
   return routing.defaultLocale;
 }
+
+/** Untrusted `?locale=` value → a supported locale (falls back to the default). */
+export function parseLocaleParam(raw: string | null | undefined): AppLocale {
+  return raw === "en" || raw === "vi" ? raw : routing.defaultLocale;
+}

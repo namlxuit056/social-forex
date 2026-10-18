@@ -2,7 +2,6 @@
 
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { marked } from "marked";
 import { Bot, Lock, Loader2, Send, Sparkles } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -13,13 +12,10 @@ import type {
   AiArticleChatSendResponse,
   AiSuggestError,
 } from "@/lib/ai/types";
+import { renderAiMarkdown } from "@/lib/ai-markdown";
 import { cn } from "@/lib/utils";
 
 type ChatMessage = Pick<AiArticleChatMessage, "id" | "role" | "content">;
-
-function renderAiMarkdown(content: string) {
-  return marked.parse(content, { async: false }) as string;
-}
 
 type Props = {
   articleId: string;

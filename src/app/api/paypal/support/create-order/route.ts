@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createPayPalSupportOrder } from "@/lib/paypal-vip";
+import { clientIp } from "@/lib/client-ip";
 import { rateLimit } from "@/lib/rate-limit";
 import { parseSupportAmount } from "@/lib/support-amount";
 
 export async function POST(req: NextRequest) {
-  const ip = req.headers.get("x-forwarded-for") ?? "unknown";
+  const ip = clientIp(req.headers);
   if (!rateLimit(`support-order:${ip}`, 10, 10 * 60_000).ok) {
     return NextResponse.json({ error: "rate_limited" }, { status: 429 });
   }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { isVipActive } from "@/lib/vip";
+import { clientIp } from "@/lib/client-ip";
 import { rateLimit } from "@/lib/rate-limit";
 import { resolveQuotes } from "@/lib/quotes/resolve-quotes";
 import { QUOTE_BY_SYMBOL } from "@/lib/quotes/definitions";
@@ -56,7 +57,7 @@ export async function POST(req: NextRequest) {
 
   const rateLimitKey = userId
     ? `ai:${userId}`
-    : `ai:anon:${req.headers.get("x-forwarded-for") ?? "unknown"}`;
+    : `ai:anon:${clientIp(req.headers)}`;
   const maxReq = isVip ? 3 : 1;
   const windowMs = isVip ? 60_000 : 300_000;
   const { ok, remaining } = rateLimit(rateLimitKey, maxReq, windowMs);

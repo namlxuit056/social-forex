@@ -188,7 +188,7 @@ export function FeedSection() {
               </p>
               <ul className="grid gap-2 sm:grid-cols-2">
                 {suggested.map((trader) => {
-                  const displayName = trader.name ?? trader.email ?? "—";
+                  const displayName = trader.name ?? "—";
                   const isFollowing = followingIds.has(trader.id);
                   return (
                     <li
@@ -242,7 +242,7 @@ export function FeedSection() {
           {items.map((item) => {
             const config = typeConfig[item.type];
             const Icon = config.icon;
-            const authorName = item.author.name ?? item.author.email ?? "—";
+            const authorName = item.author.name ?? "—";
 
             return (
               <div

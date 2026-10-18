@@ -80,7 +80,7 @@ export function WebinarList({ webinars, userId }: Props) {
     <div className="grid gap-4 sm:grid-cols-2">
       {webinars.map((webinar) => {
         const status = statusConfig[webinar.status];
-        const hostName = webinar.host.name ?? webinar.host.email ?? "—";
+        const hostName = webinar.host.name ?? "—";
         const isLive = webinar.status === "LIVE";
         const isScheduled = webinar.status === "SCHEDULED";
         const isEnded = webinar.status === "ENDED";

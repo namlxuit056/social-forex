@@ -1,3 +1,4 @@
+import { jsonLdHtml } from "@/lib/json-ld";
 import { getSiteUrl } from "@/lib/site-url";
 
 /**
@@ -40,7 +41,7 @@ export function WebsiteJsonLd({ locale }: { locale: string }) {
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      dangerouslySetInnerHTML={{ __html: jsonLdHtml(jsonLd) }}
     />
   );
 }

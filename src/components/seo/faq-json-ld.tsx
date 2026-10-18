@@ -1,3 +1,5 @@
+import { jsonLdHtml } from "@/lib/json-ld";
+
 type FaqItem = { question: string; answer: string };
 
 /**
@@ -22,7 +24,7 @@ export function FaqJsonLd({ items }: { items: FaqItem[] }) {
     <script
       type="application/ld+json"
       // eslint-disable-next-line react/no-danger -- JSON-LD requires inline script
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      dangerouslySetInnerHTML={{ __html: jsonLdHtml(jsonLd) }}
     />
   );
 }
