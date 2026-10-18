@@ -6,6 +6,7 @@
 
 [![Live site](https://img.shields.io/badge/live-toolforex.xyz-0b7a3e?style=for-the-badge)](https://toolforex.xyz)
 [![License: AGPL v3](https://img.shields.io/badge/license-AGPL--3.0-blue?style=for-the-badge)](LICENSE)
+[![Support with PayPal](https://img.shields.io/badge/support-PayPal-003087?style=for-the-badge&logo=paypal&logoColor=white)](https://toolforex.xyz/support)
 [![Sponsor](https://img.shields.io/badge/sponsor-%E2%9D%A4-db61a2?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/namlxuit056)
 
 ### 👉 Try it live: **[toolforex.xyz](https://toolforex.xyz)**
@@ -119,7 +120,7 @@ SocialForex is built and run by one developer and hosted at [toolforex.xyz](http
 
 - 🌐 Dùng thử ngay: **[toolforex.xyz](https://toolforex.xyz)**
 - 🛠️ Tự cài đặt: xem mục [Getting started](#getting-started)
-- ❤️ Ủng hộ dự án: [GitHub Sponsors](https://github.com/sponsors/namlxuit056) — giúp trang trải chi phí server, dữ liệu và AI
+- ❤️ Ủng hộ dự án: [PayPal / thẻ tại toolforex.xyz/support](https://toolforex.xyz/support) hoặc [GitHub Sponsors](https://github.com/sponsors/namlxuit056) — giúp trang trải chi phí server, dữ liệu và AI
 - 💬 Nhóm Telegram: [t.me/toolforex](https://t.me/toolforex)
 
 Mọi nội dung chỉ mang tính giáo dục, **không phải lời khuyên đầu tư**.
