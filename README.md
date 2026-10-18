@@ -104,6 +104,7 @@ Issues and pull requests are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 SocialForex is built and run by one developer and hosted at [toolforex.xyz](https://toolforex.xyz). If it helps your trading, you can support hosting, data and AI costs:
 
+- ☕ [Support with PayPal or card](https://toolforex.xyz/support) — one-off, any amount from $1
 - ❤️ [Sponsor on GitHub](https://github.com/sponsors/namlxuit056) — monthly
 - ⭐ Star this repository and share [toolforex.xyz](https://toolforex.xyz) with other traders
 - 💬 Join the Telegram group: [t.me/toolforex](https://t.me/toolforex)
