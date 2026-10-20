@@ -34,7 +34,45 @@ const ORDER_TYPE_OPTIONS: { value: PlaceOrderType; label: string }[] = [
 
 export function NewOrderDialog() {
   const [open, setOpen] = useState(false);
-  const [symbol, setSymbol] = useState("XAUUSD");
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger render={<Button size="sm" className="gap-1.5" />}>
+        <Plus className="size-4" />
+        New Order
+      </DialogTrigger>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle>Place order</DialogTitle>
+        </DialogHeader>
+        {open && <NewOrderForm onPlaced={() => setOpen(false)} onCancel={() => setOpen(false)} />}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/**
+ * The order ticket body, shared by the /positions dialog and the inline
+ * ticket on /desk. `symbol` makes the symbol follow an outside selection
+ * (e.g. the desk chart) while still letting the user change it here.
+ */
+export function NewOrderForm({
+  symbol: externalSymbol,
+  onPlaced,
+  onCancel,
+  inline = false,
+}: {
+  symbol?: string;
+  /** Render outside a dialog (no bleed-to-edge dialog footer). */
+  inline?: boolean;
+  onPlaced?: () => void;
+  onCancel?: () => void;
+}) {
+  const [symbol, setSymbol] = useState(externalSymbol ?? "XAUUSD");
+  const [syncedExternalSymbol, setSyncedExternalSymbol] = useState(externalSymbol);
+  if (externalSymbol !== syncedExternalSymbol) {
+    setSyncedExternalSymbol(externalSymbol);
+    if (externalSymbol) setSymbol(externalSymbol);
+  }
   const [orderType, setOrderType] = useState<PlaceOrderType>("BUY");
   const [volume, setVolume] = useState("0.01");
   const [price, setPrice] = useState("");
@@ -56,13 +94,14 @@ export function NewOrderDialog() {
   } | null>(null);
   const [edgeWarning, setEdgeWarning] = useState<EdgeWarning | null>(null);
   const [marketPrice, setMarketPrice] = useState<{ bid: number; ask: number } | null>(null);
+  const [placed, setPlaced] = useState(false);
 
   const isPendingType = orderType !== "BUY" && orderType !== "SELL";
   const isBuy = orderType.startsWith("BUY");
 
   // Market orders have no entry price field — fetch the live quote just to preview $ SL/TP/R:R.
   useEffect(() => {
-    if (!open || isPendingType) return;
+    if (isPendingType) return;
     let cancelled = false;
     fetch("/api/quotes")
       .then((res) => res.json() as Promise<QuotesApiResponse>)
@@ -77,7 +116,7 @@ export function NewOrderDialog() {
     return () => {
       cancelled = true;
     };
-  }, [open, isPendingType, symbol]);
+  }, [isPendingType, symbol]);
 
   const referencePrice = isPendingType
     ? (Number(price) || null)
@@ -98,6 +137,7 @@ export function NewOrderDialog() {
 
   function handleSubmit(confirmed = false) {
     setError(null);
+    setPlaced(false);
     if (!confirmed) {
       setDailyLimitWarning(null);
       setPlanWarning(null);
@@ -139,7 +179,8 @@ export function NewOrderDialog() {
         setError(result.error);
         return;
       }
-      setOpen(false);
+      setPlaced(true);
+      onPlaced?.();
       setPrice("");
       setSl("");
       setTp("");
@@ -150,171 +191,167 @@ export function NewOrderDialog() {
     });
   }
 
+  const Footer = inline ? "div" : DialogFooter;
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button size="sm" className="gap-1.5" />}>
-        <Plus className="size-4" />
-        New Order
-      </DialogTrigger>
-      <DialogContent className="max-w-sm">
-        <DialogHeader>
-          <DialogTitle>Place order</DialogTitle>
-        </DialogHeader>
-        <div className="grid gap-4 py-2">
-          <div className="grid gap-1.5">
-            <Label htmlFor="order-symbol">Symbol</Label>
-            <Select
-              value={symbol}
-              onValueChange={(value) => {
-                if (!value) return;
-                setSymbol(value);
-                setPlanWarning(null);
-                setDailyLimitWarning(null);
-                setRiskWarning(null);
-                setEdgeWarning(null);
-              }}
-            >
-              <SelectTrigger id="order-symbol" className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {QUOTE_DEFINITIONS.map((d) => (
-                  <SelectItem key={d.symbol} value={d.symbol}>
-                    {d.symbol}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="grid gap-1.5">
-            <Label htmlFor="order-type">Order type</Label>
-            <Select
-              value={orderType}
-              onValueChange={(v) => {
-                setOrderType(v as PlaceOrderType);
-                setEdgeWarning(null);
-              }}
-            >
-              <SelectTrigger id="order-type" className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {ORDER_TYPE_OPTIONS.map((o) => (
-                  <SelectItem key={o.value} value={o.value}>
-                    {o.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div className="grid gap-1.5">
-              <Label htmlFor="order-volume">Lot</Label>
-              <Input
-                id="order-volume"
-                type="number"
-                step="0.01"
-                min="0.01"
-                value={volume}
-                onChange={(e) => setVolume(e.target.value)}
-              />
-            </div>
-            {isPendingType && (
-              <div className="grid gap-1.5">
-                <Label htmlFor="order-price">Entry price</Label>
-                <Input
-                  id="order-price"
-                  type="number"
-                  step="any"
-                  placeholder="0.00000"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                />
-              </div>
-            )}
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div className="grid gap-1.5">
-              <Label htmlFor="order-sl">Stop Loss</Label>
-              <Input
-                id="order-sl"
-                type="number"
-                step="any"
-                placeholder="Optional — auto 10% risk if blank"
-                value={sl}
-                onChange={(e) => setSl(e.target.value)}
-              />
-              <SlAmountHint amount={risk.slAmount} />
-            </div>
-            <div className="grid gap-1.5">
-              <Label htmlFor="order-tp">Take Profit</Label>
-              <Input
-                id="order-tp"
-                type="number"
-                step="any"
-                placeholder="Optional"
-                value={tp}
-                onChange={(e) => setTp(e.target.value)}
-              />
-              <TpAmountHint amount={risk.tpAmount} />
-            </div>
-          </div>
-
-          <RiskRewardPreview riskReward={risk.riskReward} />
-
-          {open && !edgeWarning && (
-            <EdgeCheckHint symbol={symbol} direction={orderType} className="" />
-          )}
-
-          {planWarning && (
-            <p className="text-sm text-amber-600 dark:text-amber-400">
-              {planWarning.hasPlan
-                ? `${planWarning.symbol} isn't in today's trading plan.`
-                : `You haven't set a trading plan for today.`}{" "}
-              Trading an unplanned pair is a common discipline slip — place this order anyway?
-            </p>
-          )}
-          {dailyLimitWarning && (
-            <p className="text-sm text-amber-600 dark:text-amber-400">
-              You&apos;ve placed {dailyLimitWarning.ordersPlacedToday}/{dailyLimitWarning.maxTrades} orders
-              today, hitting the daily limit from your trading plan. Place this one anyway?
-            </p>
-          )}
-          {riskWarning && (
-            <p className="text-sm text-amber-600 dark:text-amber-400">
-              This order pushes today&apos;s total risk to ~{riskWarning.projectedPct}% of your account
-              (~${Math.round(riskWarning.riskUsedToday)} used + ~${Math.round(riskWarning.newRisk)} here),
-              over your {riskWarning.maxRiskPercent}% daily plan limit. Place it anyway?
-            </p>
-          )}
-          {edgeWarning && (
-            <p className="text-sm text-amber-600 dark:text-amber-400">
-              Your win rate on {edgeFacetLabelEn(edgeWarning)} is {edgeWarning.winRate}% over{" "}
-              {edgeWarning.total} trades, below your overall {edgeWarning.baselineWinRate}%. Place this
-              order anyway?
-            </p>
-          )}
-          {error && <p className="text-sm text-destructive">{error}</p>}
-          <p className="text-xs text-muted-foreground">
-            Command queued — MT5 EA executes on next poll.
-          </p>
+    <>
+      <div className="grid gap-4 py-2">
+        <div className="grid gap-1.5">
+          <Label htmlFor="order-symbol">Symbol</Label>
+          <Select
+            value={symbol}
+            onValueChange={(value) => {
+              if (!value) return;
+              setSymbol(value);
+              setPlanWarning(null);
+              setDailyLimitWarning(null);
+              setRiskWarning(null);
+              setEdgeWarning(null);
+            }}
+          >
+            <SelectTrigger id="order-symbol" className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {QUOTE_DEFINITIONS.map((d) => (
+                <SelectItem key={d.symbol} value={d.symbol}>
+                  {d.symbol}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-          {dailyLimitWarning || planWarning || riskWarning || edgeWarning ? (
-            <Button variant="outline" onClick={() => handleSubmit(true)} disabled={isPending}>
-              {isPending ? "Queuing…" : "Place anyway"}
-            </Button>
-          ) : (
-            <Button onClick={() => handleSubmit(false)} disabled={isPending}>
-              {isPending ? "Queuing…" : "Place order"}
-            </Button>
+
+        <div className="grid gap-1.5">
+          <Label htmlFor="order-type">Order type</Label>
+          <Select
+            value={orderType}
+            onValueChange={(v) => {
+              setOrderType(v as PlaceOrderType);
+              setEdgeWarning(null);
+            }}
+          >
+            <SelectTrigger id="order-type" className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {ORDER_TYPE_OPTIONS.map((o) => (
+                <SelectItem key={o.value} value={o.value}>
+                  {o.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div className="grid gap-1.5">
+            <Label htmlFor="order-volume">Lot</Label>
+            <Input
+              id="order-volume"
+              type="number"
+              step="0.01"
+              min="0.01"
+              value={volume}
+              onChange={(e) => setVolume(e.target.value)}
+            />
+          </div>
+          {isPendingType && (
+            <div className="grid gap-1.5">
+              <Label htmlFor="order-price">Entry price</Label>
+              <Input
+                id="order-price"
+                type="number"
+                step="any"
+                placeholder="0.00000"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+              />
+            </div>
           )}
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div className="grid gap-1.5">
+            <Label htmlFor="order-sl">Stop Loss</Label>
+            <Input
+              id="order-sl"
+              type="number"
+              step="any"
+              placeholder="Optional — auto 10% risk if blank"
+              value={sl}
+              onChange={(e) => setSl(e.target.value)}
+            />
+            <SlAmountHint amount={risk.slAmount} />
+          </div>
+          <div className="grid gap-1.5">
+            <Label htmlFor="order-tp">Take Profit</Label>
+            <Input
+              id="order-tp"
+              type="number"
+              step="any"
+              placeholder="Optional"
+              value={tp}
+              onChange={(e) => setTp(e.target.value)}
+            />
+            <TpAmountHint amount={risk.tpAmount} />
+          </div>
+        </div>
+
+        <RiskRewardPreview riskReward={risk.riskReward} />
+
+        {!edgeWarning && (
+          <EdgeCheckHint symbol={symbol} direction={orderType} className="" />
+        )}
+
+        {planWarning && (
+          <p className="text-sm text-amber-600 dark:text-amber-400">
+            {planWarning.hasPlan
+              ? `${planWarning.symbol} isn't in today's trading plan.`
+              : `You haven't set a trading plan for today.`}{" "}
+            Trading an unplanned pair is a common discipline slip — place this order anyway?
+          </p>
+        )}
+        {dailyLimitWarning && (
+          <p className="text-sm text-amber-600 dark:text-amber-400">
+            You&apos;ve placed {dailyLimitWarning.ordersPlacedToday}/{dailyLimitWarning.maxTrades} orders
+            today, hitting the daily limit from your trading plan. Place this one anyway?
+          </p>
+        )}
+        {riskWarning && (
+          <p className="text-sm text-amber-600 dark:text-amber-400">
+            This order pushes today&apos;s total risk to ~{riskWarning.projectedPct}% of your account
+            (~${Math.round(riskWarning.riskUsedToday)} used + ~${Math.round(riskWarning.newRisk)} here),
+            over your {riskWarning.maxRiskPercent}% daily plan limit. Place it anyway?
+          </p>
+        )}
+        {edgeWarning && (
+          <p className="text-sm text-amber-600 dark:text-amber-400">
+            Your win rate on {edgeFacetLabelEn(edgeWarning)} is {edgeWarning.winRate}% over{" "}
+            {edgeWarning.total} trades, below your overall {edgeWarning.baselineWinRate}%. Place this
+            order anyway?
+          </p>
+        )}
+        {error && <p className="text-sm text-destructive">{error}</p>}
+        {placed && !error && (
+          <p className="text-sm text-emerald-600 dark:text-emerald-400">Order queued.</p>
+        )}
+        <p className="text-xs text-muted-foreground">
+          Command queued — MT5 EA executes on next poll.
+        </p>
+      </div>
+      <Footer className={inline ? "flex justify-end gap-2" : undefined}>
+        {onCancel && <Button variant="outline" onClick={onCancel}>Cancel</Button>}
+        {dailyLimitWarning || planWarning || riskWarning || edgeWarning ? (
+          <Button variant="outline" onClick={() => handleSubmit(true)} disabled={isPending}>
+            {isPending ? "Queuing…" : "Place anyway"}
+          </Button>
+        ) : (
+          <Button onClick={() => handleSubmit(false)} disabled={isPending}>
+            {isPending ? "Queuing…" : "Place order"}
+          </Button>
+        )}
+      </Footer>
+    </>
   );
 }

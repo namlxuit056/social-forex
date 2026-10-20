@@ -5,6 +5,9 @@ import { Link } from "@/i18n/navigation";
 import { ChartContainer } from "@/components/charts/chart-container";
 import { EconomicCalendar } from "@/components/calendar/economic-calendar";
 import { PreTradeDesk } from "@/components/desk/pre-trade-desk";
+import { DeskOrderTicket, type DeskOrderTicketState } from "@/components/desk/desk-order-ticket";
+import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/layout/page-header";
 import { Disclaimer } from "@/components/layout/disclaimer";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
@@ -48,7 +51,20 @@ export default async function DeskPage({
   const tCal = await getTranslations("calendar");
   const tCommon = await getTranslations("common");
 
-  const [initialQuotes, cal] = await Promise.all([resolveQuotes(), resolveCalendarEvents()]);
+  const session = await auth();
+  const userId = session?.user?.id;
+  const [initialQuotes, cal, mt5Connection] = await Promise.all([
+    resolveQuotes(),
+    resolveCalendarEvents(),
+    userId
+      ? prisma.mt5Connection.findFirst({ where: { userId, revokedAt: null }, select: { id: true } })
+      : null,
+  ]);
+  const orderTicketState: DeskOrderTicketState = !userId
+    ? "signedOut"
+    : mt5Connection
+      ? "ready"
+      : "noConnection";
   const newsContextHours = getNewsContextHours();
   const newsWindow = getNewsContextWindow();
   const deskCurrencies = new Set<string>();
@@ -109,6 +125,9 @@ export default async function DeskPage({
           >
             {t("jumpPreTrade")}
           </a>
+          <a href="#desk-order" className="inline-flex min-h-6 items-center underline-offset-4 hover:underline">
+            {t("jumpOrder")}
+          </a>
           <a href="#desk-quotes" className="inline-flex min-h-6 items-center underline-offset-4 hover:underline">
             {t("jumpQuotes")}
           </a>
@@ -131,6 +150,10 @@ export default async function DeskPage({
           </Suspense>
         }
       />
+
+      <Suspense>
+        <DeskOrderTicket state={orderTicketState} />
+      </Suspense>
 
       <section id="desk-quotes" className="scroll-mt-24 space-y-4">
         <div className="flex flex-col gap-1 border-b border-border pb-2 sm:flex-row sm:items-end sm:justify-between">

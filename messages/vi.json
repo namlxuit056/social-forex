@@ -615,7 +615,15 @@
         "title": "Sẵn sàng ghi journal",
         "desc": "Nếu vào lệnh, bạn sẽ ghi lại lý do và kết quả."
       }
-    }
+    },
+    "jumpOrder": "Vào lệnh",
+    "orderTitle": "Vào lệnh MT5",
+    "orderSubtitle": "Đặt lệnh market hoặc chờ thẳng xuống MT5 qua bridge — symbol đi theo biểu đồ bên trên.",
+    "orderOpenPositions": "Quản lý lệnh đang mở",
+    "orderSignedOut": "Đăng nhập để vào lệnh MT5 ngay trên bàn live.",
+    "orderSignInCta": "Đăng nhập",
+    "orderNoConnection": "Bạn chưa kết nối MT5.",
+    "orderConnectCta": "Thiết lập MT5 Bridge"
   },
   "tools": {
     "title": "Công cụ tính toán",
