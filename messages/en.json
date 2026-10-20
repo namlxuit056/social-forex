@@ -616,10 +616,6 @@
         "desc": "If you take the trade, you will record the reason and outcome."
       }
     },
-    "jumpOrder": "Order",
-    "orderTitle": "Place MT5 order",
-    "orderSubtitle": "Send market or pending orders straight to MT5 via the bridge — the symbol follows the chart above.",
-    "orderOpenPositions": "Manage open positions",
     "orderSignedOut": "Sign in to place MT5 orders right from the live desk.",
     "orderSignInCta": "Sign in",
     "orderNoConnection": "You haven't connected MT5 yet.",

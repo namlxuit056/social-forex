@@ -21,6 +21,7 @@ import { logGuardOverride } from "@/actions/guard-override";
 import { edgeFacetLabelEn } from "@/lib/journal/edge-check";
 import { EdgeCheckHint } from "@/components/journal/edge-check-hint";
 import { estimateOrderRisk } from "@/lib/calculators";
+import { cn } from "@/lib/utils";
 import { SlAmountHint, TpAmountHint, RiskRewardPreview } from "./risk-reward-preview";
 
 const ORDER_TYPE_OPTIONS: { value: PlaceOrderType; label: string }[] = [
@@ -32,11 +33,28 @@ const ORDER_TYPE_OPTIONS: { value: PlaceOrderType; label: string }[] = [
   { value: "SELL_STOP", label: "Sell Stop" },
 ];
 
-export function NewOrderDialog() {
+export type NewOrderDefaults = {
+  symbol?: string;
+  orderType?: PlaceOrderType;
+  volume?: number;
+  stopLoss?: number;
+};
+
+/**
+ * Shared "New Order" ticket: /positions uses it bare, /desk pre-fills it from
+ * the position-size calculator. Defaults are read each time the dialog opens.
+ */
+export function NewOrderDialog({
+  defaults,
+  triggerClassName,
+}: {
+  defaults?: NewOrderDefaults;
+  triggerClassName?: string;
+} = {}) {
   const [open, setOpen] = useState(false);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button size="sm" className="gap-1.5" />}>
+      <DialogTrigger render={<Button size="sm" className={cn("gap-1.5", triggerClassName)} />}>
         <Plus className="size-4" />
         New Order
       </DialogTrigger>
@@ -44,39 +62,32 @@ export function NewOrderDialog() {
         <DialogHeader>
           <DialogTitle>Place order</DialogTitle>
         </DialogHeader>
-        {open && <NewOrderForm onPlaced={() => setOpen(false)} onCancel={() => setOpen(false)} />}
+        {open && (
+          <NewOrderForm
+            defaults={defaults}
+            onPlaced={() => setOpen(false)}
+            onCancel={() => setOpen(false)}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );
 }
 
-/**
- * The order ticket body, shared by the /positions dialog and the inline
- * ticket on /desk. `symbol` makes the symbol follow an outside selection
- * (e.g. the desk chart) while still letting the user change it here.
- */
-export function NewOrderForm({
-  symbol: externalSymbol,
+function NewOrderForm({
+  defaults,
   onPlaced,
   onCancel,
-  inline = false,
 }: {
-  symbol?: string;
-  /** Render outside a dialog (no bleed-to-edge dialog footer). */
-  inline?: boolean;
-  onPlaced?: () => void;
-  onCancel?: () => void;
+  defaults?: NewOrderDefaults;
+  onPlaced: () => void;
+  onCancel: () => void;
 }) {
-  const [symbol, setSymbol] = useState(externalSymbol ?? "XAUUSD");
-  const [syncedExternalSymbol, setSyncedExternalSymbol] = useState(externalSymbol);
-  if (externalSymbol !== syncedExternalSymbol) {
-    setSyncedExternalSymbol(externalSymbol);
-    if (externalSymbol) setSymbol(externalSymbol);
-  }
-  const [orderType, setOrderType] = useState<PlaceOrderType>("BUY");
-  const [volume, setVolume] = useState("0.01");
+  const [symbol, setSymbol] = useState(defaults?.symbol ?? "XAUUSD");
+  const [orderType, setOrderType] = useState<PlaceOrderType>(defaults?.orderType ?? "BUY");
+  const [volume, setVolume] = useState(defaults?.volume ? String(defaults.volume) : "0.01");
   const [price, setPrice] = useState("");
-  const [sl, setSl] = useState("");
+  const [sl, setSl] = useState(defaults?.stopLoss ? String(defaults.stopLoss) : "");
   const [tp, setTp] = useState("");
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -94,7 +105,6 @@ export function NewOrderForm({
   } | null>(null);
   const [edgeWarning, setEdgeWarning] = useState<EdgeWarning | null>(null);
   const [marketPrice, setMarketPrice] = useState<{ bid: number; ask: number } | null>(null);
-  const [placed, setPlaced] = useState(false);
 
   const isPendingType = orderType !== "BUY" && orderType !== "SELL";
   const isBuy = orderType.startsWith("BUY");
@@ -137,7 +147,6 @@ export function NewOrderForm({
 
   function handleSubmit(confirmed = false) {
     setError(null);
-    setPlaced(false);
     if (!confirmed) {
       setDailyLimitWarning(null);
       setPlanWarning(null);
@@ -179,19 +188,9 @@ export function NewOrderForm({
         setError(result.error);
         return;
       }
-      setPlaced(true);
-      onPlaced?.();
-      setPrice("");
-      setSl("");
-      setTp("");
-      setDailyLimitWarning(null);
-      setPlanWarning(null);
-      setRiskWarning(null);
-      setEdgeWarning(null);
+      onPlaced();
     });
   }
-
-  const Footer = inline ? "div" : DialogFooter;
 
   return (
     <>
@@ -333,15 +332,12 @@ export function NewOrderForm({
           </p>
         )}
         {error && <p className="text-sm text-destructive">{error}</p>}
-        {placed && !error && (
-          <p className="text-sm text-emerald-600 dark:text-emerald-400">Order queued.</p>
-        )}
         <p className="text-xs text-muted-foreground">
           Command queued — MT5 EA executes on next poll.
         </p>
       </div>
-      <Footer className={inline ? "flex justify-end gap-2" : undefined}>
-        {onCancel && <Button variant="outline" onClick={onCancel}>Cancel</Button>}
+      <DialogFooter>
+        <Button variant="outline" onClick={onCancel}>Cancel</Button>
         {dailyLimitWarning || planWarning || riskWarning || edgeWarning ? (
           <Button variant="outline" onClick={() => handleSubmit(true)} disabled={isPending}>
             {isPending ? "Queuing…" : "Place anyway"}
@@ -351,7 +347,7 @@ export function NewOrderForm({
             {isPending ? "Queuing…" : "Place order"}
           </Button>
         )}
-      </Footer>
+      </DialogFooter>
     </>
   );
 }

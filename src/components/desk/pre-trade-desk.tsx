@@ -3,7 +3,7 @@
 import { type ReactNode, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
-import { getPathname } from "@/i18n/navigation";
+import { getPathname, Link } from "@/i18n/navigation";
 import {
   AlertTriangle,
   Calculator,
@@ -31,6 +31,10 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { NewOrderDialog } from "@/components/mt5/new-order-dialog";
+
+/** Whether the viewer can send the sized order to MT5 from the desk. */
+export type DeskOrderState = "signedOut" | "noConnection" | "ready";
 
 type ChecklistKey = "news" | "levels" | "risk" | "mindset" | "journal";
 
@@ -68,10 +72,12 @@ export function PreTradeDesk({
   newsEvents,
   newsContextHours,
   chart,
+  orderState = "signedOut",
 }: {
   quotes: QuoteRow[];
   newsEvents: SignalCardNewsEvent[];
   newsContextHours: number;
+  orderState?: DeskOrderState;
   /** Rendered beside the sizing panel so price and lot size are read together. */
   chart?: ReactNode;
 }) {
@@ -97,6 +103,13 @@ export function PreTradeDesk({
   const [riskPct, setRiskPct] = useState("1");
   const [entry, setEntry] = useState(String(selectedMid));
   const [stopLoss, setStopLoss] = useState(String(selectedMid));
+
+  // SL below entry means a long, above means a short; equal (the untouched
+  // default) leaves the order ticket without an SL.
+  const entryNum = numberValue(entry);
+  const slNum = numberValue(stopLoss);
+  const slSide: "BUY" | "SELL" | null =
+    entryNum > 0 && slNum > 0 && slNum !== entryNum ? (slNum < entryNum ? "BUY" : "SELL") : null;
 
   const switchSymbol = (next: string) => {
     const nextMid = midPrice(quoteForSymbol(quotes, next));
@@ -302,13 +315,36 @@ export function PreTradeDesk({
                   <dd className="text-xl tabular-nums">{riskPlan.lots}</dd>
                 </div>
               </dl>
-              <a href={planHref} className="mt-4 block">
-                <Button className="w-full" size="sm">
-                  <ClipboardCheck className="size-4" aria-hidden />
-                  {t("useInPlan")}
-                  <ExternalLink className="size-3.5" aria-hidden />
-                </Button>
-              </a>
+              <div className="mt-4 grid gap-2">
+                {orderState === "ready" ? (
+                  <NewOrderDialog
+                    triggerClassName="w-full"
+                    defaults={{
+                      symbol,
+                      orderType: slSide === "SELL" ? "SELL" : "BUY",
+                      volume: riskPlan.lots > 0 ? riskPlan.lots : undefined,
+                      stopLoss: slSide ? slNum : undefined,
+                    }}
+                  />
+                ) : (
+                  <p className="text-xs leading-relaxed text-muted-foreground">
+                    {orderState === "signedOut" ? t("orderSignedOut") : t("orderNoConnection")}{" "}
+                    <Link
+                      href={orderState === "signedOut" ? "/auth/signin" : "/mt5"}
+                      className="font-medium text-primary underline-offset-4 hover:underline"
+                    >
+                      {orderState === "signedOut" ? t("orderSignInCta") : t("orderConnectCta")}
+                    </Link>
+                  </p>
+                )}
+                <a href={planHref} className="block">
+                  <Button className="w-full" size="sm" variant={orderState === "ready" ? "outline" : "default"}>
+                    <ClipboardCheck className="size-4" aria-hidden />
+                    {t("useInPlan")}
+                    <ExternalLink className="size-3.5" aria-hidden />
+                  </Button>
+                </a>
+              </div>
             </CardContent>
           </Card>
         </div>
