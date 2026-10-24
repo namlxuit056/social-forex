@@ -59,6 +59,16 @@ SocialForex is a full-stack trading companion for retail forex / gold / crypto t
 
 Screenshots are regenerated with `node scripts/screenshots.mjs` (account balances are blurred automatically).
 
+### 🤖 Use it from your AI assistant (MCP)
+
+SocialForex is also a public [MCP](https://modelcontextprotocol.io) server — quotes, economic calendar, screener, currency strength, trading sessions and a position-size calculator, right inside Claude, Cursor, VS Code or DeepSeek Harness:
+
+```bash
+claude mcp add --transport http socialforex https://toolforex.xyz/api/mcp
+```
+
+See [`docs/mcp.md`](docs/mcp.md) for the tool list and other clients.
+
 ## Tech stack
 
 - **Next.js 16** (App Router) + **React 19**, **Tailwind CSS v4** + shadcn/ui
@@ -123,5 +133,6 @@ SocialForex is built and run by one developer and hosted at [toolforex.xyz](http
 - 🛠️ Tự cài đặt: xem mục [Getting started](#getting-started)
 - ❤️ Ủng hộ dự án: [PayPal / thẻ tại toolforex.xyz/support](https://toolforex.xyz/support) hoặc [GitHub Sponsors](https://github.com/sponsors/namlxuit056) — giúp trang trải chi phí server, dữ liệu và AI
 - 💬 Nhóm Telegram: [t.me/toolforex](https://t.me/toolforex)
+- 🤖 Dùng trong AI assistant (Claude, Cursor, DeepSeek Harness…) qua MCP: `https://toolforex.xyz/api/mcp` — xem [`docs/mcp.md`](docs/mcp.md)
 
 Mọi nội dung chỉ mang tính giáo dục, **không phải lời khuyên đầu tư**.

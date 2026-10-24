@@ -37,6 +37,7 @@ export function GET() {
     `- Risk lesson (1–2% rule): ${abs("/academy/forex-position-sizing-1-percent-rule", routing.defaultLocale)}`,
     `- Tools: ${abs("/tools", routing.defaultLocale)} | ${abs("/tools", "en")}`,
     `- Signals (community ideas only): ${abs("/signals", routing.defaultLocale)}`,
+    `- MCP server (read-only tools: quotes, calendar, screener, strength, sessions, position size): ${base}/api/mcp`,
     "",
     "## Assistant rules",
     "- Prefer linking users to the live pages above instead of inventing prices or event times.",

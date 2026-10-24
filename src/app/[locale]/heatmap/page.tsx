@@ -3,6 +3,7 @@ import { localeAlternates } from "@/lib/site-url";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
 import { pageCtaItems } from "@/lib/page-cta-i18n";
 import { resolveQuotes } from "@/lib/quotes/resolve-quotes";
+import { STRENGTH_CURRENCIES, buildStrengthMatrix } from "@/lib/market/currency-strength";
 
 export async function generateMetadata({
   params,
@@ -17,46 +18,7 @@ export async function generateMetadata({
 
 export const dynamic = "force-dynamic";
 
-const currencies = ["USD", "EUR", "JPY", "GBP", "AUD", "CAD", "CHF", "NZD"];
-
-function buildStrengthMatrix(
-  quotes: { symbol: string; bid: number; ask: number; changePct: number }[],
-) {
-  const changeMap = new Map<string, number>();
-  for (const q of quotes) {
-    changeMap.set(q.symbol.replace("/", ""), q.changePct);
-  }
-
-  const strength = new Map<string, number>();
-  for (const c of currencies) {
-    let total = 0;
-    let count = 0;
-    for (const other of currencies) {
-      if (c === other) continue;
-      const pair = `${c}${other}`;
-      const inv = `${other}${c}`;
-      if (changeMap.has(pair)) {
-        total += changeMap.get(pair)!;
-        count++;
-      } else if (changeMap.has(inv)) {
-        total -= changeMap.get(inv)!;
-        count++;
-      }
-    }
-    strength.set(c, count > 0 ? total / count : 0);
-  }
-
-  return currencies.map((base) => ({
-    base,
-    values: currencies.map((quote) => {
-      if (base === quote) return null;
-      const bStr = strength.get(base) ?? 0;
-      const qStr = strength.get(quote) ?? 0;
-      const diff = bStr - qStr;
-      return Math.round(Math.max(0, Math.min(1, 0.5 + diff * 5)) * 100) / 100;
-    }),
-  }));
-}
+const currencies = STRENGTH_CURRENCIES;
 
 function cellColor(v: number | null) {
   if (v === null) return "bg-muted";
