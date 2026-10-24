@@ -69,6 +69,11 @@ claude mcp add --transport http socialforex https://toolforex.xyz/api/mcp
 
 See [`docs/mcp.md`](docs/mcp.md) for the tool list and other clients.
 
+<div align="center">
+<img src="docs/screenshots/mcp-assistant.png" alt="An AI assistant answering &quot;Any BTC signal?&quot; with live SocialForex screener data over MCP" width="760">
+<br><sub>Asking an assistant <i>"BTC có tín hiệu gì không?"</i> — it calls the SocialForex MCP tools and answers from live screener data.</sub>
+</div>
+
 ## Tech stack
 
 - **Next.js 16** (App Router) + **React 19**, **Tailwind CSS v4** + shadcn/ui

@@ -7,6 +7,10 @@ SocialForex exposes a public, read-only [Model Context Protocol](https://modelco
 - **Auth:** none — only public data is exposed
 - **Rate limit:** 60 requests / minute / IP
 
+<img src="screenshots/mcp-assistant.png" alt="An AI assistant answering &quot;Any BTC signal?&quot; with live SocialForex screener data over MCP" width="760">
+
+*Asked "BTC có tín hiệu gì không?" (any BTC signal?), the assistant calls `get_screener` and answers from live data: multi-timeframe ratings, RSI, ADX, MACD, Bollinger levels and ATR.*
+
 ## Tools
 
 | Tool | What it returns |
@@ -38,6 +42,18 @@ claude mcp add --transport http socialforex https://toolforex.xyz/api/mcp
     "socialforex": { "url": "https://toolforex.xyz/api/mcp" }
   }
 }
+```
+
+**DeepSeek Harness** — save as `socialforex.cordis.yml` and pass it with `dsh web --patch socialforex.cordis.yml` (or merge the `insert` entry into `$DSH_HOME/cordis.patch.yml` to load it every run). Tools appear as `mcp__socialforex__<tool>`.
+
+```yaml
+- insert:
+    - id: mcp-socialforex
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: socialforex
+        transport: streamable-http
+        url: https://toolforex.xyz/api/mcp
 ```
 
 Then ask, for example: *"What high-impact USD news is coming this week, and how strong is USD right now?"* or *"Lot size for XAUUSD, $5,000 account, 1% risk, entry 2650, SL 2640?"*
