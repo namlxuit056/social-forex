@@ -1,0 +1,18 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.namlxuit056/social-forex",
+  "title": "SocialForex",
+  "description": "Live forex, gold & crypto quotes, economic calendar, screener, currency strength, lot-size calc",
+  "version": "0.1.0",
+  "websiteUrl": "https://toolforex.xyz",
+  "repository": {
+    "url": "https://github.com/namlxuit056/social-forex",
+    "source": "github"
+  },
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://toolforex.xyz/api/mcp"
+    }
+  ]
+}
