@@ -66,7 +66,8 @@
     "scrollPrimaryAria": "Primary sections",
     "scrollSecondaryAria": "More links and tools",
     "missions": "Missions",
-    "support": "Support us"
+    "support": "Support us",
+    "tradingAgents": "AI Agents"
   },
   "footer": {
     "tagline": "Forex tools, calendar, and lessons for new traders — plus community when you are ready.",
@@ -2927,5 +2928,61 @@
     "waysSponsors": "Sponsor monthly on GitHub",
     "waysShare": "Share in the Telegram group",
     "note": "Support is a voluntary one-off payment. It does not unlock VIP or any other feature and is non-refundable. Pay with a PayPal balance or card via PayPal."
+  },
+  "tradingAgents": {
+    "title": "AI Agents Desk",
+    "description": "A team of AI agents (technical, news, sentiment, bull/bear researchers, risk managers) debate and reach one trading decision for the pair you pick. Built on the open-source TradingAgents framework.",
+    "loginRequired": "Sign in to use AI Agents",
+    "loginHint": "This feature is for VIP members.",
+    "signIn": "Sign in",
+    "vipRequired": "VIP feature",
+    "vipRequiredHint": "Each analysis runs dozens of AI calls, so it is open to VIP members only.",
+    "upgradeVip": "Upgrade to VIP",
+    "newRun": "New analysis",
+    "newRunDesc": "Pick a pair and the analyst agents. Results for the same pair on the same day are shared for 6 hours.",
+    "symbol": "Pair",
+    "analysts": "Analyst agents",
+    "analyst": {
+      "market": "Technical",
+      "news": "News & macro",
+      "social": "Social sentiment"
+    },
+    "run": "Run analysis",
+    "runHint": "Usually takes 3–10 minutes. Up to 5 runs per day.",
+    "running": "The agents are analysing and debating… this page updates when they finish (3–10 minutes).",
+    "failed": "The analysis failed.",
+    "finalDecision": "Final decision",
+    "history": "Your analyses",
+    "disclaimer": "AI-generated for reference only, not investment advice.",
+    "rating": {
+      "Buy": "Buy",
+      "Overweight": "Lean buy",
+      "Hold": "Stay out",
+      "Underweight": "Lean sell",
+      "Sell": "Sell",
+      "REVIEW": "Needs review"
+    },
+    "status": {
+      "QUEUED": "Queued",
+      "RUNNING": "Running",
+      "DONE": "Done",
+      "ERROR": "Failed"
+    },
+    "report": {
+      "market_report": "Technical report",
+      "sentiment_report": "Sentiment report",
+      "news_report": "News report",
+      "fundamentals_report": "Fundamentals report",
+      "investment_plan": "Plan from the bull/bear debate",
+      "trader_investment_plan": "Trader's proposal"
+    },
+    "errors": {
+      "rate_limited": "Too many requests, try again in a minute.",
+      "invalid_data": "Invalid input.",
+      "vip_required": "This feature is for VIP members.",
+      "quota_reached": "You have used all 5 analyses for the last 24 hours.",
+      "sidecar_unavailable": "The AI Agents service is not running, try again later.",
+      "unknown": "Something went wrong, try again later."
+    }
   }
 }

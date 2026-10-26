@@ -127,6 +127,7 @@ model User {
   hostedWebinars       Webinar[]
   webinarRegistrations WebinarRegistration[]
   aiTradeProposals     AiTradeProposal[]
+  tradingAgentsRuns    TradingAgentsRun[]
   telegramBroadcaster  TelegramSignalBroadcaster?
   academyProgress      AcademyProgress[]
   autoScalpConfig      AutoScalpConfig?
@@ -1444,4 +1445,26 @@ model AcademyLesson {
   updatedAt     DateTime  @updatedAt
 
   @@unique([slug, locale])
+}
+
+/// Multi-agent analysis run executed by the TradingAgents sidecar (services/trading-agents).
+model TradingAgentsRun {
+  id         String    @id @default(cuid())
+  userId     String
+  symbol     String
+  tradeDate  String    // YYYY-MM-DD analysis date
+  language   String    @default("vi")
+  analysts   String[]
+  status     String    @default("QUEUED") // QUEUED | RUNNING | DONE | ERROR
+  rating     String?   // Buy | Overweight | Hold | Underweight | Sell | REVIEW
+  decision   String?   // Portfolio Manager's final decision (markdown)
+  reports    Json?     // { market_report, news_report, ... } markdown by stage
+  error      String?
+  createdAt  DateTime  @default(now())
+  finishedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([symbol, tradeDate, language, status])
 }

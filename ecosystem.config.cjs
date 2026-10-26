@@ -29,6 +29,16 @@ module.exports = {
       restart_delay: 5000,
     },
     {
+      // TradingAgents multi-agent analysis sidecar (services/trading-agents).
+      // Setup: cd services/trading-agents && uv sync
+      name: "sf-agents",
+      cwd: path.join(cwd, "services/trading-agents"),
+      script: path.join(cwd, "services/trading-agents/.venv/bin/uvicorn"),
+      args: "server:app --host 127.0.0.1 --port 8765",
+      interpreter: "none",
+      restart_delay: 5000,
+    },
+    {
       // Public ingress. Named tunnel if ~/.cloudflared/config.yml exists, else a
       // temporary *.trycloudflare.com URL (printed in `pm2 logs sf-tunnel`).
       name: "sf-tunnel",

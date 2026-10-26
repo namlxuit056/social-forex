@@ -1,0 +1,18 @@
+[project]
+name = "toolforex-trading-agents"
+version = "0.1.0"
+description = "HTTP sidecar that runs TauricResearch/TradingAgents for toolforex"
+requires-python = ">=3.11"
+dependencies = [
+    "tradingagents",
+    "fastapi>=0.115",
+    "uvicorn>=0.32",
+]
+
+[tool.uv]
+package = false
+
+# The clone lives next to this repo (../TradingAgents). Point TRADINGAGENTS
+# at a git URL instead if the sibling checkout is not available.
+[tool.uv.sources]
+tradingagents = { path = "../../../TradingAgents", editable = true }

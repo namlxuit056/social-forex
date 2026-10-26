@@ -66,7 +66,8 @@
     "scrollPrimaryAria": "Mục chính",
     "scrollSecondaryAria": "Liên kết và công cụ thêm",
     "missions": "Nhiệm vụ",
-    "support": "Ủng hộ dự án"
+    "support": "Ủng hộ dự án",
+    "tradingAgents": "AI Agents"
   },
   "footer": {
     "tagline": "Công cụ, lịch kinh tế và bài học cho người mới — kèm cộng đồng khi bạn sẵn sàng.",
@@ -2927,5 +2928,61 @@
     "waysSponsors": "Tài trợ hằng tháng trên GitHub",
     "waysShare": "Chia sẻ vào nhóm Telegram",
     "note": "Ủng hộ là khoản thanh toán tự nguyện một lần, không mở khoá VIP hay tính năng nào và không hoàn tiền. Thanh toán bằng số dư PayPal hoặc thẻ qua PayPal."
+  },
+  "tradingAgents": {
+    "title": "Hội đồng AI Agents",
+    "description": "Nhiều AI agent (phân tích kỹ thuật, tin tức, tâm lý, phe mua/bán, quản trị rủi ro) tranh luận rồi đưa ra một quyết định giao dịch cho cặp bạn chọn. Dựa trên mã nguồn mở TradingAgents.",
+    "loginRequired": "Đăng nhập để dùng AI Agents",
+    "loginHint": "Tính năng dành cho thành viên VIP.",
+    "signIn": "Đăng nhập",
+    "vipRequired": "Tính năng dành cho VIP",
+    "vipRequiredHint": "Mỗi lần phân tích chạy hàng chục lượt AI, nên hiện chỉ mở cho thành viên VIP.",
+    "upgradeVip": "Nâng cấp VIP",
+    "newRun": "Phân tích mới",
+    "newRunDesc": "Chọn cặp và các agent phân tích. Kết quả cùng cặp trong ngày được dùng chung trong 6 giờ.",
+    "symbol": "Cặp",
+    "analysts": "Agent phân tích",
+    "analyst": {
+      "market": "Kỹ thuật",
+      "news": "Tin tức & vĩ mô",
+      "social": "Tâm lý MXH"
+    },
+    "run": "Chạy phân tích",
+    "runHint": "Thường mất 3–10 phút. Tối đa 5 lần/ngày.",
+    "running": "Các agent đang phân tích và tranh luận… trang sẽ tự cập nhật khi xong (3–10 phút).",
+    "failed": "Phân tích thất bại.",
+    "finalDecision": "Quyết định cuối cùng",
+    "history": "Lịch sử phân tích của bạn",
+    "disclaimer": "Kết quả do AI tạo ra để tham khảo, không phải lời khuyên đầu tư.",
+    "rating": {
+      "Buy": "Mua",
+      "Overweight": "Nghiêng mua",
+      "Hold": "Đứng ngoài",
+      "Underweight": "Nghiêng bán",
+      "Sell": "Bán",
+      "REVIEW": "Cần xem lại"
+    },
+    "status": {
+      "QUEUED": "Đang chờ",
+      "RUNNING": "Đang chạy",
+      "DONE": "Xong",
+      "ERROR": "Lỗi"
+    },
+    "report": {
+      "market_report": "Báo cáo kỹ thuật",
+      "sentiment_report": "Báo cáo tâm lý",
+      "news_report": "Báo cáo tin tức",
+      "fundamentals_report": "Báo cáo cơ bản",
+      "investment_plan": "Kế hoạch từ tranh luận Mua/Bán",
+      "trader_investment_plan": "Đề xuất của Trader"
+    },
+    "errors": {
+      "rate_limited": "Bạn thao tác quá nhanh, thử lại sau 1 phút.",
+      "invalid_data": "Dữ liệu không hợp lệ.",
+      "vip_required": "Tính năng dành cho VIP.",
+      "quota_reached": "Bạn đã dùng hết 5 lần phân tích trong 24 giờ.",
+      "sidecar_unavailable": "Dịch vụ AI Agents đang không chạy, thử lại sau.",
+      "unknown": "Có lỗi xảy ra, thử lại sau."
+    }
   }
 }

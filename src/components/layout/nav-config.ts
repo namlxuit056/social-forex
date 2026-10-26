@@ -17,6 +17,7 @@ export const marketNavKeys = [
   { href: "/alerts", key: "alerts" },
   { href: "/heatmap", key: "heatmap" },
   { href: "/sentiment", key: "sentiment" },
+  { href: "/trading-agents", key: "tradingAgents" },
 ] as const;
 
 export const communityNavKeys = [

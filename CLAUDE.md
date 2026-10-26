@@ -66,6 +66,11 @@ External signal sources (optional — feed `/quotes/technical-rating`, see `src/
 - `MYFXBOOK_EMAIL` / `MYFXBOOK_PASSWORD` — free Myfxbook account, enables the Community Outlook contrarian source
 - `IG_SENTIMENT_URL` — URL returning IG Client Sentiment as JSON (best-effort DailyFX scrape used if unset)
 
+TradingAgents multi-agent analysis (optional — `/trading-agents`, Python sidecar in `services/trading-agents/`, pm2 `sf-agents`):
+- `TRADING_AGENTS_URL` — sidecar base, default `http://127.0.0.1:8765`
+- `TRADING_AGENTS_SECRET` — shared bearer secret (falls back to `CRON_SECRET`)
+- `TRADINGAGENTS_*` — upstream overrides (provider/models); defaults to DeepSeek when `DEEPSEEK_API_KEY` is set
+
 Every notification these produce carries `meta.source` (`tradingview` | `cot` | `oandaBook` | `myfxbook` | `igDailyfx`); labels/blurbs live in the `signalSources` i18n namespace.
 
 ## Architecture
