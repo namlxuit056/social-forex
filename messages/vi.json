@@ -1668,7 +1668,8 @@
     "reportTargetSignalComment": "Bình luận tín hiệu",
     "signalSymbol": "Cặp",
     "reportTargetReview": "Đánh giá provider",
-    "viewReview": "Xem đánh giá"
+    "viewReview": "Xem đánh giá",
+    "aiArticlesWriteNew": "Viết bài mới"
   },
   "vip": {
     "title": "Nâng cấp VIP",

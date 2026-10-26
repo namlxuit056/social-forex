@@ -49,9 +49,10 @@ function stripTags(value: string) {
     .trim();
 }
 
-function slugify(value: string) {
+export function slugify(value: string) {
   return value
     .toLowerCase()
+    .replace(/đ/g, "d")
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
@@ -214,7 +215,7 @@ export async function fetchCurrentTrendingKeywords(
   return getTrendingForexKeywords(seedKeywords, locale);
 }
 
-async function uniqueSlug(base: string, locale: ArticleLocale) {
+export async function uniqueSlug(base: string, locale: ArticleLocale) {
   const slug = base || `forex-article-${Date.now()}`;
   for (let i = 0; i < 20; i++) {
     const candidate = i === 0 ? slug : `${slug}-${i + 1}`;

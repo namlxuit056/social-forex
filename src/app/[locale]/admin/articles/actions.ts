@@ -8,6 +8,8 @@ import { prisma } from "@/lib/prisma";
 import {
   generateArticleForCustomKeyword,
   runAiArticleAutomation,
+  slugify,
+  uniqueSlug,
 } from "@/lib/ai/article-writer";
 
 async function requireAdmin() {
@@ -176,4 +178,59 @@ export async function updateAiArticle(
   revalidateLocalizedPath("/articles");
   revalidateLocalizedPath(`/admin/articles/${id}`);
   return { ok: true };
+}
+
+const createArticleSchema = updateArticleSchema.omit({ id: true }).extend({
+  keyword: z.string().min(2).max(100).trim(),
+  locale: z.enum(["vi", "en"]),
+  status: z.enum(["DRAFT", "PUBLISHED"]),
+});
+
+export type CreateArticleState = { error: string } | { ok: true; id: string } | null;
+
+/** Admin-written article, stored alongside the AI ones so /articles lists both. */
+export async function createManualArticle(
+  _prev: CreateArticleState,
+  formData: FormData,
+): Promise<CreateArticleState> {
+  await requireAdmin();
+  const parsed = createArticleSchema.safeParse({
+    keyword: formData.get("keyword"),
+    locale: formData.get("locale") || "vi",
+    status: formData.get("status") || "DRAFT",
+    title: formData.get("title"),
+    summary: formData.get("summary"),
+    metaDescription: formData.get("metaDescription"),
+    body: formData.get("body"),
+    imageUrl: formData.get("imageUrl") ?? "",
+    imageAlt: formData.get("imageAlt") ?? "",
+  });
+  if (!parsed.success) {
+    const first = parsed.error.issues[0];
+    return { error: `${first?.path.join(".") ?? "field"}: ${first?.message ?? "Invalid"}` };
+  }
+
+  const { imageUrl, imageAlt, status, locale, ...data } = parsed.data;
+  let id: string;
+  try {
+    const article = await prisma.aiGeneratedArticle.create({
+      data: {
+        ...data,
+        locale,
+        status,
+        slug: await uniqueSlug(slugify(data.title), locale),
+        trendSource: "manual",
+        sourceKeywords: [data.keyword],
+        imageUrl: imageUrl || null,
+        imageAlt: imageAlt || null,
+        publishedAt: status === "PUBLISHED" ? new Date() : null,
+      },
+    });
+    id = article.id;
+  } catch {
+    return { error: "Lỗi cơ sở dữ liệu. Vui lòng thử lại." };
+  }
+  revalidateLocalizedPath("/admin/articles");
+  revalidateLocalizedPath("/articles");
+  return { ok: true, id };
 }

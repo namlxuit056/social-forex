@@ -1,6 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
-import { Bot, FileText, Play, Plus, Settings, TrendingUp } from "lucide-react";
+import { Bot, FileText, PenLine, Play, Plus, Settings, TrendingUp } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { fetchCurrentTrendingKeywords } from "@/lib/ai/article-writer";
@@ -95,14 +95,20 @@ export default async function AdminAiArticlesPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="font-heading text-xl font-semibold text-foreground">
-          <Bot className="mr-2 inline-block size-5" aria-hidden />
-          {t("aiArticles")}
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {t("aiArticlesDesc")}
-        </p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="font-heading text-xl font-semibold text-foreground">
+            <Bot className="mr-2 inline-block size-5" aria-hidden />
+            {t("aiArticles")}
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {t("aiArticlesDesc")}
+          </p>
+        </div>
+        <Link href="/admin/articles/new" className={cn(buttonVariants(), "gap-2 self-start sm:self-auto")}>
+          <PenLine className="size-4" aria-hidden />
+          {t("aiArticlesWriteNew")}
+        </Link>
       </div>
 
       {/* Stats */}

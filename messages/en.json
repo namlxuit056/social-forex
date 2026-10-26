@@ -1668,7 +1668,8 @@
     "reportTargetSignalComment": "Signal comment",
     "signalSymbol": "Symbol",
     "reportTargetReview": "Provider review",
-    "viewReview": "View review"
+    "viewReview": "View review",
+    "aiArticlesWriteNew": "Write new article"
   },
   "vip": {
     "title": "Upgrade to VIP",
