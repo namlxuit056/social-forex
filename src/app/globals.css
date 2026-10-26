@@ -19,6 +19,18 @@
 .article-body th { background: hsl(var(--muted)); font-weight: 600; }
 .article-body hr { border-color: hsl(var(--border)); margin: 1.5rem 0; }
 
+/* Article with its own <style> (.article-custom, see src/lib/article-styles.ts): restore the
+   browser defaults Tailwind's preflight resets, at zero specificity so the article's CSS wins. */
+:where(.article-custom) h1 { font-size: 2em; font-weight: 700; margin: 0.67em 0; }
+:where(.article-custom) h2 { font-size: 1.5em; font-weight: 700; margin: 0.83em 0; }
+:where(.article-custom) h3 { font-size: 1.17em; font-weight: 700; margin: 1em 0; }
+:where(.article-custom) h4, :where(.article-custom) h5, :where(.article-custom) h6 { font-weight: 700; margin: 1.33em 0; }
+:where(.article-custom) p { margin: 1em 0; }
+:where(.article-custom) ul { list-style: disc; margin: 1em 0; padding-left: 40px; }
+:where(.article-custom) ol { list-style: decimal; margin: 1em 0; padding-left: 40px; }
+:where(.article-custom) a { text-decoration: underline; }
+:where(.article-custom) th { font-weight: 700; }
+
 /* Chat message body — markdown rendered from AI replies, compact for a chat bubble */
 .chat-message-body p { margin: 0.35rem 0; line-height: 1.6; }
 .chat-message-body p:first-child { margin-top: 0; }

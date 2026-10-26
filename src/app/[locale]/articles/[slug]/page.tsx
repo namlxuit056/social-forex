@@ -248,7 +248,12 @@ export default async function ArticlePage({ params }: Props) {
 
           {body.css ? <style dangerouslySetInnerHTML={{ __html: body.css }} /> : null}
           <div
-            className={`article-body ${ARTICLE_SCOPE_CLASS} prose prose-invert max-w-none text-sm leading-relaxed text-foreground/90`}
+            // An article with its own CSS owns its typography; the site's .article-body rules would override it
+            className={
+              body.css
+                ? `${ARTICLE_SCOPE_CLASS} max-w-none text-sm`
+                : "article-body prose prose-invert max-w-none text-sm leading-relaxed text-foreground/90"
+            }
             // Body is authored by admin/AI only, and sanitized; CSS is scoped to this wrapper
             dangerouslySetInnerHTML={{ __html: body.html }}
           />
