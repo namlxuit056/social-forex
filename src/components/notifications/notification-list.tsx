@@ -27,7 +27,8 @@ export type NotificationRow = {
     | "SCREENER_ALERT"
     | "MT5_AUTO_CLOSE"
     | "CALENDAR_ACTUAL_SIGNAL"
-    | "TECHNICAL_RATING_SIGNAL";
+    | "TECHNICAL_RATING_SIGNAL"
+    | "TRADING_AGENTS_DONE";
   createdAt: string;
   readAt: string | null;
   signal: { id: string; symbol: string; direction: string } | null;
@@ -78,6 +79,18 @@ function asCalendarActualMeta(meta: NotificationRow["meta"]): CalendarActualMeta
   };
 }
 
+type TradingAgentsMeta = { runId: string; symbol: string; status: string; rating: string | null };
+
+function asTradingAgentsMeta(meta: NotificationRow["meta"]): TradingAgentsMeta | null {
+  if (!meta || typeof meta.runId !== "string" || typeof meta.symbol !== "string") return null;
+  return {
+    runId: meta.runId,
+    symbol: meta.symbol,
+    status: typeof meta.status === "string" ? meta.status : "DONE",
+    rating: typeof meta.rating === "string" ? meta.rating : null,
+  };
+}
+
 const EXTERNAL_SOURCES = ["cot", "oandaBook", "myfxbook", "igDailyfx"] as const;
 type ExternalSource = (typeof EXTERNAL_SOURCES)[number];
 
@@ -106,6 +119,7 @@ export function NotificationList({
 }) {
   const t = useTranslations("notifications");
   const ts = useTranslations("signalSources");
+  const tta = useTranslations("tradingAgents");
   // Optimistic: đánh dấu read ngay khi click, revert nếu server action fail
   const [optimisticReadIds, setOptimisticReadIds] = useState<ReadonlySet<string>>(
     () => new Set(),
@@ -140,6 +154,8 @@ export function NotificationList({
           n.kind === "TECHNICAL_RATING_SIGNAL" ? asExternalSignalMeta(n.meta) : null;
         const calendarMeta =
           n.kind === "CALENDAR_ACTUAL_SIGNAL" ? asCalendarActualMeta(n.meta) : null;
+        const agentsMeta =
+          n.kind === "TRADING_AGENTS_DONE" ? asTradingAgentsMeta(n.meta) : null;
         const href =
           n.kind === "USER_FOLLOWED" && n.actor
             ? `/u/${n.actor.id}`
@@ -159,6 +175,10 @@ export function NotificationList({
                           : "/calendar"
                         : n.kind === "TECHNICAL_RATING_SIGNAL"
                           ? "/quotes/technical-rating"
+                          : n.kind === "TRADING_AGENTS_DONE"
+                            ? agentsMeta
+                              ? `/trading-agents?run=${agentsMeta.runId}`
+                              : "/trading-agents"
                           : n.signal
                             ? `/signals/${n.signal.id}`
                             : "/notifications";
@@ -219,6 +239,13 @@ export function NotificationList({
                                       { symbol: ratingMeta.symbol },
                                     )
                                   : t("technicalRatingSignal")
+                              : n.kind === "TRADING_AGENTS_DONE" && agentsMeta
+                                ? agentsMeta.status === "DONE"
+                                  ? t("tradingAgentsDone", {
+                                      symbol: agentsMeta.symbol,
+                                      rating: tta(`rating.${agentsMeta.rating ?? "REVIEW"}`),
+                                    })
+                                  : t("tradingAgentsFailed", { symbol: agentsMeta.symbol })
                               : n.signal
                                 ? t("signalNew", {
                                   symbol: n.signal.symbol,

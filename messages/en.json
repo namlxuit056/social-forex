@@ -1452,7 +1452,9 @@
     "calendarActualSignalBearish": "{event} ({currency}): actual data is out → {currency} weakens, see buy/sell pairs",
     "technicalRatingSignal": "A confident technical signal (TradingView) fired for a symbol you follow",
     "technicalRatingSignalBuy": "{symbol}: strong technical BUY signal",
-    "technicalRatingSignalSell": "{symbol}: strong technical SELL signal"
+    "technicalRatingSignalSell": "{symbol}: strong technical SELL signal",
+    "tradingAgentsDone": "{symbol}: AI Agents analysis ready — {rating}",
+    "tradingAgentsFailed": "{symbol}: AI Agents analysis failed"
   },
   "auth": {
     "signInTitle": "Sign in",
@@ -2798,7 +2800,19 @@
     "calendarActualSell": "SELL",
     "technicalRatingBuyTitle": "{symbol}: strong technical BUY signal",
     "technicalRatingSellTitle": "{symbol}: strong technical SELL signal",
-    "technicalRatingBody": "Reference entry: {entryLow}–{entryHigh} · SL {stopLoss} · TP {takeProfit}"
+    "technicalRatingBody": "Reference entry: {entryLow}–{entryHigh} · SL {stopLoss} · TP {takeProfit}",
+    "tradingAgentsDoneTitle": "{symbol}: AI Agents analysis is ready",
+    "tradingAgentsDoneBody": "Verdict: {rating}. Tap to read the full report.",
+    "tradingAgentsFailedTitle": "{symbol}: AI Agents analysis failed",
+    "tradingAgentsFailedBody": "The analysis did not finish, you can run it again.",
+    "tradingAgentsRating": {
+      "Buy": "Buy",
+      "Overweight": "Lean buy",
+      "Hold": "Stay out",
+      "Underweight": "Lean sell",
+      "Sell": "Sell",
+      "REVIEW": "Needs review"
+    }
   },
   "missions": {
     "title": "Beginner mission board",
@@ -2948,8 +2962,8 @@
       "social": "Social sentiment"
     },
     "run": "Run analysis",
-    "runHint": "Usually takes 3–10 minutes. Up to 5 runs per day.",
-    "running": "The agents are analysing and debating… this page updates when they finish (3–10 minutes).",
+    "runHint": "Runs in the background for 3–10 minutes and notifies you when done. Up to 5 runs per day.",
+    "running": "The agents are working in the background (3–10 minutes). You can leave this page — you'll get a notification when it's done.",
     "failed": "The analysis failed.",
     "finalDecision": "Final decision",
     "history": "Your analyses",

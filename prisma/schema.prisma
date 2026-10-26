@@ -299,6 +299,7 @@ enum NotificationKind {
   MT5_AUTO_CLOSE
   CALENDAR_ACTUAL_SIGNAL
   TECHNICAL_RATING_SIGNAL
+  TRADING_AGENTS_DONE
 }
 
 model Notification {
@@ -1455,6 +1456,8 @@ model TradingAgentsRun {
   tradeDate  String    // YYYY-MM-DD analysis date
   language   String    @default("vi")
   analysts   String[]
+  /// Other users who asked for this same run while it was in progress — notified with the owner.
+  watcherIds String[]  @default([])
   status     String    @default("QUEUED") // QUEUED | RUNNING | DONE | ERROR
   rating     String?   // Buy | Overweight | Hold | Underweight | Sell | REVIEW
   decision   String?   // Portfolio Manager's final decision (markdown)

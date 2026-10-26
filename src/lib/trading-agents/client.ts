@@ -1,5 +1,7 @@
-import type { TradingAgentsRun } from "@/generated/prisma/client";
+import type { Prisma, TradingAgentsRun } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
+import { sendLocalizedPushToUser } from "@/lib/push-i18n";
+import { revalidateNotificationSurfaces } from "@/lib/revalidate-notification-surfaces";
 
 /**
  * Client for the TradingAgents sidecar (services/trading-agents, pm2 `sf-agents`).
@@ -19,6 +21,13 @@ export const TRADING_AGENTS_REPORT_KEYS = [
   "investment_plan",
   "trader_investment_plan",
 ] as const;
+
+const RATINGS = ["Buy", "Overweight", "Hold", "Underweight", "Sell", "REVIEW"] as const;
+type Rating = (typeof RATINGS)[number];
+
+function asRating(value: string | null): Rating {
+  return RATINGS.includes(value as Rating) ? (value as Rating) : "REVIEW";
+}
 
 // A run takes 3–10 minutes; past this it is treated as lost.
 const RUN_TIMEOUT_MS = 30 * 60 * 1000;
@@ -85,28 +94,95 @@ export async function syncTradingAgentsRun(run: TradingAgentsRun): Promise<Tradi
   if (!job) return timedOut ? markError(run, "timeout") : run;
 
   if (job.status === "done") {
-    return prisma.tradingAgentsRun.update({
-      where: { id: run.id },
-      data: {
-        status: "DONE",
-        rating: job.rating,
-        decision: job.final_decision,
-        reports: job.reports,
-        finishedAt: new Date(),
-      },
+    return finish(run, {
+      status: "DONE",
+      rating: job.rating,
+      decision: job.final_decision,
+      reports: job.reports,
     });
   }
   if (job.status === "error") return markError(run, job.error ?? "unknown");
   if (timedOut) return markError(run, "timeout");
-  if (job.status === "running" && run.status !== "RUNNING") {
+  if (job.status === "running" && run.status === "QUEUED") {
     return prisma.tradingAgentsRun.update({ where: { id: run.id }, data: { status: "RUNNING" } });
   }
   return run;
 }
 
-function markError(run: TradingAgentsRun, error: string) {
-  return prisma.tradingAgentsRun.update({
-    where: { id: run.id },
-    data: { status: "ERROR", error, finishedAt: new Date() },
+/** Sync every unfinished run — called by the sidecar when a job ends, and by cron as a backstop. */
+export async function syncUnfinishedTradingAgentsRuns(): Promise<number> {
+  const runs = await prisma.tradingAgentsRun.findMany({
+    where: { status: { in: ["QUEUED", "RUNNING"] } },
   });
+  let finished = 0;
+  for (const run of runs) {
+    if (isRunFinished((await syncTradingAgentsRun(run)).status)) finished += 1;
+  }
+  return finished;
+}
+
+function markError(run: TradingAgentsRun, error: string) {
+  return finish(run, { status: "ERROR", error });
+}
+
+/**
+ * Move an unfinished run to DONE/ERROR. The conditional update makes the
+ * transition happen once even when the callback, cron and a page poll race,
+ * and only the winner notifies.
+ */
+async function finish(
+  run: TradingAgentsRun,
+  data: {
+    status: "DONE" | "ERROR";
+    rating?: string | null;
+    decision?: string | null;
+    reports?: Prisma.InputJsonValue;
+    error?: string;
+  },
+): Promise<TradingAgentsRun> {
+  const { count } = await prisma.tradingAgentsRun.updateMany({
+    where: { id: run.id, status: { in: ["QUEUED", "RUNNING"] } },
+    data: { ...data, finishedAt: new Date() },
+  });
+  const updated = await prisma.tradingAgentsRun.findUniqueOrThrow({ where: { id: run.id } });
+  if (count === 1) await notifyRunFinished(updated);
+  return updated;
+}
+
+async function notifyRunFinished(run: TradingAgentsRun) {
+  const userIds = [...new Set([run.userId, ...run.watcherIds])];
+  const meta = { runId: run.id, symbol: run.symbol, status: run.status, rating: run.rating };
+  const url = `/trading-agents?run=${run.id}`;
+
+  for (const userId of userIds) {
+    await prisma.notification.upsert({
+      where: { userId_dedupeKey: { userId, dedupeKey: `ta:${run.id}` } },
+      create: { userId, kind: "TRADING_AGENTS_DONE", dedupeKey: `ta:${run.id}`, meta },
+      update: {},
+    });
+    try {
+      await sendLocalizedPushToUser(userId, (t) =>
+        run.status === "DONE"
+          ? {
+              title: t("tradingAgentsDoneTitle", { symbol: run.symbol }),
+              body: t("tradingAgentsDoneBody", {
+                rating: t(`tradingAgentsRating.${asRating(run.rating)}`),
+              }),
+              url,
+            }
+          : {
+              title: t("tradingAgentsFailedTitle", { symbol: run.symbol }),
+              body: t("tradingAgentsFailedBody"),
+              url,
+            },
+      );
+    } catch {
+      // Non-blocking
+    }
+  }
+  try {
+    revalidateNotificationSurfaces();
+  } catch {
+    // Throws when reached from a page render (the /trading-agents poll path); the bell refreshes on next navigation.
+  }
 }

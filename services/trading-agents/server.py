@@ -19,6 +19,7 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Literal
 
+import requests
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, Header, HTTPException
 from pydantic import BaseModel, Field
@@ -43,6 +44,8 @@ logging.basicConfig(level=logging.INFO)
 
 SECRET = os.getenv("TRADING_AGENTS_SECRET") or os.getenv("CRON_SECRET") or ""
 CONCURRENCY = int(os.getenv("TRADING_AGENTS_CONCURRENCY", "1"))
+# toolforex route that syncs finished runs and notifies their users.
+CALLBACK_URL = os.getenv("TRADING_AGENTS_CALLBACK_URL", "http://127.0.0.1:3000/api/trading-agents/sync")
 MAX_JOBS_KEPT = 200
 
 LANGUAGES = {"vi": "Vietnamese", "en": "English"}
@@ -124,6 +127,16 @@ def _execute(req: RunRequest) -> None:
         job.status = "error"
     finally:
         job.finished_at = _now()
+        _notify_finished(req.id)
+
+
+def _notify_finished(run_id: str) -> None:
+    """Tell toolforex a job ended so it saves the result and notifies now; its
+    5-minute cron picks the run up anyway if this call is lost."""
+    try:
+        requests.post(CALLBACK_URL, headers={"Authorization": f"Bearer {SECRET}"}, timeout=30)
+    except requests.RequestException as exc:
+        logger.warning("callback for run %s failed: %s", run_id, exc)
 
 
 @app.get("/health")

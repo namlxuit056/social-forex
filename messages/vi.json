@@ -1452,7 +1452,9 @@
     "calendarActualSignalBearish": "{event} ({currency}): có số liệu thực tế → {currency} yếu đi, xem cặp buy/sell",
     "technicalRatingSignal": "Có tín hiệu kỹ thuật chắc chắn (TradingView) cho symbol bạn theo dõi",
     "technicalRatingSignalBuy": "{symbol}: Tín hiệu kỹ thuật MUA mạnh",
-    "technicalRatingSignalSell": "{symbol}: Tín hiệu kỹ thuật BÁN mạnh"
+    "technicalRatingSignalSell": "{symbol}: Tín hiệu kỹ thuật BÁN mạnh",
+    "tradingAgentsDone": "{symbol}: AI Agents đã phân tích xong — {rating}",
+    "tradingAgentsFailed": "{symbol}: AI Agents phân tích thất bại"
   },
   "auth": {
     "signInTitle": "Đăng nhập",
@@ -2798,7 +2800,19 @@
     "calendarActualSell": "BÁN",
     "technicalRatingBuyTitle": "{symbol}: Tín hiệu kỹ thuật MUA mạnh",
     "technicalRatingSellTitle": "{symbol}: Tín hiệu kỹ thuật BÁN mạnh",
-    "technicalRatingBody": "Vùng vào tham khảo: {entryLow}–{entryHigh} · SL {stopLoss} · TP {takeProfit}"
+    "technicalRatingBody": "Vùng vào tham khảo: {entryLow}–{entryHigh} · SL {stopLoss} · TP {takeProfit}",
+    "tradingAgentsDoneTitle": "{symbol}: AI Agents đã phân tích xong",
+    "tradingAgentsDoneBody": "Kết luận: {rating}. Bấm để xem báo cáo đầy đủ.",
+    "tradingAgentsFailedTitle": "{symbol}: AI Agents phân tích thất bại",
+    "tradingAgentsFailedBody": "Lần phân tích không hoàn tất, bạn có thể chạy lại.",
+    "tradingAgentsRating": {
+      "Buy": "Mua",
+      "Overweight": "Nghiêng mua",
+      "Hold": "Đứng ngoài",
+      "Underweight": "Nghiêng bán",
+      "Sell": "Bán",
+      "REVIEW": "Cần xem lại"
+    }
   },
   "missions": {
     "title": "Bảng nhiệm vụ người mới",
@@ -2948,8 +2962,8 @@
       "social": "Tâm lý MXH"
     },
     "run": "Chạy phân tích",
-    "runHint": "Thường mất 3–10 phút. Tối đa 5 lần/ngày.",
-    "running": "Các agent đang phân tích và tranh luận… trang sẽ tự cập nhật khi xong (3–10 phút).",
+    "runHint": "Chạy ngầm 3–10 phút, xong sẽ báo qua thông báo. Tối đa 5 lần/ngày.",
+    "running": "Các agent đang phân tích ngầm (3–10 phút). Bạn có thể rời trang — sẽ có thông báo khi xong.",
     "failed": "Phân tích thất bại.",
     "finalDecision": "Quyết định cuối cùng",
     "history": "Lịch sử phân tích của bạn",

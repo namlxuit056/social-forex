@@ -65,9 +65,18 @@ export async function startTradingAgentsRun(input: {
       ],
     },
     orderBy: { createdAt: "desc" },
-    select: { id: true },
+    select: { id: true, userId: true, status: true, watcherIds: true },
   });
-  if (reusable) return { runId: reusable.id };
+  if (reusable) {
+    // Joining a run still in progress: get notified when it finishes too.
+    if (reusable.status !== "DONE" && reusable.userId !== userId && !reusable.watcherIds.includes(userId)) {
+      await prisma.tradingAgentsRun.update({
+        where: { id: reusable.id },
+        data: { watcherIds: { push: userId } },
+      });
+    }
+    return { runId: reusable.id };
+  }
 
   if (!isAdmin) {
     const usedToday = await prisma.tradingAgentsRun.count({
