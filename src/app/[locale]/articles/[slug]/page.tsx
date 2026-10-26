@@ -1,5 +1,6 @@
 import { jsonLdHtml } from "@/lib/json-ld";
 import { sanitizeContentHtml } from "@/lib/safe-html";
+import { ARTICLE_SCOPE_CLASS, scopeArticleCss, splitArticleHtml } from "@/lib/article-styles";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -33,6 +34,18 @@ function ensureHtml(body: string): string {
     ? body
     : (marked.parse(trimmed, { async: false }) as string);
   return sanitizeContentHtml(html.replace(PROMPT_LABEL_IN_HEADING, "$1"));
+}
+
+/**
+ * Body HTML plus scoped CSS. Only admin-written ("manual") articles keep their
+ * <style> blocks — AI articles are written from web results, so their CSS is dropped.
+ */
+function renderBody(body: string, trendSource: string | null) {
+  const { html, css } = splitArticleHtml(body);
+  return {
+    html: ensureHtml(html),
+    css: trendSource === "manual" ? scopeArticleCss(css) : "",
+  };
 }
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
@@ -119,6 +132,8 @@ export default async function ArticlePage({ params }: Props) {
     const prefix = fallback.locale === routing.defaultLocale ? "" : `/${fallback.locale}`;
     redirect(`${prefix}/articles/${slug}`);
   }
+
+  const body = renderBody(article.body, article.trendSource);
 
   const articleUrl = absoluteUrl(`/articles/${slug}`, locale);
   const jsonLd = {
@@ -231,10 +246,11 @@ export default async function ArticlePage({ params }: Props) {
             </div>
           )}
 
+          {body.css ? <style dangerouslySetInnerHTML={{ __html: body.css }} /> : null}
           <div
-            className="article-body prose prose-invert max-w-none text-sm leading-relaxed text-foreground/90"
-            // Body is authored by admin/AI only — trusted HTML source
-            dangerouslySetInnerHTML={{ __html: ensureHtml(article.body) }}
+            className={`article-body ${ARTICLE_SCOPE_CLASS} prose prose-invert max-w-none text-sm leading-relaxed text-foreground/90`}
+            // Body is authored by admin/AI only, and sanitized; CSS is scoped to this wrapper
+            dangerouslySetInnerHTML={{ __html: body.html }}
           />
 
           <Disclaimer variant="compact" />

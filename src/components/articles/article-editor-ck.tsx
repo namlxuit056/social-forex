@@ -16,6 +16,7 @@ import {
   ImageToolbar,
   ImageUpload,
   FileRepository,
+  FullPage,
   GeneralHtmlSupport,
   Link,
   List,
@@ -64,7 +65,7 @@ const PLUGINS = [
   Autoformat, BlockQuote, Bold, Essentials, FileRepository, Heading,
   HorizontalLine, Image, ImageCaption, ImageResize, ImageStyle, ImageToolbar,
   ImageUpload, Indent, IndentBlock, Italic, Link, List, Paragraph, Table, TableToolbar,
-  GeneralHtmlSupport, SourceEditing,
+  FullPage, GeneralHtmlSupport, SourceEditing,
 ];
 
 const TOOLBAR = [
@@ -99,10 +100,11 @@ const EDITOR_CONFIG = {
   },
   table: { contentToolbar: ["tableColumn", "tableRow", "mergeTableCells"] },
   link: { addTargetToExternalLinks: true },
-  // Keep class/style on hand-written HTML (Source mode). The public page still
-  // runs it through sanitizeContentHtml, which drops scripts and unsafe styles.
+  // Keep class/style on hand-written HTML (Source mode), and with FullPage a pasted
+  // whole page keeps its <head><style>. The public page sanitizes the HTML and
+  // scopes that CSS to the article (src/lib/article-styles.ts).
   htmlSupport: {
-    allow: [{ name: /^(div|span|p|h[2-6]|ul|ol|li|table|thead|tbody|tr|th|td|blockquote|strong|em|figure|section)$/, classes: true as const, styles: true as const }],
+    allow: [{ name: /^(div|span|p|h[1-6]|ul|ol|li|table|thead|tbody|tr|th|td|blockquote|strong|em|figure|section)$/, classes: true as const, styles: true as const }],
   },
 };
 

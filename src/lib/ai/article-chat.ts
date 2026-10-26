@@ -1,3 +1,4 @@
+import { splitArticleHtml } from "@/lib/article-styles";
 import type { AppLocale } from "@/lib/api-locale";
 import { createAiClient, resolveAiProvider, resolveMaxTokens } from "@/lib/ai/provider";
 import type { AiAdvisorMessage } from "@/lib/ai/types";
@@ -24,7 +25,8 @@ function responseLanguage(locale: AppLocale) {
 }
 
 function stripHtml(html: string) {
-  return html
+  // Drop <style>/<head> first so CSS and page titles don't read as article text.
+  return splitArticleHtml(html).html
     .replace(/<[^>]+>/g, " ")
     .replace(/&amp;/g, "&")
     .replace(/&quot;/g, '"')
