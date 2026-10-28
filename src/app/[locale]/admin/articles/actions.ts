@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { unescapePastedHtml } from "@/lib/article-styles";
 import {
   generateArticleForCustomKeyword,
   runAiArticleAutomation,
@@ -135,7 +136,7 @@ const updateArticleSchema = z.object({
   title: z.string().min(8).max(140).trim(),
   summary: z.string().min(30).max(280).trim(),
   metaDescription: z.string().min(50).max(180).trim(),
-  body: z.string().min(100).max(200000).trim(),
+  body: z.string().min(100).max(200000).trim().transform(unescapePastedHtml),
   imageUrl: z.string().trim().max(2000).optional().or(z.literal("")),
   imageAlt: z.string().trim().max(200).optional().or(z.literal("")),
 });

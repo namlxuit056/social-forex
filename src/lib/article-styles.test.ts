@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { scopeArticleCss, splitArticleHtml } from "./article-styles";
+import { scopeArticleCss, splitArticleHtml, unescapePastedHtml } from "./article-styles";
 
 describe("splitArticleHtml", () => {
   it("keeps only the body of a pasted full page and collects its styles", () => {
@@ -49,5 +49,25 @@ describe("scopeArticleCss", () => {
 
   it("returns an empty string for unparseable CSS", () => {
     expect(scopeArticleCss(".a{color:red")).toBe("");
+  });
+});
+
+describe("unescapePastedHtml", () => {
+  it("restores HTML source that was pasted into the visual editor", () => {
+    expect(
+      unescapePastedHtml("<p>&lt;style&gt;<br>a{b:c}<br>&lt;/style&gt;<br>&lt;div class=\"x\"&gt;A &amp;amp; B&lt;/div&gt;</p>"),
+    ).toBe('<style>\na{b:c}\n</style>\n<div class="x">A &amp; B</div>');
+  });
+
+  it("leaves real HTML and plain prose unchanged", () => {
+    expect(unescapePastedHtml("<h2>X</h2><p>&lt;b&gt;</p>")).toBe("<h2>X</h2><p>&lt;b&gt;</p>");
+    expect(unescapePastedHtml("<p>1 &lt; 2</p>")).toBe("<p>1 &lt; 2</p>");
+  });
+});
+
+describe("splitArticleHtml head tags without <head>", () => {
+  it("drops title, meta and link tags", () => {
+    const { html } = splitArticleHtml('<title>T</title><meta name="a"><link rel="x" href="y"><div>ok</div>');
+    expect(html).toBe("<div>ok</div>");
   });
 });

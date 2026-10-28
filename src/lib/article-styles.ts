@@ -30,8 +30,31 @@ export function splitArticleHtml(body: string): { html: string; css: string } {
     : withoutStyles
         .replace(/<!doctype[^>]*>/gi, "")
         .replace(/<head\b[\s\S]*?<\/head>/gi, "")
+        .replace(/<title\b[\s\S]*?<\/title>/gi, "")
+        .replace(/<(?:meta|link|base)\b[^>]*>/gi, "")
         .replace(/<\/?(?:html|body)\b[^>]*>/gi, "");
   return { html: html.trim(), css: css.join("\n") };
+}
+
+const ENTITIES: Record<string, string> = {
+  "&lt;": "<", "&gt;": ">", "&quot;": '"', "&#39;": "'", "&nbsp;": " ", "&amp;": "&",
+};
+
+/**
+ * HTML source pasted into the visual editor is stored as escaped text inside
+ * <p>/<br> (`<p>&lt;div&gt;…</p>`). Turns such a body back into the HTML it
+ * spells out; any other body is returned unchanged.
+ */
+export function unescapePastedHtml(body: string): string {
+  const tags = body.match(/<\/?([a-z][a-z0-9]*)\b[^>]*>/gi) ?? [];
+  const onlyTextBlocks = tags.every((tag) => /^<\/?(?:p|br)\b/i.test(tag));
+  if (!onlyTextBlocks || !/&lt;\/?[a-z][a-z0-9]*\b[^]*?&gt;/i.test(body)) return body;
+  return body
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/p>\s*<p\b[^>]*>/gi, "\n")
+    .replace(/<\/?p\b[^>]*>/gi, "")
+    .replace(/&(?:lt|gt|quot|#39|nbsp|amp);/g, (entity) => ENTITIES[entity])
+    .trim();
 }
 
 function scopeSelector(selector: string): string {

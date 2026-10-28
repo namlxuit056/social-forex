@@ -1,6 +1,6 @@
 import { jsonLdHtml } from "@/lib/json-ld";
 import { sanitizeContentHtml } from "@/lib/safe-html";
-import { ARTICLE_SCOPE_CLASS, scopeArticleCss, splitArticleHtml } from "@/lib/article-styles";
+import { ARTICLE_SCOPE_CLASS, scopeArticleCss, splitArticleHtml, unescapePastedHtml } from "@/lib/article-styles";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -41,10 +41,12 @@ function ensureHtml(body: string): string {
  * <style> blocks — AI articles are written from web results, so their CSS is dropped.
  */
 function renderBody(body: string, trendSource: string | null) {
-  const { html, css } = splitArticleHtml(body);
+  const manual = trendSource === "manual";
+  // Saved before the editor learned to decode pasted HTML source.
+  const { html, css } = splitArticleHtml(manual ? unescapePastedHtml(body) : body);
   return {
     html: ensureHtml(html),
-    css: trendSource === "manual" ? scopeArticleCss(css) : "",
+    css: manual ? scopeArticleCss(css) : "",
   };
 }
 
