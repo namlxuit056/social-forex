@@ -29,6 +29,17 @@ describe("scopeArticleCss", () => {
     expect(out).toContain(".article-custom .card h2, .article-custom p{color:var(--g)}");
   });
 
+  it("makes the article's light/dark theme follow the site's .dark class", () => {
+    const out = scopeArticleCss(
+      ':root{--bg:#fff} @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#000} .x{color:red}} :root[data-theme="dark"]{--bg:#000} body::before{content:""}',
+    );
+    expect(out).toContain(".article-custom{--bg:#fff}");
+    expect(out).toContain(".dark .article-custom{--bg:#000}");
+    expect(out).toContain(".dark .article-custom .x{color:red}");
+    expect(out).toContain(".article-custom::before{");
+    expect(out).not.toMatch(/prefers-color-scheme|data-theme|\.article-custom :not/);
+  });
+
   it("scopes rules inside @media but not keyframe steps", () => {
     const out = scopeArticleCss("@media(max-width:480px){.stats{gap:4px}} @keyframes f{from{opacity:0}to{opacity:1}}");
     expect(out).toContain(".article-custom .stats{gap:4px}");

@@ -8,7 +8,15 @@ const ALLOWED_AT_RULES = new Set(["media", "supports", "keyframes", "-webkit-key
 // Remote loads (tracking / exfiltration) and legacy script-in-CSS vectors.
 const UNSAFE_VALUE = /url\s*\(|image-set\s*\(|expression\s*\(|javascript:|@import/i;
 const UNSAFE_PROPS = new Set(["behavior", "-moz-binding"]);
-const PAGE_ROOT = /^(?:html\s*)?(?:body|:root|html)\b\s*/i;
+const PAGE_ROOT = /^(?:html\s*)?(?:body|:root|html)(?![-\w])/i;
+// The rest of the root's compound selector: `:root:not([data-theme="light"])`, `body::before`.
+const ROOT_COMPOUND = /^(?:\[[^\]]*\]|:not\([^)]*\)|::?[-\w]+(?:\([^)]*\))?|[.#][-\w]+)*/;
+const THEME_ATTR = /:not\(\s*\[data-theme=["']?(dark|light)["']?\]\s*\)|\[data-theme=["']?(dark|light)["']?\]/gi;
+const COLOR_SCHEME_MEDIA = /^\s*\(\s*prefers-color-scheme\s*:\s*(dark|light)\s*\)\s*$/i;
+
+type Theme = "dark" | "light";
+// The site toggles dark mode with a `.dark` class on <html> (next-themes).
+const THEME_ANCESTOR: Record<Theme, string> = { dark: ".dark ", light: "html:not(.dark) " };
 
 const STYLE_BLOCK = /<style\b[^>]*>([\s\S]*?)<\/style>/gi;
 const BODY_INNER = /<body\b[^>]*>([\s\S]*?)<\/body>/i;
@@ -57,13 +65,26 @@ export function unescapePastedHtml(body: string): string {
     .trim();
 }
 
-function scopeSelector(selector: string): string {
+/**
+ * Prefixes a selector with the article wrapper. Page-level selectors (`body`,
+ * `:root`, `html`) become the wrapper itself; a `[data-theme]` on them, or an
+ * enclosing prefers-color-scheme query, follows the site's theme instead.
+ */
+function scopeSelector(selector: string, mediaTheme?: Theme): string {
   const trimmed = selector.trim();
-  if (PAGE_ROOT.test(trimmed)) {
-    const rest = trimmed.replace(PAGE_ROOT, "");
-    return rest ? `${SCOPE} ${rest}` : SCOPE;
-  }
-  return `${SCOPE} ${trimmed}`;
+  const root = trimmed.match(PAGE_ROOT);
+  if (!root) return `${mediaTheme ? THEME_ANCESTOR[mediaTheme] : ""}${SCOPE} ${trimmed}`;
+
+  const afterRoot = trimmed.slice(root[0].length);
+  const compound = afterRoot.match(ROOT_COMPOUND)?.[0] ?? "";
+  let theme = mediaTheme;
+  // `:not([data-theme="light"])` is always true on the wrapper; only an explicit theme counts.
+  const ownCompound = compound.replace(THEME_ATTR, (...groups: (string | undefined)[]) => {
+    if (groups[2]) theme = groups[2].toLowerCase() as Theme;
+    return "";
+  });
+  const ancestor = theme ? THEME_ANCESTOR[theme] : "";
+  return `${ancestor}${SCOPE}${ownCompound}${afterRoot.slice(compound.length)}`;
 }
 
 function insideKeyframes(rule: Rule) {
@@ -90,9 +111,20 @@ export function scopeArticleCss(css: string): string {
   root.walkAtRules((atRule) => {
     if (!ALLOWED_AT_RULES.has(atRule.name.toLowerCase())) atRule.remove();
   });
+  const themed = new WeakSet<Rule>();
+  root.walkAtRules("media", (media) => {
+    const theme = media.params.match(COLOR_SCHEME_MEDIA)?.[1]?.toLowerCase() as Theme | undefined;
+    if (!theme) return;
+    media.walkRules((rule) => {
+      if (insideKeyframes(rule)) return;
+      rule.selectors = rule.selectors.map((selector) => scopeSelector(selector, theme));
+      themed.add(rule);
+    });
+    media.replaceWith(media.nodes ?? []);
+  });
   root.walkRules((rule) => {
-    if (insideKeyframes(rule)) return;
-    rule.selectors = rule.selectors.map(scopeSelector);
+    if (insideKeyframes(rule) || themed.has(rule)) return;
+    rule.selectors = rule.selectors.map((selector) => scopeSelector(selector));
   });
   root.walkDecls((decl) => {
     const prop = decl.prop.toLowerCase();
