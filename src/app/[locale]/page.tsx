@@ -26,6 +26,10 @@ import { absoluteUrl } from "@/lib/site-url";
 import { routing } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 
+// ISR: the page has no per-visitor data (session UI is client-side), so render
+// once a minute instead of on every request. Live prices load client-side.
+export const revalidate = 60;
+
 const blocks = [
   {
     titleKey: "block_beginner_title" as const,
@@ -99,7 +103,8 @@ export async function generateMetadata({
     .map((k) => k.trim())
     .filter(Boolean);
   return {
-    title: t("metaTitle"),
+    // metaTitle already starts with the brand — skip the layout's "· Social Forex" suffix.
+    title: { absolute: t("metaTitle") },
     description: t("metaDescription"),
     ...(keywords.length > 0 ? { keywords } : {}),
     alternates: {

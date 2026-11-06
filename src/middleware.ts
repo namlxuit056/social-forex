@@ -12,12 +12,18 @@ const intlMiddleware = createMiddleware(routing);
  */
 export default function middleware(request: NextRequest) {
   const host = request.headers.get("host") ?? "";
-  if (host.startsWith("www.")) {
+  // Behind Cloudflare Tunnel the origin always sees plain http; the visitor's
+  // scheme arrives in x-forwarded-proto. Without this, http:// serves a 200
+  // duplicate of every page instead of redirecting.
+  const isLocal = /^(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$/.test(host);
+  const isPlainHttp = !isLocal && request.headers.get("x-forwarded-proto") === "http";
+  if (host.startsWith("www.") || isPlainHttp) {
     const url = request.nextUrl.clone();
-    url.host = host.slice(4);
+    url.protocol = "https:";
+    url.host = host.startsWith("www.") ? host.slice(4) : host;
     // Self-hosted behind a tunnel, nextUrl carries the internal port (3000).
     url.port = "";
-    return NextResponse.redirect(url, 308);
+    return NextResponse.redirect(url, isPlainHttp ? 301 : 308);
   }
   return intlMiddleware(request);
 }

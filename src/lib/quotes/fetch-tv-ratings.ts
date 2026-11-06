@@ -28,7 +28,8 @@ async function scanMarket(market: TvMarket, tickers: string[]): Promise<Map<stri
         "Recommend.All|15",
       ],
     }),
-    next: { revalidate: 0 },
+    // No `next: { revalidate: 0 }`: it dropped the whole homepage to dynamic
+    // rendering. Uncached is already the default, and callers keep their own TTL cache.
   });
 
   if (!res.ok) {

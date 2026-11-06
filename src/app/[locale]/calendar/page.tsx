@@ -7,7 +7,8 @@ import { PageCtaRow } from "@/components/layout/page-cta-row";
 import { parseCalendarCurrencySearchParams } from "@/lib/calendar/parse-currency-search-params";
 import { resolveCalendarEvents } from "@/lib/calendar/resolve-calendar";
 import { pageCtaItems } from "@/lib/page-cta-i18n";
-import { absoluteUrl } from "@/lib/site-url";
+import { localeAlternates } from "@/lib/site-url";
+import { BreadcrumbJsonLd } from "@/components/seo/breadcrumb-json-ld";
 
 export async function generateMetadata({
   params,
@@ -18,9 +19,9 @@ export async function generateMetadata({
   setRequestLocale(locale);
   const t = await getTranslations("calendar");
   return {
-    title: t("title"),
-    description: t("description"),
-    alternates: { canonical: absoluteUrl("/calendar", locale) },
+    title: t("metaTitle"),
+    description: t("metaDescription"),
+    alternates: localeAlternates("/calendar", locale),
   };
 }
 
@@ -56,6 +57,13 @@ export default async function CalendarPage({
 
   return (
     <div className="space-y-8">
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Social Forex", path: "/" },
+          { name: t("title"), path: "/calendar" },
+        ]}
+        locale={locale}
+      />
       <PageHeader title={t("title")} description={t("description")} />
       <EconomicCalendar
         key={calendarFilterKey}

@@ -56,7 +56,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     for (const route of staticPaths) {
       entries.push({
-        url: `${BASE}${prefix}${route.path}`,
+        // Homepage canonical renders as `https://host/` — match it exactly.
+        url: prefix || route.path ? `${BASE}${prefix}${route.path}` : `${BASE}/`,
         changeFrequency: route.changeFrequency,
         priority: route.priority,
       });

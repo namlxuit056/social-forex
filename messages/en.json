@@ -552,7 +552,9 @@
       "fmpSyncFailedDb": "Could not sync FMP ({message}). Showing DB cache.",
       "fmpPaywallSample": "FMP requires a paid plan. Showing sample data.",
       "fmpSyncFailedSample": "Could not sync FMP ({message}). Showing sample."
-    }
+    },
+    "metaTitle": "Forex Economic Calendar Today — Live Events",
+    "metaDescription": "Today’s forex economic calendar: NFP, CPI, Fed and central bank rate decisions with impact levels, forecasts and actuals. Switch between VN time and UTC."
   },
   "desk": {
     "metaTitle": "Live desk",
@@ -1083,7 +1085,9 @@
     "quizResult": "{correct}/{total} correct — {score}/100 pts",
     "priceActionSectionTitle": "Price Action for beginners",
     "priceActionSectionDesc": "A suggested price action learning path: from reading candles, support and resistance, trend, reversal patterns, to specific entry setups.",
-    "otherLessonsTitle": "Other lessons"
+    "otherLessonsTitle": "Other lessons",
+    "metaTitle": "Free Forex Course: Beginner to Advanced Lessons",
+    "metaDescription": "Free forex lessons from first trade to advanced price action: risk management, position sizing, chart patterns and trading psychology, step by step."
   },
   "articles": {
     "title": "AI forex articles",

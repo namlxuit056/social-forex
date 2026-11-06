@@ -4,6 +4,8 @@ import { Link } from "@/i18n/navigation";
 import { Disclaimer } from "@/components/layout/disclaimer";
 import { PageCtaRow } from "@/components/layout/page-cta-row";
 import { BreadcrumbNav } from "@/components/seo/breadcrumb-nav";
+import { BreadcrumbJsonLd } from "@/components/seo/breadcrumb-json-ld";
+import { ItemListJsonLd } from "@/components/seo/item-list-json-ld";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { getAcademyLessons, getPriceActionPathLessons } from "@/lib/content/academy";
@@ -27,8 +29,8 @@ export async function generateMetadata({
   setRequestLocale(locale);
   const t = await getTranslations("academy");
   return {
-    title: t("title"),
-    description: t("description"),
+    title: t("metaTitle"),
+    description: t("metaDescription"),
     alternates: {
       canonical: absoluteUrl("/academy", locale),
       languages: {
@@ -140,6 +142,20 @@ export default async function AcademyPage({
 
   return (
     <div className="space-y-8">
+      <BreadcrumbJsonLd
+        items={[
+          { name: "Social Forex", path: "/" },
+          { name: t("title"), path: "/academy" },
+        ]}
+        locale={locale}
+      />
+      <ItemListJsonLd
+        name={t("metaTitle")}
+        items={academyLessons.map((l) => ({
+          name: l.title,
+          url: absoluteUrl(`/academy/${l.slug}`, locale),
+        }))}
+      />
       <BreadcrumbNav
         items={[
           { label: tCommon("home"), href: "/" },

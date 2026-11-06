@@ -1,17 +1,11 @@
-import { auth } from "@/auth";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { AccountMenu } from "@/components/layout/account-menu";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
-import { MobileNav } from "@/components/layout/mobile-nav";
 import { SiteNavLink } from "@/components/layout/site-nav-link";
 import { SiteLogo } from "@/components/layout/site-logo";
 import { NavMegaMenu } from "@/components/layout/nav-mega-menu";
-import { NotificationBell } from "@/components/notifications/notification-bell";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { prisma } from "@/lib/prisma";
+import { HeaderSessionArea } from "@/components/layout/header-session-area";
 import {
   primaryNavKeys,
   marketNavKeys,
@@ -26,22 +20,7 @@ const megaMenuGroups = [
 ] as const;
 
 export async function SiteHeader() {
-  const session = await auth();
   const t = await getTranslations("nav");
-  const tc = await getTranslations("common");
-
-  let isStaff = false;
-  let unreadNotifications = 0;
-  if (session?.user?.id) {
-    const u = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { role: true },
-    });
-    isStaff = u?.role === "ADMIN" || u?.role === "MOD";
-    unreadNotifications = await prisma.notification.count({
-      where: { userId: session.user.id, readAt: null },
-    });
-  }
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background">
@@ -91,46 +70,7 @@ export async function SiteHeader() {
           <ThemeToggle />
           <LanguageSwitcher />
 
-          {session?.user ? (
-            <>
-              <NotificationBell initialCount={unreadNotifications} />
-              <Link
-                href="/dashboard"
-                className={cn(
-                  buttonVariants({ size: "sm" }),
-                  "hidden text-xs sm:inline-flex",
-                )}
-              >
-                {tc("dashboard")}
-              </Link>
-              <span className="hidden xl:inline-flex">
-                <AccountMenu
-                  label={session.user.name ?? session.user.email ?? ""}
-                  isStaff={isStaff}
-                />
-              </span>
-            </>
-          ) : (
-            <>
-              <Link
-                href="/auth/signin"
-                className="hidden shrink-0 whitespace-nowrap rounded-md px-2 py-1.5 text-xs font-medium text-muted-foreground transition hover:bg-item-hover hover:text-foreground sm:inline-flex sm:px-2.5 sm:text-sm"
-              >
-                {tc("signIn")}
-              </Link>
-              <Link
-                href="/auth/register"
-                className={cn(
-                  buttonVariants({ size: "sm" }),
-                  "hidden shrink-0 text-xs sm:inline-flex",
-                )}
-              >
-                {tc("signUp")}
-              </Link>
-            </>
-          )}
-
-          <MobileNav isStaff={isStaff} isAuthenticated={!!session?.user} />
+          <HeaderSessionArea />
         </div>
       </div>
 

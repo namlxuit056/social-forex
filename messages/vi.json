@@ -552,7 +552,9 @@
       "fmpSyncFailedDb": "Không đồng bộ FMP ({message}). Hiển thị cache DB.",
       "fmpPaywallSample": "FMP cần gói trả phí. Đang hiển thị dữ liệu mẫu.",
       "fmpSyncFailedSample": "Không đồng bộ FMP ({message}). Hiển thị mẫu."
-    }
+    },
+    "metaTitle": "Lịch kinh tế Forex hôm nay — giờ Việt Nam",
+    "metaDescription": "Lịch kinh tế forex hôm nay: NFP, CPI, lãi suất Fed và ngân hàng trung ương, kèm mức ảnh hưởng, dự báo và thực tế. Chuyển nhanh giữa giờ VN và UTC."
   },
   "desk": {
     "metaTitle": "Bàn live",
@@ -1083,7 +1085,9 @@
     "quizResult": "{correct}/{total} câu đúng — {score}/100 điểm",
     "priceActionSectionTitle": "Price Action cho người mới bắt đầu",
     "priceActionSectionDesc": "Lộ trình học price action theo thứ tự đề xuất: từ đọc nến, vùng hỗ trợ kháng cự, xu hướng, mô hình đảo chiều, đến các setup entry cụ thể.",
-    "otherLessonsTitle": "Các bài học khác"
+    "otherLessonsTitle": "Các bài học khác",
+    "metaTitle": "Học Forex miễn phí từ cơ bản đến nâng cao",
+    "metaDescription": "Khóa học forex miễn phí từ lệnh đầu tiên đến price action nâng cao: quản lý vốn, tính khối lượng lot, mô hình nến và tâm lý giao dịch, từng bước một."
   },
   "articles": {
     "title": "Bài viết AI về forex",

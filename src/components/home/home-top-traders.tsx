@@ -82,7 +82,7 @@ export async function HomeTopTraders() {
         </div>
         <Link
           href="/leaderboard"
-          className="flex shrink-0 items-center gap-1 text-sm text-primary hover:underline"
+          className="flex min-h-6 shrink-0 items-center gap-1 text-sm text-primary hover:underline"
         >
           {t("topTradersViewAll")}
           <ArrowRight className="size-3.5" />

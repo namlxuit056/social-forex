@@ -60,7 +60,7 @@ export async function SiteFooter() {
               href="https://t.me/toolforex"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-xs text-blue-700 hover:text-blue-800 transition dark:text-blue-300 dark:hover:text-blue-200"
+              className="inline-flex min-h-6 items-center text-xs text-blue-700 hover:text-blue-800 transition dark:text-blue-300 dark:hover:text-blue-200"
             >
               t.me/toolforex
             </a>

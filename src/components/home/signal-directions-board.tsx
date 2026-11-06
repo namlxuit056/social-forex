@@ -113,7 +113,7 @@ export async function SignalDirectionsBoard({
         </div>
         <Link
           href="/quotes/technical-rating"
-          className="flex shrink-0 items-center gap-1 text-sm text-primary hover:underline"
+          className="flex min-h-6 shrink-0 items-center gap-1 text-sm text-primary hover:underline"
         >
           {t("signalBoardViewAll")}
           <ArrowRight className="size-3.5" aria-hidden />
