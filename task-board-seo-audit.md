@@ -20,7 +20,7 @@
 | T008 | ⏳ TODO | Chờ chốt từ khóa chính |
 | T009 | ✅ | Bỏ og:url ở layout; sitemap `https://toolforex.xyz/` |
 | T010 | ✅ | 2 link "View…" và link Telegram ở footer: `min-h-6` |
-| T011 | 🟡 một phần | Build và chạy thử trên cổng 3100 đã OK. Chưa test luồng đăng nhập, chưa deploy |
+| T011 | ✅ deploy · ⏳ test đăng nhập | Đã deploy 2026-11-06. Server gốc 3–14ms; công khai 0.67–0.82s (trước 1.5–2.5s), phần còn lại là độ trễ mạng qua tunnel, chưa test luồng đăng nhập |
 
 **Thay đổi ngoài kế hoạch (phát hiện khi build):**
 - Root layout `src/app/layout.tsx` gọi `getLocale()`, hàm này đọc `headers()`, nên mọi trang đều bị render động. Đã xóa file này và chuyển `<html>` vào `src/app/[locale]/layout.tsx` (theo cách Next 16 hướng dẫn).
