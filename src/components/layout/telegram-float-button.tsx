@@ -19,8 +19,8 @@ export function TelegramFloatButton() {
 
       {/* Button with pulse ring */}
       <span className="relative flex h-14 w-14 items-center justify-center">
-        {/* Outer ping ring */}
-        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#229ED9] opacity-25" />
+        {/* Pulse in place: animate-ping scales past the viewport edge and adds a sideways scroll. */}
+        <span className="absolute inline-flex h-full w-full animate-pulse rounded-full bg-[#229ED9] opacity-25" />
         {/* Button circle */}
         <span className="relative flex h-14 w-14 items-center justify-center rounded-full bg-[#229ED9] shadow-[0_4px_20px_rgba(34,158,217,0.5)] transition-transform duration-200 group-hover:scale-110">
           <svg
