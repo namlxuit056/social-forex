@@ -167,7 +167,7 @@ export default async function HomePage({
         <p className="mt-4 max-w-2xl text-base text-muted-foreground md:text-lg">
           {tHome("subtitle")}
         </p>
-        <ul className="mt-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:gap-x-5">
+        <ul className="mt-5 flex flex-col gap-2">
           {(["heroTrust1", "heroTrust2", "heroTrust3"] as const).map((key) => (
             <li
               key={key}

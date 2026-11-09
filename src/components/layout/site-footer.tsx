@@ -30,14 +30,14 @@ export async function SiteFooter() {
               <Link
                 key={l.href}
                 href={l.href}
-                className="inline-flex min-h-6 items-center text-muted-foreground transition hover:text-foreground"
+                className="inline-flex min-h-6 items-center whitespace-nowrap text-muted-foreground transition hover:text-foreground"
               >
                 {tn(l.key)}
               </Link>
             ))}
             <a
               href="/llms.txt"
-              className="inline-flex min-h-6 items-center text-muted-foreground transition hover:text-foreground"
+              className="inline-flex min-h-6 items-center whitespace-nowrap text-muted-foreground transition hover:text-foreground"
             >
               {tf("llmsLink")}
             </a>

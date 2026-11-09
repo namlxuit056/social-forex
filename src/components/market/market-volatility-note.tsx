@@ -216,7 +216,7 @@ export function MarketVolatilityNote({ serverNowIso, locale }: Props) {
                   >
                     {levelLabel(o.level)}
                   </span>
-                  <span className="truncate font-medium text-foreground">
+                  <span className="min-w-0 font-medium text-foreground">
                     {pairLabel(o.key)}
                   </span>
                 </span>
