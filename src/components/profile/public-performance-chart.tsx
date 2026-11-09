@@ -275,7 +275,7 @@ export function PublicPerformanceChart({
             <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
               {t("overviewNetPnl")}
             </p>
-            <p className={cn("mt-1 font-mono text-base font-bold tabular-nums", stats.totalPnl >= 0 ? "text-emerald-500" : "text-red-500")}>
+            <p className={cn("mt-1 font-mono text-base font-bold tabular-nums", stats.totalPnl >= 0 ? "text-success" : "text-danger")}>
               {fmtCurrency(stats.totalPnl)}
             </p>
           </div>
@@ -295,7 +295,7 @@ export function PublicPerformanceChart({
             <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
               {t("overviewWinRate")}
             </p>
-            <p className={cn("mt-1 font-mono text-base font-bold tabular-nums", stats.winRate >= 50 ? "text-emerald-500" : "text-red-500")}>
+            <p className={cn("mt-1 font-mono text-base font-bold tabular-nums", stats.winRate >= 50 ? "text-success" : "text-danger")}>
               {stats.winRate}%
             </p>
             <div className="mt-1 h-0.5 overflow-hidden rounded-full bg-muted">
@@ -316,9 +316,9 @@ export function PublicPerformanceChart({
             {streak.count > 0 && streak.type ? (
               <div className="mt-1 flex items-center gap-1">
                 {isWinStreak
-                  ? <Flame className="size-4 shrink-0 text-emerald-500" />
-                  : <TrendingDown className="size-4 shrink-0 text-red-500" />}
-                <span className={cn("font-mono text-base font-bold tabular-nums", isWinStreak ? "text-emerald-500" : "text-red-500")}>
+                  ? <Flame className="size-4 shrink-0 text-success" />
+                  : <TrendingDown className="size-4 shrink-0 text-danger" />}
+                <span className={cn("font-mono text-base font-bold tabular-nums", isWinStreak ? "text-success" : "text-danger")}>
                   {streak.count}{isWinStreak ? "W" : "L"}
                 </span>
               </div>
@@ -332,7 +332,7 @@ export function PublicPerformanceChart({
             <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
               {t("overviewProfitFactor")}
             </p>
-            <p className={cn("mt-1 font-mono text-base font-bold tabular-nums", stats.profitFactor >= 1 ? "text-emerald-500" : "text-red-500")}>
+            <p className={cn("mt-1 font-mono text-base font-bold tabular-nums", stats.profitFactor >= 1 ? "text-success" : "text-danger")}>
               {stats.profitFactor === Infinity ? "∞" : stats.profitFactor === 0 ? "—" : stats.profitFactor.toFixed(2)}
             </p>
           </div>
@@ -342,7 +342,7 @@ export function PublicPerformanceChart({
             <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
               {t("overviewMaxDrawdown")}
             </p>
-            <p className={cn("mt-1 font-mono text-base font-bold tabular-nums", !chart || chart.maxDD === 0 ? "text-muted-foreground" : "text-red-500")}>
+            <p className={cn("mt-1 font-mono text-base font-bold tabular-nums", !chart || chart.maxDD === 0 ? "text-muted-foreground" : "text-danger")}>
               {!chart || chart.maxDD === 0 ? "—" : fmtCurrency(chart.maxDD)}
             </p>
           </div>
@@ -356,9 +356,9 @@ export function PublicPerformanceChart({
               <div className="bg-red-500 transition-all" style={{ width: `${(stats.losses / stats.tradeCount) * 100}%` }} />
             </div>
             <span className="shrink-0 text-muted-foreground">
-              <span className="text-emerald-500">{stats.wins}W</span>
+              <span className="text-success">{stats.wins}W</span>
               {" / "}
-              <span className="text-red-500">{stats.losses}L</span>
+              <span className="text-danger">{stats.losses}L</span>
             </span>
           </div>
         )}

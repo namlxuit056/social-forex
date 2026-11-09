@@ -49,7 +49,7 @@ function EdgeGroupCard({
                 <span
                   className={cn(
                     "font-mono font-medium",
-                    isWorst ? "text-red-500" : isBest ? "text-emerald-500" : "text-foreground",
+                    isWorst ? "text-danger" : isBest ? "text-success" : "text-foreground",
                   )}
                 >
                   {labelOf(r.key)}
@@ -57,7 +57,7 @@ function EdgeGroupCard({
                 <span className="shrink-0 text-xs text-muted-foreground">
                   {r.winRate !== null ? `${r.winRate}%` : notEnoughLabel}{" "}
                   · {r.wins}W/{r.losses}L ·{" "}
-                  <span className={r.pnl >= 0 ? "text-emerald-500" : "text-red-500"}>
+                  <span className={r.pnl >= 0 ? "text-success" : "text-danger"}>
                     {r.pnl >= 0 ? "+" : "-"}${Math.abs(r.pnl).toFixed(2)}
                   </span>
                 </span>

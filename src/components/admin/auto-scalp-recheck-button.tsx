@@ -59,7 +59,7 @@ export function AutoScalpRecheckButton({ proposalId }: { proposalId: string }) {
             <span
               className={cn(
                 result.verdict === "kept"
-                  ? "text-emerald-600 dark:text-emerald-400"
+                  ? "text-success"
                   : "text-destructive",
               )}
             >
@@ -75,7 +75,7 @@ export function AutoScalpRecheckButton({ proposalId }: { proposalId: string }) {
             <p className="text-xs text-muted-foreground">Đã gửi lệnh huỷ order xuống MT5 bridge.</p>
           )}
           {result.verdict === "cancelled" && !result.mt5CancelQueued && (
-            <p className="text-xs text-amber-600 dark:text-amber-500">
+            <p className="text-xs text-warning">
               Tín hiệu đã huỷ nhưng không có MT5 ticket để gửi lệnh huỷ — kiểm tra thủ công.
             </p>
           )}

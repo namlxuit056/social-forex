@@ -10,8 +10,8 @@ import type { AiPortfolioReviewResponse, AiSuggestError } from "@/lib/ai/types";
 
 function riskLevelTone(level: "low" | "medium" | "high") {
   if (level === "high") return "border-destructive/30 bg-destructive/8 text-destructive";
-  if (level === "medium") return "border-amber-500/30 bg-amber-500/8 text-amber-600 dark:text-amber-500";
-  return "border-emerald-500/30 bg-emerald-500/8 text-emerald-600 dark:text-emerald-500";
+  if (level === "medium") return "border-amber-500/30 bg-amber-500/8 text-warning";
+  return "border-emerald-500/30 bg-emerald-500/8 text-success";
 }
 
 export function PortfolioReviewPanel({ positionCount }: { positionCount: number }) {

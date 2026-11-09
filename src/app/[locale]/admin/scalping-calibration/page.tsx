@@ -26,8 +26,8 @@ export async function generateMetadata() {
 const MIN_SAMPLE_FOR_TRUST = 20;
 
 function winRateColor(pct: number) {
-  if (pct >= 55) return "text-emerald-600 dark:text-emerald-400";
-  if (pct >= 45) return "text-amber-600 dark:text-amber-500";
+  if (pct >= 55) return "text-success";
+  if (pct >= 45) return "text-warning";
   return "text-destructive";
 }
 
@@ -62,7 +62,7 @@ function formatDateTime(value: Date) {
 }
 
 function pnlColor(pnl: number) {
-  if (pnl > 0) return "text-emerald-600 dark:text-emerald-400";
+  if (pnl > 0) return "text-success";
   if (pnl < 0) return "text-destructive";
   return "text-muted-foreground";
 }
@@ -105,7 +105,7 @@ function HistoryTable({ rows }: { rows: AutoScalpHistoryRow[] }) {
               </td>
               <td className="py-2 pr-4 font-mono font-semibold">{row.symbol}</td>
               <td className="py-2 pr-4">
-                <span className={row.direction === "LONG" ? "text-emerald-600 dark:text-emerald-400" : "text-destructive"}>
+                <span className={row.direction === "LONG" ? "text-success" : "text-destructive"}>
                   {row.direction}
                 </span>
               </td>
@@ -137,8 +137,8 @@ function HistoryTable({ rows }: { rows: AutoScalpHistoryRow[] }) {
                             <span
                               className={cn(
                                 "mr-1 font-semibold",
-                                item.status === "pass" && "text-emerald-600 dark:text-emerald-400",
-                                item.status === "warn" && "text-amber-600 dark:text-amber-500",
+                                item.status === "pass" && "text-success",
+                                item.status === "warn" && "text-warning",
                                 item.status === "fail" && "text-destructive",
                               )}
                             >
@@ -161,7 +161,7 @@ function HistoryTable({ rows }: { rows: AutoScalpHistoryRow[] }) {
 }
 
 function rColor(r: number) {
-  if (r > 0.05) return "text-emerald-600 dark:text-emerald-400";
+  if (r > 0.05) return "text-success";
   if (r < -0.05) return "text-destructive";
   return "text-muted-foreground";
 }

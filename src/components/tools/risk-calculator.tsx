@@ -259,9 +259,9 @@ export function RiskCalculator({
                   className={cn(
                     "mt-0.5 font-mono text-sm font-bold",
                     rrRatio >= 2
-                      ? "text-emerald-600 dark:text-emerald-400"
+                      ? "text-success"
                       : rrRatio >= 1
-                        ? "text-amber-600 dark:text-amber-400"
+                        ? "text-warning"
                         : "text-destructive",
                   )}
                 >

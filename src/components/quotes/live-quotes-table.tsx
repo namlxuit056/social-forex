@@ -537,7 +537,16 @@ export function LiveQuotesTable({
                 ))}
               </div>
               <div className="hidden overflow-x-auto rounded-lg border border-border md:block">
-                <table className="w-full min-w-[980px] text-left text-sm">
+                <table className="w-full min-w-[980px] table-fixed text-left text-sm">
+                  {/* Same widths in every group table, so Bid/Ask/Δ% line up down the page. */}
+                  <colgroup>
+                    <col className="w-[26%]" />
+                    <col className="w-[14%]" />
+                    <col className="w-[14%]" />
+                    <col className="w-[11%]" />
+                    <col className="w-[17%]" />
+                    <col className="w-[18%]" />
+                  </colgroup>
                   <thead className="bg-muted/50 text-muted-foreground">
                     <tr>
                       <th className="px-3 py-2 font-medium">{t("colPair")}</th>
@@ -545,7 +554,7 @@ export function LiveQuotesTable({
                       <th className="px-3 py-2 font-medium">{t("colAsk")}</th>
                       <th className="px-3 py-2 font-medium">{t("colChange")}</th>
                       <th className="px-3 py-2 font-medium">{t("colAiTrend")}</th>
-                      <th className="w-px whitespace-nowrap px-2 py-2 text-end font-medium">
+                      <th className="whitespace-nowrap px-2 py-2 text-end font-medium">
                         {t("colActions")}
                       </th>
                     </tr>

@@ -107,7 +107,7 @@ export default async function ArticlesPage({
                 </p>
                 <Link
                   href={`/articles/${article.slug}`}
-                  className="mt-4 inline-block text-sm font-medium text-primary hover:underline"
+                  className="mt-3 inline-flex min-h-10 items-center text-sm font-medium text-primary hover:underline"
                 >
                   {t("readMore")}
                 </Link>

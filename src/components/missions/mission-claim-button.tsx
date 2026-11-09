@@ -29,7 +29,7 @@ export function MissionClaimButton({ missionId, xp }: { missionId: string; xp: n
 
   if (claimed) {
     return (
-      <span className="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-600 dark:text-emerald-400">
+      <span className="inline-flex items-center gap-1.5 text-sm font-medium text-success">
         <Sparkles className="size-4" aria-hidden />
         {t("claimedToast", { xp })}
       </span>

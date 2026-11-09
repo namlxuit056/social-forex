@@ -130,7 +130,7 @@ export default async function AcademyPage({
           href={`/academy/${lesson.slug}`}
           className={cn(
             buttonVariants({ variant: "link", size: "sm" }),
-            "mt-4 h-auto px-0",
+            "mt-3 h-auto min-h-10 px-0",
           )}
         >
           {done ? t("completedBadge") + " · " : ""}

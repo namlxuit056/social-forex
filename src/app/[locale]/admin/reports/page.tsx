@@ -91,9 +91,9 @@ export default async function AdminReportsPage({
 
   const statusBadge = (s: string) => {
     if (s === "OPEN")
-      return "bg-amber-500/15 text-amber-600 dark:text-amber-400";
+      return "bg-amber-500/15 text-warning";
     if (s === "REVIEWED")
-      return "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400";
+      return "bg-emerald-500/15 text-success";
     return "bg-muted text-muted-foreground";
   };
 

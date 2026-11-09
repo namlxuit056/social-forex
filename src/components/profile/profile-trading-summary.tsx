@@ -76,7 +76,7 @@ export async function ProfileTradingSummary({
       value: String(mt5Connection?.openPositions ?? activeCount),
       sub: hasLiveSync ? t("mt5ReadOnlyBadge") : t("profileNoLivePositions"),
       icon: RadioTower,
-      valueClass: hasLiveSync ? "text-emerald-600 dark:text-emerald-300" : "text-muted-foreground",
+      valueClass: hasLiveSync ? "text-success" : "text-muted-foreground",
     },
     {
       label: t("overviewNetPnl"),
@@ -85,9 +85,9 @@ export async function ProfileTradingSummary({
       icon: Activity,
       valueClass:
         netPnl > 0
-          ? "text-emerald-600 dark:text-emerald-300"
+          ? "text-success"
           : netPnl < 0
-            ? "text-red-600 dark:text-red-300"
+            ? "text-danger"
             : "text-foreground",
     },
   ];

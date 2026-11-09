@@ -112,7 +112,7 @@ function JobCard({
       <CardContent>
         <p className="text-sm text-muted-foreground">{job.description}</p>
         {!enabled && (
-          <p className="mt-2 text-xs font-medium text-amber-600 dark:text-amber-500">
+          <p className="mt-2 text-xs font-medium text-warning">
             Đã tắt — lịch tự động (Vercel Cron) và trigger bên ngoài sẽ bị bỏ qua. Nút &quot;Chạy ngay&quot; bên dưới vẫn hoạt động để test thủ công.
           </p>
         )}

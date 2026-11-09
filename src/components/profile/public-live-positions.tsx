@@ -95,7 +95,7 @@ export async function PublicLivePositions({
       <CardHeader className="pb-2">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <CardTitle className="flex items-center gap-2 text-base">
-            <RadioTower className="size-4 text-emerald-500" />
+            <RadioTower className="size-4 text-success" />
             {t("profileLiveTitle")}
           </CardTitle>
           {mt5Connection.lastSeenAt ? (
@@ -137,8 +137,8 @@ export async function PublicLivePositions({
                 livePositions.length === 0
                   ? "text-foreground"
                   : totalProfit >= 0
-                    ? "text-emerald-500"
-                    : "text-red-500",
+                    ? "text-success"
+                    : "text-danger",
               )}
             >
               {livePositions.length === 0 ? "—" : fmtCurrency(totalProfit)}
@@ -182,7 +182,7 @@ export async function PublicLivePositions({
                       <td
                         className={cn(
                           "px-2 py-2 text-right font-mono font-semibold",
-                          isProfit ? "text-emerald-500" : "text-red-500",
+                          isProfit ? "text-success" : "text-danger",
                         )}
                       >
                         {position.profit == null ? "—" : fmtCurrency(position.profit)}
@@ -199,7 +199,7 @@ export async function PublicLivePositions({
                   <td
                     className={cn(
                       "px-2 py-2 text-right font-mono font-semibold",
-                      totalProfit >= 0 ? "text-emerald-500" : "text-red-500",
+                      totalProfit >= 0 ? "text-success" : "text-danger",
                     )}
                   >
                     {fmtCurrency(totalProfit)}

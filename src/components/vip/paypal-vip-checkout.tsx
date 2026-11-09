@@ -141,7 +141,7 @@ export function PayPalVipCheckout({
       <div>
         <h2 className="text-lg font-semibold text-foreground">{copy.selectPlan}</h2>
         <p className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
-          <ShieldAlert className="size-3.5 text-amber-500" aria-hidden />
+          <ShieldAlert className="size-3.5 text-warning" aria-hidden />
           {clientId ? copy.paypalConfigured : copy.paypalMissingConfig}
         </p>
       </div>

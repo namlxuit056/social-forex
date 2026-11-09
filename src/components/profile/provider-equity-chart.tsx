@@ -128,7 +128,7 @@ export function ProviderEquityChart({
           <span
             className={cn(
               "font-mono text-sm",
-              totalR >= 0 ? "text-emerald-500" : "text-red-500",
+              totalR >= 0 ? "text-success" : "text-danger",
             )}
           >
             {fmtR(totalR)}

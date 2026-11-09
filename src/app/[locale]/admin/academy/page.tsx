@@ -152,7 +152,7 @@ export default async function AdminAcademyPage() {
                       {lesson.imageUrl ? (
                         <span className="text-xs text-green-500">✓ Ảnh</span>
                       ) : (
-                        <span className="text-xs text-amber-500">✗ Chưa có ảnh</span>
+                        <span className="text-xs text-warning">✗ Chưa có ảnh</span>
                       )}
                     </div>
                     <Link

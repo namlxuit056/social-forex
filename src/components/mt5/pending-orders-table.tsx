@@ -79,13 +79,13 @@ function orderRisk(o: LivePendingOrder) {
 function SlAmount({ o }: { o: LivePendingOrder }) {
   const { slAmount } = orderRisk(o);
   if (slAmount == null || slAmount <= 0) return null;
-  return <span className="block font-mono text-[11px] text-red-500">-{slAmount.toFixed(2)}</span>;
+  return <span className="block font-mono text-[11px] text-danger">-{slAmount.toFixed(2)}</span>;
 }
 
 function TpAmount({ o }: { o: LivePendingOrder }) {
   const { tpAmount } = orderRisk(o);
   if (tpAmount == null || tpAmount <= 0) return null;
-  return <span className="block font-mono text-[11px] text-emerald-500">+{tpAmount.toFixed(2)}</span>;
+  return <span className="block font-mono text-[11px] text-success">+{tpAmount.toFixed(2)}</span>;
 }
 
 function RiskRewardCell({ o }: { o: LivePendingOrder }) {
@@ -96,9 +96,9 @@ function RiskRewardCell({ o }: { o: LivePendingOrder }) {
       className={cn(
         "font-mono text-xs font-semibold tabular-nums",
         riskReward >= 2
-          ? "text-emerald-600 dark:text-emerald-400"
+          ? "text-success"
           : riskReward >= 1
-            ? "text-amber-600 dark:text-amber-400"
+            ? "text-warning"
             : "text-destructive",
       )}
     >
@@ -114,7 +114,7 @@ function TypeBadge({ type }: { type: string }) {
       variant="outline"
       className={cn(
         "gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold",
-        isBuy ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-500" : "border-red-500/30 bg-red-500/10 text-red-500",
+        isBuy ? "border-emerald-500/30 bg-emerald-500/10 text-success" : "border-red-500/30 bg-red-500/10 text-danger",
       )}
     >
       {isBuy ? <ArrowUpRight className="size-3" /> : <ArrowDownRight className="size-3" />}

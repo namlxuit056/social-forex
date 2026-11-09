@@ -255,7 +255,7 @@ export default async function SignalsPage({
         <Card className="border-amber-500/30 bg-amber-50 dark:bg-amber-950/20">
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
-              <Lock className="size-4 text-amber-500 dark:text-amber-400" />
+              <Lock className="size-4 text-warning" />
               <CardTitle className="text-base text-amber-800 dark:text-amber-200">
                 {t("vipLocked")}
               </CardTitle>

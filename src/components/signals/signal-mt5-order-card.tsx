@@ -272,7 +272,7 @@ export function SignalMt5OrderCard({
         </div>
         <div>
           <dt className="text-muted-foreground">{t("mt5OrderRiskIfSl")}</dt>
-          <dd className="font-mono font-medium text-red-500">
+          <dd className="font-mono font-medium text-danger">
             {risk.slAmount != null && risk.slAmount > 0
               ? `-${fmtUsd(risk.slAmount)}${balance ? ` (${((risk.slAmount / balance) * 100).toFixed(1)}%)` : ""}`
               : "—"}
@@ -280,16 +280,16 @@ export function SignalMt5OrderCard({
         </div>
         <div>
           <dt className="text-muted-foreground">{t("mt5OrderRewardIfTp")}</dt>
-          <dd className="font-mono font-medium text-emerald-500">
+          <dd className="font-mono font-medium text-success">
             {risk.tpAmount != null && risk.tpAmount > 0 ? `+${fmtUsd(risk.tpAmount)}` : "—"}
           </dd>
         </div>
       </dl>
 
-      {stopLoss == null && <p className="text-xs text-amber-600 dark:text-amber-500">{t("mt5OrderNoSl")}</p>}
+      {stopLoss == null && <p className="text-xs text-warning">{t("mt5OrderNoSl")}</p>}
 
       {hasWarnings && (
-        <div className="space-y-1 text-sm text-amber-600 dark:text-amber-400">
+        <div className="space-y-1 text-sm text-warning">
           {warnings?.plan && (
             <p>
               {warnings.plan.hasPlan
@@ -327,7 +327,7 @@ export function SignalMt5OrderCard({
 
       {error && <p className="text-sm text-destructive">{error}</p>}
       {done && (
-        <p className="flex items-center gap-1.5 text-sm text-emerald-600 dark:text-emerald-500">
+        <p className="flex items-center gap-1.5 text-sm text-success">
           <CheckCircle2 className="size-4" aria-hidden />
           {t("mt5OrderQueued")}{" "}
           <Link href="/positions" className="font-medium underline">

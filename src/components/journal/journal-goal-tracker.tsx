@@ -88,7 +88,7 @@ export function JournalGoalTracker({
               className={cn(
                 "rounded-full px-2 py-0.5 text-[11px] font-medium",
                 progress!.metCount === progress!.totalCount
-                  ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+                  ? "bg-emerald-500/15 text-success"
                   : "bg-muted text-muted-foreground",
               )}
             >
@@ -171,11 +171,11 @@ export function JournalGoalTracker({
                 <div key={m} className="space-y-1">
                   <div className="flex items-center justify-between text-xs">
                     <span className="flex items-center gap-1 font-medium">
-                      {item.met && <Check className="size-3.5 text-emerald-500" />}
+                      {item.met && <Check className="size-3.5 text-success" />}
                       {metricLabel[m]}
                     </span>
                     <span className="font-mono text-muted-foreground">
-                      <span className={item.met ? "text-emerald-500" : "text-foreground"}>
+                      <span className={item.met ? "text-success" : "text-foreground"}>
                         {fmt(m, item.actual)}
                       </span>{" "}
                       / {fmt(m, item.target)}

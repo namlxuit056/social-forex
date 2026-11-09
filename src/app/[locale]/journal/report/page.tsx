@@ -263,9 +263,9 @@ export default async function JournalReportPage({
                 <p
                   className={`mt-1 font-mono text-base font-bold ${
                     s.tone === "pos"
-                      ? "text-emerald-600 dark:text-emerald-400"
+                      ? "text-success"
                       : s.tone === "neg"
-                        ? "text-red-600 dark:text-red-400"
+                        ? "text-danger"
                         : ""
                   }`}
                 >
@@ -311,7 +311,7 @@ export default async function JournalReportPage({
                   <div key={it.metric} className="flex items-center justify-between text-xs">
                     <span>{metricLabel[it.metric]}</span>
                     <span className="font-mono">
-                      <span className={it.met ? "text-emerald-600 dark:text-emerald-400" : ""}>
+                      <span className={it.met ? "text-success" : ""}>
                         {fmtGoal(it.metric, it.actual)}
                       </span>{" "}
                       / {fmtGoal(it.metric, it.target)}
@@ -331,7 +331,7 @@ export default async function JournalReportPage({
                   <div key={b.key}>
                     <p
                       className={`font-mono text-base font-bold ${
-                        b.win ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400"
+                        b.win ? "text-success" : "text-danger"
                       }`}
                     >
                       {b.count}

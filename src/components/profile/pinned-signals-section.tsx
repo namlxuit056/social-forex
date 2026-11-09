@@ -47,8 +47,8 @@ export async function PinnedSignalsSection({ profileUserId, viewerVipUntil, view
                 <span
                   className={
                     signal.direction === "LONG"
-                      ? "text-emerald-600 font-semibold"
-                      : "text-red-500 font-semibold"
+                      ? "text-success font-semibold"
+                      : "text-danger font-semibold"
                   }
                 >
                   {signal.direction}

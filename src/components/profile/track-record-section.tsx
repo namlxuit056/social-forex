@@ -23,8 +23,8 @@ function Tile({ label, value, tone }: { label: string; value: string; tone: "pos
       <p
         className={cn(
           "mt-1 font-mono text-base font-bold tabular-nums",
-          tone === "pos" && "text-emerald-500",
-          tone === "neg" && "text-red-500",
+          tone === "pos" && "text-success",
+          tone === "neg" && "text-danger",
           tone === "neutral" && "text-muted-foreground",
         )}
       >

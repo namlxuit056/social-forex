@@ -46,7 +46,7 @@ const DAILY_BREAKDOWN_COLLAPSED_COUNT = 10;
 
 function DailyStatusIcon({ status }: { status: "target-hit" | "stop-hit" | "no-trade" | "in-progress" }) {
   if (status === "target-hit") {
-    return <CheckCircle2 className="size-4 text-emerald-600 dark:text-emerald-400" />;
+    return <CheckCircle2 className="size-4 text-success" />;
   }
   if (status === "stop-hit") {
     return <XCircle className="size-4 text-destructive" />;
@@ -96,7 +96,7 @@ export function JournalCompoundPlanCard({
   const badge = useMemo(() => {
     if (!progress) return null;
     if (progress.todayStatus === "target-hit") {
-      return { label: t("compoundPlanTargetHit"), cls: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" };
+      return { label: t("compoundPlanTargetHit"), cls: "bg-emerald-500/15 text-success" };
     }
     if (progress.todayStatus === "stop-hit") {
       return { label: t("compoundPlanStopHit"), cls: "bg-destructive/15 text-destructive" };
@@ -201,7 +201,7 @@ export function JournalCompoundPlanCard({
               </div>
               <div>
                 <p className="text-[11px] text-muted-foreground">{t("compoundPlanTodayTarget")}</p>
-                <p className="font-mono text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                <p className="font-mono text-sm font-medium text-success">
                   {fmtMoney(progress.todayTargetAmount)}
                 </p>
               </div>
@@ -216,7 +216,7 @@ export function JournalCompoundPlanCard({
                 <p
                   className={cn(
                     "font-mono text-sm font-medium",
-                    progress.todayPnl >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-destructive",
+                    progress.todayPnl >= 0 ? "text-success" : "text-destructive",
                   )}
                 >
                   {fmtMoney(progress.todayPnl)}
@@ -232,7 +232,7 @@ export function JournalCompoundPlanCard({
                   <p
                     className={cn(
                       "font-mono text-sm font-medium",
-                      progress.weeklyPnl >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-destructive",
+                      progress.weeklyPnl >= 0 ? "text-success" : "text-destructive",
                     )}
                   >
                     {fmtMoney(progress.weeklyPnl)}
@@ -248,7 +248,7 @@ export function JournalCompoundPlanCard({
                   <p
                     className={cn(
                       "font-mono text-sm font-medium",
-                      progress.monthlyPnl >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-destructive",
+                      progress.monthlyPnl >= 0 ? "text-success" : "text-destructive",
                     )}
                   >
                     {fmtMoney(progress.monthlyPnl)}
@@ -278,12 +278,12 @@ export function JournalCompoundPlanCard({
             </div>
 
             {progress.eta.kind === "reached" ? (
-              <p className="flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+              <p className="flex items-center gap-1.5 text-xs font-medium text-success">
                 <PartyPopper className="size-3.5" />
                 {t("compoundPlanReached")}
               </p>
             ) : progress.eta.kind === "stalled" ? (
-              <p className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400">
+              <p className="flex items-center gap-1.5 text-xs text-warning">
                 <AlertTriangle className="size-3.5" />
                 {t("compoundPlanStalled")}
               </p>
@@ -343,7 +343,7 @@ export function JournalCompoundPlanCard({
                                 })}
                               </td>
                               <td className="px-2 py-1.5 text-right font-mono">${day.startCapital.toFixed(2)}</td>
-                              <td className="px-2 py-1.5 text-right font-mono text-emerald-600 dark:text-emerald-400">
+                              <td className="px-2 py-1.5 text-right font-mono text-success">
                                 +${day.targetAmount.toFixed(2)}
                               </td>
                               <td className="px-2 py-1.5 text-right font-mono text-destructive">
@@ -353,7 +353,7 @@ export function JournalCompoundPlanCard({
                                 className={cn(
                                   "px-2 py-1.5 text-right font-mono font-medium",
                                   day.pnl > 0
-                                    ? "text-emerald-600 dark:text-emerald-400"
+                                    ? "text-success"
                                     : day.pnl < 0
                                       ? "text-destructive"
                                       : "text-muted-foreground",

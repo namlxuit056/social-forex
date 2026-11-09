@@ -128,7 +128,7 @@ export function JournalCalendar({
                     <p
                       className={cn(
                         "font-mono text-[11px] font-bold leading-tight sm:text-xs",
-                        cell.pnl >= 0 ? "text-emerald-500" : "text-red-500",
+                        cell.pnl >= 0 ? "text-success" : "text-danger",
                       )}
                     >
                       {fmtCurrency(cell.pnl)}
@@ -147,7 +147,7 @@ export function JournalCalendar({
           <span
             className={cn(
               "font-mono font-semibold",
-              monthTotal >= 0 ? "text-emerald-500" : "text-red-500",
+              monthTotal >= 0 ? "text-success" : "text-danger",
             )}
           >
             {fmtCurrency(monthTotal)}

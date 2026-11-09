@@ -165,7 +165,7 @@ export async function ProfileCopiersSection({
                         : "bg-red-500/10",
                   )}
                 >
-                  <p className={cn("text-muted-foreground", floatingPnl == null ? "" : floatingPnl >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400")}>
+                  <p className={cn("text-muted-foreground", floatingPnl == null ? "" : floatingPnl >= 0 ? "text-success" : "text-danger")}>
                     {t("profileFloatingPnl")}
                   </p>
                   <p
@@ -174,8 +174,8 @@ export async function ProfileCopiersSection({
                       floatingPnl == null
                         ? "text-foreground"
                         : floatingPnl >= 0
-                          ? "text-emerald-600 dark:text-emerald-400"
-                          : "text-red-600 dark:text-red-400",
+                          ? "text-success"
+                          : "text-danger",
                     )}
                   >
                     {floatingPnl == null

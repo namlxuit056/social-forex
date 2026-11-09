@@ -133,8 +133,8 @@ function BBPositionBadge({ position }: { position: "above" | "below" | "within" 
   if (position === "unknown")
     return <span className="text-xs text-muted-foreground">—</span>;
   const cfg = {
-    above: { label: "Above", cls: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" },
-    below: { label: "Below", cls: "bg-red-500/15 text-red-500" },
+    above: { label: "Above", cls: "bg-emerald-500/15 text-success" },
+    below: { label: "Below", cls: "bg-red-500/15 text-danger" },
     within: { label: "Within", cls: "bg-muted/50 text-muted-foreground" },
   } as const;
   const { label, cls } = cfg[position];
@@ -150,9 +150,9 @@ function StochBadge({ value, state }: { value: number | null; state: "overbought
     return <span className="text-xs text-muted-foreground">—</span>;
   const cls =
     state === "overbought"
-      ? "bg-red-500/15 text-red-500"
+      ? "bg-red-500/15 text-danger"
       : state === "oversold"
-        ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+        ? "bg-emerald-500/15 text-success"
         : "bg-muted/50 text-muted-foreground";
   return (
     <span className={cn("inline-block rounded px-1.5 py-0.5 text-[10px] font-semibold leading-tight whitespace-nowrap tabular-nums", cls)}>
@@ -166,7 +166,7 @@ function MACDCell({ value, signal }: { value: number | null; signal: number | nu
     return <span className="text-xs text-muted-foreground">—</span>;
   const bullish = signal !== null ? value > signal : value > 0;
   return (
-    <span className={cn("text-xs tabular-nums font-medium", bullish ? "text-emerald-600 dark:text-emerald-400" : "text-red-500")}>
+    <span className={cn("text-xs tabular-nums font-medium", bullish ? "text-success" : "text-danger")}>
       {value.toFixed(4)}
     </span>
   );
@@ -485,7 +485,7 @@ export function MarketScreener({ pairs, isLoggedIn, isVip, initialFavorites = []
           <thead className="bg-muted/50 text-muted-foreground">
             <tr>
               <th className="w-10 px-2 py-2.5 text-center">
-                <Star className="inline size-3.5 text-amber-500" fill="currentColor" />
+                <Star className="inline size-3.5 text-warning" fill="currentColor" />
               </th>
               <th
                 className="group cursor-pointer select-none px-3 py-2.5"
@@ -593,7 +593,7 @@ export function MarketScreener({ pairs, isLoggedIn, isVip, initialFavorites = []
                       className={cn(
                         "size-4 transition-colors",
                         isFav
-                          ? "fill-amber-400 text-amber-500"
+                          ? "fill-amber-400 text-warning"
                           : "text-muted-foreground group-hover/star:text-amber-400",
                       )}
                     />
@@ -615,8 +615,8 @@ export function MarketScreener({ pairs, isLoggedIn, isVip, initialFavorites = []
                     className={cn(
                       "font-mono text-xs",
                       (pair.changePercent ?? 0) >= 0
-                        ? "text-emerald-500"
-                        : "text-red-500",
+                        ? "text-success"
+                        : "text-danger",
                     )}
                   >
                     {(pair.changePercent ?? 0) >= 0 ? "+" : ""}
@@ -629,9 +629,9 @@ export function MarketScreener({ pairs, isLoggedIn, isVip, initialFavorites = []
                       className={cn(
                         "font-mono text-xs font-medium",
                         pair.rsi > 70
-                          ? "text-red-500"
+                          ? "text-danger"
                           : pair.rsi < 30
-                            ? "text-emerald-500"
+                            ? "text-success"
                             : "text-muted-foreground",
                       )}
                     >

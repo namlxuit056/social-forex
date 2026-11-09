@@ -83,7 +83,7 @@ export default async function MissionsPage({ params }: { params: Promise<{ local
             <p className="text-xs text-muted-foreground">{t("summaryDone")}</p>
           </div>
           <div>
-            <p className="text-2xl font-bold tabular-nums text-emerald-600 dark:text-emerald-400">
+            <p className="text-2xl font-bold tabular-nums text-success">
               +{board.earnedXp}
             </p>
             <p className="text-xs text-muted-foreground">{t("summaryEarnedXp")}</p>
@@ -101,7 +101,7 @@ export default async function MissionsPage({ params }: { params: Promise<{ local
           </div>
           <div>
             <p className="inline-flex items-center gap-1.5 text-2xl font-bold tabular-nums text-foreground">
-              <Trophy className="size-5 text-amber-500" aria-hidden />
+              <Trophy className="size-5 text-warning" aria-hidden />
               {getLevel(userXp)}
             </p>
             <p className="text-xs text-muted-foreground">{t("summaryLevel")}</p>
@@ -146,7 +146,7 @@ export default async function MissionsPage({ params }: { params: Promise<{ local
                     <CardHeader className="pb-2">
                       <CardTitle className="flex items-start gap-2 text-sm font-medium">
                         {st.claimed ? (
-                          <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald-600 dark:text-emerald-400" aria-hidden />
+                          <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-success" aria-hidden />
                         ) : st.complete ? (
                           <Sparkles className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
                         ) : (
@@ -173,7 +173,7 @@ export default async function MissionsPage({ params }: { params: Promise<{ local
                       )}
 
                       {st.claimed ? (
-                        <p className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                        <p className="inline-flex items-center gap-1.5 text-xs font-medium text-success">
                           <Sparkles className="size-3.5" aria-hidden />
                           {t("claimedToast", { xp: def.xp })}
                         </p>
@@ -199,7 +199,7 @@ export default async function MissionsPage({ params }: { params: Promise<{ local
       {board.claimedCount === board.totalCount && (
         <section className="rounded-xl border border-emerald-500/30 bg-emerald-500/8 p-5 ring-1 ring-emerald-500/10">
           <h2 className="inline-flex items-center gap-2 font-heading text-lg font-semibold text-foreground">
-            <Trophy className="size-5 text-amber-500" aria-hidden />
+            <Trophy className="size-5 text-warning" aria-hidden />
             {t("allDoneTitle")}
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t("allDoneBody")}</p>

@@ -8,15 +8,15 @@ import { cn } from "@/lib/utils";
 import type { AiTradeReviewResponse, AiTradeReviewResult } from "@/lib/ai/types";
 
 const VERDICT_STYLE: Record<AiTradeReviewResult["verdict"], string> = {
-  disciplined: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400",
+  disciplined: "bg-emerald-500/15 text-success",
   acceptable: "bg-yellow-500/15 text-yellow-600 dark:text-yellow-400",
-  undisciplined: "bg-red-500/15 text-red-600 dark:text-red-400",
+  undisciplined: "bg-red-500/15 text-danger",
 };
 
 function scoreColor(score: number) {
-  if (score >= 75) return "text-emerald-500";
+  if (score >= 75) return "text-success";
   if (score >= 45) return "text-yellow-500";
-  return "text-red-500";
+  return "text-danger";
 }
 
 export function TradeReviewCard({
@@ -116,7 +116,7 @@ export function TradeReviewCard({
 
       {error && !loading && (
         <div className="mt-3 space-y-2">
-          <p className="text-red-500">{error}</p>
+          <p className="text-danger">{error}</p>
           <Button type="button" variant="outline" size="sm" onClick={() => load()}>
             {t("tradeReviewRegenerate")}
           </Button>
@@ -157,7 +157,7 @@ export function TradeReviewCard({
 
           {review.wentRight.length > 0 && (
             <ReviewList
-              icon={<CheckCircle2 className="size-3.5 text-emerald-500" />}
+              icon={<CheckCircle2 className="size-3.5 text-success" />}
               title={t("tradeReviewWentRight")}
               items={review.wentRight}
             />
@@ -171,7 +171,7 @@ export function TradeReviewCard({
           )}
           {review.disciplineFlags.length > 0 && (
             <ReviewList
-              icon={<Flag className="size-3.5 text-red-500" />}
+              icon={<Flag className="size-3.5 text-danger" />}
               title={t("tradeReviewFlags")}
               items={review.disciplineFlags}
             />

@@ -304,7 +304,7 @@ function NewOrderForm({
         )}
 
         {planWarning && (
-          <p className="text-sm text-amber-600 dark:text-amber-400">
+          <p className="text-sm text-warning">
             {planWarning.hasPlan
               ? `${planWarning.symbol} isn't in today's trading plan.`
               : `You haven't set a trading plan for today.`}{" "}
@@ -312,20 +312,20 @@ function NewOrderForm({
           </p>
         )}
         {dailyLimitWarning && (
-          <p className="text-sm text-amber-600 dark:text-amber-400">
+          <p className="text-sm text-warning">
             You&apos;ve placed {dailyLimitWarning.ordersPlacedToday}/{dailyLimitWarning.maxTrades} orders
             today, hitting the daily limit from your trading plan. Place this one anyway?
           </p>
         )}
         {riskWarning && (
-          <p className="text-sm text-amber-600 dark:text-amber-400">
+          <p className="text-sm text-warning">
             This order pushes today&apos;s total risk to ~{riskWarning.projectedPct}% of your account
             (~${Math.round(riskWarning.riskUsedToday)} used + ~${Math.round(riskWarning.newRisk)} here),
             over your {riskWarning.maxRiskPercent}% daily plan limit. Place it anyway?
           </p>
         )}
         {edgeWarning && (
-          <p className="text-sm text-amber-600 dark:text-amber-400">
+          <p className="text-sm text-warning">
             Your win rate on {edgeFacetLabelEn(edgeWarning)} is {edgeWarning.winRate}% over{" "}
             {edgeWarning.total} trades, below your overall {edgeWarning.baselineWinRate}%. Place this
             order anyway?

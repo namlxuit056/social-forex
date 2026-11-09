@@ -121,7 +121,7 @@ export async function SignalDirectionsBoard({
       </div>
 
       <div className="mt-4 overflow-x-auto">
-        <table className="w-full min-w-200 border-collapse text-sm">
+        <table className="w-full min-w-200 border-collapse whitespace-nowrap text-sm">
           <thead>
             <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
               <th className="py-2 pr-3 font-medium">{t("signalBoardColPair")}</th>
@@ -176,10 +176,10 @@ export async function SignalDirectionsBoard({
                       ? `${fmt(s.entryLow)}–${fmt(s.entryHigh)}`
                       : "—"}
                   </td>
-                  <td className="py-2.5 pr-3 text-right align-top font-mono text-xs text-red-600 dark:text-red-300">
+                  <td className="py-2.5 pr-3 text-right align-top font-mono text-xs text-danger">
                     {fmt(s.stopLoss)}
                   </td>
-                  <td className="py-2.5 pr-3 text-right align-top font-mono text-xs text-emerald-600 dark:text-emerald-300">
+                  <td className="py-2.5 pr-3 text-right align-top font-mono text-xs text-success">
                     {fmt(s.takeProfit)}
                   </td>
                   <td className="py-2.5 pr-3 align-top">
@@ -211,8 +211,8 @@ export async function SignalDirectionsBoard({
                             className={cn(
                               "font-mono font-semibold",
                               score.winRate! >= 0.5
-                                ? "text-emerald-600 dark:text-emerald-300"
-                                : "text-red-600 dark:text-red-300",
+                                ? "text-success"
+                                : "text-danger",
                             )}
                           >
                             {Math.round(score.winRate! * 100)}%

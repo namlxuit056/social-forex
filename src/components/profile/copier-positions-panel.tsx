@@ -7,8 +7,8 @@ import type { LivePosition } from "./public-live-positions";
 
 function directionBadgeClass(type: string): string {
   const upper = type.toUpperCase();
-  if (upper.startsWith("BUY")) return "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400";
-  if (upper.startsWith("SELL")) return "bg-red-500/10 text-red-600 dark:text-red-400";
+  if (upper.startsWith("BUY")) return "bg-emerald-500/10 text-success";
+  if (upper.startsWith("SELL")) return "bg-red-500/10 text-danger";
   return "bg-muted/40 text-muted-foreground";
 }
 
@@ -93,7 +93,7 @@ function StatusTable({
                   <td
                     className={cn(
                       "px-2 py-1.5 text-right font-mono font-semibold",
-                      isProfit ? "text-emerald-500" : "text-red-500",
+                      isProfit ? "text-success" : "text-danger",
                     )}
                   >
                     {row.profit == null ? "—" : `${row.profit >= 0 ? "+" : ""}${row.profit.toFixed(2)}`}

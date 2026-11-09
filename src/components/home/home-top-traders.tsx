@@ -58,9 +58,9 @@ const RANK_RING = [
 ];
 
 const RANK_NUM_CLASS = [
-  "bg-amber-400/15 text-amber-500",
-  "bg-slate-400/15 text-slate-400",
-  "bg-amber-600/15 text-amber-600",
+  "bg-amber-400/15 text-warning",
+  "bg-slate-400/15 text-slate-600 dark:text-slate-300",
+  "bg-amber-600/15 text-orange-800 dark:text-orange-300",
 ];
 
 export async function HomeTopTraders() {
@@ -89,7 +89,7 @@ export async function HomeTopTraders() {
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(9.5rem,1fr))] gap-3">
         {traders.map((trader, i) => {
           const initials = trader.label.slice(0, 2).toUpperCase();
           const ringClass = RANK_RING[i] ?? "ring-border/50";
@@ -151,10 +151,10 @@ export async function HomeTopTraders() {
                 className={cn(
                   "mt-1.5 font-mono text-2xl font-bold tabular-nums leading-none",
                   trader.winRate >= 60
-                    ? "text-emerald-500"
+                    ? "text-success"
                     : trader.winRate >= 50
                       ? "text-foreground"
-                      : "text-red-500",
+                      : "text-danger",
                 )}
               >
                 {trader.winRate}%
@@ -162,9 +162,9 @@ export async function HomeTopTraders() {
 
               {/* W/L counts */}
               <p className="mt-1 text-[11px] text-muted-foreground">
-                <span className="text-emerald-500/80">{trader.wins}W</span>
+                <span className="text-success">{trader.wins}W</span>
                 {" / "}
-                <span className="text-red-500/80">{trader.losses}L</span>
+                <span className="text-danger">{trader.losses}L</span>
               </p>
 
               {/* Win rate bar */}

@@ -434,7 +434,7 @@ export function EconomicCalendar({
           <span className="text-xs font-medium text-muted-foreground">
             {t("labelCurrency")}
           </span>
-          <div className="flex flex-wrap gap-1">
+          <div className="grid grid-cols-5 gap-1 sm:flex sm:flex-wrap">
             {currencies.map((c) => (
               <ToggleChip
                 key={c}
@@ -457,11 +457,8 @@ export function EconomicCalendar({
           </div>
         </div>
 
-        {/* Divider */}
-        <div className="hidden h-6 w-px bg-border sm:block" />
-
-        {/* Timezone */}
-        <div className="flex items-center gap-2">
+        {/* Timezone: own row, so it never wraps alone at some widths */}
+        <div className="flex items-center gap-2 sm:basis-full">
           <span className="text-xs font-medium text-muted-foreground">
             {t("labelTime")}
           </span>
@@ -543,7 +540,7 @@ export function EconomicCalendar({
       {/* Table */}
       <div className="hidden overflow-x-auto rounded-xl border border-border md:block">
         <table className="w-full min-w-[800px] text-left text-sm">
-          <thead className="bg-muted/50 text-muted-foreground">
+          <thead className="whitespace-nowrap bg-muted/50 text-muted-foreground">
             <tr>
               <th className="px-4 py-3">{t("tableTime")}</th>
               <th className="px-4 py-3">{t("tableStatus")}</th>
@@ -575,7 +572,7 @@ export function EconomicCalendar({
                     ev.id === initialHighlightEventId && "bg-amber-500/10 ring-2 ring-inset ring-amber-500/50",
                   )}
                 >
-                  <td className="px-4 py-3 font-mono text-foreground/90">
+                  <td className="whitespace-nowrap px-4 py-3 font-mono text-foreground/90">
                     {formatInTimeZone(
                       new Date(ev.timeUtc),
                       tz,
@@ -584,9 +581,9 @@ export function EconomicCalendar({
                   </td>
                   <td className="px-4 py-3">{statusBadgeRow(status)}</td>
                   <td className="px-4 py-3 font-medium">{ev.currency}</td>
-                  <td className="px-4 py-3">{ev.title}</td>
+                  <td className="min-w-48 px-4 py-3">{ev.title}</td>
                   <td className="px-4 py-3">{impactBadge(ev.impact)}</td>
-                  <td className="px-4 py-3 text-muted-foreground">
+                  <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">
                     {valuesLabel(ev)}
                   </td>
                   <td className="min-w-80 px-4 py-3 align-top">

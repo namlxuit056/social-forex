@@ -35,7 +35,7 @@ export function PinSignalButton({ signalId, signalSymbol, isPinned, loggedIn, at
         disabled={disabled}
         aria-label={label}
         title={disabled ? t("pinLimitReachedHint", { max: MAX_PINS }) : label}
-        className={cn(isPinned && "border-amber-400 text-amber-600 hover:text-amber-700")}
+        className={cn(isPinned && "border-amber-400 text-warning hover:text-amber-700")}
       >
         {isPinned ? <PinOff className="h-4 w-4" /> : <Pin className="h-4 w-4" />}
         <span className="ml-1.5 hidden sm:inline">

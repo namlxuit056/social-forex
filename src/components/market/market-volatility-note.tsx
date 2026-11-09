@@ -87,9 +87,9 @@ export function MarketVolatilityNote({ serverNowIso, locale }: Props) {
   const levelLabel = (level: VolatilityLevel) => t(`level_${level}`);
 
   const levelClass: Record<VolatilityLevel, string> = {
-    high: "bg-red-500/15 text-red-600 ring-red-500/30 dark:text-red-400",
-    medium: "bg-amber-500/15 text-amber-600 ring-amber-500/30 dark:text-amber-400",
-    low: "bg-sky-500/15 text-sky-600 ring-sky-500/30 dark:text-sky-400",
+    high: "bg-red-500/15 text-danger ring-red-500/30 dark:text-red-400",
+    medium: "bg-amber-500/15 text-warning ring-amber-500/30 dark:text-amber-400",
+    low: "bg-sky-500/15 text-sky-700 ring-sky-500/30 dark:text-sky-400",
   };
 
   const highActive = state.currentOverlap?.level === "high";
@@ -112,7 +112,7 @@ export function MarketVolatilityNote({ serverNowIso, locale }: Props) {
   } else if (highActive && state.currentOverlap) {
     headline = (
       <>
-        <span className="font-semibold text-red-600 dark:text-red-400">
+        <span className="font-semibold text-danger">
           {t("ongoingHigh", { pair: pairLabel(state.currentOverlap.key) })}
         </span>{" "}
         <span className="text-muted-foreground">
@@ -158,9 +158,9 @@ export function MarketVolatilityNote({ serverNowIso, locale }: Props) {
             className="flex items-center gap-2 font-heading text-lg font-semibold tracking-tight text-foreground"
           >
             {highActive ? (
-              <Flame className="size-5 shrink-0 text-red-500" aria-hidden />
+              <Flame className="size-5 shrink-0 text-danger" aria-hidden />
             ) : (
-              <TrendingUp className="size-5 shrink-0 text-amber-500" aria-hidden />
+              <TrendingUp className="size-5 shrink-0 text-warning" aria-hidden />
             )}
             {t("title")}
           </h2>

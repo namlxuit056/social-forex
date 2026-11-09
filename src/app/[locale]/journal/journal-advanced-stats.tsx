@@ -97,8 +97,8 @@ function StatCard({
       <p
         className={cn(
           "mt-1.5 font-mono text-lg font-bold tabular-nums",
-          tone === "positive" && "text-emerald-500",
-          tone === "negative" && "text-red-500",
+          tone === "positive" && "text-success",
+          tone === "negative" && "text-danger",
           tone === "neutral" && "text-foreground",
         )}
       >
@@ -109,8 +109,8 @@ function StatCard({
         <p
           className={cn(
             "mt-0.5 font-mono text-[10px] tabular-nums",
-            delta.good === true && "text-emerald-600 dark:text-emerald-500",
-            delta.good === false && "text-red-600 dark:text-red-500",
+            delta.good === true && "text-success",
+            delta.good === false && "text-danger",
             delta.good === null && "text-muted-foreground",
           )}
         >
@@ -211,7 +211,7 @@ function GroupStatsTable({
               .filter((r) => r.stat !== null)
               .map(({ key, stat }) => (
                 <div key={key} className="space-y-1.5 text-sm">
-                  <p className="flex items-center gap-1 font-semibold text-amber-500">
+                  <p className="flex items-center gap-1 font-semibold text-warning">
                     {key === bestKey && <span aria-hidden>🏆</span>}
                     {labelOf(key)}
                   </p>
@@ -227,8 +227,8 @@ function GroupStatsTable({
                         stat!.winRate === null
                           ? "text-foreground"
                           : stat!.winRate >= 50
-                            ? "text-emerald-500"
-                            : "text-red-500",
+                            ? "text-success"
+                            : "text-danger",
                       )}
                     >
                       {stat!.winRate !== null ? `${stat!.winRate}%` : "—"}
@@ -239,7 +239,7 @@ function GroupStatsTable({
                     <span
                       className={cn(
                         "font-mono",
-                        stat!.netPnl >= 0 ? "text-emerald-500" : "text-red-500",
+                        stat!.netPnl >= 0 ? "text-success" : "text-danger",
                       )}
                     >
                       {fmtMoney(stat!.netPnl)}
@@ -256,7 +256,7 @@ function GroupStatsTable({
                     <span
                       className={cn(
                         "font-mono",
-                        (stat!.expectancy ?? 0) >= 0 ? "text-emerald-500" : "text-red-500",
+                        (stat!.expectancy ?? 0) >= 0 ? "text-success" : "text-danger",
                       )}
                     >
                       {stat!.expectancy !== null ? fmtMoney(stat!.expectancy) : "—"}
@@ -420,7 +420,7 @@ function DisciplineScorecardCard({ scorecard }: { scorecard: DisciplineScorecard
   if (score === null || scorecard.sampleSize < MIN_CLOSED_TRADES) return null;
 
   const scoreColor =
-    score >= 80 ? "text-emerald-500" : score >= 60 ? "text-amber-500" : "text-red-500";
+    score >= 80 ? "text-success" : score >= 60 ? "text-warning" : "text-danger";
 
   const top =
     scorecard.topLever !== null
@@ -456,8 +456,8 @@ function DisciplineScorecardCard({ scorecard }: { scorecard: DisciplineScorecard
             className={cn(
               "text-xs",
               score >= 80
-                ? "text-emerald-600 dark:text-emerald-500"
-                : "text-amber-600 dark:text-amber-500",
+                ? "text-success"
+                : "text-warning",
             )}
           >
             {t("scorecardTopLever", {
@@ -497,8 +497,8 @@ function DisciplineScorecardCard({ scorecard }: { scorecard: DisciplineScorecard
                     className={cn(
                       "rounded px-1 py-0.5 tabular-nums",
                       r.winRateGap > 0
-                        ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-500"
-                        : "bg-red-500/10 text-red-600 dark:text-red-500",
+                        ? "bg-emerald-500/10 text-success"
+                        : "bg-red-500/10 text-danger",
                     )}
                   >
                     {r.winRateGap > 0 ? "+" : ""}
@@ -522,7 +522,7 @@ function AiReviewTrendCard({ trend }: { trend: AiReviewTrend }) {
   if (trend.sampleSize < MIN_CLOSED_TRADES) return null;
 
   const scoreColor = (score: number) =>
-    score >= 75 ? "text-emerald-500" : score >= 45 ? "text-amber-500" : "text-red-500";
+    score >= 75 ? "text-success" : score >= 45 ? "text-warning" : "text-danger";
 
   const verdictRows: { key: keyof AiReviewTrend["overall"]; labelKey: string }[] = [
     { key: "disciplined", labelKey: "tradeReviewVerdictDisciplined" },
@@ -571,8 +571,8 @@ function AiReviewTrendCard({ trend }: { trend: AiReviewTrend }) {
             className={cn(
               "text-xs",
               trend.scoreTrendDelta >= 0
-                ? "text-emerald-600 dark:text-emerald-500"
-                : "text-amber-600 dark:text-amber-500",
+                ? "text-success"
+                : "text-warning",
             )}
           >
             {t("aiReviewTrendDelta", {
@@ -586,7 +586,7 @@ function AiReviewTrendCard({ trend }: { trend: AiReviewTrend }) {
         )}
 
         {trend.recentUndisciplinedRatePct !== null && trend.recentUndisciplinedRatePct > 0 ? (
-          <p className="text-xs text-amber-600 dark:text-amber-500">
+          <p className="text-xs text-warning">
             {t("aiReviewTrendRecentUndisciplined", { pct: trend.recentUndisciplinedRatePct })}
           </p>
         ) : null}
@@ -613,7 +613,7 @@ function MistakeCostCard({ stats }: { stats: MistakeStats }) {
       </CardHeader>
       <CardContent className="space-y-4">
         {worst && worst.totalPnl < 0 && (
-          <p className="text-xs text-amber-600 dark:text-amber-500">
+          <p className="text-xs text-warning">
             {t("mistakeCostInsight", {
               mistake: labels[worst.tag],
               count: worst.count,
@@ -636,8 +636,8 @@ function MistakeCostCard({ stats }: { stats: MistakeStats }) {
                   r.winRate === null
                     ? "text-muted-foreground/50"
                     : r.winRate >= 50
-                      ? "text-emerald-500"
-                      : "text-red-500",
+                      ? "text-success"
+                      : "text-danger",
                 )}
               >
                 {r.winRate !== null ? `${r.winRate}%` : "—"}
@@ -655,7 +655,7 @@ function MistakeCostCard({ stats }: { stats: MistakeStats }) {
                 <span
                   className={cn(
                     "w-20 text-right font-mono font-medium",
-                    r.totalPnl >= 0 ? "text-emerald-500" : "text-red-500",
+                    r.totalPnl >= 0 ? "text-success" : "text-danger",
                   )}
                 >
                   {fmtMoney(r.totalPnl)}
@@ -737,7 +737,7 @@ function GreenDaysCard({
       </CardHeader>
       <CardContent className="space-y-4">
         {portraitParts.length > 0 && (
-          <p className="text-xs text-emerald-600 dark:text-emerald-500">
+          <p className="text-xs text-success">
             {t("greenPortrait", { parts: portraitParts.join(" · ") })}
           </p>
         )}
@@ -770,7 +770,7 @@ function GreenDaysCard({
                 <span
                   className={cn(
                     "font-mono font-medium",
-                    day.netPnl >= 0 ? "text-emerald-500" : "text-red-500",
+                    day.netPnl >= 0 ? "text-success" : "text-danger",
                   )}
                 >
                   {fmtMoney(day.netPnl)}
@@ -779,7 +779,7 @@ function GreenDaysCard({
                   {day.signals.map((sig) => (
                     <span
                       key={sig}
-                      className="rounded bg-emerald-500/10 px-1.5 py-0.5 text-[10px] text-emerald-600 dark:text-emerald-500"
+                      className="rounded bg-emerald-500/10 px-1.5 py-0.5 text-[10px] text-success"
                     >
                       {signalLabel(sig, day)}
                     </span>
@@ -796,16 +796,16 @@ function GreenDaysCard({
                     <span
                       className={cn(
                         tr.result === "WIN"
-                          ? "text-emerald-500"
+                          ? "text-success"
                           : tr.result === "LOSS"
-                            ? "text-red-500"
+                            ? "text-danger"
                             : "text-muted-foreground",
                       )}
                     >
                       {tr.result}
                     </span>
                     <span>{tr.lotSize ?? "—"}</span>
-                    <span className={cn((tr.pnl ?? 0) >= 0 ? "text-emerald-500" : "text-red-500")}>
+                    <span className={cn((tr.pnl ?? 0) >= 0 ? "text-success" : "text-danger")}>
                       {tr.pnl !== null ? fmtMoney(tr.pnl) : "—"}
                     </span>
                   </div>
@@ -950,7 +950,7 @@ function TiltDaysCard({ result, locale }: { result: TiltDaysResult; locale: stri
       </CardHeader>
       <CardContent className="space-y-4">
         {result.tiltWinRate !== null && result.normalWinRate !== null && (
-          <p className="text-xs text-amber-600 dark:text-amber-500">
+          <p className="text-xs text-warning">
             {t("tiltPayoff", {
               tiltPnl: fmtMoney(result.tiltNetPnl),
               tiltRate: result.tiltWinRate,
@@ -977,7 +977,7 @@ function TiltDaysCard({ result, locale }: { result: TiltDaysResult; locale: stri
                 <span
                   className={cn(
                     "font-mono font-medium",
-                    day.netPnl >= 0 ? "text-emerald-500" : "text-red-500",
+                    day.netPnl >= 0 ? "text-success" : "text-danger",
                   )}
                 >
                   {fmtMoney(day.netPnl)}
@@ -986,7 +986,7 @@ function TiltDaysCard({ result, locale }: { result: TiltDaysResult; locale: stri
                   {day.signals.map((sig) => (
                     <span
                       key={sig}
-                      className="rounded bg-amber-500/10 px-1.5 py-0.5 text-[10px] text-amber-600 dark:text-amber-500"
+                      className="rounded bg-amber-500/10 px-1.5 py-0.5 text-[10px] text-warning"
                     >
                       {signalLabel(sig, day)}
                     </span>
@@ -1003,9 +1003,9 @@ function TiltDaysCard({ result, locale }: { result: TiltDaysResult; locale: stri
                     <span
                       className={cn(
                         tr.result === "WIN"
-                          ? "text-emerald-500"
+                          ? "text-success"
                           : tr.result === "LOSS"
-                            ? "text-red-500"
+                            ? "text-danger"
                             : "text-muted-foreground",
                       )}
                     >
@@ -1014,7 +1014,7 @@ function TiltDaysCard({ result, locale }: { result: TiltDaysResult; locale: stri
                     <span>{tr.lotSize ?? "—"}</span>
                     <span
                       className={cn(
-                        (tr.pnl ?? 0) >= 0 ? "text-emerald-500" : "text-red-500",
+                        (tr.pnl ?? 0) >= 0 ? "text-success" : "text-danger",
                       )}
                     >
                       {tr.pnl !== null ? fmtMoney(tr.pnl) : "—"}
@@ -1522,14 +1522,14 @@ export function JournalAdvancedStats({
                   />
                 </div>
                 {excursion.avgMfeCapturePct !== null && excursion.avgMfeCapturePct < 0.5 && (
-                  <p className="text-xs text-amber-600 dark:text-amber-500">
+                  <p className="text-xs text-warning">
                     {t("excursionInsightEarly", {
                       pct: Math.round(excursion.avgMfeCapturePct * 100),
                     })}
                   </p>
                 )}
                 {excursion.giveBackCount >= 2 && excursion.avgGiveBackOnLosers !== null && (
-                  <p className="text-xs text-amber-600 dark:text-amber-500">
+                  <p className="text-xs text-warning">
                     {t("excursionInsightGiveBack", {
                       count: excursion.giveBackCount,
                       amount: fmtMoney(excursion.avgGiveBackOnLosers),

@@ -169,13 +169,13 @@ export function TechnicalRatingHistory({
                 </div>
                 <div className="rounded-lg border border-border bg-muted/20 p-3">
                   <p className="text-xs text-muted-foreground">{t("technicalRatingBuySignals")}</p>
-                  <p className="mt-1 font-mono text-xl font-bold text-emerald-500">
+                  <p className="mt-1 font-mono text-xl font-bold text-success">
                     {summary.buySignals}
                   </p>
                 </div>
                 <div className="rounded-lg border border-border bg-muted/20 p-3">
                   <p className="text-xs text-muted-foreground">{t("technicalRatingSellSignals")}</p>
-                  <p className="mt-1 font-mono text-xl font-bold text-red-500">
+                  <p className="mt-1 font-mono text-xl font-bold text-danger">
                     {summary.sellSignals}
                   </p>
                 </div>
@@ -269,8 +269,8 @@ export function TechnicalRatingHistory({
                               s.winRate === null
                                 ? "text-muted-foreground"
                                 : s.winRate >= 0.5
-                                  ? "text-emerald-500"
-                                  : "text-red-500",
+                                  ? "text-success"
+                                  : "text-danger",
                             )}
                           >
                             {s.winRate === null ? "—" : `${Math.round(s.winRate * 100)}%`}
@@ -285,7 +285,7 @@ export function TechnicalRatingHistory({
                             <span
                               className={cn(
                                 "font-mono",
-                                s.avgFavorPct >= 0 ? "text-emerald-500" : "text-red-500",
+                                s.avgFavorPct >= 0 ? "text-success" : "text-danger",
                               )}
                             >
                               {s.avgFavorPct >= 0 ? "+" : ""}
@@ -381,7 +381,7 @@ export function TechnicalRatingHistory({
                           )}
                         </span>
                         {meta.tvAgree === true || meta.tvAgree === false ? (
-                          <span className={meta.tvAgree ? "text-emerald-500" : "text-amber-500"}>
+                          <span className={meta.tvAgree ? "text-success" : "text-warning"}>
                             · {ts(meta.tvAgree ? "tvAgree" : "tvDisagree")}
                           </span>
                         ) : null}
@@ -392,10 +392,10 @@ export function TechnicalRatingHistory({
                         <span>
                           {t("technicalRatingEntryZone")}: {meta.entryLow}–{meta.entryHigh}
                         </span>
-                        <span className="text-red-500">
+                        <span className="text-danger">
                           {t("technicalRatingStopLoss")}: {meta.stopLoss}
                         </span>
-                        <span className="text-emerald-500">
+                        <span className="text-success">
                           {t("technicalRatingTakeProfit")}: {meta.takeProfit}
                         </span>
                       </div>

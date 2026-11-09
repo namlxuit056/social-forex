@@ -350,7 +350,7 @@ export function JournalFormCard({
               ))}
             </select>
             {bestSetup && setup !== bestSetup.setup && (
-              <p className="mt-1.5 text-xs text-amber-600 dark:text-amber-400">
+              <p className="mt-1.5 text-xs text-warning">
                 {t("setupPlaybookHint", {
                   setup: setupLabels[bestSetup.setup],
                   winRate: bestSetup.winRate,

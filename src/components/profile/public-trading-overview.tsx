@@ -84,7 +84,7 @@ export async function PublicTradingOverview({
                 <Badge key={symbol.symbol} variant="outline" className="gap-1.5 px-2.5 py-1">
                   <span className="font-mono">{symbol.symbol}</span>
                   <span className="text-muted-foreground">{symbol.count}</span>
-                  <span className={symbol.pnl >= 0 ? "text-emerald-500" : "text-red-500"}>
+                  <span className={symbol.pnl >= 0 ? "text-success" : "text-danger"}>
                     {fmtCurrency(symbol.pnl)}
                   </span>
                 </Badge>

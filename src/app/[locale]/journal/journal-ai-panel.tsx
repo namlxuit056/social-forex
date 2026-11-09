@@ -150,7 +150,7 @@ export function JournalAiPanel({ tradeCount }: { tradeCount: number }) {
           <div className="grid gap-4 lg:grid-cols-2">
             <div className="rounded-lg border border-border bg-background/70 p-4">
               <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                <CheckCircle2 className="size-4 text-emerald-600" aria-hidden />
+                <CheckCircle2 className="size-4 text-success" aria-hidden />
                 {t("aiStrengths")}
               </h3>
               <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
@@ -163,7 +163,7 @@ export function JournalAiPanel({ tradeCount }: { tradeCount: number }) {
             </div>
             <div className="rounded-lg border border-border bg-background/70 p-4">
               <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                <AlertTriangle className="size-4 text-amber-600" aria-hidden />
+                <AlertTriangle className="size-4 text-warning" aria-hidden />
                 {t("aiRiskFlags")}
               </h3>
               <ul className="mt-3 space-y-2 text-sm text-muted-foreground">

@@ -65,7 +65,7 @@ export function BroadcasterManager({
         <p className="text-xs text-destructive">{addState.error}</p>
       )}
       {addState && "ok" in addState && (
-        <p className="text-xs text-emerald-600">{t("telegramSignalsAdded")}</p>
+        <p className="text-xs text-success">{t("telegramSignalsAdded")}</p>
       )}
 
       {broadcasters.length === 0 ? (

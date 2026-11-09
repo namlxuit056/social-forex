@@ -29,7 +29,7 @@ export function PageCtaRow({
       <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
         {heading}
       </p>
-      <div className="mt-3 flex flex-wrap gap-2">
+      <div className="mt-3 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
         {visibleItems.map((c, i) => (
           <Link
             key={`${c.href}-${c.label}`}

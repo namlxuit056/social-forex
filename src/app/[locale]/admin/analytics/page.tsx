@@ -233,7 +233,7 @@ export default async function AdminAnalyticsPage({
       label: t("analyticsVisits30d"),
       value: totalVisits,
       icon: MousePointerClick,
-      className: "text-emerald-500 bg-emerald-500/10",
+      className: "text-success bg-emerald-500/10",
     },
     {
       label: t("analyticsActiveUsers30d"),
@@ -247,7 +247,7 @@ export default async function AdminAnalyticsPage({
       icon: AlertTriangle,
       className:
         totalErrors > 0
-          ? "text-red-500 bg-red-500/10"
+          ? "text-danger bg-red-500/10"
           : "text-muted-foreground bg-muted/50",
     },
     {
@@ -560,7 +560,7 @@ export default async function AdminAnalyticsPage({
         <Card className="border-border">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <AlertTriangle className="size-4 text-red-500" />
+              <AlertTriangle className="size-4 text-danger" />
               Top lỗi 30 ngày
             </CardTitle>
           </CardHeader>
@@ -585,7 +585,7 @@ export default async function AdminAnalyticsPage({
         <Card className="border-border">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <AlertTriangle className="size-4 text-red-500" />
+              <AlertTriangle className="size-4 text-danger" />
               Lỗi gần đây (tất cả user)
             </CardTitle>
           </CardHeader>

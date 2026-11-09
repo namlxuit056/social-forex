@@ -42,7 +42,7 @@ function CopyBtn({ id, value, copied, onCopy }: {
       aria-label={done ? tc("copied") : tc("copy")}
       className="ml-1.5 rounded p-0.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-foreground"
     >
-      {done ? <Check className="size-3 text-emerald-500" /> : <Copy className="size-3" />}
+      {done ? <Check className="size-3 text-success" /> : <Copy className="size-3" />}
     </button>
   );
 }
@@ -108,15 +108,15 @@ function PivotCalculator() {
 
       {pivots ? (
         <div className="rounded-lg border border-border bg-muted/10 p-2">
-          <PivotRow label="R3" value={pivots.r3} color="text-sky-600 dark:text-sky-400" id="r3" copied={copied} onCopy={copy} />
-          <PivotRow label="R2" value={pivots.r2} color="text-sky-600 dark:text-sky-400" id="r2" copied={copied} onCopy={copy} />
-          <PivotRow label="R1" value={pivots.r1} color="text-sky-600 dark:text-sky-400" id="r1" copied={copied} onCopy={copy} />
+          <PivotRow label="R3" value={pivots.r3} color="text-sky-700 dark:text-sky-400" id="r3" copied={copied} onCopy={copy} />
+          <PivotRow label="R2" value={pivots.r2} color="text-sky-700 dark:text-sky-400" id="r2" copied={copied} onCopy={copy} />
+          <PivotRow label="R1" value={pivots.r1} color="text-sky-700 dark:text-sky-400" id="r1" copied={copied} onCopy={copy} />
           <div className="my-1 border-t border-border" />
           <PivotRow label="P" value={pivots.pivot} color="text-foreground font-bold" id="p" copied={copied} onCopy={copy} />
           <div className="my-1 border-t border-border" />
-          <PivotRow label="S1" value={pivots.s1} color="text-amber-600 dark:text-amber-400" id="s1" copied={copied} onCopy={copy} />
-          <PivotRow label="S2" value={pivots.s2} color="text-amber-600 dark:text-amber-400" id="s2" copied={copied} onCopy={copy} />
-          <PivotRow label="S3" value={pivots.s3} color="text-amber-600 dark:text-amber-400" id="s3" copied={copied} onCopy={copy} />
+          <PivotRow label="S1" value={pivots.s1} color="text-warning" id="s1" copied={copied} onCopy={copy} />
+          <PivotRow label="S2" value={pivots.s2} color="text-warning" id="s2" copied={copied} onCopy={copy} />
+          <PivotRow label="S3" value={pivots.s3} color="text-warning" id="s3" copied={copied} onCopy={copy} />
         </div>
       ) : (
         <div className="rounded-lg border border-dashed border-border bg-muted/10 px-4 py-3 text-center text-xs text-muted-foreground">

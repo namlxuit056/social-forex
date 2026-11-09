@@ -40,7 +40,7 @@ export function CopierBlockButton({
       size="sm"
       className={
         blocked
-          ? "gap-1.5 text-emerald-500 hover:text-emerald-400"
+          ? "gap-1.5 text-success hover:text-emerald-400"
           : "gap-1.5 text-destructive hover:text-red-400"
       }
       onClick={handleToggle}

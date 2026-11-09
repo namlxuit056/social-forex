@@ -204,7 +204,7 @@ export function CopyTradeButton({
                     <p className="text-xs text-muted-foreground">{t("statWinRate")}</p>
                     <p
                       className={`font-mono text-sm font-semibold ${
-                        providerWinRate >= 50 ? "text-emerald-500" : "text-red-500"
+                        providerWinRate >= 50 ? "text-success" : "text-danger"
                       }`}
                     >
                       {providerWinRate.toFixed(1)}%

@@ -61,7 +61,7 @@ function QualityBar({ score }: { score: number }) {
   const color =
     score >= 70 ? "bg-emerald-500" : score >= 50 ? "bg-amber-500" : "bg-red-500";
   const textColor =
-    score >= 70 ? "text-emerald-500" : score >= 50 ? "text-amber-500" : "text-red-500";
+    score >= 70 ? "text-success" : score >= 50 ? "text-warning" : "text-danger";
   return (
     <div className="flex items-center gap-1.5">
       <div className="h-1.5 flex-1 rounded-full bg-muted/50">
@@ -136,7 +136,7 @@ function PickCard({ pick, t }: { pick: AiPickResult; t: ReturnType<typeof useTra
         </div>
         <span className={cn(
           "rounded px-1.5 py-0.5 text-[11px] font-bold shrink-0",
-          isLong ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" : "bg-red-500/15 text-red-500",
+          isLong ? "bg-emerald-500/15 text-success" : "bg-red-500/15 text-danger",
         )}>
           {isLong ? "▲ LONG" : "▼ SHORT"}
         </span>
@@ -160,8 +160,8 @@ function PickCard({ pick, t }: { pick: AiPickResult; t: ReturnType<typeof useTra
               "text-[10px] font-medium rounded px-1.5 py-0.5",
               aligned
                 ? isLong
-                  ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                  : "bg-red-500/10 text-red-500"
+                  ? "bg-emerald-500/10 text-success"
+                  : "bg-red-500/10 text-danger"
                 : "bg-muted/30 text-muted-foreground",
             )}>
               {tf} {aligned ? "✓" : "–"}
@@ -178,11 +178,11 @@ function PickCard({ pick, t }: { pick: AiPickResult; t: ReturnType<typeof useTra
         </div>
         <div>
           <div className="text-muted-foreground">SL</div>
-          <div className="font-mono font-semibold text-red-500">{pick.stopLoss.toFixed(dec)}</div>
+          <div className="font-mono font-semibold text-danger">{pick.stopLoss.toFixed(dec)}</div>
         </div>
         <div>
           <div className="text-muted-foreground">TP</div>
-          <div className="font-mono font-semibold text-emerald-500">{pick.takeProfit.toFixed(dec)}</div>
+          <div className="font-mono font-semibold text-success">{pick.takeProfit.toFixed(dec)}</div>
         </div>
       </div>
 
@@ -192,7 +192,7 @@ function PickCard({ pick, t }: { pick: AiPickResult; t: ReturnType<typeof useTra
           <div key={i} className="flex items-start gap-1.5">
             <span className={cn(
               "mt-0.5 text-[10px] font-bold shrink-0",
-              item.status === "pass" ? "text-emerald-500" : item.status === "warn" ? "text-amber-500" : "text-red-500",
+              item.status === "pass" ? "text-success" : item.status === "warn" ? "text-warning" : "text-danger",
             )}>
               {item.status === "pass" ? "✓" : item.status === "warn" ? "⚠" : "✗"}
             </span>
@@ -217,8 +217,8 @@ function PickCard({ pick, t }: { pick: AiPickResult; t: ReturnType<typeof useTra
         {/* Confirm section */}
         {view === "done" && signalId ? (
           <div className="flex items-center gap-1.5 rounded-md bg-emerald-500/10 px-2.5 py-1.5">
-            <CheckCircle2 className="size-3.5 text-emerald-500 shrink-0" />
-            <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+            <CheckCircle2 className="size-3.5 text-success shrink-0" />
+            <span className="text-xs text-success font-medium">
               {t("aiPicksConfirmDone")}
             </span>
             <Link href={`/signals/${signalId}`} className="ml-auto text-xs text-primary hover:underline shrink-0">
@@ -227,7 +227,7 @@ function PickCard({ pick, t }: { pick: AiPickResult; t: ReturnType<typeof useTra
           </div>
         ) : view === "error" ? (
           <div className="flex items-center gap-2 rounded-md bg-red-500/10 px-2.5 py-1.5">
-            <span className="text-xs text-red-500 flex-1">{t(`aiPicksErr_${errorMsg}`)}</span>
+            <span className="text-xs text-danger flex-1">{t(`aiPicksErr_${errorMsg}`)}</span>
             <button onClick={() => setView("idle")} className="text-xs text-muted-foreground hover:text-foreground">
               {t("aiPicksRetry")}
             </button>
@@ -270,8 +270,8 @@ function PickCard({ pick, t }: { pick: AiPickResult; t: ReturnType<typeof useTra
             className={cn(
               "w-full rounded-md py-1.5 text-xs font-medium transition",
               isLong
-                ? "border border-emerald-500/40 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10"
-                : "border border-red-500/40 text-red-500 hover:bg-red-500/10",
+                ? "border border-emerald-500/40 text-success hover:bg-emerald-500/10"
+                : "border border-red-500/40 text-danger hover:bg-red-500/10",
             )}
           >
             {t("aiPicksConfirmOpen")} {isLong ? "▲" : "▼"}
@@ -363,7 +363,7 @@ export function AiPicksPanel({ isLoggedIn, isVip }: Props) {
     return (
       <div className="flex items-center justify-between gap-4 rounded-lg border border-amber-500/30 bg-amber-50/50 dark:bg-amber-950/20 p-4">
         <div className="flex items-center gap-2.5">
-          <Crown className="size-4 text-amber-500 shrink-0" />
+          <Crown className="size-4 text-warning shrink-0" />
           <div>
             <p className="text-sm font-medium text-foreground">{t("aiPicksTitle")}</p>
             <p className="text-xs text-amber-700 dark:text-amber-300/70">{t("aiPicksVipHint")}</p>

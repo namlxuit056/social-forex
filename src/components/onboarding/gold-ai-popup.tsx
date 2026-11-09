@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { getPathname } from "@/i18n/navigation";
 
 const STORAGE_KEY = "social-forex:gold-ai-popup:v1";
+const FIRST_VISIT_KEY = "social-forex:first-visit";
+const FIRST_SESSION_KEY = "social-forex:first-session";
 
 export function GoldAiPopup() {
   const t = useTranslations("goldAiPopup");
@@ -31,6 +33,12 @@ export function GoldAiPopup() {
 
     try {
       if (window.localStorage.getItem(STORAGE_KEY)) return;
+      // Let a first-time visitor see the page itself; introduce the feature from their next visit.
+      if (!window.localStorage.getItem(FIRST_VISIT_KEY)) {
+        window.localStorage.setItem(FIRST_VISIT_KEY, String(Date.now()));
+        window.sessionStorage.setItem(FIRST_SESSION_KEY, "1");
+      }
+      if (window.sessionStorage.getItem(FIRST_SESSION_KEY)) return;
     } catch {
       return;
     }

@@ -228,9 +228,9 @@ export function AutoScalpSettings({ initial, isVip }: Props) {
           {isPending ? <Loader2 className="size-3 animate-spin" /> : <Save className="size-3" />}
           {t("autoSave")}
         </button>
-        {saved && <span className="text-xs text-emerald-600 dark:text-emerald-400">{t("autoSaved")}</span>}
+        {saved && <span className="text-xs text-success">{t("autoSaved")}</span>}
         {errorMsg && (
-          <span className="text-xs text-red-500">
+          <span className="text-xs text-danger">
             {errorMsg.startsWith("invalid_data:") ? errorMsg : t(`err_${errorMsg as "unauthorized" | "vip_required" | "invalid_data" | "error"}`)}
           </span>
         )}

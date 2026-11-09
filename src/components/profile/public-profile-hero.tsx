@@ -133,7 +133,7 @@ export function PublicProfileHero({
         {socialProof && socialProof.totalSignals > 0 && (
           <div className="mt-4 flex flex-wrap gap-3">
             <div className="flex items-center gap-2 rounded-lg bg-muted/40 px-3 py-2">
-              <TrendingUp className="size-4 text-emerald-500" />
+              <TrendingUp className="size-4 text-success" />
               <div>
                 <p className="text-lg font-bold text-foreground">{socialProof.totalSignals}</p>
                 <p className="text-[11px] text-muted-foreground">{socialProof.signalsLabel}</p>

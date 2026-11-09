@@ -3,7 +3,9 @@ import { signalLevel, signalLevelDetail } from "@/components/signals/signal-leve
 
 type Level = "entry" | "sl" | "tp1" | "tp2" | "tp3";
 
-/** Entry / SL on the first row, TP1–3 on the second. Missing levels show "—". */
+const TARGET_COLS: Record<number, string> = { 1: "grid-cols-2", 2: "grid-cols-2", 3: "grid-cols-3" };
+
+/** Entry / SL on the first row, the set targets on the second. Missing Entry/SL/TP1 show "—". */
 export function PriceLevels({
   values,
   labels,
@@ -29,16 +31,18 @@ export function PriceLevels({
       </div>
     );
   };
+  // TP1 always shows (a missing target is worth seeing); TP2/TP3 only when set.
+  const targets = (["tp1", "tp2", "tp3"] as const).filter(
+    (level) => level === "tp1" || (values[level] != null && values[level] !== ""),
+  );
   return (
     <div className={cn("space-y-2", className)}>
       <dl className="grid grid-cols-2 gap-2 sm:gap-3">
         {cell("entry")}
         {cell("sl")}
       </dl>
-      <dl className="grid grid-cols-3 gap-2 sm:gap-3">
-        {cell("tp1")}
-        {cell("tp2")}
-        {cell("tp3")}
+      <dl className={cn("grid gap-2 sm:gap-3", TARGET_COLS[targets.length])}>
+        {targets.map(cell)}
       </dl>
     </div>
   );

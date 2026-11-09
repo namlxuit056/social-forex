@@ -26,7 +26,7 @@ export function ReviewForm({
 
   if (state?.ok) {
     return (
-      <p className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-500">
+      <p className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-success">
         {t("reviewSubmitted")}
       </p>
     );

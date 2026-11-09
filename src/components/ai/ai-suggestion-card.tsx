@@ -93,9 +93,9 @@ function formatNewsTime(minutesFromNow: number) {
 }
 
 function scoreClass(score: number) {
-  if (score >= 75) return "text-emerald-600 dark:text-emerald-300";
+  if (score >= 75) return "text-success";
   if (score >= 55) return "text-yellow-600 dark:text-yellow-300";
-  return "text-red-600 dark:text-red-300";
+  return "text-danger";
 }
 
 function checklistClass(status: "pass" | "warn" | "fail") {
@@ -200,9 +200,9 @@ export function AiSuggestionCard({
       >
         <div className="flex items-center gap-2">
           {isLong ? (
-            <TrendingUp className="size-5 text-emerald-500" />
+            <TrendingUp className="size-5 text-success" />
           ) : (
-            <TrendingDown className="size-5 text-red-500" />
+            <TrendingDown className="size-5 text-danger" />
           )}
           <div>
             <h3 className="text-sm font-bold text-foreground">
@@ -212,7 +212,7 @@ export function AiSuggestionCard({
               <span
                 className={cn(
                   "text-xs font-semibold",
-                  isLong ? "text-emerald-500" : "text-red-500",
+                  isLong ? "text-success" : "text-danger",
                 )}
               >
                 {isLong ? t("long") : t("short")}
@@ -245,16 +245,16 @@ export function AiSuggestionCard({
           value={formatPrice(suggestion.entry)}
         />
         <PriceCell
-          icon={<Shield className="size-3.5 text-red-500" />}
+          icon={<Shield className="size-3.5 text-danger" />}
           label={t("stopLoss")}
           value={formatPrice(suggestion.stopLoss)}
-          className="text-red-500"
+          className="text-danger"
         />
         <PriceCell
-          icon={<Target className="size-3.5 text-emerald-500" />}
+          icon={<Target className="size-3.5 text-success" />}
           label={t("takeProfit")}
           value={formatPrice(suggestion.takeProfit)}
-          className="text-emerald-500"
+          className="text-success"
         />
       </div>
 
@@ -426,7 +426,7 @@ export function AiSuggestionCard({
             </div>
             <div>
               <dt className="text-muted-foreground">{t("suggestedLots")}</dt>
-              <dd className="mt-0.5 font-mono font-bold text-emerald-600 dark:text-emerald-300">
+              <dd className="mt-0.5 font-mono font-bold text-success">
                 {riskPlan.lots}
               </dd>
             </div>

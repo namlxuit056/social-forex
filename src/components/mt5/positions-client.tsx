@@ -88,8 +88,8 @@ function Metric({
       <span
         className={cn(
           "text-lg font-semibold tabular-nums tracking-tight sm:text-xl",
-          tone === "profit" && "text-emerald-500",
-          tone === "loss" && "text-red-500",
+          tone === "profit" && "text-success",
+          tone === "loss" && "text-danger",
         )}
       >
         {value}
@@ -464,7 +464,7 @@ export function PositionsClient({
                     disabled={quickOrderPending || marketClosed}
                     onClick={() => handleQuickOrder("BUY")}
                     className={cn(
-                      "gap-1.5 border-emerald-500/50 text-emerald-600 hover:bg-emerald-500/10 hover:text-emerald-600 dark:text-emerald-400",
+                      "gap-1.5 border-emerald-500/50 text-success hover:bg-emerald-500/10 hover:text-emerald-600 dark:text-emerald-400",
                       marketClosed && "cursor-not-allowed",
                     )}
                   >
@@ -483,7 +483,7 @@ export function PositionsClient({
                     disabled={quickOrderPending || marketClosed}
                     onClick={() => handleQuickOrder("SELL")}
                     className={cn(
-                      "gap-1.5 border-red-500/50 text-red-600 hover:bg-red-500/10 hover:text-red-600 dark:text-red-400",
+                      "gap-1.5 border-red-500/50 text-danger hover:bg-red-500/10 hover:text-red-600 dark:text-red-400",
                       marketClosed && "cursor-not-allowed",
                     )}
                   >

@@ -64,14 +64,14 @@ export function VipSignalTeaser({
         )}
       >
         <div className="flex items-start gap-3">
-          <Lock className="mt-0.5 size-4 shrink-0 text-amber-500" aria-hidden />
+          <Lock className="mt-0.5 size-4 shrink-0 text-warning" aria-hidden />
           <div className="space-y-1">
             {title ? (
               <p className="text-sm font-medium text-foreground">{title}</p>
             ) : null}
             <p className="text-sm text-muted-foreground">{message}</p>
             {winRateLabel ? (
-              <p className="text-xs font-medium text-amber-600 dark:text-amber-400">
+              <p className="text-xs font-medium text-warning">
                 {winRateLabel}
               </p>
             ) : null}
@@ -92,7 +92,7 @@ export function VipSignalTeaser({
       <div className="space-y-0.5">
         <p className="text-sm text-amber-400/90">{message}</p>
         {winRateLabel ? (
-          <p className="text-xs font-medium text-amber-600 dark:text-amber-400">
+          <p className="text-xs font-medium text-warning">
             {winRateLabel}
           </p>
         ) : null}

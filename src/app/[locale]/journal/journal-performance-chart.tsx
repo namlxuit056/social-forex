@@ -516,7 +516,7 @@ export function JournalPerformanceChart({
             <p
               className={cn(
                 "mt-1.5 font-mono text-xl font-bold tabular-nums",
-                summary.totalPnl >= 0 ? "text-emerald-500" : "text-red-500",
+                summary.totalPnl >= 0 ? "text-success" : "text-danger",
               )}
             >
               {fmtCurrency(summary.totalPnl)}
@@ -525,7 +525,7 @@ export function JournalPerformanceChart({
               <p
                 className={cn(
                   "mt-0.5 font-mono text-xs",
-                  summary.accountPercent >= 0 ? "text-emerald-500/70" : "text-red-500/70",
+                  summary.accountPercent >= 0 ? "text-success/70" : "text-danger/70",
                 )}
               >
                 {fmtPercent(summary.accountPercent)}
@@ -542,9 +542,9 @@ export function JournalPerformanceChart({
               {summary.tradeCount}
             </p>
             <p className="mt-0.5 text-[11px] text-muted-foreground/70">
-              <span className="text-emerald-500/80">{summary.wins}W</span>
+              <span className="text-success">{summary.wins}W</span>
               {" / "}
-              <span className="text-red-500/80">{summary.losses}L</span>
+              <span className="text-danger">{summary.losses}L</span>
             </p>
           </div>
 
@@ -556,7 +556,7 @@ export function JournalPerformanceChart({
             <p
               className={cn(
                 "mt-1.5 font-mono text-xl font-bold tabular-nums",
-                summary.winRate >= 50 ? "text-emerald-500" : "text-red-500",
+                summary.winRate >= 50 ? "text-success" : "text-danger",
               )}
             >
               {summary.winRate}%
@@ -586,14 +586,14 @@ export function JournalPerformanceChart({
             {streak.count > 0 && streak.type ? (
               <div className="mt-1.5 flex items-center gap-1.5">
                 {isWinStreak ? (
-                  <Flame className="size-5 shrink-0 text-emerald-500" />
+                  <Flame className="size-5 shrink-0 text-success" />
                 ) : (
-                  <TrendingDown className="size-5 shrink-0 text-red-500" />
+                  <TrendingDown className="size-5 shrink-0 text-danger" />
                 )}
                 <span
                   className={cn(
                     "font-mono text-xl font-bold tabular-nums",
-                    isWinStreak ? "text-emerald-500" : "text-red-500",
+                    isWinStreak ? "text-success" : "text-danger",
                   )}
                 >
                   {streak.count}
@@ -620,7 +620,7 @@ export function JournalPerformanceChart({
             <p
               className={cn(
                 "mt-1.5 font-mono text-xl font-bold tabular-nums",
-                summary.profitFactor >= 1 ? "text-emerald-500" : "text-red-500",
+                summary.profitFactor >= 1 ? "text-success" : "text-danger",
               )}
             >
               {summary.profitFactor === Infinity
@@ -641,7 +641,7 @@ export function JournalPerformanceChart({
                 "mt-1.5 font-mono text-xl font-bold tabular-nums",
                 maxDrawdown === null || maxDrawdown === 0
                   ? "text-muted-foreground"
-                  : "text-red-500",
+                  : "text-danger",
               )}
             >
               {maxDrawdown === null || maxDrawdown === 0
@@ -663,7 +663,7 @@ export function JournalPerformanceChart({
                   <span className="truncate text-[11px] text-muted-foreground">
                     {summary.best.label}
                   </span>
-                  <span className="shrink-0 font-mono text-sm font-semibold text-emerald-500">
+                  <span className="shrink-0 font-mono text-sm font-semibold text-success">
                     {fmtCurrency(summary.best.pnl)}
                   </span>
                 </div>
@@ -671,7 +671,7 @@ export function JournalPerformanceChart({
                   <span className="truncate text-[11px] text-muted-foreground">
                     {summary.worst.label}
                   </span>
-                  <span className="shrink-0 font-mono text-sm font-semibold text-red-500">
+                  <span className="shrink-0 font-mono text-sm font-semibold text-danger">
                     {fmtCurrency(summary.worst.pnl)}
                   </span>
                 </div>
@@ -696,9 +696,9 @@ export function JournalPerformanceChart({
               />
             </div>
             <span className="shrink-0 text-muted-foreground">
-              <span className="text-emerald-500">{summary.wins}W</span>
+              <span className="text-success">{summary.wins}W</span>
               {" / "}
-              <span className="text-red-500">{summary.losses}L</span>
+              <span className="text-danger">{summary.losses}L</span>
             </span>
           </div>
         )}

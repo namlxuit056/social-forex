@@ -231,8 +231,8 @@ function EditForm({ trade, onClose }: { trade: Trade; onClose: () => void }) {
 
 function ResultBadge({ result, t }: { result: string; t: ReturnType<typeof useTranslations> }) {
   const classes: Record<string, string> = {
-    WIN: "bg-emerald-500/15 text-emerald-500",
-    LOSS: "bg-red-500/15 text-red-500",
+    WIN: "bg-emerald-500/15 text-success",
+    LOSS: "bg-red-500/15 text-danger",
     BREAKEVEN: "bg-yellow-500/15 text-yellow-500",
     PENDING: "bg-blue-500/15 text-blue-400",
   };
@@ -304,7 +304,7 @@ function TradeRow({
         {mistakeText && (
           <span
             title={mistakeText}
-            className="block max-w-40 truncate font-sans text-[10px] font-normal text-amber-600 dark:text-amber-500"
+            className="block max-w-40 truncate font-sans text-[10px] font-normal text-warning"
           >
             ⚠ {mistakeText}
           </span>
@@ -326,7 +326,7 @@ function TradeRow({
       <td
         className={cn(
           "px-4 py-2.5 font-mono text-xs font-medium",
-          trade.pnl != null && trade.pnl >= 0 ? "text-emerald-500" : "text-red-500",
+          trade.pnl != null && trade.pnl >= 0 ? "text-success" : "text-danger",
         )}
       >
         {trade.pnl != null
@@ -341,8 +341,8 @@ function TradeRow({
           r == null
             ? "text-muted-foreground/40"
             : r >= 0
-              ? "text-emerald-500"
-              : "text-red-500",
+              ? "text-success"
+              : "text-danger",
         )}
       >
         {r != null && !isPending ? `${r >= 0 ? "+" : ""}${r.toFixed(2)}R` : "—"}
@@ -458,8 +458,8 @@ export function JournalTable({ trades, locale }: { trades: Trade[]; locale: stri
 
   const filterButtons: { key: Filter; label: string; color?: string }[] = [
     { key: "ALL", label: t("all") },
-    { key: "WIN", label: t("win"), color: "text-emerald-500" },
-    { key: "LOSS", label: t("loss"), color: "text-red-500" },
+    { key: "WIN", label: t("win"), color: "text-success" },
+    { key: "LOSS", label: t("loss"), color: "text-danger" },
     ...(counts.BREAKEVEN > 0 ? [{ key: "BREAKEVEN" as Filter, label: t("breakeven"), color: "text-yellow-500" }] : []),
     ...(counts.PENDING > 0 ? [{ key: "PENDING" as Filter, label: t("pending"), color: "text-blue-400" }] : []),
   ];

@@ -96,14 +96,14 @@ export default async function AdminDashboardPage({
       label: t("pendingReports"),
       value: pendingReports,
       icon: Flag,
-      color: pendingReports > 0 ? "text-red-500" : "text-muted-foreground",
+      color: pendingReports > 0 ? "text-danger" : "text-muted-foreground",
       bg: pendingReports > 0 ? "bg-red-500/10" : "bg-muted/50",
     },
     {
       label: t("activeSignals"),
       value: activeSignals,
       icon: TrendingUp,
-      color: "text-emerald-500",
+      color: "text-success",
       bg: "bg-emerald-500/10",
     },
   ];

@@ -78,9 +78,9 @@ function DirectionBadge({ direction }: { direction: string }) {
 function ResultBadge({ result }: { result: ClosedTrade["result"] }) {
   const tone =
     result === "WIN"
-      ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400"
+      ? "bg-emerald-500/15 text-success"
       : result === "LOSS"
-        ? "bg-red-500/15 text-red-600 dark:text-red-400"
+        ? "bg-red-500/15 text-danger"
         : "bg-muted text-muted-foreground";
   return <span className={cn("rounded-full px-2 py-0.5 text-xs font-semibold", tone)}>{result}</span>;
 }
@@ -88,7 +88,7 @@ function ResultBadge({ result }: { result: ClosedTrade["result"] }) {
 function PL({ value }: { value: number | null }) {
   const v = value ?? 0;
   return (
-    <span className={cn("font-mono font-semibold tabular-nums", v >= 0 ? "text-emerald-500" : "text-red-500")}>
+    <span className={cn("font-mono font-semibold tabular-nums", v >= 0 ? "text-success" : "text-danger")}>
       {fmtProfit(value)}
     </span>
   );
@@ -103,7 +103,7 @@ function RrCell({ trade }: { trade: ClosedTrade }) {
   return (
     <span className="inline-flex flex-col items-end">
       {tpPercent != null && (
-        <span className="font-mono text-xs tabular-nums text-emerald-600 dark:text-emerald-400">
+        <span className="font-mono text-xs tabular-nums text-success">
           TP {tpPercent.toFixed(2)}%
         </span>
       )}
@@ -111,7 +111,7 @@ function RrCell({ trade }: { trade: ClosedTrade }) {
         <span
           className={cn(
             "font-mono text-[11px] font-semibold tabular-nums",
-            rr >= 2 ? "text-emerald-600 dark:text-emerald-400" : rr >= 1 ? "text-amber-600 dark:text-amber-400" : "text-destructive",
+            rr >= 2 ? "text-success" : rr >= 1 ? "text-warning" : "text-destructive",
           )}
         >
           R:R 1:{rr.toFixed(2)}

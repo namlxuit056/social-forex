@@ -42,7 +42,7 @@ const typeConfig: Record<
 > = {
   signal_new: { icon: Radio, color: "text-blue-500", labelKey: "signalNew" },
   signal_win: { icon: TrendingUp, color: "text-green-500", labelKey: "signalWin" },
-  signal_loss: { icon: TrendingDown, color: "text-red-500", labelKey: "signalLoss" },
+  signal_loss: { icon: TrendingDown, color: "text-danger", labelKey: "signalLoss" },
   journal: { icon: BookOpen, color: "text-violet-500", labelKey: "journalEntry" },
   forum: { icon: MessageSquare, color: "text-orange-500", labelKey: "forumThread" },
 };
@@ -336,7 +336,7 @@ function FeedItemContent({ item }: { item: FeedItem }) {
           {String(d.symbol)} {String(d.direction)}
         </span>
         {pnl != null && (
-          <span className={cn("ml-1 font-mono font-medium", pnl >= 0 ? "text-green-500" : "text-red-500")}>
+          <span className={cn("ml-1 font-mono font-medium", pnl >= 0 ? "text-green-500" : "text-danger")}>
             {pnl >= 0 ? "+" : ""}{pnl.toFixed(2)}
           </span>
         )}

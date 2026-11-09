@@ -130,7 +130,7 @@ export function TrackRecordTable({
                     <p
                       className={cn(
                         "mt-2 font-mono text-xs font-medium",
-                        row.r >= 0 ? "text-emerald-500" : "text-red-500",
+                        row.r >= 0 ? "text-success" : "text-danger",
                       )}
                     >
                       {fmtR(row.r)}
@@ -184,7 +184,7 @@ export function TrackRecordTable({
                     <td
                       className={cn(
                         "px-4 py-2.5 font-mono text-xs font-medium",
-                        row.r >= 0 ? "text-emerald-500" : "text-red-500",
+                        row.r >= 0 ? "text-success" : "text-danger",
                       )}
                     >
                       {fmtR(row.r)}

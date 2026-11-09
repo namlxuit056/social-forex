@@ -82,7 +82,7 @@ export function RealBacktest({ initialResult }: Props) {
             <Card className="border-border bg-card">
               <CardContent className="pt-4">
                 <p className="text-xs text-muted-foreground">{t("winRate")}</p>
-                <p className={cn("mt-1 font-mono text-2xl font-bold", result.winRate >= 50 ? "text-green-500" : "text-red-500")}>
+                <p className={cn("mt-1 font-mono text-2xl font-bold", result.winRate >= 50 ? "text-green-500" : "text-danger")}>
                   {result.winRate.toFixed(1)}%
                 </p>
                 <p className="text-xs text-muted-foreground">{result.wins}W / {result.losses}L</p>
@@ -91,7 +91,7 @@ export function RealBacktest({ initialResult }: Props) {
             <Card className="border-border bg-card">
               <CardContent className="pt-4">
                 <p className="text-xs text-muted-foreground">{t("totalPnl")}</p>
-                <p className={cn("mt-1 font-mono text-2xl font-bold", result.totalPnl >= 0 ? "text-green-500" : "text-red-500")}>
+                <p className={cn("mt-1 font-mono text-2xl font-bold", result.totalPnl >= 0 ? "text-green-500" : "text-danger")}>
                   {result.totalPnl >= 0 ? "+" : ""}{result.totalPnl.toFixed(2)}%
                 </p>
               </CardContent>
@@ -99,7 +99,7 @@ export function RealBacktest({ initialResult }: Props) {
             <Card className="border-border bg-card">
               <CardContent className="pt-4">
                 <p className="text-xs text-muted-foreground">{t("profitFactor")}</p>
-                <p className={cn("mt-1 font-mono text-2xl font-bold", result.profitFactor >= 1 ? "text-green-500" : "text-red-500")}>
+                <p className={cn("mt-1 font-mono text-2xl font-bold", result.profitFactor >= 1 ? "text-green-500" : "text-danger")}>
                   {result.profitFactor.toFixed(2)}
                 </p>
               </CardContent>
@@ -107,7 +107,7 @@ export function RealBacktest({ initialResult }: Props) {
             <Card className="border-border bg-card">
               <CardContent className="pt-4">
                 <p className="text-xs text-muted-foreground">{t("maxDrawdown")}</p>
-                <p className="mt-1 font-mono text-2xl font-bold text-red-500">
+                <p className="mt-1 font-mono text-2xl font-bold text-danger">
                   -{result.maxDrawdown.toFixed(2)}%
                 </p>
               </CardContent>

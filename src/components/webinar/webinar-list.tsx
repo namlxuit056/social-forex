@@ -29,7 +29,7 @@ type Props = {
 
 const statusConfig: Record<string, { color: string; label: string }> = {
   SCHEDULED: { color: "bg-blue-500/15 text-blue-500", label: "Upcoming" },
-  LIVE: { color: "bg-red-500/15 text-red-500", label: "Live Now" },
+  LIVE: { color: "bg-red-500/15 text-danger", label: "Live Now" },
   ENDED: { color: "bg-muted text-muted-foreground", label: "Ended" },
   CANCELLED: { color: "bg-muted text-muted-foreground", label: "Cancelled" },
 };

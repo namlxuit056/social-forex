@@ -186,9 +186,9 @@ function SignalCard({
             className={cn(
               "font-mono",
               (item.lastProfit ?? 0) > 0
-                ? "text-emerald-600 dark:text-emerald-300"
+                ? "text-success"
                 : (item.lastProfit ?? 0) < 0
-                  ? "text-red-600 dark:text-red-300"
+                  ? "text-danger"
                   : "text-foreground",
             )}
           >

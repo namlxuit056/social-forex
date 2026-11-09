@@ -58,7 +58,7 @@ export function LossStreakGuard({
         variant="outline"
         size="sm"
         title={title}
-        className="gap-1.5 border-red-500/40 text-red-600 dark:text-red-300"
+        className="gap-1.5 border-red-500/40 text-danger"
         onClick={unlock}
       >
         <Lock className="size-3.5" />

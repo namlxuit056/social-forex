@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 export function SlAmountHint({ amount }: { amount: number | null }) {
   if (amount == null) return null;
   return (
-    <p className={cn("mt-1 font-mono text-xs", amount > 0 ? "text-red-500" : "text-muted-foreground")}>
+    <p className={cn("mt-1 font-mono text-xs", amount > 0 ? "text-danger" : "text-muted-foreground")}>
       {amount > 0 ? `≈ -$${amount.toFixed(2)} if hit` : "On the profit side — no loss if hit"}
     </p>
   );
@@ -12,7 +12,7 @@ export function SlAmountHint({ amount }: { amount: number | null }) {
 export function TpAmountHint({ amount }: { amount: number | null }) {
   if (amount == null) return null;
   return (
-    <p className={cn("mt-1 font-mono text-xs", amount > 0 ? "text-emerald-500" : "text-muted-foreground")}>
+    <p className={cn("mt-1 font-mono text-xs", amount > 0 ? "text-success" : "text-muted-foreground")}>
       {amount > 0 ? `≈ +$${amount.toFixed(2)} if hit` : "On the loss side — no gain if hit"}
     </p>
   );
@@ -27,9 +27,9 @@ export function RiskRewardPreview({ riskReward }: { riskReward: number | null })
         className={cn(
           "font-mono text-sm font-bold",
           riskReward >= 2
-            ? "text-emerald-600 dark:text-emerald-400"
+            ? "text-success"
             : riskReward >= 1
-              ? "text-amber-600 dark:text-amber-400"
+              ? "text-warning"
               : "text-destructive",
         )}
       >

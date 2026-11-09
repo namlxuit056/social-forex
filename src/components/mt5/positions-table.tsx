@@ -89,7 +89,7 @@ function SideBadge({ type }: { type: string }) {
 function PL({ value, className }: { value: number | null; className?: string }) {
   const v = value ?? 0;
   return (
-    <span className={cn("font-mono font-semibold tabular-nums", v >= 0 ? "text-emerald-500" : "text-red-500", className)}>
+    <span className={cn("font-mono font-semibold tabular-nums", v >= 0 ? "text-success" : "text-danger", className)}>
       {fmtProfit(value)}
     </span>
   );
@@ -149,13 +149,13 @@ function estimateRiskReward(p: LivePosition, equity: number | null): number | nu
 function SlAmount({ p, equity }: { p: LivePosition; equity: number | null }) {
   const risk = estimateRisk(p, equity);
   if (!risk || risk.protected || risk.riskAmount <= 0) return null;
-  return <span className="block font-mono text-[11px] text-red-500">-{risk.riskAmount.toFixed(2)}</span>;
+  return <span className="block font-mono text-[11px] text-danger">-{risk.riskAmount.toFixed(2)}</span>;
 }
 
 function TpAmount({ p }: { p: LivePosition }) {
   const amount = estimateTakeProfitAmount(p);
   if (amount == null || amount <= 0) return null;
-  return <span className="block font-mono text-[11px] text-emerald-500">+{amount.toFixed(2)}</span>;
+  return <span className="block font-mono text-[11px] text-success">+{amount.toFixed(2)}</span>;
 }
 
 function RiskCell({ p, equity, currency }: { p: LivePosition; equity: number | null; currency: string | null }) {
@@ -165,9 +165,9 @@ function RiskCell({ p, equity, currency }: { p: LivePosition; equity: number | n
     return <span className="font-mono text-xs tabular-nums text-muted-foreground">—</span>;
   }
   if (risk.protected) {
-    return <span className="font-mono text-xs font-semibold tabular-nums text-emerald-500">Protected</span>;
+    return <span className="font-mono text-xs font-semibold tabular-nums text-success">Protected</span>;
   }
-  const tone = risk.riskPct > 5 ? "text-red-500" : risk.riskPct > 2 ? "text-amber-500" : "text-muted-foreground";
+  const tone = risk.riskPct > 5 ? "text-danger" : risk.riskPct > 2 ? "text-warning" : "text-muted-foreground";
   return (
     <span className="inline-flex flex-col items-end">
       <span className={cn("font-mono text-xs font-semibold tabular-nums", tone)}>
@@ -178,9 +178,9 @@ function RiskCell({ p, equity, currency }: { p: LivePosition; equity: number | n
           className={cn(
             "font-mono text-[11px] font-semibold tabular-nums",
             riskReward >= 2
-              ? "text-emerald-600 dark:text-emerald-400"
+              ? "text-success"
               : riskReward >= 1
-                ? "text-amber-600 dark:text-amber-400"
+                ? "text-warning"
                 : "text-destructive",
           )}
         >
@@ -223,7 +223,7 @@ function ProximityBadge({ target }: { target: "sl" | "tp" }) {
     <span
       className={cn(
         "inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10px] font-semibold whitespace-nowrap",
-        isSl ? "bg-red-500/15 text-red-500" : "bg-emerald-500/15 text-emerald-500",
+        isSl ? "bg-red-500/15 text-danger" : "bg-emerald-500/15 text-success",
       )}
     >
       <span className={cn("size-1.5 rounded-full animate-pulse", isSl ? "bg-red-500" : "bg-emerald-500")} />
@@ -261,7 +261,7 @@ function NewsBadge({ events }: { events: TodayNewsEvent[] }) {
         render={
           <Link
             href={{ pathname: "/calendar", query: { currencies: currencies.join(","), highlight: target.id } }}
-            className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-semibold whitespace-nowrap text-amber-600 transition-colors hover:bg-amber-500/25 dark:text-amber-400"
+            className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-semibold whitespace-nowrap text-warning transition-colors hover:bg-amber-500/25 dark:text-amber-400"
           />
         }
       >
@@ -893,7 +893,7 @@ export function PositionsTable({ positions, currency, equity, newsEventsToday }:
                           <span
                             className={cn(
                               "font-mono tabular-nums",
-                              risk?.protected && "font-semibold text-emerald-500",
+                              risk?.protected && "font-semibold text-success",
                             )}
                           >
                             {!risk
@@ -907,9 +907,9 @@ export function PositionsTable({ positions, currency, equity, newsEventsToday }:
                               className={cn(
                                 "font-mono text-[11px] font-semibold",
                                 riskReward >= 2
-                                  ? "text-emerald-600 dark:text-emerald-400"
+                                  ? "text-success"
                                   : riskReward >= 1
-                                    ? "text-amber-600 dark:text-amber-400"
+                                    ? "text-warning"
                                     : "text-destructive",
                               )}
                             >

@@ -652,7 +652,7 @@ export function SignalRoom({
                             {s.authorHasMt5 && (
                               <Badge
                                 variant="outline"
-                                className="gap-1 border-emerald-500/30 bg-emerald-500/8 text-emerald-600 dark:text-emerald-400 text-[10px] px-1.5 py-0.5 h-5"
+                                className="gap-1 border-emerald-500/30 bg-emerald-500/8 text-success text-[10px] px-1.5 py-0.5 h-5"
                               >
                                 <ShieldCheck className="size-2.5" />
                                 MT5
@@ -716,7 +716,8 @@ export function SignalRoom({
                         )}
 
                         {s.notes && !s.masked ? (
-                          <p className="text-sm text-muted-foreground">{s.notes}</p>
+                          // Full notes live on the detail page; long AI checklists would swamp the card.
+                          <p className="line-clamp-3 text-sm text-muted-foreground">{s.notes}</p>
                         ) : null}
 
                         <div className="flex flex-wrap items-center gap-2">

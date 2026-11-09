@@ -253,7 +253,7 @@ export default async function CopyTradePage({
                 )}
 
                 {"warning" in step && step.warning && (
-                  <div className="mt-3 flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-sm text-amber-600 dark:text-amber-400">
+                  <div className="mt-3 flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-sm text-warning">
                     <AlertTriangle className="mt-0.5 size-4 shrink-0" />
                     {step.warning}
                   </div>
@@ -328,7 +328,7 @@ export default async function CopyTradePage({
       {/* Risk Warning */}
       <Card className="border-amber-500/30 bg-amber-500/5">
         <CardContent className="flex items-start gap-3 pt-6">
-          <AlertTriangle className="mt-0.5 size-5 shrink-0 text-amber-500" />
+          <AlertTriangle className="mt-0.5 size-5 shrink-0 text-warning" />
           <div>
             <h3 className="font-medium text-foreground">{t("warningTitle")}</h3>
             <p className="mt-1 text-sm text-muted-foreground">{t("warningText")}</p>

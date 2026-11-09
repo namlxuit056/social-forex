@@ -28,7 +28,7 @@ export function UserRow({ user, currentUserId, locale }: UserRowProps) {
   const isSelf = user.id === currentUserId;
 
   const roleBadge = (role: string) => {
-    if (role === "ADMIN") return "bg-red-500/15 text-red-600 dark:text-red-400";
+    if (role === "ADMIN") return "bg-red-500/15 text-danger";
     if (role === "MOD") return "bg-blue-500/15 text-blue-600 dark:text-blue-400";
     return "bg-muted text-muted-foreground";
   };
@@ -62,7 +62,7 @@ export function UserRow({ user, currentUserId, locale }: UserRowProps) {
       </td>
       <td className="px-4 py-2.5 text-xs">
         {user.emailVerified ? (
-          <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+          <span className="inline-flex items-center gap-1 text-success">
             ✓ Verified
           </span>
         ) : (
@@ -98,7 +98,7 @@ export function UserRow({ user, currentUserId, locale }: UserRowProps) {
               {isPending ? "…" : t("changeRole")}
             </button>
             {state?.ok && (
-              <span className="text-[11px] text-emerald-600">✓</span>
+              <span className="text-[11px] text-success">✓</span>
             )}
             {state?.error && (
               <span className="text-[11px] text-destructive">{state.error}</span>

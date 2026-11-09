@@ -25,7 +25,7 @@ export async function SiteFooter() {
             <p className="font-medium text-foreground/90">Social Forex</p>
             <p className="mt-2 max-w-md leading-relaxed">{tf("tagline")}</p>
           </div>
-          <nav className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
+          <nav className="grid grid-cols-2 gap-x-8 gap-y-1 text-xs sm:grid-cols-3 lg:grid-cols-5">
             {footerNavKeys.map((l) => (
               <Link
                 key={l.href}

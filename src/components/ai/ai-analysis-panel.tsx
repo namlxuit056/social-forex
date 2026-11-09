@@ -211,7 +211,7 @@ export function AiAnalysisPanel({ symbol }: Props) {
 
       {/* Error */}
       {error && (
-        <div className="rounded-lg border border-red-500/20 bg-red-500/5 px-4 py-3 text-xs text-red-600 dark:text-red-400">
+        <div className="rounded-lg border border-red-500/20 bg-red-500/5 px-4 py-3 text-xs text-danger">
           {error}
         </div>
       )}

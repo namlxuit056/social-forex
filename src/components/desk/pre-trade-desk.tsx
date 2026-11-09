@@ -211,7 +211,7 @@ export function PreTradeDesk({
           variant="outline"
           className={cn(
             "h-7 rounded-md px-2.5",
-            ready ? "border-primary/35 bg-primary/10 text-primary" : "border-amber-500/35 bg-amber-500/10 text-amber-600 dark:text-amber-300",
+            ready ? "border-primary/35 bg-primary/10 text-primary" : "border-amber-500/35 bg-amber-500/10 text-warning",
           )}
         >
           {ready ? t("readyBadge") : t("notReadyBadge")}

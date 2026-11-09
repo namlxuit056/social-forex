@@ -160,7 +160,7 @@ export function BulkGenerateForm() {
 
             {phase === "done" && (
               <p
-                className={`text-sm font-medium ${failedCount > 0 ? "text-amber-500" : "text-green-500"}`}
+                className={`text-sm font-medium ${failedCount > 0 ? "text-warning" : "text-green-500"}`}
               >
                 Hoàn thành: {doneCount} thành công
                 {failedCount > 0 ? `, ${failedCount} thất bại` : ""}

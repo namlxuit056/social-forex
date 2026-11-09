@@ -38,7 +38,7 @@ export function SignalReactions({
           className={cn(
             "h-8 gap-1.5 text-xs",
             userReaction === "LIKE" &&
-              "border-emerald-500/50 bg-emerald-500/10 text-emerald-500",
+              "border-emerald-500/50 bg-emerald-500/10 text-success",
           )}
         >
           <ThumbsUp className="size-3.5" />
@@ -58,7 +58,7 @@ export function SignalReactions({
           className={cn(
             "h-8 gap-1.5 text-xs",
             userReaction === "DISLIKE" &&
-              "border-red-500/50 bg-red-500/10 text-red-500",
+              "border-red-500/50 bg-red-500/10 text-danger",
           )}
         >
           <ThumbsDown className="size-3.5" />

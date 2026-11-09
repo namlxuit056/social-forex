@@ -61,7 +61,7 @@ export function SignalEditForm({
         <p className="text-sm text-destructive">{state.error}</p>
       ) : null}
       {state?.ok ? (
-        <p className="text-sm text-emerald-600 dark:text-emerald-400">{t("editSaved")}</p>
+        <p className="text-sm text-success">{t("editSaved")}</p>
       ) : null}
       <div className="grid gap-3 sm:grid-cols-2">
         <div>

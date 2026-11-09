@@ -1212,7 +1212,7 @@ export function TradingPlanForm({ plan, locale, hasPrefill = false }: Props) {
 
       {state?.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
       {hasUnsavedChanges ? (
-        <p className="text-sm text-amber-600 dark:text-amber-300">{t("unsavedChanges")}</p>
+        <p className="text-sm text-warning">{t("unsavedChanges")}</p>
       ) : state?.ok ? (
         <p className="text-sm text-primary">{t("saved")}</p>
       ) : null}
@@ -1233,7 +1233,7 @@ export function TradingPlanForm({ plan, locale, hasPrefill = false }: Props) {
             <p
               className={cn(
                 "truncate text-xs",
-                hasUnsavedChanges ? "text-amber-600 dark:text-amber-300" : "text-muted-foreground",
+                hasUnsavedChanges ? "text-warning" : "text-muted-foreground",
               )}
             >
               {hasUnsavedChanges ? t("unsavedChanges") : state?.ok ? t("saved") : t("readyToSave")}

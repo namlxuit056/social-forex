@@ -209,8 +209,8 @@ export function JournalLivePanel({
       value: account.equity != null ? `${account.equity.toFixed(2)} ${currency}` : "—",
       icon: TrendingUp,
       color: account.equity != null && account.balance != null && account.equity >= account.balance
-        ? "text-emerald-500"
-        : "text-red-500",
+        ? "text-success"
+        : "text-danger",
       bg: account.equity != null && account.balance != null && account.equity >= account.balance
         ? "bg-emerald-500/10"
         : "bg-red-500/10",
@@ -273,7 +273,7 @@ export function JournalLivePanel({
             <span
               className={cn(
                 "text-sm font-semibold tabular-nums",
-                totalLiveProfit >= 0 ? "text-emerald-500" : "text-red-500",
+                totalLiveProfit >= 0 ? "text-success" : "text-danger",
               )}
             >
               {totalLiveProfit >= 0 ? "+" : ""}
@@ -335,7 +335,7 @@ export function JournalLivePanel({
                         <td
                           className={cn(
                             "px-4 py-2.5 text-right font-mono text-xs font-semibold",
-                            (pos.profit ?? 0) >= 0 ? "text-emerald-500" : "text-red-500",
+                            (pos.profit ?? 0) >= 0 ? "text-success" : "text-danger",
                           )}
                         >
                           {pos.profit != null

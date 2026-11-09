@@ -80,7 +80,7 @@ export default async function UpgradeVipPage({
       </div>
 
       <div className="flex items-start gap-3 rounded-xl border border-amber-500/25 bg-amber-500/10 px-5 py-4">
-        <GraduationCap className="mt-0.5 size-5 shrink-0 text-amber-600 dark:text-amber-400" />
+        <GraduationCap className="mt-0.5 size-5 shrink-0 text-warning" />
         <div className="space-y-1">
           <p className="text-sm font-medium text-foreground">
             {t("educationalTitle")}
@@ -98,7 +98,7 @@ export default async function UpgradeVipPage({
             {t("currentStatus")}
           </span>
           {vip ? (
-            <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
+            <Badge className="bg-emerald-500/15 text-success">
               <ShieldCheck className="mr-1 size-3" />
               {t("active", {
                 date: dbUser?.vipUntil?.toLocaleDateString(locale) ?? "",
@@ -137,7 +137,7 @@ export default async function UpgradeVipPage({
             (key, i) => (
               <li key={key} className="flex items-start gap-3 text-sm">
                 {i < 3 ? (
-                  <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-emerald-500" />
+                  <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-success" />
                 ) : i === 3 ? (
                   <Award className="mt-0.5 size-4 shrink-0 text-blue-500" />
                 ) : (

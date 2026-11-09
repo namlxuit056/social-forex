@@ -70,7 +70,7 @@ export function MoodTodayPicker() {
           ))}
         </div>
         {isNegativeMood(mood) && (
-          <p className="w-full text-xs text-amber-600 dark:text-amber-400">
+          <p className="w-full text-xs text-warning">
             {t("moodReminderBody")}
           </p>
         )}

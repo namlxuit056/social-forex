@@ -86,7 +86,7 @@ export function TradeHistoryPaginated({
                 <p
                   className={cn(
                     "mt-2 font-mono text-xs font-medium",
-                    (trade.pnl ?? 0) >= 0 ? "text-emerald-500" : "text-red-500",
+                    (trade.pnl ?? 0) >= 0 ? "text-success" : "text-danger",
                   )}
                 >
                   {trade.pnl == null ? "—" : fmtCurrency(trade.pnl)}
@@ -121,7 +121,7 @@ export function TradeHistoryPaginated({
                 <td
                   className={cn(
                     "px-4 py-2.5 font-mono text-xs font-medium",
-                    (trade.pnl ?? 0) >= 0 ? "text-emerald-500" : "text-red-500",
+                    (trade.pnl ?? 0) >= 0 ? "text-success" : "text-danger",
                   )}
                 >
                   {trade.pnl == null ? "—" : fmtCurrency(trade.pnl)}

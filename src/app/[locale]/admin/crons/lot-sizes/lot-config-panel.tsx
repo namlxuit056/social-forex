@@ -16,7 +16,7 @@ function FeedbackBadge({ feedback }: { feedback: Feedback }) {
     <span
       className={
         feedback.ok
-          ? "flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400"
+          ? "flex items-center gap-1 text-xs text-success"
           : "flex items-center gap-1 text-xs text-destructive"
       }
     >
