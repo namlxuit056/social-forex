@@ -20,7 +20,7 @@ export async function SiteFooter() {
   return (
     <footer className="border-t border-border bg-background px-4 py-10 text-sm text-muted-foreground">
       <div className="mx-auto max-w-7xl space-y-8">
-        <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <p className="font-medium text-foreground/90">Social Forex</p>
             <p className="mt-2 max-w-md leading-relaxed">{tf("tagline")}</p>
