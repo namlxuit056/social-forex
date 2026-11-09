@@ -96,7 +96,7 @@ export function OnboardingChecklist() {
               ) : (
                 <Link
                   href={href}
-                  className="flex items-center gap-2 text-sm text-foreground hover:text-primary"
+                  className="flex items-center gap-2 text-sm text-foreground hover:text-brand"
                 >
                   <Circle className="h-4 w-4 shrink-0 text-muted-foreground" />
                   {label}

@@ -113,7 +113,7 @@ export function ArticleContentAnalyzer({ keyword, title, locale, getBody, editor
         type="button"
         variant="outline"
         size="sm"
-        className="w-full gap-2 border-primary/40 text-primary hover:bg-primary/10"
+        className="w-full gap-2 border-primary/40 text-brand hover:bg-primary/10"
         onClick={analyze}
         disabled={loading}
       >
@@ -136,7 +136,7 @@ export function ArticleContentAnalyzer({ keyword, title, locale, getBody, editor
             className="flex w-full items-center justify-between px-3 py-2.5 text-left"
           >
             <span className="flex items-center gap-2 text-xs font-medium text-foreground">
-              <Sparkles className="size-3.5 text-primary" />
+              <Sparkles className="size-3.5 text-brand" />
               Kết quả phân tích AI
               <Badge variant="outline" className="px-1.5 py-0 text-[10px]">
                 {result.weakSections.length} vấn đề

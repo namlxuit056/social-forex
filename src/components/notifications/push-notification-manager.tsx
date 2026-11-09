@@ -108,7 +108,7 @@ export function PushNotificationManager() {
     <div className="flex items-center justify-between rounded-lg border border-border bg-muted/20 px-4 py-3">
       <div className="flex items-center gap-3">
         {subscribed ? (
-          <Bell className="size-4 text-primary" />
+          <Bell className="size-4 text-brand" />
         ) : (
           <BellOff className="size-4 text-muted-foreground" />
         )}

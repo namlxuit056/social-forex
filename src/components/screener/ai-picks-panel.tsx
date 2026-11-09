@@ -210,7 +210,7 @@ function PickCard({ pick, t }: { pick: AiPickResult; t: ReturnType<typeof useTra
 
       {/* Footer actions */}
       <div className="mt-auto space-y-2">
-        <Link href={`/chart?symbol=${pick.symbol}`} className="text-xs text-primary hover:underline">
+        <Link href={`/chart?symbol=${pick.symbol}`} className="text-xs text-brand hover:underline">
           {t("viewChart")} →
         </Link>
 
@@ -221,7 +221,7 @@ function PickCard({ pick, t }: { pick: AiPickResult; t: ReturnType<typeof useTra
             <span className="text-xs text-success font-medium">
               {t("aiPicksConfirmDone")}
             </span>
-            <Link href={`/signals/${signalId}`} className="ml-auto text-xs text-primary hover:underline shrink-0">
+            <Link href={`/signals/${signalId}`} className="ml-auto text-xs text-brand hover:underline shrink-0">
               {t("aiPicksViewSignal")}
             </Link>
           </div>
@@ -342,7 +342,7 @@ export function AiPicksPanel({ isLoggedIn, isVip }: Props) {
     return (
       <div className="flex items-center justify-between gap-4 rounded-lg border border-border bg-muted/10 p-4">
         <div className="flex items-center gap-2.5">
-          <Sparkles className="size-4 text-primary/60 shrink-0" />
+          <Sparkles className="size-4 text-brand/60 shrink-0" />
           <div>
             <p className="text-sm font-medium text-foreground">{t("aiPicksTitle")}</p>
             <p className="text-xs text-muted-foreground">{t("aiPicksLoginHint")}</p>
@@ -384,7 +384,7 @@ export function AiPicksPanel({ isLoggedIn, isVip }: Props) {
     return (
       <div className="flex items-center justify-between gap-4 rounded-lg border border-primary/20 bg-primary/5 p-4">
         <div className="flex items-center gap-2.5">
-          <Sparkles className="size-4 text-primary shrink-0" />
+          <Sparkles className="size-4 text-brand shrink-0" />
           <div>
             <p className="text-sm font-medium text-foreground">{t("aiPicksTitle")}</p>
             <p className="text-xs text-muted-foreground">{t("aiPicksIdleHint")}</p>
@@ -405,7 +405,7 @@ export function AiPicksPanel({ isLoggedIn, isVip }: Props) {
     return (
       <div className="rounded-lg border border-border bg-muted/10 p-4 space-y-3">
         <div className="flex items-center gap-2">
-          <Loader2 className="size-4 text-primary animate-spin" />
+          <Loader2 className="size-4 text-brand animate-spin" />
           <span className="text-sm font-medium text-muted-foreground">{t("aiPicksLoading")}</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -433,7 +433,7 @@ export function AiPicksPanel({ isLoggedIn, isVip }: Props) {
         <p className="text-xs text-muted-foreground">{t("aiPicksError")}</p>
         <button
           onClick={handleAnalyze}
-          className="shrink-0 text-xs text-primary hover:underline"
+          className="shrink-0 text-xs text-brand hover:underline"
         >
           {t("aiPicksRetry")}
         </button>
@@ -453,7 +453,7 @@ export function AiPicksPanel({ isLoggedIn, isVip }: Props) {
         </div>
         <button
           onClick={handleAnalyze}
-          className="shrink-0 text-xs text-primary hover:underline"
+          className="shrink-0 text-xs text-brand hover:underline"
         >
           {t("aiPicksRetry")}
         </button>
@@ -465,7 +465,7 @@ export function AiPicksPanel({ isLoggedIn, isVip }: Props) {
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Sparkles className="size-4 text-primary" />
+          <Sparkles className="size-4 text-brand" />
           <span className="text-sm font-semibold text-foreground">{t("aiPicksTitle")}</span>
           <span className="text-xs text-muted-foreground">· {picks.length} {t("aiPicksCount")}</span>
         </div>
@@ -473,7 +473,7 @@ export function AiPicksPanel({ isLoggedIn, isVip }: Props) {
           onClick={canRefresh ? handleAnalyze : undefined}
           disabled={!canRefresh}
           className={canRefresh
-            ? "text-xs text-primary hover:underline transition"
+            ? "text-xs text-brand hover:underline transition"
             : "text-xs text-muted-foreground cursor-not-allowed"}
         >
           {canRefresh

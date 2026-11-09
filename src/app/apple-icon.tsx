@@ -15,7 +15,7 @@ export default function AppleIcon() {
           alignItems: "center",
           justifyContent: "center",
           borderRadius: 40,
-          background: "linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%)",
+          background: "linear-gradient(135deg, #f5c542 0%, #f0b90b 50%, #d99a00 100%)",
           position: "relative",
         }}
       >
@@ -28,14 +28,14 @@ export default function AppleIcon() {
         >
           <path
             d="M20 70L40 40L60 55L80 25"
-            stroke="white"
+            stroke="#1a1300"
             strokeWidth="8"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
           <path
             d="M65 25H80V40"
-            stroke="white"
+            stroke="#1a1300"
             strokeWidth="8"
             strokeLinecap="round"
             strokeLinejoin="round"

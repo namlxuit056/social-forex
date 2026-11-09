@@ -14,7 +14,7 @@ export default function Icon() {
           alignItems: "center",
           justifyContent: "center",
           borderRadius: 8,
-          background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+          background: "linear-gradient(135deg, #f5c542 0%, #d99a00 100%)",
         }}
       >
         <svg
@@ -26,14 +26,14 @@ export default function Icon() {
         >
           <path
             d="M4 14L8 8L12 11L16 5"
-            stroke="white"
+            stroke="#1a1300"
             strokeWidth="2.2"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
           <path
             d="M13 5H16V8"
-            stroke="white"
+            stroke="#1a1300"
             strokeWidth="2.2"
             strokeLinecap="round"
             strokeLinejoin="round"

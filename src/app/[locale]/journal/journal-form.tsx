@@ -141,7 +141,7 @@ export function JournalFormCard({
         <CardTitle className="flex items-center gap-2 text-base">
           {prefill?.from ? (
             <>
-              <BookOpen className="size-4 text-primary" />
+              <BookOpen className="size-4 text-brand" />
               {t("copyFromSignal")}
             </>
           ) : (

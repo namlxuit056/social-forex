@@ -388,7 +388,7 @@ export function SignalRoom({
                   className={cn(
                     "rounded-full border px-2.5 py-1 font-mono text-xs font-medium transition-colors",
                     active
-                      ? "border-primary bg-primary/15 text-primary"
+                      ? "border-primary bg-primary/15 text-brand"
                       : "border-border bg-muted/40 text-muted-foreground hover:border-primary/50 hover:text-foreground",
                   )}
                 >
@@ -645,7 +645,7 @@ export function SignalRoom({
                                   </span>
                                 )}
                               </span>
-                              <span className="min-w-0 truncate font-medium text-primary underline-offset-4 hover:underline">
+                              <span className="min-w-0 truncate font-medium text-brand underline-offset-4 hover:underline">
                                 {s.authorLabel}
                               </span>
                             </Link>
@@ -780,7 +780,7 @@ export function SignalRoom({
                           ) : null}
                           <Link
                             href={`/signals/${s.id}`}
-                            className="inline-flex min-h-11 items-center gap-1 text-sm font-medium text-primary underline-offset-4 hover:underline"
+                            className="inline-flex min-h-11 items-center gap-1 text-sm font-medium text-brand underline-offset-4 hover:underline"
                             aria-label={t("viewDetailAria", { symbol: s.symbol })}
                           >
                             {t("viewDetail")}

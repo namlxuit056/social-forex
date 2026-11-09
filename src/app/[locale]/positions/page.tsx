@@ -35,7 +35,7 @@ export default async function PositionsPage({
   return (
     <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6">
       <div className="flex items-start gap-3">
-        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-brand">
           <Activity className="size-6" />
         </div>
         <div>

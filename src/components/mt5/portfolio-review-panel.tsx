@@ -73,7 +73,7 @@ export function PortfolioReviewPanel({ positionCount }: { positionCount: number 
     <section className="space-y-4 rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-3">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-brand">
             <ShieldAlert className="size-4" aria-hidden />
           </div>
           <div>

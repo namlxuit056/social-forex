@@ -140,7 +140,7 @@ export default async function ProfilePage({
           </div>
           <div className="flex gap-4">
             <dt className="text-muted-foreground">{t("vip")}</dt>
-            <dd className={vip ? "text-primary" : "text-muted-foreground"}>
+            <dd className={vip ? "text-brand" : "text-muted-foreground"}>
               {vip
                 ? t("vipActive", { date: dbUser?.vipUntil?.toLocaleDateString(locale) ?? "" })
                 : t("vipInactive")}
@@ -149,7 +149,7 @@ export default async function ProfilePage({
           <div className="flex flex-col gap-1.5 pt-1">
             <div className="flex items-center gap-2 text-sm">
               <span className="text-muted-foreground">XP</span>
-              <span className="font-semibold text-primary">Lv.{userLevel}</span>
+              <span className="font-semibold text-brand">Lv.{userLevel}</span>
               <span className="text-muted-foreground">·</span>
               <span className="font-mono text-foreground">{userXp} XP</span>
             </div>

@@ -95,7 +95,7 @@ function ProposalCard({
           <span className="text-green-500 font-medium">Signal created ✓</span>
           <Link
             href={`/signals/${state.signalId}`}
-            className="text-primary hover:underline"
+            className="text-brand hover:underline"
           >
             View signal →
           </Link>

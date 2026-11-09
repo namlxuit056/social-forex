@@ -34,8 +34,8 @@ function SortIcon({ col, sortBy, sortDir }: { col: SortColumn; sortBy: SortColum
   if (sortBy !== col)
     return <ChevronsUpDown className="ml-1 inline size-3 opacity-30 group-hover:opacity-60" />;
   return sortDir === "asc"
-    ? <ChevronUp className="ml-1 inline size-3 text-primary" />
-    : <ChevronDown className="ml-1 inline size-3 text-primary" />;
+    ? <ChevronUp className="ml-1 inline size-3 text-brand" />
+    : <ChevronDown className="ml-1 inline size-3 text-brand" />;
 }
 
 type ScreenerPair = {
@@ -426,13 +426,13 @@ export function MarketScreener({ pairs, isLoggedIn, isVip, initialFavorites = []
             className={cn(
               "rounded-md px-3 py-1.5 text-xs font-medium transition",
               filter === f.key
-                ? "bg-primary/15 text-primary"
+                ? "bg-primary/15 text-brand"
                 : "bg-muted/30 text-muted-foreground hover:text-foreground",
             )}
           >
             {f.label}
             {f.count !== undefined && f.count > 0 && (
-              <span className="ml-1 inline-flex items-center justify-center rounded-full bg-primary/20 px-1.5 py-0.5 text-[10px] font-semibold leading-none text-primary">
+              <span className="ml-1 inline-flex items-center justify-center rounded-full bg-primary/20 px-1.5 py-0.5 text-[10px] font-semibold leading-none text-brand">
                 {f.count}
               </span>
             )}
@@ -445,7 +445,7 @@ export function MarketScreener({ pairs, isLoggedIn, isVip, initialFavorites = []
             onClick={() => setShowColMenu((v) => !v)}
             className={cn(
               "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition",
-              showColMenu ? "bg-primary/15 text-primary" : "bg-muted/30 text-muted-foreground hover:text-foreground",
+              showColMenu ? "bg-primary/15 text-brand" : "bg-muted/30 text-muted-foreground hover:text-foreground",
             )}
           >
             <Columns3 className="size-3.5" />
@@ -698,7 +698,7 @@ export function MarketScreener({ pairs, isLoggedIn, isVip, initialFavorites = []
                 <td className="px-3 py-2.5 text-right">
                   <Link
                     href={`/chart?symbol=${pair.symbol}`}
-                    className="text-xs text-primary hover:underline"
+                    className="text-xs text-brand hover:underline"
                   >
                     {t("viewChart")}
                   </Link>

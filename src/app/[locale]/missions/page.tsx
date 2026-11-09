@@ -92,7 +92,7 @@ export default async function MissionsPage({ params }: { params: Promise<{ local
             <p
               className={cn(
                 "text-2xl font-bold tabular-nums",
-                board.claimableXp > 0 ? "text-primary" : "text-foreground",
+                board.claimableXp > 0 ? "text-brand" : "text-foreground",
               )}
             >
               +{board.claimableXp}
@@ -148,7 +148,7 @@ export default async function MissionsPage({ params }: { params: Promise<{ local
                         {st.claimed ? (
                           <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-success" aria-hidden />
                         ) : st.complete ? (
-                          <Sparkles className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
+                          <Sparkles className="mt-0.5 size-4 shrink-0 text-brand" aria-hidden />
                         ) : (
                           <Circle className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden />
                         )}

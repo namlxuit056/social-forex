@@ -259,7 +259,7 @@ export function ArticleSeoPanel({ fields, locale, onApplyFix }: Props) {
                               "mt-1.5 h-6 gap-1 px-2 text-[10px]",
                               applied.has(i)
                                 ? "text-emerald-400"
-                                : "text-primary hover:text-primary",
+                                : "text-brand hover:text-brand",
                             )}
                             onClick={() => applyFix(i, issue)}
                             disabled={applied.has(i)}

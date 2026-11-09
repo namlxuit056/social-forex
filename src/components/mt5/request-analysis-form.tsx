@@ -98,7 +98,7 @@ export function RequestAnalysisForm({ hasConnection }: Props) {
           {errorKey === "analysisVipRequired" && (
             <Link
               href="/upgrade-vip"
-              className="font-medium text-primary underline-offset-2 hover:underline"
+              className="font-medium text-brand underline-offset-2 hover:underline"
             >
               {t("analysisUpgradeVip")}
             </Link>

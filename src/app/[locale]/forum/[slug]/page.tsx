@@ -111,7 +111,7 @@ export default async function ForumCategoryPage({ params, searchParams }: Props)
                 <span className="flex items-center gap-1.5 font-medium text-foreground">
                   {row.isPinned && (
                     <Pin
-                      className="size-3.5 shrink-0 text-primary"
+                      className="size-3.5 shrink-0 text-brand"
                       aria-label={t("pinnedThread")}
                     />
                   )}

@@ -82,7 +82,7 @@ export async function HomeTopTraders() {
         </div>
         <Link
           href="/leaderboard"
-          className="flex min-h-6 shrink-0 items-center gap-1 text-sm text-primary hover:underline"
+          className="flex min-h-6 shrink-0 items-center gap-1 text-sm text-brand hover:underline"
         >
           {t("topTradersViewAll")}
           <ArrowRight className="size-3.5" />
@@ -142,7 +142,7 @@ export async function HomeTopTraders() {
               </div>
 
               {/* Name */}
-              <p className="w-full truncate text-sm font-medium text-foreground group-hover:text-primary">
+              <p className="w-full truncate text-sm font-medium text-foreground group-hover:text-brand">
                 {trader.label}
               </p>
 

@@ -126,7 +126,7 @@ export function RealBacktest({ initialResult }: Props) {
                       fill="none"
                       stroke="currentColor"
                       strokeWidth="1.5"
-                      className="text-primary"
+                      className="text-brand"
                       points={result.equityCurve.map((p, i) => {
                         const x = (i / (result.equityCurve.length - 1)) * 400;
                         const minY = Math.min(...result.equityCurve.map((e) => e.y));

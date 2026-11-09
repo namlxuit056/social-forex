@@ -67,7 +67,7 @@ export function PwaInstallPrompt() {
       <div className="rounded-xl border border-border bg-card p-4 shadow-xl backdrop-blur-sm">
         <div className="flex items-start gap-3">
           <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/15">
-            <Download className="size-5 text-primary" />
+            <Download className="size-5 text-brand" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-foreground">{t("installTitle")}</p>

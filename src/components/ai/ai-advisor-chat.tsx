@@ -113,7 +113,7 @@ export function AiAdvisorChat() {
         <section className="flex h-[min(42rem,calc(100vh-2rem))] w-[calc(100vw-2rem)] max-w-[25rem] flex-col overflow-hidden rounded-xl border border-border bg-background shadow-2xl shadow-black/25 sm:h-[38rem]">
           <div className="flex items-center justify-between gap-3 border-b border-border bg-muted/35 px-4 py-3">
             <div className="flex min-w-0 items-center gap-2">
-              <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-brand">
                 <Bot className="size-4.5" aria-hidden />
               </span>
               <div className="min-w-0">

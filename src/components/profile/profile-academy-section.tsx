@@ -71,10 +71,10 @@ export async function ProfileAcademySection({
             className="rounded-xl border border-primary/30 bg-primary/5 p-4"
           >
             <div className="flex items-start justify-between gap-2">
-              <span className="text-xs font-medium uppercase tracking-wide text-primary">
+              <span className="text-xs font-medium uppercase tracking-wide text-brand">
                 {levelLabel[lesson.level] ?? lesson.level}
               </span>
-              <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
+              <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-brand" aria-hidden />
             </div>
             <Link
               href={`/academy/${lesson.slug}`}

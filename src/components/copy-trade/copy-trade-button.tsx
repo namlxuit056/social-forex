@@ -181,7 +181,7 @@ export function CopyTradeButton({
 
           {!!providerCopierCount && (
             <div className="flex items-center gap-2 rounded-lg border border-primary/25 bg-primary/5 px-3 py-2 text-xs">
-              <Users className="size-3.5 shrink-0 text-primary" />
+              <Users className="size-3.5 shrink-0 text-brand" />
               <span className="font-medium text-foreground">
                 {t("statCopiers", { count: providerCopierCount })}
               </span>

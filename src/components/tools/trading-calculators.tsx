@@ -164,7 +164,7 @@ function MarginCalculator() {
             className={cn(
               "rounded-md border px-2.5 py-0.5 font-mono text-xs transition-colors",
               symbol.toUpperCase() === s
-                ? "border-primary bg-primary/10 text-primary"
+                ? "border-primary bg-primary/10 text-brand"
                 : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground",
             )}
           >
@@ -242,7 +242,7 @@ function MarginCalculator() {
           </div>
           <div>
             <p className="text-[11px] text-muted-foreground">{t("marginRequired")}</p>
-            <p className="mt-0.5 font-mono text-base font-bold text-primary">
+            <p className="mt-0.5 font-mono text-base font-bold text-brand">
               ${result.margin.toLocaleString(undefined, { maximumFractionDigits: 2 })}
             </p>
           </div>

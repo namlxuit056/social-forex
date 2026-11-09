@@ -108,7 +108,7 @@ export function JournalCompoundPlanCard({
     <Card className="border-border">
       <CardHeader className="flex-row items-center justify-between gap-3 pb-2">
         <CardTitle className="flex items-center gap-1.5 text-sm">
-          <TrendingUp className="size-4 text-primary" />
+          <TrendingUp className="size-4 text-brand" />
           {t("compoundPlanTitle")}
         </CardTitle>
         <div className="flex items-center gap-2">

@@ -75,7 +75,7 @@ export default async function AdminAcademyPage() {
           <Card className="border-border">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
-                <Plus className="size-4 text-primary" aria-hidden />
+                <Plus className="size-4 text-brand" aria-hidden />
                 Tạo bài học theo chủ đề
               </CardTitle>
             </CardHeader>
@@ -121,7 +121,7 @@ export default async function AdminAcademyPage() {
         <Card className="border-border">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <BookOpen className="size-4 text-primary" aria-hidden />
+              <BookOpen className="size-4 text-brand" aria-hidden />
               Bài học đã tạo ({lessons.length})
             </CardTitle>
           </CardHeader>

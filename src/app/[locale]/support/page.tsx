@@ -49,7 +49,7 @@ export default async function SupportPage({
           <ul className="space-y-3">
             {uses.map(({ icon: Icon, text }) => (
               <li key={text} className="flex gap-3 text-sm text-muted-foreground">
-                <Icon className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
+                <Icon className="mt-0.5 size-4 shrink-0 text-brand" aria-hidden />
                 <span>{text}</span>
               </li>
             ))}
@@ -57,7 +57,7 @@ export default async function SupportPage({
           <p className="text-sm text-muted-foreground">
             {t.rich("openSource", {
               link: (chunks) => (
-                <a href={REPO_URL} target="_blank" rel="noopener noreferrer" className="font-medium text-primary underline-offset-4 hover:underline">
+                <a href={REPO_URL} target="_blank" rel="noopener noreferrer" className="font-medium text-brand underline-offset-4 hover:underline">
                   {chunks}
                 </a>
               ),
@@ -90,7 +90,7 @@ export default async function SupportPage({
               rel="noopener noreferrer"
               className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-3 text-sm text-foreground transition hover:bg-muted"
             >
-              <Icon className="size-4 shrink-0 text-primary" aria-hidden />
+              <Icon className="size-4 shrink-0 text-brand" aria-hidden />
               {label}
             </a>
           ))}

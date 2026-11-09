@@ -18,7 +18,7 @@ export async function JournalMt5Prompt() {
     <Card className="border-border bg-card">
       <CardHeader className="pb-4">
         <div className="mb-3 flex size-11 items-center justify-center rounded-lg bg-primary/10 ring-1 ring-primary/20">
-          <Cable className="size-5 text-primary" aria-hidden />
+          <Cable className="size-5 text-brand" aria-hidden />
         </div>
         <CardTitle className="font-heading text-lg">{t("emptyMt5Title")}</CardTitle>
         <CardDescription className="text-pretty leading-relaxed">
@@ -39,7 +39,7 @@ export async function JournalMt5Prompt() {
               )}
 
               <div className="mb-3 flex items-center gap-2">
-                <span className="flex size-6 items-center justify-center rounded-full bg-primary/15 text-[11px] font-bold text-primary">
+                <span className="flex size-6 items-center justify-center rounded-full bg-primary/15 text-[11px] font-bold text-brand">
                   {i + 1}
                 </span>
                 <Icon className="size-4 text-muted-foreground" aria-hidden />

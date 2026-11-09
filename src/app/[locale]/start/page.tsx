@@ -119,7 +119,7 @@ export default async function StartPage({
       <ol className="space-y-6">
         <li className="relative rounded-xl border border-border bg-card p-5 pl-6 md:p-6 md:pl-8">
           <span
-            className="absolute left-0 top-5 flex size-8 -translate-x-1/2 items-center justify-center rounded-full border border-primary/40 bg-primary/10 text-xs font-semibold text-primary md:top-6"
+            className="absolute left-0 top-5 flex size-8 -translate-x-1/2 items-center justify-center rounded-full border border-primary/40 bg-primary/10 text-xs font-semibold text-brand md:top-6"
             aria-hidden
           >
             1
@@ -152,7 +152,7 @@ export default async function StartPage({
 
         <li className="relative rounded-xl border border-border bg-card p-5 pl-6 md:p-6 md:pl-8">
           <span
-            className="absolute left-0 top-5 flex size-8 -translate-x-1/2 items-center justify-center rounded-full border border-primary/40 bg-primary/10 text-xs font-semibold text-primary md:top-6"
+            className="absolute left-0 top-5 flex size-8 -translate-x-1/2 items-center justify-center rounded-full border border-primary/40 bg-primary/10 text-xs font-semibold text-brand md:top-6"
             aria-hidden
           >
             2
@@ -201,7 +201,7 @@ export default async function StartPage({
 
         <li className="relative rounded-xl border border-border bg-card p-5 pl-6 md:p-6 md:pl-8">
           <span
-            className="absolute left-0 top-5 flex size-8 -translate-x-1/2 items-center justify-center rounded-full border border-primary/40 bg-primary/10 text-xs font-semibold text-primary md:top-6"
+            className="absolute left-0 top-5 flex size-8 -translate-x-1/2 items-center justify-center rounded-full border border-primary/40 bg-primary/10 text-xs font-semibold text-brand md:top-6"
             aria-hidden
           >
             3
@@ -216,7 +216,7 @@ export default async function StartPage({
 
         <li className="relative rounded-xl border border-border bg-card p-5 pl-6 md:p-6 md:pl-8">
           <span
-            className="absolute left-0 top-5 flex size-8 -translate-x-1/2 items-center justify-center rounded-full border border-primary/40 bg-primary/10 text-xs font-semibold text-primary md:top-6"
+            className="absolute left-0 top-5 flex size-8 -translate-x-1/2 items-center justify-center rounded-full border border-primary/40 bg-primary/10 text-xs font-semibold text-brand md:top-6"
             aria-hidden
           >
             4
@@ -231,7 +231,7 @@ export default async function StartPage({
 
         <li className="relative rounded-xl border border-border bg-card p-5 pl-6 md:p-6 md:pl-8">
           <span
-            className="absolute left-0 top-5 flex size-8 -translate-x-1/2 items-center justify-center rounded-full border border-primary/40 bg-primary/10 text-xs font-semibold text-primary md:top-6"
+            className="absolute left-0 top-5 flex size-8 -translate-x-1/2 items-center justify-center rounded-full border border-primary/40 bg-primary/10 text-xs font-semibold text-brand md:top-6"
             aria-hidden
           >
             5

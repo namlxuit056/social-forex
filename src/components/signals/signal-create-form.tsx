@@ -320,7 +320,7 @@ export function SignalCreateForm({
                     aria-live="polite"
                     aria-busy="true"
                   >
-                    <Loader2 className="size-5 animate-spin text-primary" />
+                    <Loader2 className="size-5 animate-spin text-brand" />
                     <span className="max-w-[100px] truncate px-1 text-center text-[10px] font-medium text-foreground">
                       {t("imagesUploading")}
                     </span>

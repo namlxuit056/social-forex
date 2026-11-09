@@ -106,7 +106,7 @@ export default async function AdminSignalsPage({
                       <div className="flex flex-wrap items-center gap-2">
                         <Link
                           href={`/signals/${s.id}`}
-                          className="text-xs text-primary underline-offset-4 hover:underline"
+                          className="text-xs text-brand underline-offset-4 hover:underline"
                         >
                           {t("viewSignal")}
                         </Link>

@@ -36,7 +36,7 @@ export function ProfileReferralSection({
   return (
     <div className="rounded-xl border border-border bg-card p-6">
       <h2 className="flex items-center gap-2 font-medium text-foreground">
-        <Gift className="size-4 text-primary" />
+        <Gift className="size-4 text-brand" />
         {t("title")}
       </h2>
       <p className="mt-1 text-sm text-muted-foreground">{t("rewardHint")}</p>
@@ -84,7 +84,7 @@ export function ProfileReferralSection({
               <Gift className="size-3.5" />
               {t("statsVipEarned")}
             </div>
-            <p className="mt-1 text-lg font-bold text-primary">{totalVipDays}d</p>
+            <p className="mt-1 text-lg font-bold text-brand">{totalVipDays}d</p>
           </div>
         </div>
       </div>

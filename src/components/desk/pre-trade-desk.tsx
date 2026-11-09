@@ -211,7 +211,7 @@ export function PreTradeDesk({
           variant="outline"
           className={cn(
             "h-7 rounded-md px-2.5",
-            ready ? "border-primary/35 bg-primary/10 text-primary" : "border-amber-500/35 bg-amber-500/10 text-warning",
+            ready ? "border-primary/35 bg-primary/10 text-brand" : "border-amber-500/35 bg-amber-500/10 text-warning",
           )}
         >
           {ready ? t("readyBadge") : t("notReadyBadge")}
@@ -235,7 +235,7 @@ export function PreTradeDesk({
           <Card className="rounded-xl">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <ShieldCheck className="size-4 text-primary" aria-hidden />
+                <ShieldCheck className="size-4 text-brand" aria-hidden />
                 {t("setupTitle")}
               </CardTitle>
               <CardDescription>{t("setupDesc")}</CardDescription>
@@ -291,7 +291,7 @@ export function PreTradeDesk({
           <Card className="rounded-xl">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Calculator className="size-4 text-primary" aria-hidden />
+                <Calculator className="size-4 text-brand" aria-hidden />
                 {t("riskResultTitle")}
               </CardTitle>
               <CardDescription>{t("riskResultDesc")}</CardDescription>
@@ -310,7 +310,7 @@ export function PreTradeDesk({
                   <dt className="text-muted-foreground">{t("pipValue")}</dt>
                   <dd className="tabular-nums text-foreground">${riskPlan.pipValuePerLot}</dd>
                 </div>
-                <div className="flex items-center justify-between gap-3 border-t border-border pt-2 text-primary">
+                <div className="flex items-center justify-between gap-3 border-t border-border pt-2 text-brand">
                   <dt>{t("suggestedLots")}</dt>
                   <dd className="text-xl tabular-nums">{riskPlan.lots}</dd>
                 </div>
@@ -331,7 +331,7 @@ export function PreTradeDesk({
                     {orderState === "signedOut" ? t("orderSignedOut") : t("orderNoConnection")}{" "}
                     <Link
                       href={orderState === "signedOut" ? "/auth/signin" : "/mt5"}
-                      className="font-medium text-primary underline-offset-4 hover:underline"
+                      className="font-medium text-brand underline-offset-4 hover:underline"
                     >
                       {orderState === "signedOut" ? t("orderSignInCta") : t("orderConnectCta")}
                     </Link>
@@ -354,7 +354,7 @@ export function PreTradeDesk({
         <Card className="rounded-xl">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <CalendarClock className="size-4 text-primary" aria-hidden />
+              <CalendarClock className="size-4 text-brand" aria-hidden />
               {t("newsTitle", { hours: newsContextHours })}
             </CardTitle>
             <CardDescription>{t("newsDesc")}</CardDescription>
@@ -398,7 +398,7 @@ export function PreTradeDesk({
         <Card className="rounded-xl">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <CheckCircle2 className="size-4 text-primary" aria-hidden />
+              <CheckCircle2 className="size-4 text-brand" aria-hidden />
               {t("checklistTitle")}
             </CardTitle>
             <CardDescription>{t("checklistDesc", { done: checklistDone, total: CHECKLIST_KEYS.length })}</CardDescription>

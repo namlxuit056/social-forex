@@ -155,7 +155,7 @@ export function FeedSection() {
               className={cn(
                 "rounded-md px-3 py-1.5 text-xs font-medium transition",
                 filter === f.key
-                  ? "bg-primary/15 text-primary"
+                  ? "bg-primary/15 text-brand"
                   : "bg-muted/30 text-muted-foreground hover:text-foreground",
               )}
             >
@@ -175,7 +175,7 @@ export function FeedSection() {
             <p className="text-sm text-muted-foreground">{t("feedEmpty")}</p>
             <Link
               href="/leaderboard"
-              className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+              className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-brand hover:underline"
             >
               {t("feedDiscoverTraders")}
               <ArrowRight className="size-3.5" />
@@ -198,7 +198,7 @@ export function FeedSection() {
                       <div className="min-w-0">
                         <Link
                           href={`/u/${trader.id}`}
-                          className="block truncate text-sm font-medium text-foreground hover:text-primary"
+                          className="block truncate text-sm font-medium text-foreground hover:text-brand"
                         >
                           {displayName}
                         </Link>
@@ -219,8 +219,8 @@ export function FeedSection() {
                         className={cn(
                           "flex shrink-0 items-center gap-1 rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
                           isFollowing
-                            ? "bg-primary/15 text-primary"
-                            : "bg-muted/50 text-muted-foreground hover:bg-primary/10 hover:text-primary",
+                            ? "bg-primary/15 text-brand"
+                            : "bg-muted/50 text-muted-foreground hover:bg-primary/10 hover:text-brand",
                         )}
                       >
                         {isFollowing ? (
@@ -256,7 +256,7 @@ export function FeedSection() {
                   <div className="flex flex-wrap items-center gap-1.5">
                     <Link
                       href={`/u/${item.author.id}`}
-                      className="text-sm font-medium text-foreground hover:text-primary"
+                      className="text-sm font-medium text-foreground hover:text-brand"
                     >
                       {authorName}
                     </Link>
@@ -348,7 +348,7 @@ function FeedItemContent({ item }: { item: FeedItem }) {
     return (
       <Link
         href={`/forum/${item.data.threadId}`}
-        className="mt-1 block text-sm font-medium text-foreground hover:text-primary"
+        className="mt-1 block text-sm font-medium text-foreground hover:text-brand"
       >
         {String(item.data.title)}
       </Link>

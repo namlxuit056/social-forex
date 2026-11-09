@@ -124,7 +124,7 @@ export function CalendarEventAiAnalysis({ event, compact = false }: Props) {
             {t("aiLoginRequired")}{" "}
             <Link
               href={{ pathname: "/auth/signin", query: { callbackUrl: "/calendar" } }}
-              className="font-medium text-primary underline-offset-4 hover:underline"
+              className="font-medium text-brand underline-offset-4 hover:underline"
             >
               {tc("signIn")}
             </Link>

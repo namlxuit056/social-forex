@@ -877,7 +877,7 @@ function StatsActionsCard({
     <Card className="border-primary/30 bg-primary/5">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-sm">
-          <ListChecks className="size-4 text-primary" aria-hidden />
+          <ListChecks className="size-4 text-brand" aria-hidden />
           {t("statsActionsTitle")}
         </CardTitle>
         <p className="text-xs text-muted-foreground">
@@ -891,7 +891,7 @@ function StatsActionsCard({
           <ol className="space-y-2">
             {actions.map((a, i) => (
               <li key={a.kind} className="flex gap-3 text-sm">
-                <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/15 font-mono text-[11px] font-semibold text-primary">
+                <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/15 font-mono text-[11px] font-semibold text-brand">
                   {i + 1}
                 </span>
                 <span className="text-foreground">

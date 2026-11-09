@@ -299,7 +299,7 @@ export function LiveQuotesTable({
                 pathname: "/auth/signin",
                 query: { callbackUrl: "/quotes" },
               }}
-              className="text-xs font-medium text-primary underline-offset-4 hover:underline"
+              className="text-xs font-medium text-brand underline-offset-4 hover:underline"
             >
               {tc("signIn")}
             </Link>

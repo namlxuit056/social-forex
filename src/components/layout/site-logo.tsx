@@ -4,7 +4,7 @@ export function SiteLogo({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "flex size-8 items-center justify-center rounded-lg bg-linear-to-br from-emerald-500 to-emerald-700 shadow-sm shadow-emerald-500/25",
+        "flex size-8 items-center justify-center rounded-lg bg-linear-to-br from-[#f5c542] to-[#d99a00] shadow-sm shadow-amber-500/25",
         className,
       )}
     >
@@ -18,14 +18,14 @@ export function SiteLogo({ className }: { className?: string }) {
       >
         <path
           d="M4 14L8 8L12 11L16 5"
-          stroke="white"
+          stroke="#1a1300"
           strokeWidth="2.2"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
         <path
           d="M13 5H16V8"
-          stroke="white"
+          stroke="#1a1300"
           strokeWidth="2.2"
           strokeLinecap="round"
           strokeLinejoin="round"

@@ -119,7 +119,7 @@ function RangeFilter({
           className={cn(
             "rounded px-2 py-1 text-xs font-mono font-bold transition",
             active
-              ? "bg-primary/15 text-primary"
+              ? "bg-primary/15 text-brand"
               : "bg-muted/40 text-muted-foreground hover:text-foreground",
           )}
         >
@@ -257,7 +257,7 @@ function MultiSelectFilter({
               className={cn(
                 "rounded px-2 py-0.5 text-[10px] font-medium transition",
                 isSelected
-                  ? "bg-primary/15 text-primary border border-primary/30"
+                  ? "bg-primary/15 text-brand border border-primary/30"
                   : "bg-muted/30 text-muted-foreground hover:text-foreground border border-transparent",
               )}
             >
@@ -389,12 +389,12 @@ export function ScreenerFilterBuilder({
         <button
           type="button"
           onClick={() => setExpanded(!expanded)}
-          className="flex items-center gap-2 text-sm font-medium text-foreground hover:text-primary transition"
+          className="flex items-center gap-2 text-sm font-medium text-foreground hover:text-brand transition"
         >
           <SlidersHorizontal className="size-4" />
           {t("customFilter")}
           {hasActiveFilters && (
-            <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-primary">
+            <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-semibold text-brand">
               {matchedPairs}/{totalPairs}
             </span>
           )}
@@ -518,7 +518,7 @@ export function ScreenerFilterBuilder({
             <button
               type="button"
               onClick={handleApply}
-              className="rounded-md bg-primary/15 px-4 py-1.5 text-xs font-semibold text-primary hover:bg-primary/25 transition"
+              className="rounded-md bg-primary/15 px-4 py-1.5 text-xs font-semibold text-brand hover:bg-primary/25 transition"
             >
               {t("applyFilters")}
             </button>
@@ -546,7 +546,7 @@ export function ScreenerFilterBuilder({
                     type="button"
                     onClick={handleSavePreset}
                     disabled={!presetName.trim()}
-                    className="rounded bg-primary/15 px-2 py-1 text-[10px] font-semibold text-primary disabled:opacity-40"
+                    className="rounded bg-primary/15 px-2 py-1 text-[10px] font-semibold text-brand disabled:opacity-40"
                   >
                     <Save className="size-3" />
                   </button>

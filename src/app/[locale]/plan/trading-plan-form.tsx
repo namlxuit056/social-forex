@@ -217,7 +217,7 @@ function FieldSupportLink({
   return (
     <Link
       href={href}
-      className="inline-flex items-center gap-1 text-xs font-medium text-primary underline-offset-4 hover:underline"
+      className="inline-flex items-center gap-1 text-xs font-medium text-brand underline-offset-4 hover:underline"
     >
       {label}
       <ExternalLink className="size-3" aria-hidden />
@@ -559,13 +559,13 @@ export function TradingPlanForm({ plan, locale, hasPrefill = false }: Props) {
   if (!isEditing) {
     return (
       <div className="space-y-5">
-        {state?.ok ? <p className="text-sm text-primary">{t("saved")}</p> : null}
+        {state?.ok ? <p className="text-sm text-brand">{t("saved")}</p> : null}
 
         <Card className="border-border bg-card">
           <CardHeader className="gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <CardTitle className="flex items-center gap-2 text-base">
-                <CalendarClock className="size-4 text-primary" aria-hidden />
+                <CalendarClock className="size-4 text-brand" aria-hidden />
                 {t("summaryTitle")}
               </CardTitle>
               <CardDescription className="mt-1">
@@ -715,7 +715,7 @@ export function TradingPlanForm({ plan, locale, hasPrefill = false }: Props) {
                         <CheckCircle2
                           className={cn(
                             "mt-0.5 size-4 shrink-0",
-                            readPlan[key] ? "text-primary" : "text-muted-foreground/45",
+                            readPlan[key] ? "text-brand" : "text-muted-foreground/45",
                           )}
                           aria-hidden
                         />
@@ -805,7 +805,7 @@ export function TradingPlanForm({ plan, locale, hasPrefill = false }: Props) {
         <CardHeader className="gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <CardTitle className="flex items-center gap-2 text-base">
-              <CalendarClock className="size-4 text-primary" aria-hidden />
+              <CalendarClock className="size-4 text-brand" aria-hidden />
               {t("planCardTitle")}
             </CardTitle>
             <CardDescription className="mt-1">
@@ -813,7 +813,7 @@ export function TradingPlanForm({ plan, locale, hasPrefill = false }: Props) {
             </CardDescription>
           </div>
           {readPlan.completedAt ? (
-            <Badge className="w-fit bg-primary/20 text-primary hover:bg-primary/25">
+            <Badge className="w-fit bg-primary/20 text-brand hover:bg-primary/25">
               <CheckCircle2 className="mr-1 size-3.5" aria-hidden />
               {t("completed")}
             </Badge>
@@ -1099,7 +1099,7 @@ export function TradingPlanForm({ plan, locale, hasPrefill = false }: Props) {
                         aria-live="polite"
                         aria-busy="true"
                       >
-                        <Loader2 className="size-5 animate-spin text-primary" />
+                        <Loader2 className="size-5 animate-spin text-brand" />
                         <span className="max-w-27.5 truncate px-1 text-center text-[10px] font-medium text-foreground">
                           {t("imagesUploading")}
                         </span>
@@ -1214,7 +1214,7 @@ export function TradingPlanForm({ plan, locale, hasPrefill = false }: Props) {
       {hasUnsavedChanges ? (
         <p className="text-sm text-warning">{t("unsavedChanges")}</p>
       ) : state?.ok ? (
-        <p className="text-sm text-primary">{t("saved")}</p>
+        <p className="text-sm text-brand">{t("saved")}</p>
       ) : null}
 
       <div className="hidden justify-end sm:flex">

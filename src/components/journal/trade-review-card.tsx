@@ -87,7 +87,7 @@ export function TradeReviewCard({
     <div className="rounded-lg border border-primary/20 bg-primary/[0.03] p-4 text-sm">
       <div className="flex items-start justify-between gap-3">
         <p className="flex items-center gap-1.5 font-medium">
-          <Sparkles className="size-4 text-primary" />
+          <Sparkles className="size-4 text-brand" />
           {t("tradeReviewTitle", { symbol, direction })}
         </p>
         {review && (
@@ -178,7 +178,7 @@ export function TradeReviewCard({
           )}
 
           <div className="flex items-start gap-2 rounded-md bg-muted/50 p-2.5">
-            <ArrowRight className="mt-0.5 size-4 shrink-0 text-primary" />
+            <ArrowRight className="mt-0.5 size-4 shrink-0 text-brand" />
             <p>
               <span className="font-medium">{t("tradeReviewNextAction")}: </span>
               {review.nextAction}

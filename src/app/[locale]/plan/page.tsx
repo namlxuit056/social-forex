@@ -304,7 +304,7 @@ export default async function TradingPlanPage({
         <Card className="rounded-lg border-border bg-card">
           <CardHeader className="pb-2">
             <CardDescription>{t("statChecklist")}</CardDescription>
-            <CardTitle className="font-mono text-2xl tabular-nums text-primary">
+            <CardTitle className="font-mono text-2xl tabular-nums text-brand">
               {checklistCount}/5
             </CardTitle>
           </CardHeader>
@@ -331,7 +331,7 @@ export default async function TradingPlanPage({
             </CardTitle>
           </CardHeader>
           <CardContent className="flex items-center gap-2 text-xs text-muted-foreground">
-            <ShieldCheck className="size-3.5 text-primary" aria-hidden />
+            <ShieldCheck className="size-3.5 text-brand" aria-hidden />
             {t("statCompletedDesc")}
           </CardContent>
         </Card>
@@ -406,7 +406,7 @@ export default async function TradingPlanPage({
                   className={cn(
                     "inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm transition hover:border-primary/35 hover:bg-muted/40",
                     item.completedAt
-                      ? "border-primary/25 bg-primary/8 text-primary"
+                      ? "border-primary/25 bg-primary/8 text-brand"
                       : "border-border bg-card text-muted-foreground",
                   )}
                 >

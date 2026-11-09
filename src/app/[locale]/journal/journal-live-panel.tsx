@@ -184,7 +184,7 @@ export function JournalLivePanel({
           </div>
           <Link
             href="/mt5"
-            className="text-xs font-medium text-primary hover:underline"
+            className="text-xs font-medium text-brand hover:underline"
           >
             {t("connectMt5")} →
           </Link>
@@ -264,7 +264,7 @@ export function JournalLivePanel({
           <CardTitle className="text-base">
             {t("livePositions")}
             {positions.length > 0 && (
-              <span className="ml-2 inline-flex size-5 items-center justify-center rounded-full bg-primary/15 text-xs font-semibold text-primary">
+              <span className="ml-2 inline-flex size-5 items-center justify-center rounded-full bg-primary/15 text-xs font-semibold text-brand">
                 {positions.length}
               </span>
             )}

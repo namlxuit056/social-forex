@@ -18,7 +18,7 @@ export function SymbolChartLink({
       title={`${symbol} — TradingView`}
       onClick={(e) => e.stopPropagation()}
       className={cn(
-        "group/tv inline-flex items-center gap-1 underline-offset-2 hover:text-primary hover:underline",
+        "group/tv inline-flex items-center gap-1 underline-offset-2 hover:text-brand hover:underline",
         className,
       )}
     >

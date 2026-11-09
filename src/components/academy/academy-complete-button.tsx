@@ -36,7 +36,7 @@ export function AcademyCompleteButton({ lessonSlug, initialCompleted }: Props) {
         size="sm"
         onClick={toggle}
         disabled={isPending}
-        className="gap-2 border-primary/40 text-primary hover:bg-primary/10"
+        className="gap-2 border-primary/40 text-brand hover:bg-primary/10"
       >
         {isPending ? (
           <Loader2 className="h-4 w-4 animate-spin" />

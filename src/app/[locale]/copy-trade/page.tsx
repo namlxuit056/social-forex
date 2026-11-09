@@ -200,7 +200,7 @@ export default async function CopyTradePage({
             <div key={step.num} className="flex gap-4">
               {/* Timeline */}
               <div className="flex flex-col items-center">
-                <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-brand">
                   {step.num}
                 </div>
                 {step.num < steps.length && (
@@ -211,7 +211,7 @@ export default async function CopyTradePage({
               {/* Content */}
               <div className="min-w-0 pb-6">
                 <div className="flex items-center gap-2">
-                  <Icon className="size-4 text-primary" />
+                  <Icon className="size-4 text-brand" />
                   <h2 className="text-base font-semibold text-foreground">
                     {step.title}
                   </h2>
@@ -221,7 +221,7 @@ export default async function CopyTradePage({
                 <ul className="mt-3 space-y-1.5">
                   {step.details.map((d, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm text-muted-foreground">
-                      <ChevronRight className="mt-0.5 size-3.5 shrink-0 text-primary/60" />
+                      <ChevronRight className="mt-0.5 size-3.5 shrink-0 text-brand/60" />
                       {d}
                     </li>
                   ))}
@@ -238,7 +238,7 @@ export default async function CopyTradePage({
                       </div>
                     ))}
                     {"codeHighlight" in step && step.codeHighlight && (
-                      <div className="rounded-md border border-primary/30 bg-primary/5 px-3 py-2 font-mono text-xs text-primary">
+                      <div className="rounded-md border border-primary/30 bg-primary/5 px-3 py-2 font-mono text-xs text-brand">
                         {step.codeHighlight}
                       </div>
                     )}
@@ -292,7 +292,7 @@ export default async function CopyTradePage({
                   key={i}
                   className="border-b border-border last:border-0 hover:bg-muted/20"
                 >
-                  <td className="px-4 py-2.5 font-mono text-xs text-primary">
+                  <td className="px-4 py-2.5 font-mono text-xs text-brand">
                     {p.name}
                   </td>
                   <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">

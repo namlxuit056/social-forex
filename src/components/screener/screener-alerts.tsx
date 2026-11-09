@@ -353,7 +353,7 @@ function CreateAlertForm({
               className={cn(
                 "rounded px-2 py-0.5 text-[10px] font-medium border transition",
                 emaBias.includes(opt)
-                  ? "border-primary bg-primary/10 text-primary"
+                  ? "border-primary bg-primary/10 text-brand"
                   : "border-muted bg-muted/30 text-muted-foreground hover:text-foreground",
               )}
             >
@@ -377,7 +377,7 @@ function CreateAlertForm({
               className={cn(
                 "rounded px-2 py-0.5 text-[10px] font-medium border transition",
                 group.includes(opt)
-                  ? "border-primary bg-primary/10 text-primary"
+                  ? "border-primary bg-primary/10 text-brand"
                   : "border-muted bg-muted/30 text-muted-foreground hover:text-foreground",
               )}
             >
@@ -496,7 +496,7 @@ export function ScreenerAlerts({ className }: Props) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Bell className="size-4 text-primary" />
+          <Bell className="size-4 text-brand" />
           <h3 className="text-sm font-semibold">{t("title")}</h3>
           {alerts.length > 0 && (
             <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
@@ -508,7 +508,7 @@ export function ScreenerAlerts({ className }: Props) {
           <button
             type="button"
             onClick={() => setShowCreate(true)}
-            className="flex items-center gap-1 rounded bg-primary/10 px-2 py-1 text-[10px] font-medium text-primary hover:bg-primary/20 transition"
+            className="flex items-center gap-1 rounded bg-primary/10 px-2 py-1 text-[10px] font-medium text-brand hover:bg-primary/20 transition"
           >
             <Plus className="size-3" />
             {t("newAlert")}

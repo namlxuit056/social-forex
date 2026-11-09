@@ -146,7 +146,7 @@ export function ProviderEquityChart({
               className={cn(
                 "rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
                 view === v
-                  ? "bg-primary/10 text-primary"
+                  ? "bg-primary/10 text-brand"
                   : "text-muted-foreground hover:text-foreground",
               )}
             >

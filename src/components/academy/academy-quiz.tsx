@@ -138,7 +138,7 @@ export function AcademyQuiz({
             </Button>
           )}
           {xpEarned > 0 && (
-            <p className="text-xs text-primary font-medium">
+            <p className="text-xs text-brand font-medium">
               +{xpEarned} XP {t("lessonCompleted")}
             </p>
           )}

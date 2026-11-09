@@ -33,7 +33,7 @@ export async function SiteHeader() {
         >
           <SiteLogo />
           <span className="text-base font-bold tracking-tight text-foreground">
-            Social<span className="text-primary">Forex</span>
+            Social<span className="text-brand">Forex</span>
           </span>
         </Link>
 

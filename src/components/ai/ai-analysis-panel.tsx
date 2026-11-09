@@ -149,7 +149,7 @@ export function AiAnalysisPanel({ symbol }: Props) {
     <div className="space-y-3">
       <div className="rounded-xl border border-border bg-card px-4 py-3">
         <div className="flex items-start gap-2">
-          <Sparkles className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
+          <Sparkles className="mt-0.5 size-4 shrink-0 text-brand" aria-hidden />
           <div>
             <h2 className="font-heading text-sm font-semibold text-foreground">
               {t("expertTitle")}
@@ -201,7 +201,7 @@ export function AiAnalysisPanel({ symbol }: Props) {
                 pathname: "/auth/signin",
                 query: { callbackUrl: `/chart?symbol=${symbol}` },
               }}
-              className="font-medium text-primary underline-offset-4 hover:underline"
+              className="font-medium text-brand underline-offset-4 hover:underline"
             >
               {tc("signIn")}
             </Link>

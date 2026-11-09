@@ -126,7 +126,7 @@ export function EconomicCalendar({
   const statusBadgeRow = (s: CalendarEventStatus) => {
     const map = {
       upcoming: "bg-muted text-muted-foreground",
-      live: "bg-primary/25 text-primary ring-1 ring-primary/30",
+      live: "bg-primary/25 text-brand ring-1 ring-primary/30",
       finished: "bg-muted text-muted-foreground",
     };
     return (

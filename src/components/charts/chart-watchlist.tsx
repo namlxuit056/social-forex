@@ -68,7 +68,7 @@ export function ChartWatchlist({ activeSymbol, onSelect }: Props) {
           className={cn(
             "flex-1 px-3 py-2 text-xs font-medium transition-colors",
             tab === "favorites"
-              ? "border-b-2 border-primary text-primary"
+              ? "border-b-2 border-primary text-brand"
               : "text-muted-foreground hover:text-foreground",
           )}
         >
@@ -85,7 +85,7 @@ export function ChartWatchlist({ activeSymbol, onSelect }: Props) {
           className={cn(
             "flex-1 px-3 py-2 text-xs font-medium transition-colors",
             tab === "all"
-              ? "border-b-2 border-primary text-primary"
+              ? "border-b-2 border-primary text-brand"
               : "text-muted-foreground hover:text-foreground",
           )}
         >
@@ -226,7 +226,7 @@ function PairRow({
         <span
           className={cn(
             "text-xs font-semibold",
-            active ? "text-primary" : "text-foreground",
+            active ? "text-brand" : "text-foreground",
           )}
         >
           {symbol}

@@ -90,7 +90,7 @@ export function DailyActivityWidget() {
           <CardTitle className="text-base">{t("dailyActivity")}</CardTitle>
           <div className="flex items-center gap-2 text-sm">
             <span className="text-muted-foreground">{t("level")}</span>
-            <span className="font-bold text-primary">{level}</span>
+            <span className="font-bold text-brand">{level}</span>
             <div className="h-1.5 w-16 rounded-full bg-muted">
               <div
                 className="h-full rounded-full bg-primary transition-all"

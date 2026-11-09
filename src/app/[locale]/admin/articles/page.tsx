@@ -137,7 +137,7 @@ export default async function AdminAiArticlesPage({
           <Card className="border-border">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
-                <Settings className="size-4 text-primary" aria-hidden />
+                <Settings className="size-4 text-brand" aria-hidden />
                 {t("aiArticlesSettings")}
               </CardTitle>
             </CardHeader>
@@ -246,7 +246,7 @@ export default async function AdminAiArticlesPage({
           <Card className="border-border">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
-                <TrendingUp className="size-4 text-primary" aria-hidden />
+                <TrendingUp className="size-4 text-brand" aria-hidden />
                 {t("aiArticlesTrending")}
               </CardTitle>
             </CardHeader>
@@ -284,7 +284,7 @@ export default async function AdminAiArticlesPage({
           <Card className="border-border">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-base">
-                <Plus className="size-4 text-primary" aria-hidden />
+                <Plus className="size-4 text-brand" aria-hidden />
                 {t("aiArticlesGenerateManual")}
               </CardTitle>
             </CardHeader>
@@ -339,7 +339,7 @@ export default async function AdminAiArticlesPage({
         <Card className="border-border">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <FileText className="size-4 text-primary" aria-hidden />
+              <FileText className="size-4 text-brand" aria-hidden />
               {t("aiArticlesRecent")}
             </CardTitle>
           </CardHeader>

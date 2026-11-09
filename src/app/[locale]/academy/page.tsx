@@ -101,12 +101,12 @@ export default async function AcademyPage({
         )}
       >
         <div className="flex items-start justify-between gap-2">
-          <span className="text-xs font-medium uppercase tracking-wide text-primary">
+          <span className="text-xs font-medium uppercase tracking-wide text-brand">
             {step ? `${step}. ` : ""}
             {levelLabel[lesson.level] ?? lesson.level}
           </span>
           {done && (
-            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
           )}
         </div>
         <h2 className="mt-2 font-heading text-lg font-medium text-foreground">

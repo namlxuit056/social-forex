@@ -69,7 +69,7 @@ export function ProfileFollowersSection({ items, totalCount }: Props) {
                     </span>
                   )}
                 </span>
-                <span className="min-w-0 truncate font-medium text-primary">
+                <span className="min-w-0 truncate font-medium text-brand">
                   {label}
                 </span>
               </Link>
@@ -82,7 +82,7 @@ export function ProfileFollowersSection({ items, totalCount }: Props) {
           type="button"
           variant="ghost"
           size="sm"
-          className="h-auto px-2 py-2 text-primary"
+          className="h-auto px-2 py-2 text-brand"
           onClick={() => setExpanded(true)}
         >
           {t("followersLoadMore", {

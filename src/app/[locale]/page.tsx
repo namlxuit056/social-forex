@@ -152,13 +152,13 @@ export default async function HomePage({
       />
       <FaqJsonLd items={faqItems} />
       <section className="max-w-3xl">
-        <p className="text-sm font-medium text-primary">
+        <p className="text-sm font-medium text-brand">
           {tHome("badge")}
         </p>
         <h1 className="mt-3 font-heading text-3xl font-semibold tracking-tight text-foreground">
           {tHome.rich("headline", {
             tools: (chunks) => (
-              <span className="text-primary">{chunks}</span>
+              <span className="text-brand">{chunks}</span>
             ),
             data: (chunks) => chunks,
             people: (chunks) => chunks,
@@ -173,7 +173,7 @@ export default async function HomePage({
               key={key}
               className="flex items-center gap-2 text-sm text-muted-foreground"
             >
-              <CheckCircle2 className="size-4 shrink-0 text-primary" aria-hidden />
+              <CheckCircle2 className="size-4 shrink-0 text-brand" aria-hidden />
               <span>{tHome(key)}</span>
             </li>
           ))}

@@ -239,7 +239,7 @@ function AnalysisCard({
       <div className="mt-auto space-y-2">
         <Link
           href={`/chart?symbol=${result.symbol}`}
-          className="text-xs text-primary hover:underline"
+          className="text-xs text-brand hover:underline"
         >
           {t("viewChart")} →
         </Link>
@@ -252,7 +252,7 @@ function AnalysisCard({
             </span>
             <Link
               href={`/signals/${signalId}`}
-              className="ml-auto text-xs text-primary hover:underline shrink-0"
+              className="ml-auto text-xs text-brand hover:underline shrink-0"
             >
               {t("viewSignal")}
             </Link>
@@ -385,7 +385,7 @@ export function ScalpingPanel({ isLoggedIn, isVip }: Props) {
     return (
       <div className="flex items-center justify-between gap-4 rounded-lg border border-border bg-muted/10 p-4">
         <div className="flex items-center gap-2.5">
-          <Zap className="size-4 text-primary/60 shrink-0" />
+          <Zap className="size-4 text-brand/60 shrink-0" />
           <div>
             <p className="text-sm font-medium text-foreground">{t("title")}</p>
             <p className="text-xs text-muted-foreground">{t("loginHint")}</p>
@@ -496,7 +496,7 @@ export function ScalpingPanel({ isLoggedIn, isVip }: Props) {
       {state.status === "error" && (
         <div className="flex items-center justify-between rounded-lg border border-border bg-muted/10 p-4">
           <p className="text-xs text-muted-foreground">{t("errorMsg")}</p>
-          <button onClick={handleAnalyze} className="text-xs text-primary hover:underline">
+          <button onClick={handleAnalyze} className="text-xs text-brand hover:underline">
             {t("retry")}
           </button>
         </div>

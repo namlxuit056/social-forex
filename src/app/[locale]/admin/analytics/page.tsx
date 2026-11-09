@@ -254,7 +254,7 @@ export default async function AdminAnalyticsPage({
       label: t("analyticsFunnelEvents30d"),
       value: totalFunnelEvents,
       icon: Target,
-      className: "text-primary bg-primary/10",
+      className: "text-brand bg-primary/10",
     },
   ];
 

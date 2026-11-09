@@ -35,7 +35,7 @@ export async function RelatedLessons({
             <Badge variant="outline" className="mb-2 text-[10px]">
               {tAcademy(lesson.level)}
             </Badge>
-            <h3 className="text-sm font-medium text-foreground group-hover:text-primary">
+            <h3 className="text-sm font-medium text-foreground group-hover:text-brand">
               {lesson.title}
             </h3>
             <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
@@ -72,7 +72,7 @@ export function RelatedArticles({
             <Badge variant="outline" className="mb-2 text-[10px]">
               {article.keyword}
             </Badge>
-            <h3 className="text-sm font-medium text-foreground group-hover:text-primary">
+            <h3 className="text-sm font-medium text-foreground group-hover:text-brand">
               {article.title}
             </h3>
             <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">

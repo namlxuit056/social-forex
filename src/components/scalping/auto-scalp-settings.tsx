@@ -56,7 +56,7 @@ function SymbolCard({
           className="p-1 rounded text-muted-foreground hover:text-foreground transition-colors"
           title={sym.enabled ? t("disable") : t("enable")}
         >
-          {sym.enabled ? <ToggleRight className="size-4 text-primary" /> : <ToggleLeft className="size-4" />}
+          {sym.enabled ? <ToggleRight className="size-4 text-brand" /> : <ToggleLeft className="size-4" />}
         </button>
         <button
           onClick={() => onRemove(sym.id)}
@@ -161,7 +161,7 @@ export function AutoScalpSettings({ initial, isVip }: Props) {
       {/* Header + master toggle */}
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Bot className={cn("size-4 shrink-0", enabled ? "text-primary" : "text-muted-foreground")} />
+          <Bot className={cn("size-4 shrink-0", enabled ? "text-brand" : "text-muted-foreground")} />
           <div>
             <p className="text-sm font-semibold text-foreground">{t("autoTitle")}</p>
             <p className="text-xs text-muted-foreground">{t("autoDesc")}</p>

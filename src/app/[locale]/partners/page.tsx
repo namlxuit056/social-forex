@@ -46,11 +46,11 @@ export default async function PartnersPage({
             <li>Broker listing: comparison table with fixed criteria.</li>
           </ul>
           <p className="text-sm">
-            <Link href="/brokers" className="font-medium text-primary hover:underline">
+            <Link href="/brokers" className="font-medium text-brand hover:underline">
               {tn("brokers")}
             </Link>
             {" · "}
-            <Link href="/resources" className="font-medium text-primary hover:underline">
+            <Link href="/resources" className="font-medium text-brand hover:underline">
               {tn("resources")}
             </Link>
           </p>

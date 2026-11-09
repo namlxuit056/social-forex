@@ -64,7 +64,7 @@ export function ChangePasswordForm() {
         <p className="text-sm text-destructive">{state.error}</p>
       ) : null}
       {state?.ok ? (
-        <p className="text-sm text-primary">{t("changePasswordSuccess")}</p>
+        <p className="text-sm text-brand">{t("changePasswordSuccess")}</p>
       ) : null}
       <Button type="submit" size="sm" disabled={pending}>
         {pending ? t("changePasswordSaving") : t("changePasswordSave")}

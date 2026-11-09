@@ -127,7 +127,7 @@ function HistoryTable({ rows }: { rows: AutoScalpHistoryRow[] }) {
                   </div>
                 )}
                 <details>
-                  <summary className="cursor-pointer text-xs text-primary hover:underline">Xem</summary>
+                  <summary className="cursor-pointer text-xs text-brand hover:underline">Xem</summary>
                   <div className="mt-2 max-w-md space-y-2">
                     <p className="text-xs text-muted-foreground whitespace-pre-wrap">{row.reasoning}</p>
                     {row.checklist.length > 0 && (
@@ -276,7 +276,7 @@ function ThresholdSimTable({
                     >
                       <td className="py-2 pr-4 font-mono">
                         ≥{row.minScore} / ≥{row.minConfidence}
-                        {active && <span className="ml-1.5 text-[10px] uppercase text-primary">đang bật</span>}
+                        {active && <span className="ml-1.5 text-[10px] uppercase text-brand">đang bật</span>}
                       </td>
                       <td className="py-2 pr-4">{row.kept}</td>
                       <td className="py-2 pr-4 text-muted-foreground">−{row.filtered}</td>

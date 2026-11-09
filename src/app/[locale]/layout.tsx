@@ -112,7 +112,7 @@ export default async function LocaleLayout({
     >
       <head>
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#10b981" />
+        <meta name="theme-color" content="#f0b90b" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta
           name="apple-mobile-web-app-status-bar-style"

@@ -39,7 +39,7 @@ function Gate({ title, hint, href, cta }: { title: string; hint: string; href: s
   return (
     <Card className="border-border bg-card">
       <CardContent className="flex flex-col items-center gap-4 py-12 text-center">
-        <Sparkles className="size-12 text-primary/40" />
+        <Sparkles className="size-12 text-brand/40" />
         <div>
           <h3 className="font-heading text-lg font-medium text-foreground">{title}</h3>
           <p className="mt-1 text-sm text-muted-foreground">{hint}</p>
@@ -123,7 +123,7 @@ export default async function TradingAgentsPage({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
-            <Bot className="size-5 text-primary" aria-hidden />
+            <Bot className="size-5 text-brand" aria-hidden />
             {t("newRun")}
           </CardTitle>
           <CardDescription>{t("newRunDesc")}</CardDescription>
@@ -193,7 +193,7 @@ export default async function TradingAgentsPage({
                 <li key={r.id}>
                   <Link
                     href={`/trading-agents?run=${r.id}`}
-                    className="flex items-center justify-between gap-3 py-2 text-sm hover:text-primary"
+                    className="flex items-center justify-between gap-3 py-2 text-sm hover:text-brand"
                   >
                     <span className="font-medium">
                       {r.symbol} <span className="font-normal text-muted-foreground">{r.tradeDate}</span>

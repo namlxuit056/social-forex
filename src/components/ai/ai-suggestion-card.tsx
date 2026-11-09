@@ -378,7 +378,7 @@ export function AiSuggestionCard({
 
       <div className="border-b border-border px-4 py-3">
         <div className="mb-3 flex items-center gap-2">
-          <Calculator className="size-4 text-primary" aria-hidden />
+          <Calculator className="size-4 text-brand" aria-hidden />
           <span className="text-[10px] font-semibold uppercase text-muted-foreground">
             {t("riskCalculator")}
           </span>

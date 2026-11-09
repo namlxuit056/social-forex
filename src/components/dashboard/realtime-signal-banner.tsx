@@ -65,10 +65,10 @@ export function RealtimeSignalBanner() {
           key={signal.id}
           className="flex items-center gap-3 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 text-sm animate-in slide-in-from-top-2 fade-in"
         >
-          <Radio className="size-4 shrink-0 text-primary animate-pulse" />
+          <Radio className="size-4 shrink-0 text-brand animate-pulse" />
           <Link
             href={`/signals/${signal.id}`}
-            className="flex-1 font-mono font-medium text-foreground hover:text-primary"
+            className="flex-1 font-mono font-medium text-foreground hover:text-brand"
           >
             {signal.symbol} {signal.direction}
           </Link>

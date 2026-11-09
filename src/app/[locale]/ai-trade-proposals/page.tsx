@@ -44,7 +44,7 @@ export default async function AiTradeProposalsPage({
         </div>
         <Card className="border-border bg-card">
           <CardContent className="flex flex-col items-center gap-4 py-12 text-center">
-            <Brain className="size-12 text-primary/40" />
+            <Brain className="size-12 text-brand/40" />
             <div>
               <h3 className="font-heading text-lg font-medium text-foreground">
                 {t("loginRequired")}
@@ -81,7 +81,7 @@ export default async function AiTradeProposalsPage({
         </div>
         <Card className="border-border bg-card">
           <CardContent className="flex flex-col items-center gap-4 py-12 text-center">
-            <Sparkles className="size-12 text-primary/40" />
+            <Sparkles className="size-12 text-brand/40" />
             <div>
               <h3 className="font-heading text-lg font-medium text-foreground">
                 {t("vipRequired")}
@@ -119,7 +119,7 @@ export default async function AiTradeProposalsPage({
         </div>
         <Card className="border-border bg-card">
           <CardContent className="flex flex-col items-center gap-4 py-12 text-center">
-            <Sparkles className="size-12 text-primary/40" />
+            <Sparkles className="size-12 text-brand/40" />
             <div>
               <h3 className="font-heading text-lg font-medium text-foreground">
                 {t("mt5Required")}
@@ -184,7 +184,7 @@ export default async function AiTradeProposalsPage({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
-            <Download className="size-5 text-primary" aria-hidden />
+            <Download className="size-5 text-brand" aria-hidden />
             {t("setupTitle")}
           </CardTitle>
           <CardDescription>{t("setupDesc")}</CardDescription>
@@ -231,7 +231,7 @@ export default async function AiTradeProposalsPage({
                     {key === "setupStep6" ? (
                       <>
                         {t(key)}{" "}
-                        <Link href="/mt5" className="font-medium text-primary hover:underline">
+                        <Link href="/mt5" className="font-medium text-brand hover:underline">
                           MT5 Bridge
                         </Link>
                         .

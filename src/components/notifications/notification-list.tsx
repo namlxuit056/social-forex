@@ -291,7 +291,7 @@ export function NotificationList({
               <span
                 className={cn(
                   "shrink-0 text-xs font-medium",
-                  unread ? "text-primary" : "text-muted-foreground",
+                  unread ? "text-brand" : "text-muted-foreground",
                 )}
               >
                 {unread ? t("unreadBadge") : t("readBadge")}

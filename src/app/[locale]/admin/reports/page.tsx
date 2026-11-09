@@ -198,7 +198,7 @@ export default async function AdminReportsPage({
                     {threadUrl && (
                       <Link
                         href={threadUrl}
-                        className="text-primary hover:underline"
+                        className="text-brand hover:underline"
                         target="_blank"
                       >
                         {t("viewThread")} →
@@ -207,7 +207,7 @@ export default async function AdminReportsPage({
                     {signalUrl && (
                       <Link
                         href={signalUrl}
-                        className="text-primary hover:underline"
+                        className="text-brand hover:underline"
                         target="_blank"
                       >
                         {t("viewSignal")} →
@@ -216,7 +216,7 @@ export default async function AdminReportsPage({
                     {reviewUrl && (
                       <Link
                         href={reviewUrl}
-                        className="text-primary hover:underline"
+                        className="text-brand hover:underline"
                         target="_blank"
                       >
                         {t("viewReview")} →

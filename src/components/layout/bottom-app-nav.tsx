@@ -38,7 +38,7 @@ export function BottomAppNav({ userId }: Props) {
               aria-current={isActive ? "page" : undefined}
               className={cn(
                 "flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl px-2 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
-                isActive && "text-primary",
+                isActive && "text-brand",
               )}
             >
               <item.icon className="size-5" aria-hidden />

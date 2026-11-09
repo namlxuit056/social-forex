@@ -289,7 +289,7 @@ export default async function BrokersPage({
         {copy.quickPicks.map((item) => (
           <div key={item.title} className="rounded-lg border border-border bg-card p-4">
             <p className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              <Sparkles className="size-3.5 text-primary" aria-hidden />
+              <Sparkles className="size-3.5 text-brand" aria-hidden />
               {item.title}
             </p>
             <h2 className="mt-2 text-base font-semibold text-foreground">{item.broker}</h2>
@@ -300,7 +300,7 @@ export default async function BrokersPage({
 
       <section className="space-y-3">
         <div className="flex items-center gap-2">
-          <Scale className="size-4 text-primary" aria-hidden />
+          <Scale className="size-4 text-brand" aria-hidden />
           <h2 className="font-heading text-lg font-semibold text-foreground">{copy.compare}</h2>
         </div>
         <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
@@ -343,7 +343,7 @@ export default async function BrokersPage({
 
       <section className="space-y-3">
         <div className="flex items-center gap-2">
-          <BadgeCheck className="size-4 text-primary" aria-hidden />
+          <BadgeCheck className="size-4 text-brand" aria-hidden />
           <h2 className="font-heading text-lg font-semibold text-foreground">{copy.details}</h2>
         </div>
         <div className="grid gap-4 lg:grid-cols-2">

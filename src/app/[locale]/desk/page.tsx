@@ -116,7 +116,7 @@ export default async function DeskPage({
     <div className="space-y-10">
       <PageHeader title={t("title")} description={t("subtitle")}>
         <nav
-          className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-primary"
+          className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-brand"
           aria-label={t("jumpNavAria")}
         >
           <a
@@ -156,7 +156,7 @@ export default async function DeskPage({
           </h2>
           <Link
             href="/quotes"
-            className="text-xs font-medium text-muted-foreground underline-offset-4 hover:text-primary hover:underline"
+            className="text-xs font-medium text-muted-foreground underline-offset-4 hover:text-brand hover:underline"
           >
             {t("openFullPage")}
           </Link>
@@ -176,7 +176,7 @@ export default async function DeskPage({
           </h2>
           <Link
             href="/calendar"
-            className="text-xs font-medium text-muted-foreground underline-offset-4 hover:text-primary hover:underline"
+            className="text-xs font-medium text-muted-foreground underline-offset-4 hover:text-brand hover:underline"
           >
             {t("openFullPage")}
           </Link>

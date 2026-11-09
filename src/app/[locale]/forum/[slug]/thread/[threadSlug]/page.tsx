@@ -78,7 +78,7 @@ export default async function ForumThreadPage({ params }: Props) {
           {thread.author?.id ? (
             <Link
               href={`/u/${thread.author.id}`}
-              className="font-medium text-primary hover:underline"
+              className="font-medium text-brand hover:underline"
             >
               {thread.author?.name ?? thread.author?.email}
             </Link>
@@ -103,7 +103,7 @@ export default async function ForumThreadPage({ params }: Props) {
                 {p.author?.id ? (
                   <Link
                     href={`/u/${p.author.id}`}
-                    className="font-medium text-primary hover:underline"
+                    className="font-medium text-brand hover:underline"
                   >
                     {p.author?.name ?? p.author?.email}
                   </Link>

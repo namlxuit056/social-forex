@@ -149,7 +149,7 @@ function FeatureItem({
 }) {
   return (
     <div className="flex min-h-20 flex-col justify-between rounded-lg border border-border bg-background/50 p-3">
-      <span className="text-primary [&_svg]:size-4" aria-hidden>
+      <span className="text-brand [&_svg]:size-4" aria-hidden>
         {icon}
       </span>
       <span className="mt-2 text-xs font-medium leading-snug text-foreground">

@@ -76,7 +76,7 @@ export function JournalAiPanel({ tradeCount }: { tradeCount: number }) {
     <section className="space-y-4 rounded-lg border border-border bg-card p-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-3">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-brand">
             <Sparkles className="size-4" aria-hidden />
           </div>
           <div>
@@ -178,7 +178,7 @@ export function JournalAiPanel({ tradeCount }: { tradeCount: number }) {
 
           <div className="rounded-lg border border-border bg-background/70 p-4">
             <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-              <Target className="size-4 text-primary" aria-hidden />
+              <Target className="size-4 text-brand" aria-hidden />
               {t("aiImprovements")}
             </h3>
             <div className="mt-3 grid gap-3 md:grid-cols-2">

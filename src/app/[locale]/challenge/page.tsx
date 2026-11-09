@@ -80,7 +80,7 @@ export default async function ChallengePage({
       <section className="border-b border-border pb-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
-            <p className="text-sm font-medium text-primary">
+            <p className="text-sm font-medium text-brand">
               {t("eyebrow")}
             </p>
             <h1 className="mt-4 font-heading text-3xl font-semibold tracking-tight text-foreground md:text-5xl">
@@ -116,7 +116,7 @@ export default async function ChallengePage({
         <div className="mt-6 flex flex-wrap gap-3">
           {userId ? (
             hasStarted ? (
-              <Badge className="h-9 bg-primary/15 px-3 text-primary hover:bg-primary/20">
+              <Badge className="h-9 bg-primary/15 px-3 text-brand hover:bg-primary/20">
                 <CalendarDays className="size-4" aria-hidden />
                 {t("startedBadge")}
               </Badge>
@@ -156,7 +156,7 @@ export default async function ChallengePage({
 
       <section className="grid gap-4 md:grid-cols-3">
         <div className="rounded-xl border border-border bg-card p-4">
-          <ClipboardList className="size-5 text-primary" aria-hidden />
+          <ClipboardList className="size-5 text-brand" aria-hidden />
           <h2 className="mt-3 font-heading text-base font-medium text-foreground">
             {t("benefitProcessTitle")}
           </h2>
@@ -218,7 +218,7 @@ export default async function ChallengePage({
                       </CardTitle>
                     </div>
                     {complete ? (
-                      <CheckCircle2 className="size-5 shrink-0 text-primary" aria-hidden />
+                      <CheckCircle2 className="size-5 shrink-0 text-brand" aria-hidden />
                     ) : null}
                   </div>
                   <CardDescription className="leading-relaxed">
@@ -230,7 +230,7 @@ export default async function ChallengePage({
                     complete ? (
                       <Badge
                         variant="outline"
-                        className="h-9 border-primary/30 px-3 text-primary"
+                        className="h-9 border-primary/30 px-3 text-brand"
                       >
                         {t("done")}
                       </Badge>
@@ -256,7 +256,7 @@ export default async function ChallengePage({
                     href={day <= 2 ? "/calendar" : day <= 4 ? "/academy" : "/journal"}
                     className={cn(
                       buttonVariants({ variant: "ghost", size: "sm" }),
-                      "text-primary hover:text-primary",
+                      "text-brand hover:text-brand",
                     )}
                   >
                     {t("openToolCta")}

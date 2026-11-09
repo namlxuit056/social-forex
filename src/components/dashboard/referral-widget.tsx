@@ -46,7 +46,7 @@ export function ReferralWidget() {
     <Card className="border border-border bg-card">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
-          <Gift className="size-4 text-primary" />
+          <Gift className="size-4 text-brand" />
           {t("title")}
         </CardTitle>
       </CardHeader>
@@ -87,7 +87,7 @@ export function ReferralWidget() {
               <Gift className="size-3.5" />
               {t("statsVipEarned")}
             </div>
-            <p className="mt-1 text-lg font-bold text-primary">{stats.totalVipDays}d</p>
+            <p className="mt-1 text-lg font-bold text-brand">{stats.totalVipDays}d</p>
           </div>
         </div>
 

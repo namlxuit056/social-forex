@@ -108,7 +108,7 @@ export function RiskCalculator({
     <Card className="border-border">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
-          <Calculator className="size-4 text-primary" aria-hidden />
+          <Calculator className="size-4 text-brand" aria-hidden />
           {t("title")}
         </CardTitle>
       </CardHeader>
@@ -122,7 +122,7 @@ export function RiskCalculator({
               className={cn(
                 "rounded-md border px-2.5 py-0.5 font-mono text-xs transition-colors",
                 symbol.toUpperCase() === s
-                  ? "border-primary bg-primary/10 text-primary"
+                  ? "border-primary bg-primary/10 text-brand"
                   : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground",
               )}
             >
@@ -242,7 +242,7 @@ export function RiskCalculator({
             </div>
             <div>
               <p className="text-[11px] text-muted-foreground">{t("lotSize")}</p>
-              <p className="mt-0.5 font-mono text-base font-bold text-primary">
+              <p className="mt-0.5 font-mono text-base font-bold text-brand">
                 {result.lotSize.toFixed(2)}
               </p>
             </div>

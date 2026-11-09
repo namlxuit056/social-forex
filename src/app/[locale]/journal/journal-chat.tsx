@@ -99,7 +99,7 @@ export function JournalChat({ isLoggedIn, isVip }: Props) {
   return (
     <section className="rounded-xl border border-border bg-card p-4 sm:p-5">
       <div className="flex items-center gap-2">
-        <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+        <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-brand">
           <Bot className="size-4" aria-hidden />
         </span>
         <div>

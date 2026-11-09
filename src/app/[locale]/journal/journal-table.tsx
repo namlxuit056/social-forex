@@ -389,7 +389,7 @@ function TradeRow({
               variant="ghost"
               size="icon"
               title={t("tradeReviewButton")}
-              className={cn("size-7", isReviewing ? "text-primary" : "text-muted-foreground hover:text-foreground")}
+              className={cn("size-7", isReviewing ? "text-brand" : "text-muted-foreground hover:text-foreground")}
               onClick={onToggleReview}
             >
               <Sparkles className="size-3.5" />
@@ -399,7 +399,7 @@ function TradeRow({
             type="button"
             variant="ghost"
             size="icon"
-            className={cn("size-7", isEditing ? "text-primary" : "text-muted-foreground hover:text-foreground")}
+            className={cn("size-7", isEditing ? "text-brand" : "text-muted-foreground hover:text-foreground")}
             onClick={onEdit}
           >
             <Pencil className="size-3.5" />

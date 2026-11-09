@@ -342,8 +342,8 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
         <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-gradient-to-r from-primary/5 via-card to-primary/5 px-5 py-3.5">
           {user.xp > 0 && (
             <div className="flex items-center gap-2.5 rounded-lg bg-primary/10 px-3.5 py-2 ring-1 ring-primary/20">
-              <Award className="size-4.5 text-primary" />
-              <span className="text-sm font-bold text-primary">Lv.{getLevel(user.xp)}</span>
+              <Award className="size-4.5 text-brand" />
+              <span className="text-sm font-bold text-brand">Lv.{getLevel(user.xp)}</span>
               <div className="h-2 w-16 rounded-full bg-primary/20">
                 <div
                   className="h-full rounded-full bg-primary transition-all"
@@ -389,14 +389,14 @@ export default async function PublicProfilePage({ params, searchParams }: Props)
                 className={cn(
                   "inline-flex min-h-10 items-center gap-2 rounded-md border px-3 text-sm font-medium transition-colors",
                   active
-                    ? "border-primary/35 bg-primary/15 text-primary"
+                    ? "border-primary/35 bg-primary/15 text-brand"
                     : "border-transparent bg-muted/35 text-muted-foreground hover:bg-muted/60 hover:text-foreground",
                 )}
               >
                 <Icon className="size-4" aria-hidden />
                 {item.label}
                 {item.count !== undefined && item.count > 0 && (
-                  <span className="ml-0.5 inline-flex size-5 items-center justify-center rounded-full bg-primary/15 text-[10px] font-semibold text-primary">
+                  <span className="ml-0.5 inline-flex size-5 items-center justify-center rounded-full bg-primary/15 text-[10px] font-semibold text-brand">
                     {item.count > 99 ? "99+" : item.count}
                   </span>
                 )}

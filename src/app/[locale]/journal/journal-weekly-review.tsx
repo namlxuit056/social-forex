@@ -90,7 +90,7 @@ async function ReviewCard({ review }: { review: Review }) {
                     <span className="text-sm font-medium">{area.title}</span>
                   </div>
                   <p className="text-xs text-muted-foreground pl-2">{area.evidence}</p>
-                  <p className="text-xs text-primary pl-2">{area.action}</p>
+                  <p className="text-xs text-brand pl-2">{area.action}</p>
                 </li>
               ))}
             </ul>
@@ -209,7 +209,7 @@ async function WeeklyProgressTrend({ reviews }: { reviews: Review[] }) {
           className="text-border"
         />
         {n > 1 && (
-          <path d={linePath} fill="none" stroke="currentColor" strokeWidth={2} className="text-primary" />
+          <path d={linePath} fill="none" stroke="currentColor" strokeWidth={2} className="text-brand" />
         )}
         {points.map((p, i) => (
           <circle key={i} cx={p.x} cy={p.y} r={3.5} fill="currentColor" className={scoreColorClass(p.score)} />

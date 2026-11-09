@@ -65,7 +65,7 @@ export default async function MessageThreadPage({ params }: Props) {
         <BackLink href="/messages">{t("conversation")}</BackLink>
         <Link
           href={`/u/${otherId}`}
-          className="text-lg font-medium text-foreground hover:text-primary"
+          className="text-lg font-medium text-foreground hover:text-brand"
         >
           {other.name ?? "Trader"}
         </Link>

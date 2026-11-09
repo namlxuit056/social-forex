@@ -140,7 +140,7 @@ export function PublicProfileHero({
               </div>
             </div>
             <div className="flex items-center gap-2 rounded-lg bg-muted/40 px-3 py-2">
-              <Award className="size-4 text-primary" />
+              <Award className="size-4 text-brand" />
               <div>
                 <p className="text-lg font-bold text-foreground">Lv.{socialProof.level}</p>
                 <p className="text-[11px] text-muted-foreground">{socialProof.xp} {socialProof.xpLabel}</p>

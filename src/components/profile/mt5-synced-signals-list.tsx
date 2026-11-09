@@ -254,7 +254,7 @@ export function Mt5SyncedSignalsList({
             className={cn(
               "min-h-9 rounded-md border px-2.5 py-1.5 text-xs font-medium transition-all",
               statusFilter === option.value
-                ? "border-primary/35 bg-primary/15 text-primary"
+                ? "border-primary/35 bg-primary/15 text-brand"
                 : "border-transparent bg-muted/40 text-muted-foreground/65 hover:text-foreground",
             )}
           >

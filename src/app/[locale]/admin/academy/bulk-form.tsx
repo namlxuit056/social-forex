@@ -79,7 +79,7 @@ export function BulkGenerateForm() {
     <Card className="border-border">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
-          <Wand2 className="size-4 text-primary" aria-hidden />
+          <Wand2 className="size-4 text-brand" aria-hidden />
           AI tự lên ý tưởng &amp; tạo hàng loạt
         </CardTitle>
       </CardHeader>
@@ -132,7 +132,7 @@ export function BulkGenerateForm() {
                     <Circle className="size-4 text-muted-foreground" />
                   )}
                   {row.status.state === "generating" && (
-                    <Loader2 className="size-4 animate-spin text-primary" />
+                    <Loader2 className="size-4 animate-spin text-brand" />
                   )}
                   {row.status.state === "done" && (
                     <CheckCircle2 className="size-4 text-green-500" />

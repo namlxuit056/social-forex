@@ -61,7 +61,7 @@ export default async function AlertsPage({
   return (
     <div className="space-y-6">
       <div className="flex items-start gap-3">
-        <Bell className="mt-1 h-5 w-5 text-primary shrink-0" />
+        <Bell className="mt-1 h-5 w-5 text-brand shrink-0" />
         <div>
           <h1 className="font-heading text-xl font-semibold text-foreground">{t("title")}</h1>
           <p className="mt-1 text-muted-foreground">{t("description")}</p>
@@ -74,7 +74,7 @@ export default async function AlertsPage({
           <span className="text-xs text-muted-foreground">
             {activeCount}/{limit} {t("used")}
             {!vip && (
-              <span className="ml-1 text-primary">(VIP: 20)</span>
+              <span className="ml-1 text-brand">(VIP: 20)</span>
             )}
           </span>
         </div>

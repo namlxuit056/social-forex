@@ -253,7 +253,7 @@ export default async function DashboardPage({
         </div>
         <div className="flex flex-wrap items-center gap-2 lg:justify-end">
           {vipActive ? (
-            <Badge className="bg-primary/20 text-primary hover:bg-primary/25">
+            <Badge className="bg-primary/20 text-brand hover:bg-primary/25">
               <ShieldCheck className="mr-1 size-3.5" aria-hidden />
               {t("vipActive")}
             </Badge>
@@ -332,8 +332,8 @@ export default async function DashboardPage({
                         >
                           <item.icon
                             className={cn(
-                              "size-4 text-primary",
-                              item.tone !== "primary" && "text-muted-foreground group-hover:text-primary",
+                              "size-4 text-brand",
+                              item.tone !== "primary" && "text-muted-foreground group-hover:text-brand",
                             )}
                             aria-hidden
                           />
@@ -345,7 +345,7 @@ export default async function DashboardPage({
                           </CardDescription>
                         </div>
                         <ArrowRight
-                          className="size-4 shrink-0 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-primary"
+                          className="size-4 shrink-0 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-brand"
                           aria-hidden
                         />
                       </CardHeader>
@@ -382,8 +382,8 @@ export default async function DashboardPage({
                         >
                           <item.icon
                             className={cn(
-                              "size-4 text-primary",
-                              item.tone !== "primary" && "text-muted-foreground group-hover:text-primary",
+                              "size-4 text-brand",
+                              item.tone !== "primary" && "text-muted-foreground group-hover:text-brand",
                             )}
                             aria-hidden
                           />
@@ -404,7 +404,7 @@ export default async function DashboardPage({
 
           <aside className="rounded-lg border border-border bg-muted/15 p-4">
             <div className="flex items-start gap-3">
-              <div className="rounded-md bg-primary/15 p-2 text-primary ring-1 ring-primary/20">
+              <div className="rounded-md bg-primary/15 p-2 text-brand ring-1 ring-primary/20">
                 <Cable className="size-4" aria-hidden />
               </div>
               <div className="min-w-0">
@@ -468,7 +468,7 @@ export default async function DashboardPage({
               </CardHeader>
               <CardContent className="text-xs text-muted-foreground">
                 {stat.href ? (
-                  <Link href={stat.href} className="text-primary hover:underline">
+                  <Link href={stat.href} className="text-brand hover:underline">
                     {stat.detail}
                   </Link>
                 ) : (
@@ -536,10 +536,10 @@ export default async function DashboardPage({
                   <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-muted text-xs font-medium text-muted-foreground ring-1 ring-border">
                     {index + 1}
                   </span>
-                  <step.icon className="size-4 shrink-0 text-primary" aria-hidden />
+                  <step.icon className="size-4 shrink-0 text-brand" aria-hidden />
                   <span className="min-w-0 flex-1 text-foreground">{step.label}</span>
                   <ArrowRight
-                    className="size-4 shrink-0 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-primary"
+                    className="size-4 shrink-0 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-brand"
                     aria-hidden
                   />
                 </Link>
@@ -591,7 +591,7 @@ export default async function DashboardPage({
                   </p>
                 </div>
                 <TrendingUp
-                  className="size-4 text-muted-foreground transition group-hover:text-primary"
+                  className="size-4 text-muted-foreground transition group-hover:text-brand"
                   aria-hidden
                 />
               </div>

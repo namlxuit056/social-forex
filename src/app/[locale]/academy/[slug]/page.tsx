@@ -312,7 +312,7 @@ export default async function AcademyLessonPage({ params }: Props) {
               className="not-prose"
             />
             <p className="text-sm text-muted-foreground">
-              <Link href="/academy" className="font-medium text-primary hover:underline">
+              <Link href="/academy" className="font-medium text-brand hover:underline">
                 {t("backToList")}
               </Link>
             </p>

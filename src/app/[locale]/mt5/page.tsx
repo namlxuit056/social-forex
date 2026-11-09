@@ -160,7 +160,7 @@ export default async function Mt5Page({
   return (
     <div className="space-y-8">
       <section className="border-b border-border pb-7">
-        <p className="text-sm font-medium text-primary">
+        <p className="text-sm font-medium text-brand">
           {t("eyebrow")}
         </p>
         <h1 className="mt-2 font-heading text-xl font-semibold tracking-tight text-foreground">
@@ -175,7 +175,7 @@ export default async function Mt5Page({
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
-              <KeyRound className="size-5 text-primary" aria-hidden />
+              <KeyRound className="size-5 text-brand" aria-hidden />
               {t("createTitle")}
             </CardTitle>
             <CardDescription>{t("createDesc")}</CardDescription>
@@ -197,7 +197,7 @@ export default async function Mt5Page({
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
-              <Server className="size-5 text-primary" aria-hidden />
+              <Server className="size-5 text-brand" aria-hidden />
               {t("setupTitle")}
             </CardTitle>
             <CardDescription>{t("setupDesc")}</CardDescription>
@@ -279,7 +279,7 @@ export default async function Mt5Page({
             <Mt5AutoRefresh label={t("autoRefresh")} />
             <Link
               href="/journal"
-              className="text-sm font-medium text-primary hover:underline"
+              className="text-sm font-medium text-brand hover:underline"
             >
               {t("openJournal")}
             </Link>

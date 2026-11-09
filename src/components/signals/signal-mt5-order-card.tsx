@@ -182,7 +182,7 @@ export function SignalMt5OrderCard({
             <p className="text-xs text-muted-foreground">{t("mt5OrderConnectHint")}</p>
           </div>
         </div>
-        <Link href="/mt5" className="text-sm font-medium text-primary hover:underline">
+        <Link href="/mt5" className="text-sm font-medium text-brand hover:underline">
           {t("mt5OrderConnectCta")}
         </Link>
       </section>
