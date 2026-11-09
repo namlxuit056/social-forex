@@ -151,41 +151,46 @@ body {
   --info-bg: oklch(0.95 0.03 245);
 }
 
-/* Social Forex — dark fintech theme with clearer surface hierarchy */
+/* Social Forex — dark-first trading theme: near-black graphite, surfaces step up
+   page → card → popover, hairline white borders, green accent that glows. */
 .dark {
-  --background: oklch(0.115 0.018 255);
+  color-scheme: dark;
+  --background: oklch(0.13 0.008 265);
   --foreground: oklch(0.965 0.006 255);
-  --card: oklch(0.165 0.02 255);
+  --card: oklch(0.17 0.009 265);
   --card-foreground: oklch(0.965 0.006 255);
-  --popover: oklch(0.185 0.022 255);
+  --popover: oklch(0.2 0.01 265);
   --popover-foreground: oklch(0.965 0.006 255);
-  --primary: oklch(0.675 0.145 158);
-  --primary-foreground: oklch(0.085 0.018 160);
-  --secondary: oklch(0.235 0.022 255);
+  --primary: oklch(0.74 0.17 156);
+  --primary-foreground: oklch(0.16 0.04 160);
+  --secondary: oklch(0.23 0.01 265);
   --secondary-foreground: oklch(0.925 0.01 255);
-  --muted: oklch(0.215 0.02 255);
-  --muted-foreground: oklch(0.705 0.022 255);
-  --accent: oklch(0.245 0.05 225);
-  --accent-foreground: oklch(0.925 0.03 225);
+  --muted: oklch(0.21 0.01 265);
+  --muted-foreground: oklch(0.72 0.012 265);
+  --accent: oklch(0.26 0.05 158);
+  --accent-foreground: oklch(0.93 0.04 158);
   --destructive: oklch(0.66 0.2 25);
-  --border: oklch(1 0 0 / 14%);
-  --input: oklch(1 0 0 / 16%);
-  --ring: oklch(0.675 0.145 158 / 45%);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 14%);
+  --ring: oklch(0.74 0.17 156 / 50%);
   --chart-1: oklch(0.705 0.15 158);
   --chart-2: oklch(0.66 0.2 25);
   --chart-3: oklch(0.7 0.125 235);
   --chart-4: oklch(0.79 0.14 82);
   --chart-5: oklch(0.64 0.1 285);
-  --sidebar: oklch(0.14 0.018 255);
+  --sidebar: oklch(0.15 0.008 265);
   --sidebar-foreground: oklch(0.965 0.006 255);
-  --sidebar-primary: oklch(0.675 0.145 158);
+  --sidebar-primary: oklch(0.74 0.17 156);
   --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.225 0.022 255);
+  --sidebar-accent: oklch(0.23 0.01 265);
   --sidebar-accent-foreground: oklch(0.94 0.01 255);
-  --sidebar-border: oklch(1 0 0 / 12%);
-  --sidebar-ring: oklch(0.675 0.145 158 / 40%);
-  --border-strong: oklch(1 0 0 / 20%);
-  --item-hover: oklch(0.255 0.022 255);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.74 0.17 156 / 40%);
+  --border-strong: oklch(1 0 0 / 18%);
+  --item-hover: oklch(1 0 0 / 7%);
+  /* Glow: only on the primary action, the brand mark and focus — never on every card. */
+  --glow-primary: 0 0 0 1px oklch(0.74 0.17 156 / 35%), 0 0 22px -4px oklch(0.74 0.17 156 / 55%);
+  --glow-soft: oklch(0.74 0.17 156 / 9%);
   --success: oklch(0.78 0.13 158);
   --success-bg: oklch(0.3 0.06 158);
   --danger: oklch(0.75 0.15 25);
@@ -202,6 +207,15 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+  }
+  /* A faint green light above the fold, like a terminal's screen glow. Not fixed: cheap on mobile. */
+  .dark body {
+    background-image: radial-gradient(70rem 28rem at 50% -8rem, var(--glow-soft), transparent 70%);
+    background-repeat: no-repeat;
+  }
+  /* Cards catch a hairline of light on their top edge so tiers read on near-black. */
+  .dark [data-slot="card"] {
+    box-shadow: inset 0 1px 0 0 oklch(1 0 0 / 5%);
   }
   html {
     @apply font-sans;

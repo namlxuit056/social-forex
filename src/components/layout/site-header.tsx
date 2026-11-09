@@ -23,7 +23,7 @@ export async function SiteHeader() {
   const t = await getTranslations("nav");
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background">
+    <header className="sticky top-0 z-40 border-b border-border bg-background/80 backdrop-blur-md">
       {/* Main bar */}
       <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-2.5">
         {/* Logo + Brand */}
