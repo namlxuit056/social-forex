@@ -4,20 +4,76 @@ const SITE_URL = (
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://toolforex.xyz"
 ).replace(/\/$/, "");
 
+const MAX_ATTEMPTS = 4;
+// The self-hosted box drops connections now and then (ECONNRESET mid-handshake);
+// one try lost signal posts silently, so network blips and 429/5xx are retried.
+const RETRYABLE_NETWORK_CODES = new Set([
+  "ECONNRESET",
+  "ETIMEDOUT",
+  "ECONNREFUSED",
+  "EAI_AGAIN",
+  "ENOTFOUND",
+  "ENETUNREACH",
+  "EHOSTUNREACH",
+  "UND_ERR_CONNECT_TIMEOUT",
+  "UND_ERR_SOCKET",
+]);
+
+class TelegramApiError extends Error {
+  constructor(
+    message: string,
+    readonly retryAfterMs: number | null,
+  ) {
+    super(message);
+  }
+}
+
+function isRetryableNetworkError(err: unknown): boolean {
+  if (!(err instanceof Error)) return false;
+  if (err.name === "TimeoutError" || err.name === "AbortError") return true;
+  const code = (err.cause as { code?: string } | undefined)?.code;
+  return Boolean(code && RETRYABLE_NETWORK_CODES.has(code));
+}
+
+async function callTelegram(method: "sendMessage" | "sendPhoto", payload: Record<string, unknown>): Promise<void> {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/${method}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chat_id: CHAT_ID, ...payload }),
+        signal: AbortSignal.timeout(15_000),
+      });
+      if (res.ok) return;
+      const body = await res.text().catch(() => "");
+      const retryable = res.status === 429 || res.status >= 500;
+      let retryAfterMs: number | null = null;
+      try {
+        const seconds = (JSON.parse(body) as { parameters?: { retry_after?: number } }).parameters?.retry_after;
+        if (typeof seconds === "number") retryAfterMs = seconds * 1000;
+      } catch {
+        /* body is not JSON */
+      }
+      const error = new TelegramApiError(`Telegram ${method} ${res.status}: ${body}`, retryAfterMs);
+      if (!retryable || attempt >= MAX_ATTEMPTS) throw error;
+      await new Promise((r) => setTimeout(r, retryAfterMs ?? attempt * 1500));
+    } catch (err) {
+      if (err instanceof TelegramApiError) throw err;
+      if (!isRetryableNetworkError(err) || attempt >= MAX_ATTEMPTS) throw err;
+      await new Promise((r) => setTimeout(r, attempt * 1500));
+    }
+  }
+}
+
 async function send(text: string): Promise<void> {
   if (!BOT_TOKEN) return;
-  const res = await fetch(
-    `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id: CHAT_ID, text, parse_mode: "HTML" }),
-    },
-  );
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    throw new Error(`Telegram API ${res.status}: ${body}`);
-  }
+  await callTelegram("sendMessage", { text, parse_mode: "HTML" });
+}
+
+/** Signal posts are fire-and-forget for the caller, but a failure must leave a trace. */
+function logSendFailure(what: string, err: unknown) {
+  const cause = err instanceof Error ? ((err.cause as { code?: string } | undefined)?.code ?? err.message) : String(err);
+  console.error(`[telegram] ${what} not delivered after retries: ${cause}`);
 }
 
 // Allowlist gate — only signals authored by a user in TelegramSignalBroadcaster
@@ -101,8 +157,8 @@ export async function notifyTelegramNewSignal(signal: {
   lines.push("", `🔗 ${SITE_URL}/vi/signals/${signal.id}`);
   try {
     await send(lines.join("\n"));
-  } catch {
-    // Non-blocking
+  } catch (err) {
+    logSendFailure("new signal", err);
   }
 }
 
@@ -134,8 +190,8 @@ export async function notifyTelegramUpdatedSignal(signal: {
   lines.push("", `🔗 ${SITE_URL}/vi/signals/${signal.id}`);
   try {
     await send(lines.join("\n"));
-  } catch {
-    // Non-blocking
+  } catch (err) {
+    logSendFailure("updated signal", err);
   }
 }
 
@@ -166,8 +222,8 @@ export async function notifyTelegramClosedSignal(signal: {
   lines.push("", `🔗 ${SITE_URL}/vi/signals/${signal.id}`);
   try {
     await send(lines.join("\n"));
-  } catch {
-    // Non-blocking
+  } catch (err) {
+    logSendFailure("closed signal", err);
   }
 }
 
@@ -178,16 +234,6 @@ export async function notifyTelegramClosedSignal(signal: {
  */
 export async function sendTelegramChannelPost(post: { html: string; photoUrl?: string | null }): Promise<void> {
   if (!BOT_TOKEN) throw new Error("TELEGRAM_BOT_TOKEN is not set");
-  if (post.photoUrl) {
-    const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id: CHAT_ID, photo: post.photoUrl }),
-    });
-    if (!res.ok) {
-      const body = await res.text().catch(() => "");
-      throw new Error(`Telegram sendPhoto ${res.status}: ${body}`);
-    }
-  }
+  if (post.photoUrl) await callTelegram("sendPhoto", { photo: post.photoUrl });
   await send(post.html);
 }

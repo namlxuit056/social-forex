@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { revalidateLocalizedPath } from "@/lib/revalidate-locales";
 import { createHash } from "crypto";
 import { z } from "zod";
@@ -510,15 +510,18 @@ export async function POST(request: NextRequest) {
     closedMt5Signals.push(...closeResult.closedMt5Signals);
   });
 
-  // Send Telegram notifications outside the DB transaction
-  await Promise.allSettled([
-    ...newMt5Signals.map((s) =>
-      notifyTelegramNewSignal({ ...s, authorId: connection.userId }),
-    ),
-    ...closedMt5Signals.map((s) =>
-      notifyTelegramClosedSignal({ ...s, authorId: connection.userId }),
-    ),
-  ]);
+  // Telegram goes out after the EA has its response: sends retry on network
+  // blips, and the bridge must not stall waiting for them.
+  after(() =>
+    Promise.allSettled([
+      ...newMt5Signals.map((s) =>
+        notifyTelegramNewSignal({ ...s, authorId: connection.userId }),
+      ),
+      ...closedMt5Signals.map((s) =>
+        notifyTelegramClosedSignal({ ...s, authorId: connection.userId }),
+      ),
+    ]),
+  );
 
   revalidateLocalizedPath("/mt5");
   const changedSignalIds = Array.from(new Set([...touchedSignalIds, ...closedSignalIds]));
