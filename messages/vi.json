@@ -1501,7 +1501,11 @@
     "invalidCredentials": "Email hoặc mật khẩu không đúng.",
     "signInSuccessToast": "Đăng nhập thành công",
     "signingIn": "Đang xử lý…",
-    "submitSignIn": "Đăng nhập"
+    "submitSignIn": "Đăng nhập",
+    "continueWithGoogle": "Tiếp tục với Google",
+    "googleRedirecting": "Đang chuyển sang Google…",
+    "orWithEmail": "hoặc dùng email",
+    "oauthFailed": "Đăng nhập Google không thành công. Vui lòng thử lại hoặc dùng email."
   },
   "messages": {
     "title": "Tin nhắn",

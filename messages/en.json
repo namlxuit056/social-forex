@@ -1501,7 +1501,11 @@
     "invalidCredentials": "Email or password is incorrect.",
     "signInSuccessToast": "Signed in successfully",
     "signingIn": "Signing in…",
-    "submitSignIn": "Sign in"
+    "submitSignIn": "Sign in",
+    "continueWithGoogle": "Continue with Google",
+    "googleRedirecting": "Redirecting to Google…",
+    "orWithEmail": "or use email",
+    "oauthFailed": "Google sign-in didn’t go through. Try again or use email."
   },
   "messages": {
     "title": "Messages",

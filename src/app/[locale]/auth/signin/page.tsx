@@ -3,6 +3,9 @@ import { SiteLogo } from "@/components/layout/site-logo";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { SignInForm } from "@/components/auth/sign-in-form";
+import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
+import { isGoogleAuthEnabled } from "@/lib/google-auth";
+import { safeLocalizedCallbackPath } from "@/lib/safe-redirect";
 
 export async function generateMetadata({
   params,
@@ -21,12 +24,17 @@ function SignInFormFallback() {
 
 export default async function SignInPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams?: Promise<{ callbackUrl?: string | string[]; error?: string }>;
 }) {
   const { locale } = await params;
+  const query = await searchParams;
   setRequestLocale(locale);
   const t = await getTranslations("auth");
+  const rawCallbackUrl = Array.isArray(query?.callbackUrl) ? query?.callbackUrl[0] : query?.callbackUrl;
+  const callbackUrl = safeLocalizedCallbackPath(rawCallbackUrl);
 
   return (
     <div className="mx-auto max-w-md space-y-6">
@@ -36,6 +44,13 @@ export default async function SignInPage({
           {t("signInTitle")} Social Forex
         </h1>
       </div>
+      {/* Auth.js sends OAuth failures back here as ?error=… */}
+      {query?.error ? (
+        <p role="alert" className="rounded-lg border border-danger/30 bg-danger-bg px-3 py-2 text-sm text-danger">
+          {t("oauthFailed")}
+        </p>
+      ) : null}
+      {isGoogleAuthEnabled() ? <GoogleSignInButton callbackUrl={callbackUrl} surface="signin" /> : null}
       <Suspense fallback={<SignInFormFallback />}>
         <SignInForm />
       </Suspense>

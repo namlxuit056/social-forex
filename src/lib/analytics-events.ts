@@ -10,6 +10,7 @@ export const ANALYTICS_EVENTS = {
   registerFailure: "register_failure",
   loginSuccess: "login_success",
   loginFailure: "login_failure",
+  googleAuthClick: "google_auth_click",
 
   // Conversion prompts
   signupPromptView: "signup_prompt_view",

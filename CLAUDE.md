@@ -53,6 +53,9 @@ Optional (AI suggestions feature):
 - `AI_PROVIDER` — Force a specific provider (`deepseek`, `groq`, `openai`, or `anthropic`) when no admin setting is saved
 - `QUOTES_PROVIDER` — Override quote source (`yahoo` | `massive` | `mock`)
 
+Google sign-in (optional — button on /auth/signin and /auth/register only shows when both are set):
+- `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET` — Google Cloud OAuth client (Web). Authorized redirect URI: `https://toolforex.xyz/api/auth/callback/google` (plus `http://localhost:3000/api/auth/callback/google` for dev)
+
 Image uploads: `BLOB_READ_WRITE_TOKEN` (Vercel Blob)
 
 AI Article enrichment (optional):

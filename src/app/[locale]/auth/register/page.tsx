@@ -2,6 +2,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { SiteLogo } from "@/components/layout/site-logo";
 import { Link } from "@/i18n/navigation";
 import { RegisterForm } from "@/components/auth/register-form";
+import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
+import { isGoogleAuthEnabled } from "@/lib/google-auth";
 import { safeLocalizedCallbackPath } from "@/lib/safe-redirect";
 
 export async function generateMetadata({
@@ -40,6 +42,9 @@ export default async function RegisterPage({
           {t("registerTitle")}
         </h1>
       </div>
+      {isGoogleAuthEnabled() ? (
+        <GoogleSignInButton callbackUrl={callbackUrl} referralCode={ref} surface="register" />
+      ) : null}
       <RegisterForm callbackUrl={callbackUrl} referralCode={ref} />
       <p className="text-center text-sm text-muted-foreground">
         {t("hasAccount")}{" "}
