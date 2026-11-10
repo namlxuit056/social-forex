@@ -12,7 +12,8 @@ export type CronJobKey =
   | "tv-rating-check"
   | "tv-rating-daily-summary"
   | "external-signals-check"
-  | "cot-check";
+  | "cot-check"
+  | "daily-market-post";
 
 export type CronJobMeta = {
   key: CronJobKey;
@@ -27,6 +28,16 @@ export type CronJobMeta = {
 };
 
 export const CRON_JOBS: CronJobMeta[] = [
+  {
+    key: "daily-market-post",
+    label: "Bài nhận định vàng mỗi sáng",
+    description:
+      "AI viết nhận định XAUUSD từ dữ liệu kỹ thuật TradingView + tin USD trong ngày, kèm ảnh biểu đồ, tự đăng kênh Telegram. Bản Facebook và kịch bản video nằm ở /admin/daily-post để copy đăng tay. Chạy tay ở đây sẽ đăng Telegram nếu hôm nay chưa đăng.",
+    schedule: "07:30 giờ VN, thứ 2 – thứ 6",
+    risk: "normal",
+    settingsHref: "/admin/daily-post",
+    settingsLabel: "Mở bài hôm nay",
+  },
   {
     key: "screener-auto-run",
     label: "Screener: tự bắn lệnh (score ≥ 70)",

@@ -1471,3 +1471,24 @@ model TradingAgentsRun {
   @@index([userId, createdAt])
   @@index([symbol, tradeDate, language, status])
 }
+
+/// Bài nhận định vàng mỗi sáng: tự đăng kênh Telegram, bản Facebook / kịch bản video để admin copy đăng tay.
+model DailyMarketPost {
+  id             String    @id @default(cuid())
+  /// Ngày theo giờ VN, "YYYY-MM-DD"
+  day            String
+  symbol         String
+  bias           String
+  headline       String
+  telegramText   String
+  facebookText   String
+  videoScript    String
+  chartImageUrl  String?
+  telegramSentAt DateTime?
+  telegramError  String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@unique([day, symbol])
+  @@index([createdAt])
+}

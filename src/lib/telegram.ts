@@ -170,3 +170,24 @@ export async function notifyTelegramClosedSignal(signal: {
     // Non-blocking
   }
 }
+
+/**
+ * Posts a market note to the channel: the chart photo first (when there is one),
+ * then the HTML text, since a photo caption is capped at 1024 characters.
+ * Throws on API errors so the caller can record why a post did not go out.
+ */
+export async function sendTelegramChannelPost(post: { html: string; photoUrl?: string | null }): Promise<void> {
+  if (!BOT_TOKEN) throw new Error("TELEGRAM_BOT_TOKEN is not set");
+  if (post.photoUrl) {
+    const res = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: CHAT_ID, photo: post.photoUrl }),
+    });
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      throw new Error(`Telegram sendPhoto ${res.status}: ${body}`);
+    }
+  }
+  await send(post.html);
+}

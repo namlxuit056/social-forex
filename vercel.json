@@ -55,6 +55,10 @@
     {
       "path": "/api/trading-agents/sync",
       "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/marketing/daily-post/run",
+      "schedule": "30 0 * * 1-5"
     }
   ]
 }

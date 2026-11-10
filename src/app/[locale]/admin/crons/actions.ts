@@ -17,6 +17,7 @@ import { runAcademyAutoGenerate } from "@/lib/ai/academy-auto-generate";
 import { resolveCalendarEvents } from "@/lib/calendar/resolve-calendar";
 import { checkTechnicalRatingSignals } from "@/lib/quotes/notify-technical-rating";
 import { runDailyRatingSummary } from "@/lib/quotes/run-daily-rating-summary";
+import { runDailyMarketPost } from "@/lib/marketing/daily-post";
 import { runExternalSignals } from "@/lib/quotes/run-external-signals";
 import type { CronJobKey } from "./job-registry";
 
@@ -90,6 +91,9 @@ export async function runCronJob(jobKey: CronJobKey): Promise<RunCronJobResult> 
         break;
       case "cot-check":
         summary = await runExternalSignals("weekly");
+        break;
+      case "daily-market-post":
+        summary = await runDailyMarketPost();
         break;
       default:
         return { ok: false, jobKey, at, error: "unknown_job" };
