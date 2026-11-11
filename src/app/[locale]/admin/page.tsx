@@ -16,6 +16,7 @@ import {
   Send,
   Palette,
   Megaphone,
+  Gift,
 } from "lucide-react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
@@ -122,6 +123,7 @@ export default async function AdminDashboardPage({
     { href: "/admin/scalping-calibration", label: t("scalpingCalibration"), icon: Gauge },
     { href: "/admin/telegram-signals", label: t("telegramSignals"), icon: Send },
     { href: "/admin/daily-post", label: "Bài đăng mỗi ngày", icon: Megaphone },
+    { href: "/admin/exness-bonus", label: t("exnessBonus"), icon: Gift },
     { href: "/admin/design-system", label: t("designSystem"), icon: Palette },
   ];
 

@@ -85,6 +85,7 @@ model User {
   demoChallenges       UserDemoChallenge[]
   dailyTradingPlans    DailyTradingPlan[]
   mt5Connections       Mt5Connection[]
+  exnessBonusClaim     ExnessBonusClaim?
   pageVisits           UserPageVisit[]
   clientErrors         UserClientError[]
   funnelEvents         FunnelEvent[]
@@ -1491,4 +1492,40 @@ model DailyMarketPost {
 
   @@unique([day, symbol])
   @@index([createdAt])
+}
+
+enum ExnessBonusStatus {
+  PENDING
+  APPROVED
+  PAID
+  REJECTED
+}
+
+/// Thưởng $10 cho user mở tài khoản Exness qua link affiliate + kết nối MT5 Bridge.
+/// Admin tự đối chiếu số tài khoản trong Exness Partner portal (không có API).
+model ExnessBonusClaim {
+  id              String            @id @default(cuid())
+  userId          String            @unique
+  /// Snapshot tài khoản MT5 lúc gửi yêu cầu (lấy từ Mt5Connection)
+  mt5ConnectionId String?
+  accountLogin    String
+  accountServer   String?
+  accountCompany  String?
+  amountUsd       Float             @default(10)
+  status          ExnessBonusStatus @default(PENDING)
+  /// Cách nhận thưởng user chọn (VD "usdt-trc20", "bank", "exness")
+  payoutMethod    String
+  payoutDetails   String
+  userNote        String?
+  adminNote       String?
+  reviewedById    String?
+  reviewedAt      DateTime?
+  paidAt          DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([accountLogin, accountServer])
+  @@index([status, createdAt])
 }

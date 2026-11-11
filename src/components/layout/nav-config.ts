@@ -43,4 +43,5 @@ export const learningNavKeys = [
   { href: "/resources", key: "resources" },
   { href: "/brokers", key: "brokers" },
   { href: "/partners", key: "partners" },
+  { href: "/exness-bonus", key: "exnessBonus" },
 ] as const;

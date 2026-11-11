@@ -67,7 +67,8 @@
     "scrollSecondaryAria": "Liên kết và công cụ thêm",
     "missions": "Nhiệm vụ",
     "support": "Ủng hộ dự án",
-    "tradingAgents": "AI Agents"
+    "tradingAgents": "AI Agents",
+    "exnessBonus": "Thưởng Exness $10"
   },
   "footer": {
     "tagline": "Công cụ, lịch kinh tế và bài học cho người mới — kèm cộng đồng khi bạn sẵn sàng.",
@@ -1677,7 +1678,8 @@
     "signalSymbol": "Cặp",
     "reportTargetReview": "Đánh giá provider",
     "viewReview": "Xem đánh giá",
-    "aiArticlesWriteNew": "Viết bài mới"
+    "aiArticlesWriteNew": "Viết bài mới",
+    "exnessBonus": "Thưởng Exness $10"
   },
   "vip": {
     "title": "Nâng cấp VIP",
@@ -3006,6 +3008,81 @@
       "quota_reached": "Bạn đã dùng hết 5 lần phân tích trong 24 giờ.",
       "sidecar_unavailable": "Dịch vụ AI Agents đang không chạy, thử lại sau.",
       "unknown": "Có lỗi xảy ra, thử lại sau."
+    }
+  },
+  "exnessBonus": {
+    "title": "Nhận ${amount} khi mở Exness + MT5 Bridge",
+    "subtitle": "Mở tài khoản Exness thật qua link đối tác của ToolForex và kết nối MT5 Bridge — bạn được tặng ${amount}.",
+    "signupTitle": "Đăng nhập để nhận ${amount}",
+    "signupDesc": "Cần tài khoản ToolForex để theo dõi tiến độ và gửi yêu cầu nhận thưởng.",
+    "signupCta": "Tạo tài khoản miễn phí",
+    "stepsTitle": "4 bước nhận thưởng",
+    "step1": "Đăng nhập tài khoản ToolForex",
+    "step2": "Mở tài khoản Exness thật qua link đối tác",
+    "step2Desc": "Bắt buộc đăng ký qua link bên dưới để tài khoản được ghi nhận. Tài khoản mở trước đó hoặc qua link khác không được tính.",
+    "openExness": "Mở tài khoản Exness",
+    "step3": "Kết nối MT5 Bridge với tài khoản Exness thật",
+    "step3Desc": "Cài EA MT5 Bridge lên tài khoản Exness thật (không phải demo) và để EA chạy ít nhất một lần.",
+    "bridgeOk": "Đủ điều kiện",
+    "bridgeNotExness": "Không phải Exness",
+    "bridgeDemo": "Tài khoản demo",
+    "bridgeStale": "Bridge chưa chạy gần đây",
+    "setupBridge": "Cài MT5 Bridge",
+    "step4": "Gửi yêu cầu nhận ${amount}",
+    "needBridgeFirst": "Hoàn thành bước 3 để mở form nhận thưởng.",
+    "claimStatus": "Trạng thái",
+    "claimAccount": "Tài khoản MT5",
+    "adminNote": "Ghi chú từ admin",
+    "submitted": "Đã gửi yêu cầu. Admin sẽ đối chiếu và phản hồi tại trang này.",
+    "status": {
+      "PENDING": "Đang chờ duyệt",
+      "APPROVED": "Đã duyệt — chờ chuyển tiền",
+      "PAID": "Đã trả thưởng",
+      "REJECTED": "Bị từ chối"
+    },
+    "form": {
+      "account": "Tài khoản Exness",
+      "payoutMethod": "Nhận thưởng qua",
+      "payoutDetails": "Thông tin nhận tiền",
+      "payoutDetailsPlaceholder": "Địa chỉ ví / số TK ngân hàng + tên / email Exness",
+      "note": "Ghi chú (tuỳ chọn)",
+      "submit": "Gửi yêu cầu",
+      "submitting": "Đang gửi..."
+    },
+    "payoutMethods": {
+      "usdt-trc20": "USDT (TRC20)",
+      "bank": "Chuyển khoản ngân hàng (VND)",
+      "exness": "Chuyển vào tài khoản Exness"
+    },
+    "errors": {
+      "rateLimited": "Bạn thao tác quá nhanh, thử lại sau.",
+      "invalid": "Thông tin chưa hợp lệ.",
+      "notEligible": "Tài khoản này chưa đủ điều kiện (cần Exness thật, Bridge đang chạy).",
+      "demoAccount": "Tài khoản demo không được nhận thưởng.",
+      "alreadyClaimed": "Bạn đã gửi yêu cầu rồi.",
+      "accountTaken": "Tài khoản MT5 này đã được dùng để nhận thưởng.",
+      "forbidden": "Không có quyền.",
+      "notFound": "Không tìm thấy yêu cầu."
+    },
+    "termsTitle": "Điều kiện",
+    "terms1": "Mỗi người / mỗi tài khoản MT5 chỉ nhận thưởng một lần.",
+    "terms2": "Tài khoản phải là tài khoản Exness thật, mở qua link đối tác ToolForex.",
+    "terms3": "Admin đối chiếu tài khoản trong hệ thống đối tác Exness trước khi duyệt.",
+    "terms4": "Thưởng ${amount} được chuyển thủ công sau khi duyệt.",
+    "terms5": "ToolForex có quyền từ chối các trường hợp gian lận hoặc tạo nhiều tài khoản.",
+    "admin": {
+      "title": "Thưởng Exness $10",
+      "desc": "Đối chiếu số tài khoản trong Exness Partner portal (có thuộc link đối tác không) rồi duyệt/trả thưởng.",
+      "totals": "Chờ duyệt: {pending} · Đã duyệt chờ trả: {approved} · Đã trả: ${paid}",
+      "empty": "Chưa có yêu cầu nào.",
+      "approve": "Duyệt",
+      "markPaid": "Đã trả tiền",
+      "reject": "Từ chối",
+      "saving": "Đang lưu...",
+      "saved": "Đã lưu",
+      "notePlaceholder": "Ghi chú hiển thị cho user (tuỳ chọn)",
+      "submittedAt": "Gửi lúc",
+      "paidAt": "Trả lúc"
     }
   }
 }

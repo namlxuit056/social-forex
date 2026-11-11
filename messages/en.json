@@ -67,7 +67,8 @@
     "scrollSecondaryAria": "More links and tools",
     "missions": "Missions",
     "support": "Support us",
-    "tradingAgents": "AI Agents"
+    "tradingAgents": "AI Agents",
+    "exnessBonus": "Exness $10 bonus"
   },
   "footer": {
     "tagline": "Forex tools, calendar, and lessons for new traders — plus community when you are ready.",
@@ -1677,7 +1678,8 @@
     "signalSymbol": "Symbol",
     "reportTargetReview": "Provider review",
     "viewReview": "View review",
-    "aiArticlesWriteNew": "Write new article"
+    "aiArticlesWriteNew": "Write new article",
+    "exnessBonus": "Exness $10 bonus"
   },
   "vip": {
     "title": "Upgrade to VIP",
@@ -3006,6 +3008,81 @@
       "quota_reached": "You have used all 5 analyses for the last 24 hours.",
       "sidecar_unavailable": "The AI Agents service is not running, try again later.",
       "unknown": "Something went wrong, try again later."
+    }
+  },
+  "exnessBonus": {
+    "title": "Get ${amount} for Exness + MT5 Bridge",
+    "subtitle": "Open a real Exness account through ToolForex's partner link and connect MT5 Bridge — we'll send you ${amount}.",
+    "signupTitle": "Sign in to claim ${amount}",
+    "signupDesc": "You need a ToolForex account to track progress and submit your claim.",
+    "signupCta": "Create a free account",
+    "stepsTitle": "4 steps to your bonus",
+    "step1": "Sign in to ToolForex",
+    "step2": "Open a real Exness account via the partner link",
+    "step2Desc": "You must register through the link below so the account is attributed. Accounts opened earlier or through another link don't count.",
+    "openExness": "Open an Exness account",
+    "step3": "Connect MT5 Bridge to your real Exness account",
+    "step3Desc": "Install the MT5 Bridge EA on your real (not demo) Exness account and let it run at least once.",
+    "bridgeOk": "Eligible",
+    "bridgeNotExness": "Not Exness",
+    "bridgeDemo": "Demo account",
+    "bridgeStale": "Bridge hasn't run recently",
+    "setupBridge": "Set up MT5 Bridge",
+    "step4": "Claim your ${amount}",
+    "needBridgeFirst": "Finish step 3 to unlock the claim form.",
+    "claimStatus": "Status",
+    "claimAccount": "MT5 account",
+    "adminNote": "Note from admin",
+    "submitted": "Claim submitted. An admin will verify it and reply on this page.",
+    "status": {
+      "PENDING": "Pending review",
+      "APPROVED": "Approved — payout pending",
+      "PAID": "Paid",
+      "REJECTED": "Rejected"
+    },
+    "form": {
+      "account": "Exness account",
+      "payoutMethod": "Receive via",
+      "payoutDetails": "Payout details",
+      "payoutDetailsPlaceholder": "Wallet address / bank account + name / Exness email",
+      "note": "Note (optional)",
+      "submit": "Submit claim",
+      "submitting": "Submitting..."
+    },
+    "payoutMethods": {
+      "usdt-trc20": "USDT (TRC20)",
+      "bank": "Bank transfer (VND)",
+      "exness": "Transfer to Exness account"
+    },
+    "errors": {
+      "rateLimited": "Too many attempts, try again later.",
+      "invalid": "Some details are invalid.",
+      "notEligible": "This account isn't eligible yet (needs real Exness with a running Bridge).",
+      "demoAccount": "Demo accounts aren't eligible.",
+      "alreadyClaimed": "You've already submitted a claim.",
+      "accountTaken": "This MT5 account has already been used for a claim.",
+      "forbidden": "Not allowed.",
+      "notFound": "Claim not found."
+    },
+    "termsTitle": "Terms",
+    "terms1": "One bonus per person and per MT5 account.",
+    "terms2": "The account must be a real Exness account opened via ToolForex's partner link.",
+    "terms3": "An admin verifies the account in Exness's partner system before approving.",
+    "terms4": "The ${amount} bonus is paid manually after approval.",
+    "terms5": "ToolForex may reject fraud or multi-account abuse.",
+    "admin": {
+      "title": "Exness $10 bonus",
+      "desc": "Check the account number in the Exness Partner portal (is it under our link?) then approve / mark paid.",
+      "totals": "Pending: {pending} · Approved, unpaid: {approved} · Paid: ${paid}",
+      "empty": "No claims yet.",
+      "approve": "Approve",
+      "markPaid": "Mark paid",
+      "reject": "Reject",
+      "saving": "Saving...",
+      "saved": "Saved",
+      "notePlaceholder": "Note shown to the user (optional)",
+      "submittedAt": "Submitted",
+      "paidAt": "Paid"
     }
   }
 }
